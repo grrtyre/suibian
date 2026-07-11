@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>随便 · 决策工具箱</title>
+<meta name="description" content="suibian（随便）—— 一个把「不知道选啥」变成「一键搞定」的轻量决策工具箱。" />
+<style>
+  :root {
+    --bg: #0f1020;
+    --bg-soft: #1a1b2e;
+    --card: #20223a;
+    --card-2: #262a47;
+    --text: #f3f4ff;
+    --muted: #9aa0c7;
+    --accent: #ff7a59;
+    --accent-2: #ffb15c;
+    --accent-3: #7c6cff;
+    --good: #4be3a5;
+    --line: rgba(255, 255, 255, 0.08);
+    --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(1200px 600px at 80% -10%, rgba(124, 108, 255, 0.25), transparent 60%),
+                radial-gradient(900px 500px at -10% 10%, rgba(255, 122, 89, 0.18), transparent 55%),
+                var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
+
+  header.hero { text-align: center; padding: 26px 0 8px; }
+  .logo {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-size: 40px; font-weight: 800; letter-spacing: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .logo .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--good); box-shadow: 0 0 18px var(--good); }
+  .tagline { color: var(--muted); margin-top: 8px; font-size: 15px; }
+
+  nav.tabs {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    margin: 22px 0 18px;
+  }
+  nav.tabs button {
+    border: 1px solid var(--line); background: var(--card);
+    color: var(--muted); padding: 9px 15px; border-radius: 999px;
+    font-size: 14px; cursor: pointer; transition: .18s; white-space: nowrap;
+  }
+  nav.tabs button:hover { color: var(--text); border-color: rgba(255,255,255,0.22); }
+  nav.tabs button.active {
+    color: #1a1320; background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    border-color: transparent; font-weight: 700;
+  }
+
+  .panel { display: none; animation: fade .25s ease; }
+  .panel.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .card {
+    background: linear-gradient(180deg, var(--card), var(--bg-soft));
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px; box-shadow: var(--shadow);
+  }
+  .card h2 { margin: 0 0 4px; font-size: 20px; }
+  .card .hint { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+
+  textarea, input[type="text"] {
+    width: 100%; background: #15162a; color: var(--text);
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+    font-size: 15px; font-family: inherit; resize: vertical; outline: none;
+  }
+  textarea:focus, input:focus { border-color: var(--accent-3); }
+  textarea { min-height: 120px; line-height: 1.6; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  button.btn {
+    border: none; border-radius: 12px; padding: 12px 18px; font-size: 15px;
+    font-weight: 700; cursor: pointer; color: #1a1320;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    transition: transform .12s, filter .12s;
+  }
+  button.btn:hover { filter: brightness(1.06); }
+  button.btn:active { transform: scale(.97); }
+  button.btn.ghost { background: var(--card-2); color: var(--text); border: 1px solid var(--line); }
+  button.btn:disabled { opacity: .55; cursor: not-allowed; }
+
+  .result {
+    margin-top: 18px; min-height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: 26px; font-weight: 800; padding: 14px;
+    background: rgba(124, 108, 255, 0.12); border: 1px dashed rgba(124,108,255,0.5);
+    color: var(--text); word-break: break-word;
+  }
+  .result.pop { animation: pop .4s ease; }
+  @keyframes pop { 0% { transform: scale(.8); opacity: .2; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
+
+  /* Wheel */
+  .wheel-stage { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .wheel-box { position: relative; width: 320px; height: 320px; max-width: 86vw; }
+  .wheel-box canvas { width: 100%; height: 100%; display: block; transition: none; }
+  .pointer {
+    position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent;
+    border-top: 26px solid var(--accent); filter: drop-shadow(0 3px 6px rgba(0,0,0,.5)); z-index: 3;
+  }
+  .hub {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 54px; height: 54px; border-radius: 50%; background: var(--bg-soft);
+    border: 3px solid var(--accent-2); color: var(--text); font-weight: 800;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4); user-select: none;
+  }
+
+  /* coin + dice */
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .coin {
+    width: 130px; height: 130px; border-radius: 50%; position: relative;
+    transform-style: preserve-3d; transition: transform .1s;
+    background: radial-gradient(circle at 35% 30%, #ffe7a8, #f6b73c 60%, #c9851a);
+    box-shadow: inset 0 0 22px rgba(160,100,0,.5), 0 12px 30px rgba(0,0,0,.4);
+    display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; color: #6a4400;
+  }
+  .coin .face { backface-visibility: hidden; }
+  .coin.flip { animation: flip 1s ease; }
+  @keyframes flip {
+    0% { transform: rotateY(0); } 100% { transform: rotateY(1800deg); }
+  }
+  .dice {
+    width: 120px; height: 120px; border-radius: 22px; background: #f7f7ff;
+    display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+    padding: 16px; gap: 4px; box-shadow: 0 12px 30px rgba(0,0,0,.4); position: relative;
+  }
+  .dice.roll { animation: shake .6s ease; }
+  @keyframes shake {
+    0%,100% { transform: rotate(0); } 20% { transform: rotate(-14deg) scale(1.05); }
+    40% { transform: rotate(12deg) scale(1.05); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(6deg); }
+  }
+  .pip { width: 18px; height: 18px; border-radius: 50%; background: #2a2a40; align-self: center; justify-self: center; }
+  .pip.off { background: transparent; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip {
+    padding: 8px 12px; border-radius: 999px; background: var(--card-2); border: 1px solid var(--line);
+    color: var(--text); font-size: 14px; cursor: pointer;
+  }
+  .chip:hover { border-color: var(--accent-3); }
+  .chip.on { background: linear-gradient(90deg, var(--accent-3), #9b8cff); border-color: transparent; color: #fff; }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 34px; }
+  footer a { color: var(--accent-2); text-decoration: none; }
+  .toast {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card-2); color: var(--text); border: 1px solid var(--line);
+    padding: 12px 18px; border-radius: 12px; box-shadow: var(--shadow); opacity: 0;
+    transition: .25s; pointer-events: none; z-index: 50; font-size: 14px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="logo"><span class="dot"></span> 随便</div>
+    <div class="tagline">suibian · 把「不知道选啥」变成「一键搞定」</div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="pick" class="active">随机抽签</button>
+    <button data-tab="wheel">幸运转盘</button>
+    <button data-tab="coin">抛硬币</button>
+    <button data-tab="dice">掷骰子</button>
+    <button data-tab="eat">今天吃啥</button>
+    <button data-tab="quote">随便一句</button>
+  </nav>
+
+  <!-- 抽签 -->
+  <section class="panel active" id="pick">
+    <div class="card">
+      <h2>随机抽签</h2>
+      <div class="hint">每行一个选项，点「开始抽签」让它帮你决定。</div>
+      <textarea id="pickInput">奶茶
+火锅
+烤肉
+沙拉
+回家做饭</textarea>
+      <div class="row">
+        <button class="btn" id="pickBtn">开始抽签</button>
+        <button class="btn ghost" id="pickClear">清空结果</button>
+      </div>
+      <div class="result" id="pickResult">等待命运降临…</div>
+    </div>
+  </section>
+
+  <!-- 转盘 -->
+  <section class="panel" id="wheel">
+    <div class="card">
+      <h2>幸运转盘</h2>
+      <div class="hint">输入选项（每行一个），点中间按钮开始旋转。</div>
+      <textarea id="wheelInput">周末去哪玩
+点外卖
+看电影
+睡一天
+出门溜达</textarea>
+      <div class="wheel-stage">
+        <div class="wheel-box">
+          <div class="pointer"></div>
+          <canvas id="wheelCanvas" width="640" height="640"></canvas>
+          <div class="hub" id="wheelHub">GO</div>
+        </div>
+      </div>
+      <div class="result" id="wheelResult">等待旋转…</div>
+    </div>
+  </section>
+
+  <!-- 硬币 -->
+  <section class="panel" id="coin">
+    <div class="card">
+      <h2>抛硬币</h2>
+      <div class="hint">正反面，天注定。</div>
+      <div class="stage">
+        <div class="coin" id="coin"><span class="face">？</span></div>
+        <button class="btn" id="coinBtn">抛一下</button>
+        <div class="result" id="coinResult">等待抛掷…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 骰子 -->
+  <section class="panel" id="dice">
+    <div class="card">
+      <h2>掷骰子</h2>
+      <div class="hint">1 到 6，愿赌服输。</div>
+      <div class="stage">
+        <div class="dice" id="diceEl"></div>
+        <div class="row" style="justify-content:center">
+          <button class="btn" id="diceBtn">掷一下</button>
+          <button class="btn ghost" id="diceCount">骰子数：1</button>
+        </div>
+        <div class="result" id="diceResult">等待投掷…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 吃什么 -->
+  <section class="panel" id="eat">
+    <div class="card">
+      <h2>今天吃啥</h2>
+      <div class="hint">选个口味，让它替你纠结。</div>
+      <div class="chips" id="eatCats"></div>
+      <div class="row">
+        <button class="btn" id="eatBtn">帮我决定</button>
+      </div>
+      <div class="result" id="eatResult">先选个口味吧～</div>
+    </div>
+  </section>
+
+  <!-- 句子 -->
+  <section class="panel" id="quote">
+    <div class="card">
+      <h2>随便一句</h2>
+      <div class="hint">偶尔也需要一句不负责但管用的话。</div>
+      <div class="row">
+        <button class="btn" id="quoteBtn">来一句</button>
+      </div>
+      <div class="result" id="quoteResult">点上面的按钮，听天由命。</div>
+    </div>
+  </section>
+
+  <footer>
+    「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const toast = (msg) => {
+    const t = $("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 1800);
+  };
+  const rand = (n) => Math.floor(Math.random() * n);
+  const pop = (el) => { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); };
+
+  /* ---------- Tabs ---------- */
+  const tabs = $("tabs");
+  tabs.addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    [...tabs.children].forEach((x) => x.classList.toggle("active", x === b));
+    document.querySelectorAll(".panel").forEach((p) =>
+      p.classList.toggle("active", p.id === b.dataset.tab));
+    if (b.dataset.tab === "wheel") drawWheel();
+  });
+
+  /* ---------- 抽签 ---------- */
+  const pickInput = $("pickInput"), pickResult = $("pickResult");
+  function parseLines(t) {
+    return t.split("\n").map((s) => s.trim()).filter(Boolean);
+  }
+  $("pickBtn").addEventListener("click", () => {
+    const opts = parseLines(pickInput.value);
+    if (opts.length < 2) { toast("至少写两个选项嘛"); return; }
+    let i = 0, ticks = 0, total = 18 + rand(10);
+    pickResult.textContent = opts[0];
+    const timer = setInterval(() => {
+      pickResult.textContent = opts[i % opts.length];
+      i++; ticks++;
+      if (ticks >= total) {
+        clearInterval(timer);
+        const winner = opts[rand(opts.length)];
+        pickResult.textContent = "🎉 " + winner;
+        pop(pickResult);
+      }
+    }, 70);
+  });
+  $("pickClear").addEventListener("click", () => { pickResult.textContent = "等待命运降临…"; });
+
+  /* ---------- 转盘 ---------- */
+  const canvas = $("wheelCanvas"), ctx = canvas.getContext("2d");
+  const colors = ["#ff7a59", "#ffb15c", "#7c6cff", "#4be3a5", "#ff6c9c", "#5cc8ff", "#ffd166", "#b388ff"];
+  let wheelRotation = 0, wheelSpinning = false;
+  function getWheelOpts() { return parseLines($("wheelInput").value); }
+
+  function drawWheel() {
+    const opts = getWheelOpts();
+    const n = Math.max(opts.length, 1);
+    const cx = canvas.width / 2, cy = canvas.height / 2, r = cx - 8;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const arc = (Math.PI * 2) / n;
+    for (let i = 0; i < n; i++) {
+      const start = wheelRotation + i * arc;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, start + arc); ctx.closePath();
+      ctx.fillStyle = opts.length ? colors[i % colors.length] : "#33344f";
+      ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.stroke();
+      if (opts.length) {
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(start + arc / 2);
+        ctx.textAlign = "right"; ctx.fillStyle = "#fff"; ctx.font = "600 26px sans-serif";
+        let label = opts[i]; if (label.length > 8) label = label.slice(0, 7) + "…";
+        ctx.fillText(label, r - 18, 8); ctx.restore();
+      }
+    }
+    // rim
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.lineWidth = 6; ctx.strokeStyle = "rgba(255,255,255,.15)"; ctx.stroke();
+  }
+
+  function spinWheel() {
+    if (wheelSpinning) return;
+    const opts = getWheelOpts();
+    if (opts.length < 2) { toast("转盘至少需要两个选项"); return; }
+    wheelSpinning = true;
+    const n = opts.length, arc = (Math.PI * 2) / n;
+    const target = rand(n);
+    // pointer at top = -PI/2 ; segment center = rotation + i*arc + arc/2
+    const extraTurns = 5 + rand(3);
+    const base = wheelRotation % (Math.PI * 2);
+    let finalRot = -Math.PI / 2 - (target * arc + arc / 2);
+    finalRot = base + extraTurns * Math.PI * 2 + ((finalRot - base) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+    const startRot = wheelRotation, delta = finalRot - startRot, dur = 3200;
+    const t0 = performance.now();
+    function ease(t) { return 1 - Math.pow(1 - t, 3); }
+    function frame(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      wheelRotation = startRot + delta * ease(p);
+      drawWheel();
+      if (p < 1) requestAnimationFrame(frame);
+      else {
+        wheelSpinning = false;
+        const winner = opts[target];
+        $("wheelResult").textContent = "🎉 落在：" + winner;
+        pop($("wheelResult"));
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  $("wheelHub").addEventListener("click", spinWheel);
+  $("wheelInput").addEventListener("input", () => { if (!wheelSpinning) drawWheel(); });
+  drawWheel();
+
+  /* ---------- 硬币 ---------- */
+  const coin = $("coin"), coinResult = $("coinResult");
+  $("coinBtn").addEventListener("click", () => {
+    coin.classList.remove("flip"); void coin.offsetWidth; coin.classList.add("flip");
+    coin.querySelector(".face").textContent = "?";
+    setTimeout(() => {
+      const heads = Math.random() < 0.5;
+      coin.querySelector(".face").textContent = heads ? "正" : "反";
+      coinResult.textContent = heads ? "正面 ↑" : "反面 ↓";
+      pop(coinResult);
+    }, 1000);
+  });
+
+  /* ---------- 骰子 ---------- */
+  const diceEl = $("diceEl"), diceResult = $("diceResult");
+  let diceCount = 1;
+  const PIP_MAP = {
+    1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8]
+  };
+  function renderDice(values) {
+    diceEl.innerHTML = "";
+    // single die shows pips; multiple shows numbers
+    if (values.length === 1) {
+      const cells = Array(9).fill(0);
+      PIP_MAP[values[0]].forEach((i) => (cells[i] = 1));
+      cells.forEach((on) => {
+        const p = document.createElement("span");
+        p.className = "pip" + (on ? "" : " off");
+        diceEl.appendChild(p);
+      });
+    } else {
+      diceEl.style.gridTemplateColumns = "repeat(2,1fr)";
+      diceEl.style.gridTemplateRows = "repeat(3,1fr)";
+      values.forEach((v) => {
+        const s = document.createElement("span");
+        s.style.cssText = "align-self:center;justify-self:center;font-size:34px;font-weight:800;color:#2a2a40;";
+        s.textContent = v; diceEl.appendChild(s);
+      });
+    }
+  }
+  $("diceBtn").addEventListener("click", () => {
+    diceEl.classList.remove("roll"); void diceEl.offsetWidth; diceEl.classList.add("roll");
+    const vals = Array.from({ length: diceCount }, () => 1 + rand(6));
+    setTimeout(() => {
+      renderDice(vals);
+      const sum = vals.reduce((a, b) => a + b, 0);
+      diceResult.textContent = vals.join(" + ") + " = " + sum;
+      pop(diceResult);
+    }, 600);
+  });
+  $("diceCount").addEventListener("click", () => {
+    diceCount = diceCount >= 5 ? 1 : diceCount + 1;
+    $("diceCount").textContent = "骰子数：" + diceCount;
+    renderDice(Array.from({ length: diceCount }, () => 1));
+  });
+  renderDice([1]);
+
+  /* ---------- 吃什么 ---------- */
+  const EAT = {
+    "随便": ["火锅", "烤肉", "麻辣烫", "日料", "汉堡", "螺蛳粉", "沙拉", "饺子", "煲仔饭", "炸鸡"],
+    "辣的": ["火锅", "麻辣烫", "水煮鱼", "螺蛳粉", "辣子鸡", "冒菜", "湘菜小炒"],
+    "清淡": ["沙拉", "寿司", "粥", "蒸笼点心", "鸡胸肉轻食", "味噌汤套餐"],
+    "面食": ["兰州拉面", "炸酱面", "意大利面", "重庆小面", "乌冬面", "biangbiang面"],
+    "外卖": ["黄焖鸡米饭", "猪脚饭", "盖浇饭", "披萨", "咖喱饭", "三明治"]
+  };
+  const eatCats = $("eatCats"); let eatCat = "随便";
+  Object.keys(EAT).forEach((c, i) => {
+    const el = document.createElement("div");
+    el.className = "chip" + (i === 0 ? " on" : "");
+    el.textContent = c; el.dataset.cat = c;
+    el.addEventListener("click", () => {
+      eatCat = c;
+      [...eatCats.children].forEach((x) => x.classList.toggle("on", x === el));
+    });
+    eatCats.appendChild(el);
+  });
+  $("eatBtn").addEventListener("click", () => {
+    const list = EAT[eatCat];
+    const pick = list[rand(list.length)];
+    $("eatResult").textContent = "不如吃：" + pick + " 🍜";
+    pop($("eatResult"));
+  });
+
+  /* ---------- 句子 ---------- */
+  const QUOTES = [
+    "先做了再说，错了再改，比一直想强。",
+    "今天的事，明天做也行，但今天做更爽。",
+    "你担心的 90% 都不会发生，剩下 10% 也扛得住。",
+    "随便选一个，选完它就是你最好的选择。",
+    "拖延不会让事情变简单，只会让你更焦虑。",
+    "想太多的人，往往输给行动快的人。",
+    "完成比完美重要，先完成再完美。",
+    "别把别人的标准，当成自己的天花板。",
+    "休息不是偷懒，是给大脑充电。",
+    "如果实在决定不了，那就抛硬币——落下的瞬间你就知道想要什么了。",
+    "能力撑不起野心时，要么降野心，要么涨能力，别光焦虑。",
+    "今天也要好好吃饭，这是为数不多能自己决定的事。"
+  ];
+  $("quoteBtn").addEventListener("click", () => {
+    $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
+    pop($("quoteResult"));
+  });
+})();
+</script>
+</body>
+</html>
