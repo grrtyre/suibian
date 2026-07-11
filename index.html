@@ -71,7 +71,7 @@
   .card h2 { margin: 0 0 4px; font-size: 20px; }
   .card .hint { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
 
-  textarea, input[type="text"] {
+  textarea, input[type="text"], input[type="number"] {
     width: 100%; background: #15162a; color: var(--text);
     border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
     font-size: 15px; font-family: inherit; resize: vertical; outline: none;
@@ -178,6 +178,7 @@
     <button data-tab="dice">掷骰子</button>
     <button data-tab="eat">今天吃啥</button>
     <button data-tab="quote">随便一句</button>
+    <button data-tab="rand">随机数</button>
   </nav>
 
   <!-- 抽签 -->
@@ -270,6 +271,25 @@
         <button class="btn" id="quoteBtn">来一句</button>
       </div>
       <div class="result" id="quoteResult">点上面的按钮，听天由命。</div>
+    </div>
+  </section>
+
+  <!-- 随机数 -->
+  <section class="panel" id="rand">
+    <div class="card">
+      <h2>随机数</h2>
+      <div class="hint">给个范围，生成一个随机整数，专治选择困难。</div>
+      <div class="row" style="align-items:center;justify-content:center">
+        <label style="display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px">
+          最小 <input type="number" id="randMin" value="1" style="width:84px" />
+        </label>
+        <span style="color:var(--muted)">~</span>
+        <label style="display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px">
+          最大 <input type="number" id="randMax" value="100" style="width:84px" />
+        </label>
+        <button class="btn" id="randBtn">生成</button>
+      </div>
+      <div class="result" id="randResult">先定个范围吧～</div>
     </div>
   </section>
 
@@ -481,11 +501,28 @@
     "休息不是偷懒，是给大脑充电。",
     "如果实在决定不了，那就抛硬币——落下的瞬间你就知道想要什么了。",
     "能力撑不起野心时，要么降野心，要么涨能力，别光焦虑。",
-    "今天也要好好吃饭，这是为数不多能自己决定的事。"
+    "今天也要好好吃饭，这是为数不多能自己决定的事。",
+    "运气也是实力的一部分，今天你运气爆棚。",
+    "与其在朋友圈看别人玩，不如自己出门浪一圈。",
+    "把「随便」挂嘴边的人，往往最清楚自己要什么。",
+    "钱包瘪了能再赚，周末没了可就真没了。",
+    "决定了就别回头看，路是自己选的，踩坑也踏实。",
+    "与其纠结选 A 还是 B，不如先抛个硬币把心里的倾向甩出来。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
     pop($("quoteResult"));
+  });
+
+  /* ---------- 随机数 ---------- */
+  const randMin = $("randMin"), randMax = $("randMax"), randResult = $("randResult");
+  $("randBtn").addEventListener("click", () => {
+    const lo = parseInt(randMin.value, 10), hi = parseInt(randMax.value, 10);
+    if (isNaN(lo) || isNaN(hi)) { toast("请输入有效的整数"); return; }
+    if (lo > hi) { toast("最小值不能大于最大值哦"); return; }
+    const v = lo + rand(hi - lo + 1);
+    randResult.textContent = String(v);
+    pop(randResult);
   });
 })();
 </script>
