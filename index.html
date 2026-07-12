@@ -99,6 +99,8 @@
     color: var(--text); word-break: break-word;
   }
   .result.pop { animation: pop .4s ease; }
+  .fortune.pop { animation: pop .4s ease; }
+  .result.copyable { cursor: pointer; }
   @keyframes pop { 0% { transform: scale(.8); opacity: .2; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
 
   /* Wheel */
@@ -341,7 +343,7 @@
       <div class="row">
         <button class="btn" id="quoteBtn">来一句</button>
       </div>
-      <div class="result" id="quoteResult">点上面的按钮，听天由命。</div>
+      <div class="result copyable" id="quoteResult">点上面的按钮，听天由命。</div>
     </div>
   </section>
 
@@ -765,11 +767,24 @@
     "把今天的小勇敢攒起来，下次就不那么怕了。",
     "没灵感的时候，去做一件最无聊的小事，灵感反而来找你。",
     "纠结两个选项？抛硬币的瞬间，你心疼的那一面就赢了。",
-    "今天的运气额度有限，挑件最想做的事先花掉。"
+    "今天的运气额度有限，挑件最想做的事先花掉。",
+    "把今天的小成就记下来，哪怕只是「准时起床」。",
+    "别和昨天的自己比，和上周的自己比就够。",
+    "想摆烂就摆烂，摆得理直气壮也是一种能力。",
+    "运气这东西，信的人先享受。",
+    "今天的你，已经比打开页面前多了一点「随便」的勇气。",
+    "选择太多不是福，先划掉最不想要的，剩下的都是好答案。",
+    "把焦虑写下来，它就从一团雾变成一条待办。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
     pop($("quoteResult"));
+  });
+  $("quoteResult").addEventListener("click", () => {
+    const txt = $("quoteResult").textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => toast("已复制：" + txt.slice(0, 12) + "…"), () => toast(txt));
+    } else { toast(txt); }
   });
 
   /* ---------- 今日运势 ---------- */
