@@ -207,6 +207,7 @@
     <button data-tab="fortune">今日运势</button>
     <button data-tab="tod">真心话大冒险</button>
     <button data-tab="dart">扔飞镖</button>
+    <button data-tab="rps">石头剪刀布</button>
   </nav>
 
   <!-- 抽签 -->
@@ -363,6 +364,24 @@
         <button class="btn ghost" id="dartReset">清空重来</button>
       </div>
       <div class="result" id="dartResult">这一镖，试试手气？</div>
+    </div>
+  </section>
+
+  <!-- 石头剪刀布 -->
+  <section class="panel" id="rps">
+    <div class="card">
+      <h2>石头剪刀布</h2>
+      <div class="hint">出一拳，和机器人比手气。三局两胜？随你，反正它不会赖皮。</div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="rpsRock">✊ 石头</button>
+        <button class="btn ghost" id="rpsScissors">✌️ 剪刀</button>
+        <button class="btn ghost" id="rpsPaper">✋ 布</button>
+      </div>
+      <div class="result" id="rpsResult">出拳吧，看谁手气好。</div>
+      <div class="hist" id="rpsScore"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn ghost" id="rpsReset">重置战绩</button>
+      </div>
     </div>
   </section>
 
@@ -617,7 +636,11 @@
     "计划赶不上变化，但没计划连变化都没得赶。",
     "把今天过成「随便」的样子，也是一种清醒。",
     "你不是选择困难，你只是太想选对了。",
-    "与其等一个完美时机，不如现在先随便开个头。"
+    "与其等一个完美时机，不如现在先随便开个头。",
+    "手气这东西，输了就再来一局，人生也差不多。",
+    "犹豫的时候，选那个让你心跳快一点的。",
+    "别高估一年能做的事，也别低估五分钟能开始的事。",
+    "今天的「随便」，是给明天的自己留的惊喜。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -786,6 +809,49 @@
     dartMarks = []; drawDartBoard(); $("dartResult").textContent = "这一镖，试试手气？";
   });
   drawDartBoard();
+
+  /* ---------- 石头剪刀布 ---------- */
+  const RPS = [
+    { key: "rock", name: "石头", emoji: "✊" },
+    { key: "scissors", name: "剪刀", emoji: "✌️" },
+    { key: "paper", name: "布", emoji: "✋" }
+  ];
+  // beats[a] = b 表示 a 赢 b
+  const RPS_BEATS = { rock: "scissors", scissors: "paper", paper: "rock" };
+  const rpsResult = $("rpsResult"), rpsScoreEl = $("rpsScore");
+  let rpsScore = { win: 0, lose: 0, draw: 0 };
+  try { const raw = localStorage.getItem("suibian_rps_score"); if (raw) rpsScore = JSON.parse(raw); } catch (e) {}
+  function renderRpsScore() {
+    rpsScoreEl.innerHTML =
+      '<span class="hl">战绩：</span>' +
+      '<span class="h">胜 ' + rpsScore.win + '</span>' +
+      '<span class="h">负 ' + rpsScore.lose + '</span>' +
+      '<span class="h">平 ' + rpsScore.draw + '</span>';
+  }
+  renderRpsScore();
+  function rpsFind(key) { return RPS.find((x) => x.key === key); }
+  function rpsPlay(myKey) {
+    const cpu = RPS[rand(RPS.length)];
+    const me = rpsFind(myKey);
+    let outcome, verdict;
+    if (me.key === cpu.key) { outcome = "draw"; verdict = "平手，再来一局！"; }
+    else if (RPS_BEATS[me.key] === cpu.key) { outcome = "win"; verdict = "你赢了！🎉"; }
+    else { outcome = "lose"; verdict = "你输了，不服再战～"; }
+    rpsScore[outcome]++;
+    try { localStorage.setItem("suibian_rps_score", JSON.stringify(rpsScore)); } catch (e) {}
+    rpsResult.textContent = "你 " + me.emoji + " vs " + cpu.emoji + " 机器人 · " + verdict;
+    pop(rpsResult);
+    renderRpsScore();
+  }
+  $("rpsRock").addEventListener("click", () => rpsPlay("rock"));
+  $("rpsScissors").addEventListener("click", () => rpsPlay("scissors"));
+  $("rpsPaper").addEventListener("click", () => rpsPlay("paper"));
+  $("rpsReset").addEventListener("click", () => {
+    rpsScore = { win: 0, lose: 0, draw: 0 };
+    try { localStorage.setItem("suibian_rps_score", JSON.stringify(rpsScore)); } catch (e) {}
+    renderRpsScore();
+    rpsResult.textContent = "战绩已清零，重新开始吧。";
+  });
 })();
 </script>
 </body>
