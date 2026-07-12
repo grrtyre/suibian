@@ -248,6 +248,7 @@
     <button data-tab="rate">这事成吗</button>
     <button data-tab="color">灵感色卡</button>
     <button data-tab="gacha">扭蛋机</button>
+    <button data-tab="oracle">神谕球</button>
   </nav>
 
   <!-- 抽签 -->
@@ -469,6 +470,19 @@
       </div>
       <div class="result" id="gachaResult">扭蛋机待命中…</div>
       <div class="hist" id="gachaHist"></div>
+    </div>
+  </section>
+
+  <!-- 神谕球 -->
+  <section class="panel" id="oracle">
+    <div class="card">
+      <h2>神谕球</h2>
+      <div class="hint">心里装着个 yes / no 的问题？摇一摇，让神谕替你含糊其辞。</div>
+      <textarea id="oracleInput" placeholder="默念你的问题（可留空，直接摇）" style="min-height:64px">我该现在去表白吗</textarea>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="oracleBtn">摇一摇问神谕</button>
+      </div>
+      <div class="result" id="oracleResult">摇出你的专属神谕…</div>
     </div>
   </section>
 
@@ -745,7 +759,13 @@
     "运气像WiFi，你不动它永远一格，动一动就满了。",
     "纠结选A还是B时，记住：大多数选择都能回头重选。",
     "把今天的小确幸存进回忆，明天的底气就多一分。",
-    "手痒就扭一下，人生也需要点不期而遇的小彩蛋。"
+    "手痒就扭一下，人生也需要点不期而遇的小彩蛋。",
+    "神谕球说的不算数，但说中了就是你自己的心事。",
+    "问问题之前，你心里多半已经有了答案，神谕只是帮你确认。",
+    "把今天的小勇敢攒起来，下次就不那么怕了。",
+    "没灵感的时候，去做一件最无聊的小事，灵感反而来找你。",
+    "纠结两个选项？抛硬币的瞬间，你心疼的那一面就赢了。",
+    "今天的运气额度有限，挑件最想做的事先花掉。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -1098,6 +1118,32 @@
     try { localStorage.removeItem("suibian_gacha_hist"); } catch (e) {}
     renderGachaHist();
     gachaResult.textContent = "记录已清空，再扭一个？";
+  });
+
+  /* ---------- 神谕球 ---------- */
+  const oracleInput = $("oracleInput"), oracleResult = $("oracleResult");
+  const ORACLE = [
+    { lv: "上签", text: "毫无疑问，必须安排上。" },
+    { lv: "上签", text: "迹象明朗，放心冲就完事。" },
+    { lv: "上签", text: "神谕说：稳，别犹豫了。" },
+    { lv: "上签", text: "天时地利人和，干就完了。" },
+    { lv: "中签", text: "再等等，时机还没到。" },
+    { lv: "中签", text: "神谕打了个哈欠，说回头再说。" },
+    { lv: "中签", text: "模棱两可，看你今天心情。" },
+    { lv: "中签", text: "先喝口水，答案自己会浮现。" },
+    { lv: "中签", text: "不妨先抛个硬币，听听心跳偏哪边。" },
+    { lv: "下签", text: "今日不宜，改天再问一次。" },
+    { lv: "下签", text: "神谕摇了摇头，你懂的。" },
+    { lv: "下签", text: "概率偏凉，但万一呢，对吧？" },
+    { lv: "下签", text: "天机不可泄露——其实就是它也不确定。" }
+  ];
+  $("oracleBtn").addEventListener("click", () => {
+    const a = ORACLE[rand(ORACLE.length)];
+    const q = oracleInput.value.trim();
+    oracleResult.innerHTML =
+      '<div style="font-size:15px;font-weight:700;color:var(--accent-2);margin-bottom:4px">' + a.lv + '</div>' +
+      '<div>' + (q ? "「" + escapeHtml(q) + "」——" : "") + escapeHtml(a.text) + "</div>";
+    pop(oracleResult);
   });
 })();
 </script>
