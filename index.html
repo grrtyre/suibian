@@ -170,6 +170,25 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* color card */
+  .color-swatch {
+    margin-top: 16px; border-radius: 16px; min-height: 170px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; transition: background .25s; box-shadow: var(--shadow);
+    border: 1px solid var(--line); user-select: none;
+  }
+  .color-hex { font-size: 34px; font-weight: 800; letter-spacing: 2px; }
+  .color-mood { font-size: 15px; opacity: .85; margin-top: 8px; }
+  .color-pair { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .color-pair .cp {
+    flex: 1; min-width: 90px; border-radius: 12px; padding: 14px 8px; text-align: center;
+    font-size: 13px; cursor: pointer; border: 1px solid var(--line); user-select: none;
+    transition: transform .12s;
+  }
+  .color-pair .cp:active { transform: scale(.97); }
+  .color-pair .cp .cph { font-weight: 700; font-size: 15px; letter-spacing: 1px; }
+  .color-pair .cp .cps { opacity: .8; margin-top: 4px; }
+
   /* fortune */
   .fortune { margin-top: 18px; border-radius: 14px; padding: 18px;
     background: linear-gradient(135deg, rgba(124,108,255,.16), rgba(255,122,89,.12));
@@ -209,6 +228,7 @@
     <button data-tab="dart">扔飞镖</button>
     <button data-tab="rps">石头剪刀布</button>
     <button data-tab="rate">这事成吗</button>
+    <button data-tab="color">灵感色卡</button>
   </nav>
 
   <!-- 抽签 -->
@@ -396,6 +416,23 @@
         <button class="btn" id="rateBtn">测一下成功率</button>
       </div>
       <div class="result" id="rateResult">写下你惦记的事，点「测一下」。</div>
+    </div>
+  </section>
+
+  <!-- 灵感色卡 -->
+  <section class="panel" id="color">
+    <div class="card">
+      <h2>灵感色卡</h2>
+      <div class="hint">配色没灵感时，点一下抽一张随机色卡。点色块即可复制色值。</div>
+      <div class="color-swatch" id="colorSwatch">
+        <div class="color-hex" id="colorHex">#7C6CFF</div>
+        <div class="color-mood" id="colorMood">极光紫</div>
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="colorBtn">抽一张</button>
+        <button class="btn ghost" id="colorCopy">复制主色</button>
+      </div>
+      <div class="color-pair" id="colorPair"></div>
     </div>
   </section>
 
@@ -659,7 +696,14 @@
     "纠结的时候先喝口水——很多问题水喝完就想通了。",
     "你以为的「随便」，其实是给自己留的退路和余地。",
     "今天适合做一件「平时不会做」的小事。",
-    "进度慢没关系，只要方向没歪，就是在往前走。"
+    "进度慢没关系，只要方向没歪，就是在往前走。",
+    "挑颜色、挑午饭、挑心情，挑着挑着就开心了。",
+    "今天的灵感可能就藏在一张随机色卡里。",
+    "别把「随便」当敷衍，有时候那是最松弛的认真。",
+    "抽到的色卡不顺眼？再抽一张，宇宙会给你配色的。",
+    "做选择最怕的不是选错，是连选都不敢选。",
+    "把今天过成一张好看的色卡，哪怕只是随手一抹。",
+    "灵感不挑时候，你越不紧张它越来。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -898,6 +942,65 @@
       '<div style="font-size:16px;font-weight:600;margin-top:6px">' + escapeHtml(what) + " · " + rateVerdict(p) + "</div>";
     pop(rateResult);
   });
+
+  /* ---------- 灵感色卡 ---------- */
+  const colorSwatch = $("colorSwatch"), colorHex = $("colorHex"),
+        colorMood = $("colorMood"), colorPair = $("colorPair");
+  const COLOR_MOODS = [
+    [15, "暖橘"], [45, "落日金"], [75, "柠檬黄"], [150, "薄荷绿"], [190, "雾霾蓝"],
+    [220, "深海蓝"], [270, "极光紫"], [320, "樱花粉"], [350, "蜜桃红"]
+  ];
+  function moodFor(h) {
+    let best = COLOR_MOODS[0], bd = 999;
+    for (const [hue, name] of COLOR_MOODS) {
+      let d = Math.abs(h - hue); d = Math.min(d, 360 - d);
+      if (d < bd) { bd = d; best = [hue, name]; }
+    }
+    return best[1];
+  }
+  function hslToRgb(h, s, l) {
+    s /= 100; l /= 100;
+    const k = (n) => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+    const to = (x) => Math.round(255 * x);
+    return [to(f(0)), to(f(8)), to(f(4))];
+  }
+  function rgbToHex(r, g, b) {
+    return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("").toUpperCase();
+  }
+  function textColorFor(r, g, b) {
+    return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? "#1a1320" : "#ffffff";
+  }
+  function drawColor(h) {
+    const s = 62 + rand(22), l = 44 + rand(20);
+    const [r, g, b] = hslToRgb(h, s, l);
+    const hex = rgbToHex(r, g, b);
+    const tc = textColorFor(r, g, b);
+    colorSwatch.style.background = hex;
+    colorSwatch.style.color = tc;
+    colorHex.textContent = hex;
+    colorMood.textContent = moodFor(h);
+    const pairs = [(h + 180) % 360, (h + 30) % 360];
+    colorPair.innerHTML = pairs.map((p) => {
+      const [rr, gg, bb] = hslToRgb(p, s, l);
+      const ph = rgbToHex(rr, gg, bb);
+      return '<div class="cp" data-hex="' + ph + '" style="background:' + ph + ';color:' +
+        textColorFor(rr, gg, bb) + '"><div class="cph">' + ph + '</div><div class="cps">点我复制</div></div>';
+    }).join("");
+  }
+  function copyColor(hex) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(hex).then(() => toast("已复制 " + hex), () => toast(hex));
+    } else { toast(hex); }
+  }
+  $("colorBtn").addEventListener("click", () => { drawColor(rand(360)); pop(colorSwatch); });
+  $("colorCopy").addEventListener("click", () => copyColor(colorHex.textContent));
+  colorSwatch.addEventListener("click", () => copyColor(colorHex.textContent));
+  colorPair.addEventListener("click", (e) => {
+    const t = e.target.closest(".cp"); if (t) copyColor(t.dataset.hex);
+  });
+  drawColor(rand(360));
 })();
 </script>
 </body>
