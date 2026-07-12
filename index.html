@@ -208,6 +208,7 @@
     <button data-tab="tod">真心话大冒险</button>
     <button data-tab="dart">扔飞镖</button>
     <button data-tab="rps">石头剪刀布</button>
+    <button data-tab="rate">这事成吗</button>
   </nav>
 
   <!-- 抽签 -->
@@ -382,6 +383,19 @@
       <div class="row" style="justify-content:center">
         <button class="btn ghost" id="rpsReset">重置战绩</button>
       </div>
+    </div>
+  </section>
+
+  <!-- 这事成吗（成功率占卜） -->
+  <section class="panel" id="rate">
+    <div class="card">
+      <h2>这事成吗</h2>
+      <div class="hint">想把一件没谱的事算个概率？测着玩，别当真。</div>
+      <textarea id="rateInput" placeholder="想做点啥？（可留空，直接测）" style="min-height:64px">周末去爬山</textarea>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="rateBtn">测一下成功率</button>
+      </div>
+      <div class="result" id="rateResult">写下你惦记的事，点「测一下」。</div>
     </div>
   </section>
 
@@ -640,7 +654,12 @@
     "手气这东西，输了就再来一局，人生也差不多。",
     "犹豫的时候，选那个让你心跳快一点的。",
     "别高估一年能做的事，也别低估五分钟能开始的事。",
-    "今天的「随便」，是给明天的自己留的惊喜。"
+    "今天的「随便」，是给明天的自己留的惊喜。",
+    "把今天的小确幸攒起来，就是明天的底气。",
+    "纠结的时候先喝口水——很多问题水喝完就想通了。",
+    "你以为的「随便」，其实是给自己留的退路和余地。",
+    "今天适合做一件「平时不会做」的小事。",
+    "进度慢没关系，只要方向没歪，就是在往前走。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -851,6 +870,33 @@
     try { localStorage.setItem("suibian_rps_score", JSON.stringify(rpsScore)); } catch (e) {}
     renderRpsScore();
     rpsResult.textContent = "战绩已清零，重新开始吧。";
+  });
+
+  /* ---------- 这事成吗（成功率占卜） ---------- */
+  const rateInput = $("rateInput"), rateResult = $("rateResult");
+  const RATE_VERDICTS = [
+    { min: 90, text: "稳了，差的就是你点开它的那一刻。" },
+    { min: 80, text: "十拿九稳，别磨蹭，直接冲。" },
+    { min: 70, text: "成了大半，再推自己一把就到。" },
+    { min: 60, text: "挺有戏，临门一脚别软。" },
+    { min: 50, text: "五五开，拼一把说不定就翻盘。" },
+    { min: 40, text: "悬，但悬的事往往最带劲。" },
+    { min: 30, text: "有点难，不过难的才有成就感。" },
+    { min: 20, text: "概率不大，但万一呢，对吧？" },
+    { min: 10, text: "基本靠命，可你今天命不错。" },
+    { min: 0,  text: "信则灵，不信……也灵，主要看你动不动。" }
+  ];
+  function rateVerdict(p) {
+    for (const v of RATE_VERDICTS) if (p >= v.min) return v.text;
+    return RATE_VERDICTS[RATE_VERDICTS.length - 1].text;
+  }
+  $("rateBtn").addEventListener("click", () => {
+    const p = 1 + rand(100); // 1..100
+    const what = rateInput.value.trim() || "这事儿";
+    rateResult.innerHTML =
+      '<div style="font-size:40px;font-weight:800;line-height:1.2">' + p + "%</div>" +
+      '<div style="font-size:16px;font-weight:600;margin-top:6px">' + escapeHtml(what) + " · " + rateVerdict(p) + "</div>";
+    pop(rateResult);
   });
 })();
 </script>
