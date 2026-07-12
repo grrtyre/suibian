@@ -152,6 +152,9 @@
   }
   .chip:hover { border-color: var(--accent-3); }
   .chip.on { background: linear-gradient(90deg, var(--accent-3), #9b8cff); border-color: transparent; color: #fff; }
+  .hist { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .hist .hl { color: var(--muted); font-size: 12px; }
+  .hist .h { font-size: 12px; color: var(--text); padding: 4px 10px; border-radius: 999px; background: var(--card-2); border: 1px solid var(--line); }
 
   footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 34px; }
   footer a { color: var(--accent-2); text-decoration: none; }
@@ -215,6 +218,7 @@
         <button class="btn ghost" id="pickClear">清空结果</button>
       </div>
       <div class="result" id="pickResult">等待命运降临…</div>
+      <div class="hist" id="pickHist"></div>
     </div>
   </section>
 
@@ -342,6 +346,8 @@
   };
   const rand = (n) => Math.floor(Math.random() * n);
   const pop = (el) => { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); };
+  const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   /* ---------- Tabs ---------- */
   const tabs = $("tabs");
@@ -355,7 +361,22 @@
   });
 
   /* ---------- 抽签 ---------- */
-  const pickInput = $("pickInput"), pickResult = $("pickResult");
+  const pickInput = $("pickInput"), pickResult = $("pickResult"), pickHistEl = $("pickHist");
+  let pickHistory = [];
+  try { const raw = localStorage.getItem("suibian_pick_hist"); if (raw) pickHistory = JSON.parse(raw); } catch (e) {}
+  function renderPickHist() {
+    if (!pickHistory.length) { pickHistEl.innerHTML = ""; return; }
+    pickHistEl.innerHTML =
+      '<span class="hl">最近抽过：</span>' +
+      pickHistory.map((x) => '<span class="h">' + escapeHtml(x) + "</span>").join("");
+  }
+  function pushPickHist(winner) {
+    pickHistory.unshift(winner);
+    pickHistory = pickHistory.slice(0, 6);
+    try { localStorage.setItem("suibian_pick_hist", JSON.stringify(pickHistory)); } catch (e) {}
+    renderPickHist();
+  }
+  renderPickHist();
   function parseLines(t) {
     return t.split("\n").map((s) => s.trim()).filter(Boolean);
   }
@@ -372,6 +393,7 @@
         const winner = opts[rand(opts.length)];
         pickResult.textContent = "🎉 " + winner;
         pop(pickResult);
+        pushPickHist(winner);
       }
     }, 70);
   });
@@ -461,6 +483,8 @@
     diceEl.innerHTML = "";
     // single die shows pips; multiple shows numbers
     if (values.length === 1) {
+      diceEl.style.gridTemplateColumns = "";
+      diceEl.style.gridTemplateRows = "";
       const cells = Array(9).fill(0);
       PIP_MAP[values[0]].forEach((i) => (cells[i] = 1));
       cells.forEach((on) => {
@@ -545,7 +569,13 @@
     "别人的进度是别人的，你的节奏才是你的。",
     "点开这个页面，说明你已经准备好「随便」一下了。",
     "想不清楚就先动起来，思路往往在路上才出现。",
-    "别怕选错，多数选择都没有你以为的那么不可逆。"
+    "别怕选错，多数选择都没有你以为的那么不可逆。",
+    "懒有时候也是第一种生产力，它逼你想出更省力的办法。",
+    "人生没有标准答案，随便写也能及格，别太较真。",
+    "把困难拆成小块，每一块都小到「随便就能做」。",
+    "今天不卷，是战略性休整，明天再战不迟。",
+    "选择困难症的终极解药：先选，再负责，比卡着强。",
+    "好运常给有准备的人，也偶尔会光顾躺平的人。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
