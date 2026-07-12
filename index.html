@@ -201,6 +201,7 @@
     <button data-tab="quote">随便一句</button>
     <button data-tab="rand">随机数</button>
     <button data-tab="fortune">今日运势</button>
+    <button data-tab="tod">真心话大冒险</button>
   </nav>
 
   <!-- 抽签 -->
@@ -326,6 +327,20 @@
         <button class="btn ghost" id="fortuneBtn">再摇一签</button>
       </div>
       <div id="fortuneBox" class="fortune">点上面任意按钮，先看你今天什么命。</div>
+    </div>
+  </section>
+
+  <!-- 真心话大冒险 -->
+  <section class="panel" id="tod">
+    <div class="card">
+      <h2>真心话大冒险</h2>
+      <div class="hint">聚会破冰、独自解闷都行，点到谁谁负责，纯属娱乐。</div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="todTruth">真心话</button>
+        <button class="btn ghost" id="todDare">大冒险</button>
+        <button class="btn ghost" id="todRandom">随便来一个</button>
+      </div>
+      <div class="result" id="todResult">选个模式，听天由命。</div>
     </div>
   </section>
 
@@ -652,6 +667,47 @@
     const v = lo + rand(hi - lo + 1);
     randResult.textContent = String(v);
     pop(randResult);
+  });
+
+  /* ---------- 真心话大冒险 ---------- */
+  const TOD_TRUTH = [
+    "最近一次偷偷脸红是因为什么？",
+    "你手机里最舍不得删的一张照片是什么？",
+    "说一个你从没告诉过别人的小怪癖。",
+    "如果今晚能变成任何人，你想当谁？",
+    "你最近一次说谎是为了什么？",
+    "你最想给十年前的自己说句什么？",
+    "在场的人里，你最想和谁交换一天生活？",
+    "你偷偷羡慕过哪个朋友？为什么？",
+    "你做过最冲动的一个决定是什么？",
+    "如果明天世界末日，你最遗憾没做的事是什么？",
+    "你最近一次哭是因为什么？",
+    "你心里一直想说却没说出口的一句话是？"
+  ];
+  const TOD_DARE = [
+    "用夸张的语气朗读你最近一条消息。",
+    "给列表里第一个联系人发一个「在吗」然后等回复。",
+    "模仿一位在场朋友的口头禅，让大家猜是谁。",
+    "现场表演一段 10 秒的即兴舞蹈。",
+    "用方言说一句「今天天气真好」。",
+    "给旁边的人一个真诚的夸奖。",
+    "学一种动物的叫声，越像越好。",
+    "闭眼转三圈，再指着最近的一样东西——它就是今天的幸运物。",
+    "用最深情的语气念出「我爱吃螺蛳粉」。",
+    "给一位老友发「突然很想你」并截图留念。",
+    "现场编一句土味情话，必须让人起鸡皮疙瘩。",
+    "把「随便」这个词用三种不同语气各说一遍。"
+  ];
+  const todResult = $("todResult");
+  function todPick(list, label) {
+    todResult.textContent = label + "：" + list[rand(list.length)];
+    pop(todResult);
+  }
+  $("todTruth").addEventListener("click", () => todPick(TOD_TRUTH, "真心话"));
+  $("todDare").addEventListener("click", () => todPick(TOD_DARE, "大冒险"));
+  $("todRandom").addEventListener("click", () => {
+    if (Math.random() < 0.5) todPick(TOD_TRUTH, "真心话");
+    else todPick(TOD_DARE, "大冒险");
   });
 })();
 </script>
