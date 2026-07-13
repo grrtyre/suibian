@@ -49,6 +49,15 @@
   .logo .paint { font-size: 18px; opacity: .55; -webkit-text-fill-color: initial; background: none; color: var(--muted); }
   .logo .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--good); box-shadow: 0 0 18px var(--good); }
   .tagline { color: var(--muted); margin-top: 8px; font-size: 15px; }
+  .shuffle {
+    margin-top: 16px; padding: 9px 20px; border-radius: 999px; cursor: pointer;
+    font-size: 14px; font-weight: 600; letter-spacing: .5px;
+    color: var(--bg); background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border: none; box-shadow: 0 10px 26px rgba(var(--accent-3-rgb), .28);
+    transition: transform .15s, filter .15s; user-select: none;
+  }
+  .shuffle:hover { transform: translateY(-2px) scale(1.03); filter: brightness(1.06); }
+  .shuffle:active { transform: translateY(0) scale(.98); }
 
   nav.tabs {
     display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
@@ -271,6 +280,7 @@
   <header class="hero">
     <div class="logo" id="logo" title="点我换个主题色 🎨"><span class="dot"></span> 随便 <span class="paint">🎨</span></div>
     <div class="tagline">suibian · 把「不知道选啥」变成「一键搞定」</div>
+    <button class="shuffle" id="shuffleTab" title="随便跳到一个工具逛逛 🎲">🎲 随便逛逛</button>
   </header>
 
   <nav class="tabs" id="tabs">
@@ -614,6 +624,30 @@
     if (b.dataset.tab === "fortune") drawFortune(true);
   });
 
+  /* ---------- 随便逛逛（彩蛋小功能） ---------- */
+  function activateTab(id) {
+    [...tabs.children].forEach((x) => x.classList.toggle("active", x.dataset.tab === id));
+    document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === id));
+    if (id === "wheel") drawWheel();
+    if (id === "fortune") drawFortune(true);
+    const panel = document.getElementById(id);
+    if (panel) pop(panel.querySelector(".card"));
+  }
+  const tabNames = [...tabs.children].map((b) => ({ id: b.dataset.tab, label: b.textContent }));
+  $("shuffleTab").addEventListener("click", () => {
+    const cur = document.querySelector(".panel.active")?.id || "pick";
+    const others = tabNames.filter((t) => t.id !== cur);
+    const pick = others[rand(others.length)];
+    activateTab(pick.id);
+    toast("带你逛逛：" + pick.label + " 🎲");
+  });
+  // 键盘彩蛋：在页面空白处按 G 键，也能随便逛逛
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") return;
+    if (e.key === "g" || e.key === "G") { e.preventDefault(); $("shuffleTab").click(); }
+  });
+
   /* ---------- 主题切换（彩蛋） ---------- */
   const THEMES = [
     { name: "极光紫", bg: "#0f1020", bgSoft: "#1a1b2e", accent: "#ff7a59", accent2: "#ffb15c", accent3: "#7c6cff", rgb3: "124,108,255", glow1: "rgba(124,108,255,0.25)", glow2: "rgba(255,122,89,0.18)" },
@@ -921,7 +955,12 @@
     "用不上的知识最解压，因为不用为它负责。",
     "随手学一条冷知识，今天的「随便」也算有点收获。",
     "刷到一条奇怪知识，比刷到一条广告开心多了。",
-    "决定不了的时候，先随便信一条冷知识缓一缓。"
+    "决定不了的时候，先随便信一条冷知识缓一缓。",
+    "纠结选哪个工具？点「随便逛逛」，让它替你开盲盒。",
+    "不知道从哪开始，就先点一下「随便逛逛」碰碰运气。",
+    "工具的尽头是选择困难，所以才需要「随便」帮你破局。",
+    "按一下 G 键，让今天逛到哪个工具全凭天意。",
+    "逛着逛着，你本来想找的答案就自己跳出来了。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
