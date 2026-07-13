@@ -232,6 +232,20 @@
     50% { transform: translateY(0) rotate(9deg); }
     75% { transform: translateY(-4px) rotate(-5deg); }
   }
+
+  /* shuffle sort */
+  .sortbox {
+    margin-top: 18px; border-radius: 14px; padding: 16px 20px;
+    background: rgba(var(--accent-3-rgb), 0.12); border: 1px dashed rgba(var(--accent-3-rgb), 0.5);
+    color: var(--text); font-size: 17px; line-height: 1.9;
+  }
+  .sortbox.empty {
+    text-align: center; color: var(--muted); min-height: 56px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sortbox ol { margin: 0; padding-left: 24px; }
+  .sortbox li { margin: 3px 0; }
+  .sortbox.pop { animation: pop .4s ease; }
 </style>
 </head>
 <body>
@@ -257,6 +271,7 @@
     <button data-tab="color">灵感色卡</button>
     <button data-tab="gacha">扭蛋机</button>
     <button data-tab="oracle">神谕球</button>
+    <button data-tab="sort">随机排序</button>
   </nav>
 
   <!-- 抽签 -->
@@ -491,6 +506,24 @@
         <button class="btn" id="oracleBtn">摇一摇问神谕</button>
       </div>
       <div class="result" id="oracleResult">摇出你的专属神谕…</div>
+    </div>
+  </section>
+
+  <!-- 随机排序 -->
+  <section class="panel" id="sort">
+    <div class="card">
+      <h2>随机排序</h2>
+      <div class="hint">一堆事分不清先后？丢进来，让它帮你随机排个执行顺序。</div>
+      <textarea id="sortInput">写周报
+回邮件
+改方案
+健身
+洗碗</textarea>
+      <div class="row">
+        <button class="btn" id="sortBtn">排序一下</button>
+        <button class="btn ghost" id="sortClear">清空结果</button>
+      </div>
+      <div class="sortbox empty" id="sortResult">先把清单丢进来，点「排序一下」。</div>
     </div>
   </section>
 
@@ -815,7 +848,13 @@
     "页面可以换肤色，你今天也值得换个心情。",
     "点一下 logo 试试，说不定就点亮了今天。",
     "随便不是没主见，是先把纠结放下再说。",
-    "今天的配色由你决定，生活的调色盘也一样。"
+    "今天的配色由你决定，生活的调色盘也一样。",
+    "顺序比完美重要，先把清单随机排了再说。",
+    "纠结先做什么？随机排个序，第一个就是天意。",
+    "五件事一起压着最累，随机挑个开头就破局了。",
+    "随便打乱一下顺序，往往比苦思顺序更省脑子。",
+    "决定不了先后，就交给随机，它从不偏心。",
+    "今天的清单交给随机排序，剩下的交给执行力。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -1200,6 +1239,29 @@
       '<div style="font-size:15px;font-weight:700;color:var(--accent-2);margin-bottom:4px">' + a.lv + '</div>' +
       '<div>' + (q ? "「" + escapeHtml(q) + "」——" : "") + escapeHtml(a.text) + "</div>";
     pop(oracleResult);
+  });
+
+  /* ---------- 随机排序 ---------- */
+  const sortInput = $("sortInput"), sortResult = $("sortResult");
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = rand(i + 1);
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  $("sortBtn").addEventListener("click", () => {
+    const items = parseLines(sortInput.value);
+    if (items.length < 2) { toast("至少写两个，才需要排序嘛"); return; }
+    const ordered = shuffle(items);
+    sortResult.classList.remove("empty");
+    sortResult.innerHTML = "<ol>" + ordered.map((x) => "<li>" + escapeHtml(x) + "</li>").join("") + "</ol>";
+    pop(sortResult);
+  });
+  $("sortClear").addEventListener("click", () => {
+    sortResult.classList.add("empty");
+    sortResult.textContent = "先把清单丢进来，点「排序一下」。";
   });
 })();
 </script>
