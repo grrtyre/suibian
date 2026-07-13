@@ -20,13 +20,16 @@
     --line: rgba(255, 255, 255, 0.08);
     --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
     --radius: 18px;
+    --glow-1: rgba(124, 108, 255, 0.25);
+    --glow-2: rgba(255, 122, 89, 0.18);
+    --accent-3-rgb: 124, 108, 255;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(1200px 600px at 80% -10%, rgba(124, 108, 255, 0.25), transparent 60%),
-                radial-gradient(900px 500px at -10% 10%, rgba(255, 122, 89, 0.18), transparent 55%),
+    background: radial-gradient(1200px 600px at 80% -10%, var(--glow-1), transparent 60%),
+                radial-gradient(900px 500px at -10% 10%, var(--glow-2), transparent 55%),
                 var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -40,7 +43,10 @@
     font-size: 40px; font-weight: 800; letter-spacing: 2px;
     background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
     -webkit-background-clip: text; background-clip: text; color: transparent;
+    cursor: pointer; user-select: none; transition: transform .15s, filter .15s;
   }
+  .logo:hover { transform: scale(1.04); filter: brightness(1.08); }
+  .logo .paint { font-size: 18px; opacity: .55; -webkit-text-fill-color: initial; background: none; color: var(--muted); }
   .logo .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--good); box-shadow: 0 0 18px var(--good); }
   .tagline { color: var(--muted); margin-top: 8px; font-size: 15px; }
 
@@ -95,7 +101,7 @@
     margin-top: 18px; min-height: 56px; border-radius: 14px;
     display: flex; align-items: center; justify-content: center; text-align: center;
     font-size: 26px; font-weight: 800; padding: 14px;
-    background: rgba(124, 108, 255, 0.12); border: 1px dashed rgba(124,108,255,0.5);
+    background: rgba(var(--accent-3-rgb), 0.12); border: 1px dashed rgba(var(--accent-3-rgb), 0.5);
     color: var(--text); word-break: break-word;
   }
   .result.pop { animation: pop .4s ease; }
@@ -231,7 +237,7 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <div class="logo"><span class="dot"></span> 随便</div>
+    <div class="logo" id="logo" title="点我换个主题色 🎨"><span class="dot"></span> 随便 <span class="paint">🎨</span></div>
     <div class="tagline">suibian · 把「不知道选啥」变成「一键搞定」</div>
   </header>
 
@@ -519,6 +525,36 @@
     if (b.dataset.tab === "fortune") drawFortune(true);
   });
 
+  /* ---------- 主题切换（彩蛋） ---------- */
+  const THEMES = [
+    { name: "极光紫", bg: "#0f1020", bgSoft: "#1a1b2e", accent: "#ff7a59", accent2: "#ffb15c", accent3: "#7c6cff", rgb3: "124,108,255", glow1: "rgba(124,108,255,0.25)", glow2: "rgba(255,122,89,0.18)" },
+    { name: "樱花粉", bg: "#1a0f1a", bgSoft: "#2a1726", accent: "#ff6c9c", accent2: "#ffb15c", accent3: "#ff8fc7", rgb3: "255,108,156", glow1: "rgba(255,108,156,0.22)", glow2: "rgba(255,177,92,0.16)" },
+    { name: "薄荷绿", bg: "#0c1a16", bgSoft: "#14241f", accent: "#4be3a5", accent2: "#ffd166", accent3: "#5cc8ff", rgb3: "75,227,165", glow1: "rgba(75,227,165,0.20)", glow2: "rgba(92,200,255,0.16)" },
+    { name: "落日金", bg: "#1a130c", bgSoft: "#261c12", accent: "#ff9a3c", accent2: "#ffd166", accent3: "#ff6c9c", rgb3: "255,154,60", glow1: "rgba(255,154,60,0.24)", glow2: "rgba(255,209,102,0.18)" },
+    { name: "赛博青", bg: "#08141c", bgSoft: "#10202c", accent: "#5cc8ff", accent2: "#4be3a5", accent3: "#b388ff", rgb3: "92,200,255", glow1: "rgba(92,200,255,0.24)", glow2: "rgba(124,108,255,0.18)" },
+    { name: "暗夜莓", bg: "#140a1a", bgSoft: "#20142a", accent: "#b388ff", accent2: "#ff6c9c", accent3: "#7c6cff", rgb3: "179,136,255", glow1: "rgba(179,136,255,0.24)", glow2: "rgba(255,108,156,0.16)" }
+  ];
+  function applyTheme(t) {
+    const r = document.documentElement.style;
+    r.setProperty("--bg", t.bg);
+    r.setProperty("--bg-soft", t.bgSoft);
+    r.setProperty("--accent", t.accent);
+    r.setProperty("--accent-2", t.accent2);
+    r.setProperty("--accent-3", t.accent3);
+    r.setProperty("--accent-3-rgb", t.rgb3);
+    r.setProperty("--glow-1", t.glow1);
+    r.setProperty("--glow-2", t.glow2);
+  }
+  let themeIdx = 0;
+  try { const raw = localStorage.getItem("suibian_theme"); if (raw !== null) themeIdx = parseInt(raw, 10) % THEMES.length; } catch (e) {}
+  applyTheme(THEMES[themeIdx]);
+  $("logo").addEventListener("click", () => {
+    themeIdx = (themeIdx + 1) % THEMES.length;
+    applyTheme(THEMES[themeIdx]);
+    try { localStorage.setItem("suibian_theme", String(themeIdx)); } catch (e) {}
+    toast("主题已切换：🎨 " + THEMES[themeIdx].name);
+  });
+
   /* ---------- 抽签 ---------- */
   const pickInput = $("pickInput"), pickResult = $("pickResult"), pickHistEl = $("pickHist");
   let pickHistory = [];
@@ -774,7 +810,12 @@
     "运气这东西，信的人先享受。",
     "今天的你，已经比打开页面前多了一点「随便」的勇气。",
     "选择太多不是福，先划掉最不想要的，剩下的都是好答案。",
-    "把焦虑写下来，它就从一团雾变成一条待办。"
+    "把焦虑写下来，它就从一团雾变成一条待办。",
+    "换个主题色，心情好像也跟着亮了一下。",
+    "页面可以换肤色，你今天也值得换个心情。",
+    "点一下 logo 试试，说不定就点亮了今天。",
+    "随便不是没主见，是先把纠结放下再说。",
+    "今天的配色由你决定，生活的调色盘也一样。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
