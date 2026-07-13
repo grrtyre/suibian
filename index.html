@@ -291,6 +291,7 @@
     <button data-tab="oracle">神谕球</button>
     <button data-tab="sort">随机排序</button>
     <button data-tab="timer">倒计时</button>
+    <button data-tab="trivia">冷知识</button>
   </nav>
 
   <!-- 抽签 -->
@@ -567,6 +568,18 @@
         <button class="btn ghost" id="timerReset">重置</button>
       </div>
       <div class="result" id="timerResult" style="font-size:18px">设个时长，按「开始」。</div>
+    </div>
+  </section>
+
+  <!-- 冷知识 -->
+  <section class="panel" id="trivia">
+    <div class="card">
+      <h2>冷知识</h2>
+      <div class="hint">正经决策的间隙，来点用不上的奇怪知识，纯解闷，点结果还能复制。</div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="triviaBtn">来一条</button>
+      </div>
+      <div class="result copyable" id="triviaResult">点「来一条」，随便涨点奇怪知识。</div>
     </div>
   </section>
 
@@ -903,7 +916,12 @@
     "把大目标切成小段，每段都短到「随便就能开始」。",
     "与其焦虑一整天，不如先专注做一件事 15 分钟。",
     "时间不等人，但你可以先按下「开始」。",
-    "番茄钟走完一格，奖励自己发一会儿呆不过分。"
+    "番茄钟走完一格，奖励自己发一会儿呆不过分。",
+    "涨点冷知识没用，但脑子转一下就有用。",
+    "用不上的知识最解压，因为不用为它负责。",
+    "随手学一条冷知识，今天的「随便」也算有点收获。",
+    "刷到一条奇怪知识，比刷到一条广告开心多了。",
+    "决定不了的时候，先随便信一条冷知识缓一缓。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -1409,6 +1427,41 @@
     timerPresets.appendChild(el);
   });
   renderTimer();
+
+  /* ---------- 冷知识 ---------- */
+  const triviaResult = $("triviaResult");
+  const TRIVIA = [
+    "斑马其实是黑底白纹——黑色是皮肤底色，白色是后来长出来的条纹。",
+    "蜂蜜几乎不会变质，考古学家曾在古墓里发现 3000 多年前还能吃的蜂蜜。",
+    "章鱼有三颗心脏，而且它的血液是蓝色的（因为含铜而不是铁）。",
+    "你其实一直「看不见」自己的鼻子，只是大脑选择把它忽略掉了。",
+    "闪电比太阳表面还热，温度可达约 3 万摄氏度。",
+    "企鹅其实会「飞」，只不过是在水里飞，游得比很多鱼还快。",
+    "香蕉在植物学上是浆果，而草莓不是——草莓属于「假果」。",
+    "人打哈欠会传染，连狗看主人打哈欠都会跟着打。",
+    "一朵普通的积云，重量约等于 100 头大象，只是被风托着没掉下来。",
+    "你「记得」的不少细节，其实是大脑事后补的——记忆会自己编。",
+    "猫发出呼噜声时的频率，据说还能帮骨头愈合，算自带理疗。",
+    "金星上的一天比它的一年还长——它自转比绕太阳公转还慢。",
+    "蜗牛可以一口气睡上三年，醒来照样活蹦乱跳。",
+    "人出生时约有 300 块骨头，成年后慢慢合并成 206 块。",
+    "萤火虫发光几乎不产热，是自然界里最高效的「灯泡」。",
+    "人的指纹和猫鼻纹一样，都是独一无二的「身份证」。",
+    "深海鱼会自己发光，在漆黑里「打手电」找路，或者诱捕猎物。",
+    "橡皮筋拉长再松手，弹回的瞬间能量几乎没怎么损耗。",
+    "鸭子叫的声音在水下也能听见，而且不会回弹变形。",
+    "「随便」在日语里近似「てきとう」，本意确实是「适当、随性」。"
+  ];
+  $("triviaBtn").addEventListener("click", () => {
+    triviaResult.textContent = "💡 " + TRIVIA[rand(TRIVIA.length)];
+    pop(triviaResult);
+  });
+  triviaResult.addEventListener("click", () => {
+    const txt = triviaResult.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => toast("已复制：" + txt.slice(0, 12) + "…"), () => toast(txt));
+    } else { toast(txt); }
+  });
 })();
 </script>
 </body>
