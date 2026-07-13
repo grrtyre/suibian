@@ -246,6 +246,24 @@
   .sortbox ol { margin: 0; padding-left: 24px; }
   .sortbox li { margin: 3px 0; }
   .sortbox.pop { animation: pop .4s ease; }
+
+  /* timer / countdown */
+  .timer-stage {
+    position: relative; width: 220px; height: 220px; margin: 10px auto 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .timer-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .timer-ring circle { fill: none; stroke-width: 14; }
+  .timer-bg { stroke: rgba(255, 255, 255, 0.10); }
+  .timer-fg {
+    stroke: var(--accent); stroke-linecap: round;
+    transition: stroke-dashoffset .25s linear;
+  }
+  .timer-time { position: relative; font-size: 44px; font-weight: 800; letter-spacing: 2px; }
+  .timer-done .timer-fg { stroke: var(--good); }
+  .timer-done .timer-time { color: var(--good); }
+  .timer-time.pulse { animation: tpop .5s ease; }
+  @keyframes tpop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
 </style>
 </head>
 <body>
@@ -272,6 +290,7 @@
     <button data-tab="gacha">扭蛋机</button>
     <button data-tab="oracle">神谕球</button>
     <button data-tab="sort">随机排序</button>
+    <button data-tab="timer">倒计时</button>
   </nav>
 
   <!-- 抽签 -->
@@ -524,6 +543,30 @@
         <button class="btn ghost" id="sortClear">清空结果</button>
       </div>
       <div class="sortbox empty" id="sortResult">先把清单丢进来，点「排序一下」。</div>
+    </div>
+  </section>
+
+  <!-- 倒计时 -->
+  <section class="panel" id="timer">
+    <div class="card">
+      <h2>倒计时</h2>
+      <div class="hint">专注一会儿，或单纯掐个表。到点会轻响提醒你，纯前端不联网。</div>
+      <div class="timer-stage">
+        <svg class="timer-ring" viewBox="0 0 200 200" width="220" height="220">
+          <circle class="timer-bg" cx="100" cy="100" r="90"></circle>
+          <circle class="timer-fg" id="timerArc" cx="100" cy="100" r="90"></circle>
+        </svg>
+        <div class="timer-time" id="timerTime">25:00</div>
+      </div>
+      <div class="chips" id="timerPresets"></div>
+      <div class="row" style="justify-content:center;align-items:center">
+        <label style="display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:14px">
+          分 <input type="number" id="timerMin" value="25" style="width:72px" min="0" step="0.5" />
+        </label>
+        <button class="btn" id="timerStart">开始</button>
+        <button class="btn ghost" id="timerReset">重置</button>
+      </div>
+      <div class="result" id="timerResult" style="font-size:18px">设个时长，按「开始」。</div>
     </div>
   </section>
 
@@ -854,7 +897,13 @@
     "五件事一起压着最累，随机挑个开头就破局了。",
     "随便打乱一下顺序，往往比苦思顺序更省脑子。",
     "决定不了先后，就交给随机，它从不偏心。",
-    "今天的清单交给随机排序，剩下的交给执行力。"
+    "今天的清单交给随机排序，剩下的交给执行力。",
+    "专注 25 分钟，比刷两小时手机更有底气。",
+    "倒计时一响，拖延就少了借口。",
+    "把大目标切成小段，每段都短到「随便就能开始」。",
+    "与其焦虑一整天，不如先专注做一件事 15 分钟。",
+    "时间不等人，但你可以先按下「开始」。",
+    "番茄钟走完一格，奖励自己发一会儿呆不过分。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -1263,6 +1312,103 @@
     sortResult.classList.add("empty");
     sortResult.textContent = "先把清单丢进来，点「排序一下」。";
   });
+
+  /* ---------- 倒计时 ---------- */
+  const timerArc = $("timerArc"), timerTime = $("timerTime"),
+        timerResult = $("timerResult"), timerMin = $("timerMin"),
+        timerStart = $("timerStart"), timerReset = $("timerReset"),
+        timerPresets = $("timerPresets");
+  const TIMER_R = 90, TIMER_CIRC = 2 * Math.PI * TIMER_R;
+  timerArc.style.strokeDasharray = TIMER_CIRC;
+  timerArc.style.strokeDashoffset = 0;
+  let timerTotal = 25 * 60, timerLeft = timerTotal, timerId = null, timerRunning = false;
+  function renderTimer() {
+    const m = Math.floor(timerLeft / 60), s = timerLeft % 60;
+    timerTime.textContent = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    const frac = timerTotal ? timerLeft / timerTotal : 0;
+    timerArc.style.strokeDashoffset = TIMER_CIRC * (1 - frac);
+  }
+  function timerBeep() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      const ac = new AC();
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type = "sine"; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.001, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.3, ac.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.5);
+      o.start(); o.stop(ac.currentTime + 0.5);
+    } catch (e) {}
+  }
+  function timerStop() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    timerRunning = false;
+  }
+  function timerTick() {
+    timerLeft--;
+    if (timerLeft <= 0) {
+      timerStop();
+      timerLeft = 0; renderTimer();
+      timerTime.classList.remove("pulse"); void timerTime.offsetWidth; timerTime.classList.add("pulse");
+      $("timer").classList.add("timer-done");
+      timerStart.textContent = "开始";
+      timerResult.textContent = "⏰ 时间到！该停手啦。";
+      pop(timerResult);
+      toast("⏰ 时间到！");
+      timerBeep();
+      return;
+    }
+    renderTimer();
+  }
+  timerStart.addEventListener("click", () => {
+    if (timerRunning) {
+      timerStop();
+      timerStart.textContent = "继续";
+      timerResult.textContent = "已暂停，剩 " + timerTime.textContent;
+      return;
+    }
+    if (timerLeft <= 0) {
+      const mins = parseFloat(timerMin.value);
+      if (!mins || mins <= 0) { toast("先设个大于 0 的分钟数"); return; }
+      timerTotal = Math.max(1, Math.round(mins * 60));
+      timerLeft = timerTotal;
+    }
+    $("timer").classList.remove("timer-done");
+    timerRunning = true;
+    timerStart.textContent = "暂停";
+    timerResult.textContent = "计时中…专心吧。";
+    renderTimer();
+    timerId = setInterval(timerTick, 1000);
+  });
+  timerReset.addEventListener("click", () => {
+    timerStop();
+    $("timer").classList.remove("timer-done");
+    const mins = parseFloat(timerMin.value) || 25;
+    timerTotal = Math.max(1, Math.round(mins * 60));
+    timerLeft = timerTotal;
+    timerStart.textContent = "开始";
+    timerResult.textContent = "已重置，设好时长再开始。";
+    renderTimer();
+  });
+  [1, 5, 15, 25, 45].forEach((m, i) => {
+    const el = document.createElement("div");
+    el.className = "chip" + (i === 3 ? " on" : "");
+    el.textContent = m + " 分";
+    el.addEventListener("click", () => {
+      timerMin.value = m;
+      timerStop();
+      $("timer").classList.remove("timer-done");
+      timerTotal = m * 60; timerLeft = timerTotal;
+      timerStart.textContent = "开始";
+      timerResult.textContent = "已选 " + m + " 分钟，按「开始」。";
+      renderTimer();
+      [...timerPresets.children].forEach((x) => x.classList.toggle("on", x === el));
+    });
+    timerPresets.appendChild(el);
+  });
+  renderTimer();
 })();
 </script>
 </body>
