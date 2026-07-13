@@ -273,6 +273,71 @@
   .timer-done .timer-time { color: var(--good); }
   .timer-time.pulse { animation: tpop .5s ease; }
   @keyframes tpop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+  /* ---------- 设置面板 & 音效系统 ---------- */
+  .gear {
+    margin-left: 10px; padding: 9px 16px; border-radius: 999px; cursor: pointer;
+    font-size: 14px; font-weight: 600; letter-spacing: .5px;
+    color: var(--muted); background: var(--card); border: 1px solid var(--line);
+    transition: transform .15s, color .15s, border-color .15s; user-select: none;
+  }
+  .gear:hover { color: var(--text); border-color: rgba(255,255,255,0.22); transform: translateY(-1px); }
+
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none;
+    transition: opacity .25s; z-index: 60;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: 320px; max-width: 88vw;
+    background: var(--card); border-left: 1px solid var(--line); box-shadow: var(--shadow);
+    transform: translateX(100%); transition: transform .28s ease; z-index: 61;
+    display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+  .drawer-head h3 { margin: 0; font-size: 18px; }
+  .drawer-x { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; }
+  .drawer-x:hover { color: var(--text); }
+  .drawer-body { padding: 4px 20px 20px; overflow-y: auto; flex: 1; }
+  .set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px dashed var(--line); }
+  .set-row:last-child { border-bottom: none; }
+  .set-row .grow { flex: 1; min-width: 0; }
+  .set-label { font-size: 15px; }
+  .set-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .switch { position: relative; width: 46px; height: 26px; flex: 0 0 auto; }
+  .switch input { display: none; }
+  .switch .track { position: absolute; inset: 0; background: var(--card-2); border: 1px solid var(--line); border-radius: 999px; transition: .2s; cursor: pointer; }
+  .switch .track::before { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: .2s; }
+  .switch input:checked + .track { background: linear-gradient(90deg, var(--accent-2), var(--accent)); border-color: transparent; }
+  .switch input:checked + .track::before { transform: translateX(20px); background: #fff; }
+  .set-chips { display: flex; gap: 8px; flex: 0 0 auto; }
+  .set-chips .chip { font-size: 13px; padding: 6px 14px; }
+  .theme-dots { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .theme-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .12s; }
+  .theme-dot:hover { transform: scale(1.12); }
+  .theme-dot.on { border-color: #fff; box-shadow: 0 0 0 2px var(--card); }
+  .drawer-foot { padding: 16px 20px; border-top: 1px solid var(--line); }
+  .drawer-foot .btn { width: 100%; background: var(--card-2); color: var(--text); border: 1px solid var(--line); }
+
+  body.fs-large .result { font-size: 30px; }
+  body.fs-large .card h2 { font-size: 23px; }
+  body.fs-large .tagline { font-size: 16px; }
+  body.fs-large nav.tabs button { font-size: 15px; }
+  body.fs-large button.btn { font-size: 16px; }
+  body.fs-large .hint { font-size: 14px; }
+  body.fs-large .timer-time { font-size: 50px; }
+  body.fs-large .logo { font-size: 44px; }
+
+  body.compact .wrap { padding: 18px 14px 44px; }
+  body.compact .card { padding: 16px; }
+  body.compact nav.tabs { margin: 16px 0 14px; }
+  body.compact .result { min-height: 48px; padding: 12px; }
+  body.compact .hero { padding: 18px 0 4px; }
+  body.compact .fortune { padding: 14px; }
+  body.compact .color-swatch { min-height: 140px; }
+
+  body.reduce * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 </style>
 </head>
 <body>
@@ -281,6 +346,7 @@
     <div class="logo" id="logo" title="点我换个主题色 🎨"><span class="dot"></span> 随便 <span class="paint">🎨</span></div>
     <div class="tagline">suibian · 把「不知道选啥」变成「一键搞定」</div>
     <button class="shuffle" id="shuffleTab" title="随便跳到一个工具逛逛 🎲">🎲 随便逛逛</button>
+    <button class="gear" id="settingsBtn" title="设置 ⚙️">⚙️ 设置</button>
   </header>
 
   <nav class="tabs" id="tabs">
@@ -598,6 +664,43 @@
   </footer>
 </div>
 
+<!-- 设置抽屉 -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<aside class="drawer" id="settingsDrawer" aria-label="设置">
+  <div class="drawer-head">
+    <h3>⚙️ 设置</h3>
+    <button class="drawer-x" id="settingsClose" title="关闭">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="set-row">
+      <div class="grow"><div class="set-label">音效</div><div class="set-sub">点击与出结果时轻响</div></div>
+      <label class="switch"><input type="checkbox" id="setSound"><span class="track"></span></label>
+    </div>
+    <div class="set-row">
+      <div class="grow"><div class="set-label">减弱动效</div><div class="set-sub">关掉动画，更安静</div></div>
+      <label class="switch"><input type="checkbox" id="setReduce"><span class="track"></span></label>
+    </div>
+    <div class="set-row">
+      <div class="grow"><div class="set-label">字号</div><div class="set-sub">标准 / 大，照顾眼睛</div></div>
+      <div class="set-chips">
+        <div class="chip" id="setFsStd">标准</div>
+        <div class="chip" id="setFsLarge">大</div>
+      </div>
+    </div>
+    <div class="set-row">
+      <div class="grow"><div class="set-label">紧凑布局</div><div class="set-sub">更省空间</div></div>
+      <label class="switch"><input type="checkbox" id="setCompact"><span class="track"></span></label>
+    </div>
+    <div class="set-row">
+      <div class="grow"><div class="set-label">主题配色</div><div class="set-sub">也可点顶部 logo 轮换</div></div>
+      <div class="theme-dots" id="setThemes"></div>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" id="setReset">🧹 清空本地存档</button>
+  </div>
+</aside>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -609,7 +712,13 @@
     clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 1800);
   };
   const rand = (n) => Math.floor(Math.random() * n);
-  const pop = (el) => { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); };
+  const pop = (el) => {
+    el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+    if (settings.sound && el.classList &&
+        (el.classList.contains("result") || el.classList.contains("fortune") || el.classList.contains("sortbox"))) {
+      playDing();
+    }
+  };
   const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -668,14 +777,121 @@
     r.setProperty("--glow-1", t.glow1);
     r.setProperty("--glow-2", t.glow2);
   }
-  let themeIdx = 0;
-  try { const raw = localStorage.getItem("suibian_theme"); if (raw !== null) themeIdx = parseInt(raw, 10) % THEMES.length; } catch (e) {}
+
+  /* ---------- 设置 & 全局音效系统 ---------- */
+  const SETTINGS_KEY = "suibian_settings";
+  const DEFAULT_SETTINGS = { sound: true, reduce: false, fontsize: "std", compact: false, theme: 0 };
+  let settings = Object.assign({}, DEFAULT_SETTINGS);
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) settings = Object.assign({}, DEFAULT_SETTINGS, JSON.parse(raw));
+  } catch (e) {}
+  // 兼容旧版独立的主题键
+  if (settings.theme == null || isNaN(settings.theme)) {
+    try { const t = localStorage.getItem("suibian_theme"); if (t !== null) settings.theme = parseInt(t, 10) % THEMES.length; } catch (e) {}
+  }
+  settings.theme = (settings.theme | 0) % THEMES.length;
+
+  // WebAudio 音效：纯前端合成，无需任何音频文件
+  let _ac = null;
+  function getAC() {
+    if (!_ac) {
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return null;
+      try { _ac = new C(); } catch (e) { return null; }
+    }
+    if (_ac.state === "suspended") { try { _ac.resume(); } catch (e) {} }
+    return _ac;
+  }
+  function tone(freq, dur, type, vol) {
+    const ac = getAC(); if (!ac) return;
+    try {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type = type || "sine"; o.frequency.value = freq;
+      const t = ac.currentTime;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.start(t); o.stop(t + dur + 0.02);
+    } catch (e) {}
+  }
+  function playClick() { if (!settings.sound) return; tone(420, 0.05, "triangle", 0.10); }
+  function playDing() {
+    if (!settings.sound) return;
+    tone(880, 0.16, "sine", 0.16);
+    setTimeout(() => tone(1318, 0.16, "sine", 0.11), 55);
+  }
+  function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} }
+  function applySettingsClasses() {
+    document.body.classList.toggle("reduce", !!settings.reduce);
+    document.body.classList.toggle("fs-large", settings.fontsize === "large");
+    document.body.classList.toggle("compact", !!settings.compact);
+  }
+
+  let themeIdx = settings.theme;
   applyTheme(THEMES[themeIdx]);
+  applySettingsClasses();
   $("logo").addEventListener("click", () => {
     themeIdx = (themeIdx + 1) % THEMES.length;
     applyTheme(THEMES[themeIdx]);
-    try { localStorage.setItem("suibian_theme", String(themeIdx)); } catch (e) {}
+    settings.theme = themeIdx; saveSettings();
     toast("主题已切换：🎨 " + THEMES[themeIdx].name);
+  });
+
+  /* ---------- 设置抽屉交互 ---------- */
+  const drawer = $("settingsDrawer"), drawerOverlay = $("drawerOverlay");
+  function openDrawer() {
+    syncSettingsUI();
+    drawer.classList.add("open"); drawerOverlay.classList.add("open");
+  }
+  function closeDrawer() { drawer.classList.remove("open"); drawerOverlay.classList.remove("open"); }
+  $("settingsBtn").addEventListener("click", openDrawer);
+  $("settingsClose").addEventListener("click", closeDrawer);
+  drawerOverlay.addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && drawer.classList.contains("open")) closeDrawer(); });
+
+  function setSwitch(id, on) { const el = $(id); if (el) el.checked = !!on; }
+  function syncSettingsUI() {
+    setSwitch("setSound", settings.sound);
+    setSwitch("setReduce", settings.reduce);
+    setSwitch("setCompact", settings.compact);
+    $("setFsStd").classList.toggle("on", settings.fontsize !== "large");
+    $("setFsLarge").classList.toggle("on", settings.fontsize === "large");
+    [...$("setThemes").children].forEach((d, i) => d.classList.toggle("on", i === themeIdx));
+  }
+  // 构建主题色点
+  const setThemes = $("setThemes");
+  THEMES.forEach((t, i) => {
+    const d = document.createElement("div");
+    d.className = "theme-dot" + (i === themeIdx ? " on" : "");
+    d.style.background = "linear-gradient(135deg," + t.accent + "," + t.accent3 + ")";
+    d.title = t.name;
+    d.addEventListener("click", () => {
+      themeIdx = i; settings.theme = i; applyTheme(THEMES[i]); saveSettings();
+      [...setThemes.children].forEach((x) => x.classList.toggle("on", x === d));
+      toast("主题：🎨 " + t.name); playClick();
+    });
+    setThemes.appendChild(d);
+  });
+  $("setSound").addEventListener("change", (e) => { settings.sound = e.target.checked; saveSettings(); if (settings.sound) playClick(); });
+  $("setReduce").addEventListener("change", (e) => { settings.reduce = e.target.checked; applySettingsClasses(); saveSettings(); });
+  $("setCompact").addEventListener("change", (e) => { settings.compact = e.target.checked; applySettingsClasses(); saveSettings(); });
+  $("setFsStd").addEventListener("click", () => { settings.fontsize = "std"; applySettingsClasses(); saveSettings(); syncSettingsUI(); playClick(); });
+  $("setFsLarge").addEventListener("click", () => { settings.fontsize = "large"; applySettingsClasses(); saveSettings(); syncSettingsUI(); playClick(); });
+  $("setReset").addEventListener("click", () => {
+    if (!confirm("确定清空本地存档吗？\n（抽签历史、扭蛋记录、石头剪刀布战绩会被清除，主题与设置会保留）")) return;
+    ["suibian_pick_hist", "suibian_gacha_hist", "suibian_rps_score"].forEach((k) => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+    toast("本地存档已清空 ✨");
+    setTimeout(() => location.reload(), 500);
+  });
+
+  // 全局点击音效（按钮 / 标签 / 胶囊等）
+  document.addEventListener("click", (e) => {
+    const hit = e.target.closest("button, .chip, .hub, .shuffle, .gear, .logo, nav.tabs button");
+    if (hit) playClick();
   });
 
   /* ---------- 抽签 ---------- */
