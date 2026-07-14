@@ -139,6 +139,23 @@
   @keyframes splash { 0% { transform: translateY(14px) scale(.96); opacity: 0; } 55% { transform: translateY(-4px) scale(1.02); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
   .bottle-meta { font-size: 12px; color: var(--muted); font-weight: 500; }
 
+  /* 周易起卦 */
+  .iching-q { margin-top: 10px; color: var(--muted); font-size: 14px; }
+  .iching-result {
+    margin-top: 18px; padding: 20px 18px; border-radius: 14px;
+    background: rgba(var(--accent-3-rgb), 0.10); border: 1px solid var(--line); text-align: center;
+  }
+  .iching-result.pop { animation: pop .4s ease; }
+  .iching-name { margin-top: 10px; font-size: 22px; font-weight: 800; }
+  body.fs-large .iching-name { font-size: 25px; }
+  .iching-core {
+    display: inline-block; margin-top: 8px; font-size: 13px; color: var(--accent-2);
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px;
+  }
+  .iching-desc { margin-top: 12px; font-size: 15px; line-height: 1.7; color: var(--text); }
+  body.fs-large .iching-desc { font-size: 17px; }
+  .iching-move { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+
   /* Wheel */
   .wheel-stage { display: flex; flex-direction: column; align-items: center; gap: 14px; }
   .wheel-box { position: relative; width: 320px; height: 320px; max-width: 86vw; }
@@ -627,6 +644,7 @@
       <button data-tab="moments">朋友圈文案</button>
       <button data-tab="idiom">成语接龙</button>
     <button data-tab="mood">心情日记</button>
+    <button data-tab="iching">周易起卦</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1163,6 +1181,26 @@
     </div>
   </section>
 
+  <!-- 周易起卦 -->
+  <section class="panel" id="iching">
+    <div class="card">
+      <h2>☯ 周易起卦</h2>
+      <div class="hint">心里装着个问题，点「🪙 一键起卦」，让三枚铜钱替你定一卦（文王六十四卦）。纯属娱乐，认真你就输。</div>
+      <input type="text" id="ichingQ" maxlength="40" placeholder="心里想个问题（可选）…" style="margin-top:6px" />
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="ichingBtn">🪙 一键起卦</button>
+        <button class="btn ghost" id="ichingAgain">再起一卦</button>
+        <button class="btn ghost" id="ichingCopy">复制卦辞</button>
+      </div>
+      <div class="iching-result" id="ichingResult">
+        <svg viewBox="0 0 240 230" width="100%" style="max-width:300px;display:block;margin:0 auto" aria-label="卦象占位">
+          <text x="120" y="120" text-anchor="middle" fill="var(--muted)" font-size="14">卦象将在这里显现</text>
+        </svg>
+        <div class="iching-name">第 — 卦 · 静待天机</div>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1370,7 +1408,8 @@
     achv: "成就 徽章 统计 记录 墙 等级 解锁 进度 使用 次数",
     moments: "朋友圈 文案 发圈 配文 文案生成 心情 社交 晒 签名 装 段子 文案库",
     idiom: "成语 接龙 成语接龙 词语 汉字 文字游戏 语文 接字 考据 国学",
-    mood: "心情 日记 记录 情绪 签到 今天怎么样 mood 碎碎念 emo 感触 写一句 随笔"
+    mood: "心情 日记 记录 情绪 签到 今天怎么样 mood 碎碎念 emo 感触 写一句 随笔",
+    iching: "周易 起卦 卦象 占卜 铜钱 易经 六十四卦 算卦 玄学 决策 古法 问卦 五行"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -2105,7 +2144,15 @@
     "存档导出一下，把今天的「随便」也备份带走。",
     "本地存档记得备份，换浏览器也不怕把回忆弄丢。",
     "导出一份存档，就像给现在的自己拍了张快照。",
-    "导入存档不是作弊，是带着过去的自己继续随便。"
+    "导入存档不是作弊，是带着过去的自己继续随便。",
+    "铜钱三摇落定，卦象说的不算命，是替你把心事摆上了桌面。",
+    "古法起卦不为算准，是为让自己安静下来，听清心里那句答案。",
+    "乾卦教人刚健进取，坤卦教人厚德载物——你今天想当哪一面？",
+    "卦分动静，事有进退，急不来的就等它自己慢慢转过去。",
+    "六爻一落，悬着的心先放下一半，剩下的交给行动。",
+    "占卦是给纠结的人一个出口，真做决定的，还是你自己的手。",
+    "老阳老阴是变数，正如人生最妙处，往往藏在那一点不肯安分里。",
+    "之卦是变化后的你，起卦的此刻，已经是下一段故事的起点。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -3251,6 +3298,154 @@
   }
   $("idiomRestart").addEventListener("click", idiomRestart);
   $("idiomNext").addEventListener("click", idiomNext);
+
+  /* ---------- 周易起卦（文王六十四卦，三枚铜钱法） ---------- */
+  // 八经卦：值 = 三位二进制（bit0=初爻在下，1=阳 0=阴）
+  // 乾7 兑5 离6 震3 巽1 坎2 艮4 坤0
+  const ICHING = [
+    [1,7,7,"乾为天","刚健进取","自强不息，正是乘风破浪、大展拳脚的好时候。"],
+    [2,0,0,"坤为地","厚德载物","顺势包容、以静制动，厚积方能薄发。"],
+    [3,3,2,"水雷屯","初生艰难","万事开头难，像种子破土，撑过萌芽期就是晴天。"],
+    [4,2,4,"山水蒙","启蒙求知","心中存疑就去问、去学，拨开迷雾方见真章。"],
+    [5,7,2,"水天需","耐心等待","时机未到别硬闯，养精蓄锐，等云开见月。"],
+    [6,2,7,"天水讼","慎争止讼","口舌易生，退一步海阔天空，别让争辩空耗你。"],
+    [7,2,0,"地水师","出师有名","要行动就得有章法、有底气，聚众成事。"],
+    [8,0,2,"水地比","亲比相辅","找对伙伴、靠拢良人，借势而行更轻松。"],
+    [9,7,1,"风天小畜","小有积蓄","力量尚浅，先攒资源、积小胜，别贪大。"],
+    [10,5,7,"天泽履","脚踏实地","如履薄冰也要步步稳，守礼循规则无咎。"],
+    [11,7,0,"地天泰","通达安泰","天地交泰，顺风顺水，正是成事的好兆头。"],
+    [12,0,7,"天地否","闭塞待转","时运暂塞，守正待变，否极终会泰来。"],
+    [13,6,7,"天火同人","同心协力","与同频的人并肩，众志成城事竟成。"],
+    [14,7,6,"火天大有","大有收获","天时地利人和，努力有了丰厚回响。"],
+    [15,4,0,"地山谦","谦逊有终","满招损谦受益，低调做人反而走得更远。"],
+    [16,0,3,"雷地豫","愉悦预备","先乐后忧要不得，欢愉中别忘留好退路。"],
+    [17,3,5,"泽雷随","顺势而从","看清风向再跟随，随大流也要守住本心。"],
+    [18,1,4,"山风蛊","整治积弊","旧账该清就清，破而后立，焕然一新。"],
+    [19,5,0,"地泽临","亲临督导","走到一线、躬身入局，事情会顺着好起来。"],
+    [20,0,1,"风地观","观察自省","先看清全貌再出手，观而后动不迟。"],
+    [21,3,6,"火雷噬嗑","咬紧难关","遇硬骨头就下口去啃，难关终会被咬开。"],
+    [22,4,6,"山火贲","文饰之美","外在修饰添彩，但别让华丽盖过真心。"],
+    [23,0,4,"山地剥","剥落消退","大势在退，宜守不宜攻，保存实力等反弹。"],
+    [24,3,0,"地雷复","一阳来复","跌到谷底就要回升，转机就在不远处。"],
+    [25,3,7,"天雷无妄","不妄为","莫瞎折腾，顺其自然、安分守己最稳。"],
+    [26,7,4,"山天大畜","厚积薄发","继续蓄力，养得越足，将来的爆发越猛。"],
+    [27,3,4,"山雷颐","颐养正道","管住嘴、养好身，先把内在能量补足。"],
+    [28,1,5,"泽风大过","非常之举","局面反常，需要敢为人先的非常手段。"],
+    [29,2,2,"坎为水","重险修心","险中求进，稳住心神、以诚破局。"],
+    [30,6,6,"离为火","光明附丽","如日当空，借势发光，与人相依更旺。"],
+    [31,4,5,"泽山咸","感应相悦","心动就坦诚表达，人与人之间贵在共鸣。"],
+    [32,1,3,"雷风恒","恒久有成","认准方向就长久坚持，时间会给你答案。"],
+    [33,4,7,"天山遁","适时退隐","该退则退，避其锋芒是为更好的回归。"],
+    [34,7,3,"雷天大壮","壮勿妄动","羽翼渐丰也别横冲，强盛时更要守分寸。"],
+    [35,0,6,"火地晋","旭日晋升","如朝阳东升，地位声望正往上走，趁势进取。"],
+    [36,6,0,"地火明夷","韬光养晦","处境晦暗，收敛锋芒、暗中蓄力最明智。"],
+    [37,6,1,"风火家人","齐家同心","先把小家安顿好，内有秩序外自顺。"],
+    [38,5,6,"火泽睽","求同存异","看似背道，实则互补，换个角度就通了。"],
+    [39,4,2,"水山蹇","行阻且修","路遇险阻，停下修整比硬闯更聪明。"],
+    [40,2,3,"雷水解","险难消解","坚冰渐融，困局松动，问题正在被解开。"],
+    [41,5,4,"山泽损","损下益上","适当让步与舍弃，换来得大于失。"],
+    [42,3,1,"风雷益","损上益下","利人亦利己，施与之中收获更多。"],
+    [43,7,5,"泽天夬","决而能和","该断就断，果断清除隐患，但别失了和气。"],
+    [44,1,7,"天风姤","不期而遇","意外之人或事将至，缘分到时且珍惜。"],
+    [45,0,5,"泽地萃","荟萃相聚","人才物力汇聚，正是成事聚势的良机。"],
+    [46,1,0,"地风升","步步高升","如苗向上，踏实积累，地位自然攀升。"],
+    [47,2,5,"泽水困","困中守志","一时受困，守住底线不慌乱，静待出头。"],
+    [48,2,1,"水风井","养民有常","像井水长流，持续供给、利他不竭。"],
+    [49,6,5,"泽火革","顺天应人","时机成熟就大胆变革，破旧立新正当时。"],
+    [50,1,6,"火风鼎","鼎新取象","稳如鼎器，重整旗鼓、更上一层楼。"],
+    [51,3,3,"震为雷","惊惧修省","雷声惊醒，遇变不慌，反躬自省则无虞。"],
+    [52,4,4,"艮为山","止而安止","该停就停，行至山前且驻足，静观其变。"],
+    [53,4,1,"风山渐","循序渐进","如鸿渐陆，一步一脚印，慢就是稳。"],
+    [54,5,3,"雷泽归妹","归位有节","关系与计划要回到正位，过界易生乱。"],
+    [55,6,3,"雷火丰","丰盛当忧","盛极时勿忘隐忧，居安思危方能久。"],
+    [56,6,4,"火山旅","行旅在外","身处异乡或过渡期，随遇而安最自在。"],
+    [57,1,1,"巽为风","顺而入","如风无孔不入，谦顺而行则无往不利。"],
+    [58,5,5,"兑为泽","和悦以说","心怀喜悦、以诚待人，处处遇贵人。"],
+    [59,1,2,"风水涣","涣散待聚","人心或局面松散，及时凝聚向心力。"],
+    [60,5,2,"水泽节","节制有度","凡事有度，懂得节制才不会透支。"],
+    [61,5,1,"风泽中孚","诚信立身","以信为本，真心换真心，误会自消。"],
+    [62,4,3,"雷山小过","小过无咎","小事可逾矩，大事须守正，过犹不及。"],
+    [63,6,2,"水火既济","事成守成","大事初定，最忌松懈，守住成果才是赢。"],
+    [64,2,6,"水火未济","未竟待续","旅途未完，恰恰是新开始的伏笔。"]
+  ];
+  const ICH_MAP = {};
+  ICHING.forEach((h) => { ICH_MAP[(h[2] << 3) | h[1]] = { n: h[0], name: h[3], core: h[4], desc: h[5] }; });
+  const ICH_POS = ["初", "二", "三", "四", "五", "上"];
+  function ichingYang(v) { return v === 7 || v === 9; }
+  function ichingLineName(v, i) { return ICH_POS[i] + (ichingYang(v) ? "九" : "六"); }
+  function ichingToss() {
+    const lines = [];
+    for (let i = 0; i < 6; i++) {
+      let s = 0;
+      for (let k = 0; k < 3; k++) s += Math.random() < 0.5 ? 2 : 3; // 2=阴钱 3=阳钱 → 6/7/8/9
+      lines.push(s);
+    }
+    return lines; // 由下往上（初爻→上爻）
+  }
+  function ichingHexOf(lines, flip) {
+    let bin = 0;
+    lines.forEach((v, i) => {
+      let yang = ichingYang(v);
+      if (flip && (v === 6 || v === 9)) yang = !yang; // 老阴变阳、老阳变阴
+      if (yang) bin |= (1 << i);
+    });
+    return ICH_MAP[bin] || ICH_MAP[0];
+  }
+  function ichingSVG(lines) {
+    const W = 240, H = 230, L = 150, x0 = (W - L) / 2, gap = 30, top = 18, barH = 10, dot = 16;
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:300px;display:block;margin:0 auto" aria-label="卦象">';
+    for (let i = 5; i >= 0; i--) {
+      const y = top + (5 - i) * gap, v = lines[i], yang = ichingYang(v), moving = (v === 6 || v === 9);
+      const fill = moving ? "var(--accent)" : (yang ? "var(--text)" : "var(--muted)");
+      if (yang) {
+        s += '<rect x="' + x0 + '" y="' + y + '" width="' + L + '" height="' + barH + '" rx="5" fill="' + fill + '"/>';
+      } else {
+        const half = (L - 22) / 2;
+        s += '<rect x="' + x0 + '" y="' + y + '" width="' + half + '" height="' + barH + '" rx="5" fill="' + fill + '"/>';
+        s += '<rect x="' + (x0 + half + 22) + '" y="' + y + '" width="' + half + '" height="' + barH + '" rx="5" fill="' + fill + '"/>';
+      }
+      if (moving) s += '<circle cx="' + (x0 + L + dot) + '" cy="' + (y + barH / 2) + '" r="6" fill="var(--accent)"/>';
+    }
+    s += "</svg>";
+    return s;
+  }
+  let ichingLast = "";
+  function ichingCast() {
+    const lines = ichingToss();
+    const hex = ichingHexOf(lines, false);
+    const chg = ichingHexOf(lines, true);
+    const moving = lines.map((v, i) => (v === 6 || v === 9) ? ichingLineName(v, i) : null).filter(Boolean);
+    const q = ($("ichingQ").value || "").trim();
+    let html = ichingSVG(lines);
+    html += '<div class="iching-name">第 ' + hex.n + ' 卦 · ' + hex.name + "</div>";
+    html += '<div class="iching-core">' + escapeHtml(hex.core) + "</div>";
+    if (q) html += '<div class="iching-q">你问：' + escapeHtml(q) + "</div>";
+    html += '<div class="iching-desc">' + escapeHtml(hex.desc) + "</div>";
+    if (moving.length) {
+      html += '<div class="iching-move">动爻：' + moving.join("、") +
+        ' → 之卦 第 ' + chg.n + ' 卦 · ' + chg.name + '（' + escapeHtml(chg.core) + '）</div>';
+    }
+    const box = $("ichingResult");
+    box.innerHTML = html;
+    box.classList.remove("pop"); void box.offsetWidth; box.classList.add("pop");
+    playDing();
+    let summary = "【周易起卦】第 " + hex.n + " 卦 · " + hex.name + "（" + hex.core + "）\n" + hex.desc;
+    if (q) summary = "问：" + q + "\n" + summary;
+    if (moving.length) summary += "\n动爻：" + moving.join("、") + " → 之卦 第 " + chg.n + " 卦 · " + chg.name;
+    ichingLast = summary;
+    bumpUsage("iching");
+  }
+  function ichingCopy() {
+    if (!ichingLast) { toast("先起一卦再复制～"); return; }
+    const done = () => toast("卦辞已复制 📜");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ichingLast).then(done, () => toast("复制失败，手动选一下吧"));
+    } else { toast("当前环境不支持复制，手动选一下吧"); }
+  }
+  $("ichingBtn").addEventListener("click", ichingCast);
+  $("ichingAgain").addEventListener("click", ichingCast);
+  $("ichingCopy").addEventListener("click", ichingCopy);
+
 })();
 </script>
 </body>
