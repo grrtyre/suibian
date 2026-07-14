@@ -494,6 +494,37 @@
   .pw-strength { margin-top: 14px; height: 8px; border-radius: 999px; background: var(--card-2); overflow: hidden; border: 1px solid var(--line); }
   .pw-bar { height: 100%; width: 0; border-radius: 999px; transition: width .3s, background .3s; background: var(--muted); }
   .pw-strength-label { text-align: center; color: var(--muted); font-size: 13px; margin-top: 6px; }
+  /* ---------- 塔罗牌 ---------- */
+  .tarot-spread { display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
+  .tarot-card { width:150px; height:228px; perspective:1000px; }
+  .tarot-inner { position:relative; width:100%; height:100%; transition:transform .65s cubic-bezier(.2,.8,.2,1); transform-style:preserve-3d; }
+  .tarot-card.flipped .tarot-inner { transform:rotateY(180deg); }
+  .tarot-face { position:absolute; inset:0; border-radius:16px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:14px; border:1px solid rgba(255,255,255,.12); box-shadow:0 12px 34px var(--glow-1); overflow:hidden; }
+  .tarot-back { background:linear-gradient(155deg,var(--accent-3),var(--accent)); color:#fff; font-size:48px; gap:10px; }
+  .tarot-back span { font-size:13px; letter-spacing:3px; opacity:.92; }
+  .tarot-front { background:var(--bg-soft); color:var(--text); transform:rotateY(180deg); text-align:center; }
+  .tarot-pos { font-size:12px; color:var(--accent-2); letter-spacing:1px; }
+  .tarot-name { font-size:19px; font-weight:800; margin:6px 0 4px; }
+  .tarot-dir { font-size:12px; color:var(--muted); margin-bottom:8px; }
+  .tarot-front.rev .tarot-dir { color:#ff6c9c; font-weight:700; }
+  .tarot-mean { font-size:13px; line-height:1.55; opacity:.94; padding:0 2px; }
+  @media (prefers-reduced-motion: reduce) { .tarot-inner { transition:none; } }
+
+  /* ---------- 成就墙 ---------- */
+  .achv-stat { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin:14px 0 20px; }
+  .achv-stat .box { background:var(--bg-soft); border:1px solid var(--line); border-radius:14px; padding:12px 18px; min-width:98px; text-align:center; }
+  .achv-stat .num { font-size:26px; font-weight:800; color:var(--accent); }
+  .achv-stat .lab { font-size:12px; color:var(--muted); margin-top:2px; }
+  .achv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(138px,1fr)); gap:12px; }
+  .achv-badge { background:var(--bg-soft); border:1px solid var(--line); border-radius:14px; padding:14px 12px; text-align:center; transition:transform .2s, box-shadow .2s; }
+  .achv-badge.on { border-color:var(--accent); box-shadow:0 6px 22px var(--glow-1); }
+  .achv-badge .em { font-size:30px; filter:grayscale(1); opacity:.35; }
+  .achv-badge.on .em { filter:none; opacity:1; }
+  .achv-badge .nm { font-weight:700; margin-top:6px; font-size:14px; }
+  .achv-badge.off .nm { color:var(--muted); }
+  .achv-badge .ds { font-size:11px; color:var(--muted); margin-top:4px; line-height:1.4; }
+  .achv-foot { text-align:center; margin-top:16px; color:var(--muted); font-size:13px; }
+
 </style>
 </head>
 <body>
@@ -538,6 +569,8 @@
     <button data-tab="group">随机分组</button>
     <button data-tab="guess">猜数字</button>
     <button data-tab="pwgen">密码生成器</button>
+    <button data-tab="tarot">塔罗牌</button>
+    <button data-tab="achv">成就墙</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -974,6 +1007,32 @@
     </div>
   </section>
 
+  <!-- 塔罗牌 -->
+  <section class="panel" id="tarot">
+    <div class="card">
+      <h2>🎴 塔罗牌</h2>
+      <div class="hint">静下心来，在心里想一个问题（不用告诉我）。抽 1 张给自己一个提示，或抽 3 张，看看「过去 · 现在 · 未来」想对你说什么。</div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="tarotDraw1">抽 1 张</button>
+        <button class="btn" id="tarotDraw3">抽 3 张</button>
+        <button class="btn ghost" id="tarotClear">收牌</button>
+      </div>
+      <div class="tarot-spread" id="tarotSpread"></div>
+      <div class="tarot-note hint" id="tarotNote" style="text-align:center;margin-top:14px"></div>
+    </div>
+  </section>
+
+  <!-- 成就墙 -->
+  <section class="panel" id="achv">
+    <div class="card">
+      <h2>🏅 成就墙</h2>
+      <div class="hint">这个站点会默默记着你用了多少次——只存在你自己的浏览器里，绝不上传。攒成就，看看你是哪一种「随便」玩家。</div>
+      <div class="achv-stat" id="achvStat"></div>
+      <div class="achv-grid" id="achvGrid"></div>
+      <div class="achv-foot" id="achvFoot"></div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1118,6 +1177,7 @@
     if (b.dataset.tab === "wheel") drawWheel();
     if (b.dataset.tab === "fortune") drawFortune(true);
     if (b.dataset.tab === "share") drawShareCard();
+    if (b.dataset.tab === "achv") renderAchv();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -1127,6 +1187,7 @@
     if (id === "wheel") drawWheel();
     if (id === "fortune") drawFortune(true);
     if (id === "share") drawShareCard();
+    if (id === "achv") renderAchv();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -1159,7 +1220,9 @@
     trivia: "冷知识 知识 百科 科普 解闷 奇怪", nick: "网名 昵称 名字 取名 生成 id",
     share: "分享 卡片 图片 生成 海报 截图", speak: "语音 朗读 播报 发音 tts 念",
     group: "分组 随机分组 团队 团建 名单 队伍 分配 分组作业", guess: "猜数字 数字 游戏 猜数 博弈 心思",
-    pwgen: "密码 强密码 随机密码 生成 口令 密钥 账号 安全 密码生成器"
+    pwgen: "密码 强密码 随机密码 生成 口令 密钥 账号 安全 密码生成器",
+    tarot: "塔罗 牌 占卜 命运 玄学 过去 现在 未来 启示 指引 神秘",
+    achv: "成就 徽章 统计 记录 墙 等级 解锁 进度 使用 次数"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -1406,7 +1469,11 @@
   // 全局点击音效（按钮 / 标签 / 胶囊等）
   document.addEventListener("click", (e) => {
     const hit = e.target.closest("button, .chip, .hub, .shuffle, .gear, .logo, nav.tabs button");
-    if (hit) playClick();
+    if (hit) {
+      playClick();
+      const act = document.querySelector(".panel.active");
+      if (act && act.id) bumpUsage(act.id);
+    }
   });
 
   /* ---------- 抽签 ---------- */
@@ -1789,7 +1856,14 @@
     "安全感和随便，一个管账号，一个管心情，都挺重要。",
     "随机不是乱来，是让每个字符都各凭本事上位。",
     "你能决定的事不多，密码强度好歹算其中一件。",
-    "主题换一换，连生成的密码都透着股新气象。"
+    "主题换一换，连生成的密码都透着股新气象。",
+    "塔罗说你该行动了——它又不会替你动，还是你自己来。",
+    "抽一张牌不为算命，是为给自己一个安心下决定的理由。",
+    "成就墙上的小徽章，是你一次次「随便」攒下来的。",
+    "用的次数越多，越说明你这件事上，真的需要随便。",
+    "解锁成就没有捷径，只有一次次心安理得地交给随机。",
+    "夜深了还来随便，说明你今天的纠结，比白天更诚实。",
+    "收藏得越多，越像在给未来的自己留一串 shortcut。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -2575,6 +2649,118 @@
   $("pwBtn").addEventListener("click", genPassword);
   $("pwCopy").addEventListener("click", copyPw);
   pwResult.addEventListener("click", copyPw);
+
+  /* ---------- 使用统计 & 成就墙 ---------- */
+  const USAGE_KEY = "suibian_usage";
+  let usage = {};
+  try { const raw = JSON.parse(localStorage.getItem(USAGE_KEY) || "{}"); if (raw && typeof raw === "object") usage = raw; } catch (e) {}
+  function bumpUsage(id) {
+    if (!id) return;
+    usage[id] = (usage[id] || 0) + 1;
+    try { localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+  }
+
+  const BADGES = [
+    { emoji: "👋", name: "初来乍到", desc: "第一次使用随便", test: (u) => totalUses(u) >= 1 },
+    { emoji: "🔟", name: "随便十连", desc: "累计使用 10 次", test: (u) => totalUses(u) >= 10 },
+    { emoji: "🌀", name: "随便上瘾", desc: "累计使用 50 次", test: (u) => totalUses(u) >= 50 },
+    { emoji: "🏆", name: "随便大师", desc: "累计使用 100 次", test: (u) => totalUses(u) >= 100 },
+    { emoji: "🎡", name: "转盘狂魔", desc: "转幸运转盘 8 次", test: (u) => (u.wheel || 0) >= 8 },
+    { emoji: "🔮", name: "神谕信徒", desc: "问神谕球 5 次", test: (u) => (u.oracle || 0) >= 5 },
+    { emoji: "🎴", name: "塔罗学徒", desc: "抽过塔罗牌", test: (u) => (u.tarot || 0) >= 1 },
+    { emoji: "🛡️", name: "密码卫士", desc: "生成 5 个密码", test: (u) => (u.pwgen || 0) >= 5 },
+    { emoji: "🪙", name: "抛硬币达人", desc: "抛硬币 10 次", test: (u) => (u.coin || 0) >= 10 },
+    { emoji: "🌈", name: "全能选手", desc: "用过 10 种不同工具", test: (u) => Object.keys(u).filter((k) => (u[k] || 0) > 0).length >= 10 },
+    { emoji: "🌙", name: "夜猫子", desc: "深夜(22:00–5:00)来随便", test: () => { const h = new Date().getHours(); return h >= 22 || h < 5; } },
+    { emoji: "⭐", name: "收藏家", desc: "收藏 3 个常用工具", test: () => favSet.size >= 3 }
+  ];
+  function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
+  function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
+  function renderAchv() {
+    const grid = $("achvGrid"); if (!grid) return;
+    const tu = totalUses(usage);
+    const kinds = Object.keys(usage).filter((k) => (usage[k] || 0) > 0).length;
+    const unlocked = BADGES.filter(safeTest).length;
+    $("achvStat").innerHTML =
+      '<div class="box"><div class="num">' + tu + '</div><div class="lab">累计使用</div></div>' +
+      '<div class="box"><div class="num">' + kinds + '</div><div class="lab">用过的工具</div></div>' +
+      '<div class="box"><div class="num">' + unlocked + "/" + BADGES.length + '</div><div class="lab">已解锁成就</div></div>';
+    grid.innerHTML = BADGES.map((b) => {
+      const on = safeTest(b);
+      return '<div class="achv-badge ' + (on ? "on" : "off") + '">' +
+        '<div class="em">' + b.emoji + '</div>' +
+        '<div class="nm">' + escapeHtml(b.name) + '</div>' +
+        '<div class="ds">' + escapeHtml(b.desc) + '</div></div>';
+    }).join("");
+    const next = BADGES.find((b) => !safeTest(b));
+    $("achvFoot").innerHTML = next
+      ? ("下一个成就：" + next.emoji + " " + escapeHtml(next.name) + " —— " + escapeHtml(next.desc))
+      : "🎉 全部成就已解锁，你就是真正的「随便」大师！";
+  }
+  renderAchv();
+
+  /* ---------- 塔罗牌 ---------- */
+  const TAROT = [
+    { name: "愚者", up: "新的开始，带着天真去冒险。", rev: "冲动鲁莽，先三思而后行。" },
+    { name: "魔术师", up: "你已具备实现愿望的条件。", rev: "能力在，却没用对地方。" },
+    { name: "女祭司", up: "相信直觉，答案在心里。", rev: "忽略内心声音，被表象迷惑。" },
+    { name: "皇后", up: "丰盛与滋养，温柔自有力量。", rev: "过度付出，忘了照顾自己。" },
+    { name: "皇帝", up: "建立秩序，掌控自己的节奏。", rev: "控制欲太强，或缺乏主见。" },
+    { name: "教皇", up: "遵循传统，向有经验的人请教。", rev: "盲从规则，失去自我判断。" },
+    { name: "恋人", up: "重要的选择，听从真心。", rev: "关系或抉择中的犹豫与错位。" },
+    { name: "战车", up: "凭意志向前冲，你能赢。", rev: "方向失控，用力过猛易翻车。" },
+    { name: "力量", up: "以柔克刚，温柔也是力量。", rev: "自我怀疑，被情绪牵着走。" },
+    { name: "隐者", up: "独处沉淀，向内寻找答案。", rev: "过度孤立，是在逃避现实。" },
+    { name: "命运之轮", up: "转机来了，顺势而为。", rev: "变动令人不安，但终会过去。" },
+    { name: "正义", up: "因果公平，做事要经得起推敲。", rev: "逃避责任，迟早要面对。" },
+    { name: "倒吊人", up: "换个角度看，暂停也是前进。", rev: "牺牲没意义，固执换不来突破。" },
+    { name: "死神", up: "结束即是新生，放下才能走。", rev: "抗拒改变，困在原地。" },
+    { name: "节制", up: "平衡与调和，刚刚好最好。", rev: "失衡过度，冷热失当。" },
+    { name: "恶魔", up: "看清束缚你的执念与欲望。", rev: "被欲望或关系困住，难自拔。" },
+    { name: "高塔", up: "突发的崩塌，逼你重建。", rev: "旧结构硬撑，迟早要塌。" },
+    { name: "星星", up: "希望与疗愈，黑夜后有光。", rev: "信心动摇，但仍值得等待。" },
+    { name: "月亮", up: "迷雾之中，别急着下判断。", rev: "被恐惧与幻象误导。" },
+    { name: "太阳", up: "明朗喜悦，事情会好起来。", rev: "暂时的阴霾，别丢了光芒。" },
+    { name: "审判", up: "复盘过往，迎来觉醒与召唤。", rev: "自我批判过重，迟迟不原谅自己。" },
+    { name: "世界", up: "圆满达成，一个循环漂亮收尾。", rev: "差临门一脚，别半途而废。" }
+  ];
+  const tarotSpread = $("tarotSpread"), tarotNote = $("tarotNote");
+  let tarotBusy = false;
+  function drawTarot(n) {
+    if (tarotBusy) return;
+    const pool = TAROT.slice();
+    for (let i = pool.length - 1; i > 0; i--) { const j = rand(i + 1); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+    const picks = pool.slice(0, n);
+    const posNames = n === 3 ? ["过去", "现在", "未来"] : ["牌面"];
+    tarotSpread.innerHTML = ""; tarotNote.textContent = "";
+    tarotBusy = true;
+    picks.forEach((card, idx) => {
+      const reversed = Math.random() < 0.5;
+      const pos = posNames[idx] || ("第" + (idx + 1) + "张");
+      const el = document.createElement("div");
+      el.className = "tarot-card";
+      el.innerHTML = '<div class="tarot-inner">' +
+        '<div class="tarot-face tarot-back">🎴<span>随便·塔罗</span></div>' +
+        '<div class="tarot-face tarot-front ' + (reversed ? "rev" : "") + '">' +
+          '<div class="tarot-pos">' + escapeHtml(pos) + '</div>' +
+          '<div class="tarot-name">' + escapeHtml(card.name) + '</div>' +
+          '<div class="tarot-dir">' + (reversed ? "逆位" : "正位") + '</div>' +
+          '<div class="tarot-mean">' + escapeHtml(reversed ? card.rev : card.up) + '</div>' +
+        '</div></div>';
+      tarotSpread.appendChild(el);
+      setTimeout(() => { el.classList.add("flipped"); playClick(); }, 450 + idx * 620);
+    });
+    setTimeout(() => {
+      tarotBusy = false;
+      tarotNote.textContent = n === 3
+        ? "过去已成，现在正当下，未来尚可期。再抽一次，换个念头。"
+        : "牌不替你做决定，但也许给了你一个看问题的角度。";
+      bumpUsage("tarot");
+    }, 450 + n * 620 + 650);
+  }
+  $("tarotDraw1").addEventListener("click", () => drawTarot(1));
+  $("tarotDraw3").addEventListener("click", () => drawTarot(3));
+  $("tarotClear").addEventListener("click", () => { tarotSpread.innerHTML = ""; tarotNote.textContent = ""; });
 })();
 </script>
 </body>
