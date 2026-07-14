@@ -553,6 +553,28 @@
 
   /* 朋友圈文案分类 */
   .cats { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 10px 0 4px; }
+
+  /* ---------- 心情日记 ---------- */
+  .mood-faces { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:6px 0 14px; }
+  .mood-face { font-size:30px; width:54px; height:54px; border-radius:16px; display:flex; align-items:center; justify-content:center; background:var(--card-2); border:1px solid var(--line); cursor:pointer; transition:transform .15s,border-color .15s,box-shadow .15s; user-select:none; }
+  .mood-face:hover { transform:translateY(-2px); }
+  .mood-face.on { border-color:var(--accent); box-shadow:0 6px 18px var(--glow-1); background:linear-gradient(180deg,var(--card),var(--bg-soft)); }
+  .mood-list { margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+  .mood-list.pop { animation: pop .4s ease; }
+  .mood-item { display:flex; align-items:flex-start; gap:12px; background:var(--bg-soft); border:1px solid var(--line); border-radius:14px; padding:12px 14px; animation:fade .25s ease; }
+  .mood-item .mj { font-size:26px; line-height:1; }
+  .mood-item .mb { flex:1; min-width:0; }
+  .mood-item .md { font-size:12px; color:var(--muted); }
+  .mood-item .mn { font-size:15px; margin-top:3px; word-break:break-word; }
+  .mood-item .mx { color:var(--muted); cursor:pointer; font-size:14px; padding:2px 6px; border-radius:8px; }
+  .mood-item .mx:hover { color:var(--accent); background:var(--card-2); }
+  .mood-empty { text-align:center; color:var(--muted); font-size:14px; padding:10px 0; }
+
+  /* ---------- 设置：备份与恢复 ---------- */
+  .drawer-backup { padding:16px 0 4px; border-top:1px dashed var(--line); }
+  .drawer-backup .bk-title { font-size:13px; color:var(--muted); margin-bottom:10px; }
+  .drawer-backup .bk-btns { display:flex; gap:10px; }
+  .drawer-backup .bk-btns .btn { flex:1; background:var(--card-2); color:var(--text); border:1px solid var(--line); font-size:14px; padding:11px; }
 </style>
 </head>
 <body>
@@ -604,6 +626,7 @@
       <button data-tab="achv">成就墙</button>
       <button data-tab="moments">朋友圈文案</button>
       <button data-tab="idiom">成语接龙</button>
+    <button data-tab="mood">心情日记</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1125,6 +1148,21 @@
     </div>
   </section>
 
+  <!-- 心情日记 -->
+  <section class="panel" id="mood">
+    <div class="card">
+      <h2>📔 心情日记</h2>
+      <div class="hint">今天心情如何？点一个表情，随手写一句，留在这个只属于你的浏览器里。日子久了，就是一本你的心情地图。</div>
+      <div class="mood-faces" id="moodFaces"></div>
+      <textarea id="moodNote" maxlength="80" placeholder="写一句今天的话吧（最多 80 字，可留空）"></textarea>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="moodSave">📝 记一笔</button>
+        <button class="btn ghost" id="moodClear">清空我的</button>
+      </div>
+      <div class="mood-list" id="moodList"></div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1162,6 +1200,15 @@
       <div class="theme-dots" id="setThemes"></div>
     </div>
   </div>
+  <div class="drawer-backup">
+    <div class="bk-title">🗂️ 备份与恢复（导出 / 导入你的全部本地存档）</div>
+    <div class="bk-btns">
+      <button class="btn" id="setExport">📤 导出存档</button>
+      <button class="btn" id="setImport">📥 导入存档</button>
+    </div>
+    <input type="file" id="setImportFile" accept="application/json" style="display:none">
+  </div>
+
   <div class="drawer-foot">
     <button class="btn" id="setReset">🧹 清空本地存档</button>
   </div>
@@ -1271,6 +1318,7 @@
     if (b.dataset.tab === "share") drawShareCard();
     if (b.dataset.tab === "achv") renderAchv();
     if (b.dataset.tab === "idiom") idiomEnsure();
+    if (b.dataset.tab === "mood") renderMood();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -1282,6 +1330,7 @@
     if (id === "share") drawShareCard();
     if (id === "achv") renderAchv();
     if (id === "idiom") idiomEnsure();
+    if (id === "mood") renderMood();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -1320,7 +1369,8 @@
     bottle: "漂流瓶 瓶子 心事 愿望 碎碎念 匿名 留言 海里 捞 治愈",
     achv: "成就 徽章 统计 记录 墙 等级 解锁 进度 使用 次数",
     moments: "朋友圈 文案 发圈 配文 文案生成 心情 社交 晒 签名 装 段子 文案库",
-    idiom: "成语 接龙 成语接龙 词语 汉字 文字游戏 语文 接字 考据 国学"
+    idiom: "成语 接龙 成语接龙 词语 汉字 文字游戏 语文 接字 考据 国学",
+    mood: "心情 日记 记录 情绪 签到 今天怎么样 mood 碎碎念 emo 感触 写一句 随笔"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -1581,6 +1631,53 @@
     });
     toast("本地存档已清空 ✨");
     setTimeout(() => location.reload(), 500);
+  });
+
+  /* ---------- 本地存档导出 / 导入（备份与恢复） ---------- */
+  function gatherBackup() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf("suibian_") === 0) {
+        try { data[k] = JSON.parse(localStorage.getItem(k)); } catch (e) { data[k] = localStorage.getItem(k); }
+      }
+    }
+    return { app: "suibian", version: 1, exportedAt: new Date().toISOString(), data: data };
+  }
+  if ($("setExport")) $("setExport").addEventListener("click", () => {
+    try {
+      const blob = new Blob([JSON.stringify(gatherBackup(), null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const d = new Date(); const p = (n) => String(n).padStart(2, "0");
+      a.href = url; a.download = "suibian-存档-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + ".json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      playClick(); toast("存档已导出 📤");
+    } catch (e) { toast("导出失败：" + (e && e.message)); }
+  });
+  const importFile = $("setImportFile");
+  if ($("setImport")) $("setImport").addEventListener("click", () => { if (importFile) importFile.click(); });
+  if (importFile) importFile.addEventListener("change", (e) => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const obj = JSON.parse(reader.result);
+        const data = (obj && obj.data && typeof obj.data === "object") ? obj.data : (obj && typeof obj === "object" ? obj : null);
+        if (!data) { toast("文件格式不对，导入失败"); return; }
+        if (!confirm("导入会覆盖当前浏览器里的「随便」存档，确定吗？")) { e.target.value = ""; return; }
+        let n = 0;
+        Object.keys(data).forEach((k) => {
+          if (k.indexOf("suibian_") !== 0) return;
+          try { localStorage.setItem(k, typeof data[k] === "string" ? data[k] : JSON.stringify(data[k])); n++; } catch (e2) {}
+        });
+        toast("已导入 " + n + " 项存档，即将刷新 📥");
+        setTimeout(() => location.reload(), 600);
+      } catch (err) { toast("解析失败，文件可能不是有效存档"); }
+      e.target.value = "";
+    };
+    reader.readAsText(f);
   });
 
   // 全局点击音效（按钮 / 标签 / 胶囊等）
@@ -1999,7 +2096,16 @@
     "接龙接到一半断了，正好说明你今天该换个话题聊聊。",
     "把话说得又准又俏，是一种被低估的才华。",
     "与其纠结发什么，不如先发一句「今天也不错」。",
-    "表达本身就是治愈——说出来了，心事就轻了一半。"
+    "表达本身就是治愈——说出来了，心事就轻了一半。",
+    "把今天的心情记一笔，明天的你就会谢谢今天的自己。",
+    "心情日记不是给别人看的，是给未来的自己留的回音壁。",
+    "emo 的时候别憋着，写一句话丢进心情日记也算一种松手。",
+    "开心要记，难过也要记——它们都是你活过的证据。",
+    "每天一个小记录，攒久了就是一本只属于你的底气。",
+    "存档导出一下，把今天的「随便」也备份带走。",
+    "本地存档记得备份，换浏览器也不怕把回忆弄丢。",
+    "导出一份存档，就像给现在的自己拍了张快照。",
+    "导入存档不是作弊，是带着过去的自己继续随便。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -2812,7 +2918,9 @@
     { emoji: "📜", name: "打油诗人", desc: "拼过 3 首藏头诗", test: (u) => (u.poem || 0) >= 3 },
     { emoji: "🫧", name: "海上漂客", desc: "捞过 5 次漂流瓶", test: (u) => (u.bottle || 0) >= 5 },
     { emoji: "📱", name: "朋友圈文豪", desc: "生成 3 条文案", test: (u) => (u.moments || 0) >= 3 },
-    { emoji: "🀄", name: "接龙高手", desc: "玩过 3 次成语接龙", test: (u) => (u.idiom || 0) >= 3 }
+    { emoji: "🀄", name: "接龙高手", desc: "玩过 3 次成语接龙", test: (u) => (u.idiom || 0) >= 3 },
+    { emoji: "📔", name: "记录者", desc: "记过 3 篇心情日记", test: (u) => (u.mood || 0) >= 3 },
+    { emoji: "🗓️", name: "日记达人", desc: "记过 10 篇心情日记", test: (u) => (u.mood || 0) >= 10 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -3040,6 +3148,74 @@
     pop($("momentsResult"));
   });
   $("momentsResult").addEventListener("click", copyMoments);
+
+  /* ---------- 心情日记 ---------- */
+  const MOODS = [
+    { e: "😄", t: "开心" }, { e: "😐", t: "一般" }, { e: "😢", t: "难过" },
+    { e: "😡", t: "生气" }, { e: "😴", t: "疲惫" }, { e: "🤔", t: "思考" },
+    { e: "💪", t: "元气" }, { e: "🌟", t: "闪耀" }
+  ];
+  const MOOD_KEY = "suibian_mood";
+  const moodFaces = $("moodFaces"), moodNote = $("moodNote"), moodList = $("moodList");
+  let moodPick = null;
+  if (moodFaces) {
+    MOODS.forEach((m) => {
+      const el = document.createElement("div");
+      el.className = "mood-face"; el.textContent = m.e; el.title = m.t; el.dataset.e = m.e;
+      el.addEventListener("click", () => {
+        moodPick = (moodPick === m.e) ? null : m.e;
+        [...moodFaces.children].forEach((x) => x.classList.toggle("on", x.dataset.e === moodPick));
+        playClick();
+      });
+      moodFaces.appendChild(el);
+    });
+  }
+  let moodData = [];
+  try { const raw = JSON.parse(localStorage.getItem(MOOD_KEY) || "[]"); if (Array.isArray(raw)) moodData = raw; } catch (e) {}
+  function fmtDate(d) {
+    const p = (n) => String(n).padStart(2, "0");
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+  function renderMood() {
+    if (!moodList) return;
+    if (!moodData.length) { moodList.innerHTML = '<div class="mood-empty">还没有记录，记下今天的第一笔吧 🌱</div>'; return; }
+    moodList.innerHTML = moodData.map((it, idx) =>
+      '<div class="mood-item">' +
+        '<div class="mj">' + (it.e || "📝") + '</div>' +
+        '<div class="mb"><div class="md">' + escapeHtml(fmtDate(new Date(it.ts))) + '</div>' +
+        '<div class="mn">' + escapeHtml(it.note || "（没写什么，但今天来过）") + '</div></div>' +
+        '<div class="mx" data-i="' + idx + '" title="删除">✕</div>' +
+      '</div>'
+    ).join("");
+  }
+  if (moodList) {
+    moodList.addEventListener("click", (e) => {
+      const x = e.target.closest(".mx"); if (!x) return;
+      const i = parseInt(x.dataset.i, 10);
+      moodData.splice(i, 1);
+      try { localStorage.setItem(MOOD_KEY, JSON.stringify(moodData)); } catch (e2) {}
+      renderMood(); playClick(); toast("已删除这一笔");
+    });
+  }
+  function saveMood() {
+    if (!moodPick) { toast("先选个心情呀 🫧"); return; }
+    moodData.unshift({ e: moodPick, note: (moodNote.value || "").trim(), ts: Date.now() });
+    if (moodData.length > 200) moodData = moodData.slice(0, 200);
+    try { localStorage.setItem(MOOD_KEY, JSON.stringify(moodData)); } catch (e) {}
+    moodNote.value = "";
+    renderMood();
+    pop(moodList); playDing(); bumpUsage("mood");
+    toast("记下了 " + moodPick + " 的一天 📔");
+  }
+  if ($("moodSave")) $("moodSave").addEventListener("click", saveMood);
+  if ($("moodClear")) $("moodClear").addEventListener("click", () => {
+    if (!moodData.length) { toast("还没有记录可清～"); return; }
+    if (!confirm("确定清空所有心情日记吗？此操作不可恢复。")) return;
+    moodData = [];
+    try { localStorage.removeItem(MOOD_KEY); } catch (e) {}
+    renderMood(); toast("心情日记已清空 🧹");
+  });
+  renderMood();
 
   /* ---------- 成语接龙 ---------- */
   const IDIOMS = [
