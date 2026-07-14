@@ -486,6 +486,14 @@
   .daily .pill .k { color: var(--muted); font-weight: 500; margin-right: 6px; }
   .daily .pill.yi:hover { border-color: var(--good); color: var(--good); }
   .daily .pill.ji:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* 撒花庆祝动效 */
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 56; width: 100%; height: 100%; }
+
+  /* 密码生成器 */
+  .pw-strength { margin-top: 14px; height: 8px; border-radius: 999px; background: var(--card-2); overflow: hidden; border: 1px solid var(--line); }
+  .pw-bar { height: 100%; width: 0; border-radius: 999px; transition: width .3s, background .3s; background: var(--muted); }
+  .pw-strength-label { text-align: center; color: var(--muted); font-size: 13px; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -529,6 +537,7 @@
     <button data-tab="speak">语音播报</button>
     <button data-tab="group">随机分组</button>
     <button data-tab="guess">猜数字</button>
+    <button data-tab="pwgen">密码生成器</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -939,6 +948,32 @@
     </div>
   </section>
 
+  <!-- 密码生成器 -->
+  <section class="panel" id="pwgen">
+    <div class="card">
+      <h2>密码生成器</h2>
+      <div class="hint">随手搓一个又强又随机的密码。用了浏览器加密随机源，点「复制」直接用，纯前端、不联网。</div>
+      <div class="row" style="align-items:center;justify-content:space-between;gap:12px">
+        <div class="set-label" style="margin:0">长度 <b id="pwLenVal">16</b></div>
+        <input type="range" id="pwLen" min="6" max="40" value="16" style="flex:1;accent-color:var(--accent)">
+      </div>
+      <div class="chips" id="pwOpts" style="margin-top:14px">
+        <div class="chip on" data-k="upper">大写 A-Z</div>
+        <div class="chip on" data-k="lower">小写 a-z</div>
+        <div class="chip on" data-k="num">数字 0-9</div>
+        <div class="chip on" data-k="sym">符号 !@#</div>
+        <div class="chip" data-k="noAmb">排除易混 0O1lI</div>
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="pwBtn">生成密码</button>
+        <button class="btn ghost" id="pwCopy">复制</button>
+      </div>
+      <div class="result copyable" id="pwResult" style="font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px">点「生成密码」，给你搓一个。</div>
+      <div class="pw-strength"><div class="pw-bar" id="pwBar"></div></div>
+      <div class="pw-strength-label" id="pwStrengthLabel"></div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -982,6 +1017,7 @@
 </aside>
 
 <div class="toast" id="toast"></div>
+<canvas id="confetti"></canvas>
 
 <div class="modal-overlay" id="helpOverlay"></div>
 <div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-label="键盘快捷键">
@@ -1019,6 +1055,57 @@
   };
   const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  /* ---------- 撒花庆祝动效（全局，可被各工具在“赢”的时候调用） ---------- */
+  const confettiCanvas = $("confetti");
+  const cctx = confettiCanvas ? confettiCanvas.getContext("2d") : null;
+  let confettiParts = [], confettiRAF = null;
+  function sizeConfetti() {
+    if (!confettiCanvas) return;
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  if (confettiCanvas) {
+    sizeConfetti();
+    window.addEventListener("resize", sizeConfetti);
+  }
+  function confettiBurst(n) {
+    if (!cctx || (settings && settings.reduce)) return;
+    n = n || 90;
+    const cols = ["#ff7a59", "#ffb15c", "#7c6cff", "#4be3a5", "#ff6c9c", "#5cc8ff", "#ffd166", "#b388ff"];
+    const W = confettiCanvas.width, H = confettiCanvas.height;
+    for (let i = 0; i < n; i++) {
+      confettiParts.push({
+        x: W / 2 + (Math.random() - 0.5) * W * 0.5,
+        y: H * 0.30 + (Math.random() - 0.5) * 50,
+        vx: (Math.random() - 0.5) * 10,
+        vy: Math.random() * -10 - 4,
+        g: 0.22 + Math.random() * 0.14,
+        w: 5 + Math.random() * 7,
+        h: 4 + Math.random() * 6,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.34,
+        color: cols[rand(cols.length)],
+        life: 1
+      });
+    }
+    if (!confettiRAF) confettiRAF = requestAnimationFrame(confettiFrame);
+  }
+  function confettiFrame() {
+    if (!cctx) { confettiRAF = null; return; }
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    for (const p of confettiParts) {
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life -= 0.008;
+      cctx.save(); cctx.translate(p.x, p.y); cctx.rotate(p.rot);
+      cctx.globalAlpha = Math.max(p.life, 0);
+      cctx.fillStyle = p.color;
+      cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      cctx.restore();
+    }
+    confettiParts = confettiParts.filter((p) => p.life > 0 && p.y < confettiCanvas.height + 30);
+    if (confettiParts.length) confettiRAF = requestAnimationFrame(confettiFrame);
+    else { cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); confettiRAF = null; }
+  }
 
   /* ---------- Tabs ---------- */
   const tabs = $("tabs");
@@ -1071,7 +1158,8 @@
     sort: "排序 顺序 随机排序 洗牌 清单 排班", timer: "倒计时 计时 专注 番茄 时间 闹钟",
     trivia: "冷知识 知识 百科 科普 解闷 奇怪", nick: "网名 昵称 名字 取名 生成 id",
     share: "分享 卡片 图片 生成 海报 截图", speak: "语音 朗读 播报 发音 tts 念",
-    group: "分组 随机分组 团队 团建 名单 队伍 分配 分组作业", guess: "猜数字 数字 游戏 猜数 博弈 心思"
+    group: "分组 随机分组 团队 团建 名单 队伍 分配 分组作业", guess: "猜数字 数字 游戏 猜数 博弈 心思",
+    pwgen: "密码 强密码 随机密码 生成 口令 密钥 账号 安全 密码生成器"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -1189,7 +1277,9 @@
     { name: "薄荷绿", bg: "#0c1a16", bgSoft: "#14241f", accent: "#4be3a5", accent2: "#ffd166", accent3: "#5cc8ff", rgb3: "75,227,165", glow1: "rgba(75,227,165,0.20)", glow2: "rgba(92,200,255,0.16)" },
     { name: "落日金", bg: "#1a130c", bgSoft: "#261c12", accent: "#ff9a3c", accent2: "#ffd166", accent3: "#ff6c9c", rgb3: "255,154,60", glow1: "rgba(255,154,60,0.24)", glow2: "rgba(255,209,102,0.18)" },
     { name: "赛博青", bg: "#08141c", bgSoft: "#10202c", accent: "#5cc8ff", accent2: "#4be3a5", accent3: "#b388ff", rgb3: "92,200,255", glow1: "rgba(92,200,255,0.24)", glow2: "rgba(124,108,255,0.18)" },
-    { name: "暗夜莓", bg: "#140a1a", bgSoft: "#20142a", accent: "#b388ff", accent2: "#ff6c9c", accent3: "#7c6cff", rgb3: "179,136,255", glow1: "rgba(179,136,255,0.24)", glow2: "rgba(255,108,156,0.16)" }
+    { name: "暗夜莓", bg: "#140a1a", bgSoft: "#20142a", accent: "#b388ff", accent2: "#ff6c9c", accent3: "#7c6cff", rgb3: "179,136,255", glow1: "rgba(179,136,255,0.24)", glow2: "rgba(255,108,156,0.16)" },
+    { name: "森野", bg: "#08140f", bgSoft: "#0f2018", accent: "#5fd6a0", accent2: "#ffd166", accent3: "#4be3c2", rgb3: "95,214,160", glow1: "rgba(95,214,160,0.22)", glow2: "rgba(75,227,194,0.16)" },
+    { name: "蜜桃", bg: "#1a0f16", bgSoft: "#2a1622", accent: "#ff7eb3", accent2: "#ffb15c", accent3: "#ff8fc7", rgb3: "255,126,179", glow1: "rgba(255,126,179,0.22)", glow2: "rgba(255,177,92,0.16)" }
   ];
   function applyTheme(t) {
     const r = document.documentElement.style;
@@ -1352,6 +1442,7 @@
         const winner = opts[rand(opts.length)];
         pickResult.textContent = "🎉 " + winner;
         pop(pickResult);
+        confettiBurst(70);
         pushPickHist(winner);
       }
     }, 70);
@@ -1411,6 +1502,7 @@
         const winner = opts[target];
         $("wheelResult").textContent = "🎉 落在：" + winner;
         pop($("wheelResult"));
+        confettiBurst();
       }
     }
     requestAnimationFrame(frame);
@@ -1477,6 +1569,7 @@
       coin.querySelector(".face").textContent = heads ? "正" : "反";
       coinResult.textContent = heads ? "正面 ↑" : "反面 ↓";
       pop(coinResult);
+      confettiBurst(30);
     }, 1000);
   });
 
@@ -1687,7 +1780,16 @@
     "心里想好的数，往往在你「随便猜一个」时就被看穿了。",
     "小了往大猜，大了往小猜，人生很多事也是这个理。",
     "分组游戏的意义不在公平，在于谁和谁被分到了一组。",
-    "数字 1 到 100 之间藏着一个数，也藏着今天的一点小运气。"
+    "数字 1 到 100 之间藏着一个数，也藏着今天的一点小运气。",
+    "密码太长记不住，太短不安全，成年人的纠结就是这么朴实。",
+    "把账号交给强密码，把决定交给随便，分工明确。",
+    "好的密码像好的决定：够随机、够长、不按套路出牌。",
+    "别用生日当密码，也别用生日做决定，都太好猜了。",
+    "搓完这个密码，顺手也给自己搓个好心情。",
+    "安全感和随便，一个管账号，一个管心情，都挺重要。",
+    "随机不是乱来，是让每个字符都各凭本事上位。",
+    "你能决定的事不多，密码强度好歹算其中一件。",
+    "主题换一换，连生成的密码都透着股新气象。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -2002,6 +2104,7 @@
     if (me.key === cpu.key) { outcome = "draw"; verdict = "平手，再来一局！"; }
     else if (RPS_BEATS[me.key] === cpu.key) { outcome = "win"; verdict = "你赢了！🎉"; }
     else { outcome = "lose"; verdict = "你输了，不服再战～"; }
+    if (outcome === "win") confettiBurst(60);
     rpsScore[outcome]++;
     try { localStorage.setItem("suibian_rps_score", JSON.stringify(rpsScore)); } catch (e) {}
     rpsResult.textContent = "你 " + me.emoji + " vs " + cpu.emoji + " 机器人 · " + verdict;
@@ -2151,6 +2254,7 @@
     const label = cap.tag + " · " + item;
     gachaResult.innerHTML = '🎉 你扭到了 <b>【' + cap.tag + '】</b>' + escapeHtml(item);
     pop(gachaResult);
+    confettiBurst(50);
     pushGachaHist(label);
   });
   $("gachaClear").addEventListener("click", () => {
@@ -2376,7 +2480,7 @@
     guessCount++;
     if (v === guessTarget) {
       $("guessMsg").textContent = "🎉 猜对了！就是 " + guessTarget + "，用了 " + guessCount + " 次。";
-      pop($("guessMsg")); playDing();
+      pop($("guessMsg")); playDing(); confettiBurst();
       $("guessStat").textContent = "已猜 " + guessCount + " 次 · 漂亮！";
     } else if (v < guessTarget) {
       $("guessMsg").textContent = "小了，往大里猜 ↑（已猜 " + guessCount + " 次）";
@@ -2390,6 +2494,87 @@
   $("guessBtn").addEventListener("click", guessGo);
   $("guessNew").addEventListener("click", guessReset);
   $("guessInput").addEventListener("keydown", (e) => { if (e.key === "Enter") guessGo(); });
+
+  /* ---------- 密码生成器 ---------- */
+  const pwOpts = $("pwOpts"), pwResult = $("pwResult"), pwLen = $("pwLen"), pwLenVal = $("pwLenVal");
+  const PW_SETS = {
+    upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    lower: "abcdefghijklmnopqrstuvwxyz",
+    num: "0123456789",
+    sym: "!@#$%^&*()-_=+[]{};:,.<>?/"
+  };
+  const PW_AMBIG = "0O1lI|`'\"";
+  let pwConf = { upper: true, lower: true, num: true, sym: true, noAmb: false };
+  pwOpts.querySelectorAll(".chip").forEach((ch) => {
+    ch.addEventListener("click", () => {
+      const k = ch.dataset.k;
+      if (["upper", "lower", "num", "sym"].includes(k) && pwConf[k] &&
+          !["upper", "lower", "num", "sym"].some((x) => x !== k && pwConf[x])) {
+        toast("至少保留一种字符类型"); return;
+      }
+      pwConf[k] = !pwConf[k];
+      ch.classList.toggle("on", pwConf[k]);
+      playClick();
+    });
+  });
+  pwLen.addEventListener("input", () => { pwLenVal.textContent = pwLen.value; });
+  // 用浏览器加密随机源，实在没有再退回 Math.random
+  function secureRand(max) {
+    try {
+      if (window.crypto && window.crypto.getRandomValues && max <= 256) {
+        const a = new Uint8Array(1);
+        const limit = Math.floor(256 / max) * max;
+        let v;
+        do { window.crypto.getRandomValues(a); v = a[0]; } while (v >= limit);
+        return v % max;
+      }
+    } catch (e) {}
+    return rand(max);
+  }
+  function genPassword() {
+    const chosen = [];
+    let pool = "";
+    ["upper", "lower", "num", "sym"].forEach((k) => {
+      if (!pwConf[k]) return;
+      let s = PW_SETS[k];
+      if (pwConf.noAmb) s = s.split("").filter((c) => PW_AMBIG.indexOf(c) < 0).join("");
+      if (!s) return;
+      pool += s; chosen.push(s);
+    });
+    if (!pool) { toast("至少选一种字符类型"); return; }
+    const len = parseInt(pwLen.value, 10) || 16;
+    const out = [];
+    chosen.forEach((s) => out.push(s[secureRand(s.length)]));
+    while (out.length < len) out.push(pool[secureRand(pool.length)]);
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = secureRand(i + 1); const t = out[i]; out[i] = out[j]; out[j] = t;
+    }
+    const pwd = out.join("").slice(0, len);
+    pwResult.textContent = pwd;
+    pop(pwResult);
+    updatePwStrength(pwd, pool.length);
+  }
+  function updatePwStrength(pwd, poolSize) {
+    const entropy = pwd.length * Math.log2(Math.max(poolSize, 2));
+    const pct = Math.min(100, Math.round(entropy / 120 * 100));
+    let label, color;
+    if (entropy < 40) { label = "弱"; color = "#ff6c9c"; }
+    else if (entropy < 70) { label = "中"; color = "#ffb15c"; }
+    else if (entropy < 100) { label = "强"; color = "#4be3a5"; }
+    else { label = "很强"; color = "#5cc8ff"; }
+    $("pwBar").style.width = pct + "%";
+    $("pwBar").style.background = color;
+    $("pwStrengthLabel").textContent = "强度：" + label + " · 熵约 " + Math.round(entropy) + " bit";
+  }
+  function copyPw() {
+    const txt = pwResult.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => toast("已复制：" + txt.slice(0, 10) + "…"), () => toast(txt));
+    } else { toast(txt); }
+  }
+  $("pwBtn").addEventListener("click", genPassword);
+  $("pwCopy").addEventListener("click", copyPw);
+  pwResult.addEventListener("click", copyPw);
 })();
 </script>
 </body>
