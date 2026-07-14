@@ -72,6 +72,7 @@
   nav.tabs button.active {
     color: #1a1320; background: linear-gradient(90deg, var(--accent-2), var(--accent));
     border-color: transparent; font-weight: 700;
+    box-shadow: 0 8px 22px rgba(var(--accent-3-rgb), .35);
   }
 
   .panel { display: none; animation: fade .25s ease; }
@@ -369,6 +370,71 @@
 
   body.reduce * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 
+  /* ---------- 极光流动背景 ---------- */
+  body::before {
+    content: ""; position: fixed; inset: -25%; pointer-events: none; z-index: -1;
+    background:
+      radial-gradient(38% 38% at 22% 22%, var(--glow-1), transparent 70%),
+      radial-gradient(42% 42% at 78% 28%, var(--glow-2), transparent 70%),
+      radial-gradient(46% 46% at 50% 92%, var(--glow-1), transparent 72%);
+    filter: blur(38px); opacity: .5;
+    animation: aurora 20s ease-in-out infinite alternate;
+  }
+  @keyframes aurora {
+    0%   { transform: translate(-2%, -1%) scale(1); }
+    50%  { transform: translate(2%, 2%) scale(1.07); }
+    100% { transform: translate(-1%, 2%) scale(1.03); }
+  }
+
+  /* ---------- 工具搜索 & 头部操作 ---------- */
+  .search-row { display: flex; justify-content: center; margin-top: 14px; }
+  .tool-search {
+    max-width: 480px; width: 100%; background: var(--card); color: var(--text);
+    border: 1px solid var(--line); border-radius: 999px; padding: 10px 18px;
+    font-size: 14px; outline: none; transition: .18s;
+  }
+  .tool-search::placeholder { color: var(--muted); }
+  .tool-search:focus { border-color: var(--accent-3); box-shadow: 0 0 0 3px rgba(var(--accent-3-rgb), .18); }
+  .hero-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+
+  /* ---------- 快捷键帮助弹窗 ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+    opacity: 0; pointer-events: none; transition: .2s; z-index: 60;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%, -46%) scale(.96);
+    width: min(440px, 92vw); max-height: 84vh; overflow: auto;
+    background: linear-gradient(180deg, var(--card), var(--bg-soft));
+    border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+    z-index: 61; padding: 20px 22px; opacity: 0; pointer-events: none; transition: .2s;
+  }
+  .modal.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; }
+  .modal-head h3 { margin: 0; font-size: 18px; }
+  .modal-close { background: var(--card-2); border: 1px solid var(--line); color: var(--text);
+    width: 32px; height: 32px; border-radius: 10px; cursor: pointer; font-size: 15px; }
+  .modal-close:hover { border-color: rgba(255,255,255,.26); }
+  .kbd-list { list-style: none; padding: 0; margin: 14px 0 0; }
+  .kbd-list li { display: flex; align-items: center; gap: 10px; padding: 9px 0;
+    border-bottom: 1px dashed var(--line); color: var(--text); font-size: 14px; }
+  .kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px;
+    padding: 0 8px; border-radius: 7px; background: var(--card-2); border: 1px solid var(--line);
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; color: var(--accent-2);
+    box-shadow: 0 2px 0 rgba(0,0,0,.3); }
+  .modal-note { color: var(--muted); font-size: 12px; margin-top: 12px; line-height: 1.5; }
+
+  @media (max-width: 680px) {
+    nav.tabs {
+      flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
+      scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px; scrollbar-width: none;
+    }
+    nav.tabs::-webkit-scrollbar { display: none; }
+    nav.tabs button { scroll-snap-align: start; flex: 0 0 auto; }
+  }
+
   /* 分享卡片 */
   .share-styles { display: flex; gap: 8px; flex-wrap: wrap; }
   .share-styles .chip { cursor: pointer; border: 1px solid var(--line); background: var(--card-2); color: var(--muted); padding: 6px 12px; border-radius: 999px; font-size: 13px; transition: .15s; }
@@ -385,8 +451,14 @@
   <header class="hero">
     <div class="logo" id="logo" title="点我换个主题色 🎨"><span class="dot"></span> 随便 <span class="paint">🎨</span></div>
     <div class="tagline">suibian · 把「不知道选啥」变成「一键搞定」</div>
-    <button class="shuffle" id="shuffleTab" title="随便跳到一个工具逛逛 🎲">🎲 随便逛逛</button>
-    <button class="gear" id="settingsBtn" title="设置 ⚙️">⚙️ 设置</button>
+    <div class="search-row">
+      <input type="text" id="toolSearch" class="tool-search" placeholder="🔍 搜工具：抽签 / 转盘 / 运势 / 取名…（按 / 聚焦）" autocomplete="off" />
+    </div>
+    <div class="hero-actions">
+      <button class="shuffle" id="shuffleTab" title="随便跳到一个工具逛逛 🎲">🎲 随便逛逛</button>
+      <button class="gear" id="helpBtn" title="键盘快捷键 ⌨️（按 ? 打开）">⌨️ 快捷键</button>
+      <button class="gear" id="settingsBtn" title="设置 ⚙️">⚙️ 设置</button>
+    </div>
   </header>
 
   <nav class="tabs" id="tabs">
@@ -824,6 +896,23 @@
 
 <div class="toast" id="toast"></div>
 
+<div class="modal-overlay" id="helpOverlay"></div>
+<div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-label="键盘快捷键">
+  <div class="modal-head">
+    <h3>⌨️ 键盘快捷键</h3>
+    <button class="modal-close" id="helpClose" aria-label="关闭">✕</button>
+  </div>
+  <ul class="kbd-list">
+    <li><span class="kbd">G</span> 随便逛逛：随机跳到一个工具</li>
+    <li><span class="kbd">1</span>–<span class="kbd">9</span> 直接打开对应序号的工具</li>
+    <li><span class="kbd">/</span> 聚焦工具搜索框</li>
+    <li><span class="kbd">?</span> 打开 / 关闭本帮助</li>
+    <li><span class="kbd">Esc</span> 关闭设置抽屉 / 帮助弹窗</li>
+    <li><span class="kbd">点 logo</span> 切换主题配色 🎨</li>
+  </ul>
+  <p class="modal-note">所有快捷键在输入框 / 文本框聚焦时自动失效，可放心打字。按 <span class="kbd">?</span> 随时再打开本帮助。</p>
+</div>
+
 <script>
 (function () {
   "use strict";
@@ -878,6 +967,54 @@
     const tag = (e.target.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea") return;
     if (e.key === "g" || e.key === "G") { e.preventDefault(); $("shuffleTab").click(); }
+  });
+
+  /* ---------- 工具搜索（按名称 / 关键词过滤导航） ---------- */
+  const TAB_KW = {
+    pick: "抽签 选择 决定 随机 选择困难", wheel: "转盘 幸运转盘 抽奖 旋转 wheel",
+    scale: "天平 决策 权衡 比较 选择 拍板", coin: "硬币 抛硬币 正反面 决定",
+    dice: "骰子 掷骰子 赌 随机 点数", eat: "吃 吃什么 饭 美食 点外卖 口味 餐厅",
+    quote: "句子 语录 名言 鸡汤 励志 随便一句 金句", rand: "随机数 数字 随机 生成",
+    fortune: "运势 今日运势 签 算命 幸运 黄历", tod: "真心话 大冒险 聚会 游戏 喝酒 truth dare",
+    dart: "飞镖 扔飞镖 游戏 分数 靶", rps: "石头 剪刀 布 猜拳 游戏 胜负",
+    rate: "成吗 成功率 占卜 概率 这事成吗 预测", color: "颜色 色卡 配色 灵感 调色 设计",
+    gacha: "扭蛋 蛋 抽取 惊喜 gacha 盲盒", oracle: "神谕 占卜 球 玄学 命运 预测 卦",
+    sort: "排序 顺序 随机排序 洗牌 清单 排班", timer: "倒计时 计时 专注 番茄 时间 闹钟",
+    trivia: "冷知识 知识 百科 科普 解闷 奇怪", nick: "网名 昵称 名字 取名 生成 id",
+    share: "分享 卡片 图片 生成 海报 截图", speak: "语音 朗读 播报 发音 tts 念"
+  };
+  const toolSearch = $("toolSearch");
+  function filterTabs(q) {
+    q = (q || "").trim().toLowerCase();
+    [...tabs.children].forEach((b) => {
+      const label = (b.textContent || "").toLowerCase();
+      const kw = (TAB_KW[b.dataset.tab] || "").toLowerCase();
+      const hit = !q || label.indexOf(q) >= 0 || kw.indexOf(q) >= 0;
+      b.style.display = hit ? "" : "none";
+    });
+  }
+  if (toolSearch) toolSearch.addEventListener("input", (e) => filterTabs(e.target.value));
+
+  /* ---------- 快捷键帮助弹窗 ---------- */
+  const helpModal = $("helpModal"), helpOverlay = $("helpOverlay");
+  function openHelp() { helpModal.classList.add("open"); helpOverlay.classList.add("open"); }
+  function closeHelp() { helpModal.classList.remove("open"); helpOverlay.classList.remove("open"); }
+  function toggleHelp() { helpModal.classList.contains("open") ? closeHelp() : openHelp(); }
+  $("helpBtn").addEventListener("click", toggleHelp);
+  $("helpClose").addEventListener("click", closeHelp);
+  helpOverlay.addEventListener("click", closeHelp);
+
+  /* ---------- 全局键盘快捷键：/ ? 数字键 Esc ---------- */
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    const inField = tag === "input" || tag === "textarea";
+    if (e.key === "/" && !inField) { e.preventDefault(); if (toolSearch) toolSearch.focus(); return; }
+    if (e.key === "?" && !inField) { e.preventDefault(); toggleHelp(); return; }
+    if (e.key === "Escape" && helpModal.classList.contains("open")) { closeHelp(); return; }
+    if (/^[1-9]$/.test(e.key) && !inField) {
+      const btn = tabs.children[parseInt(e.key, 10) - 1];
+      if (btn) btn.click();
+    }
   });
 
   /* ---------- 主题切换（彩蛋） ---------- */
@@ -1361,7 +1498,14 @@
     "念出来的话好像比憋在心里更有分量，试试看。",
     "今天的金句值得截张图，留着下次没词儿时复用。",
     "手指懒得打字时，就让随便替你开口念。",
-    "分享是一种小型许愿：把念头说出去，它就更可能成真。"
+    "分享是一种小型许愿：把念头说出去，它就更可能成真。",
+    "工具太多找不到？在搜索框敲两个字，它自己就跳出来了。",
+    "按一下「?」，藏着的小捷径比你想的多。",
+    "数字键 1 到 9 是懒人的高速公路，直接飙到想去的工具。",
+    "背后的极光在动，说明这个页面还活着，也说明你还醒着。",
+    "搜不到想要的？那就「随便逛逛」，盲盒里常有意外之喜。",
+    "快捷键不是装酷，是给手指省点力气去干正事。",
+    "主题换一换，思路好像也跟着转了个弯。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
