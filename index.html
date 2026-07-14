@@ -38,6 +38,15 @@
   .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px 64px; }
 
   header.hero { text-align: center; padding: 26px 0 8px; }
+  .hero-clock {
+    margin: 10px auto 2px; font-size: 15px; color: var(--muted);
+    display: inline-flex; align-items: baseline; gap: 10px;
+    background: var(--glass); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 16px; backdrop-filter: blur(8px);
+  }
+  body.fs-large .hero-clock { font-size: 17px; }
+  .hero-clock .hi { font-weight: 700; color: var(--accent); }
+  .hero-clock .tm { font-variant-numeric: tabular-nums; letter-spacing: 1px; color: var(--fg); font-weight: 600; }
   .logo {
     display: inline-flex; align-items: center; gap: 12px;
     font-size: 40px; font-weight: 800; letter-spacing: 2px;
@@ -119,6 +128,16 @@
   .fortune.pop { animation: pop .4s ease; }
   .result.copyable { cursor: pointer; }
   @keyframes pop { 0% { transform: scale(.8); opacity: .2; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
+
+  /* 藏头诗 / 漂流瓶 结果样式 */
+  .result.poem { flex-direction: column; gap: 4px; font-size: 24px; line-height: 1.7; font-weight: 700; }
+  body.fs-large .result.poem { font-size: 27px; }
+  .result.poem .pl { letter-spacing: 4px; }
+  .result.bottle { flex-direction: column; gap: 8px; font-weight: 600; font-size: 19px; line-height: 1.6; }
+  body.fs-large .result.bottle { font-size: 21px; }
+  .result.bottle.splash { animation: splash .55s ease; }
+  @keyframes splash { 0% { transform: translateY(14px) scale(.96); opacity: 0; } 55% { transform: translateY(-4px) scale(1.02); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+  .bottle-meta { font-size: 12px; color: var(--muted); font-weight: 500; }
 
   /* Wheel */
   .wheel-stage { display: flex; flex-direction: column; align-items: center; gap: 14px; }
@@ -532,6 +551,7 @@
   <header class="hero">
     <div class="logo" id="logo" title="点我换个主题色 🎨"><span class="dot"></span> 随便 <span class="paint">🎨</span></div>
     <div class="tagline">suibian · 把「不知道选啥」变成「一键搞定」</div>
+    <div class="hero-clock" id="heroClock"></div>
     <div class="search-row">
       <input type="text" id="toolSearch" class="tool-search" placeholder="🔍 搜工具：抽签 / 转盘 / 运势 / 取名…（按 / 聚焦）" autocomplete="off" />
     </div>
@@ -569,8 +589,10 @@
     <button data-tab="group">随机分组</button>
     <button data-tab="guess">猜数字</button>
     <button data-tab="pwgen">密码生成器</button>
-    <button data-tab="tarot">塔罗牌</button>
-    <button data-tab="achv">成就墙</button>
+      <button data-tab="tarot">塔罗牌</button>
+      <button data-tab="poem">藏头诗</button>
+      <button data-tab="bottle">漂流瓶</button>
+      <button data-tab="achv">成就墙</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1022,6 +1044,37 @@
     </div>
   </section>
 
+  <!-- 藏头诗 -->
+  <section class="panel" id="poem">
+    <div class="card">
+      <h2>📜 藏头诗</h2>
+      <div class="hint">输入 1–6 个字（比如一个名字、一句想说的话），给你拼一首藏头小诗。仅供娱乐，认真你就输。</div>
+      <div class="row">
+        <input type="text" id="poemInput" maxlength="6" placeholder="想藏头的字，如：随便" style="max-width:260px" />
+        <button class="btn" id="poemGen">拼一首</button>
+        <button class="btn ghost" id="poemCopy">复制</button>
+      </div>
+      <div class="result poem" id="poemResult">输入几个字，让我替你写首诗 🖋️</div>
+      <div class="hint" id="poemTitle" style="text-align:center;margin-top:10px"></div>
+    </div>
+  </section>
+
+  <!-- 漂流瓶 -->
+  <section class="panel" id="bottle">
+    <div class="card">
+      <h2>🫧 漂流瓶</h2>
+      <div class="hint">写下此刻想说的一句话，扔进海里；也可以随手捞起别人（和过去的你）留下的瓶子。所有瓶子只存在你自己的浏览器里。</div>
+      <textarea id="bottleWrite" maxlength="120" placeholder="写点什么吧：一句心事、一个愿望、一句碎碎念…（最多 120 字）"></textarea>
+      <div class="row">
+        <button class="btn" id="bottleThrow">🫙 扔进海里</button>
+        <button class="btn" id="bottleCatch">🪝 捞一个</button>
+        <button class="btn ghost" id="bottleClear">清空我的</button>
+      </div>
+      <div class="result bottle" id="bottleResult">海面平静，扔一个或捞一个试试？</div>
+      <div class="hint" id="bottleStat" style="text-align:center;margin-top:10px"></div>
+    </div>
+  </section>
+
   <!-- 成就墙 -->
   <section class="panel" id="achv">
     <div class="card">
@@ -1222,6 +1275,8 @@
     group: "分组 随机分组 团队 团建 名单 队伍 分配 分组作业", guess: "猜数字 数字 游戏 猜数 博弈 心思",
     pwgen: "密码 强密码 随机密码 生成 口令 密钥 账号 安全 密码生成器",
     tarot: "塔罗 牌 占卜 命运 玄学 过去 现在 未来 启示 指引 神秘",
+    poem: "藏头 诗 写诗 诗歌 诗句 拼诗 名字 藏头诗 文艺 文字",
+    bottle: "漂流瓶 瓶子 心事 愿望 碎碎念 匿名 留言 海里 捞 治愈",
     achv: "成就 徽章 统计 记录 墙 等级 解锁 进度 使用 次数"
   };
   const toolSearch = $("toolSearch");
@@ -1310,6 +1365,25 @@
     else yiPill.style.cursor = "default";
   }
   renderDaily();
+
+  /* ---------- 顶部实时时钟 + 时段问候 ---------- */
+  const heroClock = $("heroClock");
+  function tickClock() {
+    if (!heroClock) return;
+    const d = new Date();
+    const h = d.getHours();
+    let hi = "你好";
+    if (h >= 5 && h < 11) hi = "早上好";
+    else if (h >= 11 && h < 13) hi = "中午好";
+    else if (h >= 13 && h < 18) hi = "下午好";
+    else if (h >= 18 && h < 22) hi = "晚上好";
+    else hi = "夜深了";
+    const pad = (n) => String(n).padStart(2, "0");
+    const tm = pad(h) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+    heroClock.innerHTML = '<span class="hi">' + hi + "</span><span class=\"tm\">" + tm + "</span>";
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
 
   /* ---------- 快捷键帮助弹窗 ---------- */
   const helpModal = $("helpModal"), helpOverlay = $("helpOverlay");
@@ -1863,7 +1937,17 @@
     "用的次数越多，越说明你这件事上，真的需要随便。",
     "解锁成就没有捷径，只有一次次心安理得地交给随机。",
     "夜深了还来随便，说明你今天的纠结，比白天更诚实。",
-    "收藏得越多，越像在给未来的自己留一串 shortcut。"
+    "收藏得越多，越像在给未来的自己留一串 shortcut。",
+    "藏头诗拼出来可能不通，但把名字藏进诗里的心意是真的。",
+    "给重要的人写首藏头诗，比发「在吗」浪漫一万倍。",
+    "字放对了位置就成了诗，人放对了位置就成了自己。",
+    "把心事写进漂流瓶，海会替你保守秘密。",
+    "捞到一个陌生人的瓶子，像和另一个深夜的灵魂击了个掌。",
+    "漂流瓶漂走的不是烦恼，是舍不得丢下的碎碎念。",
+    "顶上那行时钟一秒一秒走，提醒你：此刻就是最好的随便时刻。",
+    "早上好、下午好、夜深了——页面比你更记得问候自己。",
+    "每个整点来一次的小更新，是随便在悄悄陪着你进化。",
+    "工具再花哨，能帮你按下「开始」的就是好工具。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -2672,7 +2756,9 @@
     { emoji: "🪙", name: "抛硬币达人", desc: "抛硬币 10 次", test: (u) => (u.coin || 0) >= 10 },
     { emoji: "🌈", name: "全能选手", desc: "用过 10 种不同工具", test: (u) => Object.keys(u).filter((k) => (u[k] || 0) > 0).length >= 10 },
     { emoji: "🌙", name: "夜猫子", desc: "深夜(22:00–5:00)来随便", test: () => { const h = new Date().getHours(); return h >= 22 || h < 5; } },
-    { emoji: "⭐", name: "收藏家", desc: "收藏 3 个常用工具", test: () => favSet.size >= 3 }
+    { emoji: "⭐", name: "收藏家", desc: "收藏 3 个常用工具", test: () => favSet.size >= 3 },
+    { emoji: "📜", name: "打油诗人", desc: "拼过 3 首藏头诗", test: (u) => (u.poem || 0) >= 3 },
+    { emoji: "🫧", name: "海上漂客", desc: "捞过 5 次漂流瓶", test: (u) => (u.bottle || 0) >= 5 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -2698,6 +2784,102 @@
       : "🎉 全部成就已解锁，你就是真正的「随便」大师！";
   }
   renderAchv();
+
+  /* ---------- 藏头诗 ---------- */
+  const POEM_BANK = [
+    "风过无痕", "花落无声", "月上柳梢", "云卷云舒", "一蓑烟雨", "半盏清欢", "山高水长",
+    "心有繁星", "江湖路远", "人间值得", "时光清浅", "岁月温柔", "星河滚烫", "山河远阔",
+    "清风徐来", "晚风轻语", "落日余晖", "春水煮茶", "秋月无边", "踏歌而行", "且听风吟",
+    "把酒临风", "闲看花开", "静待花开", "人间烟火", "温柔以待", "万事胜意", "欢喜如常",
+    "不负韶华", "未来可期", "心之所向", "素履以往", "从容不迫", "自在如风", "清风明月",
+    "如约而至", "相见恨晚", "岁月静好", "现世安稳", "浮生若梦", "且行且歌", "万物可爱"
+  ];
+  const poemInput = $("poemInput"), poemResult = $("poemResult"), poemTitle = $("poemTitle");
+  function genPoem() {
+    const kw = (poemInput.value || "").trim().replace(/\s+/g, "");
+    if (!kw) { toast("先输入要藏头的字呀 🖋️"); return; }
+    const chars = kw.split("").slice(0, 6);
+    const used = new Set();
+    const lines = chars.map((ch) => {
+      let pick;
+      let guard = 0;
+      do { pick = POEM_BANK[rand(POEM_BANK.length)]; guard++; } while (used.has(pick) && guard < 12);
+      used.add(pick);
+      return ch + pick;
+    });
+    poemResult.innerHTML = lines.map((l) => '<div class="pl">' + escapeHtml(l) + "</div>").join("");
+    poemTitle.textContent = "—— 题：《" + kw + "》";
+    pop(poemResult);
+    bumpUsage("poem");
+  }
+  function copyPoem() {
+    const t = poemTitle.textContent + "\n" + poemResult.textContent.replace(/\s+/g, "\n");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(() => toast("诗已复制 📜"), () => toast(t));
+    } else { toast(t); }
+  }
+  $("poemGen").addEventListener("click", () => { genPoem(); playClick(); });
+  $("poemCopy").addEventListener("click", () => { copyPoem(); playClick(); });
+
+  /* ---------- 漂流瓶 ---------- */
+  const BOTTLE_PRESET = [
+    "今天也要好好吃饭、好好睡觉，你已经很努力了。",
+    "有人和我一样，在深夜还不肯睡吗？",
+    "愿望是：明年此时，我比现在更自由一点。",
+    "刚才对着窗外发了十分钟呆，竟然有点开心。",
+    "如果你捡到这个瓶子，希望今天也有人让你笑了。",
+    "我决定不再为还没发生的事提前难过啦。",
+    "攒了好多话没人说，就丢进海里吧。",
+    "愿看到的人，周一不慌，周五不丧。",
+    "其实我挺喜欢现在的自己，慢慢来也行。",
+    "把这个瓶子留给未来的我：别怕，都会过去的。",
+    "今天的小确幸：买到刚好不烫嘴的奶茶。",
+    "想和很久没联系的朋友，随便说句「在吗」。"
+  ];
+  const BOTTLE_KEY = "suibian_bottles";
+  let myBottles = [];
+  try { const raw = JSON.parse(localStorage.getItem(BOTTLE_KEY) || "[]"); if (Array.isArray(raw)) myBottles = raw; } catch (e) {}
+  const bottleWrite = $("bottleWrite"), bottleResult = $("bottleResult"), bottleStat = $("bottleStat");
+  function renderBottleStat() {
+    if (bottleStat) bottleStat.textContent = "海里共有 " + (BOTTLE_PRESET.length + myBottles.length) + " 个瓶子，其中 " + myBottles.length + " 个是你扔的 🫧";
+  }
+  renderBottleStat();
+  function throwBottle() {
+    const txt = (bottleWrite.value || "").trim();
+    if (!txt) { toast("瓶子是空的，写点什么再扔呀 🫙"); return; }
+    myBottles.unshift(txt);
+    myBottles = myBottles.slice(0, 50);
+    try { localStorage.setItem(BOTTLE_KEY, JSON.stringify(myBottles)); } catch (e) {}
+    bottleWrite.value = "";
+    bottleResult.classList.remove("splash"); void bottleResult.offsetWidth; bottleResult.classList.add("splash");
+    bottleResult.innerHTML = '<div>🫙 已扔进海里，随波而去～</div><div class="bottle-meta">某个未来的你会捞到它，也可能被另一个随手的人捡起。</div>';
+    renderBottleStat();
+    playClick();
+    bumpUsage("bottle");
+  }
+  function catchBottle() {
+    const pool = BOTTLE_PRESET.concat(myBottles);
+    const txt = pool[rand(pool.length)];
+    const mine = myBottles.indexOf(txt) >= 0;
+    bottleResult.classList.remove("splash"); void bottleResult.offsetWidth; bottleResult.classList.add("splash");
+    bottleResult.innerHTML = '<div>🪝 “' + escapeHtml(txt) + '”</div>' +
+      '<div class="bottle-meta">' + (mine ? "这是你曾扔下的瓶子，又被你捞了回来 🔁" : "来自海里一个陌生瓶子 🌊") + "</div>";
+    renderBottleStat();
+    playClick();
+    bumpUsage("bottle");
+  }
+  function clearBottles() {
+    if (!myBottles.length) { toast("你还没有扔过瓶子呢"); return; }
+    if (!confirm("确定清空你扔过的所有漂流瓶吗？（预设瓶子不受影响）")) return;
+    myBottles = [];
+    try { localStorage.removeItem(BOTTLE_KEY); } catch (e) {}
+    bottleResult.innerHTML = "你的瓶子都收回来啦，海面恢复平静 🌊";
+    renderBottleStat();
+    toast("已清空我的瓶子");
+  }
+  $("bottleThrow").addEventListener("click", throwBottle);
+  $("bottleCatch").addEventListener("click", catchBottle);
+  $("bottleClear").addEventListener("click", clearBottles);
 
   /* ---------- 塔罗牌 ---------- */
   const TAROT = [
