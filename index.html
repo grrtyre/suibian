@@ -288,6 +288,14 @@
   .sortbox li { margin: 3px 0; }
   .sortbox.pop { animation: pop .4s ease; }
 
+  /* group */
+  .grouplist { margin-top: 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .groupcard { background: rgba(var(--accent-3-rgb), 0.10); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+  .groupcard .gh { font-weight: 800; font-size: 14px; color: var(--accent-2); margin-bottom: 8px; }
+  .groupcard .gm { display: flex; flex-wrap: wrap; gap: 6px; }
+  .groupcard .gm span { background: var(--card-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 13px; }
+  .grouplist.pop { animation: pop .4s ease; }
+
   /* timer / countdown */
   .timer-stage {
     position: relative; width: 220px; height: 220px; margin: 10px auto 4px;
@@ -519,6 +527,8 @@
     <button data-tab="nick">网名生成器</button>
     <button data-tab="share">分享卡片</button>
     <button data-tab="speak">语音播报</button>
+    <button data-tab="group">随机分组</button>
+    <button data-tab="guess">猜数字</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -888,6 +898,47 @@
     </div>
   </section>
 
+  <!-- 随机分组 -->
+  <section class="panel" id="group">
+    <div class="card">
+      <h2>随机分组</h2>
+      <div class="hint">把名单输进来（每行一个），让它帮你随机分成几组——团建分队、分组作业、抽签都好用。</div>
+      <textarea id="groupInput">小明
+小红
+小刚
+小美
+阿强
+莉莉
+大壮
+丸子
+豆豆
+可乐</textarea>
+      <div class="row" style="align-items:center">
+        <span style="color:var(--muted)">分成</span>
+        <input type="number" id="groupNum" min="2" max="10" value="3" style="width:78px">
+        <span style="color:var(--muted)">组</span>
+        <button class="btn" id="groupBtn">开始分组</button>
+        <button class="btn ghost" id="groupClear">清空</button>
+      </div>
+      <div class="grouplist" id="groupResult"></div>
+    </div>
+  </section>
+
+  <!-- 猜数字 -->
+  <section class="panel" id="guess">
+    <div class="card">
+      <h2>猜数字</h2>
+      <div class="hint">我心里想了一个 1 到 100 的数，你来猜。我会告诉你「大了」还是「小了」。</div>
+      <div class="result" id="guessMsg">我已经想好一个数了，范围是 1–100，开始吧！</div>
+      <div class="row" style="justify-content:center;align-items:center">
+        <input type="number" id="guessInput" min="1" max="100" placeholder="输入 1–100" style="max-width:170px">
+        <button class="btn" id="guessBtn">猜！</button>
+        <button class="btn ghost" id="guessNew">换一个数</button>
+      </div>
+      <div id="guessStat" style="text-align:center;margin-top:10px;color:var(--muted)">已猜 0 次</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1019,7 +1070,8 @@
     gacha: "扭蛋 蛋 抽取 惊喜 gacha 盲盒", oracle: "神谕 占卜 球 玄学 命运 预测 卦",
     sort: "排序 顺序 随机排序 洗牌 清单 排班", timer: "倒计时 计时 专注 番茄 时间 闹钟",
     trivia: "冷知识 知识 百科 科普 解闷 奇怪", nick: "网名 昵称 名字 取名 生成 id",
-    share: "分享 卡片 图片 生成 海报 截图", speak: "语音 朗读 播报 发音 tts 念"
+    share: "分享 卡片 图片 生成 海报 截图", speak: "语音 朗读 播报 发音 tts 念",
+    group: "分组 随机分组 团队 团建 名单 队伍 分配 分组作业", guess: "猜数字 数字 游戏 猜数 博弈 心思"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -1627,7 +1679,15 @@
     "决定这种事，越想越重，按一下就轻了。",
     "把喜欢的工具收进「常用」，像把常听的歌加进歌单。",
     "不知道干嘛时，看一眼今日宜，它替你起个头。",
-    "收藏夹是成年人的安全感：万一呢，万一就用上了。"
+    "收藏夹是成年人的安全感：万一呢，万一就用上了。",
+    "把一堆名字丢进去，分组交给天意，省下的脑子留给正事。",
+    "团队分组最怕人情世故，随机分组最公平，谁也别怨。",
+    "二十几个人分成三组，比选中午吃啥还难，让随便来。",
+    "猜数字赢了不光荣，但猜了二十次才中，也是一种坚持。",
+    "心里想好的数，往往在你「随便猜一个」时就被看穿了。",
+    "小了往大猜，大了往小猜，人生很多事也是这个理。",
+    "分组游戏的意义不在公平，在于谁和谁被分到了一组。",
+    "数字 1 到 100 之间藏着一个数，也藏着今天的一点小运气。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -2280,6 +2340,56 @@
       navigator.clipboard.writeText(txt).then(() => toast("已复制：" + txt.slice(0, 12) + "…"), () => toast(txt));
     } else { toast(txt); }
   });
+
+  /* ---------- 随机分组 ---------- */
+  const groupInput = $("groupInput"), groupResult = $("groupResult");
+  $("groupBtn").addEventListener("click", () => {
+    const names = parseLines(groupInput.value);
+    if (names.length < 2) { toast("至少写两个名字嘛"); return; }
+    let ng = parseInt($("groupNum").value, 10);
+    if (!(ng >= 2)) ng = 2;
+    if (ng > names.length) ng = names.length;
+    const arr = names.slice();
+    for (let i = arr.length - 1; i > 0; i--) { const j = rand(i + 1); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+    const groups = Array.from({ length: ng }, () => []);
+    arr.forEach((n, i) => groups[i % ng].push(n));
+    groupResult.innerHTML = groups.map((g, i) =>
+      '<div class="groupcard"><div class="gh">第 ' + (i + 1) + ' 组 · ' + g.length + ' 人</div><div class="gm">' +
+      g.map((m) => '<span>' + escapeHtml(m) + '</span>').join("") + '</div></div>'
+    ).join("");
+    pop(groupResult);
+  });
+  $("groupClear").addEventListener("click", () => { groupResult.innerHTML = ""; });
+
+  /* ---------- 猜数字 ---------- */
+  let guessTarget = 0, guessCount = 0;
+  function guessReset() {
+    guessTarget = 1 + rand(100); guessCount = 0;
+    $("guessMsg").textContent = "我又想好了一个 1–100 的数，继续来！";
+    $("guessStat").textContent = "已猜 0 次";
+    $("guessInput").value = "";
+  }
+  guessReset();
+  function guessGo() {
+    const v = parseInt($("guessInput").value, 10);
+    if (!(v >= 1 && v <= 100)) { toast("请输入 1 到 100 之间的数"); return; }
+    guessCount++;
+    if (v === guessTarget) {
+      $("guessMsg").textContent = "🎉 猜对了！就是 " + guessTarget + "，用了 " + guessCount + " 次。";
+      pop($("guessMsg")); playDing();
+      $("guessStat").textContent = "已猜 " + guessCount + " 次 · 漂亮！";
+    } else if (v < guessTarget) {
+      $("guessMsg").textContent = "小了，往大里猜 ↑（已猜 " + guessCount + " 次）";
+      $("guessStat").textContent = "已猜 " + guessCount + " 次";
+    } else {
+      $("guessMsg").textContent = "大了，往小里猜 ↓（已猜 " + guessCount + " 次）";
+      $("guessStat").textContent = "已猜 " + guessCount + " 次";
+    }
+    $("guessInput").value = ""; $("guessInput").focus();
+  }
+  $("guessBtn").addEventListener("click", guessGo);
+  $("guessNew").addEventListener("click", guessReset);
+  $("guessInput").addEventListener("keydown", (e) => { if (e.key === "Enter") guessGo(); });
 })();
 </script>
 </body>
