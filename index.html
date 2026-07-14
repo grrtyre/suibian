@@ -64,8 +64,9 @@
     margin: 22px 0 18px;
   }
   nav.tabs button {
+    position: relative;
     border: 1px solid var(--line); background: var(--card);
-    color: var(--muted); padding: 9px 15px; border-radius: 999px;
+    color: var(--muted); padding: 9px 30px 9px 15px; border-radius: 999px;
     font-size: 14px; cursor: pointer; transition: .18s; white-space: nowrap;
   }
   nav.tabs button:hover { color: var(--text); border-color: rgba(255,255,255,0.22); }
@@ -444,6 +445,39 @@
   .speak-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
   .speak-row label { color: var(--muted); font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
   input[type="range"] { accent-color: var(--accent); }
+
+  /* 收藏 / 常用工具 */
+  nav.tabs button .fav {
+    position: absolute; top: -7px; right: -6px; z-index: 2;
+    width: 19px; height: 19px; line-height: 17px; text-align: center;
+    font-size: 13px; color: var(--muted); cursor: pointer; user-select: none;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 50%;
+    transition: .15s;
+  }
+  nav.tabs button .fav:hover { color: var(--accent-2); transform: scale(1.18); }
+  nav.tabs button .fav.faved { color: #ffd166; border-color: rgba(255,209,102,.6); }
+  .favbar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: -4px 0 14px; }
+  .favbar:empty { display: none; }
+  .favbar .favchip {
+    display: inline-flex; align-items: center; gap: 7px; cursor: pointer; user-select: none;
+    font-size: 13px; font-weight: 700; color: #1a1320;
+    background: linear-gradient(90deg, var(--accent-2), var(--accent));
+    padding: 6px 14px; border-radius: 999px;
+    box-shadow: 0 6px 16px rgba(var(--accent-3-rgb), .25); transition: .15s;
+  }
+  .favbar .favchip:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  .favbar .favchip .x { opacity: .7; font-size: 13px; line-height: 1; }
+  .favbar .favchip .x:hover { opacity: 1; }
+  /* 今日宜忌 */
+  .daily { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .daily .pill {
+    cursor: pointer; user-select: none; font-size: 14px; font-weight: 600;
+    padding: 7px 16px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); transition: .15s;
+  }
+  .daily .pill .k { color: var(--muted); font-weight: 500; margin-right: 6px; }
+  .daily .pill.yi:hover { border-color: var(--good); color: var(--good); }
+  .daily .pill.ji:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
@@ -459,6 +493,7 @@
       <button class="gear" id="helpBtn" title="键盘快捷键 ⌨️（按 ? 打开）">⌨️ 快捷键</button>
       <button class="gear" id="settingsBtn" title="设置 ⚙️">⚙️ 设置</button>
     </div>
+    <div class="daily" id="daily"></div>
   </header>
 
   <nav class="tabs" id="tabs">
@@ -485,6 +520,7 @@
     <button data-tab="share">分享卡片</button>
     <button data-tab="speak">语音播报</button>
   </nav>
+  <div class="favbar" id="favbar"></div>
 
   <!-- 抽签 -->
   <section class="panel active" id="pick">
@@ -909,6 +945,7 @@
     <li><span class="kbd">?</span> 打开 / 关闭本帮助</li>
     <li><span class="kbd">Esc</span> 关闭设置抽屉 / 帮助弹窗</li>
     <li><span class="kbd">点 logo</span> 切换主题配色 🎨</li>
+    <li><span class="kbd">★</span> 点导航按钮上的 ★，把常用工具钉到「常用」</li>
   </ul>
   <p class="modal-note">所有快捷键在输入框 / 文本框聚焦时自动失效，可放心打字。按 <span class="kbd">?</span> 随时再打开本帮助。</p>
 </div>
@@ -935,6 +972,7 @@
   /* ---------- Tabs ---------- */
   const tabs = $("tabs");
   tabs.addEventListener("click", (e) => {
+    if (e.target.closest(".fav")) return;
     const b = e.target.closest("button"); if (!b) return;
     [...tabs.children].forEach((x) => x.classList.toggle("active", x === b));
     document.querySelectorAll(".panel").forEach((p) =>
@@ -987,13 +1025,88 @@
   function filterTabs(q) {
     q = (q || "").trim().toLowerCase();
     [...tabs.children].forEach((b) => {
-      const label = (b.textContent || "").toLowerCase();
+      const label = ((b.dataset.label || b.textContent) || "").toLowerCase();
       const kw = (TAB_KW[b.dataset.tab] || "").toLowerCase();
       const hit = !q || label.indexOf(q) >= 0 || kw.indexOf(q) >= 0;
       b.style.display = hit ? "" : "none";
     });
   }
   if (toolSearch) toolSearch.addEventListener("input", (e) => filterTabs(e.target.value));
+
+  /* ---------- 收藏 / 常用工具（持久化到 localStorage） ---------- */
+  const FAV_KEY = "suibian_fav";
+  let favSet = new Set();
+  try { const raw = JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); if (Array.isArray(raw)) favSet = new Set(raw); } catch (e) {}
+  const favbar = $("favbar");
+  function saveFav() { try { localStorage.setItem(FAV_KEY, JSON.stringify([...favSet])); } catch (e) {} }
+  function tabLabel(id) {
+    const b = [...tabs.children].find((x) => x.dataset.tab === id);
+    return b ? (b.dataset.label || b.textContent) : id;
+  }
+  function renderFavbar() {
+    if (!favSet.size) { favbar.innerHTML = ""; return; }
+    favbar.innerHTML = [...favSet].map((id) =>
+      '<span class="favchip" data-tab="' + id + '">' + escapeHtml(tabLabel(id)) +
+      ' <span class="x" data-x="' + id + '">✕</span></span>'
+    ).join("");
+  }
+  function buildFavStars() {
+    [...tabs.children].forEach((b) => {
+      b.dataset.label = (b.textContent || "").trim();
+      const s = document.createElement("span");
+      s.className = "fav" + (favSet.has(b.dataset.tab) ? " faved" : "");
+      s.textContent = "★";
+      s.title = "收藏 / 取消收藏";
+      s.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        const id = b.dataset.tab;
+        const on = favSet.has(id);
+        if (on) favSet.delete(id); else favSet.add(id);
+        s.classList.toggle("faved", !on);
+        saveFav(); renderFavbar();
+        playClick();
+        toast(!on ? "已收藏：" + tabLabel(id) + " ⭐" : "已取消收藏 " + tabLabel(id));
+      });
+      b.appendChild(s);
+    });
+  }
+  favbar.addEventListener("click", (e) => {
+    const x = e.target.closest(".x");
+    if (x) {
+      const id = x.dataset.x; favSet.delete(id); saveFav(); renderFavbar();
+      const b = [...tabs.children].find((y) => y.dataset.tab === id);
+      if (b) { const st = b.querySelector(".fav"); if (st) st.classList.remove("faved"); }
+      playClick(); toast("已移除常用：" + tabLabel(id));
+      return;
+    }
+    const chip = e.target.closest(".favchip");
+    if (chip) { activateTab(chip.dataset.tab); toast("打开：" + tabLabel(chip.dataset.tab)); }
+  });
+  buildFavStars();
+  renderFavbar();
+
+  /* ---------- 今日宜忌（按日期种子，每天一变，确定性） ---------- */
+  const YI = [
+    { t: "掷骰子", tab: "dice" }, { t: "转个好运", tab: "wheel" }, { t: "问神谕", tab: "oracle" },
+    { t: "抽一签", tab: "fortune" }, { t: "扭个蛋", tab: "gacha" }, { t: "读句金句", tab: "quote" },
+    { t: "学点冷知识", tab: "trivia" }, { t: "做个决定", tab: "scale" }, { t: "掷个硬币", tab: "coin" },
+    { t: "排个顺序", tab: "sort" }, { t: "拼个网名", tab: "nick" }, { t: "随便逛逛", tab: null }
+  ];
+  const JI = ["纠结", "内耗", "反复横跳", "熬夜", "拖延", "较真", "emo", "想太多", "摆烂过头", "自我怀疑", "瞎操心", "完美主义"];
+  function renderDaily() {
+    const el = $("daily"); if (!el) return;
+    const d = new Date();
+    const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    const yi = YI[seed % YI.length];
+    const ji = JI[(seed * 7 + 3) % JI.length];
+    el.innerHTML =
+      '<span class="pill yi" data-tab="' + (yi.tab || "") + '"><span class="k">今日宜</span>' + escapeHtml(yi.t) + '</span>' +
+      '<span class="pill ji"><span class="k">今日忌</span>' + escapeHtml(ji) + '</span>';
+    const yiPill = el.querySelector(".yi");
+    if (yi.tab) yiPill.addEventListener("click", () => { activateTab(yi.tab); toast("今日宜：" + yi.t + " 🎲"); });
+    else yiPill.style.cursor = "default";
+  }
+  renderDaily();
 
   /* ---------- 快捷键帮助弹窗 ---------- */
   const helpModal = $("helpModal"), helpOverlay = $("helpOverlay");
@@ -1505,7 +1618,16 @@
     "背后的极光在动，说明这个页面还活着，也说明你还醒着。",
     "搜不到想要的？那就「随便逛逛」，盲盒里常有意外之喜。",
     "快捷键不是装酷，是给手指省点力气去干正事。",
-    "主题换一换，思路好像也跟着转了个弯。"
+    "主题换一换，思路好像也跟着转了个弯。",
+    "把常用工具钉上 ★，下次打开它就在眼前等你。",
+    "收藏不是为了囤积，是给未来的自己留条近路。",
+    "今日宜：随手做个不费脑子的小决定，运行一下运气。",
+    "今日忌：在二十几个工具里反复横跳，最后啥也没选。",
+    "页面顶上那行「今日宜忌」，是随便给你的一句温柔提醒。",
+    "决定这种事，越想越重，按一下就轻了。",
+    "把喜欢的工具收进「常用」，像把常听的歌加进歌单。",
+    "不知道干嘛时，看一眼今日宜，它替你起个头。",
+    "收藏夹是成年人的安全感：万一呢，万一就用上了。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
