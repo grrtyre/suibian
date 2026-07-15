@@ -657,6 +657,31 @@
   .cp-tags { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:6px 0; }
   .cp-tags .tag { padding:5px 12px; border-radius:999px; background:var(--card-2); border:1px solid var(--card-border); font-size:13px; }
   .cp-poem { text-align:center; color:var(--muted); font-size:14px; margin-top:6px; line-height:1.6; }
+
+  /* 反应速度测试 */
+  .react-stage {
+    margin:18px 0; min-height:180px; border-radius:16px; cursor:pointer; user-select:none;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center;
+    background:var(--card-2); border:1px solid var(--line); transition:background .12s ease;
+  }
+  .react-stage[data-state="wait"] { background:#c0392b; cursor:default; }
+  .react-stage[data-state="go"]   { background:var(--good); }
+  .react-stage[data-state="early"]{ background:#8e44ad; }
+  .react-stage[data-state="done"] { background:var(--card-2); }
+  .react-big { font-size:34px; font-weight:900; color:#fff; }
+  .react-stage[data-state="idle"] .react-big, .react-stage[data-state="done"] .react-big { color:var(--text); }
+  .react-sub { font-size:14px; color:rgba(255,255,255,.85); }
+  .react-stage[data-state="idle"] .react-sub, .react-stage[data-state="done"] .react-sub { color:var(--muted); }
+  .react-stats { display:flex; gap:12px; margin-top:16px; }
+  .react-stat { flex:1; background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:14px 8px; text-align:center; }
+  .react-stat-num { font-size:26px; font-weight:900; color:var(--accent); }
+  .react-stat-lab { font-size:12px; color:var(--muted); margin-top:4px; }
+
+  /* 周公解梦 */
+  #dreamChips .chip { padding:5px 12px; border-radius:999px; background:var(--card-2); border:1px solid var(--line); font-size:13px; cursor:pointer; color:var(--muted); }
+  #dreamChips .chip:hover { color:var(--text); border-color:rgba(var(--accent-3-rgb),.5); }
+  #dreamResult .dream-key { font-size:15px; color:var(--accent); font-weight:800; }
+  #dreamResult .dream-luck { font-size:13px; color:var(--muted); font-weight:600; }
 </style>
 </head>
 <body>
@@ -713,6 +738,8 @@
     <button data-tab="ambient">专注音景</button>
     <button data-tab="memory">记忆翻牌</button>
     <button data-tab="cp">CP 缘分测试</button>
+    <button data-tab="react">反应速度</button>
+    <button data-tab="dream">周公解梦</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1352,6 +1379,45 @@
     </div>
   </section>
 
+  <!-- 反应速度测试 -->
+  <section class="panel" id="react">
+    <div class="card">
+      <h2>⚡ 反应速度测试</h2>
+      <div class="hint">点「开始」后耐心等待——当色块变绿的一瞬间立刻点它，测出你的反应有多快。抢跑无效哦。</div>
+      <div class="react-stage" id="reactStage" data-state="idle">
+        <div class="react-big" id="reactBig">点「开始测试」</div>
+        <div class="react-sub" id="reactSub">最佳成绩会记在本地，随时挑战自己</div>
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="reactBtn">开始测试</button>
+        <button class="btn ghost" id="reactReset">清空最佳</button>
+      </div>
+      <div class="react-stats">
+        <div class="react-stat"><div class="react-stat-num" id="reactLast">—</div><div class="react-stat-lab">本次(ms)</div></div>
+        <div class="react-stat"><div class="react-stat-num" id="reactBest">—</div><div class="react-stat-lab">最佳(ms)</div></div>
+        <div class="react-stat"><div class="react-stat-num" id="reactTier">—</div><div class="react-stat-lab">评级</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 周公解梦 -->
+  <section class="panel" id="dream">
+    <div class="card">
+      <h2>🌙 周公解梦</h2>
+      <div class="hint">昨晚梦见了啥？输入一个关键词（如「掉牙」「飞」「蛇」），给你一段趣味解读。纯属娱乐，图个乐子。</div>
+      <div class="row" style="justify-content:center">
+        <input type="text" id="dreamInput" placeholder="梦见了什么…" maxlength="20"
+          style="flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card-2);color:var(--text);font-size:15px" />
+        <button class="btn" id="dreamBtn">解一解</button>
+      </div>
+      <div class="row" id="dreamChips" style="justify-content:center;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
+      <div class="result copyable" id="dreamResult" style="flex-direction:column;gap:6px;font-size:18px;line-height:1.7;font-weight:600">输入一个梦境关键词，点「解一解」。</div>
+      <div class="row" style="justify-content:center">
+        <button class="btn ghost" id="dreamRand">随便给我一梦</button>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1567,7 +1633,9 @@
     iching: "周易 起卦 卦象 占卜 铜钱 易经 六十四卦 算卦 玄学 决策 古法 问卦 五行",
     ambient: "音景 白噪音 专注 雨声 海浪 篝火 森林 咖啡馆 放松 解压 睡眠 助眠 背景音 环境音 声音 声景",
     memory: "记忆 翻牌 配对 记忆力 小游戏 益智 消消 表情 memory 找一对 大脑 训练 通关 计时",
-    cp: "cp 缘分 配对 名字 名字配对 情侣 关系 契合 恋爱 默契 测一测 搭档 朋友 配对测试 缘分测试 组合"
+    cp: "cp 缘分 配对 名字 名字配对 情侣 关系 契合 恋爱 默契 测一测 搭档 朋友 配对测试 缘分测试 组合",
+    react: "反应 反应速度 手速 测试 游戏 快 灵敏 反应力 ms 毫秒 挑战 极限 神经",
+    dream: "解梦 周公解梦 梦 梦见 梦境 玄学 预兆 寓意 象征 睡觉 做梦 解读 寓意"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -2125,6 +2193,16 @@
 
   /* ---------- 句子 ---------- */
   const QUOTES = [
+    "反应可以慢半拍，决定别拖一年。",
+    "梦是白天没说完的话，别急着解，先好好睡。",
+    "手速再快，也追不上一个说做就做的人。",
+    "别怕抢跑，怕的是绿灯亮了你还没反应过来。",
+    "焦虑就像被追的梦，转过身它其实追不上你。",
+    "人生没有标准答案，选了就往前走。",
+    "慢一点没关系，只要方向对。",
+    "今天没测出好成绩？明天的你会更快一点。",
+    "把在意的事说出来，梦里就不用再演一遍了。",
+    "运气是留给点得够快、也想得够久的人的。",
     "先做了再说，错了再改，比一直想强。",
     "今天的事，明天做也行，但今天做更爽。",
     "你担心的 90% 都不会发生，剩下 10% 也扛得住。",
@@ -3910,6 +3988,132 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast("已复制缘分结果"), () => toast(txt));
     else toast(txt);
   });
+
+  /* ---------- 反应速度测试 ---------- */
+  (function () {
+    const stage = $("reactStage"), big = $("reactBig"), sub = $("reactSub");
+    const btn = $("reactBtn"), reset = $("reactReset");
+    const elLast = $("reactLast"), elBest = $("reactBest"), elTier = $("reactTier");
+    if (!stage) return;
+    const KEY = "suibian_react";
+    let best = parseInt(localStorage.getItem(KEY) || "0", 10) || 0;
+    let state = "idle", waitT = null, startAt = 0;
+    function tierOf(ms) {
+      if (ms < 200) return "闪电侠 ⚡";
+      if (ms < 260) return "神经反射 🔥";
+      if (ms < 320) return "身手不错 👍";
+      if (ms < 400) return "普通人类 🙂";
+      if (ms < 500) return "有点困了 😴";
+      return "再喝杯咖啡 ☕";
+    }
+    function showBest() { elBest.textContent = best ? best : "—"; }
+    showBest();
+    function setState(s) { state = s; stage.dataset.state = s; }
+    function toIdle() {
+      setState("idle"); big.textContent = "点「开始测试」"; sub.textContent = "最佳成绩会记在本地，随时挑战自己"; btn.textContent = "开始测试";
+    }
+    function armWait() {
+      setState("wait"); big.textContent = "等待变绿…"; sub.textContent = "别急，绿了再点！"; btn.textContent = "测试中…";
+      const delay = 1200 + Math.random() * 2600;
+      waitT = setTimeout(() => {
+        setState("go"); big.textContent = "点！"; sub.textContent = "现在！"; startAt = performance.now();
+      }, delay);
+    }
+    function finish(ms) {
+      setState("done"); elLast.textContent = ms;
+      big.textContent = ms + " ms"; sub.textContent = tierOf(ms) + "，点「再来一次」挑战自己";
+      elTier.textContent = tierOf(ms).replace(/\s.*$/, "");
+      btn.textContent = "再来一次";
+      let isNew = false;
+      if (!best || ms < best) { best = ms; localStorage.setItem(KEY, String(best)); isNew = true; }
+      showBest();
+      if (settings && settings.sound) playDing();
+      if (isNew) { toast("新纪录！" + ms + " ms 🎉"); confettiBurst(60); }
+      bumpUsage("react");
+    }
+    function hit() {
+      if (state === "wait") {
+        clearTimeout(waitT); setState("early");
+        big.textContent = "抢跑了！"; sub.textContent = "还没变绿呢，点「再来一次」重试"; btn.textContent = "再来一次";
+      } else if (state === "go") {
+        finish(Math.round(performance.now() - startAt));
+      }
+    }
+    stage.addEventListener("click", () => { if (state === "wait" || state === "go") hit(); });
+    btn.addEventListener("click", () => {
+      if (state === "wait") return;
+      if (state === "go") { hit(); return; }
+      armWait();
+    });
+    reset.addEventListener("click", () => {
+      best = 0; localStorage.removeItem(KEY); showBest(); elTier.textContent = "—"; toast("已清空最佳成绩");
+    });
+    toIdle();
+  })();
+
+  /* ---------- 周公解梦 ---------- */
+  (function () {
+    const input = $("dreamInput"), out = $("dreamResult"), btn = $("dreamBtn"), rnd = $("dreamRand"), chips = $("dreamChips");
+    if (!input) return;
+    const DREAMS = [
+      ["掉牙", "梦见掉牙常与「变化」和「成长」相关，可能是你近期在意某段关系或身份的更替。别慌，旧的松动是新的空间。", "宜：整理旧物 忌：钻牛角尖"],
+      ["飞", "梦见飞翔，多是渴望自由与突破当下束缚的信号。你的心比现实跑得更远，是时候给它一点出口了。", "宜：出门走走 忌：憋着不说"],
+      ["坠落", "下坠的梦往往出现在压力或失控感强的时候。它提醒你：抓不住的就先松手，脚踏实地反而更稳。", "宜：早点睡 忌：熬夜硬扛"],
+      ["蛇", "梦见蛇，古解为财与智慧，也象征潜藏的机会或需要留意的人。见蛇不必怕，看清了它就是助力。", "宜：抓住机会 忌：轻信画饼"],
+      ["水", "水象征情绪与财运。清水寓意顺遂心安，浑水则提示近期心事较多，先把情绪理顺再做决定。", "宜：理清思绪 忌：情绪化决策"],
+      ["考试", "梦见考试多与「被评价」的焦虑有关，哪怕已经毕业多年。它其实在说：你对自己要求挺高的，放松点。", "宜：肯定自己 忌：过度内耗"],
+      ["迟到", "赶不上车、迟到的梦，通常反映你怕错过、怕落后。深呼吸——你的节奏，不必追着别人跑。", "宜：留出余量 忌：临时抱佛脚"],
+      ["前任", "梦见旧人，多半不是还爱，而是你在和「那段时期的自己」告别。梦到了，就当好好说声再见。", "宜：向前看 忌：反复翻旧账"],
+      ["钱", "梦见捡钱或丢钱，常映射对安全感的在意。财来财去皆是流动，把握当下能抓住的最实在。", "宜：记账复盘 忌：冲动消费"],
+      ["猫", "猫象征独立与直觉。梦见猫，或许提醒你多相信自己的第一感觉，别被他人意见带偏。", "宜：相信直觉 忌：随波逐流"],
+      ["狗", "狗代表忠诚与陪伴。梦见狗多是好兆头，暗示身边有值得信赖的人，别忘了对他们好一点。", "宜：联系老友 忌：冷落身边人"],
+      ["火", "火象征热情与转变。旺火寓意运势上扬、干劲十足；若火失控，则提示注意脾气与冲动。", "宜：趁热打铁 忌：发火伤人"],
+      ["血", "梦见血别害怕，古解多主「见红为财」或情感浓度高。它常出现在你格外投入某件事的时候。", "宜：全力以赴 忌：过度透支"],
+      ["结婚", "梦见婚礼，未必关乎爱情，更像人生进入新阶段的隐喻。你或许正准备对某件事「许下承诺」。", "宜：定下计划 忌：三分钟热度"],
+      ["怀孕", "怀孕的梦常象征「孕育中的新想法或新可能」。你心里可能正酝酿着什么，给它时间长大。", "宜：动手开始 忌：胎死腹中"],
+      ["死亡", "梦见死亡多主「终结与重生」，并非不祥。它往往意味着一个阶段结束，新的你正在路上。", "宜：断舍离 忌：沉溺过去"],
+      ["迷路", "找不到路的梦，反映你对方向的迷茫。别急着冲，先停下来看看地图——答案常在原点附近。", "宜：重新规划 忌：盲目乱撞"],
+      ["房子", "房子象征自我与内心。宽敞明亮主心境开阔，破旧拥挤则提示该给自己的生活做做清理了。", "宜：整理空间 忌：囤积负担"],
+      ["爬山", "爬山的梦寓意目标与进取。爬得吃力是过程正常，登顶那口气，会告诉你坚持是值得的。", "宜：分段推进 忌：一口吃胖"],
+      ["下雨", "雨常代表情绪的释放与洗涤。一场梦里的雨过后，你醒来也许会觉得心里轻松了不少。", "宜：好好哭一场 忌：憋成内伤"],
+      ["被追", "被追赶的梦，多是你在逃避某件不想面对的事。转过身看看——追你的，常常是你自己的焦虑。", "宜：直面问题 忌：一味拖延"],
+      ["鱼", "鱼谐音「余」，古解主富足与好运。梦见鱼多是吉兆，尤其是活蹦乱跳的鱼，年年有余。", "宜：把握机遇 忌：坐等鱼来"],
+      ["蜘蛛", "蜘蛛象征耐心与编织。梦见它，或提醒你正在铺的「网」需要时间，别急着收，火候未到。", "宜：静待时机 忌：急功近利"],
+      ["镜子", "镜子映照自我。梦见照镜，常是你在审视自己的时候，看清了就好，别对镜中人太苛刻。", "宜：接纳自己 忌：自我批判"]
+    ];
+    const GENERIC = [
+      "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
+      "梦是白天没说完的话。这个意象或许在提醒你，有件事该好好正视一下了。",
+      "周公也没记这一条，但别担心——大多数梦只是大脑在整理白天的信息，图个乐子就好。",
+      "梦境往往把情绪放大。记住梦里的感觉，比纠结象征更有意义。"
+    ];
+    function render(key) {
+      key = (key || "").trim();
+      if (!key) { toast("先输入一个梦境关键词～"); return; }
+      let hit = DREAMS.find((d) => key.indexOf(d[0]) >= 0 || d[0].indexOf(key) >= 0);
+      let text, luck, shown;
+      if (hit) { shown = hit[0]; text = hit[1]; luck = hit[2]; }
+      else { shown = key; text = GENERIC[rand(GENERIC.length)]; luck = "宜：顺其自然 忌：过度解读"; }
+      out.innerHTML = '<div class="dream-key">梦见「' + escapeHtml(shown) + "」</div><div>" +
+        escapeHtml(text) + '</div><div class="dream-luck">' + escapeHtml(luck) + "</div>";
+      pop(out); if (settings && settings.sound) playDing(); bumpUsage("dream");
+    }
+    // 关键词 chips
+    ["掉牙", "飞", "蛇", "水", "考试", "前任", "钱", "猫", "被追", "鱼"].forEach((k) => {
+      const c = document.createElement("span"); c.className = "chip"; c.textContent = k;
+      c.addEventListener("click", () => { input.value = k; render(k); });
+      chips.appendChild(c);
+    });
+    btn.addEventListener("click", () => render(input.value));
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") render(input.value); });
+    rnd.addEventListener("click", () => { const d = DREAMS[rand(DREAMS.length)]; input.value = d[0]; render(d[0]); });
+    out.addEventListener("click", () => {
+      if (!out.textContent || out.textContent.indexOf("梦见") < 0) return;
+      const txt = out.textContent.replace(/\s+/g, " ").trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast("已复制解梦结果"), () => toast(txt));
+      else toast(txt);
+    });
+  })();
 
 })();
 </script>
