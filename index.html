@@ -642,6 +642,21 @@
   body.reduce .amb-bar { animation:none; height:30px; }
   @keyframes ambWave { 0%,100%{height:12px} 50%{height:52px} }
   .amb-status { text-align:center; color:var(--muted); font-size:13px; margin-top:8px; }
+  /* CP 缘分测试 */
+  .cp-inputs { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:6px 0 10px; }
+  .cp-name { width:42%; min-width:120px; padding:12px 14px; font-size:16px; border-radius:14px; border:1.5px solid var(--card-border); background:var(--card-2); color:var(--text); text-align:center; transition:border-color .2s; }
+  .cp-name:focus { outline:none; border-color:var(--accent); }
+  .cp-am { font-size:24px; color:var(--accent); font-weight:800; }
+  .cp-result { margin-top:8px; }
+  .cp-ring-wrap { position:relative; width:160px; height:160px; margin:6px auto 10px; }
+  .cp-ring { width:160px; height:160px; transform:rotate(-90deg); }
+  .cp-track { fill:none; stroke:var(--card-border); stroke-width:11; }
+  .cp-fill { fill:none; stroke:var(--accent); stroke-width:11; stroke-linecap:round; stroke-dasharray:326.7; stroke-dashoffset:326.7; transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1), stroke .4s; }
+  .cp-score { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:38px; font-weight:900; }
+  .cp-verdict { font-size:17px; font-weight:700; text-align:center; margin:6px 0; }
+  .cp-tags { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:6px 0; }
+  .cp-tags .tag { padding:5px 12px; border-radius:999px; background:var(--card-2); border:1px solid var(--card-border); font-size:13px; }
+  .cp-poem { text-align:center; color:var(--muted); font-size:14px; margin-top:6px; line-height:1.6; }
 </style>
 </head>
 <body>
@@ -697,6 +712,7 @@
     <button data-tab="iching">周易起卦</button>
     <button data-tab="ambient">专注音景</button>
     <button data-tab="memory">记忆翻牌</button>
+    <button data-tab="cp">CP 缘分测试</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1304,6 +1320,38 @@
     </div>
   </section>
 
+  <!-- CP 缘分测试 -->
+  <section class="panel" id="cp">
+    <div class="card">
+      <h2>💞 CP 缘分测试</h2>
+      <div class="hint">把两个名字丢进来，算算你们的缘分（确定性算法：同样的名字永远得到同样的分数）。纯属娱乐，别太当真。</div>
+      <div class="cp-inputs">
+        <input type="text" id="cpA" class="cp-name" placeholder="第一个名字" maxlength="12" />
+        <span class="cp-am">×</span>
+        <input type="text" id="cpB" class="cp-name" placeholder="第二个名字" maxlength="12" />
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="cpBtn">测一测缘分</button>
+        <button class="btn ghost" id="cpReroll">换个姿势再测</button>
+      </div>
+      <div class="cp-result" id="cpResult">
+        <div class="cp-ring-wrap">
+          <svg class="cp-ring" viewBox="0 0 120 120">
+            <circle class="cp-track" cx="60" cy="60" r="52"></circle>
+            <circle class="cp-fill" id="cpFill" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="cp-score" id="cpScore">—</div>
+        </div>
+        <div class="cp-verdict" id="cpVerdict">填好两个名字，点「测一测缘分」。缘分这东西，玄学里藏着点确定性。</div>
+        <div class="cp-tags" id="cpTags"></div>
+        <div class="cp-poem" id="cpPoem"></div>
+      </div>
+      <div class="row" style="justify-content:center">
+        <button class="btn ghost" id="cpCopy">复制结果</button>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1518,7 +1566,8 @@
     mood: "心情 日记 记录 情绪 签到 今天怎么样 mood 碎碎念 emo 感触 写一句 随笔",
     iching: "周易 起卦 卦象 占卜 铜钱 易经 六十四卦 算卦 玄学 决策 古法 问卦 五行",
     ambient: "音景 白噪音 专注 雨声 海浪 篝火 森林 咖啡馆 放松 解压 睡眠 助眠 背景音 环境音 声音 声景",
-    memory: "记忆 翻牌 配对 记忆力 小游戏 益智 消消 表情 memory 找一对 大脑 训练 通关 计时"
+    memory: "记忆 翻牌 配对 记忆力 小游戏 益智 消消 表情 memory 找一对 大脑 训练 通关 计时",
+    cp: "cp 缘分 配对 名字 名字配对 情侣 关系 契合 恋爱 默契 测一测 搭档 朋友 配对测试 缘分测试 组合"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -2278,7 +2327,16 @@
     "把两件相同的事翻到一起，就叫缘分；游戏里叫配对成功。",
     "记不住答案没关系，记住「再试一次」的手感就够了。",
     "所谓专注，就是眼里只剩下那两张待配对的牌。",
-    "赢一局记忆翻牌不难，难的是每天都愿意陪自己玩一会儿。"
+    "赢一局记忆翻牌不难，难的是每天都愿意陪自己玩一会儿。",
+    "缘分这东西，急不来，但也等不得——该测就测。",
+    "两个名字凑一起能算出缘分，那名字也算半个媒人。",
+    "低分别灰心，感情都是磨出来的；高分别飘，得靠经营。",
+    "愿意陪你一起测缘分的人，本身就已经是缘分。",
+    "CP 名字越土，缘分越有戏剧性。",
+    "所谓默契，就是两个人一起「随便」也不尴尬。",
+    "别问缘分为几分，敢一起试的人才最要紧。",
+    "缘分的算法很简单：名字一对，心跳先跳。",
+    "测完缘分记得请 TA 喝杯奶茶，数字会谢谢你。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -3789,6 +3847,69 @@
   }
   const memNewBtn = $("memNew"); if (memNewBtn) memNewBtn.addEventListener("click", memNewGame);
   function memEnsure() { if (!memInited) memNewGame(); }
+
+  /* ---------- CP 缘分测试 ---------- */
+  const cpA = $("cpA"), cpB = $("cpB"), cpResult = $("cpResult"), cpFill = $("cpFill"),
+        cpScore = $("cpScore"), cpVerdict = $("cpVerdict"), cpTags = $("cpTags"), cpPoem = $("cpPoem");
+  const CP_CIRC = 2 * Math.PI * 52;
+  const CP_VERDICTS = [
+    { min: 95, t: "天作之合 ✨", tags: ["灵魂共振", "锁死", "随便结婚"], c: "#ff6c9c" },
+    { min: 85, t: "神仙眷侣 💞", tags: ["甜到齁", "撒狗粮", "双向奔赴"], c: "#ff7a59" },
+    { min: 70, t: "默契满分 💕", tags: ["一个眼神就懂", "最佳搭子", "越处越香"], c: "#ffb15c" },
+    { min: 55, t: "挺有戏 😊", tags: ["有点意思", "可以发展", "暧昧期"], c: "#4be3a5" },
+    { min: 40, t: "慢慢来 🤔", tags: ["普通朋友", "观察中", "佛系"], c: "#5cc8ff" },
+    { min: 25, t: "还得磨合 🔧", tags: ["相爱相杀", "欢喜冤家", "需要时间"], c: "#7c6cff" },
+    { min: 0,  t: "同志，冷静 🧊", tags: ["塑料情", "先做好友", "保命要紧"], c: "#9aa0b4" }
+  ];
+  const CP_POEMS = [
+    "缘分不是天注定，是两个人都愿意「随便试试」。",
+    "分数高低随缘，但愿意一起测的人，已经很特别。",
+    "你们之间，差的就是一句「走，去随便」。",
+    "测出来的只是个数字，过不过得去，看你们。",
+    "别盯着百分比，能一起笑出来的，就是好 CP。",
+    "缘分的玄学在于：你越不在意，它越来劲。",
+    "两个人名字凑一起能测出缘分，这本身就很缘分。",
+    "低分也别慌，真感情都是磨出来的。",
+    "把名字交出来的那一刻，缘分就已经开始算了。",
+    "好聚好散是缘分，吵不散也是缘分。"
+  ];
+  function cpHash(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+  let cpSalt = 0;
+  function drawCp() {
+    const a = (cpA.value || "").trim(), b = (cpB.value || "").trim();
+    if (!a || !b) { toast("两个名字都要填哦～"); return; }
+    const key = [a.toLowerCase(), b.toLowerCase()].sort().join("|") + "#" + cpSalt;
+    const score = (cpHash(key) % 61) + 40; // 40..100
+    const v = CP_VERDICTS.find((x) => score >= x.min) || CP_VERDICTS[CP_VERDICTS.length - 1];
+    cpFill.style.stroke = v.c;
+    cpFill.style.strokeDashoffset = (CP_CIRC * (1 - score / 100)).toFixed(1);
+    cpScore.textContent = score;
+    cpVerdict.textContent = v.t + "（" + a + " × " + b + "）";
+    cpVerdict.style.color = v.c;
+    cpTags.innerHTML = v.tags.map((t) => '<span class="tag">' + escapeHtml(t) + "</span>").join("");
+    const nick = (a.slice(0, 1) || "你") + (b.slice(0, 1) || "TA") + "CP";
+    cpPoem.innerHTML = "组合代号：" + escapeHtml(nick) + " · " + escapeHtml(CP_POEMS[cpHash(a + b) % CP_POEMS.length]);
+    pop(cpResult);
+    if (settings && settings.sound) playDing();
+    bumpUsage("cp");
+    if (score >= 85) confettiBurst(110);
+  }
+  if ($("cpBtn")) $("cpBtn").addEventListener("click", () => { cpSalt = 0; drawCp(); });
+  if ($("cpReroll")) $("cpReroll").addEventListener("click", () => { cpSalt++; drawCp(); });
+  if ($("cpCopy")) $("cpCopy").addEventListener("click", () => {
+    if (cpScore.textContent === "—") { toast("先测一测再复制～"); return; }
+    const txt = "「" + cpA.value.trim() + " × " + cpB.value.trim() + "」的缘分：" + cpScore.textContent +
+      "% · " + (cpVerdict.textContent || "") + " | " + (cpPoem.textContent || "");
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast("已复制缘分结果"), () => toast(txt));
+    else toast(txt);
+  });
 
 })();
 </script>
