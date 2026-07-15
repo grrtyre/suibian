@@ -682,6 +682,29 @@
   #dreamChips .chip:hover { color:var(--text); border-color:rgba(var(--accent-3-rgb),.5); }
   #dreamResult .dream-key { font-size:15px; color:var(--accent); font-weight:800; }
   #dreamResult .dream-luck { font-size:13px; color:var(--muted); font-weight:600; }
+
+  /* ---------- 21点 (Blackjack) ---------- */
+  .bj-chips, .bj-bet { font-size:15px; color:var(--muted); }
+  body.fs-large .bj-chips, body.fs-large .bj-bet { font-size:17px; }
+  .bj-chips b, .bj-bet b { color:var(--accent-2); font-size:18px; margin:0 2px; font-variant-numeric:tabular-nums; }
+  .bj-table { display:flex; flex-direction:column; gap:14px; margin:14px 0; }
+  .bj-side { background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:12px; }
+  .bj-label { font-size:14px; color:var(--muted); margin-bottom:8px; }
+  .bj-label span { color:var(--accent-2); font-weight:700; }
+  .bj-cards { display:flex; flex-wrap:wrap; gap:8px; min-height:62px; align-items:center; }
+  .bj-card {
+    width:46px; height:64px; border-radius:8px; background:#fff; color:#23262f;
+    position:relative; display:flex; flex-direction:column; justify-content:space-between;
+    padding:5px 6px; box-shadow:0 4px 12px rgba(0,0,0,.35); animation:bjDeal .25s ease;
+  }
+  .bj-card.red { color:#e23b4e; }
+  .bj-card .rk { font-size:17px; font-weight:800; line-height:1; }
+  .bj-card .st { font-size:19px; line-height:1; align-self:flex-end; }
+  .bj-card.back { background:linear-gradient(135deg, var(--accent-3), var(--accent)); color:#fff; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(124,108,255,.45); }
+  .bj-card.back .st { font-size:30px; align-self:center; }
+  @keyframes bjDeal { from { transform:translateY(-12px) scale(.9); opacity:0; } to { transform:none; opacity:1; } }
+  body.reduce .bj-card { animation:none; }
+  .bj-bust .bj-label span { color:var(--good); }
 </style>
 </head>
 <body>
@@ -740,6 +763,7 @@
     <button data-tab="cp">CP 缘分测试</button>
     <button data-tab="react">反应速度</button>
     <button data-tab="dream">周公解梦</button>
+    <button data-tab="blackjack">21点</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1418,6 +1442,41 @@
     </div>
   </section>
 
+  <!-- 21点 -->
+  <section class="panel" id="blackjack">
+    <div class="card">
+      <h2>🃏 21点</h2>
+      <div class="hint">和庄家比点数，越接近 21 越好，爆了（&gt;21）就输。A 记 1 或 11，J/Q/K 记 10。纯属娱乐，筹码只存在本地。</div>
+      <div class="row" style="justify-content:center;align-items:center;gap:14px;flex-wrap:wrap">
+        <span class="bj-chips">🪙 筹码 <b id="bjChips">100</b></span>
+        <span class="bj-bet">本局下注 <b id="bjBet">10</b></span>
+      </div>
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost" id="bjBetDown">−5</button>
+        <button class="btn ghost" id="bjBet5">+5</button>
+        <button class="btn ghost" id="bjBet10">+10</button>
+        <button class="btn ghost" id="bjBetMax">All-in</button>
+      </div>
+      <div class="bj-table">
+        <div class="bj-side" id="bjDealerSide">
+          <div class="bj-label">庄家 <span id="bjDealerScore">?</span></div>
+          <div class="bj-cards" id="bjDealerCards"></div>
+        </div>
+        <div class="bj-side">
+          <div class="bj-label">你 <span id="bjPlayerScore">0</span></div>
+          <div class="bj-cards" id="bjPlayerCards"></div>
+        </div>
+      </div>
+      <div class="result" id="bjResult">点「发牌」开始这一局，先下好注。</div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="bjDeal">发牌</button>
+        <button class="btn" id="bjHit">要牌</button>
+        <button class="btn" id="bjStand">停牌</button>
+        <button class="btn ghost" id="bjReset">重置筹码</button>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1635,7 +1694,8 @@
     memory: "记忆 翻牌 配对 记忆力 小游戏 益智 消消 表情 memory 找一对 大脑 训练 通关 计时",
     cp: "cp 缘分 配对 名字 名字配对 情侣 关系 契合 恋爱 默契 测一测 搭档 朋友 配对测试 缘分测试 组合",
     react: "反应 反应速度 手速 测试 游戏 快 灵敏 反应力 ms 毫秒 挑战 极限 神经",
-    dream: "解梦 周公解梦 梦 梦见 梦境 玄学 预兆 寓意 象征 睡觉 做梦 解读 寓意"
+    dream: "解梦 周公解梦 梦 梦见 梦境 玄学 预兆 寓意 象征 睡觉 做梦 解读 寓意",
+    blackjack: "21点 黑杰克 扑克 扑克牌 赌博 赌 赌场 牌 纸牌 庄家 要牌 停牌 点数 游戏 算牌 二十一点 二十一点"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -2414,7 +2474,17 @@
     "所谓默契，就是两个人一起「随便」也不尴尬。",
     "别问缘分为几分，敢一起试的人才最要紧。",
     "缘分的算法很简单：名字一对，心跳先跳。",
-    "测完缘分记得请 TA 喝杯奶茶，数字会谢谢你。"
+    "测完缘分记得请 TA 喝杯奶茶，数字会谢谢你。",
+    "牌桌上的输赢都是过场，敢坐下才是真玩家。",
+    "21 点爆了的瞬间，才是下次稳一点的人。",
+    "运气像筹码，输光了也能重开一局，人生同理。",
+    "要牌要的是胆量，停牌停的是贪心。",
+    "庄家不会教你，但生活总会给你发下一手牌。",
+    "输一局别急着重注，稳着来的人笑到最后。",
+    "扑克牌翻过来才知道，但决定要不要翻的永远是你。",
+    "赌品见人品，输了还愿意再来的人，值得深交。",
+    "与其算牌算到头疼，不如先随便发一手再想。",
+    "筹码见底不是终点，按「重置」那一刻你就满血复活了。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -3231,7 +3301,8 @@
     { emoji: "📔", name: "记录者", desc: "记过 3 篇心情日记", test: (u) => (u.mood || 0) >= 3 },
     { emoji: "🗓️", name: "日记达人", desc: "记过 10 篇心情日记", test: (u) => (u.mood || 0) >= 10 },
     { emoji: "🧠", name: "记忆新手", desc: "通关记忆翻牌 1 次", test: (u) => (u.memory || 0) >= 1 },
-    { emoji: "🃏", name: "翻牌高手", desc: "通关记忆翻牌 5 次", test: (u) => (u.memory || 0) >= 5 }
+    { emoji: "🃏", name: "翻牌高手", desc: "通关记忆翻牌 5 次", test: (u) => (u.memory || 0) >= 5 },
+    { emoji: "🂡", name: "21点玩家", desc: "玩过 21点 5 次", test: (u) => (u.blackjack || 0) >= 5 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4113,6 +4184,138 @@
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast("已复制解梦结果"), () => toast(txt));
       else toast(txt);
     });
+  })();
+
+  /* ---------- 21点 (Blackjack) ---------- */
+  (function () {
+    const chipsEl = $("bjChips"), betEl = $("bjBet");
+    const dealerCards = $("bjDealerCards"), playerCards = $("bjPlayerCards");
+    const dealerScoreEl = $("bjDealerScore"), playerScoreEl = $("bjPlayerScore");
+    const resultEl = $("bjResult");
+    const dealBtn = $("bjDeal"), hitBtn = $("bjHit"), standBtn = $("bjStand");
+    const resetBtn = $("bjReset"), betDown = $("bjBetDown"), bet5 = $("bjBet5");
+    const bet10 = $("bjBet10"), betMax = $("bjBetMax");
+    if (!dealBtn) return;
+    const KEY = "suibian_bjchips";
+    const SUITS = ["♠", "♥", "♦", "♣"];
+    const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+    let chips = parseInt(localStorage.getItem(KEY) || "100", 10);
+    if (!chips || chips < 1) chips = 100;
+    let bet = 10, deck = [], player = [], dealer = [], state = "idle";
+
+    function cardVal(r) { if (r === "A") return 11; if (r === "J" || r === "Q" || r === "K") return 10; return parseInt(r, 10); }
+    function handScore(cards) {
+      let total = 0, aces = 0;
+      cards.forEach((c) => { total += cardVal(c.r); if (c.r === "A") aces++; });
+      while (total > 21 && aces) { total -= 10; aces--; }
+      return total;
+    }
+    function freshDeck() {
+      const d = [];
+      SUITS.forEach((s) => RANKS.forEach((r) => d.push({ s, r })));
+      for (let i = d.length - 1; i > 0; i--) { const j = rand(i + 1); const t = d[i]; d[i] = d[j]; d[j] = t; }
+      return d;
+    }
+    function cardHtml(c) {
+      const red = (c.s === "♥" || c.s === "♦");
+      return '<div class="bj-card' + (red ? " red" : "") + '"><span class="rk">' + c.r + '</span><span class="st">' + c.s + '</span></div>';
+    }
+    function updateChips() { chipsEl.textContent = chips; try { localStorage.setItem(KEY, String(chips)); } catch (e) {} }
+    function setBet(v) {
+      if (chips < 5) { bet = chips; betEl.textContent = bet; return; }
+      bet = Math.max(5, Math.min(chips, v)); betEl.textContent = bet;
+    }
+    function controls() {
+      const noChips = chips < 5;
+      dealBtn.disabled = noChips || state === "playing";
+      hitBtn.disabled = state !== "playing";
+      standBtn.disabled = state !== "playing";
+      [betDown, bet5, bet10, betMax].forEach((b) => { b.disabled = state === "playing" || noChips; });
+      dealBtn.textContent = noChips ? "筹码见底" : "发牌";
+    }
+    function renderCards() {
+      playerCards.innerHTML = player.map(cardHtml).join("");
+      if (state === "playing") {
+        dealerCards.innerHTML = cardHtml(dealer[0]) + '<div class="bj-card back"><span class="st">🂠</span></div>';
+        dealerScoreEl.textContent = "?";
+      } else {
+        dealerCards.innerHTML = dealer.map(cardHtml).join("");
+        dealerScoreEl.textContent = dealer.length ? handScore(dealer) : "?";
+      }
+      playerScoreEl.textContent = player.length ? handScore(player) : 0;
+    }
+    function setResult(txt) { resultEl.textContent = txt; pop(resultEl); }
+
+    function deal() {
+      if (state === "playing") return;
+      if (chips < 5) { toast("筹码见底，点「重置筹码」再来"); return; }
+      setBet(bet);
+      deck = freshDeck(); player = []; dealer = [];
+      player.push(deck.pop(), deck.pop());
+      dealer.push(deck.pop(), deck.pop());
+      chips -= bet; updateChips();
+      state = "playing"; renderCards(); controls();
+      bumpUsage("blackjack");
+      const ps = handScore(player), ds = handScore([dealer[0]]);
+      if (ps === 21) { setTimeout(stand, 350); return; }
+      setResult("要牌还是停牌？你现在的点数：" + ps + "（庄家明牌 " + ds + "）");
+    }
+    function hit() {
+      if (state !== "playing") return;
+      player.push(deck.pop());
+      const ps = handScore(player);
+      renderCards();
+      if (ps > 21) { settle("bust"); return; }
+      if (ps === 21) { setTimeout(stand, 250); return; }
+      setResult("你拿到 " + ps + " 点。继续要牌，还是停牌？");
+    }
+    function stand() {
+      if (state !== "playing") return;
+      state = "dealer"; renderCards();
+      (function step() {
+        const ds = handScore(dealer);
+        if (ds < 17) { dealer.push(deck.pop()); renderCards(); setTimeout(step, 380); }
+        else settle("compare");
+      })();
+    }
+    function settle(kind) {
+      state = "done";
+      const ps = handScore(player), ds = handScore(dealer);
+      renderCards(); controls();
+      let payout = 0, msg = "";
+      const pBJ = (player.length === 2 && ps === 21);
+      const dBJ = (dealer.length === 2 && ds === 21);
+      if (kind === "bust" || ps > 21) {
+        payout = 0; msg = "爆了！你 " + ps + " 点，这局没了 💥";
+      } else if (pBJ && !dBJ) {
+        payout = bet + Math.floor(bet * 1.5); chips += payout; msg = "🎉 黑杰克！天生 21 点，进账 " + payout + " 筹码！";
+      } else if (pBJ && dBJ) {
+        payout = bet; chips += bet; msg = "平局，双方都是黑杰克，本注退回 " + bet + " 筹码。";
+      } else if (ds > 21) {
+        payout = bet * 2; chips += payout; msg = "庄家爆了！你 " + ps + " 点险胜，进账 " + payout + " 筹码 🎉";
+      } else if (ps > ds) {
+        payout = bet * 2; chips += payout; msg = "你 " + ps + " 点 > 庄家 " + ds + " 点，赢了！进账 " + payout + " 筹码 🎉";
+      } else if (ps < ds) {
+        payout = 0; msg = "你 " + ps + " 点 < 庄家 " + ds + " 点，这局归庄家了。";
+      } else {
+        payout = bet; chips += bet; msg = "平局（都是 " + ps + " 点），本注退回 " + bet + " 筹码。";
+      }
+      updateChips();
+      if (payout > bet) confettiBurst(70);
+      setResult(msg + (chips < 5 ? "（筹码见底，点「重置筹码」再来）" : ""));
+    }
+    function resetChips() { chips = 100; updateChips(); setBet(bet); controls(); toast("筹码已重置为 100 🪙"); }
+
+    dealBtn.addEventListener("click", deal);
+    hitBtn.addEventListener("click", hit);
+    standBtn.addEventListener("click", stand);
+    resetBtn.addEventListener("click", resetChips);
+    betDown.addEventListener("click", () => { if (state !== "playing") setBet(bet - 5); });
+    bet5.addEventListener("click", () => { if (state !== "playing") setBet(bet + 5); });
+    bet10.addEventListener("click", () => { if (state !== "playing") setBet(bet + 10); });
+    betMax.addEventListener("click", () => { if (state !== "playing") setBet(chips); });
+
+    updateChips(); setBet(bet); controls();
   })();
 
 })();
