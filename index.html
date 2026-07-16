@@ -790,6 +790,24 @@
   .gm2048-over-txt { font-size:19px; font-weight:800; line-height:1.5; }
   .gm2048-actions { display:flex; gap:10px; justify-content:center; margin-top:8px; }
 
+  /* 俄罗斯方块 */
+  .tetris-stage { display:flex; gap:14px; justify-content:center; align-items:flex-start; flex-wrap:wrap; margin:6px auto 4px; }
+  .tetris-main { position:relative; width:min(280px,72vw); }
+  .tetris-main canvas { width:100%; height:auto; background:var(--card-2); border:1px solid var(--line); border-radius:14px; display:block; touch-action:none; }
+  .tetris-side { display:flex; flex-direction:column; gap:10px; min-width:96px; }
+  .tetris-box { background:var(--card-2); border:1px solid var(--line); border-radius:12px; padding:8px 10px; text-align:center; }
+  .tetris-k { font-size:12px; color:var(--muted); }
+  .tetris-v { font-size:22px; font-weight:900; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .tetris-next { background:var(--card-2); border:1px solid var(--line); border-radius:12px; padding:8px; text-align:center; }
+  .tetris-next canvas { width:100%; height:auto; display:block; margin-top:4px; }
+  .tetris-over { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(0,0,0,.5); border-radius:14px; color:#fff; text-align:center; padding:14px; }
+  .tetris-over-txt { font-size:17px; font-weight:800; line-height:1.5; }
+  .tetris-actions { display:flex; gap:10px; justify-content:center; margin-top:8px; }
+  .tetris-pad { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; max-width:340px; margin:12px auto 0; }
+  .tetris-pad .tbtn { font-size:20px; padding:12px 0; border-radius:12px; border:1px solid var(--line); background:var(--card-2); color:var(--text); cursor:pointer; transition:transform .08s ease; }
+  .tetris-pad .tbtn:active { transform:scale(.94); background:var(--accent); color:#fff; }
+  @media (max-width:520px) { .tetris-stage { gap:10px; } .tetris-side { min-width:84px; } }
+
 </style>
 </head>
 <body>
@@ -855,6 +873,7 @@
     <button data-tab="lotto">幸运选号</button>
     <button data-tab="mbti">MBTI 速测</button>
     <button data-tab="gm2048">2048</button>
+    <button data-tab="tetris">俄罗斯方块</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1708,6 +1727,39 @@
     </div>
   </section>
 
+  <section class="panel" id="tetris">
+    <div class="card">
+      <h2>🎮 俄罗斯方块</h2>
+      <div class="hint">方向键移动 / 旋转，空格直接落地，手机滑动或点下方按钮。把方块拼满一行就能消除，越堆越快～</div>
+      <div class="tetris-stage">
+        <div class="tetris-main">
+          <canvas id="tetrisCanvas" width="280" height="560"></canvas>
+          <div class="tetris-over" id="tetrisOver">
+            <div class="tetris-over-txt" id="tetrisOverTxt">准备好了吗？</div>
+            <button class="btn" id="tetrisNew2">▶ 开始</button>
+          </div>
+        </div>
+        <div class="tetris-side">
+          <div class="tetris-box"><div class="tetris-k">得分</div><div class="tetris-v" id="tetrisScore">0</div></div>
+          <div class="tetris-box"><div class="tetris-k">消行</div><div class="tetris-v" id="tetrisLines">0</div></div>
+          <div class="tetris-box"><div class="tetris-k">最高</div><div class="tetris-v" id="tetrisBest">0</div></div>
+          <div class="tetris-next"><div class="tetris-k">下一个</div><canvas id="tetrisNext" width="100" height="100"></canvas></div>
+        </div>
+      </div>
+      <div class="tetris-actions">
+        <button class="btn" id="tetrisNew">新游戏</button>
+        <button class="btn ghost" id="tetrisPause">暂停</button>
+      </div>
+      <div class="tetris-pad">
+        <button class="tbtn" id="tetrisLeft" aria-label="左移">←</button>
+        <button class="tbtn" id="tetrisRot" aria-label="旋转">⟳</button>
+        <button class="tbtn" id="tetrisRight" aria-label="右移">→</button>
+        <button class="tbtn" id="tetrisDown" aria-label="下落">↓</button>
+        <button class="tbtn" id="tetrisDrop" aria-label="直接落地">⤓</button>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1871,6 +1923,7 @@
     if (b.dataset.tab !== "snake" && typeof snakeStop === "function") snakeStop();
     if (b.dataset.tab !== "lotto" && typeof lottoStop === "function") lottoStop();
     if (b.dataset.tab !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
+    if (b.dataset.tab !== "tetris" && typeof tetrisStop === "function") tetrisStop();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -1890,6 +1943,7 @@
     if (id !== "snake" && typeof snakeStop === "function") snakeStop();
     if (id !== "lotto" && typeof lottoStop === "function") lottoStop();
     if (id !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
+    if (id !== "tetris" && typeof tetrisStop === "function") tetrisStop();
     if (id === "mbti") mbtiReset();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
@@ -1943,7 +1997,8 @@
     snake: "贪吃蛇 蛇 游戏 街机 经典 手速 控制 方向 休闲 玩 复古",
     lotto: "幸运 选号 彩票 双色球 红球 蓝球 机选 号码 数字 抽奖 中奖 随机 娱乐",
     mbti: "mbti 性格 速测 测试 人格 16型 你是谁 测评 心理 类型 内向 外向 直觉 实感 思考 情感 判断 知觉 自我 认识自己 测试",
-    gm2048: "2048 数字 合并 方块 游戏 益智 滑块 方块合并 经典 解压 休闲 手速 合成 数字游戏 贪吃"
+    gm2048: "2048 数字 合并 方块 游戏 益智 滑块 方块合并 经典 解压 休闲 手速 合成 数字游戏 贪吃",
+    tetris: "俄罗斯方块 方块 俄罗斯 tetris 消除 消行 堆叠 拼图 街机 经典 手速 休闲 复古 俄罗斯方块游戏"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3579,7 +3634,9 @@
     { emoji: "🔨", name: "打地鼠高手", desc: "玩过打地鼠 5 次", test: (u) => (u.whack || 0) >= 5 },
     { emoji: "🧩", name: "认识自己", desc: "完成一次 MBTI 速测", test: (u) => (u.mbti || 0) >= 1 },
     { emoji: "🔢", name: "2048 玩家", desc: "玩过一局 2048", test: (u) => (u.gm2048 || 0) >= 1 },
-    { emoji: "🏅", name: "合体大师", desc: "在 2048 里拼出 2048 方块", test: (u) => (u.gm2048max || 0) >= 2048 }
+    { emoji: "🏅", name: "合体大师", desc: "在 2048 里拼出 2048 方块", test: (u) => (u.gm2048max || 0) >= 2048 },
+    { emoji: "🎮", name: "方块大师", desc: "玩过一局俄罗斯方块", test: (u) => (u.tetris || 0) >= 1 },
+    { emoji: "🧱", name: "消行狂魔", desc: "累计消除 40 行方块", test: (u) => (u.tetrisLines || 0) >= 40 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4442,6 +4499,19 @@
     "最好的那步，往往是你犹豫了三秒还是滑出去的那一步。",
     "游戏会结束，但再来一局的按钮永远都在，别怕重开。"
   );
+  // —— 跟随俄罗斯方块 / 堆叠 / 消除主题的新语录 ——
+  QUOTES.push(
+    "一行排满了就消失，生活里那些凑齐的事，也该学着适时清空。",
+    "方块落下去的瞬间没法反悔，但下一格永远还有空位。",
+    "旋转一下，原本卡住的形状也许就严丝合缝了。",
+    "越堆越急，越急越乱——慢一点，反而消得更快。",
+    "别等攒满整行才动手，先把眼前这块摆正。",
+    "有时候直接落地最干脆，犹豫只会堆出更高的墙。",
+    "消除一行的快感，不亚于把一件拖了很久的事做完。",
+    "游戏有最高分，人生没有——所以别光盯着分数，享受堆叠的过程。",
+    "底部稳了，上面才摆得踏实；地基不牢，再好看也塌。",
+    "七种形状，七种活法，没有哪种天生比哪种更高级。"
+  );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
       "梦是白天没说完的话。这个意象或许在提醒你，有件事该好好正视一下了。",
@@ -5253,6 +5323,268 @@
 
     loadBest(); updateScore();
     return function () {};
+  })();
+
+  /* ---------- 俄罗斯方块 ---------- */
+  const tetrisStop = (function () {
+    const KEY = "suibian_tetris";
+    const panel = $("tetris");
+    const canvas = $("tetrisCanvas");
+    const nextCv = $("tetrisNext");
+    if (!panel || !canvas) return function () {};
+    const ctx = canvas.getContext("2d");
+    const nctx = nextCv ? nextCv.getContext("2d") : null;
+    const COLS = 10, ROWS = 20, CELL = canvas.width / COLS;
+    const COLORS = { I:"#36d6e0", O:"#f4d23a", T:"#b06bff", S:"#53df78", Z:"#ff5d6c", J:"#5b8cff", L:"#ff9f43" };
+    const SHAPES = {
+      I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+      O: [[1,1],[1,1]],
+      T: [[0,1,0],[1,1,1],[0,0,0]],
+      S: [[0,1,1],[1,1,0],[0,0,0]],
+      Z: [[1,1,0],[0,1,1],[0,0,0]],
+      J: [[1,0,0],[1,1,1],[0,0,0]],
+      L: [[0,0,1],[1,1,1],[0,0,0]]
+    };
+    let board = [], cur = null, nextType = null, score = 0, lines = 0, level = 1, best = 0;
+    let started = false, over = false, paused = false, running = false;
+    let raf = null, lastT = 0, dropAcc = 0, bag = [];
+    const elScore = $("tetrisScore"), elLines = $("tetrisLines"), elBest = $("tetrisBest");
+    const overEl = $("tetrisOver"), overTxt = $("tetrisOverTxt");
+
+    function loadBest() { try { best = parseInt(localStorage.getItem(KEY) || "0", 10) || 0; } catch (e) { best = 0; } }
+    function saveBest() { try { localStorage.setItem(KEY, String(best)); } catch (e) {} }
+    function showBest() { if (elBest) elBest.textContent = best; }
+    function rotateCW(m) {
+      const n = m.length, r = [];
+      for (let i = 0; i < n; i++) r.push(new Array(n).fill(0));
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) r[x][n - 1 - y] = m[y][x];
+      return r;
+    }
+    function topOffset(m) {
+      for (let y = 0; y < m.length; y++) for (let x = 0; x < m[y].length; x++) if (m[y][x]) return y;
+      return 0;
+    }
+    function emptyBoard() {
+      board = [];
+      for (let r = 0; r < ROWS; r++) board.push(new Array(COLS).fill(0));
+    }
+    function drawCell(g, cx, cy, color, size) {
+      const px = cx * size, py = cy * size;
+      g.fillStyle = color;
+      g.fillRect(px + 1, py + 1, size - 2, size - 2);
+      g.fillStyle = "rgba(255,255,255,.20)";
+      g.fillRect(px + 1, py + 1, size - 2, Math.max(2, size * 0.18));
+    }
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "rgba(255,255,255,.05)";
+      ctx.lineWidth = 1;
+      for (let x = 1; x < COLS; x++) { ctx.beginPath(); ctx.moveTo(x * CELL, 0); ctx.lineTo(x * CELL, canvas.height); ctx.stroke(); }
+      for (let y = 1; y < ROWS; y++) { ctx.beginPath(); ctx.moveTo(0, y * CELL); ctx.lineTo(canvas.width, y * CELL); ctx.stroke(); }
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (board[r][c]) drawCell(ctx, c, r, board[r][c], CELL);
+      if (cur) {
+        let gy = cur.y;
+        while (!collides(cur.m, cur.x, gy + 1)) gy++;
+        ctx.globalAlpha = 0.22;
+        for (let r = 0; r < cur.m.length; r++) for (let c = 0; c < cur.m[r].length; c++)
+          if (cur.m[r][c] && gy + r >= 0) drawCell(ctx, cur.x + c, gy + r, COLORS[cur.type], CELL);
+        ctx.globalAlpha = 1;
+        for (let r = 0; r < cur.m.length; r++) for (let c = 0; c < cur.m[r].length; c++)
+          if (cur.m[r][c] && cur.y + r >= 0) drawCell(ctx, cur.x + c, cur.y + r, COLORS[cur.type], CELL);
+      }
+    }
+    function drawNext() {
+      if (!nctx || !nextType) return;
+      nctx.clearRect(0, 0, nextCv.width, nextCv.height);
+      const m = SHAPES[nextType], n = m.length;
+      let minR = 99, maxR = -1, minC = 99, maxC = -1;
+      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (m[r][c]) {
+        if (r < minR) minR = r; if (r > maxR) maxR = r;
+        if (c < minC) minC = c; if (c > maxC) maxC = c;
+      }
+      const w = maxC - minC + 1, h = maxR - minR + 1;
+      const size = Math.floor(Math.min(nextCv.width / 4, nextCv.height / 4));
+      const ox = (nextCv.width - w * size) / 2, oy = (nextCv.height - h * size) / 2;
+      nctx.fillStyle = COLORS[nextType];
+      for (let r = minR; r <= maxR; r++) for (let c = minC; c <= maxC; c++)
+        if (m[r][c]) nctx.fillRect(ox + (c - minC) * size + 1, oy + (r - minR) * size + 1, size - 2, size - 2);
+    }
+    function collides(m, x, y) {
+      for (let r = 0; r < m.length; r++) for (let c = 0; c < m[r].length; c++) {
+        if (!m[r][c]) continue;
+        const bx = x + c, by = y + r;
+        if (bx < 0 || bx >= COLS || by >= ROWS) return true;
+        if (by >= 0 && board[by][bx]) return true;
+      }
+      return false;
+    }
+    function lockPiece() {
+      for (let r = 0; r < cur.m.length; r++) for (let c = 0; c < cur.m[r].length; c++) {
+        if (!cur.m[r][c]) continue;
+        const by = cur.y + r, bx = cur.x + c;
+        if (by >= 0) board[by][bx] = COLORS[cur.type];
+      }
+      clearLines();
+      spawn();
+    }
+    function clearLines() {
+      let cleared = 0;
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (board[r].every(function (v) { return v; })) {
+          board.splice(r, 1);
+          board.unshift(new Array(COLS).fill(0));
+          cleared++; r++;
+        }
+      }
+      if (cleared > 0) {
+        lines += cleared;
+        score += [0, 100, 300, 500, 800][cleared] * level;
+        level = Math.floor(lines / 10) + 1;
+        updateHud();
+        if (settings && settings.sound) tone(540 + cleared * 80, 0.08, "square", 0.12);
+        try { usage.tetrisLines = (usage.tetrisLines || 0) + cleared; localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+      }
+    }
+    function updateHud() {
+      if (elScore) elScore.textContent = score;
+      if (elLines) elLines.textContent = lines;
+      if (score > best) { best = score; saveBest(); }
+      showBest();
+    }
+    function nextFromBag() {
+      if (!bag.length) bag = ["I","O","T","S","Z","J","L"];
+      const i = rand(bag.length);
+      return bag.splice(i, 1)[0];
+    }
+    function spawn() {
+      const type = nextType || nextFromBag();
+      nextType = nextFromBag();
+      const m = SHAPES[type].map(function (row) { return row.slice(); });
+      const w = m[0].length;
+      cur = { type: type, m: m, x: Math.floor((COLS - w) / 2), y: -topOffset(m) };
+      drawNext();
+      if (collides(cur.m, cur.x, cur.y)) { gameOver(); return; }
+    }
+    function move(dx) {
+      if (!cur || !running || paused || over) return;
+      if (!collides(cur.m, cur.x + dx, cur.y)) { cur.x += dx; draw(); }
+    }
+    function softDrop() {
+      if (!cur || !running || paused || over) return;
+      if (!collides(cur.m, cur.x, cur.y + 1)) { cur.y += 1; dropAcc = 0; score += 1; updateHud(); draw(); }
+      else { lockPiece(); draw(); }
+    }
+    function hardDrop() {
+      if (!cur || !running || paused || over) return;
+      let d = 0;
+      while (!collides(cur.m, cur.x, cur.y + 1)) { cur.y += 1; d++; }
+      score += d * 2; updateHud();
+      lockPiece(); draw();
+    }
+    function rotate() {
+      if (!cur || !running || paused || over) return;
+      const rm = rotateCW(cur.m);
+      const kicks = [0, -1, 1, -2, 2];
+      for (let k = 0; k < kicks.length; k++) {
+        if (!collides(rm, cur.x + kicks[k], cur.y)) { cur.m = rm; cur.x += kicks[k]; draw(); return; }
+      }
+    }
+    function gameOver() {
+      over = true; running = false;
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      const isBest = score > 0 && score >= best;
+      if (isBest) { best = score; saveBest(); showBest(); if (typeof confettiBurst === "function") confettiBurst(120); }
+      if (settings && settings.sound) tone(150, 0.3, "sawtooth", 0.12);
+      if (overEl) {
+        overEl.style.display = "flex";
+        if (overTxt) overTxt.textContent = "游戏结束！得分 " + score + (isBest ? "（新纪录！）" : "");
+      }
+      toast("俄罗斯方块结束，得分 " + score);
+    }
+    function loop(t) {
+      if (!running) return;
+      if (!lastT) lastT = t;
+      const dt = t - lastT; lastT = t;
+      if (!paused && !over && cur) {
+        dropAcc += dt;
+        const speed = Math.max(80, 800 - (level - 1) * 70);
+        if (dropAcc >= speed) {
+          dropAcc = 0;
+          if (!collides(cur.m, cur.x, cur.y + 1)) cur.y += 1;
+          else lockPiece();
+          draw();
+        }
+      }
+      raf = requestAnimationFrame(loop);
+    }
+    function start() {
+      emptyBoard();
+      score = 0; lines = 0; level = 1; over = false; paused = false;
+      bag = []; nextType = null; dropAcc = 0; lastT = 0;
+      started = true; running = true;
+      if (overEl) overEl.style.display = "none";
+      const pb = $("tetrisPause"); if (pb) pb.textContent = "暂停";
+      spawn();
+      updateHud();
+      draw();
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(loop);
+      bumpUsage("tetris");
+    }
+    function stop() {
+      running = false;
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+    }
+    function togglePause() {
+      if (!started || over) return;
+      paused = !paused;
+      const pb = $("tetrisPause"); if (pb) pb.textContent = paused ? "继续" : "暂停";
+      if (paused && overEl) {
+        overEl.style.display = "flex";
+        if (overTxt) overTxt.textContent = "已暂停，点「继续」接着玩";
+      } else if (overEl && !over) overEl.style.display = "none";
+    }
+    function onKey(e) {
+      if (!panel.classList.contains("active")) return;
+      const tag = (document.activeElement && document.activeElement.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      let handled = true;
+      switch (e.key) {
+        case "ArrowLeft": move(-1); break;
+        case "ArrowRight": move(1); break;
+        case "ArrowDown": softDrop(); break;
+        case "ArrowUp": case "x": case "X": rotate(); break;
+        case " ": hardDrop(); break;
+        case "p": case "P": togglePause(); break;
+        default: handled = false;
+      }
+      if (handled) { e.preventDefault(); if (typeof playClick === "function") playClick(); }
+    }
+    document.addEventListener("keydown", onKey);
+    let ts = null;
+    canvas.addEventListener("touchstart", function (e) { const t = e.touches[0]; ts = { x: t.clientX, y: t.clientY }; }, { passive: true });
+    canvas.addEventListener("touchend", function (e) {
+      if (!ts) return; const t = e.changedTouches[0];
+      const dx = t.clientX - ts.x, dy = t.clientY - ts.y; ts = null;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+      if (Math.abs(dx) > Math.abs(dy)) { dx > 0 ? move(1) : move(-1); }
+      else { dy > 0 ? softDrop() : rotate(); }
+    }, { passive: true });
+    $("tetrisNew").addEventListener("click", function () { if (typeof playClick === "function") playClick(); start(); });
+    $("tetrisNew2").addEventListener("click", function () { if (typeof playClick === "function") playClick(); start(); });
+    $("tetrisPause").addEventListener("click", function () { if (typeof playClick === "function") playClick(); togglePause(); });
+    $("tetrisLeft").addEventListener("click", function () { move(-1); });
+    $("tetrisRight").addEventListener("click", function () { move(1); });
+    $("tetrisDown").addEventListener("click", function () { softDrop(); });
+    $("tetrisRot").addEventListener("click", function () { rotate(); });
+    $("tetrisDrop").addEventListener("click", function () { hardDrop(); });
+    if (typeof MutationObserver !== "undefined") {
+      new MutationObserver(function () {
+        if (panel.classList.contains("active") && !running) start();
+      }).observe(panel, { attributes: true, attributeFilter: ["class"] });
+    }
+    loadBest(); showBest(); draw();
+    return stop;
   })();
 
 })();
