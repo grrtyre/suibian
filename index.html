@@ -736,6 +736,23 @@
     box-shadow:inset 0 2px 8px rgba(0,0,0,.25); transition:none;
   }
   .morse-lamp.on { background:radial-gradient(circle at 40% 35%, #fff, var(--accent) 70%); box-shadow:0 0 26px 6px rgba(var(--accent-3-rgb),.7); }
+  /* 贪吃蛇 */
+  .snake-hud { display:flex; gap:10px; margin:14px 0; flex-wrap:wrap; }
+  .snake-stat { flex:1; min-width:64px; background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:12px 6px; text-align:center; }
+  .snake-num { font-size:24px; font-weight:900; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .snake-lab { font-size:12px; color:var(--muted); margin-top:3px; }
+  .snake-wrap { position:relative; width:min(360px,86vw); margin:6px auto 14px; }
+  .snake-wrap canvas { width:100%; height:auto; background:var(--card-2); border:1px solid var(--line); border-radius:16px; display:block; touch-action:none; }
+  .snake-over { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(0,0,0,0.45); border-radius:16px; color:#fff; }
+  .snake-over-txt { font-size:18px; font-weight:800; padding:0 12px; text-align:center; }
+  /* 幸运选号 */
+  .lotto-list { display:flex; flex-direction:column; gap:10px; margin:14px 0; }
+  .lotto-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:10px 12px; }
+  .lotto-red { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#ff5a7a; color:#fff; font-weight:800; font-size:14px; }
+  .lotto-blue { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#3b82f6; color:#fff; font-weight:800; font-size:14px; }
+  .lotto-idx { color:var(--muted); font-size:13px; width:26px; }
+  .lotto-copy { margin-left:auto; }
+
 </style>
 </head>
 <body>
@@ -797,6 +814,8 @@
     <button data-tab="blackjack">21点</button>
     <button data-tab="whack">打地鼠</button>
     <button data-tab="morse">摩斯电码</button>
+    <button data-tab="snake">贪吃蛇</button>
+    <button data-tab="lotto">幸运选号</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1550,6 +1569,47 @@
     </div>
   </section>
 
+  <!-- 贪吃蛇 -->
+  <section class="panel" id="snake">
+    <div class="card">
+      <h2>🐍 贪吃蛇</h2>
+      <div class="hint">经典街机。方向键 / WASD 控制蛇，吃豆子变长、加分；撞墙或咬到自己就结束。手机上滑动屏幕也能玩。最高分记在本地。</div>
+      <div class="snake-hud">
+        <div class="snake-stat"><div class="snake-num" id="snakeScore">0</div><div class="snake-lab">得分</div></div>
+        <div class="snake-stat"><div class="snake-num" id="snakeBest">0</div><div class="snake-lab">最高分</div></div>
+        <div class="snake-stat"><div class="snake-num" id="snakeLen">3</div><div class="snake-lab">长度</div></div>
+      </div>
+      <div class="snake-wrap">
+        <canvas id="snakeCanvas" width="360" height="360"></canvas>
+        <div class="snake-over" id="snakeOver">
+          <div class="snake-over-txt">准备好了吗？</div>
+          <button class="btn" id="snakePlay">▶ 开始</button>
+        </div>
+      </div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="snakeStart">开始游戏</button>
+        <button class="btn ghost" id="snakePause">暂停</button>
+        <button class="btn ghost" id="snakeReset">清空最高分</button>
+      </div>
+      <div class="hint" style="font-size:12px">提示：撞墙或咬到自己即结束；速度随得分略微加快。</div>
+    </div>
+  </section>
+
+  <!-- 幸运选号 -->
+  <section class="panel" id="lotto">
+    <div class="card">
+      <h2>🎰 幸运选号</h2>
+      <div class="hint">手痒想来一组数字？双色球玩法：6 个红球（1–33 不重复）+ 1 个蓝球（1–16）。点「机选一注」随机生成，可连出多注、保存到本地历史、点结果复制。纯属娱乐，中奖随缘。</div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="lottoGen">🎲 机选一注</button>
+        <button class="btn ghost" id="lotto5">连出 5 注</button>
+        <button class="btn ghost" id="lottoClear">清空历史</button>
+      </div>
+      <div class="lotto-list" id="lottoList"></div>
+      <div class="hint" style="font-size:12px">蓝球为单独号码（1–16）；历史只存在本地浏览器。</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1710,6 +1770,8 @@
     if (b.dataset.tab !== "ambient") stopAmbient();
     if (b.dataset.tab !== "whack" && typeof whackStop === "function") whackStop();
     if (b.dataset.tab !== "morse" && typeof morseStop === "function") morseStop();
+    if (b.dataset.tab !== "snake" && typeof snakeStop === "function") snakeStop();
+    if (b.dataset.tab !== "lotto" && typeof lottoStop === "function") lottoStop();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -1726,6 +1788,8 @@
     if (id !== "ambient") stopAmbient();
     if (id !== "whack" && typeof whackStop === "function") whackStop();
     if (id !== "morse" && typeof morseStop === "function") morseStop();
+    if (id !== "snake" && typeof snakeStop === "function") snakeStop();
+    if (id !== "lotto" && typeof lottoStop === "function") lottoStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -1774,7 +1838,9 @@
     dream: "解梦 周公解梦 梦 梦见 梦境 玄学 预兆 寓意 象征 睡觉 做梦 解读 寓意",
     blackjack: "21点 黑杰克 扑克 扑克牌 赌博 赌 赌场 牌 纸牌 庄家 要牌 停牌 点数 游戏 算牌 二十一点 二十一点",
     whack: "打地鼠 地鼠 游戏 手速 小游戏 敲 锤 反应 得分 街机 whack mole 连击 解压 娱乐",
-    morse: "摩斯 摩斯电码 电码 莫尔斯 morse 密码 编码 解码 电报 滴滴哒哒 sos 翻译 转换"
+    morse: "摩斯 摩斯电码 电码 莫尔斯 morse 密码 编码 解码 电报 滴滴哒哒 sos 翻译 转换",
+    snake: "贪吃蛇 蛇 游戏 街机 经典 手速 控制 方向 休闲 玩 复古",
+    lotto: "幸运 选号 彩票 双色球 红球 蓝球 机选 号码 数字 抽奖 中奖 随机 娱乐"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -2573,7 +2639,15 @@
     "扑克牌翻过来才知道，但决定要不要翻的永远是你。",
     "赌品见人品，输了还愿意再来的人，值得深交。",
     "与其算牌算到头疼，不如先随便发一手再想。",
-    "筹码见底不是终点，按「重置」那一刻你就满血复活了。"
+    "筹码见底不是终点，按「重置」那一刻你就满血复活了。",
+    "贪吃蛇越吃越长，人生也是：敢往前，才有更多可能。",
+    "撞了墙就重开一局，蛇生没有过不去的坎。",
+    "方向比速度重要，走反了再快也到不了。",
+    "一组幸运数字救不了运气，但能救一下无聊的下午。",
+    "机选一注是随便，守号一生是执着，都挺好。",
+    "数字不挑人，中奖看命，开心看自己。",
+    "游戏结束只是这一局，下一局你还是主角。",
+    "手速是练出来的，运气是玩出来的。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -4607,6 +4681,170 @@
     playBtn.addEventListener("click", playMorse);
     stopBtn.addEventListener("click", stopPlay);
     return stopPlay;
+  })();
+
+  /* ---------- 贪吃蛇 ---------- */
+  const snakeStop = (function () {
+    const canvas = $("snakeCanvas");
+    if (!canvas) return function () {};
+    const ctx = canvas.getContext("2d");
+    const elScore = $("snakeScore"), elBest = $("snakeBest"), elLen = $("snakeLen");
+    const over = $("snakeOver");
+    const overTxt = over ? over.querySelector(".snake-over-txt") : null;
+    const startBtn = $("snakeStart"), pauseBtn = $("snakePause"), resetBtn = $("snakeReset"), playBtn = $("snakePlay");
+    const KEY = "suibian_snake";
+    const N = 18, CELL = canvas.width / N;
+    let best = parseInt(localStorage.getItem(KEY) || "0", 10) || 0;
+    let snake, dir, nextDir, food, score, playing, paused, timer, speed;
+
+    function showBest() { if (elBest) elBest.textContent = best; }
+    function roundRect(c, x, y, w, h, r) {
+      c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r);
+      c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+    }
+    function placeFood() {
+      const occ = new Set(snake.map(function (s) { return s.x + "," + s.y; }));
+      let p;
+      do { p = { x: rand(N), y: rand(N) }; } while (occ.has(p.x + "," + p.y) && snake.length < N * N);
+      food = p;
+    }
+    function updateHud() { if (elScore) elScore.textContent = score; if (elLen) elLen.textContent = snake.length; }
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(127,127,127,0.07)";
+      for (let i = 0; i <= N; i++) { ctx.fillRect(i * CELL, 0, 1, canvas.height); ctx.fillRect(0, i * CELL, canvas.width, 1); }
+      const accent = (getComputedStyle(document.documentElement).getPropertyValue("--accent") || "#ff6b9d").trim();
+      ctx.fillStyle = accent; roundRect(ctx, food.x * CELL + 3, food.y * CELL + 3, CELL - 6, CELL - 6, 5); ctx.fill();
+      for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = i === 0 ? "#7b5cff" : "#9d7bff";
+        roundRect(ctx, snake[i].x * CELL + 1, snake[i].y * CELL + 1, CELL - 2, CELL - 2, 5); ctx.fill();
+      }
+      const h = snake[0];
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(h.x * CELL + 5, h.y * CELL + 5, 3, 3); ctx.fillRect(h.x * CELL + CELL - 8, h.y * CELL + 5, 3, 3);
+    }
+    function reset() {
+      snake = [{ x: 9, y: 9 }, { x: 8, y: 9 }, { x: 7, y: 9 }];
+      dir = { x: 1, y: 0 }; nextDir = dir; score = 0; paused = false; speed = 130;
+      placeFood(); updateHud(); draw();
+    }
+    function step() {
+      if (!playing || paused) return;
+      dir = nextDir;
+      const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+      if (head.x < 0 || head.y < 0 || head.x >= N || head.y >= N) return gameOver();
+      if (snake.some(function (s) { return s.x === head.x && s.y === head.y; })) return gameOver();
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        score += 1; updateHud();
+        if (settings && settings.sound) tone(700, 0.05, "square", 0.1);
+        if (score % 5 === 0 && speed > 70) speed -= 6;
+        placeFood();
+      } else { snake.pop(); }
+      draw();
+    }
+    function loop() { step(); if (playing) timer = setTimeout(loop, speed); }
+    function startGame() {
+      if (playing) return;
+      reset(); playing = true; paused = false;
+      if (over) over.style.display = "none";
+      startBtn.textContent = "重新开始"; pauseBtn.textContent = "暂停"; pauseBtn.disabled = false;
+      loop();
+    }
+    function togglePause() {
+      if (!playing) return;
+      paused = !paused; pauseBtn.textContent = paused ? "继续" : "暂停";
+      if (!paused && playing) loop();
+    }
+    function gameOver() {
+      playing = false; clearTimeout(timer);
+      const isBest = score > best;
+      if (isBest) { best = score; localStorage.setItem(KEY, String(best)); showBest(); if (typeof confettiBurst === "function") confettiBurst(); }
+      if (settings && settings.sound) tone(180, 0.25, "sawtooth", 0.12);
+      if (over) { over.style.display = "flex"; if (overTxt) overTxt.textContent = "游戏结束！得分 " + score + (isBest ? "（新纪录！）" : ""); }
+      startBtn.textContent = "开始游戏";
+      toast("贪吃蛇结束，得分 " + score);
+    }
+    function onKey(e) {
+      if (!playing || paused) return;
+      const k = (e.key || "").toLowerCase();
+      let nd = null;
+      if (k === "arrowup" || k === "w") nd = { x: 0, y: -1 };
+      else if (k === "arrowdown" || k === "s") nd = { x: 0, y: 1 };
+      else if (k === "arrowleft" || k === "a") nd = { x: -1, y: 0 };
+      else if (k === "arrowright" || k === "d") nd = { x: 1, y: 0 };
+      if (nd) { e.preventDefault(); if (!(nd.x === -dir.x && nd.y === -dir.y)) nextDir = nd; }
+    }
+    let tsx = 0, tsy = 0;
+    function onTS(e) { const t = e.touches[0]; tsx = t.clientX; tsy = t.clientY; }
+    function onTE(e) {
+      if (!playing || paused) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - tsx, dy = t.clientY - tsy;
+      if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+      let nd;
+      if (Math.abs(dx) > Math.abs(dy)) nd = dx > 0 ? { x: 1, y: 0 } : { x: -1, y: 0 };
+      else nd = dy > 0 ? { x: 0, y: 1 } : { x: 0, y: -1 };
+      if (!(nd.x === -dir.x && nd.y === -dir.y)) nextDir = nd;
+    }
+    document.addEventListener("keydown", onKey);
+    canvas.addEventListener("touchstart", onTS, { passive: true });
+    canvas.addEventListener("touchend", onTE, { passive: true });
+    startBtn.addEventListener("click", startGame);
+    if (playBtn) playBtn.addEventListener("click", startGame);
+    pauseBtn.addEventListener("click", togglePause);
+    resetBtn.addEventListener("click", function () { best = 0; localStorage.removeItem(KEY); showBest(); reset(); toast("已清空最高分"); });
+    showBest(); reset();
+    return function () { playing = false; clearTimeout(timer); };
+  })();
+
+  /* ---------- 幸运选号 ---------- */
+  const lottoStop = (function () {
+    const list = $("lottoList");
+    if (!list) return function () {};
+    const genBtn = $("lottoGen"), fiveBtn = $("lotto5"), clearBtn = $("lottoClear");
+    const KEY = "suibian_lotto";
+    function load() { try { const r = JSON.parse(localStorage.getItem(KEY) || "[]"); return Array.isArray(r) ? r : []; } catch (e) { return []; } }
+    function save(arr) { try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch (e) {} }
+    function pickReds() {
+      const pool = []; for (let i = 1; i <= 33; i++) pool.push(i);
+      for (let i = pool.length - 1; i > 0; i--) { const j = rand(i + 1); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+      return pool.slice(0, 6).sort(function (a, b) { return a - b; });
+    }
+    function oneTicket() { return { red: pickReds(), blue: rand(16) + 1 }; }
+    function render() {
+      const arr = load();
+      if (!arr.length) { list.innerHTML = '<div class="hint" style="font-size:13px">还没有选号，点「机选一注」试试手气～</div>'; return; }
+      let html = "";
+      arr.forEach(function (tk, i) {
+        let reds = "";
+        tk.red.forEach(function (n) { reds += '<span class="lotto-red">' + (n < 10 ? "0" + n : n) + "</span>"; });
+        html += '<div class="lotto-row" data-i="' + i + '"><span class="lotto-idx">' + (i + 1) + '</span>' + reds +
+          '<span class="lotto-blue">' + (tk.blue < 10 ? "0" + tk.blue : tk.blue) + '</span>' +
+          '<button class="btn ghost lotto-copy" data-i="' + i + '">复制</button></div>';
+      });
+      list.innerHTML = html;
+    }
+    function addTickets(n) {
+      const arr = load();
+      for (let i = 0; i < n; i++) arr.unshift(oneTicket());
+      if (arr.length > 50) arr.length = 50;
+      save(arr); render();
+      if (settings && settings.sound) tone(660, 0.05, "triangle", 0.1);
+      if (n > 1) toast("已机选 " + n + " 注，存进本地历史");
+    }
+    list.addEventListener("click", function (e) {
+      const b = e.target.closest(".lotto-copy"); if (!b) return;
+      const arr = load(); const tk = arr[parseInt(b.dataset.i, 10)]; if (!tk) return;
+      const txt = "红球 " + tk.red.map(function (n) { return n < 10 ? "0" + n : "" + n; }).join(" ") + "  蓝球 " + (tk.blue < 10 ? "0" + tk.blue : tk.blue);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { toast("已复制：" + txt); }, function () { toast(txt); });
+      else toast(txt);
+    });
+    genBtn.addEventListener("click", function () { addTickets(1); });
+    fiveBtn.addEventListener("click", function () { addTickets(5); });
+    clearBtn.addEventListener("click", function () { save([]); render(); toast("已清空选号历史"); });
+    render();
+    return function () {};
   })();
 
 })();
