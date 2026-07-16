@@ -890,6 +890,23 @@
   .metro-dot.first.on { background:#ffd166; border-color:#ffd166; box-shadow:0 0 16px #ffd166; }
   #metroToggle.on { background:var(--accent); color:#10131a; border-color:var(--accent); }
 
+  /* 五子棋 */
+  .gmk-bar { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:4px 0 12px; }
+  .gmk-seg { display:inline-flex; background:var(--bg-soft); border:1px solid var(--line); border-radius:12px; padding:3px; gap:2px; }
+  .gmk-op { border:none; background:transparent; color:var(--muted); font:inherit; font-size:13px; font-weight:600; padding:6px 12px; border-radius:9px; cursor:pointer; transition:background .15s,color .15s; }
+  .gmk-op:hover { color:var(--text); }
+  .gmk-op.on { background:var(--accent); color:#10131a; }
+  .gmk-hud { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:2px 0 10px; }
+  .gmk-turn { font-weight:700; font-size:14px; }
+  .gmk-score { display:flex; gap:12px; font-size:13px; color:var(--muted); }
+  .gmk-score b { color:var(--text); }
+  .gmk-score .gmk-win b { color:#e0483f; }
+  .gmk-wrap { position:relative; width:min(450px,90vw); margin:4px auto 14px; }
+  .gmk-wrap canvas { width:100%; height:auto; border-radius:14px; display:block; touch-action:manipulation; box-shadow:0 8px 30px rgba(0,0,0,.25); cursor:pointer; }
+  .gmk-over { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); border-radius:14px; color:#fff; text-align:center; }
+  .gmk-over.show { display:flex; }
+  .gmk-over-txt { font-size:22px; font-weight:800; padding:0 16px; text-shadow:0 2px 10px rgba(0,0,0,.4); }
+
 </style>
 </head>
 <body>
@@ -962,6 +979,7 @@
       <button data-tab="sudoku">🎯 数独</button>
       <button data-tab="conv">📐 单位换算</button>
       <button data-tab="metro">🎵 节拍器</button>
+      <button data-tab="gomoku">⚫ 五子棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1978,6 +1996,43 @@
     </div>
   </section>
 
+  <!-- 五子棋 -->
+  <section class="panel" id="gomoku">
+    <div class="card">
+      <h2>⚫ 五子棋</h2>
+      <div class="hint">经典对弈，人机对战。你执黑先手，落子连成横、竖、斜任意方向五颗即胜。电脑会进攻也会封堵——挑个难度，来一盘？</div>
+      <div class="gmk-bar">
+        <div class="gmk-seg" id="gmkDiff" role="tablist">
+          <button class="gmk-op" data-lv="0">轻松</button>
+          <button class="gmk-op on" data-lv="1">普通</button>
+          <button class="gmk-op" data-lv="2">困难</button>
+        </div>
+        <div class="gmk-seg" id="gmkSide">
+          <button class="gmk-op on" data-first="you">我先手</button>
+          <button class="gmk-op" data-first="ai">电脑先手</button>
+        </div>
+      </div>
+      <div class="gmk-hud">
+        <div class="gmk-turn" id="gmkTurn">你执黑，点棋盘落子</div>
+        <div class="gmk-score">
+          <span class="gmk-win">胜 <b id="gmkW">0</b></span>
+          <span class="gmk-lose">负 <b id="gmkL">0</b></span>
+          <span class="gmk-draw">平 <b id="gmkD">0</b></span>
+        </div>
+      </div>
+      <div class="gmk-wrap">
+        <canvas id="gmkCanvas" width="450" height="450"></canvas>
+        <div class="gmk-over" id="gmkOver"><div class="gmk-over-txt" id="gmkOverTxt"></div></div>
+      </div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="gmkNew">🔄 新对局</button>
+        <button class="btn ghost" id="gmkUndo">↩ 悔一步</button>
+        <button class="btn ghost" id="gmkResetScore">清空战绩</button>
+      </div>
+      <div class="hint" style="font-size:12px">提示：先手略占优。困难模式电脑不手软，试试用双威胁逼它顾此失彼。战绩存在本地浏览器。</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2143,6 +2198,8 @@
     if (b.dataset.tab !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
     if (b.dataset.tab !== "tetris" && typeof tetrisStop === "function") tetrisStop();
     if (b.dataset.tab !== "metro" && typeof metroStop === "function") metroStop();
+    if (b.dataset.tab !== "gomoku" && typeof gomokuStop === "function") gomokuStop();
+    if (b.dataset.tab === "gomoku" && typeof window.gomokuShow === "function") window.gomokuShow();
     if (b.dataset.tab === "qfav") renderQfav();
     if (b.dataset.tab === "habit") renderHabit();
   });
@@ -2167,6 +2224,8 @@
     if (id !== "tetris" && typeof tetrisStop === "function") tetrisStop();
     if (id !== "mine" && typeof mineStop === "function") mineStop();
     if (id !== "metro" && typeof metroStop === "function") metroStop();
+    if (id !== "gomoku" && typeof gomokuStop === "function") gomokuStop();
+    if (id === "gomoku" && typeof window.gomokuShow === "function") window.gomokuShow();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2243,7 +2302,8 @@
     speak: "语音 朗读 播报 发音 tts 念 文字转语音 普通话 念出来",
     guess: "猜数字 数字 游戏 猜数 博弈 心思 大了 小了 100 心里想",
     conv: "单位 换算 转换 量纲 长度 重量 温度 面积 体积 速度 时间 数据 能量 压强 单位换算 计算器 convert 度量",
-    metro: "节拍器 节拍 速度 打拍子 练琴 节奏 鼓点 bpm 测速 节奏器 metronome 律动 卡拍 练耳"
+    metro: "节拍器 节拍 速度 打拍子 练琴 节奏 鼓点 bpm 测速 节奏器 metronome 律动 卡拍 练耳",
+    gomoku: "五子棋 棋 对弈 人机 下棋 gomoku 黑白子 连五 棋盘 博弈 策略 AI 电脑 对战 围棋 五连"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3885,7 +3945,9 @@
     { emoji: "💣", name: "拆弹专家", desc: "通关一局扫雷", test: (u) => (u.mine || 0) >= 1 },
     { emoji: "🎯", name: "数独高手", desc: "完成一局数独", test: (u) => (u.sudoku || 0) >= 1 },
     { emoji: "📐", name: "换算达人", desc: "用过 5 次单位换算器", test: (u) => (u.conv || 0) >= 5 },
-    { emoji: "🎵", name: "节奏大师", desc: "打过 10 次节拍器", test: (u) => (u.metro || 0) >= 10 }
+    { emoji: "🎵", name: "节奏大师", desc: "打过 10 次节拍器", test: (u) => (u.metro || 0) >= 10 },
+    { emoji: "⚫", name: "棋逢对手", desc: "五子棋战胜电脑 1 局", test: (u) => (u.gomokuWin || 0) >= 1 },
+    { emoji: "♟️", name: "五子棋王", desc: "五子棋累计胜 5 局", test: (u) => (u.gomokuWin || 0) >= 5 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4812,6 +4874,18 @@
     "测一测你的节奏，也许你比自己以为的更有规律。",
     "把大数换成小数看，把远方换算成脚下，事情就没那么吓人了。",
     "随便不是乱来，是先把眼前的单位对齐，再决定往哪走。"
+  );
+  QUOTES.push(
+    "下棋和过日子一样：别只盯着眼前这颗子，多看两步，路才宽。",
+    "先手有先手的锋芒，后手有后手的从容——位置不同，各有各的赢法。",
+    "五子连珠靠的不是运气，是一步步把选择连成线。",
+    "对手落子看似厉害，其实是在提醒你：你的破绽早就摆在那儿了。",
+    "赢一盘棋的秘诀，是同时布两条威胁，让它顾此失彼。",
+    "输了就复盘，别懊恼；每一步悔棋，都是下一次的伏笔。",
+    "困难模式的电脑不会手软，可正因如此，赢下来才格外痛快。",
+    "棋盘就那么大，机会却无限多——关键看你敢不敢先落那一子。",
+    "别怕被封堵，被拦住的方向，往往逼你找到更妙的那一手。",
+    "人生这盘棋没有悔棋键，所以每一步，都值得你认真一点。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -6625,6 +6699,240 @@
     }
   });
   metroSetBeats(4);
+
+  /* ---------- 五子棋（人机对战，含启发式 AI） ---------- */
+  const gomokuStop = (function () {
+    const canvas = $("gmkCanvas");
+    if (!canvas) return function () {};
+    const ctx = canvas.getContext("2d");
+    const N = 15, HUMAN = 1, AI = 2;
+    const SIZE = canvas.width, MARGIN = 20, GAP = (SIZE - MARGIN * 2) / (N - 1);
+    const KEY = "suibian_gomoku";
+    const DIRS = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    const PATTERNS = [
+      ["MMMMM", 1000000],
+      [".MMMM.", 50000],
+      ["MMMM.", 12000], [".MMMM", 12000],
+      ["MM.MM", 12000], ["MMM.M", 12000], ["M.MMM", 12000],
+      [".MMM.", 4000],
+      [".MM.M.", 3500], [".M.MM.", 3500],
+      ["XMMM.", 600], [".MMMX", 600],
+      ["XMM.M.", 600], [".M.MMX", 600], ["XM.MM.", 600], [".MM.MX", 600],
+      ["..MM..", 500], [".MM..", 400], ["..MM.", 400],
+      [".M.M.", 350], ["..M.M..", 350],
+      ["XMM..", 120], ["..MMX", 120],
+      [".M..", 60], ["..M.", 60]
+    ];
+    let board, turn, over, hist, winline, humanFirst, level, score, aiTimer, thinking, pendingAI;
+
+    function inb(r, c) { return r >= 0 && r < N && c >= 0 && c < N; }
+    function loadScore() { try { return JSON.parse(localStorage.getItem(KEY)) || { w: 0, l: 0, d: 0 }; } catch (e) { return { w: 0, l: 0, d: 0 }; } }
+    function saveScore() { try { localStorage.setItem(KEY, JSON.stringify(score)); } catch (e) {} }
+    function showScore() { $("gmkW").textContent = score.w; $("gmkL").textContent = score.l; $("gmkD").textContent = score.d; }
+
+    function winStr(bd, r, c, dr, dc, me, op) {
+      let s = "";
+      for (let k = -4; k <= 4; k++) {
+        if (k === 0) { s += "M"; continue; }
+        const rr = r + dr * k, cc = c + dc * k;
+        if (!inb(rr, cc)) { s += "X"; continue; }
+        const v = bd[rr][cc]; s += v === me ? "M" : v === op ? "X" : ".";
+      }
+      return s;
+    }
+    function scoreWindow(s) { for (let i = 0; i < PATTERNS.length; i++) if (s.indexOf(PATTERNS[i][0]) !== -1) return PATTERNS[i][1]; return 0; }
+    function evalPoint(bd, r, c, me, op) { let t = 0; for (let i = 0; i < DIRS.length; i++) t += scoreWindow(winStr(bd, r, c, DIRS[i][0], DIRS[i][1], me, op)); return t; }
+    function fiveLine(bd, r, c, me) {
+      for (let i = 0; i < DIRS.length; i++) {
+        const dr = DIRS[i][0], dc = DIRS[i][1]; const cells = [[r, c]];
+        for (let s = 1; s < 5; s++) { const rr = r + dr * s, cc = c + dc * s; if (inb(rr, cc) && bd[rr][cc] === me) cells.push([rr, cc]); else break; }
+        for (let s = 1; s < 5; s++) { const rr = r - dr * s, cc = c - dc * s; if (inb(rr, cc) && bd[rr][cc] === me) cells.unshift([rr, cc]); else break; }
+        if (cells.length >= 5) return cells.slice(0, 5);
+      }
+      return null;
+    }
+    function candidates(bd) {
+      const set = new Set(), out = []; let any = false;
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (bd[r][c] !== 0) {
+        any = true;
+        for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) {
+          const rr = r + dr, cc = c + dc;
+          if (inb(rr, cc) && bd[rr][cc] === 0) { const k = rr * N + cc; if (!set.has(k)) { set.add(k); out.push([rr, cc]); } }
+        }
+      }
+      if (!any) return [[7, 7]];
+      return out;
+    }
+    function aiPick(bd, lv) {
+      const cands = candidates(bd);
+      for (let i = 0; i < cands.length; i++) if (fiveLine(applyTmp(bd, cands[i], AI), cands[i][0], cands[i][1], AI)) return cands[i];
+      const blocks = [];
+      for (let i = 0; i < cands.length; i++) if (fiveLine(applyTmp(bd, cands[i], HUMAN), cands[i][0], cands[i][1], HUMAN)) blocks.push(cands[i]);
+      if (blocks.length) return blocks[0];
+      const scored = [];
+      let best = cands[0], bestV = -1;
+      for (let i = 0; i < cands.length; i++) {
+        const r = cands[i][0], c = cands[i][1];
+        const a = evalPoint(bd, r, c, AI, HUMAN), d = evalPoint(bd, r, c, HUMAN, AI);
+        const v = a + d * 0.9;
+        scored.push([v, r, c]);
+        if (v > bestV) { bestV = v; best = cands[i]; }
+      }
+      scored.sort((x, y) => y[0] - x[0]);
+      if (lv === 0) {
+        if (Math.random() < 0.3 && scored.length > 6) { const idx = Math.min(scored.length - 1, 6 + ((Math.random() * 4) | 0)); return [scored[idx][1], scored[idx][2]]; }
+        const pool = scored.slice(0, Math.min(6, scored.length)); const p = pool[(Math.random() * pool.length) | 0]; return [p[1], p[2]];
+      }
+      if (lv === 1) {
+        const top = scored.filter((s) => s[0] >= scored[0][0] * 0.85).slice(0, 4); const p = top[(Math.random() * top.length) | 0]; return [p[1], p[2]];
+      }
+      return best;
+    }
+    function applyTmp(bd, mv, who) { bd[mv[0]][mv[1]] = who; const win = fiveLine(bd, mv[0], mv[1], who); bd[mv[0]][mv[1]] = 0; return win ? bd2(bd, mv, who) : bd; }
+    function bd2(bd, mv, who) { const nb = bd.map((row) => row.slice()); nb[mv[0]][mv[1]] = who; return nb; }
+
+    function humanStone() { return humanFirst ? "black" : "white"; }
+    function draw() {
+      const light = document.body.classList.contains("theme-light") || getComputedStyle(document.body).getPropertyValue("color-scheme").indexOf("light") !== -1;
+      // wooden board regardless of theme
+      const g = ctx.createLinearGradient(0, 0, SIZE, SIZE);
+      g.addColorStop(0, "#eecb8f"); g.addColorStop(1, "#d8ad68");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, SIZE, SIZE);
+      ctx.strokeStyle = "rgba(90,62,28,.85)"; ctx.lineWidth = 1;
+      for (let i = 0; i < N; i++) {
+        const p = MARGIN + i * GAP;
+        ctx.beginPath(); ctx.moveTo(MARGIN, p); ctx.lineTo(SIZE - MARGIN, p); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(p, MARGIN); ctx.lineTo(p, SIZE - MARGIN); ctx.stroke();
+      }
+      // star points
+      ctx.fillStyle = "rgba(70,48,20,.9)";
+      [[3, 3], [3, 11], [11, 3], [11, 11], [7, 7]].forEach(([r, c]) => {
+        ctx.beginPath(); ctx.arc(MARGIN + c * GAP, MARGIN + r * GAP, 3.5, 0, 7); ctx.fill();
+      });
+      // stones
+      const rad = GAP * 0.42;
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+        if (!board[r][c]) continue;
+        const x = MARGIN + c * GAP, y = MARGIN + r * GAP;
+        const isBlack = (board[r][c] === HUMAN) ? humanFirst : !humanFirst;
+        const rg = ctx.createRadialGradient(x - rad * 0.3, y - rad * 0.3, rad * 0.1, x, y, rad);
+        if (isBlack) { rg.addColorStop(0, "#5a5a5a"); rg.addColorStop(1, "#0b0b0b"); }
+        else { rg.addColorStop(0, "#ffffff"); rg.addColorStop(1, "#cfd2d6"); }
+        ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.lineWidth = 1; ctx.stroke();
+      }
+      // last move marker
+      if (hist.length) {
+        const last = hist[hist.length - 1];
+        const x = MARGIN + last.c * GAP, y = MARGIN + last.r * GAP;
+        ctx.fillStyle = "#e0483f"; ctx.beginPath(); ctx.arc(x, y, rad * 0.28, 0, 7); ctx.fill();
+      }
+      // winning line highlight
+      if (winline) {
+        ctx.strokeStyle = "#e0483f"; ctx.lineWidth = 3;
+        winline.forEach(([r, c]) => {
+          const x = MARGIN + c * GAP, y = MARGIN + r * GAP;
+          ctx.beginPath(); ctx.arc(x, y, rad + 2, 0, 7); ctx.stroke();
+        });
+      }
+    }
+    function setTurnText() {
+      const el = $("gmkTurn");
+      if (over) return;
+      if (turn === HUMAN) el.textContent = "轮到你（" + (humanStone() === "black" ? "黑" : "白") + "子），点棋盘落子";
+      else el.textContent = "电脑思考中…";
+    }
+    function showOver(txt) { const o = $("gmkOver"); $("gmkOverTxt").textContent = txt; o.classList.add("show"); }
+    function hideOver() { $("gmkOver").classList.remove("show"); }
+
+    function finish(winner) {
+      over = true;
+      if (winner === HUMAN) { score.w++; showOver("🎉 你赢了！"); $("gmkTurn").textContent = "🎉 恭喜，你战胜了电脑！"; try { confettiBurst(90); } catch (e) {} try { tone(660, 0.12, "sine", 0.14); } catch (e) {} bumpUsage("gomokuWin"); }
+      else if (winner === AI) { score.l++; showOver("💻 电脑赢了"); $("gmkTurn").textContent = "电脑连成五子，再来一局？"; }
+      else { score.d++; showOver("和棋"); $("gmkTurn").textContent = "棋盘满了，平局。"; }
+      bumpUsage("gomoku");
+      saveScore(); showScore();
+      try { if (typeof renderAchv === "function") renderAchv(); } catch (e) {}
+    }
+    function place(r, c, who) {
+      board[r][c] = who; hist.push({ r: r, c: c, who: who });
+      const win = fiveLine(board, r, c, who);
+      draw();
+      if (win) { winline = win; draw(); finish(who); return true; }
+      if (hist.length >= N * N) { finish(0); return true; }
+      return false;
+    }
+    function scheduleAI() {
+      thinking = true; setTurnText();
+      aiTimer = setTimeout(function () {
+        aiTimer = null; thinking = false;
+        if (over) return;
+        const mv = aiPick(board, level);
+        if (!mv) return;
+        if (!place(mv[0], mv[1], AI)) { turn = HUMAN; setTurnText(); }
+      }, 350 + ((Math.random() * 250) | 0));
+    }
+    function onClick(ev) {
+      if (over || turn !== HUMAN || thinking) return;
+      const rect = canvas.getBoundingClientRect();
+      const scale = SIZE / rect.width;
+      const px = (ev.clientX - rect.left) * scale, py = (ev.clientY - rect.top) * scale;
+      const c = Math.round((px - MARGIN) / GAP), r = Math.round((py - MARGIN) / GAP);
+      if (!inb(r, c) || board[r][c]) return;
+      try { playClick(); } catch (e) {}
+      if (!place(r, c, HUMAN)) { turn = AI; scheduleAI(); }
+    }
+    function newGame() {
+      if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+      board = Array.from({ length: N }, () => Array(N).fill(0));
+      hist = []; winline = null; over = false; thinking = false; pendingAI = false;
+      hideOver();
+      turn = humanFirst ? HUMAN : AI;
+      draw(); setTurnText();
+      if (turn === AI) scheduleAI();
+    }
+    function undo() {
+      if (over) { // allow starting fresh review from a finished board
+        // undo last full round
+      }
+      if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; thinking = false; }
+      // remove back to human's turn: pop trailing AI move then human move
+      let removed = 0;
+      while (hist.length && removed < 2) {
+        const m = hist.pop(); board[m.r][m.c] = 0; removed++;
+        if (m.who === HUMAN) break;
+      }
+      if (removed === 0) return;
+      over = false; winline = null; hideOver(); turn = HUMAN; draw(); setTurnText();
+    }
+
+    // wire controls
+    score = loadScore(); showScore();
+    humanFirst = true; level = 1;
+    board = Array.from({ length: N }, () => Array(N).fill(0)); hist = []; winline = null; over = false; thinking = false;
+    turn = HUMAN;
+    canvas.addEventListener("click", onClick);
+    $("gmkNew").addEventListener("click", function () { try { playClick(); } catch (e) {} newGame(); });
+    $("gmkUndo").addEventListener("click", function () { try { playClick(); } catch (e) {} undo(); });
+    $("gmkResetScore").addEventListener("click", function () { score = { w: 0, l: 0, d: 0 }; saveScore(); showScore(); toast("战绩已清空"); });
+    $("gmkDiff").addEventListener("click", function (e) {
+      const b = e.target.closest(".gmk-op"); if (!b) return;
+      [...this.children].forEach((x) => x.classList.remove("on")); b.classList.add("on");
+      level = +b.dataset.lv; try { playClick(); } catch (e2) {} newGame();
+    });
+    $("gmkSide").addEventListener("click", function (e) {
+      const b = e.target.closest(".gmk-op"); if (!b) return;
+      [...this.children].forEach((x) => x.classList.remove("on")); b.classList.add("on");
+      humanFirst = b.dataset.first === "you"; try { playClick(); } catch (e2) {} newGame();
+    });
+    draw();
+
+    // returned stop fn: pause pending AI when leaving the tab; resume handled by gomokuShow
+    window.gomokuShow = function () { draw(); setTurnText(); if (pendingAI && !over) { pendingAI = false; scheduleAI(); } };
+    return function () {
+      if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; if (!over && turn === AI) pendingAI = true; thinking = false; }
+    };
+  })();
 
 </script>
 </body>
