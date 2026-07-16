@@ -768,6 +768,28 @@
   body.fs-large .mbti-desc { font-size: 17px; }
   .mbti-quip { margin-top: 14px; padding: 12px 14px; background: var(--card-2); border-left: 3px solid var(--accent-3); border-radius: 10px; color: var(--muted); font-style: italic; line-height: 1.6; }
 
+  /* 2048 */
+  .gm2048-stage { width:min(380px,88vw); margin:8px auto 4px; }
+  .gm2048-bar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+  .gm2048-title { font-weight:900; font-size:22px; letter-spacing:1px; }
+  .gm2048-scores { display:flex; gap:8px; }
+  .gm2048-score { background:var(--card-2); border:1px solid var(--line); border-radius:12px; padding:6px 14px; text-align:center; min-width:66px; }
+  .gm2048-score .n { font-size:20px; font-weight:900; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .gm2048-score .l { font-size:11px; color:var(--muted); }
+  .gm2048-board { position:relative; width:100%; aspect-ratio:1/1; background:var(--card-3); border-radius:16px; user-select:none; touch-action:none; overflow:hidden; }
+  .gm2048-grid { position:absolute; inset:0; display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr); }
+  .gm2048-grid > div { background:rgba(255,255,255,.07); border-radius:9px; }
+  .gm2048-tiles { position:absolute; }
+  .gm2048-tile { position:absolute; top:0; left:0; display:flex; align-items:center; justify-content:center; border-radius:9px; font-weight:900; line-height:1; transition:left .12s ease, top .12s ease, transform .14s ease; will-change:left,top,transform; }
+  .gm2048-tile.new { animation:gm2048-pop .18s ease; }
+  .gm2048-tile.merged { animation:gm2048-merge .2s ease; }
+  @keyframes gm2048-pop { 0%{ transform:scale(0); } 100%{ transform:scale(1); } }
+  @keyframes gm2048-merge { 0%{ transform:scale(1); } 55%{ transform:scale(1.16); } 100%{ transform:scale(1); } }
+  .gm2048-over { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:rgba(0,0,0,.52); color:#fff; text-align:center; padding:18px; border-radius:16px; }
+  .gm2048-over.show { display:flex; }
+  .gm2048-over-txt { font-size:19px; font-weight:800; line-height:1.5; }
+  .gm2048-actions { display:flex; gap:10px; justify-content:center; margin-top:8px; }
+
 </style>
 </head>
 <body>
@@ -832,6 +854,7 @@
     <button data-tab="snake">贪吃蛇</button>
     <button data-tab="lotto">幸运选号</button>
     <button data-tab="mbti">MBTI 速测</button>
+    <button data-tab="gm2048">2048</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1652,6 +1675,39 @@
     </div>
   </section>
 
+  <!-- 2048 -->
+  <section class="panel" id="gm2048">
+    <div class="card">
+      <h2>🔢 2048</h2>
+      <div class="hint">方向键 / WASD 移动，手机直接滑动。把相同数字合成更大的方块，目标——2048！</div>
+      <div class="gm2048-stage">
+        <div class="gm2048-bar">
+          <div class="gm2048-title">2048</div>
+          <div class="gm2048-scores">
+            <div class="gm2048-score"><div class="n" id="gm2048Score">0</div><div class="l">得分</div></div>
+            <div class="gm2048-score"><div class="n" id="gm2048Best">0</div><div class="l">最高</div></div>
+          </div>
+        </div>
+        <div class="gm2048-board" id="gm2048Board">
+          <div class="gm2048-grid" id="gm2048Grid"></div>
+          <div class="gm2048-tiles" id="gm2048Tiles"></div>
+          <div class="gm2048-over" id="gm2048Over">
+            <div class="gm2048-over-txt" id="gm2048OverTxt"></div>
+            <div class="row" style="justify-content:center;gap:10px">
+              <button class="btn" id="gm2048Continue" style="display:none">继续挑战</button>
+              <button class="btn" id="gm2048Restart">再来一局</button>
+              <button class="btn ghost" id="gm2048Undo2" style="display:none">撤销一步</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gm2048-actions">
+        <button class="btn" id="gm2048New">新游戏</button>
+        <button class="btn ghost" id="gm2048Undo">撤销</button>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1814,6 +1870,7 @@
     if (b.dataset.tab !== "morse" && typeof morseStop === "function") morseStop();
     if (b.dataset.tab !== "snake" && typeof snakeStop === "function") snakeStop();
     if (b.dataset.tab !== "lotto" && typeof lottoStop === "function") lottoStop();
+    if (b.dataset.tab !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -1832,6 +1889,7 @@
     if (id !== "morse" && typeof morseStop === "function") morseStop();
     if (id !== "snake" && typeof snakeStop === "function") snakeStop();
     if (id !== "lotto" && typeof lottoStop === "function") lottoStop();
+    if (id !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
     if (id === "mbti") mbtiReset();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
@@ -1884,7 +1942,8 @@
     morse: "摩斯 摩斯电码 电码 莫尔斯 morse 密码 编码 解码 电报 滴滴哒哒 sos 翻译 转换",
     snake: "贪吃蛇 蛇 游戏 街机 经典 手速 控制 方向 休闲 玩 复古",
     lotto: "幸运 选号 彩票 双色球 红球 蓝球 机选 号码 数字 抽奖 中奖 随机 娱乐",
-    mbti: "mbti 性格 速测 测试 人格 16型 你是谁 测评 心理 类型 内向 外向 直觉 实感 思考 情感 判断 知觉 自我 认识自己 测试"
+    mbti: "mbti 性格 速测 测试 人格 16型 你是谁 测评 心理 类型 内向 外向 直觉 实感 思考 情感 判断 知觉 自我 认识自己 测试",
+    gm2048: "2048 数字 合并 方块 游戏 益智 滑块 方块合并 经典 解压 休闲 手速 合成 数字游戏 贪吃"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3518,7 +3577,9 @@
     { emoji: "🃏", name: "翻牌高手", desc: "通关记忆翻牌 5 次", test: (u) => (u.memory || 0) >= 5 },
     { emoji: "🂡", name: "21点玩家", desc: "玩过 21点 5 次", test: (u) => (u.blackjack || 0) >= 5 },
     { emoji: "🔨", name: "打地鼠高手", desc: "玩过打地鼠 5 次", test: (u) => (u.whack || 0) >= 5 },
-    { emoji: "🧩", name: "认识自己", desc: "完成一次 MBTI 速测", test: (u) => (u.mbti || 0) >= 1 }
+    { emoji: "🧩", name: "认识自己", desc: "完成一次 MBTI 速测", test: (u) => (u.mbti || 0) >= 1 },
+    { emoji: "🔢", name: "2048 玩家", desc: "玩过一局 2048", test: (u) => (u.gm2048 || 0) >= 1 },
+    { emoji: "🏅", name: "合体大师", desc: "在 2048 里拼出 2048 方块", test: (u) => (u.gm2048max || 0) >= 2048 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4367,7 +4428,20 @@
       ["鱼", "鱼谐音「余」，古解主富足与好运。梦见鱼多是吉兆，尤其是活蹦乱跳的鱼，年年有余。", "宜：把握机遇 忌：坐等鱼来"],
       ["蜘蛛", "蜘蛛象征耐心与编织。梦见它，或提醒你正在铺的「网」需要时间，别急着收，火候未到。", "宜：静待时机 忌：急功近利"],
       ["镜子", "镜子映照自我。梦见照镜，常是你在审视自己的时候，看清了就好，别对镜中人太苛刻。", "宜：接纳自己 忌：自我批判"]
-    ];
+  ];
+  // —— 跟随 2048 / 数字 / 合成主题的新语录 ——
+  QUOTES.push(
+    "两个 2 合在一起就成了 4，很多「随便」凑一凑，也能凑出点名堂。",
+    "人生像 2048，不是每步都要 2048，先把眼前的 2 合成 4 再说。",
+    "别小看最小的那个数，所有的 2048 都从 2 开始。",
+    "合并不是为了变大，是为了腾出下一张能落子的空。",
+    "有时候退一步不是认输，是给下一步腾出位置。",
+    "你以为在消消乐，其实是在给未来腾地方。",
+    "数字会翻倍，运气也会——前提是你先动起来。",
+    "卡住了？那就换个方向滑，路从来不止一条。",
+    "最好的那步，往往是你犹豫了三秒还是滑出去的那一步。",
+    "游戏会结束，但再来一局的按钮永远都在，别怕重开。"
+  );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
       "梦是白天没说完的话。这个意象或许在提醒你，有件事该好好正视一下了。",
@@ -4990,6 +5064,196 @@
       playClick();
     });
   }
+
+  /* ---------- 2048 ---------- */
+  const gm2048Stop = (function () {
+    const KEY = "suibian_2048";
+    const board = $("gm2048Board"), gridEl = $("gm2048Grid"),
+          tilesEl = $("gm2048Tiles"), overEl = $("gm2048Over"), overTxt = $("gm2048OverTxt"),
+          scoreEl = $("gm2048Score"), bestEl = $("gm2048Best");
+    if (!board) return function () {};
+    const TILE_COLORS = { 2:"#eee4da",4:"#ede0c8",8:"#f2b179",16:"#f59563",32:"#f67c5f",64:"#f65e3b",128:"#edcf72",256:"#edcc61",512:"#edc850",1024:"#edc53f",2048:"#edc22e",4096:"#3c3a32",8192:"#2f2c26" };
+    let grid, tiles, nextId = 1, score = 0, best = 0, maxTile = 0, started = false, over = false, wonNotified = false, history = null;
+    let CELL = 72, GAP = 10;
+    const VEC = { up:{r:-1,c:0}, down:{r:1,c:0}, left:{r:0,c:-1}, right:{r:0,c:1} };
+
+    for (let i = 0; i < 16; i++) { const d = document.createElement("div"); gridEl.appendChild(d); }
+
+    function loadBest() { try { best = parseInt(localStorage.getItem(KEY) || "0", 10) || 0; } catch (e) { best = 0; } }
+    function saveBest() { try { localStorage.setItem(KEY, String(best)); } catch (e) {} }
+    function computeLayout() {
+      const W = board.clientWidth; if (W <= 0) return;
+      GAP = Math.max(8, Math.round(W * 0.028));
+      CELL = (W - 5 * GAP) / 4;
+      gridEl.style.gap = GAP + "px"; gridEl.style.padding = GAP + "px";
+      tilesEl.style.inset = GAP + "px";
+    }
+    function updateScore() {
+      scoreEl.textContent = score; bestEl.textContent = best;
+      if (score > best) { best = score; saveBest(); }
+    }
+    function positionTile(id) {
+      const t = tiles.get(id); if (!t) return;
+      t.el.style.width = CELL + "px"; t.el.style.height = CELL + "px";
+      t.el.style.left = (t.c * (CELL + GAP)) + "px";
+      t.el.style.top = (t.r * (CELL + GAP)) + "px";
+      t.el.style.fontSize = Math.max(18, Math.round(CELL * 0.42)) + "px";
+    }
+    function paintTile(id) {
+      const t = tiles.get(id); if (!t) return;
+      t.el.textContent = t.val;
+      t.el.style.background = TILE_COLORS[t.val] || "#3c3a32";
+      t.el.style.color = t.val >= 8 ? "#f9f6f2" : "#6b6357";
+    }
+    function emptyCells() { const a = []; for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (!grid[r][c]) a.push({ r, c }); return a; }
+    function spawn() {
+      const e = emptyCells(); if (!e.length) return;
+      const { r, c } = e[rand(e.length)];
+      const id = nextId++; const val = Math.random() < 0.9 ? 2 : 4;
+      const el = document.createElement("div"); el.className = "gm2048-tile new";
+      tiles.set(id, { el, val, r, c, merged: false });
+      grid[r][c] = id; tilesEl.appendChild(el);
+      computeLayout(); positionTile(id); paintTile(id);
+      setTimeout(function () { el.classList.remove("new"); }, 200);
+    }
+    function removeTile(id) {
+      const t = tiles.get(id); if (!t) return;
+      if (t.el && t.el.parentNode) t.el.parentNode.removeChild(t.el);
+      tiles.delete(id);
+    }
+    function isGameOver() {
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+        const id = grid[r][c]; if (!id) return false;
+        const v = tiles.get(id).val;
+        if (c < 3) { const r2 = grid[r][c + 1]; if (r2 && tiles.get(r2).val === v) return false; }
+        if (r < 3) { const r2 = grid[r + 1][c]; if (r2 && tiles.get(r2).val === v) return false; }
+      }
+      return true;
+    }
+    function newGame() {
+      computeLayout();
+      tiles.forEach(function (t) { if (t.el && t.el.parentNode) t.el.parentNode.removeChild(t.el); });
+      tiles = new Map(); grid = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+      nextId = 1; score = 0; maxTile = 0; over = false; wonNotified = false; history = null; started = true;
+      overEl.classList.remove("show");
+      $("gm2048Continue").style.display = "none"; $("gm2048Undo2").style.display = "none";
+      updateScore();
+      spawn(); spawn();
+    }
+    function snapshot() {
+      return { vals: grid.map(function (row) { return row.map(function (id) { return id ? tiles.get(id).val : 0; }); }), score: score, maxTile: maxTile };
+    }
+    function restore(s) {
+      tiles.forEach(function (t) { if (t.el && t.el.parentNode) t.el.parentNode.removeChild(t.el); });
+      tiles = new Map(); grid = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+      s.vals.forEach(function (row, r) { row.forEach(function (v, c) { if (v) { const id = nextId++; const el = document.createElement("div"); el.className = "gm2048-tile"; tiles.set(id, { el, val: v, r: r, c: c, merged: false }); grid[r][c] = id; tilesEl.appendChild(el); positionTile(id); paintTile(id); } }); });
+      score = s.score; maxTile = s.maxTile; over = false; overEl.classList.remove("show");
+      $("gm2048Continue").style.display = "none"; $("gm2048Undo2").style.display = "none";
+      updateScore();
+    }
+    function showOver(txt, canContinue) {
+      overTxt.innerHTML = escapeHtml(txt).replace(/\n/g, "<br>");
+      overEl.classList.add("show");
+      $("gm2048Continue").style.display = canContinue ? "" : "none";
+      $("gm2048Undo2").style.display = over ? "" : "none";
+    }
+    function move(dir) {
+      if (over) return;
+      if (!started) { newGame(); return; }
+      const v = VEC[dir]; if (!v) return;
+      const snap = snapshot();
+      const xs = [0,1,2,3], ys = [0,1,2,3];
+      if (v.r === 1) ys.reverse();
+      if (v.c === 1) xs.reverse();
+      let moved = false;
+      tiles.forEach(function (t) { t.merged = false; });
+      for (let yi = 0; yi < 4; yi++) for (let xi = 0; xi < 4; xi++) {
+        const y = ys[yi], x = xs[xi];
+        const id = grid[y][x]; if (!id) continue;
+        let r = y, c = x;
+        while (true) {
+          const nr = r + v.r, nc = c + v.c;
+          if (nr < 0 || nr >= 4 || nc < 0 || nc >= 4) break;
+          const target = grid[nr][nc];
+          if (!target) { r = nr; c = nc; }
+          else {
+            const tt = tiles.get(target), mt = tiles.get(id);
+            if (tt.val === mt.val && !tt.merged) {
+              grid[y][x] = 0; grid[nr][nc] = id;
+              mt.r = nr; mt.c = nc; mt.val *= 2; mt.merged = true;
+              positionTile(id); paintTile(id);
+              mt.el.classList.remove("merged"); void mt.el.offsetWidth; mt.el.classList.add("merged");
+              removeTile(target);
+              score += mt.val; if (mt.val > maxTile) maxTile = mt.val;
+              moved = true;
+            }
+            break;
+          }
+        }
+        if ((r !== y || c !== x)) {
+          grid[y][x] = 0; grid[r][c] = id;
+          const mt = tiles.get(id); mt.r = r; mt.c = c; positionTile(id);
+          moved = true;
+        }
+      }
+      if (moved) {
+        history = snap;
+        spawn();
+        updateScore();
+        bumpUsage("gm2048");
+        try { usage.gm2048max = Math.max(usage.gm2048max || 0, maxTile); localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e2) {}
+        if (maxTile >= 2048 && !wonNotified) {
+          wonNotified = true;
+          if (settings && settings.sound) playDing();
+          confettiBurst(120);
+          showOver("🎉 你合成了 2048！\n是见好就收，还是冲更大的数？", true);
+        } else if (isGameOver()) {
+          over = true;
+          showOver("游戏结束\n没有可以移动的方块了，再来一局？", false);
+        }
+      }
+    }
+    function undo() {
+      if (!history) { toast("没有可撤销的步骤"); return; }
+      const s = history; history = null; restore(s);
+      toast("已撤销一步");
+    }
+    document.addEventListener("keydown", function (e) {
+      if (!$("gm2048") || !$("gm2048").classList.contains("active")) return;
+      const tag = (document.activeElement && document.activeElement.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      const map = { ArrowUp:"up", ArrowDown:"down", ArrowLeft:"left", ArrowRight:"right", w:"up", s:"down", a:"left", d:"right", W:"up", S:"down", A:"left", D:"right" };
+      const dir = map[e.key];
+      if (dir) { e.preventDefault(); if (typeof playClick === "function") playClick(); move(dir); }
+    });
+    let ts = null;
+    board.addEventListener("touchstart", function (e) { const t = e.touches[0]; ts = { x: t.clientX, y: t.clientY }; }, { passive: true });
+    board.addEventListener("touchend", function (e) {
+      if (!ts) return; const t = e.changedTouches[0];
+      const dx = t.clientX - ts.x, dy = t.clientY - ts.y; ts = null;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+      if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? "right" : "left");
+      else move(dy > 0 ? "down" : "up");
+    }, { passive: true });
+    window.addEventListener("resize", function () {
+      if ($("gm2048") && $("gm2048").classList.contains("active")) { computeLayout(); tiles.forEach(function (t, id) { positionTile(id); }); }
+    });
+    // 切到本标签页时自动开新局
+    const gmPanel = $("gm2048");
+    if (gmPanel && typeof MutationObserver !== "undefined") {
+      new MutationObserver(function () {
+        if (gmPanel.classList.contains("active") && !started) newGame();
+      }).observe(gmPanel, { attributes: true, attributeFilter: ["class"] });
+    }
+    $("gm2048New").addEventListener("click", function () { if (typeof playClick === "function") playClick(); newGame(); });
+    $("gm2048Undo").addEventListener("click", function () { if (typeof playClick === "function") playClick(); undo(); });
+    $("gm2048Restart").addEventListener("click", function () { if (typeof playClick === "function") playClick(); newGame(); });
+    $("gm2048Continue").addEventListener("click", function () { if (typeof playClick === "function") playClick(); overEl.classList.remove("show"); });
+    $("gm2048Undo2").addEventListener("click", function () { if (typeof playClick === "function") playClick(); if (history) { const s = history; history = null; restore(s); } });
+
+    loadBest(); updateScore();
+    return function () {};
+  })();
 
 })();
 </script>
