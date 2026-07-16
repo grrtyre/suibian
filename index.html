@@ -753,6 +753,21 @@
   .lotto-idx { color:var(--muted); font-size:13px; width:26px; }
   .lotto-copy { margin-left:auto; }
 
+  /* MBTI 性格速测 */
+  .mbti-prog { height: 8px; background: var(--card-2); border-radius: 999px; overflow: hidden; margin: 6px 0 16px; }
+  .mbti-prog-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-3)); transition: width .25s ease; border-radius: 999px; }
+  .mbti-q { font-size: 17px; font-weight: 600; text-align: center; margin-bottom: 18px; min-height: 48px; display: flex; align-items: center; justify-content: center; line-height: 1.5; }
+  body.fs-large .mbti-q { font-size: 19px; }
+  #mbtiResult { flex-direction: column; align-items: stretch; text-align: left; gap: 4px; font-size: 15px; }
+  .mbti-type { font-size: 48px; font-weight: 900; letter-spacing: 5px; text-align: center;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .mbti-name { text-align: center; font-size: 18px; font-weight: 700; margin: 4px 0 14px; }
+  .mbti-name span { color: var(--muted); font-weight: 500; font-size: 14px; }
+  .mbti-desc { color: var(--text); line-height: 1.8; font-size: 15px; }
+  body.fs-large .mbti-desc { font-size: 17px; }
+  .mbti-quip { margin-top: 14px; padding: 12px 14px; background: var(--card-2); border-left: 3px solid var(--accent-3); border-radius: 10px; color: var(--muted); font-style: italic; line-height: 1.6; }
+
 </style>
 </head>
 <body>
@@ -816,6 +831,7 @@
     <button data-tab="morse">摩斯电码</button>
     <button data-tab="snake">贪吃蛇</button>
     <button data-tab="lotto">幸运选号</button>
+    <button data-tab="mbti">MBTI 速测</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1610,6 +1626,32 @@
     </div>
   </section>
 
+  <!-- MBTI 性格速测 -->
+  <section class="panel" id="mbti">
+    <div class="card">
+      <h2>🧩 MBTI 性格速测</h2>
+      <div class="hint">12 道小题，凭第一直觉选就好——3 分钟看穿你是哪种「随便」人格。没有标准答案，只有你自己。</div>
+      <div id="mbtiStart">
+        <div class="row" style="justify-content:center">
+          <button class="btn" id="mbtiBegin">开始测试</button>
+        </div>
+      </div>
+      <div id="mbtiQuiz" style="display:none">
+        <div class="mbti-prog"><div class="mbti-prog-bar" id="mbtiBar"></div></div>
+        <div class="mbti-q" id="mbtiQ"></div>
+        <div class="row" style="justify-content:center;gap:12px">
+          <button class="btn" id="mbtiA" style="flex:1;max-width:260px"></button>
+          <button class="btn ghost" id="mbtiB" style="flex:1;max-width:260px"></button>
+        </div>
+      </div>
+      <div id="mbtiResult" class="result" style="display:none"></div>
+      <div class="row" id="mbtiActions" style="display:none;justify-content:center">
+        <button class="btn" id="mbtiCopy">复制结果</button>
+        <button class="btn ghost" id="mbtiAgain">再测一次</button>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1790,6 +1832,7 @@
     if (id !== "morse" && typeof morseStop === "function") morseStop();
     if (id !== "snake" && typeof snakeStop === "function") snakeStop();
     if (id !== "lotto" && typeof lottoStop === "function") lottoStop();
+    if (id === "mbti") mbtiReset();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -1840,7 +1883,8 @@
     whack: "打地鼠 地鼠 游戏 手速 小游戏 敲 锤 反应 得分 街机 whack mole 连击 解压 娱乐",
     morse: "摩斯 摩斯电码 电码 莫尔斯 morse 密码 编码 解码 电报 滴滴哒哒 sos 翻译 转换",
     snake: "贪吃蛇 蛇 游戏 街机 经典 手速 控制 方向 休闲 玩 复古",
-    lotto: "幸运 选号 彩票 双色球 红球 蓝球 机选 号码 数字 抽奖 中奖 随机 娱乐"
+    lotto: "幸运 选号 彩票 双色球 红球 蓝球 机选 号码 数字 抽奖 中奖 随机 娱乐",
+    mbti: "mbti 性格 速测 测试 人格 16型 你是谁 测评 心理 类型 内向 外向 直觉 实感 思考 情感 判断 知觉 自我 认识自己 测试"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -2647,7 +2691,14 @@
     "机选一注是随便，守号一生是执着，都挺好。",
     "数字不挑人，中奖看命，开心看自己。",
     "游戏结束只是这一局，下一局你还是主角。",
-    "手速是练出来的，运气是玩出来的。"
+    "手速是练出来的，运气是玩出来的。",
+    "认识自己这事儿，随便不了一点，但可以先随便开始。",
+    "E 人充电靠聚会，I 人充电靠独处，你只是方式不同。",
+    "内向不是不会说，是觉得有些话值得先在心里过一遍。",
+    "外向不是话痨，是想到就忍不住想拉人一起。",
+    "J 人把生活过成清单，P 人把清单过成生活，都挺好。",
+    "做自己这件事，没有标准答案，你就是答案。",
+    "别人怎么标签你不重要，你愿不愿意认领才重要。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -3466,7 +3517,8 @@
     { emoji: "🧠", name: "记忆新手", desc: "通关记忆翻牌 1 次", test: (u) => (u.memory || 0) >= 1 },
     { emoji: "🃏", name: "翻牌高手", desc: "通关记忆翻牌 5 次", test: (u) => (u.memory || 0) >= 5 },
     { emoji: "🂡", name: "21点玩家", desc: "玩过 21点 5 次", test: (u) => (u.blackjack || 0) >= 5 },
-    { emoji: "🔨", name: "打地鼠高手", desc: "玩过打地鼠 5 次", test: (u) => (u.whack || 0) >= 5 }
+    { emoji: "🔨", name: "打地鼠高手", desc: "玩过打地鼠 5 次", test: (u) => (u.whack || 0) >= 5 },
+    { emoji: "🧩", name: "认识自己", desc: "完成一次 MBTI 速测", test: (u) => (u.mbti || 0) >= 1 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4846,6 +4898,98 @@
     render();
     return function () {};
   })();
+
+  /* ---------- MBTI 性格速测 ---------- */
+  const MBTI_Q = [
+    { q: "好不容易空下来的周末，你更想……", a: { t: "约朋友出去浪，人越多越带劲", l: "E" }, b: { t: "自己待着充电，谁也别来烦我", l: "I" } },
+    { q: "一群人聚会，你的状态通常是……", a: { t: "活跃气氛，认识新朋友那叫一个快", l: "E" }, b: { t: "安静待在熟人旁边，深聊更舒服", l: "I" } },
+    { q: "学一样新东西，你更看重……", a: { t: "能不能马上用、有没有具体步骤", l: "S" }, b: { t: "背后的道理和它指向的无限可能", l: "N" } },
+    { q: "描述一件事，你更习惯说……", a: { t: "「先发生了啥、再发生了啥」", l: "S" }, b: { t: "「它大概是个什么意思」", l: "N" } },
+    { q: "做决定时，你更相信……", a: { t: "逻辑和利弊，公正是第一位", l: "T" }, b: { t: "感受和人情，别伤了关系", l: "F" } },
+    { q: "朋友找你倾诉，你第一反应是……", a: { t: "先帮他分析问题、想办法", l: "T" }, b: { t: "先共情，让他感觉被懂", l: "F" } },
+    { q: "面对计划，你更喜欢……", a: { t: "提前安排好，心里才踏实", l: "J" }, b: { t: "留点余地，随机应变才自在", l: "P" } },
+    { q: "旅行前，你通常……", a: { t: "做好攻略和清单", l: "J" }, b: { t: "走到哪算哪，惊喜更香", l: "P" } },
+    { q: "聊天时你更容易……", a: { t: "想到啥说啥，现场发挥", l: "E" }, b: { t: "先在脑子里过一遍再说", l: "I" } },
+    { q: "刷到一条消息，你更在意……", a: { t: "字面信息和事实本身", l: "S" }, b: { t: "弦外之音和潜台词", l: "N" } },
+    { q: "被批评时，你更容易……", a: { t: "先想「他说得对不对」", l: "T" }, b: { t: "先想「他是不是针对我」", l: "F" } },
+    { q: "deadline 前一周，你一般是……", a: { t: "早早搞定，绝不拖", l: "J" }, b: { t: "不到最后一刻不动", l: "P" } }
+  ];
+  const MBTI_T = {
+    INTJ: { name: "建筑师", tag: "谋定后动的孤独棋手", desc: "你习惯先把全盘想明白再落子，喜欢独立掌控节奏。点子又野又稳，适合干那种「别人看不懂、你已看到终点」的大活。", quip: "随便？你只对「自己认准的随便」随便。" },
+    INTP: { name: "逻辑学家", tag: "沉迷拆解世界的人形 bug", desc: "你最爱的运动是「为什么」。脑子里常跑着十几个没写完的草稿，社交可有可无，但好奇心永不掉线。", quip: "随便选一个——反正你转头又会反悔重算一遍。" },
+    ENTJ: { name: "指挥官", tag: "天然带节奏的推土机", desc: "目标感拉满，遇到问题先想怎么解决而不是为什么。适合带队冲锋，但记得给身边人留口气。", quip: "你的「随便」=「你们定，我兜底」。" },
+    ENTP: { name: "辩论家", tag: "点子喷射机", desc: "脑子里新想法比奶茶还上头，最爱抬杠和头脑风暴。三分钟热度是常态，但每次都燃得挺亮。", quip: "随便聊——聊着聊着你就把对方说服了。" },
+    INFJ: { name: "提倡者", tag: "温柔的理想主义特工", desc: "你表面安静，内心装着一整套想改变世界的小宇宙。很会读空气，也容易为别人悄悄内耗。", quip: "你的「随便」其实藏着很深的坚持。" },
+    INFP: { name: "调停者", tag: "住在诗里的自由灵魂", desc: "价值观是你的导航仪，讨厌被框。看似佛系，触到底线比谁都硬。", quip: "随便归随便，但要合我心意才行。" },
+    ENFJ: { name: "主人公", tag: "天生的气氛与人生导师", desc: "你天然在意别人感受，乐于成全别人。注意别把自己燃干了。", quip: "你嘴上说随便，其实早替大家安排好了。" },
+    ENFP: { name: "竞选者", tag: "行走的快乐发电机", desc: "热情、好奇、人见人爱，想法多到收不住。适合打开局面，收尾就……交给 J 型朋友吧。", quip: "随便选！——然后立刻又想换一个。" },
+    ISTJ: { name: "物流师", tag: "靠谱到让人忘记担心的锚", desc: "你信规则、重承诺、把事情默默做圆满。世界靠你这种人转，但偶尔也放自己一马。", quip: "你才不随便，你只是不说。" },
+    ISFJ: { name: "守卫者", tag: "默默守护的暖心后盾", desc: "细腻、体贴、记得每个人的小习惯。付出很多，也记得偶尔为自己点个赞。", quip: "你的「随便」=「你开心就好，我没关系」。" },
+    ESTJ: { name: "总经理", tag: "把混乱收拾干净的秩序控", desc: "你擅长定规矩、推执行，是团队里的定海神针。偶尔松一松，世界也不会塌。", quip: "你嘴上说随便，手里已经把方案列好了。" },
+    ESFJ: { name: "执政官", tag: "人群里的粘合剂", desc: "热心、周到、最爱热闹和团圆。把大家照顾得妥妥的，也别忘了照顾自己。", quip: "随便？你先把所有人的喜好都记下了。" },
+    ISTP: { name: "鉴赏家", tag: "冷静上手拆一切的手艺人", desc: "不爱说爱做，遇到事先动手试。自由对你比什么都重要。", quip: "随便，反正我自己能搞定。" },
+    ISFP: { name: "探险家", tag: "把日子过成艺术的随性派", desc: "审美在线、活在当下、讨厌被绑。温柔但有自己的棱角。", quip: "随便走走，好风景都在前面。" },
+    ESTP: { name: "企业家", tag: "现场感拉满的行动派", desc: "精力旺盛、敢冲敢试，问题来了先上再说。适合搞事，也记得偶尔复盘。", quip: "随便搞！搞完再说。" },
+    ESFP: { name: "表演者", tag: "自带聚光灯的快乐野兽", desc: "你是气氛本身，热爱当下和人群。快乐传染力强，记得留点给自己。", quip: "随便嗨，开心最重要 🎉" }
+  };
+  const mbtiStart = $("mbtiStart"), mbtiQuiz = $("mbtiQuiz"), mbtiQ = $("mbtiQ"),
+        mbtiA = $("mbtiA"), mbtiB = $("mbtiB"), mbtiBar = $("mbtiBar"),
+        mbtiResult = $("mbtiResult"), mbtiActions = $("mbtiActions");
+  let mbtiStep = 0, mbtiScore = null;
+  function mbtiReset() {
+    mbtiStep = 0;
+    mbtiScore = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+    if (!mbtiStart) return;
+    mbtiStart.style.display = ""; mbtiQuiz.style.display = "none";
+    mbtiResult.style.display = "none"; mbtiActions.style.display = "none";
+  }
+  function mbtiRenderQ() {
+    const item = MBTI_Q[mbtiStep];
+    mbtiQ.textContent = (mbtiStep + 1) + ". " + item.q;
+    mbtiA.textContent = item.a.t;
+    mbtiB.textContent = item.b.t;
+    mbtiBar.style.width = Math.round((mbtiStep / MBTI_Q.length) * 100) + "%";
+  }
+  function mbtiChoose(letter) {
+    mbtiScore[letter]++;
+    mbtiStep++;
+    if (mbtiStep >= MBTI_Q.length) { mbtiShow(); return; }
+    mbtiRenderQ();
+  }
+  function mbtiShow() {
+    const type =
+      (mbtiScore.E >= mbtiScore.I ? "E" : "I") +
+      (mbtiScore.S >= mbtiScore.N ? "S" : "N") +
+      (mbtiScore.T >= mbtiScore.F ? "T" : "F") +
+      (mbtiScore.J >= mbtiScore.P ? "J" : "P");
+    const info = MBTI_T[type] || MBTI_T.INTJ;
+    mbtiBar.style.width = "100%";
+    mbtiQuiz.style.display = "none"; mbtiStart.style.display = "none";
+    mbtiResult.style.display = ""; mbtiActions.style.display = "";
+    mbtiResult.innerHTML =
+      '<div class="mbti-type">' + escapeHtml(type) + '</div>' +
+      '<div class="mbti-name">' + escapeHtml(info.name) + ' · <span>' + escapeHtml(info.tag) + '</span></div>' +
+      '<div class="mbti-desc">' + escapeHtml(info.desc) + '</div>' +
+      '<div class="mbti-quip">「' + escapeHtml(info.quip) + '」</div>';
+    pop(mbtiResult);
+    if (settings && settings.sound) playDing();
+    bumpUsage("mbti");
+    mbtiResult._text = type + " " + info.name + "\n" + info.tag + "\n" + info.desc + "\n—— " + info.quip;
+  }
+  if (mbtiStart) {
+    $("mbtiBegin").addEventListener("click", () => {
+      mbtiReset(); mbtiQuiz.style.display = ""; mbtiStart.style.display = "none"; mbtiRenderQ(); playClick();
+    });
+    mbtiA.addEventListener("click", () => { mbtiChoose(MBTI_Q[mbtiStep].a.l); playClick(); });
+    mbtiB.addEventListener("click", () => { mbtiChoose(MBTI_Q[mbtiStep].b.l); playClick(); });
+    $("mbtiAgain").addEventListener("click", () => { mbtiReset(); mbtiStart.style.display = ""; playClick(); });
+    $("mbtiCopy").addEventListener("click", () => {
+      const t = mbtiResult._text || "";
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(() => toast("已复制你的类型 🧩"), () => toast(t));
+      else toast(t);
+      playClick();
+    });
+  }
 
 })();
 </script>
