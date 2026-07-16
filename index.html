@@ -808,6 +808,28 @@
   .tetris-pad .tbtn:active { transform:scale(.94); background:var(--accent); color:#fff; }
   @media (max-width:520px) { .tetris-stage { gap:10px; } .tetris-side { min-width:84px; } }
 
+  /* 名言收藏夹 */
+  .qfav-item { display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin:10px 0; }
+  .qfav-text { font-size:15px; line-height:1.6; flex:1; }
+  .qfav-acts { display:flex; gap:8px; flex-shrink:0; }
+  .mini { font-size:13px; padding:6px 10px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--text); cursor:pointer; }
+  .mini.ghost { background:transparent; }
+  .mini:active { transform:scale(.95); }
+  /* 习惯打卡 */
+  .habit-list { display:flex; flex-direction:column; gap:10px; margin:14px 0; }
+  .habit-row { display:flex; align-items:center; gap:12px; justify-content:space-between; background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+  .habit-name { font-weight:700; font-size:16px; }
+  .habit-streak { font-size:13px; color:var(--muted); margin-top:2px; }
+  .habit-acts { display:flex; gap:8px; align-items:center; }
+  .heat-legend { font-size:12px; color:var(--muted); margin:6px 0; }
+  .habit-heat { display:grid; grid-template-rows:repeat(7,14px); grid-auto-flow:column; grid-auto-columns:14px; gap:3px; margin:10px 0 4px; overflow-x:auto; padding-bottom:6px; }
+  .h-cell { width:14px; height:14px; border-radius:3px; background:var(--card-2); border:1px solid var(--line); }
+  .h-cell.empty { background:transparent; border-color:transparent; }
+  .h-cell.l1 { background:var(--accent); opacity:.3; }
+  .h-cell.l2 { background:var(--accent); opacity:.5; }
+  .h-cell.l3 { background:var(--accent); opacity:.75; }
+  .h-cell.l4 { background:var(--accent); opacity:1; }
+
 </style>
 </head>
 <body>
@@ -873,7 +895,9 @@
     <button data-tab="lotto">幸运选号</button>
     <button data-tab="mbti">MBTI 速测</button>
     <button data-tab="gm2048">2048</button>
-    <button data-tab="tetris">俄罗斯方块</button>
+      <button data-tab="tetris">俄罗斯方块</button>
+      <button data-tab="qfav">名言收藏</button>
+      <button data-tab="habit">习惯打卡</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1004,6 +1028,7 @@
       <div class="hint">偶尔也需要一句不负责但管用的话。</div>
       <div class="row">
         <button class="btn" id="quoteBtn">来一句</button>
+        <button class="btn ghost" id="quoteFav">⭐ 收藏这句</button>
       </div>
       <div class="result copyable" id="quoteResult">点上面的按钮，听天由命。</div>
     </div>
@@ -1760,6 +1785,36 @@
     </div>
   </section>
 
+  <!-- 名言收藏 -->
+  <section class="panel" id="qfav">
+    <div class="card">
+      <h2>名言收藏夹 <span class="muted" id="qfavCount">0</span></h2>
+      <div class="hint">把「随便一句」里戳中你的话 ⭐ 收进来，随时回味、复制、带走。</div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="qfavRandom">随机回味一句</button>
+        <button class="btn ghost" id="qfavClear">清空收藏</button>
+      </div>
+      <div class="result copyable" id="qfavRandomOut" style="text-align:center">点「随机回味一句」，翻翻你收藏的灵感。</div>
+      <div id="qfavList"></div>
+    </div>
+  </section>
+
+  <!-- 习惯打卡 -->
+  <section class="panel" id="habit">
+    <div class="card">
+      <h2>习惯打卡</h2>
+      <div class="hint">给想坚持的小事起个名字，每天点一下，攒出你的连续天数 🔥</div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <input type="text" id="habitInput" placeholder="例如：喝水 / 读书 / 早睡" style="max-width:260px" />
+        <button class="btn" id="habitAdd">加一个习惯</button>
+        <button class="btn ghost" id="habitClear">清空</button>
+      </div>
+      <div class="habit-list" id="habitList"></div>
+      <div class="heat-legend">近 18 周打卡热力图（颜色越深 = 当天打卡次数越多）：</div>
+      <div class="habit-heat" id="habitHeat"></div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1924,6 +1979,8 @@
     if (b.dataset.tab !== "lotto" && typeof lottoStop === "function") lottoStop();
     if (b.dataset.tab !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
     if (b.dataset.tab !== "tetris" && typeof tetrisStop === "function") tetrisStop();
+    if (b.dataset.tab === "qfav") renderQfav();
+    if (b.dataset.tab === "habit") renderHabit();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -1944,6 +2001,8 @@
     if (id !== "lotto" && typeof lottoStop === "function") lottoStop();
     if (id !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
     if (id !== "tetris" && typeof tetrisStop === "function") tetrisStop();
+    if (id === "qfav") renderQfav();
+    if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
@@ -1998,7 +2057,9 @@
     lotto: "幸运 选号 彩票 双色球 红球 蓝球 机选 号码 数字 抽奖 中奖 随机 娱乐",
     mbti: "mbti 性格 速测 测试 人格 16型 你是谁 测评 心理 类型 内向 外向 直觉 实感 思考 情感 判断 知觉 自我 认识自己 测试",
     gm2048: "2048 数字 合并 方块 游戏 益智 滑块 方块合并 经典 解压 休闲 手速 合成 数字游戏 贪吃",
-    tetris: "俄罗斯方块 方块 俄罗斯 tetris 消除 消行 堆叠 拼图 街机 经典 手速 休闲 复古 俄罗斯方块游戏"
+    tetris: "俄罗斯方块 方块 俄罗斯 tetris 消除 消行 堆叠 拼图 街机 经典 手速 休闲 复古 俄罗斯方块游戏",
+    qfav: "收藏 名言 语录 金句 喜欢 句子 摘抄 夹 我的收藏 灵感 回味",
+    habit: "习惯 打卡 签到 坚持 自律 记录 日历 热力 打卡表 streak 每日 养成 连续"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4512,6 +4573,19 @@
     "底部稳了，上面才摆得踏实；地基不牢，再好看也塌。",
     "七种形状，七种活法，没有哪种天生比哪种更高级。"
   );
+  // —— 跟随名言收藏 / 习惯打卡 / 坚持主题的新语录 ——
+  QUOTES.push(
+    "收藏一句戳中你的话，就像往口袋里塞了颗糖，难的时候掏出来尝尝。",
+    "坚持不是每天都很猛，而是今天也来了，哪怕只来了一下下。",
+    "习惯是给未来的自己写的一封短信：现在的这点麻烦，是为了那时更轻松。",
+    "把想做的事钉成习惯，比靠意志力硬撑靠谱多了——意志力会累，习惯不会。",
+    "连续打卡的天数不重要，重要的是你又一次没骗自己。",
+    "有些句子值得被收起来，不是因为它多对，而是因为它在那一刻接住了你。",
+    "每天前进一小格，回头看时，你已经走出好远好远了。",
+    "随便不是摆烂，是先把眼前这件小事做了，剩下的交给时间。",
+    "收藏夹里囤的不是句子，是你曾认真活过的那些瞬间。",
+    "别等状态对了才开始，先开始，状态会自己跟上来。"
+  );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
       "梦是白天没说完的话。这个意象或许在提醒你，有件事该好好正视一下了。",
@@ -5586,6 +5660,142 @@
     loadBest(); showBest(); draw();
     return stop;
   })();
+
+  /* ---------- 名言收藏夹（收藏「随便一句」里戳中你的话） ---------- */
+  const QFAV_KEY = "suibian_qfav";
+  let qfav = [];
+  try { const _r = JSON.parse(localStorage.getItem(QFAV_KEY) || "[]"); if (Array.isArray(_r)) qfav = _r; } catch (e) {}
+  function saveQfav() { try { localStorage.setItem(QFAV_KEY, JSON.stringify(qfav)); } catch (e) {} }
+  function renderQfav() {
+    const box = $("qfavList"); if (!box) return;
+    const cnt = $("qfavCount"); if (cnt) cnt.textContent = String(qfav.length);
+    if (!qfav.length) {
+      box.innerHTML = '<div class="hint" style="text-align:center;padding:18px">还没有收藏的句子。去「随便一句」点「⭐ 收藏这句」吧。</div>';
+      return;
+    }
+    box.innerHTML = qfav.map(function (q, i) {
+      return '<div class="qfav-item"><div class="qfav-text">“' + escapeHtml(q) + '”</div>' +
+        '<div class="qfav-acts"><button class="mini" data-copy="' + i + '">复制</button>' +
+        '<button class="mini ghost" data-del="' + i + '">移除</button></div></div>';
+    }).join("");
+  }
+  const _qfavList = $("qfavList");
+  if (_qfavList) _qfavList.addEventListener("click", function (e) {
+    const c = e.target.closest("[data-copy]");
+    const d = e.target.closest("[data-del]");
+    if (c) {
+      const q = qfav[+c.dataset.copy];
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(q).then(function () { toast("已复制"); }, function () { toast(q); });
+      else toast(q);
+      playClick();
+    }
+    if (d) { qfav.splice(+d.dataset.del, 1); saveQfav(); renderQfav(); playClick(); toast("已移除"); }
+  });
+  const _qfavRandom = $("qfavRandom");
+  if (_qfavRandom) _qfavRandom.addEventListener("click", function () {
+    if (!qfav.length) { toast("还没有收藏的句子"); return; }
+    const q = qfav[rand(qfav.length)];
+    const r = $("qfavRandomOut"); if (r) { r.textContent = "“" + q + "”"; pop(r); }
+    playClick();
+  });
+  const _qfavClear = $("qfavClear");
+  if (_qfavClear) _qfavClear.addEventListener("click", function () {
+    if (!qfav.length) return;
+    if (!confirm("确定清空全部收藏的句子？")) return;
+    qfav = []; saveQfav(); renderQfav(); toast("已清空收藏");
+  });
+  const _quoteFav = $("quoteFav");
+  if (_quoteFav) _quoteFav.addEventListener("click", function () {
+    const t = ($("quoteResult").textContent || "").trim();
+    const q = t.replace(/^[\s“”"']+|[\s“”"']+$/g, "").trim();
+    if (!q || q === "点上面的按钮，听天由命。") { toast("先来一句再收藏～"); return; }
+    if (qfav.indexOf(q) >= 0) { toast("这句已经收藏过啦 ⭐"); return; }
+    qfav.unshift(q); if (qfav.length > 200) qfav = qfav.slice(0, 200);
+    saveQfav(); playClick();
+    toast("已收藏：”" + (q.length > 12 ? q.slice(0, 12) + "…" : q) + "” ⭐");
+  });
+
+  /* ---------- 习惯打卡（每日坚持，攒连续天数 + 热力图） ---------- */
+  const HABIT_KEY = "suibian_habit";
+  let habits = { list: [] };
+  try { const _h = JSON.parse(localStorage.getItem(HABIT_KEY) || "{}"); if (_h && typeof _h === "object" && Array.isArray(_h.list)) habits = _h; } catch (e) {}
+  if (!Array.isArray(habits.list)) habits.list = [];
+  function saveHabit() { try { localStorage.setItem(HABIT_KEY, JSON.stringify(habits)); } catch (e) {} }
+  function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function habitStreak(dates) {
+    const set = new Set(dates || []);
+    let s = 0; const d = new Date();
+    if (!set.has(ymd(d))) d.setDate(d.getDate() - 1);
+    while (set.has(ymd(d))) { s++; d.setDate(d.getDate() - 1); }
+    return s;
+  }
+  function totalChecksOn(dayStr) {
+    let n = 0; for (const h of habits.list) if ((h.dates || []).indexOf(dayStr) >= 0) n++;
+    return n;
+  }
+  function renderHabit() {
+    const listEl = $("habitList"); if (!listEl) return;
+    const today = ymd(new Date());
+    if (!habits.list.length) {
+      listEl.innerHTML = '<div class="hint" style="text-align:center;padding:18px">还没有习惯。在下面加一个，今天就开始打卡吧 🌱</div>';
+    } else {
+      listEl.innerHTML = habits.list.map(function (h, i) {
+        const done = (h.dates || []).indexOf(today) >= 0;
+        const st = habitStreak(h.dates || []);
+        return '<div class="habit-row"><div class="habit-main"><div class="habit-name">' + escapeHtml(h.name) +
+          '</div><div class="habit-streak">🔥 连续 ' + st + ' 天</div></div>' +
+          '<div class="habit-acts"><button class="btn ' + (done ? "ghost" : "") + '" data-toggle="' + i + '">' +
+          (done ? "今日已打卡 ✓" : "今日打卡") + '</button>' +
+          '<button class="mini ghost" data-del="' + i + '">删除</button></div></div>';
+      }).join("");
+    }
+    const hm = $("habitHeat");
+    if (hm) {
+      const cols = 18, total = cols * 7;
+      const days = [];
+      for (let i = total - 1; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(d); }
+      const lead = days[0].getDay();
+      const lvlCss = ["", "l1", "l2", "l3", "l4"];
+      let html = "";
+      for (let i = 0; i < lead; i++) html += '<span class="h-cell empty"></span>';
+      for (const d of days) {
+        const s = ymd(d); const n = totalChecksOn(s); const lvl = Math.min(n, 4);
+        html += '<span class="h-cell ' + lvlCss[lvl] + '" title="' + s + (n ? ("：打卡 " + n + " 次") : "：无打卡") + '"></span>';
+      }
+      hm.innerHTML = html;
+    }
+  }
+  const _habitAdd = $("habitAdd");
+  if (_habitAdd) _habitAdd.addEventListener("click", function () {
+    const inp = $("habitInput"); const name = (inp.value || "").trim();
+    if (!name) { toast("先给习惯起个名字"); return; }
+    if (habits.list.some(function (h) { return h.name === name; })) { toast("已经有这个习惯了"); return; }
+    habits.list.push({ name: name, dates: [] }); saveHabit(); inp.value = ""; renderHabit(); playClick(); toast("已添加：" + name + " 🌱");
+  });
+  const _habitList = $("habitList");
+  if (_habitList) _habitList.addEventListener("click", function (e) {
+    const tg = e.target.closest("[data-toggle]");
+    const dl = e.target.closest("[data-del]");
+    if (tg) {
+      const i = +tg.dataset.toggle; const h = habits.list[i]; const today = ymd(new Date());
+      if (!h.dates) h.dates = [];
+      const k = h.dates.indexOf(today);
+      if (k >= 0) h.dates.splice(k, 1); else h.dates.push(today);
+      saveHabit(); renderHabit(); playClick();
+      toast(k >= 0 ? "已取消今天打卡" : "打卡成功 🔥");
+      return;
+    }
+    if (dl) {
+      const i = +dl.dataset.del; const name = habits.list[i].name;
+      habits.list.splice(i, 1); saveHabit(); renderHabit(); playClick(); toast("已删除：" + name);
+    }
+  });
+  const _habitClear = $("habitClear");
+  if (_habitClear) _habitClear.addEventListener("click", function () {
+    if (!habits.list.length) return;
+    if (!confirm("确定清空所有习惯与打卡记录？")) return;
+    habits.list = []; saveHabit(); renderHabit(); toast("已清空打卡记录");
+  });
 
 })();
 </script>
