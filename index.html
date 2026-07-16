@@ -705,6 +705,37 @@
   @keyframes bjDeal { from { transform:translateY(-12px) scale(.9); opacity:0; } to { transform:none; opacity:1; } }
   body.reduce .bj-card { animation:none; }
   .bj-bust .bj-label span { color:var(--good); }
+
+  /* ---------- 打地鼠 ---------- */
+  .whack-hud { display:flex; gap:10px; margin:14px 0; flex-wrap:wrap; }
+  .whack-stat { flex:1; min-width:64px; background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:12px 6px; text-align:center; }
+  .whack-num { font-size:24px; font-weight:900; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .whack-lab { font-size:12px; color:var(--muted); margin-top:3px; }
+  .whack-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:6px auto 14px; max-width:360px; }
+  .whack-hole {
+    position:relative; aspect-ratio:1/1; border-radius:16px; cursor:pointer; user-select:none;
+    background:radial-gradient(ellipse at 50% 120%, rgba(0,0,0,.28), transparent 60%), var(--card-2);
+    border:1px solid var(--line); overflow:hidden; display:flex; align-items:flex-end; justify-content:center;
+  }
+  .whack-hole::after { content:""; position:absolute; left:12%; right:12%; bottom:10%; height:22%; border-radius:50%; background:rgba(0,0,0,.30); }
+  .whack-critter {
+    position:relative; z-index:1; font-size:38px; line-height:1; transform:translateY(120%) scale(.6);
+    transition:transform .12s cubic-bezier(.34,1.56,.64,1); pointer-events:none;
+  }
+  .whack-hole.up .whack-critter { transform:translateY(6%) scale(1); }
+  .whack-hole.bonk .whack-critter { transform:translateY(6%) scale(1.25) rotate(-8deg); filter:brightness(1.3); }
+  body.reduce .whack-critter { transition:none; }
+  @media (max-width:420px){ .whack-critter{ font-size:30px; } }
+
+  /* ---------- 摩斯电码 ---------- */
+  .morse-note { font-size:12px; color:var(--muted); text-align:center; margin-top:12px; }
+  .morse-note b { color:var(--accent-2); }
+  .morse-lamp {
+    margin:14px auto 2px; width:60px; height:60px; border-radius:50%;
+    background:var(--card-2); border:1px solid var(--line);
+    box-shadow:inset 0 2px 8px rgba(0,0,0,.25); transition:none;
+  }
+  .morse-lamp.on { background:radial-gradient(circle at 40% 35%, #fff, var(--accent) 70%); box-shadow:0 0 26px 6px rgba(var(--accent-3-rgb),.7); }
 </style>
 </head>
 <body>
@@ -764,6 +795,8 @@
     <button data-tab="react">反应速度</button>
     <button data-tab="dream">周公解梦</button>
     <button data-tab="blackjack">21点</button>
+    <button data-tab="whack">打地鼠</button>
+    <button data-tab="morse">摩斯电码</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1477,6 +1510,46 @@
     </div>
   </section>
 
+  <!-- 打地鼠 -->
+  <section class="panel" id="whack">
+    <div class="card">
+      <h2>🔨 打地鼠</h2>
+      <div class="hint">30 秒限时！地鼠 🐹 冒头就快点它得分，连击有加成；千万别打到炸弹 💣，会扣分还断连击。最高分记在本地。</div>
+      <div class="whack-hud">
+        <div class="whack-stat"><div class="whack-num" id="whackScore">0</div><div class="whack-lab">得分</div></div>
+        <div class="whack-stat"><div class="whack-num" id="whackTime">30</div><div class="whack-lab">剩余(秒)</div></div>
+        <div class="whack-stat"><div class="whack-num" id="whackCombo">×1</div><div class="whack-lab">连击</div></div>
+        <div class="whack-stat"><div class="whack-num" id="whackBest">0</div><div class="whack-lab">最高分</div></div>
+      </div>
+      <div class="whack-grid" id="whackGrid"></div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="whackStart">开始游戏</button>
+        <button class="btn ghost" id="whackReset">清空最高分</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 摩斯电码 -->
+  <section class="panel" id="morse">
+    <div class="card">
+      <h2>📡 摩斯电码</h2>
+      <div class="hint">文字与摩斯电码互译。输入中英文/字母数字自动转码，也能把 <span class="kbd">.</span> <span class="kbd">-</span> 译回文字，还能「滴滴哒哒」播放出来。</div>
+      <textarea id="morseInput" placeholder="输入文字或摩斯电码…">SUIBIAN 随便</textarea>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="morseEnc">文字 → 电码</button>
+        <button class="btn ghost" id="morseDec">电码 → 文字</button>
+        <button class="btn ghost" id="morseSwap">⇅ 对调</button>
+      </div>
+      <div class="result copyable" id="morseResult" style="font-family:'Courier New',monospace;font-size:20px;letter-spacing:1px;word-break:break-all;line-height:1.7">在上面输入内容，选择转换方向。</div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="morsePlay">▶ 播放电码</button>
+        <button class="btn ghost" id="morseStop">■ 停止</button>
+      </div>
+      <div class="morse-note">提示：中文等无标准摩斯编码的字符会以 <b>#</b> 标记跳过；播放时点亮的圆点即当前节拍。</div>
+      <div class="morse-lamp" id="morseLamp"></div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -1635,6 +1708,8 @@
     if (b.dataset.tab === "mood") renderMood();
     if (b.dataset.tab === "memory") memEnsure();
     if (b.dataset.tab !== "ambient") stopAmbient();
+    if (b.dataset.tab !== "whack" && typeof whackStop === "function") whackStop();
+    if (b.dataset.tab !== "morse" && typeof morseStop === "function") morseStop();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -1649,6 +1724,8 @@
     if (id === "mood") renderMood();
     if (id === "memory") memEnsure();
     if (id !== "ambient") stopAmbient();
+    if (id !== "whack" && typeof whackStop === "function") whackStop();
+    if (id !== "morse" && typeof morseStop === "function") morseStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -1695,7 +1772,9 @@
     cp: "cp 缘分 配对 名字 名字配对 情侣 关系 契合 恋爱 默契 测一测 搭档 朋友 配对测试 缘分测试 组合",
     react: "反应 反应速度 手速 测试 游戏 快 灵敏 反应力 ms 毫秒 挑战 极限 神经",
     dream: "解梦 周公解梦 梦 梦见 梦境 玄学 预兆 寓意 象征 睡觉 做梦 解读 寓意",
-    blackjack: "21点 黑杰克 扑克 扑克牌 赌博 赌 赌场 牌 纸牌 庄家 要牌 停牌 点数 游戏 算牌 二十一点 二十一点"
+    blackjack: "21点 黑杰克 扑克 扑克牌 赌博 赌 赌场 牌 纸牌 庄家 要牌 停牌 点数 游戏 算牌 二十一点 二十一点",
+    whack: "打地鼠 地鼠 游戏 手速 小游戏 敲 锤 反应 得分 街机 whack mole 连击 解压 娱乐",
+    morse: "摩斯 摩斯电码 电码 莫尔斯 morse 密码 编码 解码 电报 滴滴哒哒 sos 翻译 转换"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -2253,6 +2332,16 @@
 
   /* ---------- 句子 ---------- */
   const QUOTES = [
+    "冒头的地鼠迟早会挨一锤，但躲着不动的从来没赢过。",
+    "手速练不出人生，但至少能打好这一局。",
+    "生活像打地鼠，摁下一个，另一个又冒出来——那就一个个来。",
+    "连击靠的不是运气，是你没停手。",
+    "有些心事，用摩斯电码敲出来，只有懂的人才听得见。",
+    "滴是短，哒是长，人生就是长长短短拼出来的一句话。",
+    "SOS 是三短三长三短——求救不丢人，硬扛才吃亏。",
+    "别怕打到炸弹，怕的是从头到尾没敢出手。",
+    "把想说的话翻译成电码，也别忘了翻译给自己听。",
+    "节奏乱了就停一拍，重新数：滴、滴、哒。",
     "反应可以慢半拍，决定别拖一年。",
     "梦是白天没说完的话，别急着解，先好好睡。",
     "手速再快，也追不上一个说做就做的人。",
@@ -3302,7 +3391,8 @@
     { emoji: "🗓️", name: "日记达人", desc: "记过 10 篇心情日记", test: (u) => (u.mood || 0) >= 10 },
     { emoji: "🧠", name: "记忆新手", desc: "通关记忆翻牌 1 次", test: (u) => (u.memory || 0) >= 1 },
     { emoji: "🃏", name: "翻牌高手", desc: "通关记忆翻牌 5 次", test: (u) => (u.memory || 0) >= 5 },
-    { emoji: "🂡", name: "21点玩家", desc: "玩过 21点 5 次", test: (u) => (u.blackjack || 0) >= 5 }
+    { emoji: "🂡", name: "21点玩家", desc: "玩过 21点 5 次", test: (u) => (u.blackjack || 0) >= 5 },
+    { emoji: "🔨", name: "打地鼠高手", desc: "玩过打地鼠 5 次", test: (u) => (u.whack || 0) >= 5 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4316,6 +4406,207 @@
     betMax.addEventListener("click", () => { if (state !== "playing") setBet(chips); });
 
     updateChips(); setBet(bet); controls();
+  })();
+
+  /* ---------- 打地鼠 ---------- */
+  const whackStop = (function () {
+    const grid = $("whackGrid"), startBtn = $("whackStart"), resetBtn = $("whackReset");
+    const elScore = $("whackScore"), elTime = $("whackTime"), elCombo = $("whackCombo"), elBest = $("whackBest");
+    if (!grid) return function () {};
+    const KEY = "suibian_whack";
+    const HOLES = 9, GAME_SEC = 30;
+    let best = parseInt(localStorage.getItem(KEY) || "0", 10) || 0;
+    let holes = [], playing = false, score = 0, combo = 0, timeLeft = GAME_SEC;
+    let tickT = null, spawnT = null, active = new Map(); // idx -> {kind, hideAt}
+
+    // 构建 9 个洞
+    grid.innerHTML = "";
+    for (let i = 0; i < HOLES; i++) {
+      const h = document.createElement("div");
+      h.className = "whack-hole"; h.dataset.i = i;
+      h.innerHTML = '<span class="whack-critter"></span>';
+      grid.appendChild(h);
+      holes.push(h);
+    }
+    function showBest() { elBest.textContent = best; }
+    showBest();
+    function setCritter(idx, kind) {
+      const h = holes[idx], c = h.querySelector(".whack-critter");
+      c.textContent = kind === "bomb" ? "💣" : (kind === "gold" ? "⭐" : "🐹");
+      h.classList.add("up"); h.dataset.kind = kind;
+      active.set(idx, kind);
+    }
+    function clearHole(idx) {
+      const h = holes[idx]; h.classList.remove("up", "bonk"); h.dataset.kind = "";
+      active.delete(idx);
+    }
+    function clearAll() { for (let i = 0; i < HOLES; i++) clearHole(i); }
+    function spawn() {
+      if (!playing) return;
+      // 随机挑一个空洞
+      const empty = [];
+      for (let i = 0; i < HOLES; i++) if (!active.has(i)) empty.push(i);
+      if (empty.length) {
+        const idx = empty[rand(empty.length)];
+        const r = Math.random();
+        const kind = r < 0.20 ? "bomb" : (r < 0.30 ? "gold" : "mole");
+        setCritter(idx, kind);
+        const life = 700 + rand(700);
+        setTimeout(() => { if (playing && active.get(idx) === kind) clearHole(idx); }, life);
+      }
+      // 下一次冒头节奏随时间加快
+      const gap = Math.max(360, 820 - (GAME_SEC - timeLeft) * 14);
+      spawnT = setTimeout(spawn, gap);
+    }
+    function updateHud() {
+      elScore.textContent = score; elTime.textContent = timeLeft;
+      elCombo.textContent = "×" + (1 + Math.floor(combo / 3));
+    }
+    function tick() {
+      timeLeft--; updateHud();
+      if (timeLeft <= 0) { endGame(); return; }
+      tickT = setTimeout(tick, 1000);
+    }
+    function startGame() {
+      if (playing) return;
+      playing = true; score = 0; combo = 0; timeLeft = GAME_SEC;
+      clearAll(); updateHud();
+      startBtn.textContent = "游戏中…"; startBtn.disabled = true;
+      tickT = setTimeout(tick, 1000);
+      spawn();
+    }
+    function endGame() {
+      playing = false;
+      clearTimeout(tickT); clearTimeout(spawnT); clearAll();
+      startBtn.textContent = "再来一局"; startBtn.disabled = false;
+      elCombo.textContent = "×1";
+      let isNew = false;
+      if (score > best) { best = score; localStorage.setItem(KEY, String(best)); isNew = true; showBest(); }
+      bumpUsage("whack");
+      if (settings && settings.sound) playDing();
+      if (isNew && score > 0) { toast("新纪录！" + score + " 分 🎉"); confettiBurst(80); }
+      else toast("时间到！本局 " + score + " 分");
+    }
+    function hitHole(idx) {
+      if (!playing || !active.has(idx)) return;
+      const kind = active.get(idx);
+      const h = holes[idx];
+      h.classList.add("bonk");
+      if (kind === "bomb") {
+        score = Math.max(0, score - 5); combo = 0;
+        toast("💥 打到炸弹！−5 分，连击清零");
+        tone(140, 0.18, "sawtooth", 0.16);
+      } else {
+        const mult = 1 + Math.floor(combo / 3);
+        const base = kind === "gold" ? 3 : 1;
+        score += base * mult; combo++;
+        if (settings && settings.sound) tone(660 + Math.min(combo, 12) * 40, 0.06, "triangle", 0.12);
+      }
+      updateHud();
+      setTimeout(() => clearHole(idx), 90);
+    }
+    grid.addEventListener("click", (e) => {
+      const h = e.target.closest(".whack-hole"); if (!h) return;
+      hitHole(parseInt(h.dataset.i, 10));
+    });
+    startBtn.addEventListener("click", startGame);
+    resetBtn.addEventListener("click", () => {
+      best = 0; localStorage.removeItem(KEY); showBest(); toast("已清空最高分");
+    });
+    updateHud();
+    // 返回一个「离开该工具时停止」的清理函数
+    return function () {
+      if (playing) { playing = false; clearTimeout(tickT); clearTimeout(spawnT); clearAll();
+        startBtn.textContent = "开始游戏"; startBtn.disabled = false; timeLeft = GAME_SEC; updateHud(); }
+    };
+  })();
+
+  /* ---------- 摩斯电码 ---------- */
+  const morseStop = (function () {
+    const input = $("morseInput"), out = $("morseResult"), lamp = $("morseLamp");
+    const encBtn = $("morseEnc"), decBtn = $("morseDec"), swapBtn = $("morseSwap");
+    const playBtn = $("morsePlay"), stopBtn = $("morseStop");
+    if (!input) return function () {};
+    const MAP = {
+      A:".-",B:"-...",C:"-.-.",D:"-..",E:".",F:"..-.",G:"--.",H:"....",I:"..",J:".---",
+      K:"-.-",L:".-..",M:"--",N:"-.",O:"---",P:".--.",Q:"--.-",R:".-.",S:"...",T:"-",
+      U:"..-",V:"...-",W:".--",X:"-..-",Y:"-.--",Z:"--..",
+      0:"-----",1:".----",2:"..---",3:"...--",4:"....-",5:".....",6:"-....",7:"--...",8:"---..",9:"----.",
+      ".":".-.-.-",",":"--..--","?":"..--..","'":".----.","!":"-.-.--","/":"-..-.","(":"-.--.",")":"-.--.-",
+      "&":".-...",":":"---...",";":"-.-.-.","=":"-...-","+":".-.-.","-":"-....-","_":"..--.-",
+      '"':".-..-.","$":"...-..-","@":".--.-.",
+    };
+    const REV = {}; for (const k in MAP) REV[MAP[k]] = k;
+    let lastMorse = "", playT = [], playing = false;
+
+    function encode(text) {
+      const words = String(text).toUpperCase().trim().split(/\s+/);
+      return words.map((w) =>
+        [...w].map((ch) => MAP[ch] !== undefined ? MAP[ch] : "#").join(" ")
+      ).join("   ").trim();
+    }
+    function decode(code) {
+      // 单词以 3+ 空格或 / 分隔，字母以单空格分隔
+      const words = String(code).trim().split(/\s{3,}|\s*\/\s*/);
+      return words.map((w) =>
+        w.trim().split(/\s+/).map((tok) => tok === "" ? "" : (REV[tok] !== undefined ? REV[tok] : "#")).join("")
+      ).join(" ").trim();
+    }
+    function looksLikeMorse(s) { return /^[.\-\s/]+$/.test(String(s).trim()); }
+    function setOut(txt) { out.textContent = txt || "（空）"; pop(out); }
+
+    encBtn.addEventListener("click", () => {
+      const v = input.value.trim();
+      if (!v) { toast("先输入点文字～"); return; }
+      lastMorse = encode(v); setOut(lastMorse);
+      if (lastMorse.indexOf("#") >= 0) toast("部分字符无摩斯编码，已用 # 标记");
+    });
+    decBtn.addEventListener("click", () => {
+      const v = input.value.trim();
+      if (!v) { toast("先输入点电码～"); return; }
+      if (!looksLikeMorse(v)) { toast("这看起来不像电码，请只用 . - 空格 /"); return; }
+      setOut(decode(v)); lastMorse = v;
+    });
+    swapBtn.addEventListener("click", () => {
+      const cur = out.textContent.trim();
+      if (!cur || cur === "（空）") { toast("先转换出结果再对调"); return; }
+      input.value = cur; toast("已把结果放回输入框");
+    });
+
+    function stopPlay() {
+      playing = false; playT.forEach((t) => clearTimeout(t)); playT = [];
+      lamp.classList.remove("on");
+    }
+    function playMorse() {
+      let code = lastMorse;
+      if (!code || looksLikeMorse(input.value.trim()) === false && input.value.trim()) {
+        // 若当前输入是文字且尚未编码，就即时编码播放
+        if (input.value.trim() && !looksLikeMorse(input.value.trim())) code = encode(input.value.trim());
+      }
+      if (!code && looksLikeMorse(input.value.trim())) code = input.value.trim();
+      if (!code) { toast("先转换或输入电码再播放"); return; }
+      stopPlay(); playing = true;
+      const unit = 90; // 一个「点」的毫秒
+      let t = 0;
+      const seq = code.replace(/#/g, "").split("");
+      seq.forEach((ch) => {
+        if (ch === ".") {
+          playT.push(setTimeout(() => { if (playing) { lamp.classList.add("on"); if (settings.sound) tone(700, unit / 1000, "sine", 0.18); } }, t));
+          t += unit;
+          playT.push(setTimeout(() => { if (playing) lamp.classList.remove("on"); }, t)); t += unit;
+        } else if (ch === "-") {
+          playT.push(setTimeout(() => { if (playing) { lamp.classList.add("on"); if (settings.sound) tone(700, unit * 3 / 1000, "sine", 0.18); } }, t));
+          t += unit * 3;
+          playT.push(setTimeout(() => { if (playing) lamp.classList.remove("on"); }, t)); t += unit;
+        } else { // 空格：字母/单词间隔
+          t += unit * 2;
+        }
+      });
+      playT.push(setTimeout(() => { stopPlay(); }, t + 40));
+    }
+    playBtn.addEventListener("click", playMorse);
+    stopBtn.addEventListener("click", stopPlay);
+    return stopPlay;
   })();
 
 })();
