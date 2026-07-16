@@ -830,6 +830,23 @@
   .h-cell.l3 { background:var(--accent); opacity:.75; }
   .h-cell.l4 { background:var(--accent); opacity:1; }
 
+  /* ===== 扫雷 ===== */
+  .mine-diffs { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .mine-bar { display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center; }
+  .mine-disp { font-variant-numeric:tabular-nums; font-weight:900; font-size:20px; background:var(--card-2); border:1px solid var(--line); border-radius:12px; padding:8px 14px; min-width:78px; text-align:center; color:var(--accent); }
+  .mine-face { font-size:28px; line-height:1; background:var(--card-2); border:1px solid var(--line); border-radius:12px; padding:6px 14px; cursor:pointer; transition:transform .12s; user-select:none; }
+  .mine-face:active { transform:scale(.9); }
+  .mine-wrap { display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; }
+  .mine-board { display:grid; gap:2px; background:var(--line); padding:3px; border-radius:10px; max-width:100%; overflow:auto; touch-action:manipulation; }
+  .mine-cell { width:var(--mc,30px); height:var(--mc,30px); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:calc(var(--mc,30px) * .52); background:var(--card-2); border-radius:4px; cursor:pointer; user-select:none; -webkit-user-select:none; transition:background .1s; line-height:1; }
+  .mine-cell:hover { background:rgba(125,125,200,.22); }
+  .mine-cell.open { background:var(--card); cursor:default; }
+  .mine-cell.open:hover { background:var(--card); }
+  .mine-cell.flag { color:#e74c3c; background:var(--card-2); }
+  .mine-cell.mine-hit { background:#e74c3c; color:#fff; }
+  .mine-cell.boom { background:#ffce54; }
+  .mine-cell.c1{color:#1976d2}.mine-cell.c2{color:#388e3c}.mine-cell.c3{color:#d32f2f}.mine-cell.c4{color:#7b1fa2}.mine-cell.c5{color:#c2185b}.mine-cell.c6{color:#0097a7}.mine-cell.c7{color:#455a64}.mine-cell.c8{color:#616161}
+
 </style>
 </head>
 <body>
@@ -898,6 +915,7 @@
       <button data-tab="tetris">俄罗斯方块</button>
       <button data-tab="qfav">名言收藏</button>
       <button data-tab="habit">习惯打卡</button>
+      <button data-tab="mine">💣 扫雷</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1815,6 +1833,28 @@
     </div>
   </section>
 
+  <!-- 扫雷 -->
+  <section class="panel" id="mine">
+    <div class="card">
+      <h2>💣 扫雷</h2>
+      <div class="hint">左键翻开格子，右键插旗 🚩 标记地雷。第一次点永远安全——先点开一片空地，再靠数字推理剩下的雷在哪。三档难度任你挑，通关撒花 🎉</div>
+      <div class="mine-diffs">
+        <button class="btn ghost" data-diff="easy">初级 9×9 · 10雷</button>
+        <button class="btn ghost" data-diff="medium">中级 16×16 · 40雷</button>
+        <button class="btn ghost" data-diff="hard">高级 16×30 · 99雷</button>
+      </div>
+      <div class="mine-bar">
+        <div class="mine-disp" id="mineMines">💣 10</div>
+        <div class="mine-face" id="mineFace" title="重新开始">🙂</div>
+        <div class="mine-disp" id="mineTime">⏱ 0</div>
+      </div>
+      <div class="mine-wrap">
+        <div class="mine-board" id="mineBoard"></div>
+        <div class="hint" id="mineMsg" style="margin:0">点任意格子开始游戏。电脑端可右键插旗，手机端点格子后长按也能插旗。</div>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2001,6 +2041,7 @@
     if (id !== "lotto" && typeof lottoStop === "function") lottoStop();
     if (id !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
     if (id !== "tetris" && typeof tetrisStop === "function") tetrisStop();
+    if (id !== "mine" && typeof mineStop === "function") mineStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2059,7 +2100,8 @@
     gm2048: "2048 数字 合并 方块 游戏 益智 滑块 方块合并 经典 解压 休闲 手速 合成 数字游戏 贪吃",
     tetris: "俄罗斯方块 方块 俄罗斯 tetris 消除 消行 堆叠 拼图 街机 经典 手速 休闲 复古 俄罗斯方块游戏",
     qfav: "收藏 名言 语录 金句 喜欢 句子 摘抄 夹 我的收藏 灵感 回味",
-    habit: "习惯 打卡 签到 坚持 自律 记录 日历 热力 打卡表 streak 每日 养成 连续"
+    habit: "习惯 打卡 签到 坚持 自律 记录 日历 热力 打卡表 streak 每日 养成 连续",
+    mine: "扫雷 雷 地雷 推理 数字 经典 游戏 排雷 踩雷 休闲 益智 逻辑 翻开 标记 flag 解谜 挑战 反应"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3697,7 +3739,8 @@
     { emoji: "🔢", name: "2048 玩家", desc: "玩过一局 2048", test: (u) => (u.gm2048 || 0) >= 1 },
     { emoji: "🏅", name: "合体大师", desc: "在 2048 里拼出 2048 方块", test: (u) => (u.gm2048max || 0) >= 2048 },
     { emoji: "🎮", name: "方块大师", desc: "玩过一局俄罗斯方块", test: (u) => (u.tetris || 0) >= 1 },
-    { emoji: "🧱", name: "消行狂魔", desc: "累计消除 40 行方块", test: (u) => (u.tetrisLines || 0) >= 40 }
+    { emoji: "🧱", name: "消行狂魔", desc: "累计消除 40 行方块", test: (u) => (u.tetrisLines || 0) >= 40 },
+    { emoji: "💣", name: "拆弹专家", desc: "通关一局扫雷", test: (u) => (u.mine || 0) >= 1 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4585,6 +4628,19 @@
     "随便不是摆烂，是先把眼前这件小事做了，剩下的交给时间。",
     "收藏夹里囤的不是句子，是你曾认真活过的那些瞬间。",
     "别等状态对了才开始，先开始，状态会自己跟上来。"
+  );
+  // —— 跟随扫雷 / 推理 / 翻开未知主题的新语录 ——
+  QUOTES.push(
+    "翻开第一个格子前，谁也不知道雷在哪——但点下去，路就自己显出来了。",
+    "第一次点永远安全，生活也常这样：先动手，答案才肯露面。",
+    "数字不是束缚，是线索；身边一圈小数字，正在悄悄告诉你哪儿别踏。",
+    "旗子插下去，不是因为确定，是因为你愿意为「可能」做个标记。",
+    "最大的空地往往连着最多的雷区，别被一片开阔骗了。",
+    "踩过一次雷才知道痛，但下一局，你已经比上一局更会躲。",
+    "有些格子要翻开，有些要插旗，分不清的时候，先别动也是一种聪明。",
+    "通关的瞬间才懂：所谓运气，不过是耐心把每个安全格都点完。",
+    "推理到最后一步，剩下的那个没翻开的，要么是雷，要么是惊喜。",
+    "扫雷教会我一件事——把不确定一格一格点开，比干坐着怕踩雷强。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -5796,6 +5852,170 @@
     if (!confirm("确定清空所有习惯与打卡记录？")) return;
     habits.list = []; saveHabit(); renderHabit(); toast("已清空打卡记录");
   });
+
+  /* ---------- 扫雷 ---------- */
+  const mineStop = (function () {
+    const board = $("mineBoard"); if (!board) return function () {};
+    const elMines = $("mineMines"), elTime = $("mineTime"), elFace = $("mineFace"), elMsg = $("mineMsg");
+    const DIFFS = {
+      easy:   { r: 9,  c: 9,  m: 10 },
+      medium: { r: 16, c: 16, m: 40 },
+      hard:   { r: 16, c: 30, m: 99 }
+    };
+    let diff = "easy", R, C, M, grid, revealed, flagged;
+    let started = false, over = false, firstClick = true, timer = null, secs = 0, longPressed = false;
+
+    function sizeCell() {
+      const d = DIFFS[diff];
+      const avail = Math.min(window.innerWidth - 48, 940);
+      let s = Math.floor(avail / d.c) - 2;
+      s = Math.max(16, Math.min(30, s));
+      board.style.setProperty("--mc", s + "px");
+      board.style.gridTemplateColumns = "repeat(" + d.c + ", var(--mc))";
+    }
+    function newGame() {
+      const d = DIFFS[diff]; R = d.r; C = d.c; M = d.m;
+      grid = []; revealed = []; flagged = [];
+      for (let i = 0; i < R; i++) { grid.push(new Array(C).fill(0)); revealed.push(new Array(C).fill(false)); flagged.push(new Array(C).fill(false)); }
+      started = false; over = false; firstClick = true; secs = 0; stopTimer();
+      elTime.textContent = "⏱ 0";
+      elMines.textContent = "💣 " + M;
+      elFace.textContent = "🙂";
+      elMsg.textContent = "点任意格子开始游戏。";
+      render();
+    }
+    function placeMines(sr, sc) {
+      const ban = new Set();
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { const nr = sr + dr, nc = sc + dc; if (nr >= 0 && nr < R && nc >= 0 && nc < C) ban.add(nr * C + nc); }
+      let placed = 0;
+      while (placed < M) {
+        const idx = rand(R * C);
+        if (grid[Math.floor(idx / C)][idx % C] === -1) continue;
+        if (ban.has(idx)) continue;
+        grid[Math.floor(idx / C)][idx % C] = -1; placed++;
+      }
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+        if (grid[r][c] === -1) continue;
+        let n = 0;
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { const nr = r + dr, nc = c + dc; if (nr >= 0 && nr < R && nc >= 0 && nc < C && grid[nr][nc] === -1) n++; }
+        grid[r][c] = n;
+      }
+    }
+    function render() {
+      sizeCell();
+      board.innerHTML = "";
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+        const cell = document.createElement("div");
+        cell.className = "mine-cell";
+        cell.dataset.r = r; cell.dataset.c = c;
+        const v = grid[r][c], op = revealed[r][c], fl = flagged[r][c];
+        if (op) {
+          cell.classList.add("open");
+          if (v === -1) { cell.textContent = "💣"; cell.classList.add("mine-hit"); }
+          else if (v > 0) { cell.textContent = v; cell.classList.add("c" + v); }
+        } else if (fl) { cell.textContent = "🚩"; cell.classList.add("flag"); }
+        board.appendChild(cell);
+      }
+    }
+    function flood(sr, sc) {
+      const stack = [[sr, sc]];
+      while (stack.length) {
+        const p = stack.pop(); const r = p[0], c = p[1];
+        if (r < 0 || r >= R || c < 0 || c >= C) continue;
+        if (revealed[r][c] || flagged[r][c]) continue;
+        revealed[r][c] = true;
+        if (grid[r][c] === -1) continue;
+        if (grid[r][c] === 0) for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { if (dr === 0 && dc === 0) continue; stack.push([r + dr, c + dc]); }
+      }
+    }
+    function countFlags() { let n = 0; for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) if (flagged[r][c]) n++; return n; }
+    function checkWin() {
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) if (!revealed[r][c] && grid[r][c] !== -1) return;
+      win();
+    }
+    function win() {
+      over = true; stopTimer();
+      elFace.textContent = "😎";
+      elMsg.textContent = "🎉 通关！用时 " + secs + " 秒，地雷全找到啦！";
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) if (grid[r][c] === -1) flagged[r][c] = true;
+      render();
+      bumpUsage("mine");
+      if (settings && settings.sound) playDing();
+      confettiBurst(70);
+      toast("扫雷通关！🎉");
+    }
+    function lose(sr, sc) {
+      over = true; stopTimer();
+      elFace.textContent = "💀";
+      elMsg.textContent = "💥 踩雷了！再试一次？";
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) if (grid[r][c] === -1 && !flagged[r][c]) revealed[r][c] = true;
+      if (sr != null) revealed[sr][sc] = true;
+      render();
+      for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+        if (flagged[r][c] && grid[r][c] !== -1) { const el = board.querySelector('[data-r="' + r + '"][data-c="' + c + '"]'); if (el) el.textContent = "❌"; }
+      }
+      toast("踩雷了 💥");
+    }
+    function startTimer() { stopTimer(); timer = setInterval(function () { secs++; elTime.textContent = "⏱ " + secs; }, 1000); }
+    function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+    function reveal(r, c) {
+      if (over || revealed[r][c] || flagged[r][c]) return;
+      if (firstClick) { placeMines(r, c); firstClick = false; started = true; startTimer(); }
+      flood(r, c);
+      render();
+      checkWin();
+    }
+    function chord(r, c) {
+      if (grid[r][c] <= 0 || over) return;
+      let f = 0;
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { const nr = r + dr, nc = c + dc; if (nr >= 0 && nr < R && nc >= 0 && nc < C && flagged[nr][nc]) f++; }
+      if (f !== grid[r][c]) return;
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        const nr = r + dr, nc = c + dc;
+        if (nr < 0 || nr >= R || nc < 0 || nc >= C) continue;
+        if (!revealed[nr][nc] && !flagged[nr][nc]) {
+          if (grid[nr][nc] === -1) { lose(nr, nc); return; }
+          reveal(nr, nc);
+          if (over) return;
+        }
+      }
+    }
+    function toggleFlag(r, c) {
+      if (over || revealed[r][c]) return;
+      flagged[r][c] = !flagged[r][c];
+      elMines.textContent = "💣 " + (M - countFlags());
+      render();
+    }
+    board.addEventListener("click", function (e) {
+      if (longPressed) { longPressed = false; return; }
+      const t = e.target.closest(".mine-cell"); if (!t || over) return;
+      const r = +t.dataset.r, c = +t.dataset.c;
+      if (revealed[r][c]) { chord(r, c); return; }
+      if (flagged[r][c]) return;
+      if (grid[r][c] === -1) { lose(r, c); return; }
+      reveal(r, c);
+    });
+    let touchTimer = null;
+    board.addEventListener("touchstart", function (e) {
+      const t = e.target.closest(".mine-cell"); if (!t) return;
+      longPressed = false;
+      touchTimer = setTimeout(function () { longPressed = true; toggleFlag(+t.dataset.r, +t.dataset.c); }, 420);
+    }, { passive: true });
+    board.addEventListener("touchend", function () { if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } });
+    board.addEventListener("touchmove", function () { if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } }, { passive: true });
+    board.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+      const t = e.target.closest(".mine-cell"); if (!t || over) return;
+      toggleFlag(+t.dataset.r, +t.dataset.c);
+    });
+    elFace.addEventListener("click", function () { if (typeof playClick === "function") playClick(); newGame(); });
+    document.querySelectorAll("[data-diff]").forEach(function (b) {
+      b.addEventListener("click", function () { if (typeof playClick === "function") playClick(); diff = b.dataset.diff; newGame(); });
+    });
+    window.addEventListener("resize", function () { if (document.getElementById("mine") && document.getElementById("mine").classList.contains("active")) sizeCell(); });
+    newGame();
+    return stopTimer;
+  })();
 
 })();
 </script>
