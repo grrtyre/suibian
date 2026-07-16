@@ -845,7 +845,26 @@
   .mine-cell.flag { color:#e74c3c; background:var(--card-2); }
   .mine-cell.mine-hit { background:#e74c3c; color:#fff; }
   .mine-cell.boom { background:#ffce54; }
-  .mine-cell.c1{color:#1976d2}.mine-cell.c2{color:#388e3c}.mine-cell.c3{color:#d32f2f}.mine-cell.c4{color:#7b1fa2}.mine-cell.c5{color:#c2185b}.mine-cell.c6{color:#0097a7}.mine-cell.c7{color:#455a64}.mine-cell.c8{color:#616161}
+  .mine-cell.c1{color:#1976d2}.mine-cell.c2{color:#388e3c}.mine-cell.c3{color:#d32f2f}.mine-cell.c4{color:#7b1fa2}.mine-cell.c5{color:#c2185b}.mine-cell.c6{color:#0097a7}.mine-cell.c7{color:#455a64}  .mine-cell.c8{color:#616161}
+
+  /* ---------- 数独 ---------- */
+  .sud-grid { display:grid; grid-template-columns:repeat(9,1fr); gap:1px; width:min(94vw,420px); margin:14px auto 6px; background:var(--line); border:2px solid var(--line); border-radius:10px; overflow:hidden; touch-action:manipulation; }
+  .sud-cell { aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; font-size:clamp(15px,4.8vw,22px); font-weight:600; background:var(--card); color:var(--text); cursor:pointer; user-select:none; -webkit-user-select:none; position:relative; transition:background .1s; }
+  .sud-cell.given { background:var(--card-2); color:var(--accent-3); font-weight:800; }
+  .sud-cell.sel { background:rgba(124,108,255,.30); box-shadow:inset 0 0 0 2px var(--accent-3); }
+  .sud-cell.peer { background:rgba(255,255,255,.06); }
+  .sud-cell.wrong { color:#ff5a5a !important; }
+  .sud-cell.win { color:#4be3a5 !important; }
+  .sud-cell.br { border-right:2px solid var(--line); }
+  .sud-cell.bb { border-bottom:2px solid var(--line); }
+  .sud-notes { position:absolute; inset:0; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); font-size:9px; color:var(--muted); font-weight:600; line-height:1; }
+  .sud-notes span { display:flex; align-items:center; justify-content:center; }
+  .sud-bar { display:flex; justify-content:space-between; align-items:center; width:min(94vw,420px); margin:8px auto 0; color:var(--muted); font-size:14px; }
+  .sud-best { color:var(--accent-2); }
+  .sud-pad { display:grid; grid-template-columns:repeat(9,1fr); gap:6px; width:min(94vw,420px); margin:12px auto 0; }
+  .sud-pad button { aspect-ratio:1/1; border:none; border-radius:8px; background:var(--card-2); color:var(--text); font-size:18px; font-weight:700; cursor:pointer; transition:transform .08s, background .12s; }
+  .sud-pad button:active { transform:scale(.9); background:var(--accent-3); }
+  .sud-pad button.done { opacity:.32; }
 
 </style>
 </head>
@@ -916,6 +935,7 @@
       <button data-tab="qfav">名言收藏</button>
       <button data-tab="habit">习惯打卡</button>
       <button data-tab="mine">💣 扫雷</button>
+      <button data-tab="sudoku">🎯 数独</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1855,6 +1875,38 @@
     </div>
   </section>
 
+  <!-- 数独 -->
+  <section class="panel" id="sudoku">
+    <div class="card">
+      <h2>🎯 数独</h2>
+      <div class="hint">9×9 的格子里，每个数字 1–9 在每行、每列、每个 3×3 宫格都只出现一次。点格子选中它，再用下方数字键落子；卡住了就「检查」或「提示」一下。四档难度，最佳用时本地保存。</div>
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost sud-diff on" data-d="easy">简单</button>
+        <button class="btn ghost sud-diff" data-d="medium">中等</button>
+        <button class="btn ghost sud-diff" data-d="hard">困难</button>
+        <button class="btn ghost sud-diff" data-d="expert">专家</button>
+      </div>
+      <div class="sud-bar">
+        <span id="sudTime">⏱ 00:00</span>
+        <span id="sudLevel" class="sud-best"></span>
+      </div>
+      <div class="sud-grid" id="sudokuBoard"></div>
+      <div class="sud-pad" id="sudPad">
+        <button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button>
+        <button data-n="4">4</button><button data-n="5">5</button><button data-n="6">6</button>
+        <button data-n="7">7</button><button data-n="8">8</button><button data-n="9">9</button>
+      </div>
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn ghost" id="sudNotes">✏️ 笔记</button>
+        <button class="btn ghost" id="sudErase">⌫ 擦除</button>
+        <button class="btn ghost" id="sudCheck">🔍 检查</button>
+        <button class="btn ghost" id="sudHint">💡 提示</button>
+        <button class="btn" id="sudNew">🔄 新游戏</button>
+      </div>
+      <div class="hint" id="sudMsg" style="margin-top:10px;text-align:center">选好难度，开始填数吧。</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2045,6 +2097,8 @@
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
+    if (id === "sudoku") sudokuResume();
+    if (id !== "sudoku") sudokuStopTimer();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -2101,7 +2155,20 @@
     tetris: "俄罗斯方块 方块 俄罗斯 tetris 消除 消行 堆叠 拼图 街机 经典 手速 休闲 复古 俄罗斯方块游戏",
     qfav: "收藏 名言 语录 金句 喜欢 句子 摘抄 夹 我的收藏 灵感 回味",
     habit: "习惯 打卡 签到 坚持 自律 记录 日历 热力 打卡表 streak 每日 养成 连续",
-    mine: "扫雷 雷 地雷 推理 数字 经典 游戏 排雷 踩雷 休闲 益智 逻辑 翻开 标记 flag 解谜 挑战 反应"
+    mine: "扫雷 雷 地雷 推理 数字 经典 游戏 排雷 踩雷 休闲 益智 逻辑 翻开 标记 flag 解谜 挑战 反应",
+    sudoku: "数独 九宫格 填数 逻辑 推理 数字游戏 益智 sudoku 思维 解谜 宫格 行 列 唯一解 安静 专注 脑力",
+    wheel: "转盘 幸运转盘 抽奖 旋转 转圈 运气 指针 转盘抽奖 转一转",
+    coin: "硬币 抛硬币 正反面 决定 天注定 翻面 抛一下",
+    eat: "吃 吃什么 今天吃啥 饭 美食 点外卖 口味 餐厅 食堂 夜宵 选择困难 中午吃啥",
+    rand: "随机数 数字 随机 生成 整数 范围 选号 抽数 随机整数",
+    tod: "真心话 大冒险 聚会 游戏 喝酒 truth dare 破冰 派对 热场",
+    rps: "石头 剪刀 布 猜拳 游戏 胜负 平 机器人 出拳 石头剪刀布",
+    color: "颜色 色卡 配色 灵感 调色 设计 取色 渐变 色板",
+    oracle: "神谕 占卜 球 玄学 命运 预测 卦 摇一摇 yes no 问宇宙",
+    timer: "倒计时 计时 专注 番茄 时间 闹钟 提醒 掐表 分钟 计时器",
+    nick: "网名 昵称 名字 取名 生成 id 绰号 可爱 中二 网名生成",
+    speak: "语音 朗读 播报 发音 tts 念 文字转语音 普通话 念出来",
+    guess: "猜数字 数字 游戏 猜数 博弈 心思 大了 小了 100 心里想"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3740,7 +3807,8 @@
     { emoji: "🏅", name: "合体大师", desc: "在 2048 里拼出 2048 方块", test: (u) => (u.gm2048max || 0) >= 2048 },
     { emoji: "🎮", name: "方块大师", desc: "玩过一局俄罗斯方块", test: (u) => (u.tetris || 0) >= 1 },
     { emoji: "🧱", name: "消行狂魔", desc: "累计消除 40 行方块", test: (u) => (u.tetrisLines || 0) >= 40 },
-    { emoji: "💣", name: "拆弹专家", desc: "通关一局扫雷", test: (u) => (u.mine || 0) >= 1 }
+    { emoji: "💣", name: "拆弹专家", desc: "通关一局扫雷", test: (u) => (u.mine || 0) >= 1 },
+    { emoji: "🎯", name: "数独高手", desc: "完成一局数独", test: (u) => (u.sudoku || 0) >= 1 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4641,6 +4709,19 @@
     "通关的瞬间才懂：所谓运气，不过是耐心把每个安全格都点完。",
     "推理到最后一步，剩下的那个没翻开的，要么是雷，要么是惊喜。",
     "扫雷教会我一件事——把不确定一格一格点开，比干坐着怕踩雷强。"
+  );
+  // —— 跟随数独 / 逻辑 / 安静专注主题的新语录 ——
+  QUOTES.push(
+    "数独最像人生：横竖都得顾，还得照顾好每一个小宫格。",
+    "一个格子填错了别慌，从它牵连的行与列重新看一遍就好。",
+    "唯一解的意思是——再乱的局，也总有且只有一种安静的秩序。",
+    "慢慢填，别急着下笔；想清楚的那一步，往往最稳。",
+    "空白不是没答案，是还没轮到它亮起来。",
+    "有些数你一眼就认得，有些要绕一圈才回来——耐心点是值得的。",
+    "把笔记标在角落，不是犹豫，是给未来的自己留个提示。",
+    "卡住时换个格子下手，死磕一处反而越填越乱。",
+    "九宫格里装的下九个数字，也装得下你此刻想理清的乱麻。",
+    "通关的那一刻才懂：所谓逻辑，不过是把每一小格都认真对待。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -6015,6 +6096,233 @@
     window.addEventListener("resize", function () { if (document.getElementById("mine") && document.getElementById("mine").classList.contains("active")) sizeCell(); });
     newGame();
     return stopTimer;
+  })();
+
+  /* ---------- 数独（Sudoku） ---------- */
+  const SUDOKU_DIFF = { easy: 40, medium: 32, hard: 28, expert: 24 }; // 保留线索数
+  let sudSol = [], sudGiven = [], sudBoard = [], sudNotes = [], sudCells = [];
+  let sudSel = -1, sudDiff = "easy", sudNotesMode = false, sudTimer = 0, sudTimerId = null, sudRunning = false, sudDone = false, sudGenerated = false;
+
+  function sudShuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+  function sudSolveFull() {
+    const g = new Array(81).fill(0);
+    function ok(p, v) {
+      const r = (p / 9 | 0), c = p % 9, br = (r / 3 | 0) * 3, bc = (c / 3 | 0) * 3;
+      for (let i = 0; i < 9; i++) { if (g[r * 9 + i] === v) return false; if (g[i * 9 + c] === v) return false; }
+      for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) if (g[(br + i) * 9 + (bc + j)] === v) return false;
+      return true;
+    }
+    function fill(p) {
+      if (p === 81) return true;
+      if (g[p] !== 0) return fill(p + 1);
+      const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9]; sudShuffle(nums);
+      for (const v of nums) { if (ok(p, v)) { g[p] = v; if (fill(p + 1)) return true; g[p] = 0; } }
+      return false;
+    }
+    fill(0);
+    return g;
+  }
+
+  let sudNodes = 0;
+  function sudCount(g, limit) {
+    sudNodes++;
+    if (sudNodes > 6000) return limit + 1; // 预算内无法判定 → 视为不唯一，保证不卡死
+    let p = -1;
+    for (let i = 0; i < 81; i++) if (g[i] === 0) { p = i; break; }
+    if (p === -1) return 1;
+    const r = (p / 9 | 0), c = p % 9, br = (r / 3 | 0) * 3, bc = (c / 3 | 0) * 3;
+    const used = new Uint8Array(10);
+    for (let i = 0; i < 9; i++) { used[g[r * 9 + i]] = 1; used[g[i * 9 + c]] = 1; }
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) used[g[(br + i) * 9 + (bc + j)]] = 1;
+    let cnt = 0;
+    for (let v = 1; v <= 9; v++) {
+      if (used[v]) continue;
+      g[p] = v; cnt += sudCount(g, limit); g[p] = 0;
+      if (cnt >= limit) return cnt;
+    }
+    return cnt;
+  }
+  function sudUnique(puzzle) { sudNodes = 0; return sudCount(puzzle.slice(), 2) === 1; }
+
+  function sudGenerate(clues) {
+    const sol = sudSolveFull();
+    const puzzle = sol.slice();
+    const order = []; for (let i = 0; i < 81; i++) order.push(i);
+    sudShuffle(order);
+    let filled = 81;
+    for (const p of order) {
+      if (filled <= clues) break;
+      const bak = puzzle[p];
+      puzzle[p] = 0;
+      if (!sudUnique(puzzle)) puzzle[p] = bak; else filled--;
+    }
+    return { sol, puzzle };
+  }
+
+  function sudDiffName() { return { easy: "简单", medium: "中等", hard: "困难", expert: "专家" }[sudDiff] || "简单"; }
+  function sudFmt(s) { const m = (s / 60 | 0), ss = s % 60; return (m < 10 ? "0" : "") + m + ":" + (ss < 10 ? "0" : "") + ss; }
+
+  function sudRender() {
+    const board = $("sudokuBoard");
+    if (!sudCells.length) {
+      board.innerHTML = "";
+      sudCells = [];
+      for (let i = 0; i < 81; i++) {
+        const r = (i / 9 | 0), c = i % 9;
+        const cell = document.createElement("div");
+        cell.className = "sud-cell"
+          + (c % 3 === 2 && c !== 8 ? " br" : "")
+          + (r % 3 === 2 && r !== 8 ? " bb" : "");
+        cell.dataset.i = i;
+        board.appendChild(cell);
+        sudCells.push(cell);
+      }
+    }
+    for (let i = 0; i < 81; i++) {
+      const cell = sudCells[i];
+      cell.classList.remove("win", "wrong");
+      const given = sudGiven[i];
+      cell.classList.toggle("given", given);
+      cell.classList.toggle("sel", i === sudSel);
+      let peer = false;
+      if (sudSel >= 0 && i !== sudSel) {
+        const sr = (sudSel / 9 | 0), sc = sudSel % 9, r = (i / 9 | 0), c = i % 9;
+        if (sr === r || sc === c || ((sr / 3 | 0) === (r / 3 | 0) && (sc / 3 | 0) === (c / 3 | 0))) peer = true;
+      }
+      cell.classList.toggle("peer", peer);
+      const v = sudBoard[i];
+      if (v) {
+        cell.textContent = v;
+      } else if (sudNotes[i]) {
+        let html = '<div class="sud-notes">';
+        for (let n = 1; n <= 9; n++) html += "<span>" + ((sudNotes[i] >> (n - 1)) & 1 ? n : "") + "</span>";
+        html += "</div>";
+        cell.innerHTML = html;
+      } else {
+        cell.textContent = "";
+      }
+    }
+  }
+
+  function sudUpdatePad() {
+    const counts = new Array(10).fill(0);
+    for (const v of sudBoard) if (v) counts[v]++;
+    const pad = $("sudPad");
+    if (pad) pad.querySelectorAll("button").forEach((b) => { b.classList.toggle("done", counts[+b.dataset.n] >= 9); });
+  }
+
+  function sudSelect(i) { sudSel = i; sudRender(); }
+  function sudFill(n) {
+    if (sudSel < 0 || sudGiven[sudSel] || sudDone) return;
+    if (sudNotesMode) { sudBoard[sudSel] = 0; sudNotes[sudSel] ^= (1 << (n - 1)); }
+    else { sudBoard[sudSel] = (sudBoard[sudSel] === n) ? 0 : n; sudNotes[sudSel] = 0; }
+    if (typeof playClick === "function") playClick();
+    sudRender(); sudUpdatePad(); sudCheckWin();
+  }
+  function sudErase() {
+    if (sudSel < 0 || sudGiven[sudSel]) return;
+    sudBoard[sudSel] = 0; sudNotes[sudSel] = 0;
+    if (typeof playClick === "function") playClick();
+    sudRender(); sudUpdatePad();
+  }
+  function sudCheck() {
+    let wrong = 0;
+    for (let i = 0; i < 81; i++) {
+      const cell = sudCells[i]; if (!cell) continue;
+      cell.classList.remove("wrong");
+      if (sudBoard[i] && sudBoard[i] !== sudSol[i]) { cell.classList.add("wrong"); wrong++; }
+    }
+    toast(wrong ? ("有 " + wrong + " 格填错了，红字已标出") : "目前填的都对 ✅");
+  }
+  function sudHint() {
+    const empties = [];
+    for (let i = 0; i < 81; i++) if (!sudBoard[i] && !sudGiven[i]) empties.push(i);
+    if (!empties.length) { toast("没有可提示的格子了"); return; }
+    const i = empties[rand(empties.length)];
+    sudBoard[i] = sudSol[i]; sudNotes[i] = 0; sudSel = i;
+    if (typeof playClick === "function") playClick();
+    sudRender(); sudUpdatePad(); sudCheckWin();
+  }
+  function sudCheckWin() {
+    if (sudDone) return;
+    for (let i = 0; i < 81; i++) if (sudBoard[i] !== sudSol[i]) return;
+    sudDone = true; sudokuStopTimer();
+    if (typeof playDing === "function") playDing();
+    if (typeof confettiBurst === "function") confettiBurst(130);
+    try { usage.sudoku = (usage.sudoku || 0) + 1; localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+    const key = "suibian_sudoku_best_" + sudDiff;
+    let best = parseInt(localStorage.getItem(key) || "0", 10);
+    if (!best || sudTimer < best) {
+      best = sudTimer;
+      try { localStorage.setItem(key, String(best)); } catch (e) {}
+      toast("🎉 通关！新纪录 " + sudFmt(sudTimer));
+    } else toast("🎉 通关！用时 " + sudFmt(sudTimer));
+    const msg = $("sudMsg"); if (msg) msg.textContent = "搞定一局「" + sudDiffName() + "」难度，用时 " + sudFmt(sudTimer) + " 🎉";
+    for (const c of sudCells) c.classList.add("win");
+  }
+  function sudTick() { sudTimer++; const t = $("sudTime"); if (t) t.textContent = "⏱ " + sudFmt(sudTimer); }
+  function sudStartTimer() { sudokuStopTimer(); sudRunning = true; sudTimerId = setInterval(sudTick, 1000); }
+  function sudokuStopTimer() { sudRunning = false; if (sudTimerId) { clearInterval(sudTimerId); sudTimerId = null; } }
+
+  function sudNew(diff) {
+    sudDiff = diff || sudDiff || "easy";
+    document.querySelectorAll(".sud-diff").forEach((b) => b.classList.toggle("on", b.dataset.d === sudDiff));
+    const clues = SUDOKU_DIFF[sudDiff];
+    const gen = sudGenerate(clues);
+    sudSol = gen.sol; sudGiven = gen.puzzle.map((v) => v !== 0); sudBoard = gen.puzzle.slice(); sudNotes = new Array(81).fill(0);
+    sudSel = -1; sudDone = false; sudNotesMode = false;
+    const nb = $("sudNotes"); if (nb) nb.classList.remove("on");
+    sudCells = [];
+    sudRender(); sudUpdatePad();
+    sudTimer = 0; const t = $("sudTime"); if (t) t.textContent = "⏱ 00:00";
+    const best = parseInt(localStorage.getItem("suibian_sudoku_best_" + sudDiff) || "0", 10);
+    const lv = $("sudLevel"); if (lv) lv.textContent = best ? ("最佳 " + sudFmt(best)) : "";
+    const msg = $("sudMsg"); if (msg) msg.textContent = "「" + sudDiffName() + "」难度开局，加油！";
+    sudGenerated = true;
+  }
+  function sudokuResume() { if (!sudGenerated) sudNew(); else sudStartTimer(); }
+  function sudokuNew() { sudNew(); }
+
+  (function sudokuInit() {
+    const board = $("sudokuBoard");
+    if (board) {
+      board.addEventListener("click", (e) => { const c = e.target.closest(".sud-cell"); if (c) sudSelect(+c.dataset.i); });
+      board.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        const c = e.target.closest(".sud-cell"); if (!c) return;
+        const i = +c.dataset.i; if (sudGiven[i]) return;
+        sudBoard[i] = 0; sudNotes[i] = 0; sudSel = i; sudRender(); sudUpdatePad();
+      });
+    }
+    const pad = $("sudPad");
+    if (pad) pad.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) sudFill(+b.dataset.n); });
+    document.querySelectorAll(".sud-diff").forEach((b) => b.addEventListener("click", () => { if (typeof playClick === "function") playClick(); sudNew(b.dataset.d); }));
+    const bn = $("sudNotes"); if (bn) bn.addEventListener("click", () => { sudNotesMode = !sudNotesMode; bn.classList.toggle("on", sudNotesMode); });
+    const be = $("sudErase"); if (be) be.addEventListener("click", sudErase);
+    const bc = $("sudCheck"); if (bc) bc.addEventListener("click", sudCheck);
+    const bh = $("sudHint"); if (bh) bh.addEventListener("click", sudHint);
+    const bnw = $("sudNew"); if (bnw) bnw.addEventListener("click", () => { if (typeof playClick === "function") playClick(); sudNew(); });
+    // 键盘：捕获阶段拦截，避免和全局「1–9 直达工具」快捷键冲突
+    document.addEventListener("keydown", (e) => {
+      const panel = document.getElementById("sudoku");
+      if (!panel || !panel.classList.contains("active")) return;
+      const tag = (e.target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      const k = e.key;
+      if (k >= "1" && k <= "9") { sudFill(+k); e.preventDefault(); e.stopPropagation(); return; }
+      if (k === "Backspace" || k === "Delete" || k === "0") { sudErase(); e.preventDefault(); e.stopPropagation(); return; }
+      if (sudSel < 0) return;
+      let r = (sudSel / 9 | 0), c = sudSel % 9, nr = r, nc = c;
+      if (k === "ArrowUp") nr = Math.max(0, r - 1);
+      else if (k === "ArrowDown") nr = Math.min(8, r + 1);
+      else if (k === "ArrowLeft") nc = Math.max(0, c - 1);
+      else if (k === "ArrowRight") nc = Math.min(8, c + 1);
+      else return;
+      e.preventDefault(); e.stopPropagation(); sudSelect(nr * 9 + nc);
+    }, true);
+    // 预生成一局，进入标签页时直接可玩
+    sudNew();
   })();
 
 })();
