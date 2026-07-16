@@ -866,6 +866,30 @@
   .sud-pad button:active { transform:scale(.9); background:var(--accent-3); }
   .sud-pad button.done { opacity:.32; }
 
+  /* —— 单位换算器 —— */
+  .conv-cats { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:4px 0 12px; }
+  .conv-cat.on { background:var(--accent); color:#10131a; border-color:var(--accent); }
+  .conv-row { display:flex; gap:8px; align-items:stretch; max-width:460px; margin:0 auto; }
+  .conv-val { flex:1 1 auto; min-width:0; padding:11px 12px; border-radius:12px; border:1px solid var(--line); background:var(--input-bg); color:var(--text); font-size:17px; font-weight:600; }
+  .conv-unit { flex:0 0 46%; max-width:200px; padding:11px 10px; border-radius:12px; border:1px solid var(--line); background:var(--input-bg); color:var(--text); font-size:14px; }
+  .conv-swap { text-align:center; margin:6px 0; }
+  .conv-swap .btn { font-size:13px; padding:6px 14px; }
+
+  /* —— 节拍器 —— */
+  .metro-bpm { display:flex; align-items:center; justify-content:center; gap:14px; margin:10px 0 6px; }
+  .metro-num { font-size:40px; font-weight:800; line-height:1; color:var(--text); min-width:120px; text-align:center; }
+  .metro-num small { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-top:2px; letter-spacing:2px; }
+  .metro-bpm .btn { width:46px; height:46px; font-size:22px; border-radius:50%; padding:0; }
+  #metroSlider { width:min(92vw,420px); display:block; margin:12px auto 4px; accent-color:var(--accent); }
+  .metro-sigs { display:flex; gap:6px; justify-content:center; margin:6px 0 10px; }
+  .metro-sigs .btn { font-size:13px; padding:6px 12px; }
+  .metro-sigs .btn.on { background:var(--accent); color:#10131a; border-color:var(--accent); }
+  .metro-beats { display:flex; gap:10px; justify-content:center; margin:6px 0 14px; }
+  .metro-dot { width:18px; height:18px; border-radius:50%; background:var(--card-2); border:2px solid var(--line); transition:transform .08s, background .08s, box-shadow .08s; }
+  .metro-dot.on { background:var(--accent); border-color:var(--accent); transform:scale(1.35); box-shadow:0 0 14px var(--accent); }
+  .metro-dot.first.on { background:#ffd166; border-color:#ffd166; box-shadow:0 0 16px #ffd166; }
+  #metroToggle.on { background:var(--accent); color:#10131a; border-color:var(--accent); }
+
 </style>
 </head>
 <body>
@@ -936,6 +960,8 @@
       <button data-tab="habit">习惯打卡</button>
       <button data-tab="mine">💣 扫雷</button>
       <button data-tab="sudoku">🎯 数独</button>
+      <button data-tab="conv">📐 单位换算</button>
+      <button data-tab="metro">🎵 节拍器</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1907,6 +1933,51 @@
     </div>
   </section>
 
+  <!-- 单位换算器 -->
+  <section class="panel" id="conv">
+    <div class="card">
+      <h2>📐 单位换算器</h2>
+      <div class="hint">长度、重量、温度、面积、体积、速度、时间、数据、能量、压强，随手互转。改任意一边，另一边实时跟随。</div>
+      <div class="conv-cats" id="convCats"></div>
+      <div class="conv-row">
+        <input type="number" id="convFromVal" class="conv-val" value="1" inputmode="decimal" />
+        <select id="convFromUnit" class="conv-unit"></select>
+      </div>
+      <div class="conv-swap">
+        <button class="btn ghost" id="convSwap">⇅ 交换单位</button>
+      </div>
+      <div class="conv-row">
+        <input type="number" id="convToVal" class="conv-val" inputmode="decimal" />
+        <select id="convToUnit" class="conv-unit"></select>
+      </div>
+      <div class="row" style="justify-content:center;margin-top:6px">
+        <button class="btn ghost" id="convCopy">📋 复制结果</button>
+      </div>
+      <div class="result" id="convResult">结果会显示在这里。</div>
+    </div>
+  </section>
+
+  <!-- 节拍器 -->
+  <section class="panel" id="metro">
+    <div class="card">
+      <h2>🎵 节拍器</h2>
+      <div class="hint">练琴、跑步、冥想都能用它卡节奏。拖滑块调速度，点「开始」让它替你打拍子；跟着点「测速」也能算出你的速度。</div>
+      <div class="metro-bpm">
+        <button class="btn ghost" id="metroMinus">−</button>
+        <div class="metro-num"><span id="metroBpm">120</span><small>BPM</small></div>
+        <button class="btn ghost" id="metroPlus">+</button>
+      </div>
+      <input type="range" id="metroSlider" min="40" max="240" value="120" />
+      <div class="metro-sigs" id="metroSigs"></div>
+      <div class="metro-beats" id="metroBeats"></div>
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="metroToggle">▶ 开始</button>
+        <button class="btn ghost" id="metroTap">👆 测速</button>
+      </div>
+      <div class="result" id="metroResult">点「开始」让节拍走起来。</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2071,6 +2142,7 @@
     if (b.dataset.tab !== "lotto" && typeof lottoStop === "function") lottoStop();
     if (b.dataset.tab !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
     if (b.dataset.tab !== "tetris" && typeof tetrisStop === "function") tetrisStop();
+    if (b.dataset.tab !== "metro" && typeof metroStop === "function") metroStop();
     if (b.dataset.tab === "qfav") renderQfav();
     if (b.dataset.tab === "habit") renderHabit();
   });
@@ -2094,6 +2166,7 @@
     if (id !== "gm2048" && typeof gm2048Stop === "function") gm2048Stop();
     if (id !== "tetris" && typeof tetrisStop === "function") tetrisStop();
     if (id !== "mine" && typeof mineStop === "function") mineStop();
+    if (id !== "metro" && typeof metroStop === "function") metroStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2168,7 +2241,9 @@
     timer: "倒计时 计时 专注 番茄 时间 闹钟 提醒 掐表 分钟 计时器",
     nick: "网名 昵称 名字 取名 生成 id 绰号 可爱 中二 网名生成",
     speak: "语音 朗读 播报 发音 tts 念 文字转语音 普通话 念出来",
-    guess: "猜数字 数字 游戏 猜数 博弈 心思 大了 小了 100 心里想"
+    guess: "猜数字 数字 游戏 猜数 博弈 心思 大了 小了 100 心里想",
+    conv: "单位 换算 转换 量纲 长度 重量 温度 面积 体积 速度 时间 数据 能量 压强 单位换算 计算器 convert 度量",
+    metro: "节拍器 节拍 速度 打拍子 练琴 节奏 鼓点 bpm 测速 节奏器 metronome 律动 卡拍 练耳"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3808,7 +3883,9 @@
     { emoji: "🎮", name: "方块大师", desc: "玩过一局俄罗斯方块", test: (u) => (u.tetris || 0) >= 1 },
     { emoji: "🧱", name: "消行狂魔", desc: "累计消除 40 行方块", test: (u) => (u.tetrisLines || 0) >= 40 },
     { emoji: "💣", name: "拆弹专家", desc: "通关一局扫雷", test: (u) => (u.mine || 0) >= 1 },
-    { emoji: "🎯", name: "数独高手", desc: "完成一局数独", test: (u) => (u.sudoku || 0) >= 1 }
+    { emoji: "🎯", name: "数独高手", desc: "完成一局数独", test: (u) => (u.sudoku || 0) >= 1 },
+    { emoji: "📐", name: "换算达人", desc: "用过 5 次单位换算器", test: (u) => (u.conv || 0) >= 5 },
+    { emoji: "🎵", name: "节奏大师", desc: "打过 10 次节拍器", test: (u) => (u.metro || 0) >= 10 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4722,6 +4799,19 @@
     "卡住时换个格子下手，死磕一处反而越填越乱。",
     "九宫格里装的下九个数字，也装得下你此刻想理清的乱麻。",
     "通关的那一刻才懂：所谓逻辑，不过是把每一小格都认真对待。"
+  );
+  // —— 跟随单位换算 / 节拍器 / 度量节奏主题的新语录 ——
+  QUOTES.push(
+    "1 米等于多少英寸不重要，重要的是你得先迈开腿去量一量这个世界。",
+    "换算的本质是换个单位看同一件事——换个角度，难题常常就变小了。",
+    "温度有摄氏和华氏，心情也一样：同一个人，换个计量方式就差出好几度。",
+    "节拍器从不催促你，它只是稳稳地数着拍子，提醒你慢下来也别停。",
+    "120 拍的歌和 60 拍的歌都是歌，快慢没有对错，合不合拍才是关键。",
+    "跟着节拍走，心就不容易乱；生活的节奏，也可以自己调。",
+    "单位再怎么换，那堆东西的总量没变——你纠结的，往往只是单位而已。",
+    "测一测你的节奏，也许你比自己以为的更有规律。",
+    "把大数换成小数看，把远方换算成脚下，事情就没那么吓人了。",
+    "随便不是乱来，是先把眼前的单位对齐，再决定往哪走。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -6326,6 +6416,216 @@
   })();
 
 })();
+  /* ---------- 单位换算器 ---------- */
+  const CONV = {
+    "长度": [
+      {n:"毫米(mm)",f:0.001},{n:"厘米(cm)",f:0.01},{n:"米(m)",f:1},{n:"千米(km)",f:1000},
+      {n:"英寸(in)",f:0.0254},{n:"英尺(ft)",f:0.3048},{n:"码(yd)",f:0.9144},
+      {n:"英里(mi)",f:1609.344},{n:"海里(nmi)",f:1852}
+    ],
+    "重量": [
+      {n:"毫克(mg)",f:0.000001},{n:"克(g)",f:0.001},{n:"千克(kg)",f:1},{n:"吨(t)",f:1000},
+      {n:"盎司(oz)",f:0.0283495},{n:"磅(lb)",f:0.453592},{n:"斤",f:0.5},{n:"两",f:0.05}
+    ],
+    "温度": [
+      {n:"摄氏度(°C)",toBase:x=>x,fromBase:x=>x},
+      {n:"华氏度(°F)",toBase:x=>(x-32)*5/9,fromBase:x=>x*9/5+32},
+      {n:"开尔文(K)",toBase:x=>x-273.15,fromBase:x=>x+273.15}
+    ],
+    "面积": [
+      {n:"平方毫米(mm²)",f:0.000001},{n:"平方厘米(cm²)",f:0.0001},{n:"平方米(m²)",f:1},
+      {n:"平方千米(km²)",f:1000000},{n:"公顷(ha)",f:10000},{n:"亩",f:666.6667},
+      {n:"平方英尺(ft²)",f:0.092903},{n:"英亩(acre)",f:4046.8564}
+    ],
+    "体积": [
+      {n:"毫升(mL)",f:0.001},{n:"升(L)",f:1},{n:"立方米(m³)",f:1000},
+      {n:"加仑(美)",f:3.78541},{n:"品脱(美)",f:0.473176},{n:"杯",f:0.24},
+      {n:"茶匙(tsp)",f:0.005},{n:"大匙(tbsp)",f:0.015}
+    ],
+    "速度": [
+      {n:"米/秒(m/s)",f:1},{n:"千米/时(km/h)",f:0.277778},{n:"英里/时(mph)",f:0.44704},
+      {n:"节(kn)",f:0.514444},{n:"英尺/秒(ft/s)",f:0.3048}
+    ],
+    "时间": [
+      {n:"毫秒(ms)",f:0.001},{n:"秒(s)",f:1},{n:"分钟(min)",f:60},
+      {n:"小时(h)",f:3600},{n:"天(d)",f:86400},{n:"周(wk)",f:604800}
+    ],
+    "数据": [
+      {n:"比特(bit)",f:0.125},{n:"字节(B)",f:1},{n:"千字节(KB)",f:1024},
+      {n:"兆字节(MB)",f:1048576},{n:"吉字节(GB)",f:1073741824},{n:"太字节(TB)",f:1099511627776}
+    ],
+    "能量": [
+      {n:"焦耳(J)",f:1},{n:"千焦(kJ)",f:1000},{n:"卡路里(cal)",f:4.184},
+      {n:"千卡(kcal)",f:4184},{n:"瓦时(Wh)",f:3600},{n:"千瓦时(kWh)",f:3600000}
+    ],
+    "压强": [
+      {n:"帕(Pa)",f:1},{n:"千帕(kPa)",f:1000},{n:"巴(bar)",f:100000},
+      {n:"标准大气压(atm)",f:101325},{n:"毫米汞柱(mmHg)",f:133.322},
+      {n:"磅/平方英寸(psi)",f:6894.76}
+    ]
+  };
+  const convCats=$("convCats"),convFromVal=$("convFromVal"),convToVal=$("convToVal"),
+        convFromUnit=$("convFromUnit"),convToUnit=$("convToUnit"),convResult=$("convResult");
+  let convCat="长度";
+  function convToBase(u,x){return u.toBase?u.toBase(x):x*(u.f||1);}
+  function convFromBase(u,x){return u.fromBase?u.fromBase(x):x/(u.f||1);}
+  function fmtNum(x){
+    if(!isFinite(x))return "—";
+    if(x===0)return "0";
+    const a=Math.abs(x);
+    if(a>=1e15||a<1e-6)return x.toExponential(4);
+    return (Math.round(x*1e10)/1e10).toString();
+  }
+  function convFillUnits(){
+    const units=CONV[convCat];
+    convFromUnit.innerHTML=units.map((u,i)=>`<option value="${i}">${u.n}</option>`).join("");
+    convToUnit.innerHTML=units.map((u,i)=>`<option value="${i}">${u.n}</option>`).join("");
+    if(convToUnit.options.length>1)convToUnit.selectedIndex=1;
+  }
+  function convRenderCats(){
+    convCats.innerHTML=Object.keys(CONV).map((c)=>
+      `<button class="btn ghost conv-cat${c===convCat?" on":""}" data-c="${c}">${c}</button>`).join("");
+    [...convCats.children].forEach((b)=>b.addEventListener("click",()=>{
+      convCat=b.dataset.c;playClick();convRenderCats();convFillUnits();convUpdate("from");bumpUsage("conv");
+    }));
+  }
+  function convUpdate(src){
+    const units=CONV[convCat];
+    const fi=+convFromUnit.value,ti=+convToUnit.value;
+    const fu=units[fi],tu=units[ti];
+    if(src==="to"){
+      const v=parseFloat(convToVal.value);
+      if(isNaN(v)){convFromVal.value="";convResult.textContent="请输入数值。";return;}
+      const out=convFromBase(fu,convToBase(tu,v));
+      convFromVal.value=fmtNum(out);
+      convResult.textContent=fmtNum(v)+" "+tu.n+" = "+fmtNum(out)+" "+fu.n;
+    }else{
+      const v=parseFloat(convFromVal.value);
+      if(isNaN(v)){convToVal.value="";convResult.textContent="请输入数值。";return;}
+      const out=convFromBase(tu,convToBase(fu,v));
+      convToVal.value=fmtNum(out);
+      convResult.textContent=fmtNum(v)+" "+fu.n+" = "+fmtNum(out)+" "+tu.n;
+    }
+  }
+  convFromVal.addEventListener("input",()=>convUpdate("from"));
+  convToVal.addEventListener("input",()=>convUpdate("to"));
+  convFromUnit.addEventListener("change",()=>convUpdate("from"));
+  convToUnit.addEventListener("change",()=>convUpdate("from"));
+  $("convSwap").addEventListener("click",()=>{
+    const a=convFromUnit.value;convFromUnit.value=convToUnit.value;convToUnit.value=a;
+    playClick();convUpdate("from");
+  });
+  $("convCopy").addEventListener("click",()=>{
+    const t=convResult.textContent;
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>toast("已复制 📋"),()=>toast(t));
+    else toast(t);
+    bumpUsage("conv");
+  });
+  convRenderCats();convFillUnits();convUpdate("from");
+
+  /* ---------- 节拍器 ---------- */
+  let metroPlaying=false,metroTimer=null,metroRAF=null,metroNext=0,metroBeat=0,metroQueue=[];
+  let metroBpm=120,metroBeats=4;
+  const metroSlider=$("metroSlider"),metroBpmEl=$("metroBpm"),metroBeatsEl=$("metroBeats"),
+        metroToggle=$("metroToggle"),metroResult=$("metroResult");
+  function metroClick(time,accent){
+    const ac=getAC();if(!ac)return;
+    try{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.connect(g);g.connect(ac.destination);
+      o.type="square";o.frequency.value=accent?1320:880;
+      g.gain.setValueAtTime(0.0001,time);
+      g.gain.exponentialRampToValueAtTime(accent?0.5:0.3,time+0.001);
+      g.gain.exponentialRampToValueAtTime(0.0001,time+0.05);
+      o.start(time);o.stop(time+0.06);
+    }catch(e){}
+  }
+  function metroSetBeats(n){
+    metroBeats=n;
+    metroBeatsEl.innerHTML="";
+    for(let i=0;i<n;i++){
+      const d=document.createElement("div");
+      d.className="metro-dot"+(i===0?" first":"");
+      metroBeatsEl.appendChild(d);
+    }
+    metroLight(-1);
+  }
+  function metroLight(i){
+    [...metroBeatsEl.children].forEach((d,idx)=>d.classList.toggle("on",idx===i));
+  }
+  function metroScheduler(){
+    const ac=getAC();if(!ac){metroStop();return;}
+    while(metroNext<ac.currentTime+0.12){
+      metroClick(metroNext,metroBeat===0);
+      metroQueue.push({beat:metroBeat,time:metroNext});
+      metroNext+=60/metroBpm;
+      metroBeat=(metroBeat+1)%metroBeats;
+    }
+    metroTimer=setTimeout(metroScheduler,25);
+  }
+  function metroDraw(){
+    if(!metroPlaying)return;
+    const ac=getAC();
+    while(metroQueue.length&&metroQueue[0].time<=ac.currentTime){
+      const n=metroQueue.shift();
+      metroLight(n.beat);
+    }
+    metroRAF=requestAnimationFrame(metroDraw);
+  }
+  function metroStart(){
+    const ac=getAC();
+    if(!ac){toast("当前浏览器不支持音频播放 🔇");return;}
+    if(metroPlaying)return;
+    metroPlaying=true;metroBeat=0;metroQueue=[];metroLight(-1);
+    metroNext=ac.currentTime+0.08;
+    metroToggle.textContent="⏹ 停止";metroToggle.classList.add("on");
+    metroResult.textContent="节拍运行中 · "+metroBpm+" BPM · "+metroBeats+" 拍";
+    metroScheduler();metroDraw();bumpUsage("metro");
+  }
+  function metroStop(){
+    metroPlaying=false;
+    if(metroTimer){clearTimeout(metroTimer);metroTimer=null;}
+    if(metroRAF){cancelAnimationFrame(metroRAF);metroRAF=null;}
+    metroToggle.textContent="▶ 开始";metroToggle.classList.remove("on");
+    metroLight(-1);
+  }
+  metroToggle.addEventListener("click",()=>{if(metroPlaying)metroStop();else metroStart();});
+  function metroSetBpm(v){
+    metroBpm=Math.max(40,Math.min(240,Math.round(v)));
+    metroBpmEl.textContent=metroBpm;metroSlider.value=metroBpm;
+  }
+  metroSlider.addEventListener("input",()=>metroSetBpm(+metroSlider.value));
+  $("metroPlus").addEventListener("click",()=>{metroSetBpm(metroBpm+1);playClick();});
+  $("metroMinus").addEventListener("click",()=>{metroSetBpm(metroBpm-1);playClick();});
+  [2,3,4,6].forEach((n)=>{
+    const b=document.createElement("button");
+    b.className="btn ghost metro-sig"+(n===4?" on":"");b.textContent=n+"拍";b.dataset.n=n;
+    b.addEventListener("click",()=>{
+      metroSetBeats(n);
+      [...$("metroSigs").children].forEach((x)=>x.classList.remove("on"));
+      b.classList.add("on");playClick();
+      if(metroPlaying)metroResult.textContent="节拍运行中 · "+metroBpm+" BPM · "+n+" 拍";
+    });
+    $("metroSigs").appendChild(b);
+  });
+  let metroTaps=[];
+  $("metroTap").addEventListener("click",()=>{
+    const now=performance.now();
+    if(metroTaps.length&&now-metroTaps[metroTaps.length-1]>2000)metroTaps=[];
+    metroTaps.push(now);
+    if(metroTaps.length>5)metroTaps.shift();
+    playClick();
+    if(metroTaps.length>=2){
+      let sum=0;for(let i=1;i<metroTaps.length;i++)sum+=metroTaps[i]-metroTaps[i-1];
+      const avg=sum/(metroTaps.length-1);
+      metroSetBpm(60000/avg);
+      metroResult.textContent="测速结果 · "+metroBpm+" BPM";
+    }else{
+      metroResult.textContent="再点几下，测出你的速度…";
+    }
+  });
+  metroSetBeats(4);
+
 </script>
 </body>
 </html>
