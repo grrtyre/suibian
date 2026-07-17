@@ -977,6 +977,25 @@
   .simon-pad{border:none;border-radius:18px;aspect-ratio:1/1;background:var(--c);opacity:.78;cursor:pointer;transition:transform .12s,filter .12s,box-shadow .12s,opacity .12s;box-shadow:0 6px 18px rgba(0,0,0,.22)}
   .simon-pad.lit{opacity:1;filter:brightness(1.7);transform:scale(1.05);box-shadow:0 0 28px var(--c),0 6px 18px rgba(0,0,0,.22)}
   @media (max-width:520px){.type-source{font-size:15px;letter-spacing:.5px}.simon-pads{max-width:260px}}
+  /* ---------- 老虎机 ---------- */
+  .slot-machine{position:relative;margin:8px auto 14px;max-width:440px;padding:18px 16px 16px;border-radius:22px;background:linear-gradient(160deg,var(--card-2),var(--card));border:2px solid var(--accent);box-shadow:0 10px 34px var(--glow1),inset 0 0 0 1px rgba(255,255,255,.05)}
+  .slot-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:10px}
+  .slot-coins{font-weight:800;color:var(--accent2);font-size:16px}
+  .slot-reels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:#0a0a12;border-radius:16px;padding:12px;box-shadow:inset 0 4px 18px rgba(0,0,0,.5)}
+  .slot-reel{position:relative;height:110px;border-radius:12px;background:radial-gradient(circle at 50% 30%,#ffffff,#dfe3ee 70%,#bfc6d6);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+  .slot-reel.spinning{animation:slotwob .12s linear infinite}
+  @keyframes slotwob{0%{transform:translateY(-2px)}50%{transform:translateY(2px)}100%{transform:translateY(-2px)}}
+  .slot-sym{font-size:62px;line-height:1;filter:drop-shadow(0 3px 2px rgba(0,0,0,.25));transition:transform .12s}
+  .slot-reel.spinning .slot-sym{filter:blur(2px) drop-shadow(0 3px 2px rgba(0,0,0,.25))}
+  .slot-reel.win{box-shadow:0 0 0 3px var(--accent2),0 0 22px var(--glow2);animation:slotwin .5s ease}
+  @keyframes slotwin{0%,100%{transform:scale(1)}40%{transform:scale(1.08)}}
+  .slot-hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  .slot-stat{background:var(--card-2);border-radius:12px;padding:8px 4px;text-align:center}
+  .slot-stat .n{font-size:18px;font-weight:800;color:var(--text)}
+  .slot-stat .l{font-size:11px;color:var(--muted);margin-top:2px}
+  .slot-msg{text-align:center;margin-top:12px;min-height:22px;font-weight:700;color:var(--accent2)}
+  .slot-btns{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  @media (max-width:520px){.slot-reel{height:92px}.slot-sym{font-size:50px}.slot-hud{grid-template-columns:repeat(2,1fr)}}
   </style>
 </head>
 <body>
@@ -1058,6 +1077,7 @@
       <button data-tab="match3">🍬 消消乐</button>
       <button data-tab="typing">⌨️ 打字测速</button>
       <button data-tab="simon">🟢 记忆序列</button>
+      <button data-tab="slot">🎰 老虎机</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2341,6 +2361,33 @@
     </div>
   </section>
 
+  <!-- 老虎机 -->
+  <section class="panel" id="slot">
+    <div class="card">
+      <h2>🎰 老虎机</h2>
+      <div class="hint">每拉一把花 5 金币，三连就中大奖。金币见底也别慌，点「🔋 补 100 币」接着玩。纯娱乐，图个手气～</div>
+      <div class="slot-machine">
+        <div class="slot-top"><span>🎰 幸运老虎机</span><span>金币 <b class="slot-coins" id="slotCoins">100</b></span></div>
+        <div class="slot-reels">
+          <div class="slot-reel" id="slotR0"><span class="slot-sym" id="slotS0">🍒</span></div>
+          <div class="slot-reel" id="slotR1"><span class="slot-sym" id="slotS1">🍋</span></div>
+          <div class="slot-reel" id="slotR2"><span class="slot-sym" id="slotS2">🍉</span></div>
+        </div>
+        <div class="slot-hud">
+          <div class="slot-stat"><div class="n" id="slotLast">—</div><div class="l">上次赢</div></div>
+          <div class="slot-stat"><div class="n" id="slotBest">—</div><div class="l">最佳赢</div></div>
+          <div class="slot-stat"><div class="n" id="slotPulls">0</div><div class="l">总拉数</div></div>
+          <div class="slot-stat"><div class="n" id="slotWon">0</div><div class="l">累计赢</div></div>
+        </div>
+        <div class="slot-msg" id="slotMsg">点「🎰 拉一把」，看看今天手气～</div>
+      </div>
+      <div class="slot-btns">
+        <button class="btn primary" id="slotSpin">🎰 拉一把（5 币）</button>
+        <button class="btn ghost" id="slotRefill">🔋 补 100 币</button>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2550,6 +2597,7 @@
     if (id !== "typing" && typeof typingStop === "function") typingStop();
     if (id === "simon") simonStart();
     if (id !== "simon" && typeof simonStop === "function") simonStop();
+    if (id !== "slot" && typeof slotStop === "function") slotStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2635,7 +2683,8 @@
     slide: "华容道 数字 拼图 滑块 拼图游戏 滑块拼图 15-puzzle 数字华容道 数字游戏 益智 解压 经典 排序 归位 滑动 方块 puzzle sliding 重排 整理 滑块 puzzle 脑力",
     match3: "消消乐 三消 消除 糖果 对对碰 拼三 消除游戏 糖果传奇 candy 颜色 凑齐 连成 三连 方块消除 益智 小游戏 休闲 连消",
     typing: "打字 测速 速度 打字测速 手速 指法 练习 中文 英文 字/分 正确率 wpm 计时 键盘 敲 速度测试 练习打字 盲打",
-    simon: "记忆 序列 记忆序列 记忆力 记性 顺序 复现 彩色 方块 小游戏 反应 练脑 记颜色 simon 看顺序 点出来 挑战 关卡"
+    simon: "记忆 序列 记忆序列 记忆力 记性 顺序 复现 彩色 方块 小游戏 反应 练脑 记颜色 simon 看顺序 点出来 挑战 关卡",
+    slot: "老虎机 老虎机 拉霸 拉霸机 转轮 运气 幸运 中奖 金币 赌博 赌场 幸运轮 777 暴富 赌 水果机 吃角子"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4302,7 +4351,9 @@
     { emoji: "🍬", name: "消消乐玩家", desc: "玩过一次消消乐", test: (u) => (u.match3 || 0) >= 1 },
     { emoji: "🥇", name: "糖果大师", desc: "累计玩消消乐 10 次", test: (u) => (u.match3 || 0) >= 10 },
     { emoji: "⌨️", name: "打字新星", desc: "完成一次打字测速", test: (u) => (u.typing || 0) >= 1 },
-    { emoji: "🔵", name: "记忆大师", desc: "记忆序列闯过 8 关", test: (u) => (u.simon || 0) >= 8 }
+    { emoji: "🔵", name: "记忆大师", desc: "记忆序列闯过 8 关", test: (u) => (u.simon || 0) >= 8 },
+    { emoji: "🎰", name: "一夜暴富", desc: "老虎机赢过 1 次", test: (u) => (u.slotWin || 0) >= 1 },
+    { emoji: "💰", name: "拉霸狂魔", desc: "累计拉老虎机 20 把", test: (u) => (u.slot || 0) >= 20 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5316,6 +5367,19 @@
     "记性好的人，是把每一次「再看一眼」都当成了复习。",
     "手速练不出来就练心态——稳稳敲完，比抢快更重要。",
     "随便记点什么吧，将来的你，会谢谢现在肯动手的自己。"
+  );
+  // —— 跟随老虎机 / 运气 / 随便赌一把主题的新语录 ——
+  QUOTES.push(
+    "手气这东西，求它不来，不求它倒常晃两下——不如拉一把，图个乐。",
+    "老虎机最懂人心：明明知道大概率亏，手还是忍不住往那颗按钮上放。",
+    "三颗一样的瞬间，比赢了多少更让人上头——运气被你亲手抓到的那一下。",
+    "金币见底也别慌，人生哪次不是「补 100 币」接着走。",
+    "赌徒的浪漫：宁可输在「万一呢」，也不肯认输在「早知道」。",
+    "运气像风，你站对了风口它就来；站错了，拉断胳膊也白搭。",
+    "有些事算得越精越输，随便拉一把，反而中了——松弛感才是隐藏 buff。",
+    "赢了撒花、输了耸肩，这台老虎机教你的，是「别把结果当自己」。",
+    "头奖概率低得像中彩票，可正因为它低，亮起来的那秒才值回所有等待。",
+    "别信「下一把一定中」——但下一把，确实值得随手拉一下。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -8317,6 +8381,109 @@
   function typingStop() { if (typeTimer) { clearInterval(typeTimer); typeTimer = null; } }
   if (typeInput) { typeInput.addEventListener("input", typeOnInput); typeInput.addEventListener("compositionend", typeOnInput); }
   if ($("typeNew")) $("typeNew").addEventListener("click", () => { typeLoad(); playClick(); });
+
+  /* ========== 老虎机 (Slot Machine) ========== */
+  const slotStop = (function () {
+    const COST = 5;
+    const SYMS = [
+      { e: "🍒", w: 30 }, { e: "🍋", w: 26 }, { e: "🍊", w: 20 },
+      { e: "🍉", w: 14 }, { e: "🍇", w: 8 }, { e: "🔔", w: 6 },
+      { e: "⭐", w: 4 }, { e: "💎", w: 2 }
+    ];
+    const PAY3 = [12, 18, 24, 36, 48, 72, 100, 300];
+    const COIN_KEY = "suibian_slot_coins", BEST_KEY = "suibian_slot_best";
+    const r0 = $("slotR0"), r1 = $("slotR1"), r2 = $("slotR2");
+    const s0 = $("slotS0"), s1 = $("slotS1"), s2 = $("slotS2");
+    const elCoins = $("slotCoins"), elLast = $("slotLast"), elBest = $("slotBest");
+    const elPulls = $("slotPulls"), elWon = $("slotWon"), elMsg = $("slotMsg");
+    const spinBtn = $("slotSpin"), refillBtn = $("slotRefill");
+    if (!r0) return;
+    let coins = parseInt(localStorage.getItem(COIN_KEY), 10); if (!coins || coins < 0) coins = 100;
+    let best = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0;
+    let pulls = 0, won = 0, lastWin = 0, spinning = false;
+    let finals = [0, 1, 2], timers = [], ivs = [];
+    function saveCoins() { try { localStorage.setItem(COIN_KEY, String(coins)); } catch (e) {} }
+    function showCoins() { elCoins.textContent = coins; }
+    function pickSym() { let t = 0; SYMS.forEach((s) => t += s.w); let r = Math.random() * t; for (let i = 0; i < SYMS.length; i++) { r -= SYMS[i].w; if (r < 0) return i; } return SYMS.length - 1; }
+    function showStats() { elLast.textContent = lastWin > 0 ? "+" + lastWin : "0"; elBest.textContent = best ? best : "—"; elPulls.textContent = pulls; elWon.textContent = won; }
+    function winFx(big) {
+      [r0, r1, r2].forEach((r) => r.classList.add("win"));
+      setTimeout(() => [r0, r1, r2].forEach((r) => r.classList.remove("win")), 650);
+      if (settings && settings.sound) playDing();
+      if (big) confettiBurst(120); else confettiBurst(60);
+    }
+    function evaluate(a, b, c) {
+      if (a === b && b === c) return { win: PAY3[a], kind: "3", sym: a };
+      if (a === b || b === c || a === c) return { win: 8, kind: "2" };
+      return { win: 0, kind: "0" };
+    }
+    function startReel(idx, sym, stopAt) {
+      const reel = [r0, r1, r2][idx], symEl = [s0, s1, s2][idx];
+      reel.classList.add("spinning");
+      const iv = setInterval(() => { symEl.textContent = SYMS[pickSym()].e; }, 70);
+      ivs.push(iv);
+      const tk = setTimeout(() => {
+        clearInterval(iv);
+        symEl.textContent = SYMS[sym].e;
+        reel.classList.remove("spinning");
+        if (idx === 2) finishSpin();
+      }, stopAt);
+      timers.push(tk);
+    }
+    function doSpin() {
+      if (spinning) return;
+      if (coins < COST) { toast("金币不够啦，点「🔋 补 100 币」接着玩～"); return; }
+      coins -= COST; saveCoins(); showCoins();
+      spinning = true; pulls++;
+      try { bumpUsage("slot"); } catch (e) {}
+      spinBtn.disabled = true;
+      elMsg.textContent = "转动中…";
+      finals = [pickSym(), pickSym(), pickSym()];
+      startReel(0, finals[0], 700);
+      startReel(1, finals[1], 1000);
+      startReel(2, finals[2], 1300);
+    }
+    function finishSpin() {
+      spinning = false; spinBtn.disabled = false;
+      const a = finals[0], b = finals[1], c = finals[2];
+      const res = evaluate(a, b, c);
+      lastWin = res.win;
+      if (res.win > 0) {
+        coins += res.win; saveCoins(); showCoins(); won += res.win;
+        if (res.win > best) { best = res.win; try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {} }
+        try { bumpUsage("slotWin"); } catch (e) {}
+        if (res.kind === "3" && a === 7) {
+          elMsg.textContent = "💎 头奖！三颗钻石，狂赢 " + res.win + " 金币！";
+          toast("🎰 头奖！+" + res.win + " 金币 💎");
+          winFx(true);
+        } else if (res.kind === "3") {
+          elMsg.textContent = "🎉 三连 " + SYMS[a].e + "！赢 " + res.win + " 金币";
+          toast("三连中奖！+" + res.win + " 币 🎉");
+          winFx(true);
+        } else {
+          elMsg.textContent = "✨ 两个一样，小赢 " + res.win + " 金币";
+          winFx(false);
+        }
+      } else {
+        elMsg.textContent = "🙈 没中，再来一把试试手气";
+      }
+      showStats();
+    }
+    function refill() {
+      coins += 100; saveCoins(); showCoins();
+      toast("已补 100 金币 🔋");
+    }
+    spinBtn.addEventListener("click", doSpin);
+    refillBtn.addEventListener("click", refill);
+    showCoins(); showStats();
+    s0.textContent = SYMS[0].e; s1.textContent = SYMS[1].e; s2.textContent = SYMS[2].e;
+    return function stop() {
+      spinning = false; spinBtn.disabled = false;
+      ivs.forEach((iv) => clearInterval(iv)); ivs = [];
+      timers.forEach((t) => clearTimeout(t)); timers = [];
+      [r0, r1, r2].forEach((r) => r.classList.remove("spinning"));
+    };
+  })();
 
   /* ========== 记忆序列 (Simon) ========== */
   const SIMON_FREQ = [329.63, 261.63, 220.00, 392.00];
