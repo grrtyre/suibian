@@ -949,6 +949,19 @@
   .slide-tile:active { transform:scale(.95); }
   .result.win { color:#2ecc71; font-weight:700; }
 
+  /* 消消乐 */
+  .m3-board{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;width:100%;max-width:430px;margin:14px auto 6px;background:rgba(0,0,0,.07);padding:7px;border-radius:16px;}
+  .m3-cell{position:relative;aspect-ratio:1;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:clamp(17px,5vw,30px);cursor:pointer;user-select:none;transition:transform .12s,box-shadow .12s;background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);}
+  .m3-cell:active{transform:scale(.9);}
+  .m3-cell.sel{box-shadow:0 0 0 3px var(--accent,#7c6cff),0 5px 14px rgba(0,0,0,.2);transform:scale(1.07);z-index:2;}
+  .m3-cell.clearing{animation:m3pop .19s ease forwards;}
+  @keyframes m3pop{to{transform:scale(0) rotate(40deg);opacity:0;}}
+  .m3-hud{display:flex;gap:8px;flex-wrap:wrap;}
+  .m3-stat{background:rgba(255,255,255,.55);border-radius:10px;padding:4px 11px;font-size:13px;color:var(--text);}
+  .m3-stat b{font-size:16px;margin-left:4px;}
+  .m3-ctl{justify-content:space-between;align-items:center;}
+  .m3-wrap{margin:6px 0 2px;}
+
   </style>
 </head>
 <body>
@@ -1027,6 +1040,7 @@
       <button data-tab="piano">🎹 电子琴</button>
       <button data-tab="draw">🎨 涂鸦板</button>
       <button data-tab="slide">🧩 数字华容道</button>
+      <button data-tab="match3">🍬 消消乐</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2253,6 +2267,25 @@
     </div>
   </section>
 
+  <section class="panel" id="match3">
+    <div class="card">
+      <h2>🍬 消消乐</h2>
+      <div class="hint">点一个糖果，再点它旁边那个交换位置；三个或更多同色连成一条线（横或竖）就消除得分。连锁消除有连击加成，凑得越巧分越高，分数会记成你的最佳成绩。</div>
+      <div class="row m3-ctl">
+        <div class="m3-hud">
+          <div class="m3-stat">分数 <b id="m3Score">0</b></div>
+          <div class="m3-stat">最佳 <b id="m3Best">0</b></div>
+          <div class="m3-stat">步数 <b id="m3Moves">0</b></div>
+        </div>
+        <button class="btn primary" id="m3New">🔀 新游戏</button>
+      </div>
+      <div class="m3-wrap">
+        <div class="m3-board" id="m3Board"></div>
+      </div>
+      <div class="result" id="m3Msg">点「新游戏」或直接点格子，开消 🍬</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2457,6 +2490,7 @@
     if (id !== "piano" && typeof pianoStop === "function") pianoStop();
     if (id !== "slide" && typeof slideStop === "function") slideStop();
     if (id === "slide" && typeof window.slideStart === "function") window.slideStart();
+    if (id !== "match3" && typeof match3Stop === "function") match3Stop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2539,7 +2573,8 @@
     sokoban: "推箱子 搬运 箱子 仓库 boxes sokoban 仓库番 益智 解谜 推 方块 关卡 经典 闯关 逻辑",
     piano: "电子琴 钢琴 琴 弹奏 音乐 乐器 弹琴 键盘 音符 旋律 曲子 演奏 合成器 音阶 keyboard piano play 小星星 八音盒",
     draw: "涂鸦 画板 画画 绘画 涂鸦板 画笔 随手画 涂颜色 画一幅 签名 简笔画 涂一涂 画一画 draw painting sketch board 笔 图 草稿",
-    slide: "华容道 数字 拼图 滑块 拼图游戏 滑块拼图 15-puzzle 数字华容道 数字游戏 益智 解压 经典 排序 归位 滑动 方块 puzzle sliding 重排 整理 滑块 puzzle 脑力"
+    slide: "华容道 数字 拼图 滑块 拼图游戏 滑块拼图 15-puzzle 数字华容道 数字游戏 益智 解压 经典 排序 归位 滑动 方块 puzzle sliding 重排 整理 滑块 puzzle 脑力",
+    match3: "消消乐 三消 消除 糖果 对对碰 拼三 消除游戏 糖果传奇 candy 颜色 凑齐 连成 三连 方块消除 益智 小游戏 休闲 连消"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3353,7 +3388,16 @@
     "外向不是话痨，是想到就忍不住想拉人一起。",
     "J 人把生活过成清单，P 人把清单过成生活，都挺好。",
     "做自己这件事，没有标准答案，你就是答案。",
-    "别人怎么标签你不重要，你愿不愿意认领才重要。"
+    "别人怎么标签你不重要，你愿不愿意认领才重要。",
+    "人生就像消消乐，有时候得先挪开几块，才露出连成一片的好运。",
+    "三个一样的凑到一起就会消失——有些麻烦，堆着才显眼，散开就没了。",
+    "连击不是运气，是你没在第一步就松手。",
+    "凑不齐三连的时候，先换个相邻的试试，路往往就在旁边。",
+    "同一色的聚在一起才有力量，人也一样，找对一群人就顺了。",
+    "消掉一排的爽，不来自分数，来自「终于理顺了」的瞬间。",
+    "手别停，下一消除永远在你敢动的那一下之后。",
+    "有些关系得先清掉杂质，剩下的才连得起来。",
+    "通关不靠一次凑齐，靠一次次小消除攒出来的大势。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -4193,7 +4237,9 @@
     { emoji: "🎨", name: "小画家", desc: "涂鸦过一次", test: (u) => (u.draw || 0) >= 1 },
     { emoji: "🖌️", name: "涂鸦狂魔", desc: "累计涂鸦 10 次", test: (u) => (u.draw || 0) >= 10 },
     { emoji: "🧩", name: "拼图新手", desc: "拼好一次数字华容道", test: (u) => (u.slide || 0) >= 1 },
-    { emoji: "👑", name: "拼图大师", desc: "累计拼好 10 次数字华容道", test: (u) => (u.slide || 0) >= 10 }
+    { emoji: "👑", name: "拼图大师", desc: "累计拼好 10 次数字华容道", test: (u) => (u.slide || 0) >= 10 },
+    { emoji: "🍬", name: "消消乐玩家", desc: "玩过一次消消乐", test: (u) => (u.match3 || 0) >= 1 },
+    { emoji: "🥇", name: "糖果大师", desc: "累计玩消消乐 10 次", test: (u) => (u.match3 || 0) >= 10 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -7950,6 +7996,170 @@
     }
     window.slideStart = start;
     return function stopFn() { stopTimer(); };
+  })();
+
+  /* ---------- 消消乐（三消小游戏） ---------- */
+  const match3Stop = (function () {
+    const board = $("m3Board");
+    if (!board) return function () {};
+    const N = 8, K = 6;
+    const FRUITS = ["🍓", "🍋", "🍇", "🍉", "🫐", "🍊"];
+    const KEY = "suibian_match3_best";
+    let best = 0;
+    try { best = parseInt(localStorage.getItem(KEY) || "0", 10) || 0; } catch (e) { best = 0; }
+    const scoreEl = $("m3Score"), bestEl = $("m3Best"), movesEl = $("m3Moves"), msgEl = $("m3Msg");
+    let grid = [], cells = [], sel = null, busy = false, score = 0, moves = 0, played = false, gen = 0;
+
+    function rnd() { return rand(K); }
+    function build() {
+      board.innerHTML = "";
+      cells = [];
+      grid = [];
+      for (let r = 0; r < N; r++) {
+        grid[r] = [];
+        cells[r] = [];
+        for (let c = 0; c < N; c++) {
+          const d = document.createElement("div");
+          d.className = "m3-cell";
+          d.appendChild(document.createElement("span"));
+          d.addEventListener("click", () => onCell(r, c));
+          board.appendChild(d);
+          cells[r][c] = d;
+          grid[r][c] = 0;
+        }
+      }
+    }
+    function makesAt(r, c, v) {
+      if (c >= 2 && grid[r][c - 1] === v && grid[r][c - 2] === v) return true;
+      if (r >= 2 && grid[r - 1][c] === v && grid[r - 2][c] === v) return true;
+      return false;
+    }
+    function fill() {
+      for (let r = 0; r < N; r++) {
+        grid[r] = [];
+        for (let c = 0; c < N; c++) {
+          let v, g = 0;
+          do { v = rnd(); g++; } while (g < 30 && makesAt(r, c, v));
+          grid[r][c] = v;
+        }
+      }
+    }
+    function draw() {
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+        const d = cells[r][c], v = grid[r][c], sp = d.firstChild;
+        d.classList.remove("clearing");
+        sp.textContent = v < 0 ? "" : FRUITS[v];
+        d.classList.toggle("sel", !!sel && sel.r === r && sel.c === c);
+      }
+    }
+    function findMatches() {
+      const set = new Set();
+      for (let r = 0; r < N; r++) {
+        let run = 1;
+        for (let c = 1; c < N; c++) {
+          if (grid[r][c] >= 0 && grid[r][c] === grid[r][c - 1]) run++;
+          else { if (run >= 3) for (let k = c - run; k < c; k++) set.add(r + "," + k); run = 1; }
+        }
+        if (run >= 3) for (let k = N - run; k < N; k++) set.add(r + "," + k);
+      }
+      for (let c = 0; c < N; c++) {
+        let run = 1;
+        for (let r = 1; r < N; r++) {
+          if (grid[r][c] >= 0 && grid[r][c] === grid[r - 1][c]) run++;
+          else { if (run >= 3) for (let k = r - run; k < r; k++) set.add(k + "," + c); run = 1; }
+        }
+        if (run >= 3) for (let k = N - run; k < N; k++) set.add(k + "," + c);
+      }
+      return set;
+    }
+    function collapse() {
+      for (let c = 0; c < N; c++) {
+        const col = [];
+        for (let r = 0; r < N; r++) if (grid[r][c] >= 0) col.push(grid[r][c]);
+        for (let r = 0; r < N; r++) {
+          if (r < N - col.length) grid[r][c] = rnd();
+          else grid[r][c] = col[r - (N - col.length)];
+        }
+      }
+    }
+    function swap(r1, c1, r2, c2) { const t = grid[r1][c1]; grid[r1][c1] = grid[r2][c2]; grid[r2][c2] = t; }
+    function hasMove() {
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+        if (c < N - 1) { swap(r, c, r, c + 1); const ok = findMatches().size > 0; swap(r, c, r, c + 1); if (ok) return true; }
+        if (r < N - 1) { swap(r, c, r + 1, c); const ok = findMatches().size > 0; swap(r, c, r + 1, c); if (ok) return true; }
+      }
+      return false;
+    }
+    function ensurePlayable() { let t = 0; while (!hasMove() && t < 25) { fill(); t++; } }
+    function updateHud() {
+      scoreEl.textContent = score;
+      bestEl.textContent = best;
+      movesEl.textContent = moves;
+    }
+    function onCell(r, c) {
+      if (busy) return;
+      if (!sel) { sel = { r, c }; draw(); return; }
+      if (sel.r === r && sel.c === c) { sel = null; draw(); return; }
+      if (Math.abs(sel.r - r) + Math.abs(sel.c - c) !== 1) { sel = { r, c }; draw(); return; }
+      const sr = sel.r, sc = sel.c;
+      sel = null;
+      swap(sr, sc, r, c);
+      draw();
+      if (findMatches().size === 0) {
+        swap(sr, sc, r, c);
+        draw();
+        toast("凑不出三连，换回来啦 🔁");
+        return;
+      }
+      if (!played) { played = true; bumpUsage("match3"); }
+      moves++;
+      updateHud();
+      busy = true;
+      resolve(0, gen);
+    }
+    function resolve(chain, myGen) {
+      if (myGen !== gen) return;
+      const m = findMatches();
+      if (m.size === 0) {
+        busy = false;
+        if (score > best) { best = score; try { localStorage.setItem(KEY, String(best)); } catch (e) {} }
+        updateHud();
+        ensurePlayable();
+        draw();
+        renderAchv();
+        return;
+      }
+      const ch = chain + 1;
+      score += m.size * 10 * ch;
+      m.forEach((key) => {
+        const p = key.split(","), r = +p[0], c = +p[1];
+        grid[r][c] = -1;
+        if (cells[r] && cells[r][c]) cells[r][c].classList.add("clearing");
+      });
+      updateHud();
+      if (ch >= 2) { msgEl.textContent = "连击 ×" + ch + "！消得漂亮 🍬"; msgEl.className = "result win"; }
+      setTimeout(() => {
+        if (myGen !== gen) return;
+        collapse();
+        draw();
+        setTimeout(() => resolve(ch, myGen), 150);
+      }, 190);
+    }
+    function newGame() {
+      gen++;
+      score = 0; moves = 0; sel = null; busy = false; played = false;
+      fill();
+      ensurePlayable();
+      draw();
+      updateHud();
+      msgEl.textContent = "点两个相邻的糖果交换，凑成三连就消 🍬";
+      msgEl.className = "result";
+    }
+    const m3NewBtn = $("m3New");
+    if (m3NewBtn) m3NewBtn.addEventListener("click", () => { newGame(); playClick(); });
+    build();
+    newGame();
+    return function stopFn() { gen++; sel = null; busy = false; };
   })();
 
 </script>
