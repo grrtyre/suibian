@@ -1008,7 +1008,31 @@
   .breakout-stat .l{font-size:11px;color:var(--muted);margin-top:2px}
   .breakout-btns{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
   @media (max-width:520px){.breakout-hud{grid-template-columns:repeat(2,1fr)}#breakoutCanvas{height:320px}}
-  </style>
+    /* ---------- 命运之旅 ---------- */
+  .adv-hud{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .adv-stat{background:rgba(128,128,128,.16);border-radius:14px;padding:8px 14px;min-width:84px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .adv-num{font-size:22px;font-weight:800;color:var(--accent,#7c6cff)}
+  .adv-lab{font-size:12px;opacity:.7;margin-top:2px}
+  .adv-board{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}
+  .adv-tile{position:relative;aspect-ratio:1/1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20px;background:rgba(128,128,128,.16);box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);transition:transform .15s,box-shadow .15s}
+  .adv-tile .tn{position:absolute;top:3px;left:5px;font-size:10px;opacity:.5}
+  .adv-tile .ic{line-height:1}
+  .adv-tile.goal{background:linear-gradient(135deg,#ffd166,#ff7a59);color:#3a2a00}
+  .adv-tile.start{background:linear-gradient(135deg,#a0e7a0,#4be3a5);color:#063}
+  .adv-tile.cur{box-shadow:0 0 0 3px var(--accent,#7c6cff),0 6px 16px rgba(0,0,0,.18);transform:scale(1.08);z-index:2}
+  .adv-tile.done{opacity:.5}
+  .adv-tile .tok{font-size:22px;line-height:1;margin-top:2px}
+  .adv-play{display:flex;align-items:center;gap:14px;justify-content:center;margin:6px 0 4px;flex-wrap:wrap}
+  .adv-die{font-size:52px;width:78px;height:78px;display:flex;align-items:center;justify-content:center;background:rgba(128,128,128,.16);border-radius:18px;box-shadow:0 4px 14px rgba(0,0,0,.12);transition:transform .1s}
+  .adv-die.roll{animation:advshake .25s infinite}
+  @keyframes advshake{0%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}100%{transform:rotate(-12deg)}}
+  .adv-msg{flex:1;max-width:380px;font-size:15px;line-height:1.5;min-height:48px;display:flex;align-items:center}
+  .adv-choices{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;min-height:0;margin:4px 0}
+  .adv-choices:empty{display:none}
+  .adv-log{margin-top:12px;max-height:130px;overflow:auto;font-size:13px;line-height:1.7;opacity:.85;display:flex;flex-direction:column;gap:2px}
+  .adv-log .lg{padding:2px 8px;border-radius:8px;background:rgba(128,128,128,.16)}
+
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -1091,6 +1115,7 @@
       <button data-tab="simon">🟢 记忆序列</button>
       <button data-tab="slot">🎰 老虎机</button>
       <button data-tab="breakout">🧱 打砖块</button>
+      <button data-tab="adventure">🎲 命运之旅</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2427,6 +2452,31 @@
 
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
+  <!-- 命运之旅 -->
+  <section class="panel" id="adventure">
+    <div class="card">
+      <h2>🎲 命运之旅</h2>
+      <div class="hint">掷骰子沿路前进，踩到哪格就触发哪格的命运：好运加金币、厄运扣体力、奇遇随机、歇脚回血。体力归零就倒下，走到 🏁 终点即通关。最高金币记在本地。</div>
+      <div class="adv-hud">
+        <div class="adv-stat"><div class="adv-num" id="advCoins">0</div><div class="adv-lab">💰 金币</div></div>
+        <div class="adv-stat"><div class="adv-num" id="advHp">100</div><div class="adv-lab">❤️ 体力</div></div>
+        <div class="adv-stat"><div class="adv-num" id="advStep">0/20</div><div class="adv-lab">🚶 步数</div></div>
+        <div class="adv-stat"><div class="adv-num" id="advBest">0</div><div class="adv-lab">🏅 最高金币</div></div>
+      </div>
+      <div class="adv-board" id="advBoard"></div>
+      <div class="adv-play">
+        <div class="adv-die" id="advDice">🎲</div>
+        <div class="adv-msg" id="advMsg">点「掷骰子」出发吧～</div>
+      </div>
+      <div class="adv-choices" id="advChoices"></div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="advRoll">🎲 掷骰子</button>
+        <button class="btn ghost" id="advRestart">🔄 重新开始</button>
+      </div>
+      <div class="adv-log" id="advLog"></div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -2636,6 +2686,8 @@
     if (id !== "simon" && typeof simonStop === "function") simonStop();
     if (id !== "slot" && typeof slotStop === "function") slotStop();
     if (id !== "breakout" && typeof breakoutStop === "function") breakoutStop();
+    if (id === "adventure") advStart();
+    if (id !== "adventure" && typeof advStop === "function") advStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2723,7 +2775,8 @@
     typing: "打字 测速 速度 打字测速 手速 指法 练习 中文 英文 字/分 正确率 wpm 计时 键盘 敲 速度测试 练习打字 盲打",
     simon: "记忆 序列 记忆序列 记忆力 记性 顺序 复现 彩色 方块 小游戏 反应 练脑 记颜色 simon 看顺序 点出来 挑战 关卡",
     slot: "老虎机 老虎机 拉霸 拉霸机 转轮 运气 幸运 中奖 金币 赌博 赌场 幸运轮 777 暴富 赌 水果机 吃角子",
-    breakout: "打砖块 砖块 弹球 挡板 小球 反弹 砖块游戏 breakout 街机 经典 游戏 休闲 手速 反应 墙壁 通关 关卡 分数 打 消除 接球 小球"
+    breakout: "打砖块 砖块 弹球 挡板 小球 反弹 砖块游戏 breakout 街机 经典 游戏 休闲 手速 反应 墙壁 通关 关卡 分数 打 消除 接球 小球",
+    adventure: "命运 之旅 冒险 骰子 大富翁 掷骰 棋盘 闯关 运气 随机 旅程 人生 旅行 探险 走路 选择 通关 小路 岔路 事件 格子 game"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4403,7 +4456,9 @@
     { emoji: "🎰", name: "一夜暴富", desc: "老虎机赢过 1 次", test: (u) => (u.slotWin || 0) >= 1 },
     { emoji: "💰", name: "拉霸狂魔", desc: "累计拉老虎机 20 把", test: (u) => (u.slot || 0) >= 20 },
     { emoji: "🕹️", name: "打砖块玩家", desc: "玩过一次打砖块", test: (u) => (u.breakout || 0) >= 1 },
-    { emoji: "💥", name: "砖块爆破手", desc: "打砖块单局拿下 1000 分", test: (u) => (u.breakoutMax || 0) >= 1000 }
+    { emoji: "💥", name: "砖块爆破手", desc: "打砖块单局拿下 1000 分", test: (u) => (u.breakoutMax || 0) >= 1000 },
+    { emoji: "🎲", name: "命运旅人", desc: "踏上一次命运之旅", test: (u) => (u.adventure || 0) >= 1 },
+    { emoji: "💰", name: "人生赢家", desc: "在命运之旅攒到 80 金币通关", test: () => { try { return (parseInt(localStorage.getItem("suibian_adventure_best") || "0", 10) || 0) >= 80; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5430,6 +5485,19 @@
     "赢了撒花、输了耸肩，这台老虎机教你的，是「别把结果当自己」。",
     "头奖概率低得像中彩票，可正因为它低，亮起来的那秒才值回所有等待。",
     "别信「下一把一定中」——但下一把，确实值得随手拉一下。"
+  );
+  // —— 跟随命运之旅 / 掷骰闯关主题的新语录 ——
+  QUOTES.push(
+    "命运像骰子，你掷出去的那一下，路就定了——但怎么走完，还是你自己的事。",
+    "运气好时别飘，运气差时也别丧：这一格的厄运，下一格没准就翻盘。",
+    "人生这场掷骰游戏，重要的不是每次都掷出六，而是掷歪了也愿意继续走。",
+    "岔路口别纠结太久，随便选一条，走着走着路就宽了。",
+    "运气是概率，坚持是权重——你走得够远，好格子总会被你踩到。",
+    "有些格子注定要踩雷，那不是你倒霉，是这趟旅程的一部分。",
+    "终点的奖赏不重要，重要的是你真的走到了终点。",
+    "随手掷一把，比站在原地算计半天才动一步，要痛快得多。",
+    "命运之旅教会一件事：歇脚不是浪费时间，是为了走更远的路。",
+    "通关的那刻才懂，前面那些好运厄运，都是让你成为『你』的格子。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -8787,6 +8855,209 @@
   simonPads.forEach((p, i) => p.addEventListener("click", () => simonPress(i)));
   if ($("simonStartBtn")) $("simonStartBtn").addEventListener("click", () => { simonStartGame(); playClick(); });
   if ($("simonReplay")) $("simonReplay").addEventListener("click", () => { if (simonActive && simonSeq.length) { if ($("simonMsg")) $("simonMsg").textContent = "重播顺序… 🟢"; simonPlay(); } });
+
+  /* ================= 命运之旅（掷骰闯关小游戏） ================= */
+  const ADV_LEN = 20;                       // 终点索引：0=起点，20=终点
+  const ADV_FACES = ["\u2680","\u2681","\u2682","\u2683","\u2684","\u2685"];
+  const ADV_GOOD = [
+    { icon:"\u{1f4b0}", title:"捡到钱", text:"路边躺着个钱包，你物归原主，失主硬塞给你一笔谢礼。", eff:{coins:18} },
+    { icon:"\u{1f31f}", title:"灵感闪现", text:"走路时突然想通一件纠结很久的事，整个人都轻了。", eff:{coins:8, hp:8} },
+    { icon:"\u{1f340}", title:"四叶草", text:"草丛里一株四叶草，今天运气开挂。", eff:{coins:12} },
+    { icon:"\u{1f381}", title:"神秘礼盒", text:"有人递来一个包装精美的盒子，里头是惊喜。", eff:{coins:15} },
+    { icon:"\u2600\ufe0f", title:"好天气", text:"阳光正好，碰见的每个人都对你笑。", eff:{hp:12} },
+    { icon:"\u{1f431}", title:"猫的庇佑", text:"一只橘猫蹭了蹭你的腿，据说能带来好运。", eff:{coins:10, hp:6} }
+  ];
+  const ADV_BAD = [
+    { icon:"\u{1f327}\ufe0f", title:"淋成落汤鸡", text:"一阵急雨把你浇透，钱包也没顾上收。", eff:{coins:-10, hp:-12} },
+    { icon:"\u{1f573}\ufe0f", title:"踩坑里", text:"低头看手机，一脚踩进没盖的下水道口。", eff:{hp:-15} },
+    { icon:"\u{1f41d}", title:"被蜂追", text:"你路过花丛，惊动了蜂群，撒腿就跑。", eff:{hp:-10, coins:-5} },
+    { icon:"\u{1f4b8}", title:"请客", text:"走着遇上老朋友，盛情难却在饭馆请了一顿。", eff:{coins:-15} },
+    { icon:"\u{1f635}", title:"撞了南墙", text:"岔路口选错，撞了南墙才回头。", eff:{hp:-8} }
+  ];
+  const ADV_REST = [
+    { icon:"\u26f0", title:"歇脚", text:"找了块草地坐下，啃口干粮，回回血。", eff:{hp:18} },
+    { icon:"\u2668\ufe0f", title:"泡个脚", text:"路边温泉正好，泡完浑身舒坦。", eff:{hp:15} },
+    { icon:"\u{1f34e}", title:"吃个苹果", text:"啃了个脆苹果，体力恢复不少。", eff:{hp:12} }
+  ];
+  const ADV_MEET = [
+    { icon:"\u{1f9d9}", title:"遇隐士", text:"林间老者递来一句话：『路是自己走出来的。』", eff:{coins:5} },
+    { icon:"\u{1f3ad}", title:"街头戏班", text:"撞上一场街头表演，看得你哈哈大笑。", eff:{hp:6} },
+    { icon:"\u{1f4dc}", title:"拾得残卷", text:"捡到半页旧书，虽看不懂，却觉得珍贵。", eff:{coins:6} },
+    { icon:"\u{1f434}", title:"好心人载一程", text:"赶车的大叔让你搭了段顺风车。", eff:{coins:4} }
+  ];
+  const ADV_CHOICE = [
+    { icon:"\u{1f6a9}", title:"岔路口", text:"前方岔成两条路，你只能选一条走。",
+      choices:[ {label:"走大路 \u{1f6e3}\ufe0f", text:"大路平坦，遇见小贩，花点钱买了份热食。", eff:{coins:-6, hp:8}},
+                {label:"抄小道 \u{1f33f}", text:"小道幽静，捡到路旁遗落的零钱。", eff:{coins:10, hp:-4}} ] },
+    { icon:"\u{1f370}", title:"甜品摊", text:"摊主请你二选一。",
+      choices:[ {label:"吃蛋糕 \u{1f370}", text:"甜到心里，但有点腻，走慢了。", eff:{hp:6, coins:-4}},
+                {label:"喝清茶 \u{1f375}", text:"清茶醒神，脚步轻快。", eff:{hp:10}} ] },
+    { icon:"\u{1f3b2}", title:"神秘赌局", text:"路边有人邀你赌一把小钱。",
+      choices:[ {label:"赌一把 \u{1f3b2}", text:"手气不错，赢了一笔！", eff:{coins:16}},
+                {label:"婉拒 \u{1f645}", text:"你笑笑摆手，继续赶路，省得惹事。", eff:{hp:4}} ] },
+    { icon:"\u{1f436}", title:"流浪狗", text:"一只小狗跟着你，似是想要个家。",
+      choices:[ {label:"带它走 \u{1f415}", text:"多一个伙伴，路上多了温暖，也多花一份口粮。", eff:{hp:10, coins:-8}},
+                {label:"留食物 \u{1f9b4}", text:"你留了点吃的，挥手告别。", eff:{hp:6}} ] }
+  ];
+  let adv = null, advTimer = null;
+  function advBuildBoard() {
+    const board = [{ kind:"start", icon:"\u{1f6a9}", title:"起点", text:"旅程开始，从这里出发。", eff:{} }];
+    const pools = { good:ADV_GOOD, bad:ADV_BAD, rest:ADV_REST, meet:ADV_MEET, choice:ADV_CHOICE };
+    const kinds = ["good","good","bad","bad","rest","meet","choice","choice"];
+    for (let i = 1; i < ADV_LEN; i++) {
+      const k = kinds[rand(kinds.length)];
+      const tpl = pools[k][rand(pools[k].length)];
+      board.push(Object.assign({ kind:k }, tpl));
+    }
+    board.push({ kind:"goal", icon:"\u{1f3c1}", title:"终点", text:"走到这里就算通关！", eff:{} });
+    return board;
+  }
+  function advReset() {
+    if (advTimer) { clearInterval(advTimer); advTimer = null; }
+    let best = 0; try { best = parseInt(localStorage.getItem("suibian_adventure_best") || "0", 10) || 0; } catch (e) {}
+    adv = { pos:0, coins:0, hp:100, board:advBuildBoard(), over:false, counted:false, awaiting:false, best:best, log:[] };
+    advRender();
+  }
+  function advStart() { if (!adv) advReset(); else advRender(); }
+  function advStop() { if (advTimer) { clearInterval(advTimer); advTimer = null; } }
+  function advSetMsg(html) { const m = $("advMsg"); if (m) m.innerHTML = html; }
+  function advLog(s) {
+    adv.log.unshift(s);
+    if (adv.log.length > 12) adv.log.length = 12;
+    const el = $("advLog");
+    if (el) el.innerHTML = adv.log.map((x) => '<div class="lg">' + escapeHtml(x) + "</div>").join("");
+  }
+  function advRender() {
+    if (!adv) return;
+    $("advCoins").textContent = adv.coins;
+    $("advHp").textContent = Math.max(0, adv.hp);
+    $("advStep").textContent = adv.pos + "/" + ADV_LEN;
+    $("advBest").textContent = adv.best;
+    const b = $("advBoard");
+    b.innerHTML = adv.board.map((t, i) => {
+      let cls = "adv-tile";
+      if (i === 0) cls += " start";
+      if (i === ADV_LEN) cls += " goal";
+      if (i === adv.pos) cls += " cur";
+      else if (i < adv.pos) cls += " done";
+      let inner = '<span class="tn">' + i + '</span><span class="ic">' + t.icon + '</span>';
+      if (i === adv.pos) inner += '<span class="tok">\u{1f9d1}</span>';
+      return '<div class="' + cls + '">' + inner + '</div>';
+    }).join("");
+  }
+  function advEnableRoll() { const btn = $("advRoll"); if (btn) btn.disabled = false; }
+  function advApply(eff, t) {
+    eff = eff || {};
+    if (eff.coins) adv.coins = Math.max(0, adv.coins + eff.coins);
+    if (eff.hp) adv.hp = adv.hp + eff.hp;
+    const parts = [];
+    if (eff.coins) parts.push((eff.coins > 0 ? "\u{1f4b0} +" : "\u{1f4b0} ") + eff.coins + " 金币");
+    if (eff.hp) parts.push((eff.hp > 0 ? "\u2764\ufe0f +" : "\u2764\ufe0f ") + eff.hp + " 体力");
+    advSetMsg(t.icon + " <b>" + t.title + "</b>：" + t.text + (parts.length ? "（" + parts.join("，") + "）" : ""));
+    advLog(t.icon + " " + t.title + (parts.length ? " " + parts.join("，") : ""));
+    pop($("advMsg"));
+    if (settings && settings.sound) playDing();
+  }
+  function advAfterEvent() {
+    advRender();
+    if (adv.hp <= 0) { advLose(); return; }
+    advEnableRoll();
+  }
+  function advShowChoice(t) {
+    adv.awaiting = true;
+    advSetMsg(t.icon + " <b>" + t.title + "</b>：" + t.text + " 选一个吧：");
+    const box = $("advChoices");
+    box.innerHTML = t.choices.map((c, i) => '<button class="btn" data-ci="' + i + '">' + escapeHtml(c.label) + "</button>").join("");
+    box.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+      const c = t.choices[parseInt(b.dataset.ci, 10)];
+      box.innerHTML = "";
+      adv.awaiting = false;
+      advApply(c.eff, { icon:t.icon, title:c.label, text:c.text });
+      advAfterEvent();
+    }));
+  }
+  function advLand(idx) {
+    if (!adv) return;
+    const t = adv.board[idx];
+    if (t.kind === "goal") { advWin(); return; }
+    if (t.kind === "start") { advSetMsg("\u{1f6a9} 你回到了起点……不对，起点就是你刚出发的地方。"); advEnableRoll(); return; }
+    if (t.kind === "choice") { advShowChoice(t); return; }
+    advApply(t.eff, t);
+    advAfterEvent();
+  }
+  function advMove(steps) {
+    if (!adv) return;
+    const target = Math.min(adv.pos + steps, ADV_LEN);
+    const walk = () => {
+      if (!adv || adv.pos >= target) { advLand(target); return; }
+      adv.pos++;
+      advRender();
+      if (adv.pos >= target) setTimeout(() => advLand(target), 220);
+      else setTimeout(walk, 170);
+    };
+    if (adv.pos >= target) { advLand(target); return; }
+    walk();
+  }
+  function advRoll() {
+    if (!adv || adv.over || adv.awaiting) return;
+    $("advRoll").disabled = true;
+    const die = $("advDice");
+    die.classList.add("roll");
+    let n = 0, ticks = 0;
+    if (advTimer) clearInterval(advTimer);
+    advTimer = setInterval(() => {
+      n = rand(6) + 1;
+      die.textContent = ADV_FACES[n - 1];
+      ticks++;
+      if (ticks >= 8) {
+        clearInterval(advTimer); advTimer = null;
+        die.classList.remove("roll");
+        $("advMsg").textContent = "你掷出了 " + n + " 点，向前走 " + n + " 格～";
+        advMove(n);
+      }
+    }, 70);
+  }
+  function advSaveBest() {
+    if (adv.coins > adv.best) {
+      adv.best = adv.coins;
+      try { localStorage.setItem("suibian_adventure_best", String(adv.best)); } catch (e) {}
+    }
+  }
+  function advCountUse() {
+    if (adv.counted) return;
+    adv.counted = true;
+    bumpUsage("adventure");
+  }
+  function advWin() {
+    adv.over = true;
+    advSaveBest();
+    advSetMsg("\u{1f3c1} 你走到了终点，通关啦！最终攒下 <b>" + adv.coins + "</b> 金币。");
+    advLog("\u{1f3c1} 通关！金币 " + adv.coins);
+    advRender();
+    if (settings && settings.sound) playDing();
+    confettiBurst(120);
+    advCountUse();
+    const btn = $("advRoll"); if (btn) btn.disabled = true;
+  }
+  function advLose() {
+    adv.over = true;
+    adv.hp = 0;
+    advSaveBest();
+    advSetMsg("\u{1f480} 体力耗尽，你倒在了第 " + adv.pos + " 格。这趟旅程到此为止。");
+    advLog("\u{1f480} 倒下（第 " + adv.pos + " 格）");
+    advRender();
+    if (settings && settings.sound) playDing();
+    advCountUse();
+    const btn = $("advRoll"); if (btn) btn.disabled = true;
+  }
+  function advRestart() {
+    advStop();
+    advReset();
+    advSetMsg("\u{1f3b2} 新的一局，从起点出发吧～");
+    advEnableRoll();
+  }
+  if ($("advRoll")) $("advRoll").addEventListener("click", () => { playClick(); advRoll(); });
+  if ($("advRestart")) $("advRestart").addEventListener("click", () => { playClick(); advRestart(); });
 
 </script>
 </body>
