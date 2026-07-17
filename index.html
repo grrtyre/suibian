@@ -962,6 +962,21 @@
   .m3-ctl{justify-content:space-between;align-items:center;}
   .m3-wrap{margin:6px 0 2px;}
 
+  /* ---------- 打字测速 & 记忆序列 ---------- */
+  .type-source{font-size:17px;line-height:2;letter-spacing:1px;background:var(--card);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px 16px;color:var(--muted);user-select:none;word-break:break-all;min-height:54px}
+  .type-source .tp{padding:0 1px;border-radius:3px;transition:color .08s,background .08s}
+  .type-source .tp.ok{color:var(--accent)}
+  .type-source .tp.bad{color:#ff6b81;background:rgba(255,107,129,.16);text-decoration:underline}
+  .type-input{width:100%;min-height:96px;resize:vertical;margin-top:12px;padding:12px 14px;font-size:16px;line-height:1.7;border-radius:14px;background:var(--card);color:var(--text);border:1px solid rgba(255,255,255,.14);outline:none;font-family:inherit}
+  .type-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-3-rgb),.18)}
+  .type-best{color:var(--muted);font-size:14px;align-self:center}
+  .type-best b{color:var(--text)}
+  .type-stats{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:14px;margin-top:10px}
+  .type-stats b{color:var(--accent)}
+  .simon-pads{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:320px;margin:14px auto 4px}
+  .simon-pad{border:none;border-radius:18px;aspect-ratio:1/1;background:var(--c);opacity:.78;cursor:pointer;transition:transform .12s,filter .12s,box-shadow .12s,opacity .12s;box-shadow:0 6px 18px rgba(0,0,0,.22)}
+  .simon-pad.lit{opacity:1;filter:brightness(1.7);transform:scale(1.05);box-shadow:0 0 28px var(--c),0 6px 18px rgba(0,0,0,.22)}
+  @media (max-width:520px){.type-source{font-size:15px;letter-spacing:.5px}.simon-pads{max-width:260px}}
   </style>
 </head>
 <body>
@@ -1041,6 +1056,8 @@
       <button data-tab="draw">🎨 涂鸦板</button>
       <button data-tab="slide">🧩 数字华容道</button>
       <button data-tab="match3">🍬 消消乐</button>
+      <button data-tab="typing">⌨️ 打字测速</button>
+      <button data-tab="simon">🟢 记忆序列</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2286,6 +2303,44 @@
     </div>
   </section>
 
+  <section class="panel" id="typing">
+    <div class="card">
+      <h2>⌨️ 打字测速</h2>
+      <div class="hint">照着下面的文字敲，系统实时统计速度（字/分）和正确率，并自动计时。敲完一整段即出成绩，最快纪录会留下来（中英文都行）。</div>
+      <div class="row">
+        <button class="btn primary" id="typeNew">🔁 换一段</button>
+        <span class="type-best">最佳 <b id="typeBest">—</b> 字/分</span>
+      </div>
+      <div class="type-source" id="typeSource"></div>
+      <textarea id="typeInput" class="type-input" placeholder="在这里开始敲（支持中文 / 英文）…" spellcheck="false" autocomplete="off"></textarea>
+      <div class="row type-stats">
+        <div>速度 <b id="typeWpm">0</b> 字/分</div>
+        <div>正确率 <b id="typeAcc">100%</b></div>
+        <div>用时 <b id="typeTime">0.0</b> 秒</div>
+      </div>
+      <div class="result" id="typeResult">点「换一段」或直接敲下第一个字，计时就开始 ⏱️</div>
+    </div>
+  </section>
+
+  <section class="panel" id="simon">
+    <div class="card">
+      <h2>🟢 记忆序列</h2>
+      <div class="hint">看彩色方块依次亮起、记住顺序，然后照着点出来。每过一关序列更长，看你能记到第几关（最高关数会留下来）。</div>
+      <div class="row">
+        <button class="btn primary" id="simonStartBtn">▶️ 开始</button>
+        <button class="btn ghost" id="simonReplay">🔁 重播</button>
+        <span class="type-best">最高 <b id="simonBest">0</b> 关</span>
+      </div>
+      <div class="simon-pads" id="simonPads">
+        <div class="simon-pad" data-c="0" style="--c:#ff5d73"></div>
+        <div class="simon-pad" data-c="1" style="--c:#ffd166"></div>
+        <div class="simon-pad" data-c="2" style="--c:#06d6a0"></div>
+        <div class="simon-pad" data-c="3" style="--c:#4d96ff"></div>
+      </div>
+      <div class="result" id="simonMsg">点「开始」，看看你的记性有多好 🧠</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2491,6 +2546,10 @@
     if (id !== "slide" && typeof slideStop === "function") slideStop();
     if (id === "slide" && typeof window.slideStart === "function") window.slideStart();
     if (id !== "match3" && typeof match3Stop === "function") match3Stop();
+    if (id === "typing") typingStart();
+    if (id !== "typing" && typeof typingStop === "function") typingStop();
+    if (id === "simon") simonStart();
+    if (id !== "simon" && typeof simonStop === "function") simonStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2574,7 +2633,9 @@
     piano: "电子琴 钢琴 琴 弹奏 音乐 乐器 弹琴 键盘 音符 旋律 曲子 演奏 合成器 音阶 keyboard piano play 小星星 八音盒",
     draw: "涂鸦 画板 画画 绘画 涂鸦板 画笔 随手画 涂颜色 画一幅 签名 简笔画 涂一涂 画一画 draw painting sketch board 笔 图 草稿",
     slide: "华容道 数字 拼图 滑块 拼图游戏 滑块拼图 15-puzzle 数字华容道 数字游戏 益智 解压 经典 排序 归位 滑动 方块 puzzle sliding 重排 整理 滑块 puzzle 脑力",
-    match3: "消消乐 三消 消除 糖果 对对碰 拼三 消除游戏 糖果传奇 candy 颜色 凑齐 连成 三连 方块消除 益智 小游戏 休闲 连消"
+    match3: "消消乐 三消 消除 糖果 对对碰 拼三 消除游戏 糖果传奇 candy 颜色 凑齐 连成 三连 方块消除 益智 小游戏 休闲 连消",
+    typing: "打字 测速 速度 打字测速 手速 指法 练习 中文 英文 字/分 正确率 wpm 计时 键盘 敲 速度测试 练习打字 盲打",
+    simon: "记忆 序列 记忆序列 记忆力 记性 顺序 复现 彩色 方块 小游戏 反应 练脑 记颜色 simon 看顺序 点出来 挑战 关卡"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4239,7 +4300,9 @@
     { emoji: "🧩", name: "拼图新手", desc: "拼好一次数字华容道", test: (u) => (u.slide || 0) >= 1 },
     { emoji: "👑", name: "拼图大师", desc: "累计拼好 10 次数字华容道", test: (u) => (u.slide || 0) >= 10 },
     { emoji: "🍬", name: "消消乐玩家", desc: "玩过一次消消乐", test: (u) => (u.match3 || 0) >= 1 },
-    { emoji: "🥇", name: "糖果大师", desc: "累计玩消消乐 10 次", test: (u) => (u.match3 || 0) >= 10 }
+    { emoji: "🥇", name: "糖果大师", desc: "累计玩消消乐 10 次", test: (u) => (u.match3 || 0) >= 10 },
+    { emoji: "⌨️", name: "打字新星", desc: "完成一次打字测速", test: (u) => (u.typing || 0) >= 1 },
+    { emoji: "🔵", name: "记忆大师", desc: "记忆序列闯过 8 关", test: (u) => (u.simon || 0) >= 8 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5241,6 +5304,18 @@
     "滑块拼图教会耐心：先把能定的定下来，剩下的自然会松动。",
     "最难拼的永远是最后那几格，可只要不放弃挪，总会齐。",
     "随便拼一拼也挺好，但真想拼好，得先决定从哪一格下手。"
+  );
+  QUOTES.push(
+    "手指在键盘上跳舞的时候，脑子反而最安静。",
+    "记性不好没关系，重要的东西多过几遍，就刻进去了。",
+    "打字快不快无所谓，把想说的敲出来，本身就挺治愈。",
+    "那些你以为记不住的顺序，其实只是还没认真看过一遍。",
+    "随便敲一行字，都比在脑子里空转一整天强。",
+    "反应慢半拍不是缺点，是你想得比谁都多。",
+    "把话敲进屏幕的瞬间，犹豫就少了一大半。",
+    "记性好的人，是把每一次「再看一眼」都当成了复习。",
+    "手速练不出来就练心态——稳稳敲完，比抢快更重要。",
+    "随便记点什么吧，将来的你，会谢谢现在肯动手的自己。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -8161,6 +8236,147 @@
     newGame();
     return function stopFn() { gen++; sel = null; busy = false; };
   })();
+
+  /* ========== 打字测速 ========== */
+  const TYPE_BANK = [
+    "生活原本沉闷，但跑起来就有风。随便敲几个字，先让手指热个身。",
+    "你不必事事周全，先把眼前这一件敲完，剩下的会自然接上来。",
+    "键盘上的字一个一个蹦出来，像极了日子里那些慢慢成形的小决定。",
+    "别想太多，敲就完了。随便的句子，也能敲出一行很顺的节奏。",
+    "The quick brown fox jumps over the lazy dog while you type as fast as you can.",
+    "与其在脑子里反复犹豫，不如让手指替你先把答案敲出来。",
+    "今天也要好好吃饭、好好睡觉，你已经比昨天更靠近想成为的自己。",
+    "随便不是摆烂，是把有限的精力留给真正在乎的那几件事。",
+    "把烦恼敲进输入框，再一个一个删掉，好像也没那么难收拾了。",
+    "风很温柔，云很慢，你慢慢敲，世界不会因为你停一秒就塌掉。",
+    "Typing is just thinking with your fingers, one key at a time, no rush at all.",
+    "愿你敲下的每个字，都通往更自由一点的明天，哪怕只是随手一句。",
+    "决定不了午餐吃什么，就先敲完这段话，肚子说不定自己有答案。",
+    "深夜的键盘声最诚实，敲给自己的字，不用给任何人看。"
+  ];
+  let typeTimer = null, typeStart = 0, typeCur = "", typeDone = false;
+  const typeInput = $("typeInput"), typeSource = $("typeSource"), typeResult = $("typeResult");
+  function typeBestShow() {
+    let b = 0; try { b = parseInt(localStorage.getItem("suibian_typing_best") || "0", 10) || 0; } catch (e) {}
+    if ($("typeBest")) $("typeBest").textContent = b || "—";
+  }
+  function typeLoad() {
+    let t; do { t = TYPE_BANK[rand(TYPE_BANK.length)]; } while (t === typeCur && TYPE_BANK.length > 1);
+    typeCur = t; typeDone = false; typeStart = 0;
+    if (typeTimer) { clearInterval(typeTimer); typeTimer = null; }
+    if (typeSource) {
+      typeSource.innerHTML = "";
+      for (let i = 0; i < t.length; i++) {
+        const s = document.createElement("span");
+        s.textContent = t[i]; s.className = "tp";
+        typeSource.appendChild(s);
+      }
+    }
+    if (typeInput) typeInput.value = "";
+    if ($("typeWpm")) $("typeWpm").textContent = "0";
+    if ($("typeAcc")) $("typeAcc").textContent = "100%";
+    if ($("typeTime")) $("typeTime").textContent = "0.0";
+    if (typeResult) typeResult.textContent = "照着上面的字敲，第一个字落下即开始计时 ⏱️";
+  }
+  function typeRender() {
+    if (typeDone) return;
+    const v = typeInput ? typeInput.value : "";
+    const spans = typeSource ? typeSource.children : [];
+    let correct = 0;
+    for (let i = 0; i < spans.length; i++) {
+      const ch = v[i];
+      if (ch === undefined) spans[i].className = "tp";
+      else if (ch === typeCur[i]) { spans[i].className = "tp ok"; correct++; }
+      else spans[i].className = "tp bad";
+    }
+    const el = typeStart ? (Date.now() - typeStart) / 1000 : 0;
+    if ($("typeTime")) $("typeTime").textContent = el.toFixed(1);
+    if ($("typeAcc")) $("typeAcc").textContent = (v.length ? Math.round((correct / v.length) * 100) : 100) + "%";
+    if (el > 0 && $("typeWpm")) $("typeWpm").textContent = Math.round((correct / el) * 60);
+    if (v.length >= typeCur.length) typeFinish(correct, v.length, el);
+  }
+  function typeOnInput() {
+    if (typeDone) return;
+    if (!typeStart) { typeStart = Date.now(); if (typeResult) typeResult.textContent = "稳住，别看键盘，跟着节奏来 ⌨️"; typeTimer = setInterval(typeRender, 200); }
+    typeRender();
+  }
+  function typeFinish(correct, total, el) {
+    typeDone = true;
+    if (typeTimer) { clearInterval(typeTimer); typeTimer = null; }
+    const acc = total ? Math.round((correct / total) * 100) : 0;
+    const wpm = el > 0 ? Math.round((correct / el) * 60) : 0;
+    let best = 0; try { best = parseInt(localStorage.getItem("suibian_typing_best") || "0", 10) || 0; } catch (e) {}
+    let msg = "敲完啦！速度 <b>" + wpm + "</b> 字/分 · 正确率 <b>" + acc + "%</b> · 用时 " + el.toFixed(1) + " 秒。";
+    if (wpm > best) { best = wpm; try { localStorage.setItem("suibian_typing_best", String(best)); } catch (e) {} msg += " 🎉 新纪录！"; if (typeof confettiBurst === "function" && !settings.reduce) confettiBurst(40); }
+    typeBestShow();
+    if (typeResult) { typeResult.innerHTML = msg; pop(typeResult); }
+    if (typeof playDing === "function") playDing();
+    bumpUsage("typing");
+  }
+  function typingStart() { typeBestShow(); if (!typeCur) typeLoad(); }
+  function typingStop() { if (typeTimer) { clearInterval(typeTimer); typeTimer = null; } }
+  if (typeInput) { typeInput.addEventListener("input", typeOnInput); typeInput.addEventListener("compositionend", typeOnInput); }
+  if ($("typeNew")) $("typeNew").addEventListener("click", () => { typeLoad(); playClick(); });
+
+  /* ========== 记忆序列 (Simon) ========== */
+  const SIMON_FREQ = [329.63, 261.63, 220.00, 392.00];
+  const simonPads = $("simonPads") ? [...$("simonPads").children] : [];
+  let simonSeq = [], simonInput = 0, simonLocked = true, simonActive = false, simonTimers = [];
+  function simonClearTimers() { simonTimers.forEach((t) => clearTimeout(t)); simonTimers = []; }
+  function simonLit(i) {
+    const pad = simonPads[i]; if (!pad) return;
+    pad.classList.add("lit");
+    try { tone(SIMON_FREQ[i], 0.32, "sine", 0.22); } catch (e) {}
+    simonTimers.push(setTimeout(() => pad.classList.remove("lit"), 360));
+  }
+  function simonPlay() {
+    simonLocked = true; simonClearTimers();
+    let k = 0;
+    const step = () => {
+      if (k >= simonSeq.length) { simonLocked = false; simonInput = 0; if ($("simonMsg")) $("simonMsg").textContent = "该你了，照着顺序点出来 👆"; return; }
+      simonLit(simonSeq[k]); k++;
+      simonTimers.push(setTimeout(step, 620));
+    };
+    simonTimers.push(setTimeout(step, 600));
+  }
+  function simonNext() { simonSeq.push(rand(4)); simonPlay(); }
+  function simonStartGame() {
+    simonClearTimers(); simonActive = true; simonSeq = [rand(4)];
+    if ($("simonMsg")) $("simonMsg").textContent = "看好顺序… 🟢";
+    simonPlay();
+  }
+  function simonPress(i) {
+    if (simonLocked || !simonActive) return;
+    simonLit(i);
+    if (simonSeq[simonInput] === i) {
+      simonInput++;
+      if (simonInput >= simonSeq.length) {
+        simonLocked = true;
+        const lvl = simonSeq.length;
+        let best = 0; try { best = parseInt(localStorage.getItem("suibian_simon_best") || "0", 10) || 0; } catch (e) {}
+        if (lvl > best) { best = lvl; try { localStorage.setItem("suibian_simon_best", String(best)); } catch (e) {} if ($("simonMsg")) $("simonMsg").textContent = "过 " + lvl + " 关！新纪录 🎉"; if (typeof confettiBurst === "function" && !settings.reduce) confettiBurst(40); }
+        else if ($("simonMsg")) $("simonMsg").textContent = "过 " + lvl + " 关！继续 💪";
+        if ($("simonBest")) $("simonBest").textContent = best;
+        if (typeof playDing === "function") playDing();
+        bumpUsage("simon");
+        simonTimers.push(setTimeout(simonNext, 900));
+      }
+    } else {
+      simonLocked = true; simonActive = false;
+      if (typeof tone === "function") { try { tone(150, 0.5, "sawtooth", 0.2); } catch (e) {} }
+      let b = 0; try { b = parseInt(localStorage.getItem("suibian_simon_best") || "0", 10) || 0; } catch (e) {}
+      if ($("simonBest")) $("simonBest").textContent = b;
+      if ($("simonMsg")) $("simonMsg").textContent = "记错啦 💥 你闯到了第 " + simonSeq.length + " 关。点「开始」再来！";
+    }
+  }
+  function simonStart() {
+    let b = 0; try { b = parseInt(localStorage.getItem("suibian_simon_best") || "0", 10) || 0; } catch (e) {}
+    if ($("simonBest")) $("simonBest").textContent = b;
+  }
+  function simonStop() { simonLocked = true; simonActive = false; simonClearTimers(); }
+  simonPads.forEach((p, i) => p.addEventListener("click", () => simonPress(i)));
+  if ($("simonStartBtn")) $("simonStartBtn").addEventListener("click", () => { simonStartGame(); playClick(); });
+  if ($("simonReplay")) $("simonReplay").addEventListener("click", () => { if (simonActive && simonSeq.length) { if ($("simonMsg")) $("simonMsg").textContent = "重播顺序… 🟢"; simonPlay(); } });
 
 </script>
 </body>
