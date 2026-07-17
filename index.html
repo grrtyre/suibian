@@ -937,7 +937,19 @@
   #drawCanvas { width:100%; height:auto; display:block; border-radius:8px; background:#fff; cursor:crosshair; touch-action:none; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06); }
   .draw-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
 
-</style>
+  /* ---------- 数字华容道 ---------- */
+  .slide-ctl { flex-wrap: wrap; align-items:flex-end; }
+  .slide-ctl label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted); }
+  .slide-hud { display:flex; gap:10px; justify-content:center; margin:12px 0 4px; flex-wrap:wrap; }
+  .slide-stat { background:var(--card,#eef0fb); border-radius:10px; padding:6px 14px; font-size:13px; color:var(--muted); white-space:nowrap; }
+  .slide-stat b { color:var(--accent); margin-left:4px; font-size:15px; }
+  .slide-wrap { display:flex; justify-content:center; margin:12px 0; }
+  .slide-board { position:relative; width:min(360px,86vw); border-radius:14px; background:var(--card,#eef0fb); box-shadow:inset 0 0 0 1px rgba(0,0,0,.06); touch-action:none; }
+  .slide-tile { position:absolute; display:flex; align-items:center; justify-content:center; border-radius:10px; font-weight:700; color:#fff; cursor:pointer; user-select:none; -webkit-user-select:none; background:linear-gradient(135deg,var(--accent),var(--accent)); box-shadow:0 4px 10px rgba(0,0,0,.18); transition:left .14s ease, top .14s ease, width .14s ease, height .14s ease, font-size .14s ease; }
+  .slide-tile:active { transform:scale(.95); }
+  .result.win { color:#2ecc71; font-weight:700; }
+
+  </style>
 </head>
 <body>
 <div class="wrap">
@@ -1014,6 +1026,7 @@
       <button data-tab="sokoban">📦 推箱子</button>
       <button data-tab="piano">🎹 电子琴</button>
       <button data-tab="draw">🎨 涂鸦板</button>
+      <button data-tab="slide">🧩 数字华容道</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2212,6 +2225,34 @@
     </div>
   </section>
 
+  <!-- 数字华容道 -->
+  <section class="panel" id="slide">
+    <div class="card">
+      <h2>🧩 数字华容道</h2>
+      <div class="hint">把数字按 1 → N 顺序排好、空白归位即通关。点空格旁边的方块滑动，或用方向键 / 手机滑动。每次打乱都保证有解。</div>
+      <div class="row slide-ctl">
+        <label class="grow">难度
+          <select id="slideSize">
+            <option value="3">3×3 简单</option>
+            <option value="4" selected>4×4 普通</option>
+            <option value="5">5×5 困难</option>
+          </select>
+        </label>
+        <button class="btn primary" id="slideNew">🔀 新游戏</button>
+        <button class="btn ghost" id="slideUndo">↩ 撤一步</button>
+      </div>
+      <div class="slide-hud">
+        <div class="slide-stat">步数 <b id="slideMoves">0</b></div>
+        <div class="slide-stat">用时 <b id="slideTime">00:00</b></div>
+        <div class="slide-stat">最佳 <b id="slideBest">—</b></div>
+      </div>
+      <div class="slide-wrap">
+        <div class="slide-board" id="slideBoard"></div>
+      </div>
+      <div class="result" id="slideMsg">点「新游戏」开始拼图 🧩</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2414,6 +2455,8 @@
     if (id !== "sokoban" && typeof sokobanStop === "function") sokobanStop();
     if (id === "sokoban" && typeof window.sokobanStart === "function") window.sokobanStart();
     if (id !== "piano" && typeof pianoStop === "function") pianoStop();
+    if (id !== "slide" && typeof slideStop === "function") slideStop();
+    if (id === "slide" && typeof window.slideStart === "function") window.slideStart();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2495,7 +2538,8 @@
     maze: "迷宫 走迷宫 路径 探索 寻路 解谜 出口 方向 益智 游戏 闯关 路线 绕路 出口 最短 path maze",
     sokoban: "推箱子 搬运 箱子 仓库 boxes sokoban 仓库番 益智 解谜 推 方块 关卡 经典 闯关 逻辑",
     piano: "电子琴 钢琴 琴 弹奏 音乐 乐器 弹琴 键盘 音符 旋律 曲子 演奏 合成器 音阶 keyboard piano play 小星星 八音盒",
-    draw: "涂鸦 画板 画画 绘画 涂鸦板 画笔 随手画 涂颜色 画一幅 签名 简笔画 涂一涂 画一画 draw painting sketch board 笔 图 草稿"
+    draw: "涂鸦 画板 画画 绘画 涂鸦板 画笔 随手画 涂颜色 画一幅 签名 简笔画 涂一涂 画一画 draw painting sketch board 笔 图 草稿",
+    slide: "华容道 数字 拼图 滑块 拼图游戏 滑块拼图 15-puzzle 数字华容道 数字游戏 益智 解压 经典 排序 归位 滑动 方块 puzzle sliding 重排 整理 滑块 puzzle 脑力"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4147,7 +4191,9 @@
     { emoji: "🎹", name: "弹奏家", desc: "弹过一次电子琴", test: (u) => (u.piano || 0) >= 1 },
     { emoji: "🎼", name: "小演奏家", desc: "累计弹奏 10 次电子琴", test: (u) => (u.piano || 0) >= 10 },
     { emoji: "🎨", name: "小画家", desc: "涂鸦过一次", test: (u) => (u.draw || 0) >= 1 },
-    { emoji: "🖌️", name: "涂鸦狂魔", desc: "累计涂鸦 10 次", test: (u) => (u.draw || 0) >= 10 }
+    { emoji: "🖌️", name: "涂鸦狂魔", desc: "累计涂鸦 10 次", test: (u) => (u.draw || 0) >= 10 },
+    { emoji: "🧩", name: "拼图新手", desc: "拼好一次数字华容道", test: (u) => (u.slide || 0) >= 1 },
+    { emoji: "👑", name: "拼图大师", desc: "累计拼好 10 次数字华容道", test: (u) => (u.slide || 0) >= 10 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5136,6 +5182,19 @@
     "随手记比认真记更真实：松手的瞬间，才画得出你真正的样子。",
     "存成图片带走的那一刻才懂：有些灵感，得趁热画下来。",
     "涂鸦板教会一件事——想得再满，也不如动手画一笔来得踏实。"
+  );
+  // —— 跟随数字华容道 / 滑块拼图主题的新语录 ——
+  QUOTES.push(
+    "数字华容道最磨人的是：明明只差一格，却要绕一大圈才挪得动它。",
+    "把乱掉的顺序一格一格归位，急不得——生活里好多事，也是这么拼回来的。",
+    "空白那格不是为了让你偷懒，是给你腾出腾挪的空间。",
+    "拼图卡住时，退一步往往比硬顶更有效；人生那块空格，也是同理。",
+    "看着数字一点点排好，你会相信：再乱的局，也终有归位的那天。",
+    "别小看每一步——华容道里，走错一格，可能要多绕十几步才回来。",
+    "通关的那一下最爽：原来刚才那些绕路，都是必须的。",
+    "滑块拼图教会耐心：先把能定的定下来，剩下的自然会松动。",
+    "最难拼的永远是最后那几格，可只要不放弃挪，总会齐。",
+    "随便拼一拼也挺好，但真想拼好，得先决定从哪一格下手。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -7740,6 +7799,157 @@
         }, 'image/png');
       } catch (e) { toast('保存失败，换个浏览器试试～'); }
     });
+  })();
+
+  /* ---------- 🧩 数字华容道（滑块拼图，打乱保证有解，纯前端零依赖） ---------- */
+  const slideStop = (function () {
+    const board = $("slideBoard");
+    if (!board) return function () {};
+    const KEY = "suibian_slide_best";
+    let best = {};
+    try { best = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { best = {}; }
+    const movesEl = $("slideMoves"), timeEl = $("slideTime"), bestEl = $("slideBest"), msgEl = $("slideMsg"), sizeSel = $("slideSize");
+    let size = 4, state = null, blank = 0, tiles = {}, cell = 0, moves = 0, solved = false, hist = [];
+    let timer = null, startT = 0, accum = 0, suppressClick = false;
+    function fmt(ms) { const s = Math.floor(ms / 1000), m = Math.floor(s / 60); return String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+    function elapsed() { return accum + (timer ? Date.now() - startT : 0); }
+    function build() {
+      const n = size;
+      board.innerHTML = "";
+      const w = board.clientWidth || 320;
+      board.style.height = w + "px";
+      cell = w / n;
+      tiles = {};
+      for (let v = 1; v < n * n; v++) {
+        const t = document.createElement("div");
+        t.className = "slide-tile";
+        t.textContent = v;
+        t.style.width = (cell - 6) + "px";
+        t.style.height = (cell - 6) + "px";
+        t.style.fontSize = Math.max(14, Math.round(cell * 0.34)) + "px";
+        t.addEventListener("click", () => { if (suppressClick) { suppressClick = false; return; } slideVal(v); });
+        board.appendChild(t);
+        tiles[v] = t;
+      }
+      board.querySelectorAll(".slide-tile").forEach((t) => (t.style.transition = "none"));
+      place();
+      void board.offsetWidth;
+      board.querySelectorAll(".slide-tile").forEach((t) => (t.style.transition = ""));
+    }
+    function place() {
+      const n = size;
+      for (let i = 0; i < state.length; i++) {
+        const v = state[i]; if (v === 0) continue;
+        const r = Math.floor(i / n), c = i % n, t = tiles[v];
+        if (!t) continue;
+        t.style.left = (c * cell + 3) + "px";
+        t.style.top = (r * cell + 3) + "px";
+      }
+    }
+    function adjacent(a, b) {
+      const n = size, ra = Math.floor(a / n), ca = a % n, rb = Math.floor(b / n), cb = b % n;
+      return (ra === rb && Math.abs(ca - cb) === 1) || (ca === cb && Math.abs(ra - rb) === 1);
+    }
+    function pushHist() { hist.push({ s: state.slice(), b: blank, m: moves }); if (hist.length > 400) hist.shift(); }
+    function moveTo(idx) {
+      if (solved || idx < 0 || idx >= state.length) return false;
+      if (!adjacent(idx, blank)) return false;
+      pushHist();
+      state[blank] = state[idx]; state[idx] = 0; blank = idx; moves++;
+      place(); updateHud(); check();
+      return true;
+    }
+    function slideVal(v) { const i = state.indexOf(v); if (i >= 0) moveTo(i); }
+    function dirMove(dir) {
+      if (solved) return;
+      const n = size, b = blank, br = Math.floor(b / n), bc = b % n; let ti = -1;
+      if (dir === "up" && br < n - 1) ti = b + n;
+      else if (dir === "down" && br > 0) ti = b - n;
+      else if (dir === "left" && bc < n - 1) ti = b + 1;
+      else if (dir === "right" && bc > 0) ti = b - 1;
+      if (ti >= 0) moveTo(ti);
+    }
+    function check() {
+      for (let i = 0; i < state.length - 1; i++) if (state[i] !== i + 1) return;
+      if (state[state.length - 1] !== 0) return;
+      solved = true; stopTimer();
+      const key = String(size);
+      let isBest = false;
+      if (best[key] == null || moves < best[key]) { best[key] = moves; isBest = true; try { localStorage.setItem(KEY, JSON.stringify(best)); } catch (e) {} }
+      msgEl.innerHTML = "🎉 拼好啦！用了 <b>" + moves + "</b> 步 · " + fmt(elapsed()) + (isBest ? " · 新纪录！" : "");
+      msgEl.className = "result win";
+      bumpUsage("slide"); renderAchv();
+      if (!settings.reduce) confettiBurst();
+      if (settings.sound) tone(880, 0.12);
+    }
+    function updateHud() {
+      movesEl.textContent = moves;
+      timeEl.textContent = fmt(elapsed());
+      const b = best[String(size)];
+      bestEl.textContent = (b == null ? "—" : (b + " 步"));
+    }
+    function runTimer() { stopTimer(); startT = Date.now(); timer = setInterval(() => { timeEl.textContent = fmt(elapsed()); }, 200); }
+    function stopTimer() { if (timer) { clearInterval(timer); timer = null; accum += Date.now() - startT; } }
+    function shuffle(silent) {
+      const n = size;
+      state = []; for (let i = 0; i < n * n - 1; i++) state.push(i + 1); state.push(0);
+      blank = n * n - 1; let prev = -1;
+      const steps = n * n * 60;
+      for (let s = 0; s < steps; s++) {
+        const r = Math.floor(blank / n), c = blank % n, nb = [];
+        if (r > 0) nb.push(blank - n);
+        if (r < n - 1) nb.push(blank + n);
+        if (c > 0) nb.push(blank - 1);
+        if (c < n - 1) nb.push(blank + 1);
+        const pool = nb.length > 1 ? nb.filter((x) => x !== prev) : nb;
+        const pick = pool[rand(pool.length)];
+        state[blank] = state[pick]; state[pick] = 0; prev = blank; blank = pick;
+      }
+      let ok = false; for (let i = 0; i < state.length - 1; i++) if (state[i] !== i + 1) { ok = true; break; }
+      if (!ok) { const t0 = state[0], t1 = state[1]; state[0] = t1; state[1] = t0; blank = state.indexOf(0); }
+      moves = 0; solved = false; hist = []; accum = 0;
+      build();
+      if (!silent) bumpUsage("slide");
+      updateHud(); runTimer();
+      msgEl.textContent = "把数字按 1 → " + (n * n - 1) + " 排好，空白归位即通关 🧩";
+      msgEl.className = "result";
+    }
+    function undo() {
+      if (solved) return;
+      const h = hist.pop(); if (!h) return;
+      state = h.s; blank = h.b; moves = h.m;
+      place(); updateHud();
+    }
+    let tsx = 0, tsy = 0, touching = false;
+    board.addEventListener("touchstart", (e) => { const t = e.touches[0]; tsx = t.clientX; tsy = t.clientY; touching = true; }, { passive: true });
+    board.addEventListener("touchend", (e) => {
+      if (!touching) return; touching = false;
+      const t = e.changedTouches[0], dx = t.clientX - tsx, dy = t.clientY - tsy;
+      if (Math.abs(dx) < 18 && Math.abs(dy) < 18) return;
+      suppressClick = true; setTimeout(() => (suppressClick = false), 0);
+      if (Math.abs(dx) > Math.abs(dy)) dirMove(dx > 0 ? "right" : "left"); else dirMove(dy > 0 ? "down" : "up");
+    }, { passive: true });
+    document.addEventListener("keydown", (e) => {
+      const panel = document.getElementById("slide");
+      if (!panel || !panel.classList.contains("active")) return;
+      const map = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
+      if (map[e.key]) { e.preventDefault(); dirMove(map[e.key]); }
+    });
+    window.addEventListener("resize", () => {
+      if (!state) return;
+      const w = board.clientWidth || 320; board.style.height = w + "px"; cell = w / size;
+      for (const v in tiles) { const t = tiles[v]; t.style.width = (cell - 6) + "px"; t.style.height = (cell - 6) + "px"; t.style.fontSize = Math.max(14, Math.round(cell * 0.34)) + "px"; }
+      place();
+    });
+    if (sizeSel) sizeSel.addEventListener("change", () => { size = parseInt(sizeSel.value, 10) || 4; shuffle(false); });
+    $("slideNew").addEventListener("click", () => { shuffle(false); playClick(); });
+    $("slideUndo").addEventListener("click", () => { undo(); playClick(); });
+    function start() {
+      if (!state) { size = parseInt((sizeSel && sizeSel.value) || "4", 10) || 4; shuffle(true); }
+      else if (!solved) { runTimer(); }
+    }
+    window.slideStart = start;
+    return function stopFn() { stopTimer(); };
   })();
 
 </script>
