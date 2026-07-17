@@ -907,6 +907,22 @@
   .gmk-over.show { display:flex; }
   .gmk-over-txt { font-size:22px; font-weight:800; padding:0 16px; text-shadow:0 2px 10px rgba(0,0,0,.4); }
 
+  /* 电子琴 */
+  .piano-wrap { margin:8px auto 2px; max-width:680px; }
+  .piano { position:relative; display:flex; height:168px; user-select:none; -webkit-user-select:none; touch-action:none; background:var(--card-2); border-radius:14px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.28); }
+  .pkey { box-sizing:border-box; }
+  .pkey.white { flex:1 1 0; background:linear-gradient(#ffffff,#eef0f4); border-right:1px solid #d3d6df; border-radius:0 0 7px 7px; cursor:pointer; transition:background .06s; }
+  .pkey.white:last-child { border-right:none; }
+  .pkey.black { position:absolute; top:0; height:62%; background:linear-gradient(#33363f,#0c0e13); border-radius:0 0 5px 5px; z-index:2; box-shadow:0 3px 7px rgba(0,0,0,.45); cursor:pointer; transition:background .06s; }
+  .pkey.white.down { background:linear-gradient(var(--accent),#d7c4ff); }
+  .pkey.black.down { background:linear-gradient(#6a4cc0,#3a2a78); }
+  .piano-row { display:flex; align-items:center; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+  .piano-row label { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
+  #pianoWave { padding:6px 8px; border-radius:9px; border:1px solid var(--line); background:var(--bg-soft); color:var(--text); font:inherit; }
+  #pianoVol { width:120px; accent-color:var(--accent); }
+  .piano-keys-hint { font-size:12px; color:var(--muted); text-align:center; margin-top:8px; }
+  .piano-keys-hint b { color:var(--text); }
+
 </style>
 </head>
 <body>
@@ -982,6 +998,7 @@
       <button data-tab="gomoku">⚫ 五子棋</button>
       <button data-tab="maze">🌀 迷宫</button>
       <button data-tab="sokoban">📦 推箱子</button>
+      <button data-tab="piano">🎹 电子琴</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2120,6 +2137,33 @@
     </div>
   </section>
 
+  <!-- 电子琴 -->
+  <section class="panel" id="piano">
+    <div class="card">
+      <h2>🎹 电子琴</h2>
+      <div class="hint">用鼠标 / 触摸点琴键，或用键盘 <b>A S D F G H J K L ;</b>（白键）与 <b>W E T Y U O P</b>（黑键）弹奏。右下角可调音色与音量；点「🎵 来一段」让随便替你弹首小曲。声音由浏览器实时合成，无需任何音频文件，弹过即计入使用统计。</div>
+      <div class="piano-wrap">
+        <div class="piano" id="pianoKeys"></div>
+      </div>
+      <div class="piano-keys-hint">键盘映射：白键 <b>A S D F G H J K L ;</b>　黑键 <b>W E T Y U O P</b>（覆盖 C4–E5 一段，其余琴键用鼠标 / 触摸弹）</div>
+      <div class="piano-row">
+        <label>音色
+          <select id="pianoWave">
+            <option value="sine">正弦 sine</option>
+            <option value="triangle" selected>三角 triangle</option>
+            <option value="square">方波 square</option>
+            <option value="sawtooth">锯齿 saw</option>
+          </select>
+        </label>
+        <label>音量
+          <input type="range" id="pianoVol" min="0" max="100" value="60">
+        </label>
+        <button class="btn" id="pianoDemo">🎵 来一段</button>
+      </div>
+      <div class="hint" style="font-size:12px">提示：首次点琴键才会出声（浏览器要求用户先互动）；若设备静音则听不到，与本站的「音效」开关互不干扰——电子琴永远想响就响。</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2321,6 +2365,7 @@
     if (id === "maze" && typeof window.mazeStart === "function") window.mazeStart();
     if (id !== "sokoban" && typeof sokobanStop === "function") sokobanStop();
     if (id === "sokoban" && typeof window.sokobanStart === "function") window.sokobanStart();
+    if (id !== "piano" && typeof pianoStop === "function") pianoStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2400,7 +2445,8 @@
     metro: "节拍器 节拍 速度 打拍子 练琴 节奏 鼓点 bpm 测速 节奏器 metronome 律动 卡拍 练耳",
     gomoku: "五子棋 棋 对弈 人机 下棋 gomoku 黑白子 连五 棋盘 博弈 策略 AI 电脑 对战 围棋 五连",
     maze: "迷宫 走迷宫 路径 探索 寻路 解谜 出口 方向 益智 游戏 闯关 路线 绕路 出口 最短 path maze",
-    sokoban: "推箱子 搬运 箱子 仓库 boxes sokoban 仓库番 益智 解谜 推 方块 关卡 经典 闯关 逻辑"
+    sokoban: "推箱子 搬运 箱子 仓库 boxes sokoban 仓库番 益智 解谜 推 方块 关卡 经典 闯关 逻辑",
+    piano: "电子琴 钢琴 琴 弹奏 音乐 乐器 弹琴 键盘 音符 旋律 曲子 演奏 合成器 音阶 keyboard piano play 小星星 八音盒"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4048,7 +4094,9 @@
     { emoji: "🌀", name: "迷宫行者", desc: "走出一座迷宫", test: (u) => (u.maze || 0) >= 1 },
     { emoji: "🧭", name: "探路达人", desc: "累计走出 5 座迷宫", test: (u) => (u.maze || 0) >= 5 },
     { emoji: "📦", name: "搬运工", desc: "通关一关推箱子", test: (u) => (u.sokoban || 0) >= 1 },
-    { emoji: "🚚", name: "推箱大师", desc: "累计通关 5 关推箱子", test: (u) => (u.sokoban || 0) >= 5 }
+    { emoji: "🚚", name: "推箱大师", desc: "累计通关 5 关推箱子", test: (u) => (u.sokoban || 0) >= 5 },
+    { emoji: "🎹", name: "弹奏家", desc: "弹过一次电子琴", test: (u) => (u.piano || 0) >= 1 },
+    { emoji: "🎼", name: "小演奏家", desc: "累计弹奏 10 次电子琴", test: (u) => (u.piano || 0) >= 10 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5011,6 +5059,19 @@
     "通关的瞬间才明白，前面那些看似绕远的步子，其实都是必须的。",
     "会推箱子的人，懂得先规划全局，再动手——别让手比脑子快。",
     "每一关都有解，只是有的人早看穿，有的人撞了南墙才回头。"
+  );
+  // —— 跟随电子琴 / 音乐 / 随便弹主题的新语录 ——
+  QUOTES.push(
+    "有些事不必按谱来，随便按几个键，也能响成一首只属于此刻的曲子。",
+    "黑键白键挨在一起才叫钢琴——生活里那些不和谐的音，凑近了也是旋律。",
+    "弹错一个音别慌，下一拍接上就好；人和曲子，都是弹着弹着就顺了。",
+    "电子琴的好处是：按下去就响，松手就停——干脆得像你该有的态度。",
+    "听不见声音的时候，先确认自己是不是还愿意思去「按一下」。",
+    "旋律比道理好懂：你不必解释为什么难过，弹一段慢的就行。",
+    "小星星那么简单，可全世界都记得——把一件事做到人人会哼，才算真本事。",
+    "音阶一级一级上，急不得；你离想要的那段高音，也就差几个音的距离。",
+    "琴键再多，一次也只能按一个；专注此刻这一个音，整首曲子自然就来了。",
+    "随便弹弹不是敷衍，是给手指一点自由，也给心情一个出口。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -7380,6 +7441,148 @@
     }, { passive: true });
     window.sokobanStart = start;
     return function stopFn() { started = false; won = false; };
+  })();
+
+  /* ---------- 电子琴 ---------- */
+  const pianoStop = (function () {
+    const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    function midiOf(name) {
+      const m = /^([A-G]#?)(\d)$/.exec(name);
+      if (!m) return 60;
+      return (parseInt(m[2], 10) + 1) * 12 + NAMES.indexOf(m[1]);
+    }
+    // 25 键：C4..C6（15 白 + 10 黑）
+    const KEYS = [
+      { n: 'C4', b: false }, { n: 'C#4', b: true }, { n: 'D4', b: false }, { n: 'D#4', b: true }, { n: 'E4', b: false },
+      { n: 'F4', b: false }, { n: 'F#4', b: true }, { n: 'G4', b: false }, { n: 'G#4', b: true }, { n: 'A4', b: false },
+      { n: 'A#4', b: true }, { n: 'B4', b: false },
+      { n: 'C5', b: false }, { n: 'C#5', b: true }, { n: 'D5', b: false }, { n: 'D#5', b: true }, { n: 'E5', b: false },
+      { n: 'F5', b: false }, { n: 'F#5', b: true }, { n: 'G5', b: false }, { n: 'G#5', b: true }, { n: 'A5', b: false },
+      { n: 'A#5', b: true }, { n: 'B5', b: false }, { n: 'C6', b: false }
+    ];
+    const KEYMAP = { a: 'C4', w: 'C#4', s: 'D4', e: 'D#4', d: 'E4', f: 'F4', t: 'F#4', g: 'G4', y: 'G#4', h: 'A4', u: 'A#4', j: 'B4', k: 'C5', o: 'C#5', l: 'D5', p: 'D#5', ';': 'E5' };
+
+    let ac = null, master = null;
+    let volLevel = 0.6;
+    let wave = 'triangle';
+    let lastBump = 0;
+    const keyEls = {};
+
+    function ensureAC() {
+      if (ac) return;
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return;
+      try {
+        ac = new C();
+        master = ac.createGain();
+        master.gain.value = volLevel;
+        master.connect(ac.destination);
+      } catch (e) { ac = null; }
+    }
+    function throttleBump() {
+      const now = Date.now();
+      if (now - lastBump > 1200) { lastBump = now; try { bumpUsage('piano'); } catch (e) {} }
+    }
+    function playNote(midi) {
+      ensureAC();
+      if (ac && ac.state === 'suspended') { try { ac.resume(); } catch (e) {} }
+      const el = keyEls[midi];
+      if (el) {
+        el.classList.add('down');
+        setTimeout(function () { if (el) el.classList.remove('down'); }, 240);
+      }
+      throttleBump();
+      if (!ac) return;
+      const f = 440 * Math.pow(2, (midi - 69) / 12);
+      const t = ac.currentTime;
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = wave;
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.9, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+      o.connect(g); g.connect(master);
+      o.start(t);
+      o.stop(t + 1.6);
+    }
+
+    const wrap = $('pianoKeys');
+    if (wrap) {
+      const whiteCount = KEYS.filter(function (k) { return !k.b; }).length;
+      const W = 100 / whiteCount;
+      let wi = -1;
+      KEYS.forEach(function (k) {
+        const midi = midiOf(k.n);
+        const el = document.createElement('div');
+        el.className = 'pkey ' + (k.b ? 'black' : 'white');
+        el.dataset.midi = midi;
+        if (!k.b) { wi++; }
+        else {
+          el.style.width = (W * 0.62) + '%';
+          el.style.left = ((wi + 1) * W - W * 0.31) + '%';
+        }
+        el.addEventListener('pointerdown', function (ev) { ev.preventDefault(); playNote(midi); });
+        el.addEventListener('pointerup', function () { if (el) el.classList.remove('down'); });
+        el.addEventListener('pointerleave', function () { if (el) el.classList.remove('down'); });
+        el.addEventListener('pointercancel', function () { if (el) el.classList.remove('down'); });
+        wrap.appendChild(el);
+        keyEls[midi] = el;
+      });
+    }
+
+    const volSlider = $('pianoVol');
+    if (volSlider) {
+      volLevel = (+volSlider.value) / 100;
+      if (master) master.gain.value = volLevel;
+      volSlider.addEventListener('input', function () {
+        volLevel = (+volSlider.value) / 100;
+        if (master) master.gain.value = volLevel;
+      });
+    }
+    const waveSel = $('pianoWave');
+    if (waveSel) {
+      wave = waveSel.value || 'triangle';
+      waveSel.addEventListener('change', function () { wave = waveSel.value || 'triangle'; });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      const tag = (e.target && e.target.tagName ? e.target.tagName : '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      const panel = document.getElementById('piano');
+      if (!panel || !panel.classList.contains('active')) return;
+      const kk = e.key.toLowerCase();
+      if (KEYMAP[kk]) { e.preventDefault(); if (!e.repeat) playNote(midiOf(KEYMAP[kk])); }
+    });
+
+    // 演示：小星星
+    const DEMO = [
+      ['C4', 1], ['C4', 1], ['G4', 1], ['G4', 1], ['A4', 1], ['A4', 1], ['G4', 2],
+      ['F4', 1], ['F4', 1], ['E4', 1], ['E4', 1], ['D4', 1], ['D4', 1], ['C4', 2],
+      ['G4', 1], ['G4', 1], ['F4', 1], ['F4', 1], ['E4', 1], ['E4', 1], ['D4', 2],
+      ['G4', 1], ['G4', 1], ['F4', 1], ['F4', 1], ['E4', 1], ['E4', 1], ['D4', 2]
+    ];
+    let demoTimers = [];
+    let demoOn = false;
+    function cancelDemo() { demoOn = false; demoTimers.forEach(clearTimeout); demoTimers = []; }
+    function playDemo() {
+      cancelDemo(); demoOn = true;
+      const beat = 430;
+      let t = 0;
+      DEMO.forEach(function (pair) {
+        const midi = midiOf(pair[0]);
+        demoTimers.push(setTimeout(function () { if (demoOn) playNote(midi); }, t));
+        t += pair[1] * beat;
+      });
+      demoTimers.push(setTimeout(function () { demoOn = false; }, t + 320));
+    }
+    const demoBtn = $('pianoDemo');
+    if (demoBtn) demoBtn.addEventListener('click', function () {
+      ensureAC();
+      if (ac && ac.state === 'suspended') { try { ac.resume(); } catch (e) {} }
+      playDemo();
+    });
+
+    return function stopFn() { cancelDemo(); };
   })();
 
 </script>
