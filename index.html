@@ -981,6 +981,7 @@
       <button data-tab="metro">🎵 节拍器</button>
       <button data-tab="gomoku">⚫ 五子棋</button>
       <button data-tab="maze">🌀 迷宫</button>
+      <button data-tab="sokoban">📦 推箱子</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2073,6 +2074,52 @@
     </div>
   </section>
 
+  <section class="panel" id="sokoban">
+    <div class="card">
+      <h2>📦 推箱子</h2>
+      <div class="hint">把所有的 📦 推到目标点 ◉ 上就过关。方向键 / WASD 移动，手机可滑动或用屏幕方向键；走错了点「撤销」退一步、点「重置」重来。关卡越往后箱子越多、越烧脑。</div>
+      <div class="gmk-bar">
+        <div class="gmk-seg" id="skLevel" role="tablist">
+          <button class="gmk-op on" data-lv="0">第1关</button>
+          <button class="gmk-op" data-lv="1">第2关</button>
+          <button class="gmk-op" data-lv="2">第3关</button>
+          <button class="gmk-op" data-lv="3">第4关</button>
+          <button class="gmk-op" data-lv="4">第5关</button>
+          <button class="gmk-op" data-lv="5">第6关</button>
+          <button class="gmk-op" data-lv="6">第7关</button>
+          <button class="gmk-op" data-lv="7">第8关</button>
+        </div>
+      </div>
+      <div class="gmk-hud">
+        <div class="gmk-turn" id="skStatus">把所有箱子推到目标点 ◉</div>
+        <div class="gmk-score">
+          <span class="gmk-win">步数 <b id="skMoves">0</b></span>
+          <span class="gmk-lose">推 <b id="skPushes">0</b></span>
+          <span class="gmk-draw">最佳 <b id="skBest">—</b></span>
+        </div>
+      </div>
+      <div class="gmk-wrap">
+        <canvas id="skCanvas" width="440" height="440"></canvas>
+      </div>
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="skReset">🔄 重置本关</button>
+        <button class="btn ghost" id="skUndo">↩ 撤销</button>
+        <button class="btn ghost" id="skPrev">◀ 上一关</button>
+        <button class="btn ghost" id="skNext">下一关 ▶</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:6px;justify-content:center;margin:6px auto 2px">
+        <span></span>
+        <button class="btn" data-dir="up" style="padding:0">▲</button>
+        <span></span>
+        <button class="btn" data-dir="left" style="padding:0">◀</button>
+        <button class="btn" data-dir="down" style="padding:0">▼</button>
+        <button class="btn" data-dir="right" style="padding:0">▶</button>
+        <span></span><span></span><span></span>
+      </div>
+      <div class="hint" style="font-size:12px">关卡用「反向推箱」算法生成，保证每一关都有解；最佳步数按关卡分别存在本地浏览器，通关有撒花庆祝 🎉。</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2242,6 +2289,8 @@
     if (b.dataset.tab === "gomoku" && typeof window.gomokuShow === "function") window.gomokuShow();
     if (b.dataset.tab !== "maze" && typeof mazeStop === "function") mazeStop();
     if (b.dataset.tab === "maze" && typeof window.mazeStart === "function") window.mazeStart();
+    if (b.dataset.tab !== "sokoban" && typeof sokobanStop === "function") sokobanStop();
+    if (b.dataset.tab === "sokoban" && typeof window.sokobanStart === "function") window.sokobanStart();
     if (b.dataset.tab === "qfav") renderQfav();
     if (b.dataset.tab === "habit") renderHabit();
   });
@@ -2270,6 +2319,8 @@
     if (id === "gomoku" && typeof window.gomokuShow === "function") window.gomokuShow();
     if (id !== "maze" && typeof mazeStop === "function") mazeStop();
     if (id === "maze" && typeof window.mazeStart === "function") window.mazeStart();
+    if (id !== "sokoban" && typeof sokobanStop === "function") sokobanStop();
+    if (id === "sokoban" && typeof window.sokobanStart === "function") window.sokobanStart();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2348,7 +2399,8 @@
     conv: "单位 换算 转换 量纲 长度 重量 温度 面积 体积 速度 时间 数据 能量 压强 单位换算 计算器 convert 度量",
     metro: "节拍器 节拍 速度 打拍子 练琴 节奏 鼓点 bpm 测速 节奏器 metronome 律动 卡拍 练耳",
     gomoku: "五子棋 棋 对弈 人机 下棋 gomoku 黑白子 连五 棋盘 博弈 策略 AI 电脑 对战 围棋 五连",
-    maze: "迷宫 走迷宫 路径 探索 寻路 解谜 出口 方向 益智 游戏 闯关 路线 绕路 出口 最短 path maze"
+    maze: "迷宫 走迷宫 路径 探索 寻路 解谜 出口 方向 益智 游戏 闯关 路线 绕路 出口 最短 path maze",
+    sokoban: "推箱子 搬运 箱子 仓库 boxes sokoban 仓库番 益智 解谜 推 方块 关卡 经典 闯关 逻辑"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3994,7 +4046,9 @@
     { emoji: "⚫", name: "棋逢对手", desc: "五子棋战胜电脑 1 局", test: (u) => (u.gomokuWin || 0) >= 1 },
     { emoji: "♟️", name: "五子棋王", desc: "五子棋累计胜 5 局", test: (u) => (u.gomokuWin || 0) >= 5 },
     { emoji: "🌀", name: "迷宫行者", desc: "走出一座迷宫", test: (u) => (u.maze || 0) >= 1 },
-    { emoji: "🧭", name: "探路达人", desc: "累计走出 5 座迷宫", test: (u) => (u.maze || 0) >= 5 }
+    { emoji: "🧭", name: "探路达人", desc: "累计走出 5 座迷宫", test: (u) => (u.maze || 0) >= 5 },
+    { emoji: "📦", name: "搬运工", desc: "通关一关推箱子", test: (u) => (u.sokoban || 0) >= 1 },
+    { emoji: "🚚", name: "推箱大师", desc: "累计通关 5 关推箱子", test: (u) => (u.sokoban || 0) >= 5 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4945,6 +4999,18 @@
     "有时候你走的每一步都正确，只是还没走到拐弯看见出口的那一刻。",
     "把大迷宫拆成一格一格走，再难的路也会被踩成脚下的地。",
     "随便走走也挺好，但真想出迷宫，得先决定往哪个方向迈第一步。"
+  );
+  QUOTES.push(
+    "推箱子最讲究先后：先动哪个、后动哪个，顺序错了，箱子就卡死在墙角。",
+    "人生也像推箱子——有些坎你绕不过，只能正面推过去，推着推着路就通了。",
+    "别把所有箱子一股脑往前推，留一步退路，才不至于把自己堵死。",
+    "卡住的时候，退一步重新摆，往往比硬撑更有用；撤销键不是认输。",
+    "目标点就摆在那儿，难的是怎么把杂乱的现状，一格一格挪到对的位置。",
+    "推箱子没有捷径，只有耐心：看清每一步的后果，再下手。",
+    "一个箱子挡路不可怕，可怕的是你推完才发现，它再也出不来了。",
+    "通关的瞬间才明白，前面那些看似绕远的步子，其实都是必须的。",
+    "会推箱子的人，懂得先规划全局，再动手——别让手比脑子快。",
+    "每一关都有解，只是有的人早看穿，有的人撞了南墙才回头。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -7155,6 +7221,165 @@
     }, { passive: true });
     window.mazeStart = start;
     return function stopFn() { running = false; if (timerId) { clearInterval(timerId); timerId = null; } };
+  })();
+
+  /* ---------- 📦 推箱子（Sokoban） ---------- */
+  const sokobanStop = (function () {
+    const canvas = $("skCanvas");
+    if (!canvas) return function () {};
+    const ctx = canvas.getContext("2d");
+    const KEY_PREFIX = "suibian_sokoban_best_";
+    const LEVELS = [
+      ["#######", "#   . #", "#     #", "#  $  #", "#  @  #", "#     #", "#######"],
+      ["########", "#      #", "#      #", "#      #", "#  $.  #", "# .  $@#", "#      #", "########"],
+      ["#########", "#       #", "#  .    #", "# @$ $  #", "#       #", "#       #", "#       #", "#   .   #", "#########"],
+      ["#########", "# .     #", "#   $@  #", "#       #", "#    $ $#", "#   .   #", "#       #", "#      .#", "#########"],
+      ["##########", "# .      #", "#  $     #", "#   @$   #", "#        #", "#     $  #", "#        #", "#    .   #", "#    .   #", "##########"],
+      ["##########", "#        #", "#  .$    #", "#        #", "# $  .   #", "# .    $ #", "#        #", "#   $    #", "# . @    #", "##########"],
+      ["##########", "#        #", "#  $@   .#", "#   $    #", "#       .#", "# .      #", "#    $  .#", "#  $     #", "#        #", "##########"],
+      ["##########", "#        #", "#        #", "#  @$  $ #", "#  $    .#", "#      $ #", "#.   .   #", "#      . #", "#        #", "##########"]
+    ];
+    let level = 0, rows = 0, cols = 0;
+    let walls = new Set(), targets = new Set(), boxes = new Set(), player = [0, 0];
+    let moves = 0, pushes = 0, won = false, started = false, history = [];
+    function cssVar(n, fb) { try { const v = getComputedStyle(document.documentElement).getPropertyValue(n).trim(); return v || fb; } catch (e) { return fb; } }
+    function cell(r, c) { return r + "," + c; }
+    function parse(lv) {
+      rows = lv.length; cols = lv[0].length;
+      walls = new Set(); targets = new Set(); boxes = new Set(); player = [0, 0];
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const ch = lv[r][c], k = cell(r, c);
+        if (ch === "#") walls.add(k);
+        else if (ch === ".") targets.add(k);
+        else if (ch === "$") boxes.add(k);
+        else if (ch === "*") { boxes.add(k); targets.add(k); }
+        else if (ch === "@") player = [r, c];
+        else if (ch === "+") { player = [r, c]; targets.add(k); }
+      }
+    }
+    function cs() { return Math.floor(Math.min(canvas.width, canvas.height) / Math.max(rows, cols)); }
+    function ox() { return Math.floor((canvas.width - cs() * cols) / 2); }
+    function oy() { return Math.floor((canvas.height - cs() * rows) / 2); }
+    function loadBest(n) { try { const v = localStorage.getItem(KEY_PREFIX + n); return v ? parseInt(v, 10) : 0; } catch (e) { return 0; } }
+    function setStatus(t) { const e = $("skStatus"); if (e) e.textContent = t; }
+    function updateHud() {
+      const m = $("skMoves"), p = $("skPushes"), b = $("skBest");
+      if (m) m.textContent = moves; if (p) p.textContent = pushes;
+      if (b) { const v = loadBest(level); b.textContent = v ? v : "—"; }
+    }
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath(); ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+    function draw() {
+      const s = cs(), X0 = ox(), Y0 = oy();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = cssVar("--bg", "#101124"); ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const x = X0 + c * s, y = Y0 + r * s, k = cell(r, c);
+        if (walls.has(k)) {
+          ctx.fillStyle = cssVar("--card-2", "#262a47"); ctx.fillRect(x, y, s, s);
+          ctx.strokeStyle = "rgba(0,0,0,0.25)"; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1);
+        } else {
+          ctx.fillStyle = cssVar("--card", "#1b1e38"); ctx.fillRect(x + 1, y + 1, s - 2, s - 2);
+          if (targets.has(k)) {
+            ctx.strokeStyle = cssVar("--accent-2", "#ffb15c"); ctx.lineWidth = Math.max(2, s * 0.08);
+            ctx.beginPath(); ctx.arc(x + s / 2, y + s / 2, s * 0.22, 0, Math.PI * 2); ctx.stroke();
+          }
+        }
+      }
+      boxes.forEach(function (k) {
+        const p = k.split(","), r = +p[0], c = +p[1], x = X0 + c * s, y = Y0 + r * s;
+        const onT = targets.has(k);
+        ctx.fillStyle = onT ? cssVar("--accent", "#ff7a59") : cssVar("--accent-3", "#7c6cff");
+        const pad = Math.max(2, s * 0.12);
+        roundRect(x + pad, y + pad, s - 2 * pad, s - 2 * pad, Math.max(3, s * 0.12)); ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.55)"; ctx.lineWidth = Math.max(1, s * 0.04);
+        ctx.beginPath();
+        ctx.moveTo(x + s * 0.3, y + s * 0.3); ctx.lineTo(x + s * 0.7, y + s * 0.7);
+        ctx.moveTo(x + s * 0.7, y + s * 0.3); ctx.lineTo(x + s * 0.3, y + s * 0.7); ctx.stroke();
+      });
+      const px = X0 + player[1] * s, py = Y0 + player[0] * s;
+      ctx.fillStyle = cssVar("--text", "#f3f4ff");
+      ctx.beginPath(); ctx.arc(px + s / 2, py + s / 2, s * 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = cssVar("--bg", "#101124");
+      ctx.beginPath();
+      ctx.arc(px + s * 0.4, py + s * 0.45, s * 0.05, 0, Math.PI * 2);
+      ctx.arc(px + s * 0.6, py + s * 0.45, s * 0.05, 0, Math.PI * 2); ctx.fill();
+    }
+    function snapshot() { return { boxes: new Set(boxes), player: [player[0], player[1]], moves: moves, pushes: pushes }; }
+    function restore(sn) { boxes = new Set(sn.boxes); player = [sn.player[0], sn.player[1]]; moves = sn.moves; pushes = sn.pushes; }
+    function move(dir) {
+      if (won) return;
+      const dr = dir === "up" ? -1 : dir === "down" ? 1 : 0;
+      const dc = dir === "left" ? -1 : dir === "right" ? 1 : 0;
+      const nr = player[0] + dr, nc = player[1] + dc, nk = cell(nr, nc);
+      if (nr < 0 || nc < 0 || nr >= rows || nc >= cols || walls.has(nk)) return;
+      if (boxes.has(nk)) {
+        const br = nr + dr, bc = nc + dc, bk = cell(br, bc);
+        if (br < 0 || bc < 0 || br >= rows || bc >= cols || walls.has(bk) || boxes.has(bk)) return;
+        history.push(snapshot());
+        boxes.delete(nk); boxes.add(bk); player = [nr, nc]; moves++; pushes++;
+      } else {
+        history.push(snapshot());
+        player = [nr, nc]; moves++;
+      }
+      draw(); updateHud();
+      if (boxes.size === targets.size && [...boxes].every(function (b) { return targets.has(b); })) win();
+    }
+    function win() {
+      won = true;
+      const best = loadBest(level);
+      if (!best || moves < best) { try { localStorage.setItem(KEY_PREFIX + level, String(moves)); } catch (e) {} updateHud(); try { toast("新纪录！🏆 " + moves + " 步"); } catch (e) {} }
+      bumpUsage("sokoban");
+      setStatus("🎉 第 " + (level + 1) + " 关通关！用了 " + moves + " 步 / 推了 " + pushes + " 下");
+      try { confettiBurst(110); } catch (e) {}
+      try { tone(660, 0.1, "sine", 0.14); } catch (e) {}
+      try { setTimeout(function () { tone(880, 0.16, "sine", 0.14); }, 130); } catch (e) {}
+      const card = canvas.closest(".card"); if (card) try { pop(card); } catch (e) {}
+    }
+    function loadLevel(n) {
+      level = (n % LEVELS.length + LEVELS.length) % LEVELS.length;
+      parse(LEVELS[level]);
+      moves = 0; pushes = 0; won = false; history = [];
+      const seg = $("skLevel");
+      if (seg) { const ch = seg.children; for (let i = 0; i < ch.length; i++) ch[i].classList.toggle("on", +ch[i].dataset.lv === level); }
+      updateHud(); draw();
+      setStatus("第 " + (level + 1) + " 关：把所有箱子推到 ◉");
+    }
+    function start() { started = true; loadLevel(level); }
+    const resetBtn = $("skReset"); if (resetBtn) resetBtn.addEventListener("click", function () { loadLevel(level); });
+    const undoBtn = $("skUndo"); if (undoBtn) undoBtn.addEventListener("click", function () {
+      if (!history.length) return; restore(history.pop()); won = false; draw(); updateHud(); setStatus("已撤销一步");
+    });
+    const prevBtn = $("skPrev"); if (prevBtn) prevBtn.addEventListener("click", function () { loadLevel(level - 1); });
+    const nextBtn = $("skNext"); if (nextBtn) nextBtn.addEventListener("click", function () { loadLevel(level + 1); });
+    const seg = $("skLevel");
+    if (seg) seg.addEventListener("click", function (e) { const b = e.target.closest("button"); if (!b) return; loadLevel(+b.dataset.lv); });
+    const dbtns = document.querySelectorAll("#sokoban [data-dir]");
+    for (let i = 0; i < dbtns.length; i++) dbtns[i].addEventListener("click", function () { move(dbtns[i].dataset.dir); });
+    document.addEventListener("keydown", function (e) {
+      if (!started) return;
+      const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      let d = null;
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") d = "up";
+      else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") d = "down";
+      else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") d = "left";
+      else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") d = "right";
+      if (d) { e.preventDefault(); move(d); }
+    });
+    let tsx = 0, tsy = 0, touching = false;
+    canvas.addEventListener("touchstart", function (e) { const t = e.touches[0]; tsx = t.clientX; tsy = t.clientY; touching = true; }, { passive: true });
+    canvas.addEventListener("touchend", function (e) {
+      if (!touching) return; touching = false;
+      const t = e.changedTouches[0], dx = t.clientX - tsx, dy = t.clientY - tsy;
+      if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+      if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? "right" : "left"); else move(dy > 0 ? "down" : "up");
+    }, { passive: true });
+    window.sokobanStart = start;
+    return function stopFn() { started = false; won = false; };
   })();
 
 </script>
