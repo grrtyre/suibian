@@ -980,6 +980,7 @@
       <button data-tab="conv">📐 单位换算</button>
       <button data-tab="metro">🎵 节拍器</button>
       <button data-tab="gomoku">⚫ 五子棋</button>
+      <button data-tab="maze">🌀 迷宫</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2033,6 +2034,45 @@
     </div>
   </section>
 
+  <section class="panel" id="maze">
+    <div class="card">
+      <h2>🌀 迷宫</h2>
+      <div class="hint">亲手走出一座迷宫：从入口（左上角）走到出口（右下角 🏁）即通关。方向键 / WASD 移动，手机可滑动或用屏幕方向键。卡住了就点亮「寻路提示」，看最短路线怎么走。</div>
+      <div class="gmk-bar">
+        <div class="gmk-seg" id="mzSize" role="tablist">
+          <button class="gmk-op on" data-sz="9">入门 9×9</button>
+          <button class="gmk-op" data-sz="13">进阶 13×13</button>
+          <button class="gmk-op" data-sz="17">烧脑 17×17</button>
+        </div>
+        <button class="gmk-op" id="mzHint">💡 寻路提示</button>
+      </div>
+      <div class="gmk-hud">
+        <div class="gmk-turn" id="mzStatus">打开即开局，走到右下角就赢</div>
+        <div class="gmk-score">
+          <span class="gmk-win">⏱ <b id="mzTime">00:00</b></span>
+          <span class="gmk-lose">步数 <b id="mzMoves">0</b></span>
+          <span class="gmk-draw">最佳 <b id="mzBest">—</b></span>
+        </div>
+      </div>
+      <div class="gmk-wrap">
+        <canvas id="mzCanvas" width="440" height="440"></canvas>
+      </div>
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="mzNew">🔄 新迷宫</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:6px;justify-content:center;margin:6px auto 2px">
+        <span></span>
+        <button class="btn" data-dir="up" style="padding:0">▲</button>
+        <span></span>
+        <button class="btn" data-dir="left" style="padding:0">◀</button>
+        <button class="btn" data-dir="down" style="padding:0">▼</button>
+        <button class="btn" data-dir="right" style="padding:0">▶</button>
+        <span></span><span></span><span></span>
+      </div>
+      <div class="hint" style="font-size:12px">迷宫用经典「递归回溯」算法生成，每座都只有唯一通路；最佳成绩按尺寸分别存在本地浏览器，刷新也不丢。</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2200,6 +2240,8 @@
     if (b.dataset.tab !== "metro" && typeof metroStop === "function") metroStop();
     if (b.dataset.tab !== "gomoku" && typeof gomokuStop === "function") gomokuStop();
     if (b.dataset.tab === "gomoku" && typeof window.gomokuShow === "function") window.gomokuShow();
+    if (b.dataset.tab !== "maze" && typeof mazeStop === "function") mazeStop();
+    if (b.dataset.tab === "maze" && typeof window.mazeStart === "function") window.mazeStart();
     if (b.dataset.tab === "qfav") renderQfav();
     if (b.dataset.tab === "habit") renderHabit();
   });
@@ -2226,6 +2268,8 @@
     if (id !== "metro" && typeof metroStop === "function") metroStop();
     if (id !== "gomoku" && typeof gomokuStop === "function") gomokuStop();
     if (id === "gomoku" && typeof window.gomokuShow === "function") window.gomokuShow();
+    if (id !== "maze" && typeof mazeStop === "function") mazeStop();
+    if (id === "maze" && typeof window.mazeStart === "function") window.mazeStart();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2303,7 +2347,8 @@
     guess: "猜数字 数字 游戏 猜数 博弈 心思 大了 小了 100 心里想",
     conv: "单位 换算 转换 量纲 长度 重量 温度 面积 体积 速度 时间 数据 能量 压强 单位换算 计算器 convert 度量",
     metro: "节拍器 节拍 速度 打拍子 练琴 节奏 鼓点 bpm 测速 节奏器 metronome 律动 卡拍 练耳",
-    gomoku: "五子棋 棋 对弈 人机 下棋 gomoku 黑白子 连五 棋盘 博弈 策略 AI 电脑 对战 围棋 五连"
+    gomoku: "五子棋 棋 对弈 人机 下棋 gomoku 黑白子 连五 棋盘 博弈 策略 AI 电脑 对战 围棋 五连",
+    maze: "迷宫 走迷宫 路径 探索 寻路 解谜 出口 方向 益智 游戏 闯关 路线 绕路 出口 最短 path maze"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3947,7 +3992,9 @@
     { emoji: "📐", name: "换算达人", desc: "用过 5 次单位换算器", test: (u) => (u.conv || 0) >= 5 },
     { emoji: "🎵", name: "节奏大师", desc: "打过 10 次节拍器", test: (u) => (u.metro || 0) >= 10 },
     { emoji: "⚫", name: "棋逢对手", desc: "五子棋战胜电脑 1 局", test: (u) => (u.gomokuWin || 0) >= 1 },
-    { emoji: "♟️", name: "五子棋王", desc: "五子棋累计胜 5 局", test: (u) => (u.gomokuWin || 0) >= 5 }
+    { emoji: "♟️", name: "五子棋王", desc: "五子棋累计胜 5 局", test: (u) => (u.gomokuWin || 0) >= 5 },
+    { emoji: "🌀", name: "迷宫行者", desc: "走出一座迷宫", test: (u) => (u.maze || 0) >= 1 },
+    { emoji: "🧭", name: "探路达人", desc: "累计走出 5 座迷宫", test: (u) => (u.maze || 0) >= 5 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -4886,6 +4933,18 @@
     "棋盘就那么大，机会却无限多——关键看你敢不敢先落那一子。",
     "别怕被封堵，被拦住的方向，往往逼你找到更妙的那一手。",
     "人生这盘棋没有悔棋键，所以每一步，都值得你认真一点。"
+  );
+  QUOTES.push(
+    "迷宫最妙的地方，是明明只有一条路，你却总觉得自己走错了。",
+    "抬头看看出口在哪，比闷头乱撞有用——方向感，是随便不来的。",
+    "走迷宫别怕碰壁，每堵墙都在悄悄告诉你：这边不通，换个方向。",
+    "最短的路往往绕最远的弯，生活给你的绕路，可能正是唯一的通路。",
+    "点亮提示不丢人，承认卡住、借一步力，也是一种本事。",
+    "出口一直在右下角等你，你只需要别停在半路、别往回走。",
+    "迷宫里最危险的不是墙，是原地打转还以为自己在前进。",
+    "有时候你走的每一步都正确，只是还没走到拐弯看见出口的那一刻。",
+    "把大迷宫拆成一格一格走，再难的路也会被踩成脚下的地。",
+    "随便走走也挺好，但真想出迷宫，得先决定往哪个方向迈第一步。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -6932,6 +6991,170 @@
     return function () {
       if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; if (!over && turn === AI) pendingAI = true; thinking = false; }
     };
+  })();
+
+  /* ---------- 🌀 迷宫（递归回溯生成 + 寻路 + 计时 + 最佳成绩，纯前端零依赖） ---------- */
+  const mazeStop = (function () {
+    const canvas = $("mzCanvas");
+    if (!canvas) return function () {};
+    const ctx = canvas.getContext("2d");
+    const KEY_PREFIX = "suibian_maze_best_";
+    let cols = 9, rows = 9;
+    let grid = [];
+    let pr = 0, pc = 0, moves = 0;
+    let running = false, won = false;
+    let startTime = 0, timerId = null;
+    let showHint = false, hintPath = [];
+    function cssVar(n, fb) { try { const v = getComputedStyle(document.documentElement).getPropertyValue(n).trim(); return v || fb; } catch (e) { return fb; } }
+    function loadBest(sz) { try { const v = localStorage.getItem(KEY_PREFIX + sz); return v ? parseInt(v, 10) : 0; } catch (e) { return 0; } }
+    function fmt(ms) { const s = Math.floor(ms / 1000); const m = Math.floor(s / 60); return String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+    function setStatus(t) { const e = $("mzStatus"); if (e) e.textContent = t; }
+    function updateBest() { const e = $("mzBest"); const b = loadBest(cols); if (e) e.textContent = b ? fmt(b) : "—"; }
+    function gen() {
+      grid = [];
+      for (let r = 0; r < rows; r++) { const row = []; for (let c = 0; c < cols; c++) row.push({ n: true, e: true, s: true, w: true }); grid.push(row); }
+      const visited = []; for (let r = 0; r < rows; r++) { const v = []; for (let c = 0; c < cols; c++) v.push(false); visited.push(v); }
+      const stack = [[0, 0]]; visited[0][0] = true;
+      const DIRS = [["n", 0, -1, "s"], ["s", 0, 1, "n"], ["w", -1, 0, "e"], ["e", 1, 0, "w"]];
+      while (stack.length) {
+        const cur = stack[stack.length - 1], c = cur[0], r = cur[1];
+        const nb = [];
+        for (let i = 0; i < DIRS.length; i++) {
+          const d = DIRS[i][0], dc = DIRS[i][1], dr = DIRS[i][2], opp = DIRS[i][3];
+          const nc = c + dc, nr = r + dr;
+          if (nc >= 0 && nc < cols && nr >= 0 && nr < rows && !visited[nr][nc]) nb.push([d, dc, dr, opp, nc, nr]);
+        }
+        if (nb.length) {
+          const pick = nb[rand(nb.length)], d = pick[0], dc = pick[1], dr = pick[2], opp = pick[3], nc = pick[4], nr = pick[5];
+          grid[r][c][d] = false; grid[nr][nc][opp] = false;
+          visited[nr][nc] = true; stack.push([nc, nr]);
+        } else stack.pop();
+      }
+    }
+    function cs() { return Math.floor(Math.min(canvas.width, canvas.height) / Math.max(cols, rows)); }
+    function ox() { return Math.floor((canvas.width - cs() * cols) / 2); }
+    function oy() { return Math.floor((canvas.height - cs() * rows) / 2); }
+    function bfsPath() {
+      const goal = (rows - 1) + "," + (cols - 1);
+      const seen = {}; seen[pr + "," + pc] = null; const q = [[pc, pr]];
+      while (q.length) {
+        const cur = q.shift(), c = cur[0], r = cur[1];
+        if (c === cols - 1 && r === rows - 1) break;
+        const cell = grid[r][c], nbrs = [];
+        if (!cell.n) nbrs.push([c, r - 1]); if (!cell.s) nbrs.push([c, r + 1]);
+        if (!cell.w) nbrs.push([c - 1, r]); if (!cell.e) nbrs.push([c + 1, r]);
+        for (let i = 0; i < nbrs.length; i++) { const nc = nbrs[i][0], nr = nbrs[i][1], k = nr + "," + nc; if (!(k in seen)) { seen[k] = r + "," + c; q.push([nc, nr]); } }
+      }
+      const path = []; let cur = goal;
+      if (!(cur in seen)) return path;
+      while (cur !== null) { const p = cur.split(","); path.push([parseInt(p[0], 10), parseInt(p[1], 10)]); cur = seen[cur]; }
+      return path.reverse();
+    }
+    function draw() {
+      const s = cs(), X0 = ox(), Y0 = oy();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = cssVar("--bg", "#101124"); ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = cssVar("--card-2", "#262a47"); ctx.fillRect(X0, Y0, s * cols, s * rows);
+      if (showHint && hintPath.length) {
+        ctx.fillStyle = "rgba(" + cssVar("--accent-3-rgb", "124,108,255") + ",0.35)";
+        for (let i = 0; i < hintPath.length; i++) { const rr = hintPath[i][0], cc = hintPath[i][1]; ctx.fillRect(X0 + cc * s + 2, Y0 + rr * s + 2, s - 4, s - 4); }
+      }
+      const gx = X0 + (cols - 1) * s, gy = Y0 + (rows - 1) * s;
+      ctx.fillStyle = cssVar("--accent-2", "#ffb15c"); ctx.fillRect(gx + s * 0.2, gy + s * 0.2, s * 0.6, s * 0.6);
+      const px = X0 + pc * s, py = Y0 + pr * s;
+      ctx.fillStyle = cssVar("--accent", "#ff7a59");
+      ctx.beginPath(); ctx.arc(px + s / 2, py + s / 2, s * 0.32, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = cssVar("--text", "#f3f4ff"); ctx.lineWidth = Math.max(2, s * 0.12); ctx.lineCap = "round";
+      ctx.beginPath();
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const x = X0 + c * s, y = Y0 + r * s, cell = grid[r][c];
+        if (cell.n) { ctx.moveTo(x, y); ctx.lineTo(x + s, y); }
+        if (cell.w) { ctx.moveTo(x, y); ctx.lineTo(x, y + s); }
+        if (c === cols - 1 && cell.e) { ctx.moveTo(x + s, y); ctx.lineTo(x + s, y + s); }
+        if (r === rows - 1 && cell.s) { ctx.moveTo(x, y + s); ctx.lineTo(x + s, y + s); }
+      }
+      ctx.stroke();
+    }
+    function move(dir) {
+      if (!running || won) return;
+      const cell = grid[pr][pc]; let nr = pr, nc = pc;
+      if (dir === "up") { if (cell.n) return; nr--; }
+      else if (dir === "down") { if (cell.s) return; nr++; }
+      else if (dir === "left") { if (cell.w) return; nc--; }
+      else if (dir === "right") { if (cell.e) return; nc++; }
+      else return;
+      pr = nr; pc = nc; moves++;
+      if (showHint) hintPath = bfsPath();
+      draw();
+      const me = $("mzMoves"); if (me) me.textContent = moves;
+      if (pr === rows - 1 && pc === cols - 1) win();
+    }
+    function updateClock() { if (!running) return; const e = $("mzTime"); if (e) e.textContent = fmt(performance.now() - startTime); }
+    function win() {
+      won = true; running = false;
+      if (timerId) { clearInterval(timerId); timerId = null; }
+      const t = Math.floor(performance.now() - startTime);
+      const e = $("mzTime"); if (e) e.textContent = fmt(t);
+      const best = loadBest(cols);
+      if (!best || t < best) { try { localStorage.setItem(KEY_PREFIX + cols, String(t)); } catch (err) {} updateBest(); try { toast("新纪录！🏆"); } catch (err) {} }
+      bumpUsage("maze");
+      setStatus("🎉 通关！用时 " + fmt(t) + "，走了 " + moves + " 步");
+      try { confettiBurst(110); } catch (err) {}
+      try { tone(660, 0.1, "sine", 0.14); } catch (err) {}
+      try { setTimeout(function () { tone(880, 0.16, "sine", 0.14); }, 130); } catch (err) {}
+      const card = canvas.closest(".card"); if (card) try { pop(card); } catch (err) {}
+    }
+    function start() {
+      gen(); pr = 0; pc = 0; moves = 0; won = false; running = true;
+      startTime = performance.now();
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(updateClock, 200);
+      const te = $("mzTime"); if (te) te.textContent = "00:00";
+      const me = $("mzMoves"); if (me) me.textContent = "0";
+      updateBest();
+      hintPath = showHint ? bfsPath() : [];
+      draw();
+      setStatus("用方向键 / WASD / 滑动，走到右下角 🏁");
+    }
+    const sizeBox = $("mzSize");
+    if (sizeBox) sizeBox.addEventListener("click", function (e) {
+      const b = e.target.closest("button"); if (!b) return;
+      const ch = sizeBox.children; for (let i = 0; i < ch.length; i++) ch[i].classList.toggle("on", ch[i] === b);
+      cols = rows = parseInt(b.dataset.sz, 10) || 9;
+      start();
+    });
+    const newBtn = $("mzNew"); if (newBtn) newBtn.addEventListener("click", function () { start(); });
+    const hintBtn = $("mzHint");
+    if (hintBtn) hintBtn.addEventListener("click", function () {
+      showHint = !showHint;
+      hintBtn.classList.toggle("on", showHint);
+      hintBtn.textContent = showHint ? "💡 寻路提示(开)" : "💡 寻路提示";
+      hintPath = showHint ? bfsPath() : [];
+      draw();
+    });
+    const dbtns = document.querySelectorAll("#maze [data-dir]");
+    for (let i = 0; i < dbtns.length; i++) dbtns[i].addEventListener("click", function () { move(dbtns[i].dataset.dir); });
+    document.addEventListener("keydown", function (e) {
+      if (!running) return;
+      const tag = (e.target && e.target.tagName ? e.target.tagName : "").toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      let d = null;
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") d = "up";
+      else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") d = "down";
+      else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") d = "left";
+      else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") d = "right";
+      if (d) { e.preventDefault(); move(d); }
+    });
+    let tsx = 0, tsy = 0, touching = false;
+    canvas.addEventListener("touchstart", function (e) { const t = e.touches[0]; tsx = t.clientX; tsy = t.clientY; touching = true; }, { passive: true });
+    canvas.addEventListener("touchend", function (e) {
+      if (!touching) return; touching = false;
+      const t = e.changedTouches[0], dx = t.clientX - tsx, dy = t.clientY - tsy;
+      if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return;
+      if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? "right" : "left"); else move(dy > 0 ? "down" : "up");
+    }, { passive: true });
+    window.mazeStart = start;
+    return function stopFn() { running = false; if (timerId) { clearInterval(timerId); timerId = null; } };
   })();
 
 </script>
