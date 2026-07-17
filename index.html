@@ -996,6 +996,18 @@
   .slot-msg{text-align:center;margin-top:12px;min-height:22px;font-weight:700;color:var(--accent2)}
   .slot-btns{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
   @media (max-width:520px){.slot-reel{height:92px}.slot-sym{font-size:50px}.slot-hud{grid-template-columns:repeat(2,1fr)}}
+  .breakout-wrap{position:relative;border-radius:14px;overflow:hidden}
+  #breakoutCanvas{display:block;width:100%;height:380px;border-radius:14px;background:#0a0a12;box-shadow:inset 0 4px 18px rgba(0,0,0,.5);touch-action:none;cursor:pointer}
+  .breakout-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(10,10,18,.76);border-radius:14px;text-align:center;backdrop-filter:blur(2px);padding:18px}
+  .breakout-overlay .bo-msg{font-size:21px;font-weight:800;color:var(--text);line-height:1.5}
+  .breakout-overlay .bo-sub{font-size:13px;color:var(--muted);margin-top:-8px}
+  .breakout-overlay .btn{max-width:220px}
+  .breakout-hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  .breakout-stat{background:var(--card-2);border-radius:12px;padding:8px 4px;text-align:center}
+  .breakout-stat .n{font-size:18px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+  .breakout-stat .l{font-size:11px;color:var(--muted);margin-top:2px}
+  .breakout-btns{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  @media (max-width:520px){.breakout-hud{grid-template-columns:repeat(2,1fr)}#breakoutCanvas{height:320px}}
   </style>
 </head>
 <body>
@@ -1078,6 +1090,7 @@
       <button data-tab="typing">⌨️ 打字测速</button>
       <button data-tab="simon">🟢 记忆序列</button>
       <button data-tab="slot">🎰 老虎机</button>
+      <button data-tab="breakout">🧱 打砖块</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2388,6 +2401,30 @@
     </div>
   </section>
 
+  <section class="panel" id="breakout">
+    <div class="card">
+      <h2>🧱 打砖块</h2>
+      <div class="hint">鼠标 / 手指拖动挡板接球，或按 ← →（A / D）移动，空格暂停。把砖块全打掉就过关，掉球扣一条命，闯过 8 关即通关。最高分自动记在本地～</div>
+      <div class="breakout-wrap">
+        <canvas id="breakoutCanvas" width="700" height="380"></canvas>
+        <div class="breakout-overlay" id="breakoutOverlay">
+          <div class="bo-msg" id="breakoutMsg">🧱 打砖块</div>
+          <div class="bo-sub" id="breakoutSub">鼠标拖动挡板，把砖块全打掉</div>
+          <button class="btn" id="breakoutBtn">开始游戏</button>
+        </div>
+      </div>
+      <div class="breakout-hud">
+        <div class="breakout-stat"><div class="n" id="breakoutScore">0</div><div class="l">得分</div></div>
+        <div class="breakout-stat"><div class="n" id="breakoutLives">3</div><div class="l">生命</div></div>
+        <div class="breakout-stat"><div class="n" id="breakoutLevel">1</div><div class="l">关卡</div></div>
+        <div class="breakout-stat"><div class="n" id="breakoutBest">0</div><div class="l">最高分</div></div>
+      </div>
+      <div class="breakout-btns">
+        <button class="btn primary" id="breakoutStart">▶ 开始 / 重开</button>
+      </div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2598,6 +2635,7 @@
     if (id === "simon") simonStart();
     if (id !== "simon" && typeof simonStop === "function") simonStop();
     if (id !== "slot" && typeof slotStop === "function") slotStop();
+    if (id !== "breakout" && typeof breakoutStop === "function") breakoutStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2684,7 +2722,8 @@
     match3: "消消乐 三消 消除 糖果 对对碰 拼三 消除游戏 糖果传奇 candy 颜色 凑齐 连成 三连 方块消除 益智 小游戏 休闲 连消",
     typing: "打字 测速 速度 打字测速 手速 指法 练习 中文 英文 字/分 正确率 wpm 计时 键盘 敲 速度测试 练习打字 盲打",
     simon: "记忆 序列 记忆序列 记忆力 记性 顺序 复现 彩色 方块 小游戏 反应 练脑 记颜色 simon 看顺序 点出来 挑战 关卡",
-    slot: "老虎机 老虎机 拉霸 拉霸机 转轮 运气 幸运 中奖 金币 赌博 赌场 幸运轮 777 暴富 赌 水果机 吃角子"
+    slot: "老虎机 老虎机 拉霸 拉霸机 转轮 运气 幸运 中奖 金币 赌博 赌场 幸运轮 777 暴富 赌 水果机 吃角子",
+    breakout: "打砖块 砖块 弹球 挡板 小球 反弹 砖块游戏 breakout 街机 经典 游戏 休闲 手速 反应 墙壁 通关 关卡 分数 打 消除 接球 小球"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -3507,7 +3546,16 @@
     "消掉一排的爽，不来自分数，来自「终于理顺了」的瞬间。",
     "手别停，下一消除永远在你敢动的那一下之后。",
     "有些关系得先清掉杂质，剩下的才连得起来。",
-    "通关不靠一次凑齐，靠一次次小消除攒出来的大势。"
+    "通关不靠一次凑齐，靠一次次小消除攒出来的大势。",
+    "挡板不用追着球跑，站对位置，球自然回来找你。",
+    "球总会落下来，关键是接住它的那一下别慌。",
+    "砖块一块块敲，分数一分分涨，急什么。",
+    "被打散的砖墙，也是重新排兵布阵的机会。",
+    "手稳比手快重要，接球这事儿急不得。",
+    "掉一球不算输，站起来再接一拍就行。",
+    "越到后面砖越硬，越说明你离通关近了。",
+    "把烦心事当砖块，一下一下，总能敲干净。",
+    "通关那一刻的撒花，是给每一拍都没松手的自己。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -4353,7 +4401,9 @@
     { emoji: "⌨️", name: "打字新星", desc: "完成一次打字测速", test: (u) => (u.typing || 0) >= 1 },
     { emoji: "🔵", name: "记忆大师", desc: "记忆序列闯过 8 关", test: (u) => (u.simon || 0) >= 8 },
     { emoji: "🎰", name: "一夜暴富", desc: "老虎机赢过 1 次", test: (u) => (u.slotWin || 0) >= 1 },
-    { emoji: "💰", name: "拉霸狂魔", desc: "累计拉老虎机 20 把", test: (u) => (u.slot || 0) >= 20 }
+    { emoji: "💰", name: "拉霸狂魔", desc: "累计拉老虎机 20 把", test: (u) => (u.slot || 0) >= 20 },
+    { emoji: "🕹️", name: "打砖块玩家", desc: "玩过一次打砖块", test: (u) => (u.breakout || 0) >= 1 },
+    { emoji: "💥", name: "砖块爆破手", desc: "打砖块单局拿下 1000 分", test: (u) => (u.breakoutMax || 0) >= 1000 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -8482,6 +8532,199 @@
       ivs.forEach((iv) => clearInterval(iv)); ivs = [];
       timers.forEach((t) => clearTimeout(t)); timers = [];
       [r0, r1, r2].forEach((r) => r.classList.remove("spinning"));
+    };
+  })();
+
+  /* ========== 打砖块 (Breakout) ========== */
+  const breakoutStop = (function () {
+    const HS_KEY = "suibian_breakout";
+    const canvas = $("breakoutCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const overlay = $("breakoutOverlay"), ovText = $("breakoutMsg"), ovSub = $("breakoutSub"), ovBtn = $("breakoutBtn");
+    const elScore = $("breakoutScore"), elLives = $("breakoutLives"), elLevel = $("breakoutLevel"), elBest = $("breakoutBest");
+    const startBtn = $("breakoutStart");
+
+    const COLS = 9, PAD = 6, MAXH = 380;
+    const ROWCOLORS = ["#ff7a59", "#ffb15c", "#ffd166", "#7c6cff", "#4be3a5", "#36c5f0", "#ff6fae"];
+    let W = 0, H = MAXH;
+    let paddle = { x: 0, w: 110, h: 14, y: H - 28, speed: 580 };
+    let ball = { x: 0, y: 0, r: 8, vx: 0, vy: 0 };
+    let bricks = [];
+    let score = 0, lives = 3, level = 1, best = 0;
+    let state = "ready"; // ready | playing | paused | over | win
+    let raf = 0, last = 0, running = false, keyL = false, keyR = false;
+
+    try { best = parseInt(localStorage.getItem(HS_KEY) || "0", 10) || 0; } catch (e) {}
+    function cssVar(n, fb) { const v = getComputedStyle(document.documentElement).getPropertyValue(n); return (v && v.trim()) || fb; }
+    function fit() {
+      const cw = canvas.clientWidth || (canvas.parentNode ? canvas.parentNode.clientWidth : 0) || 700;
+      W = cw; H = MAXH;
+      canvas.style.height = H + "px";
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    function buildBricks() {
+      bricks = [];
+      const rows = Math.min(3 + level, 7);
+      const top = 38, bw = (W - PAD * (COLS + 1)) / COLS, bh = 22;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const hp = (level >= 3 && r === 0) ? 2 : 1;
+          bricks.push({ x: PAD + c * (bw + PAD), y: top + r * (bh + PAD), w: bw, h: bh, alive: true, hp: hp, color: ROWCOLORS[r % ROWCOLORS.length] });
+        }
+      }
+    }
+    function resetPaddle() { paddle.w = Math.max(72, W * 0.16); paddle.x = W / 2; paddle.y = H - 28; }
+    function resetBall() {
+      const sp = 250 + (level - 1) * 26;
+      ball.x = paddle.x; ball.y = paddle.y - ball.r - 1;
+      const ang = (-Math.PI / 2) + (Math.random() * 0.5 - 0.25);
+      ball.vx = Math.cos(ang) * sp; ball.vy = Math.sin(ang) * sp;
+    }
+    function newGame() { score = 0; lives = 3; level = 1; fit(); resetPaddle(); buildBricks(); resetBall(); updateHud(); }
+    function startGame() {
+      if (state === "playing") return;
+      if (state === "ready" || state === "over" || state === "win") newGame();
+      state = "playing"; hideOverlay(); running = true;
+      try { bumpUsage("breakout"); } catch (e) {}
+      last = performance.now(); loop(last);
+    }
+    function resume() { if (state !== "playing") { state = "playing"; hideOverlay(); running = true; last = performance.now(); loop(last); } }
+    function pause() { if (state !== "playing") return; state = "paused"; running = false; cancelAnimationFrame(raf); showOverlay("已暂停", "继续游戏", "空格或点这里回到战场"); }
+    function nextLevel() {
+      level++;
+      if (level > 8) { winGame(); return; }
+      buildBricks(); resetPaddle(); resetBall(); updateHud();
+      state = "paused"; running = false; cancelAnimationFrame(raf);
+      showOverlay("第 " + level + " 关！", "继续", "砖块更密，球更快，稳住");
+    }
+    function loseLife() {
+      lives--; updateHud();
+      if (typeof tone === "function") { try { tone(140, 0.4, "sawtooth", 0.18); } catch (e) {} }
+      if (lives <= 0) { gameOver(); return; }
+      resetBall(); state = "paused"; running = false; cancelAnimationFrame(raf);
+      showOverlay("掉球啦，还剩 " + lives + " 条命", "继续", "挡板往球落点挪一点");
+    }
+    function gameOver() { state = "over"; running = false; cancelAnimationFrame(raf); saveBest(); showOverlay("游戏结束 · 得分 " + score, "再来一局", "最高分 " + best); }
+    function winGame() {
+      state = "win"; running = false; cancelAnimationFrame(raf); saveBest();
+      if (typeof confettiBurst === "function" && settings && !settings.reduce) confettiBurst(150);
+      if (typeof playDing === "function") playDing();
+      showOverlay("🏆 通关全部 8 关！得分 " + score, "再来一局", "砖块爆破手就是你");
+    }
+    function saveBest() {
+      if (score > best) best = score;
+      try { localStorage.setItem(HS_KEY, String(best)); } catch (e) {}
+      try { usage.breakoutMax = Math.max(usage.breakoutMax || 0, score); localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+      updateHud();
+    }
+    function updateHud() { elScore.textContent = score; elLives.textContent = lives; elLevel.textContent = level; elBest.textContent = best; }
+    function showOverlay(t, b, s) { ovText.textContent = t; ovBtn.textContent = b; if (ovSub) ovSub.textContent = s || ""; overlay.style.display = "flex"; }
+    function hideOverlay() { overlay.style.display = "none"; }
+    function roundRect(x, y, w, h, r) {
+      r = Math.min(r, w / 2, h / 2);
+      ctx.beginPath(); ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+    function hitBall(b) {
+      const cx = Math.max(b.x, Math.min(ball.x, b.x + b.w));
+      const cy = Math.max(b.y, Math.min(ball.y, b.y + b.h));
+      const dx = ball.x - cx, dy = ball.y - cy;
+      return dx * dx + dy * dy <= ball.r * ball.r;
+    }
+    function step(dt) {
+      if (keyL) paddle.x -= paddle.speed * dt;
+      if (keyR) paddle.x += paddle.speed * dt;
+      paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, paddle.x));
+      ball.x += ball.vx * dt; ball.y += ball.vy * dt;
+      if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
+      if (ball.x + ball.r > W) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
+      if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
+      if (ball.vy > 0 && ball.y + ball.r >= paddle.y && ball.y - ball.r <= paddle.y + paddle.h &&
+          ball.x >= paddle.x - paddle.w / 2 && ball.x <= paddle.x + paddle.w / 2) {
+        ball.y = paddle.y - ball.r;
+        const off = (ball.x - paddle.x) / (paddle.w / 2);
+        const sp = Math.hypot(ball.vx, ball.vy) || 250;
+        const ang = (-Math.PI / 2) + off * (Math.PI / 3);
+        ball.vx = Math.cos(ang) * sp; ball.vy = Math.sin(ang) * sp;
+        if (typeof tone === "function") { try { tone(320, 0.06, "square", 0.13); } catch (e) {} }
+      }
+      for (let i = 0; i < bricks.length; i++) {
+        const b = bricks[i]; if (!b.alive) continue;
+        if (hitBall(b)) {
+          b.hp--;
+          if (b.hp <= 0) { b.alive = false; score += 10 * level; } else { score += 5; }
+          const prevX = ball.x - ball.vx * dt;
+          if (prevX <= b.x || prevX >= b.x + b.w) ball.vx = -ball.vx; else ball.vy = -ball.vy;
+          if (typeof tone === "function") { try { tone(520, 0.05, "triangle", 0.11); } catch (e) {} }
+          if (score > best) best = score;
+          break;
+        }
+      }
+      if (ball.y - ball.r > H) { loseLife(); return; }
+      if (bricks.every((b) => !b.alive)) { nextLevel(); return; }
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (const b of bricks) {
+        if (!b.alive) continue;
+        ctx.fillStyle = b.color; roundRect(b.x, b.y, b.w, b.h, 5); ctx.fill();
+        if (b.hp > 1) { ctx.strokeStyle = "rgba(255,255,255,0.65)"; ctx.lineWidth = 2; roundRect(b.x, b.y, b.w, b.h, 5); ctx.stroke(); }
+      }
+      ctx.fillStyle = cssVar("--accent2", "#ffb15c");
+      roundRect(paddle.x - paddle.w / 2, paddle.y, paddle.w, paddle.h, 7); ctx.fill();
+      ctx.fillStyle = cssVar("--accent", "#ff7a59");
+      ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.fill();
+    }
+    function loop(t) {
+      if (!running) return;
+      const dt = Math.min((t - last) / 1000, 0.033);
+      last = t;
+      step(dt);
+      if (!running) return;
+      draw(); updateHud();
+      raf = requestAnimationFrame(loop);
+    }
+    function pointerX(e) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = (e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX) - rect.left;
+      return cx;
+    }
+    function onMove(e) {
+      if (state !== "playing") return;
+      const cx = pointerX(e);
+      paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, cx));
+      if (e.cancelable) e.preventDefault();
+    }
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    canvas.addEventListener("touchstart", (e) => { if (state === "playing") { const cx = pointerX(e); paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, cx)); } }, { passive: true });
+    ovBtn.addEventListener("click", overlay_click);
+    function overlay_click() {
+      if (state === "ready" || state === "over" || state === "win") startGame();
+      else if (state === "paused") resume();
+    }
+    startBtn.addEventListener("click", () => { state = "ready"; startGame(); });
+    document.addEventListener("keydown", (e) => {
+      if (!running) return;
+      const k = e.key;
+      if (k === "ArrowLeft" || k === "a" || k === "A") { keyL = true; if (e.cancelable) e.preventDefault(); }
+      else if (k === "ArrowRight" || k === "d" || k === "D") { keyR = true; if (e.cancelable) e.preventDefault(); }
+      else if (k === " " || k === "Spacebar") { if (e.cancelable) e.preventDefault(); pause(); }
+    });
+    document.addEventListener("keyup", (e) => {
+      const k = e.key;
+      if (k === "ArrowLeft" || k === "a" || k === "A") keyL = false;
+      else if (k === "ArrowRight" || k === "d" || k === "D") keyR = false;
+    });
+    fit(); resetPaddle(); buildBricks(); resetBall(); updateHud();
+    showOverlay("🧱 打砖块", "开始游戏", "鼠标拖动挡板，把砖块全打掉");
+    return function stop() {
+      if (running) { running = false; cancelAnimationFrame(raf); if (state === "playing") { state = "paused"; showOverlay("已暂停", "继续游戏", "切回标签页，点这里接着打"); } }
+      keyL = keyR = false;
     };
   })();
 
