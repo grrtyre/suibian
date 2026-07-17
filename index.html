@@ -1031,6 +1031,14 @@
   .adv-choices:empty{display:none}
   .adv-log{margin-top:12px;max-height:130px;overflow:auto;font-size:13px;line-height:1.7;opacity:.85;display:flex;flex-direction:column;gap:2px}
   .adv-log .lg{padding:2px 8px;border-radius:8px;background:rgba(128,128,128,.16)}
+  /* 合成大西瓜 */
+  .suika-hud{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .suika-stat{background:rgba(128,128,128,.16);border-radius:14px;padding:8px 14px;min-width:84px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  .suika-num{font-size:22px;font-weight:800;color:var(--accent,#7c6cff)}
+  .suika-lab{font-size:12px;opacity:.7;margin-top:2px}
+  .suika-stage{position:relative;max-width:360px;margin:6px auto 12px}
+  .suika-canvas{width:100%;height:auto;display:block;background:var(--card-2);border:1px solid var(--line);border-radius:16px;touch-action:none;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+  .suika-msg{margin-top:8px;text-align:center;font-size:14px;min-height:20px;opacity:.9}
 
 </style>
 </head>
@@ -1116,6 +1124,7 @@
       <button data-tab="slot">🎰 老虎机</button>
       <button data-tab="breakout">🧱 打砖块</button>
       <button data-tab="adventure">🎲 命运之旅</button>
+      <button data-tab="suika">🍉 合成大西瓜</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2477,6 +2486,26 @@
     </div>
   </section>
 
+  <!-- 合成大西瓜 -->
+  <section class="panel" id="suika">
+    <div class="card">
+      <h2>🍉 合成大西瓜</h2>
+      <div class="hint">相同的水果撞到一起会合成更大的一个，一路合到 🍉 大西瓜！堆到顶线就结束。点屏幕或按空格落下当前水果，← → 移动位置。</div>
+      <div class="suika-hud">
+        <div class="suika-stat"><div class="suika-num" id="suikaScore">0</div><div class="suika-lab">得分</div></div>
+        <div class="suika-stat"><div class="suika-num" id="suikaBest">0</div><div class="suika-lab">最高</div></div>
+        <div class="suika-stat suika-next-box"><div class="suika-num" id="suikaNext">🍒</div><div class="suika-lab">下一个</div></div>
+      </div>
+      <div class="suika-stage">
+        <canvas id="suikaCanvas" class="suika-canvas" width="340" height="480"></canvas>
+        <div class="suika-msg" id="suikaMsg">点一下，让水果落下来～</div>
+      </div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" id="suikaRestart">🔄 重开</button>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -2688,6 +2717,8 @@
     if (id !== "breakout" && typeof breakoutStop === "function") breakoutStop();
     if (id === "adventure") advStart();
     if (id !== "adventure" && typeof advStop === "function") advStop();
+    if (id === "suika") suikaStart();
+    if (id !== "suika" && typeof suikaStop === "function") suikaStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2776,7 +2807,8 @@
     simon: "记忆 序列 记忆序列 记忆力 记性 顺序 复现 彩色 方块 小游戏 反应 练脑 记颜色 simon 看顺序 点出来 挑战 关卡",
     slot: "老虎机 老虎机 拉霸 拉霸机 转轮 运气 幸运 中奖 金币 赌博 赌场 幸运轮 777 暴富 赌 水果机 吃角子",
     breakout: "打砖块 砖块 弹球 挡板 小球 反弹 砖块游戏 breakout 街机 经典 游戏 休闲 手速 反应 墙壁 通关 关卡 分数 打 消除 接球 小球",
-    adventure: "命运 之旅 冒险 骰子 大富翁 掷骰 棋盘 闯关 运气 随机 旅程 人生 旅行 探险 走路 选择 通关 小路 岔路 事件 格子 game"
+    adventure: "命运 之旅 冒险 骰子 大富翁 掷骰 棋盘 闯关 运气 随机 旅程 人生 旅行 探险 走路 选择 通关 小路 岔路 事件 格子 game",
+    suika: "合成 大西瓜 西瓜 水果 合并 合成 消除 物理 掉落 游戏 休闲 甜 堆叠 樱桃 草莓 葡萄 橙子 苹果 菠萝 蜜瓜 合成大西瓜 merge fruit"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4458,7 +4490,9 @@
     { emoji: "🕹️", name: "打砖块玩家", desc: "玩过一次打砖块", test: (u) => (u.breakout || 0) >= 1 },
     { emoji: "💥", name: "砖块爆破手", desc: "打砖块单局拿下 1000 分", test: (u) => (u.breakoutMax || 0) >= 1000 },
     { emoji: "🎲", name: "命运旅人", desc: "踏上一次命运之旅", test: (u) => (u.adventure || 0) >= 1 },
-    { emoji: "💰", name: "人生赢家", desc: "在命运之旅攒到 80 金币通关", test: () => { try { return (parseInt(localStorage.getItem("suibian_adventure_best") || "0", 10) || 0) >= 80; } catch (e) { return false; } } }
+    { emoji: "💰", name: "人生赢家", desc: "在命运之旅攒到 80 金币通关", test: () => { try { return (parseInt(localStorage.getItem("suibian_adventure_best") || "0", 10) || 0) >= 80; } catch (e) { return false; } } },
+    { emoji: "🍉", name: "合成玩家", desc: "玩过一局合成大西瓜", test: (u) => (u.suika || 0) >= 1 },
+    { emoji: "🏆", name: "西瓜大亨", desc: "合成大西瓜单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_suika") || "0", 10) || 0) >= 500; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5498,6 +5532,19 @@
     "随手掷一把，比站在原地算计半天才动一步，要痛快得多。",
     "命运之旅教会一件事：歇脚不是浪费时间，是为了走更远的路。",
     "通关的那刻才懂，前面那些好运厄运，都是让你成为『你』的格子。"
+  );
+  // —— 跟随合成大西瓜 / 融合 / 随便 theme 的新语录 ——
+  QUOTES.push(
+    "两个一模一样的自己撞在一起，才会变成更好的版本——合成大西瓜，是随便教你的成长学。",
+    "别小看一颗樱桃：它只是还没遇到另一个自己，合着合着就成西瓜了。",
+    "生活也讲合成：今天攒一点、明天攒一点，不知不觉就堆出了个大西瓜。",
+    "落点歪一点没关系，只要还在盘里，总有机会和同类撞个满怀。",
+    "堆太高会溢出来，装太满会塌——随便留点余地的智慧，连水果都懂。",
+    "与其纠结下哪一个，不如先落下去：动起来的水果，才合得成西瓜。",
+    "每一次合成都是一次清零重启，旧的形态消失，新的可能诞生。",
+    "顶线快到了别慌，往往就差那最后一下轻轻的合并，就通关了。",
+    "西瓜不是一天合成的，是无数颗樱桃，一颗一颗凑出来的甜。",
+    "随便丢一颗下去，剩下的交给重力——很多事，光想不动永远合不成。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -9058,6 +9105,205 @@
   }
   if ($("advRoll")) $("advRoll").addEventListener("click", () => { playClick(); advRoll(); });
   if ($("advRestart")) $("advRestart").addEventListener("click", () => { playClick(); advRestart(); });
+
+  /* ================= 合成大西瓜（物理合成小游戏，零依赖） ================= */
+  const SUIKA_W = 340, SUIKA_H = 480;
+  const SUIKA_R = [15, 22, 29, 37, 45, 54, 63, 72, 82, 92, 103];
+  const SUIKA_E = ["🍒", "🍓", "🍇", "🍊", "🍋", "🍎", "🍐", "🍑", "🍍", "🍈", "🍉"];
+  const SUIKA_C = ["#e8503a", "#f1648f", "#8e5bd6", "#f59331", "#f2cb3b", "#e23b3b", "#a4c34a", "#f3a3b8", "#e8b84b", "#86c25a", "#3fae5a"];
+  const SUIKA_SCORE = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66];
+  let suika = null;
+
+  function suikaInit() {
+    const cv = $("suikaCanvas"); if (!cv) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = SUIKA_W * dpr; cv.height = SUIKA_H * dpr;
+    const ctx = cv.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    suika = {
+      cv, ctx, dpr,
+      bodies: [], cur: null, next: rand(5), score: 0, best: 0,
+      over: false, playing: false, raf: 0, cooldown: 0, overTimer: 0,
+      pointerX: SUIKA_W / 2, dropY: 36, lineY: 64
+    };
+    try { suika.best = parseInt(localStorage.getItem("suibian_suika") || "0", 10) || 0; } catch (e) {}
+    suikaSpawnNext(); suikaBind(); suikaRenderHud();
+  }
+  function suikaSpawnNext() {
+    suika.cur = { type: suika.next, x: suika.pointerX };
+    suika.next = rand(5);
+    suikaRenderNext();
+  }
+  function suikaBind() {
+    const cv = suika.cv; if (cv._sb) return; cv._sb = true;
+    const clampX = (t) => Math.max(SUIKA_R[t], Math.min(SUIKA_W - SUIKA_R[t], suika.pointerX));
+    const move = (clientX) => {
+      const r = cv.getBoundingClientRect();
+      let x = (clientX - r.left) / r.width * SUIKA_W;
+      const t = suika.cur ? suika.cur.type : 0;
+      x = Math.max(SUIKA_R[t], Math.min(SUIKA_W - SUIKA_R[t], x));
+      suika.pointerX = x; if (suika.cur) suika.cur.x = x;
+    };
+    cv.addEventListener("mousemove", (e) => move(e.clientX));
+    cv.addEventListener("touchmove", (e) => { if (e.touches[0]) { move(e.touches[0].clientX); e.preventDefault(); } }, { passive: false });
+    cv.addEventListener("mousedown", (e) => { move(e.clientX); suikaDrop(); });
+    cv.addEventListener("touchstart", (e) => { if (e.touches[0]) move(e.touches[0].clientX); suikaDrop(); e.preventDefault(); }, { passive: false });
+    cv.tabIndex = 0;
+    cv.addEventListener("keydown", (e) => {
+      const t = suika.cur ? suika.cur.type : 0;
+      if (e.key === "ArrowLeft") { suika.pointerX = Math.max(SUIKA_R[t], suika.pointerX - 14); if (suika.cur) suika.cur.x = suika.pointerX; }
+      else if (e.key === "ArrowRight") { suika.pointerX = Math.min(SUIKA_W - SUIKA_R[t], suika.pointerX + 14); if (suika.cur) suika.cur.x = suika.pointerX; }
+      else if (e.key === " " || e.key === "Enter") { suikaDrop(); e.preventDefault(); }
+    });
+    const rb = $("suikaRestart"); if (rb) rb.addEventListener("click", () => { playClick(); suikaReset(); });
+  }
+  function suikaDrop() {
+    if (!suika || suika.over || !suika.cur || suika.cooldown > 0) return;
+    const t = suika.cur.type;
+    suika.bodies.push({ x: suika.cur.x, y: suika.dropY, vx: 0, vy: 2, r: SUIKA_R[t], type: t, _dead: false });
+    suika.cur = null; suika.cooldown = 26; suika.overTimer = 0;
+    bumpUsage("suika");
+  }
+  function suikaReset() {
+    if (!suika) { suikaInit(); return; }
+    suika.bodies = []; suika.score = 0; suika.over = false; suika.cur = null;
+    suika.cooldown = 0; suika.overTimer = 0; suika.next = rand(5);
+    suikaSpawnNext(); suikaRenderHud(); suikaShowMsg("点一下，让水果落下来～");
+  }
+  function suikaStep() {
+    const G = 0.4, REST = 0.2, FRIC = 0.99, ITER = 5, VMAX = 16;
+    const b = suika.bodies;
+    if (suika.cooldown > 0) {
+      suika.cooldown--;
+      if (suika.cooldown === 0 && !suika.cur && !suika.over) suikaSpawnNext();
+    }
+    for (const f of b) {
+      f.vy += G; f.vx *= FRIC; f.vy *= FRIC;
+      f.vx = Math.max(-VMAX, Math.min(VMAX, f.vx));
+      f.vy = Math.max(-VMAX, Math.min(VMAX, f.vy));
+      f.x += f.vx; f.y += f.vy;
+    }
+    for (const f of b) {
+      if (f.x < f.r) { f.x = f.r; f.vx = -f.vx * REST; }
+      if (f.x > SUIKA_W - f.r) { f.x = SUIKA_W - f.r; f.vx = -f.vx * REST; }
+      if (f.y > SUIKA_H - f.r) { f.y = SUIKA_H - f.r; f.vy = -f.vy * REST; if (Math.abs(f.vy) < 1) f.vy = 0; f.vx *= 0.85; }
+    }
+    for (let it = 0; it < ITER; it++) {
+      for (let i = 0; i < b.length; i++) {
+        for (let j = i + 1; j < b.length; j++) {
+          const a = b[i], c = b[j];
+          let dx = c.x - a.x, dy = c.y - a.y;
+          let d = Math.hypot(dx, dy);
+          const min = a.r + c.r;
+          if (d < min && d > 0.0001) {
+            const nx = dx / d, ny = dy / d, overlap = min - d, push = overlap / 2;
+            a.x -= nx * push; a.y -= ny * push; c.x += nx * push; c.y += ny * push;
+            const rvx = c.vx - a.vx, rvy = c.vy - a.vy, rel = rvx * nx + rvy * ny;
+            if (rel < 0) { const imp = -(1 + REST) * rel / 2; a.vx -= imp * nx; a.vy -= imp * ny; c.vx += imp * nx; c.vy += imp * ny; }
+          }
+        }
+      }
+      for (const f of b) {
+        if (f.x < f.r) f.x = f.r;
+        if (f.x > SUIKA_W - f.r) f.x = SUIKA_W - f.r;
+        if (f.y > SUIKA_H - f.r) f.y = SUIKA_H - f.r;
+      }
+    }
+    const merges = [];
+    for (let i = 0; i < b.length; i++) {
+      for (let j = i + 1; j < b.length; j++) {
+        const a = b[i], c = b[j];
+        if (a._dead || c._dead || a.type !== c.type) continue;
+        if (Math.hypot(c.x - a.x, c.y - a.y) < a.r + c.r + 1) merges.push([a, c]);
+      }
+    }
+    for (const pr of merges) {
+      const a = pr[0], c = pr[1];
+      if (a._dead || c._dead) continue;
+      a._dead = true; c._dead = true;
+      const nx = (a.x + c.x) / 2, ny = (a.y + c.y) / 2, nt = a.type + 1;
+      if (nt <= 10) {
+        b.push({ x: nx, y: ny, vx: 0, vy: -1, r: SUIKA_R[nt], type: nt, _dead: false });
+        suika.score += SUIKA_SCORE[nt];
+        if (settings && settings.sound) playDing();
+        if (nt === 10) confettiBurst();
+      } else {
+        suika.score += 100; confettiBurst();
+        if (settings && settings.sound) playDing();
+      }
+    }
+    if (merges.length) { suika.bodies = b.filter((f) => !f._dead); suikaRenderHud(); }
+    let danger = false;
+    for (const f of suika.bodies) {
+      if (Math.hypot(f.vx, f.vy) < 1.2 && (f.y - f.r) < suika.lineY) { danger = true; break; }
+    }
+    if (danger) { suika.overTimer++; if (suika.overTimer > 70) suikaGameOver(); }
+    else suika.overTimer = 0;
+  }
+  function suikaGameOver() {
+    if (suika.over) return;
+    suika.over = true;
+    if (suika.score > suika.best) {
+      suika.best = suika.score;
+      try { localStorage.setItem("suibian_suika", String(suika.best)); } catch (e) {}
+    }
+    suikaRenderHud();
+    suikaShowMsg("游戏结束！本局 " + suika.score + " 分，最高 " + suika.best + " 分。点「重开」再来一局～");
+  }
+  function suikaDraw() {
+    const ctx = suika.ctx;
+    ctx.clearRect(0, 0, SUIKA_W, SUIKA_H);
+    ctx.fillStyle = "rgba(120,120,150,0.08)";
+    ctx.fillRect(0, 0, SUIKA_W, SUIKA_H);
+    ctx.strokeStyle = suika.over ? "rgba(255,80,80,0.7)" : "rgba(255,255,255,0.28)";
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(0, suika.lineY); ctx.lineTo(SUIKA_W, suika.lineY); ctx.stroke();
+    ctx.setLineDash([]);
+    for (const f of suika.bodies) {
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = SUIKA_C[f.type]; ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = "rgba(0,0,0,0.12)"; ctx.stroke();
+      ctx.font = Math.floor(f.r * 1.5) + "px serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(SUIKA_E[f.type], f.x, f.y + 1);
+    }
+    if (suika.cur && !suika.over) {
+      const t = suika.cur.type, r = SUIKA_R[t];
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath(); ctx.arc(suika.cur.x, suika.dropY, r, 0, Math.PI * 2);
+      ctx.fillStyle = SUIKA_C[t]; ctx.fill();
+      ctx.font = Math.floor(r * 1.5) + "px serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(SUIKA_E[t], suika.cur.x, suika.dropY + 1);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.setLineDash([4, 6]);
+      ctx.beginPath(); ctx.moveTo(suika.cur.x, suika.dropY + r); ctx.lineTo(suika.cur.x, SUIKA_H); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+  function suikaLoop() {
+    if (!suika || !suika.playing) return;
+    if (!suika.over) suikaStep();
+    suikaDraw();
+    suika.raf = requestAnimationFrame(suikaLoop);
+  }
+  function suikaStart() {
+    if (!suika) suikaInit();
+    if (!suika || suika.playing) return;
+    suika.playing = true;
+    suika.raf = requestAnimationFrame(suikaLoop);
+  }
+  function suikaStop() {
+    if (!suika) return;
+    suika.playing = false;
+    if (suika.raf) cancelAnimationFrame(suika.raf);
+    suika.raf = 0;
+  }
+  function suikaRenderHud() {
+    const s = $("suikaScore"), bs = $("suikaBest");
+    if (s) s.textContent = suika.score;
+    if (bs) bs.textContent = suika.best;
+  }
+  function suikaRenderNext() { const n = $("suikaNext"); if (n) n.textContent = SUIKA_E[suika.next]; }
+  function suikaShowMsg(m) { const el = $("suikaMsg"); if (el) el.textContent = m; }
 
 </script>
 </body>
