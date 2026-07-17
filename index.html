@@ -923,6 +923,20 @@
   .piano-keys-hint { font-size:12px; color:var(--muted); text-align:center; margin-top:8px; }
   .piano-keys-hint b { color:var(--text); }
 
+  /* 🎨 涂鸦板 */
+  .draw-toolbar { display:flex; flex-wrap:wrap; gap:12px 18px; align-items:center; margin:14px 0 6px; }
+  .draw-colors { display:flex; gap:7px; flex-wrap:wrap; }
+  .draw-swatch { width:26px; height:26px; border-radius:50%; cursor:pointer; border:2px solid rgba(255,255,255,.6); box-shadow:0 1px 4px rgba(0,0,0,.25); transition:transform .1s; }
+  .draw-swatch:hover { transform:scale(1.12); }
+  .draw-swatch.sel { outline:2px solid var(--accent); outline-offset:2px; }
+  .draw-toolbar label { font-size:13px; color:var(--muted); display:flex; align-items:center; gap:7px; }
+  .draw-toolbar select, .draw-toolbar input[type=color] { padding:4px 6px; border-radius:9px; border:1px solid var(--line); background:var(--bg-soft); color:var(--text); font:inherit; }
+  .draw-toolbar input[type=range] { width:120px; accent-color:var(--accent); }
+  .draw-check { cursor:pointer; user-select:none; }
+  .draw-stage { margin-top:12px; background:var(--card-2); border-radius:14px; padding:10px; box-shadow:0 8px 30px rgba(0,0,0,.18); }
+  #drawCanvas { width:100%; height:auto; display:block; border-radius:8px; background:#fff; cursor:crosshair; touch-action:none; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06); }
+  .draw-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+
 </style>
 </head>
 <body>
@@ -999,6 +1013,7 @@
       <button data-tab="maze">🌀 迷宫</button>
       <button data-tab="sokoban">📦 推箱子</button>
       <button data-tab="piano">🎹 电子琴</button>
+      <button data-tab="draw">🎨 涂鸦板</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2164,6 +2179,39 @@
     </div>
   </section>
 
+  <!-- 涂鸦板 -->
+  <section class="panel" id="draw">
+    <div class="card">
+      <h2>🎨 涂鸦板</h2>
+      <div class="hint">随手画点什么——涂鸦、签名、随手记、给朋友画个小像，都能画。支持鼠标 / 触摸 / 手写笔，画完一键存成图片带走。</div>
+      <div class="draw-toolbar">
+        <div class="draw-colors" id="drawSwatches"></div>
+        <label>自定义<input type="color" id="drawCustom" value="#1f6feb"></label>
+        <label>粗细<input type="range" id="drawSize" min="1" max="48" value="6"><span id="drawSizeVal">6</span></label>
+        <label class="draw-check"><input type="checkbox" id="drawRainbow"> 🌈 彩虹笔</label>
+        <label class="draw-check"><input type="checkbox" id="drawEraser"> 🧽 橡皮</label>
+        <label>底色
+          <select id="drawBg">
+            <option value="#ffffff" selected>白底</option>
+            <option value="#0e1116">黑底</option>
+            <option value="#fff7e6">米黄</option>
+            <option value="#fff0f6">粉底</option>
+          </select>
+        </label>
+      </div>
+      <div class="draw-stage">
+        <canvas id="drawCanvas" width="720" height="460"></canvas>
+      </div>
+      <div class="draw-actions">
+        <button class="btn" id="drawUndo">↶ 撤销</button>
+        <button class="btn" id="drawRedo">↷ 重做</button>
+        <button class="btn" id="drawClear">🗑 清空</button>
+        <button class="btn primary" id="drawSave">💾 存为图片</button>
+      </div>
+      <div class="hint" style="font-size:12px">提示：橡皮会涂回当前底色；「存为图片」下载一张 PNG 到本地。你的涂鸦只存在这台设备上，关掉页面不会上传任何东西。</div>
+    </div>
+  </section>
+
   <footer>
     「随便」· 一个用 <a href="https://github.com/grrtyre/suibian" target="_blank" rel="noopener">GitHub</a> 托管的纯前端小玩具 · 无需联网、无广告、不收集任何数据
   </footer>
@@ -2446,7 +2494,8 @@
     gomoku: "五子棋 棋 对弈 人机 下棋 gomoku 黑白子 连五 棋盘 博弈 策略 AI 电脑 对战 围棋 五连",
     maze: "迷宫 走迷宫 路径 探索 寻路 解谜 出口 方向 益智 游戏 闯关 路线 绕路 出口 最短 path maze",
     sokoban: "推箱子 搬运 箱子 仓库 boxes sokoban 仓库番 益智 解谜 推 方块 关卡 经典 闯关 逻辑",
-    piano: "电子琴 钢琴 琴 弹奏 音乐 乐器 弹琴 键盘 音符 旋律 曲子 演奏 合成器 音阶 keyboard piano play 小星星 八音盒"
+    piano: "电子琴 钢琴 琴 弹奏 音乐 乐器 弹琴 键盘 音符 旋律 曲子 演奏 合成器 音阶 keyboard piano play 小星星 八音盒",
+    draw: "涂鸦 画板 画画 绘画 涂鸦板 画笔 随手画 涂颜色 画一幅 签名 简笔画 涂一涂 画一画 draw painting sketch board 笔 图 草稿"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4096,7 +4145,9 @@
     { emoji: "📦", name: "搬运工", desc: "通关一关推箱子", test: (u) => (u.sokoban || 0) >= 1 },
     { emoji: "🚚", name: "推箱大师", desc: "累计通关 5 关推箱子", test: (u) => (u.sokoban || 0) >= 5 },
     { emoji: "🎹", name: "弹奏家", desc: "弹过一次电子琴", test: (u) => (u.piano || 0) >= 1 },
-    { emoji: "🎼", name: "小演奏家", desc: "累计弹奏 10 次电子琴", test: (u) => (u.piano || 0) >= 10 }
+    { emoji: "🎼", name: "小演奏家", desc: "累计弹奏 10 次电子琴", test: (u) => (u.piano || 0) >= 10 },
+    { emoji: "🎨", name: "小画家", desc: "涂鸦过一次", test: (u) => (u.draw || 0) >= 1 },
+    { emoji: "🖌️", name: "涂鸦狂魔", desc: "累计涂鸦 10 次", test: (u) => (u.draw || 0) >= 10 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5072,6 +5123,19 @@
     "音阶一级一级上，急不得；你离想要的那段高音，也就差几个音的距离。",
     "琴键再多，一次也只能按一个；专注此刻这一个音，整首曲子自然就来了。",
     "随便弹弹不是敷衍，是给手指一点自由，也给心情一个出口。"
+  );
+  // —— 跟随涂鸦板 / 随手画主题的新语录 ——
+  QUOTES.push(
+    "白纸最怕的不是画错，是迟迟不敢下第一笔——随便涂一笔，局面就活了。",
+    "线条歪一点没关系，涂鸦本来就不是考试，顺着手感走就好。",
+    "橡皮擦存在的意义，不是擦掉错误，是给你再来一次的勇气。",
+    "同一支笔，红的是热情，蓝的是冷静，你今天想画哪种心情？",
+    "彩虹笔转一圈，颜色自己就会变——有些事别规划太死，让它自己流动。",
+    "画坏了就清空重来，画布不记仇，生活也该这么大方。",
+    "签名写得好看不重要，重要的是那笔落下时，你认得那是你自己。",
+    "随手记比认真记更真实：松手的瞬间，才画得出你真正的样子。",
+    "存成图片带走的那一刻才懂：有些灵感，得趁热画下来。",
+    "涂鸦板教会一件事——想得再满，也不如动手画一笔来得踏实。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -7583,6 +7647,99 @@
     });
 
     return function stopFn() { cancelDemo(); };
+  })();
+
+  // —— 🎨 涂鸦板 ——
+  (function () {
+    var cv = $('drawCanvas');
+    if (!cv) return;
+    var ctx = cv.getContext('2d');
+    var W = cv.width, H = cv.height;
+    var PALETTE = ['#1f6feb', '#e5484d', '#12a594', '#f76808', '#f5d90a', '#30a46c', '#8e4ec6', '#e93d82', '#111111', '#ffffff'];
+    var bg = '#ffffff', color = '#1f6feb', size = 6, rainbow = false, eraser = false, hue = 0;
+    var drawing = false, last = null, undoStack = [], redoStack = [], lastBump = 0;
+    var MAX_U = 30;
+    var swatches = $('drawSwatches'), custom = $('drawCustom'), sizeEl = $('drawSize'), sizeVal = $('drawSizeVal');
+    var rainbowEl = $('drawRainbow'), eraserEl = $('drawEraser'), bgEl = $('drawBg');
+
+    function fillBg() { ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+    function snap() { try { return ctx.getImageData(0, 0, W, H); } catch (e) { return null; } }
+    function pushUndo() { var s = snap(); if (s) { undoStack.push(s); if (undoStack.length > MAX_U) undoStack.shift(); redoStack.length = 0; } }
+    function applySnap(s) { if (s) ctx.putImageData(s, 0, 0); }
+    function init() { fillBg(); undoStack.length = 0; redoStack.length = 0; }
+
+    function buildSwatches() {
+      PALETTE.forEach(function (c, i) {
+        var s = document.createElement('span');
+        s.className = 'draw-swatch' + (i === 0 ? ' sel' : '');
+        s.style.background = c; s.title = c;
+        s.addEventListener('click', function () {
+          color = c; if (custom) custom.value = c; eraserEl.checked = false; eraser = false;
+          var all = document.querySelectorAll('.draw-swatch');
+          for (var k = 0; k < all.length; k++) all[k].classList.remove('sel');
+          s.classList.add('sel');
+        });
+        swatches.appendChild(s);
+      });
+    }
+    function pt(e) {
+      var r = cv.getBoundingClientRect();
+      var sx = cv.width / r.width, sy = cv.height / r.height;
+      return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy };
+    }
+    function curColor() {
+      if (eraser) return bg;
+      if (rainbow) { hue = (hue + 4) % 360; return 'hsl(' + hue + ',85%,55%)'; }
+      return color;
+    }
+    function paint(a, b) {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.lineWidth = size; ctx.strokeStyle = curColor(); ctx.fillStyle = ctx.strokeStyle;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      if (a.x === b.x && a.y === b.y) { ctx.beginPath(); ctx.arc(a.x, a.y, size / 2, 0, Math.PI * 2); ctx.fill(); }
+    }
+    function bumpOnce() { var now = Date.now(); if (now - lastBump > 1200) { lastBump = now; try { bumpUsage('draw'); } catch (e) {} } }
+    function down(e) {
+      e.preventDefault();
+      try { if (cv.setPointerCapture && e.pointerId != null) cv.setPointerCapture(e.pointerId); } catch (x) {}
+      drawing = true; pushUndo(); last = pt(e); paint(last, last); bumpOnce();
+    }
+    function move(e) { if (!drawing) return; e.preventDefault(); var p = pt(e); paint(last, p); last = p; }
+    function up() { drawing = false; last = null; }
+
+    try { buildSwatches(); } catch (e) {}
+    init();
+    cv.addEventListener('pointerdown', down);
+    cv.addEventListener('pointermove', move);
+    cv.addEventListener('pointerup', up);
+    cv.addEventListener('pointercancel', up);
+    cv.addEventListener('pointerleave', up);
+    if (custom) custom.addEventListener('input', function () {
+      color = custom.value; eraserEl.checked = false; eraser = false;
+      var all = document.querySelectorAll('.draw-swatch');
+      for (var k = 0; k < all.length; k++) all[k].classList.remove('sel');
+    });
+    sizeEl.addEventListener('input', function () { size = +sizeEl.value; sizeVal.textContent = size; });
+    rainbowEl.addEventListener('change', function () { rainbow = rainbowEl.checked; if (rainbow) { eraserEl.checked = false; eraser = false; } });
+    eraserEl.addEventListener('change', function () { eraser = eraserEl.checked; if (eraser) { rainbowEl.checked = false; rainbow = false; } });
+    bgEl.addEventListener('change', function () { pushUndo(); bg = bgEl.value; fillBg(); });
+    $('drawUndo').addEventListener('click', function () { if (undoStack.length) { redoStack.push(snap()); applySnap(undoStack.pop()); } });
+    $('drawRedo').addEventListener('click', function () { if (redoStack.length) { undoStack.push(snap()); applySnap(redoStack.pop()); } });
+    $('drawClear').addEventListener('click', function () { pushUndo(); fillBg(); });
+    $('drawSave').addEventListener('click', function () {
+      try {
+        cv.toBlob(function (blob) {
+          if (!blob) { toast('保存失败，换个浏览器试试～'); return; }
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'suibian-draw-' + Date.now() + '.png';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (x) {} }, 1500);
+          toast('已存成图片 💾');
+        }, 'image/png');
+      } catch (e) { toast('保存失败，换个浏览器试试～'); }
+    });
   })();
 
 </script>
