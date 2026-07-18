@@ -1075,6 +1075,24 @@
   .catch-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(8,10,30,.66);border-radius:16px;text-align:center;padding:18px}
   .catch-ov-text{font-size:26px;font-weight:800;color:#fff}
   .catch-ov-sub{font-size:14px;color:#d7d9ff;max-width:300px;line-height:1.5}
+  /* 节奏大师 */
+  .rhy-tracks{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:4px 0 14px}
+  .rhy-track{border:1px solid var(--line);background:var(--card-2);color:var(--muted);padding:7px 14px;border-radius:999px;cursor:pointer;font-size:14px;transition:.15s}
+  .rhy-track.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#1a1020;font-weight:700;border-color:transparent}
+  .rhy-hud{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:4px 0 8px}
+  .rhy-stat{background:var(--card-2);border:1px solid var(--line);border-radius:14px;padding:8px 16px;min-width:72px;text-align:center}
+  .rhy-num{font-size:22px;font-weight:800;color:var(--accent)}
+  .rhy-lab{font-size:12px;color:var(--muted)}
+  .rhy-bar{height:8px;background:var(--card-2);border-radius:999px;max-width:420px;margin:0 auto 12px;overflow:hidden}
+  .rhy-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent-3),var(--accent));transition:width .15s}
+  .rhy-stage{position:relative;max-width:420px;margin:0 auto}
+  .rhy-canvas{width:100%;display:block;border-radius:16px;touch-action:none;background:linear-gradient(180deg,#101540,#241b4d)}
+  .rhy-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(8,10,30,.7);border-radius:16px;text-align:center;padding:18px}
+  .rhy-ov-text{font-size:26px;font-weight:800;color:#fff}
+  .rhy-ov-sub{font-size:14px;color:#d7d9ff;max-width:320px;line-height:1.5}
+  .rhy-keys{display:flex;gap:8px;max-width:420px;margin:12px auto 4px}
+  .rhy-lane{flex:1;padding:14px 0;font-size:18px;font-weight:800;border:1px solid var(--line);background:var(--card-2);color:var(--text);border-radius:14px;cursor:pointer;transition:.08s;user-select:none}
+  .rhy-lane:active{transform:scale(.94);background:var(--accent-3)}
 </style>
 </head>
 <body>
@@ -1163,6 +1181,7 @@
       <button data-tab="breath">🌬️ 呼吸冥想</button>
       <button data-tab="plane">🛦 飞机大战</button>
       <button data-tab="catch">🍎 接水果</button>
+      <button data-tab="rhythm">🎶 节奏大师</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2592,6 +2611,45 @@
     </div>
   </section>
 
+  <!-- 节奏大师 -->
+  <section class="panel" id="rhythm">
+    <div class="card">
+      <h2>🎶 节奏大师</h2>
+      <div class="hint">音符从天而降，在底部横线处用 <b>D&nbsp;F&nbsp;J&nbsp;K</b>（或点下方琴键）敲中它们。越准分越高，连击有加成，Accuracy 决定评级。三档难度，谱面固定好练手。</div>
+      <div class="rhy-tracks">
+        <button class="rhy-track active" data-track="easy">练习曲 · 95</button>
+        <button class="rhy-track" data-track="normal">律动 · 125</button>
+        <button class="rhy-track" data-track="hard">狂想曲 · 155</button>
+      </div>
+      <div class="rhy-hud">
+        <div class="rhy-stat"><div class="rhy-num" id="rhythmScore">0</div><div class="rhy-lab">得分</div></div>
+        <div class="rhy-stat"><div class="rhy-num" id="rhythmBest">0</div><div class="rhy-lab">最高</div></div>
+        <div class="rhy-stat"><div class="rhy-num" id="rhythmCombo">0x</div><div class="rhy-lab">连击</div></div>
+        <div class="rhy-stat"><div class="rhy-num" id="rhythmAcc">100%</div><div class="rhy-lab">准确率</div></div>
+      </div>
+      <div class="rhy-bar"><div class="rhy-bar-fill" id="rhythmProg"></div></div>
+      <div class="rhy-stage">
+        <canvas id="rhythmCanvas" class="rhy-canvas" width="360" height="520"></canvas>
+        <div class="rhy-overlay" id="rhythmOverlay">
+          <div class="rhy-ov-text" id="rhythmOvText">🎶 节奏大师</div>
+          <div class="rhy-ov-sub" id="rhythmOvSub">选好难度，点「开始演奏」</div>
+          <button class="btn primary" id="rhythmOvBtn">开始演奏</button>
+        </div>
+      </div>
+      <div class="rhy-keys">
+        <button class="rhy-lane" data-lane="0">D</button>
+        <button class="rhy-lane" data-lane="1">F</button>
+        <button class="rhy-lane" data-lane="2">J</button>
+        <button class="rhy-lane" data-lane="3">K</button>
+      </div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="rhythmStart">▶ 开始演奏</button>
+        <button class="btn ghost" id="rhythmPause">⏸️ 暂停</button>
+        <button class="btn ghost" id="rhythmRestart">🔄 重开</button>
+      </div>
+    </div>
+  </section>
+
   <!-- 飞机大战 -->
   <section class="panel" id="plane">
     <div class="card">
@@ -2836,6 +2894,7 @@
     if (id === "plane") planeStart();
     if (id !== "plane" && typeof planeStop === "function") planeStop();
     if (id !== "catch" && typeof catchStop === "function") catchStop();
+    if (id !== "rhythm" && typeof rhythmStop === "function") rhythmStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2928,7 +2987,8 @@
     suika: "合成 大西瓜 西瓜 水果 合并 合成 消除 物理 掉落 游戏 休闲 甜 堆叠 樱桃 草莓 葡萄 橙子 苹果 菠萝 蜜瓜 合成大西瓜 merge fruit",
     breath: "呼吸 冥想 放松 解压 正念 静心 深呼吸 舒缓 焦虑 助眠 平静 休息 养生 4-7-8 方箱呼吸 放松呼吸 breathing meditation calm 慢下来 安神",
     plane: "飞机 大战 射击 飞机大战 打飞机 太空 战机 射击游戏 敌机 子弹 闯关 街机 经典 手速 反应 躲 生存 空战 shooter plane 撑住",
-    "catch": "接水果 水果 接物 篮子 休闲 反应 手速 躲 掉落 游戏 连击 得分 接住 苹果 西瓜 放松"
+    "catch": "接水果 水果 接物 篮子 休闲 反应 手速 躲 掉落 游戏 连击 得分 接住 苹果 西瓜 放松",
+    rhythm: "节奏 音游 音乐 游戏 反应 手速 节奏大师 打拍 下落 音符 按拍 律动 歌曲 弹奏 命中 连击 节拍 神曲 钢琴 演奏 dfjk"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4618,7 +4678,9 @@
     { emoji: "🛦", name: "王牌飞行员", desc: "起飞一次飞机大战", test: (u) => (u.plane || 0) >= 1 },
     { emoji: "🌟", name: "空中霸主", desc: "飞机大战单局得分破 2000", test: () => { try { return (parseInt(localStorage.getItem("suibian_plane") || "0", 10) || 0) >= 2000; } catch (e) { return false; } } },
     { emoji: "🍎", name: "接水果玩家", desc: "玩过一次接水果", test: (u) => (u.catch || 0) >= 1 },
-    { emoji: "🏆", name: "水果猎人", desc: "接水果单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_catch") || "0", 10) || 0) >= 500; } catch (e) { return false; } } }
+    { emoji: "🏆", name: "水果猎人", desc: "接水果单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_catch") || "0", 10) || 0) >= 500; } catch (e) { return false; } } },
+    { emoji: "🎶", name: "节奏新星", desc: "玩过一次节奏大师", test: (u) => (u.rhythm || 0) >= 1 },
+    { emoji: "🏆", name: "音游大触", desc: "节奏大师单局得分破 3000", test: () => { try { return (parseInt(localStorage.getItem("suibian_rhythm") || "0", 10) || 0) >= 3000; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5709,6 +5771,18 @@
     "三分靠运气，七分靠手稳——接水果和过日子一个道理。",
     "关卡越往后越快，习惯就好，生活给你的节奏从来不会慢下来。",
     "随便接几个，心情就甜了；今天也别让自己空着手。"
+  );
+  QUOTES.push(
+    "生活不是看你踩得多准，是看你能不能在乱拍里找到自己的节奏。",
+    "完美一拍靠天赋，连击不断靠的是不慌。",
+    "错过一个音符别停手，下一拍还在前面等你。",
+    "有些人天生踩点，有些人慢慢练——节奏感都是接出来的。",
+    "该出手时就出手，犹豫那一瞬，音符就飞过线了。",
+    "快慢不重要，重要的是你终于和自己合上了拍。",
+    "High 歌不一定要唱给别人听，自己心里有鼓点就行。",
+    "失误是节奏的一部分，没谁能从头到尾全 PERFECT。",
+    "把日子过成一首歌：有快板也有慢板，别总是一个调。",
+    "随便晃两下也好，身体记得的节拍，比脑子更诚实。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -10075,12 +10149,297 @@
     return stop;
   })();
 
+  /* ---------- 节奏大师（下落式音游） ---------- */
+  const rhythmStop = (function () {
+    const canvas = $("rhythmCanvas");
+    if (!canvas) return function () {};
+    const ctx = canvas.getContext("2d");
+    const HS_KEY = "suibian_rhythm";
+    const H = 520;
+    const LANES = 4;
+    const HIT_Y = 430;
+    const TOP_Y = -40;
+    const TRAVEL = 1700;
+    const KEYS = ["d", "f", "j", "k"];
+    const LANE_NAME = ["D", "F", "J", "K"];
+    const LANE_PITCH = [392.0, 523.25, 659.25, 783.99];
+    const LANE_COLORS = ["#7c6cff", "#ff7a59", "#4be3a5", "#ffb15c"];
+    const PERFECT = 70, GOOD = 140, LATE = 175;
+    const TRACKS = [
+      { id: "easy", name: "练习曲", bpm: 95, beats: 42, density: 0.5, double: 0, extra: 0 },
+      { id: "normal", name: "律动", bpm: 125, beats: 64, density: 1, double: 0.18, extra: 0 },
+      { id: "hard", name: "狂想曲", bpm: 155, beats: 96, density: 1, double: 0.28, extra: 0.32 }
+    ];
+    function mulberry32(a) {
+      return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    function buildChart(track) {
+      const seed = (track.id.split("").reduce((a, c) => a + c.charCodeAt(0), 7) * 2654435761) >>> 0;
+      const rng = mulberry32(seed);
+      const beatMs = 60000 / track.bpm;
+      const lead = 2200;
+      const notes = [];
+      let lastLane = -1;
+      for (let b = 0; b < track.beats; b++) {
+        if (rng() > track.density) continue;
+        const t = lead + b * beatMs;
+        let lane = Math.floor(rng() * LANES);
+        if (lane === lastLane && rng() < 0.6) lane = (lane + 1 + Math.floor(rng() * (LANES - 1))) % LANES;
+        notes.push({ lane: lane, t: t, judged: false, hit: false });
+        lastLane = lane;
+        if (track.double && rng() < track.double) {
+          const l2 = (lane + 1 + Math.floor(rng() * (LANES - 1))) % LANES;
+          notes.push({ lane: l2, t: t, judged: false, hit: false });
+        }
+        if (track.extra && rng() < track.extra) {
+          const l3 = Math.floor(rng() * LANES);
+          notes.push({ lane: l3, t: t + beatMs / 2, judged: false, hit: false });
+        }
+      }
+      notes.sort((a, b) => a.t - b.t);
+      return notes;
+    }
+    const obj = {
+      canvas, ctx, W: 360, H: H, track: TRACKS[0], chart: [],
+      state: "menu", raf: 0, running: false,
+      startT: 0, countdownEnd: 0, pausedAt: 0, preState: "playing", endAt: 0,
+      score: 0, best: 0, combo: 0, maxCombo: 0,
+      perfect: 0, good: 0, miss: 0, total: 0, hits: 0,
+      flash: [0, 0, 0, 0], judgeFx: []
+    };
+    try { obj.best = parseInt(localStorage.getItem(HS_KEY) || "0", 10) || 0; } catch (e) {}
+    function cssVar(n, fb) { const v = getComputedStyle(document.documentElement).getPropertyValue(n); return (v && v.trim()) || fb; }
+    function laneW() { return obj.W / LANES; }
+    function roundRect(c, x, y, w, h, r) {
+      c.beginPath();
+      c.moveTo(x + r, y);
+      c.arcTo(x + w, y, x + w, y + h, r);
+      c.arcTo(x + w, y + h, x, y + h, r);
+      c.arcTo(x, y + h, x, y, r);
+      c.arcTo(x, y, x + w, y, r);
+      c.closePath();
+    }
+    function fit() {
+      const cw = canvas.clientWidth || (canvas.parentNode ? canvas.parentNode.clientWidth : 0) || 360;
+      canvas.style.height = H + "px";
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(cw * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      obj.W = cw; obj.H = H;
+    }
+    function accuracy() {
+      if (obj.total === 0) return 100;
+      return Math.round((obj.perfect + obj.good * 0.6) / obj.total * 100);
+    }
+    function updateHud() {
+      const s = $("rhythmScore"), b = $("rhythmBest"), c = $("rhythmCombo"), a = $("rhythmAcc"), p = $("rhythmProg");
+      if (s) s.textContent = obj.score;
+      if (b) b.textContent = obj.best;
+      if (c) c.textContent = obj.combo + "x";
+      if (a) a.textContent = accuracy() + "%";
+      if (p) { const prog = obj.total > 0 ? Math.min(1, obj.hits / obj.total) : 0; p.style.width = (prog * 100).toFixed(1) + "%"; }
+    }
+    function chooseTrack(t) {
+      obj.track = t;
+      document.querySelectorAll(".rhy-track").forEach((b) => b.classList.toggle("active", b.dataset.track === t.id));
+    }
+    function showOverlay(t, b, s) {
+      const o = $("rhythmOverlay"), ot = $("rhythmOvText"), ob = $("rhythmOvBtn"), os = $("rhythmOvSub");
+      if (ot) ot.textContent = t; if (ob) ob.textContent = b; if (os) os.textContent = s || ""; if (o) o.style.display = "flex";
+    }
+    function hideOverlay() { const o = $("rhythmOverlay"); if (o) o.style.display = "none"; }
+    function startGame() {
+      fit();
+      obj.chart = buildChart(obj.track);
+      obj.total = obj.chart.length;
+      obj.score = 0; obj.combo = 0; obj.maxCombo = 0;
+      obj.perfect = 0; obj.good = 0; obj.miss = 0; obj.hits = 0; obj.endAt = 0;
+      obj.flash = [0, 0, 0, 0]; obj.judgeFx = [];
+      obj.state = "countdown"; obj.running = true; obj.preState = "countdown";
+      hideOverlay();
+      try { bumpUsage("rhythm"); } catch (e) {}
+      obj.countdownEnd = performance.now() + 3000;
+      obj.raf = requestAnimationFrame(loop);
+    }
+    function judge(note, now) {
+      const dt = Math.abs((now - obj.startT) - note.t);
+      note.judged = true; note.hit = true; obj.hits++;
+      let kind, base;
+      if (dt <= PERFECT) { kind = "PERFECT"; base = 300; obj.perfect++; }
+      else { kind = "GOOD"; base = 100; obj.good++; }
+      obj.combo++; obj.maxCombo = Math.max(obj.maxCombo, obj.combo);
+      const mult = Math.min(1 + obj.combo * 0.03, 3);
+      obj.score += Math.round(base * mult);
+      obj.flash[note.lane] = 0.18;
+      obj.judgeFx.push({ lane: note.lane, kind: kind, t: now });
+      if (typeof tone === "function") { try { tone(LANE_PITCH[note.lane], 0.10, "triangle", 0.16); } catch (e) {} }
+      updateHud();
+    }
+    function missNote() {
+      obj.miss++; obj.combo = 0;
+      obj.judgeFx.push({ lane: -1, kind: "MISS", t: performance.now() });
+      updateHud();
+      if (typeof tone === "function") { try { tone(140, 0.18, "sawtooth", 0.12); } catch (e) {} }
+    }
+    function pressLane(lane) {
+      if (obj.state !== "playing") return;
+      const now = performance.now();
+      let best = null, bestDt = 1e9;
+      for (const n of obj.chart) {
+        if (n.judged || n.lane !== lane) continue;
+        const dt = Math.abs((now - obj.startT) - n.t);
+        if (dt < bestDt) { bestDt = dt; best = n; }
+      }
+      if (best && bestDt <= GOOD) judge(best, now);
+      else obj.flash[lane] = 0.12;
+    }
+    function step(now) {
+      for (const n of obj.chart) {
+        if (!n.judged && (now - obj.startT) - n.t > LATE) { n.judged = true; n.hit = false; missNote(); }
+      }
+      for (let i = 0; i < LANES; i++) if (obj.flash[i] > 0) obj.flash[i] -= 0.016;
+      obj.judgeFx = obj.judgeFx.filter((f) => now - f.t < 600);
+      if (obj.total > 0 && obj.hits + obj.miss >= obj.total) {
+        if (!obj.endAt) obj.endAt = now + 500;
+        else if (now >= obj.endAt) finish();
+      }
+    }
+    function finish() {
+      obj.state = "over"; obj.running = false; cancelAnimationFrame(obj.raf);
+      const prev = obj.best;
+      if (obj.score > obj.best) obj.best = obj.score;
+      try { localStorage.setItem(HS_KEY, String(obj.best)); } catch (e) {}
+      try { usage.rhythmMax = Math.max(usage.rhythmMax || 0, obj.score); localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+      updateHud();
+      const acc = accuracy();
+      let rating = "C";
+      if (acc >= 95) rating = "S"; else if (acc >= 85) rating = "A"; else if (acc >= 70) rating = "B";
+      const isNew = obj.score > prev && obj.score > 0;
+      if (isNew) {
+        if (typeof confettiBurst === "function" && settings && !settings.reduce) confettiBurst(150);
+        if (typeof playDing === "function") playDing();
+      }
+      const sub = "评级 " + rating + " · 准确率 " + acc + "% · 最大连击 " + obj.maxCombo +
+        "x · 完美 " + obj.perfect + " / 良 " + obj.good + " / 失误 " + obj.miss;
+      showOverlay("🎶 演奏完成 · " + obj.score + " 分" + (isNew ? "（新纪录！）" : ""), "再来一局", sub);
+    }
+    function draw(now) {
+      const w = obj.W;
+      ctx.clearRect(0, 0, w, obj.H);
+      const g = ctx.createLinearGradient(0, 0, 0, obj.H);
+      g.addColorStop(0, cssVar("--bg2", "#1a1f4d"));
+      g.addColorStop(1, cssVar("--bg", "#0e1230"));
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, obj.H);
+      if (obj.state === "countdown") {
+        const left = Math.ceil((obj.countdownEnd - now) / 1000);
+        ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.fillRect(0, 0, w, obj.H);
+        ctx.fillStyle = cssVar("--accent-2", "#ffb15c"); ctx.font = "bold 96px sans-serif";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(left > 0 ? String(left) : "GO", w / 2, obj.H / 2);
+        return;
+      }
+      const lw = laneW();
+      ctx.strokeStyle = "rgba(255,255,255,.06)"; ctx.lineWidth = 1;
+      for (let i = 1; i < LANES; i++) { ctx.beginPath(); ctx.moveTo(i * lw, 0); ctx.lineTo(i * lw, obj.H); ctx.stroke(); }
+      ctx.strokeStyle = cssVar("--accent", "#7c6cff"); ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(0, HIT_Y); ctx.lineTo(w, HIT_Y); ctx.stroke();
+      for (let i = 0; i < LANES; i++) {
+        if (obj.flash[i] > 0) { ctx.fillStyle = "rgba(124,108,255," + (obj.flash[i] * 2.2) + ")"; ctx.fillRect(i * lw, HIT_Y - 30, lw, 60); }
+        ctx.fillStyle = "rgba(255,255,255,.10)"; ctx.fillRect(i * lw + 6, HIT_Y + 8, lw - 12, 46);
+        ctx.fillStyle = cssVar("--text", "#fff"); ctx.font = "bold 18px sans-serif";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(LANE_NAME[i], i * lw + lw / 2, HIT_Y + 31);
+      }
+      const elapsed = now - obj.startT;
+      for (const n of obj.chart) {
+        if (n.judged) continue;
+        const dt = n.t - elapsed;
+        const y = HIT_Y - dt * (HIT_Y - TOP_Y) / TRAVEL;
+        if (y < -30 || y > obj.H + 30) continue;
+        const cx = n.lane * lw + lw / 2;
+        ctx.fillStyle = LANE_COLORS[n.lane];
+        roundRect(ctx, cx - lw * 0.36, y - 11, lw * 0.72, 22, 7); ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,.25)";
+        roundRect(ctx, cx - lw * 0.36, y - 11, lw * 0.72, 7, 5); ctx.fill();
+      }
+      for (const f of obj.judgeFx) {
+        if (f.lane < 0) continue;
+        const age = (now - f.t) / 600;
+        ctx.globalAlpha = Math.max(0, 1 - age);
+        ctx.fillStyle = f.kind === "PERFECT" ? "#4be3a5" : "#ffd166";
+        ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(f.kind, f.lane * lw + lw / 2, HIT_Y - 46 - age * 16);
+        ctx.globalAlpha = 1;
+      }
+    }
+    function loop(t) {
+      if (!obj.running) return;
+      const now = t;
+      if (obj.state === "countdown") { if (now >= obj.countdownEnd) { obj.state = "playing"; obj.startT = now; obj.preState = "playing"; } }
+      else if (obj.state === "playing") step(now);
+      if (!obj.running) return;
+      draw(now);
+      obj.raf = requestAnimationFrame(loop);
+    }
+    function pause() {
+      if (obj.state !== "playing" && obj.state !== "countdown") return;
+      obj.pausedAt = performance.now();
+      obj.state = "paused"; obj.running = false; cancelAnimationFrame(obj.raf);
+      showOverlay("已暂停", "继续", "回到标签页点这里继续演奏");
+    }
+    function resume() {
+      if (obj.state !== "paused") return;
+      const d = performance.now() - obj.pausedAt;
+      if (obj.preState === "playing") obj.startT += d; else obj.countdownEnd += d;
+      hideOverlay();
+      obj.state = obj.preState; obj.running = true;
+      obj.raf = requestAnimationFrame(loop);
+    }
+    const startBtn = $("rhythmStart"), pauseBtn = $("rhythmPause"), restartBtn = $("rhythmRestart"), ovBtn = $("rhythmOvBtn");
+    if (startBtn) startBtn.addEventListener("click", () => { startGame(); if (typeof playClick === "function") playClick(); });
+    if (pauseBtn) pauseBtn.addEventListener("click", () => { if (obj.state === "playing" || obj.state === "countdown") pause(); else if (obj.state === "paused") resume(); if (typeof playClick === "function") playClick(); });
+    if (restartBtn) restartBtn.addEventListener("click", () => { startGame(); if (typeof playClick === "function") playClick(); });
+    if (ovBtn) ovBtn.addEventListener("click", () => { if (obj.state === "menu" || obj.state === "over") startGame(); else if (obj.state === "paused") resume(); if (typeof playClick === "function") playClick(); });
+    document.querySelectorAll(".rhy-track").forEach((b) => b.addEventListener("click", () => { chooseTrack(TRACKS.find((x) => x.id === b.dataset.track) || TRACKS[0]); if (typeof playClick === "function") playClick(); }));
+    document.querySelectorAll(".rhy-lane").forEach((btn) => {
+      const lane = parseInt(btn.dataset.lane, 10);
+      const handler = (e) => { if (e.cancelable) e.preventDefault(); pressLane(lane); };
+      btn.addEventListener("mousedown", handler);
+      btn.addEventListener("touchstart", handler, { passive: false });
+    });
+    document.addEventListener("keydown", (e) => {
+      const tag = (e.target.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      const k = (e.key || "").toLowerCase();
+      const lane = KEYS.indexOf(k);
+      if (lane >= 0) { if (obj.state === "playing" && e.cancelable) e.preventDefault(); pressLane(lane); }
+    });
+    if (typeof window !== "undefined" && window.addEventListener) window.addEventListener("resize", () => { if (obj.state !== "menu") fit(); });
+    fit(); chooseTrack(obj.track); updateHud();
+    showOverlay("🎶 节奏大师", "开始演奏", "选好难度，点「开始演奏」→ 用 D F J K 或下方琴键，在横线处击中下落的音符！");
+    function stop() {
+      obj.running = false;
+      if (obj.raf) cancelAnimationFrame(obj.raf);
+      obj.raf = 0;
+      if (obj.state === "playing" || obj.state === "countdown") {
+        obj.pausedAt = performance.now(); obj.preState = obj.state === "countdown" ? "countdown" : "playing";
+        obj.state = "paused";
+        const o = $("rhythmOverlay"); if (o) o.style.display = "flex";
+        const t = $("rhythmOvText"); if (t) t.textContent = "已暂停";
+        const b = $("rhythmOvBtn"); if (b) b.textContent = "继续";
+        const s = $("rhythmOvSub"); if (s) s.textContent = "离开啦？回来点这里继续演奏";
+      }
+    }
+    return stop;
+  })();
+
 })();
 
 </script>
 </body>
 </html>
-
-    { emoji: "🌬️", name: "静心一刻", desc: "完成一次呼吸冥想", test: (u) => (u.breath || 0) >= 1 },
-    { emoji: "🧘", name: "冥想达人", desc: "累计冥想 10 次", test: (u) => (u.breath || 0) >= 10 }
-];
