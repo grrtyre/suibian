@@ -1150,6 +1150,27 @@
   .flap-stage { position:relative; max-width:360px; margin:0 auto; }
   .flap-stage canvas { width:100%; height:auto; display:block; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#bfe3ff; touch-action:none; }
   .flap-msg { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); background:rgba(0,0,0,.55); color:#fff; padding:8px 16px; border-radius:999px; font-size:15px; font-weight:600; pointer-events:none; white-space:nowrap; transition:opacity .15s; }
+  /* 连连看 */
+  .llk-board { position:relative; display:grid; gap:4px; width:min(92vw,464px); margin:10px auto 4px; }
+  .llk-cell { aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; font-size:clamp(15px,4.4vw,25px);
+    background:var(--card2,#fff); border-radius:10px; cursor:pointer; user-select:none; -webkit-user-select:none;
+    box-shadow:0 1px 3px rgba(0,0,0,.10); transition:transform .08s ease, box-shadow .12s ease; }
+  .llk-cell:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.14); }
+  .llk-cell.empty { background:transparent; box-shadow:none; cursor:default; }
+  .llk-cell.empty:hover { transform:none; }
+  .llk-cell.sel { outline:3px solid var(--accent); outline-offset:-3px; transform:scale(1.07); }
+  .llk-cell.hint { animation:llkPulse .5s ease-in-out 2; outline:3px solid #ffd166; outline-offset:-3px; }
+  .llk-cell.matched { animation:llkPop .26s ease forwards; }
+  .llk-cell.shake { animation:llkShk .42s ease; }
+  .llk-svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; z-index:6; }
+  .llk-path { fill:none; stroke:var(--accent); stroke-width:4; stroke-linecap:round; stroke-linejoin:round; opacity:.9; }
+  .llk-msg { min-height:1.4em; margin-top:8px; text-align:center; font-weight:600; color:var(--muted); }
+  .llk-msg.win { color:var(--accent); font-size:1.05em; }
+  .llk-chips, .llk-stats { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:6px 0; }
+  .llk-stats .box { flex:1 1 64px; max-width:96px; }
+  @keyframes llkPop { 0%{transform:scale(1)} 45%{transform:scale(1.28)} 100%{transform:scale(0);opacity:0} }
+  @keyframes llkShk { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+  @keyframes llkPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
 </style>
 </head>
 <body>
@@ -1242,6 +1263,7 @@
       <button data-tab="emojiq">🧠 emoji 猜词</button>
       <button data-tab="notes">📝 灵感便签</button>
       <button data-tab="flappy">🐤 像素小鸟</button>
+    <button data-tab="llk">🔗 连连看</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2811,6 +2833,31 @@
     </div>
   </section>
 
+  <!-- 连连看 -->
+  <section class="panel" id="llk">
+    <div class="card">
+      <h2>🔗 连连看</h2>
+      <div class="hint">点两个相同的图案：只要能用不超过两个拐弯的线连起来（线还能绕到棋盘外圈），就消除。清空整盘即通关。卡住会自动洗牌，也能点「💡 提示」找一对。连消有连击加分，最高分本地保存。</div>
+      <div class="llk-chips" id="llkChips">
+        <div class="chip active" data-diff="easy">简单 · 8×6</div>
+        <div class="chip" data-diff="mid">中等 · 10×6</div>
+        <div class="chip" data-diff="hard">困难 · 10×8</div>
+      </div>
+      <div class="llk-stats">
+        <div class="box"><div class="num" id="llkScore">0</div><div class="lab">得分</div></div>
+        <div class="box"><div class="num" id="llkCombo">×1</div><div class="lab">连击</div></div>
+        <div class="box"><div class="num" id="llkLeft">0</div><div class="lab">剩余</div></div>
+        <div class="box"><div class="num" id="llkBest">0</div><div class="lab">最高分</div></div>
+      </div>
+      <div class="llk-board" id="llkBoard"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="llkHint">💡 提示</button>
+        <button class="btn primary" id="llkNew">🔀 重新开始</button>
+      </div>
+      <div class="llk-msg" id="llkMsg"></div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3035,6 +3082,8 @@
     if (id === "notes") renderNotes();
     if (id === "flappy") flappyStart();
     if (id !== "flappy" && typeof flappyStop === "function") flappyStop();
+    if (id === "llk") llkStart();
+    if (id !== "llk" && typeof llkStop === "function") llkStop();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
     if (id === "sudoku") sudokuResume();
@@ -3130,7 +3179,8 @@
     rhythm: "节奏 音游 音乐 游戏 反应 手速 节奏大师 打拍 下落 音符 按拍 律动 歌曲 弹奏 命中 连击 节拍 神曲 钢琴 演奏 dfjk",
     emojiq: "emoji 猜词 看图 猜成语 脑筋急转弯 字谜 选择题 四选一 测试 脑力 解谜 联想 表情 趣味 问答 猜词游戏 反应 知识 猜意思",
     notes: "便签 灵感 随手记 笔记 便利贴 备忘录 贴纸 记录 想法 待办 灵感墙 sticky note 写下来 记一笔 闪念 草稿",
-    flappy: "像素小鸟 小鸟 飞行 flappy 撞水管 休闲 游戏 振翅 飞翔 躲避 反应 手速 闯关"
+    flappy: "像素小鸟 小鸟 飞行 flappy 撞水管 休闲 游戏 振翅 飞翔 躲避 反应 手速 闯关",
+    llk: "连连看 链接 消除 配对 图案 找相同 消一消 益智 连线 转弯 经典 小游戏 休闲 link 一对 消除游戏 通关"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4828,7 +4878,9 @@
     { emoji: "📝", name: "随手记", desc: "新建过一张灵感便签", test: (u) => (u.notes || 0) >= 1 },
     { emoji: "🗒️", name: "便签达人", desc: "累计贴过 10 张灵感便签", test: (u) => (u.notes || 0) >= 10 },
     { emoji: "🐤", name: "初飞", desc: "起飞一次像素小鸟", test: (u) => (u.flappy || 0) >= 1 },
-    { emoji: "🏆", name: "小鸟王者", desc: "像素小鸟单局得分破 30", test: () => { try { return (parseInt(localStorage.getItem("suibian_flappy") || "0", 10) || 0) >= 30; } catch (e) { return false; } } }
+    { emoji: "🏆", name: "小鸟王者", desc: "像素小鸟单局得分破 30", test: () => { try { return (parseInt(localStorage.getItem("suibian_flappy") || "0", 10) || 0) >= 30; } catch (e) { return false; } } },
+    { emoji: "🔗", name: "连线新手", desc: "通关一次连连看", test: (u) => (u.llk || 0) >= 1 },
+    { emoji: "🧠", name: "眼疾手快", desc: "连连看单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_llk") || "0", 10) || 0) >= 500; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -10630,6 +10682,19 @@
     "最难的不是起飞，是落地前还愿意再振一次翅。",
     "随便玩玩也别有压力，撞了就重来，小鸟从不记仇。"
   );
+  // —— 跟随连连看 / 连线消除主题的新语录 ——
+  QUOTES.push(
+    "有些关系就像连连看——看着隔得远，其实绕两个弯就能接上。",
+    "卡住的时候别硬连，先「洗牌」换个角度看，路就通了。",
+    "能连起来的，从来都是本来就一样的那一对；凑合不来的，怎么拐弯都到不了。",
+    "最高分的秘密不是手快，是别让连击断在你走神的那个瞬间。",
+    "棋盘清空那一下最爽：原来刚才那些绕路，都是必须的。",
+    "两个相同的图案，隔再远也能连——前提是中间没被别的东西堵死。",
+    "生活里很多事，给了你不超过两个拐弯的机会，绕对了就消掉了。",
+    "提示不是认输，是承认「我需要借一步力」，聪明的玩家都点。",
+    "别贪心一次连太多，先把眼前这对顺手消了，局面就松了。",
+    "随手连一对也挺好，反正整盘迟早会被你一点点清空。"
+  );
 
   (function () {
     const HS_KEY = "suibian_emojiq", USAGE_ID = "emojiq", TOTAL = 12, TIME = 15;
@@ -11074,6 +11139,234 @@
     cancelAnimationFrame(fpRaf); fpRaf = requestAnimationFrame(fpLoop);
   }
   function flappyStop() { fpActive = false; cancelAnimationFrame(fpRaf); }
+
+  /* ---------- 连连看 (Lianliankan) ---------- */
+  const LLK_ICONS = ["🍎","🍊","🍋","🍉","🍇","🍓","🍒","🍑","🥝","🍍","🥥","🥑","🍅","🥕","🌽","🍆","🥔","🌶️","🍄","🥦","🍌","🫐","🥭","🍐","🍈","🥨","🍞","🧀","🍳","🥚","🍗","🍕","🍔","🌭","🌮","🌯","🍣","🍱","🍤","🍙","🍚","🍰","🍩","🍪","🍫","🍬","🍭","🍿","🧁","🍦"];
+  const LLK_DIFF = { easy: { c: 8, r: 6 }, mid: { c: 10, r: 6 }, hard: { c: 10, r: 8 } };
+  let llkDiff = "easy", llkC = 8, llkR = 6;
+  let llkGrid = [], llkEls = [], llkSel = null, llkScore = 0, llkCombo = 0;
+  let llkTotal = 0, llkLeft = 0, llkInited = false, llkBlink = false;
+  const llkBoard = $("llkBoard");
+  let llkSvg = $("llkSvg");
+  function llkBestGet() { try { return parseInt(localStorage.getItem("suibian_llk") || "0", 10) || 0; } catch (e) { return 0; } }
+  function llkBestSet(v) { try { localStorage.setItem("suibian_llk", String(v)); } catch (e) {} }
+  function llkShowBest() { const el = $("llkBest"); if (el) el.textContent = llkBestGet(); }
+  function llkSize() { const d = LLK_DIFF[llkDiff]; llkC = d.c; llkR = d.r; }
+
+  function llkNewGame() {
+    if (!llkBoard) return;
+    llkSize();
+    llkScore = 0; llkCombo = 0; llkSel = null; llkLeft = 0;
+    const sc = $("llkScore"), cm = $("llkCombo"), mg = $("llkMsg");
+    if (sc) sc.textContent = "0"; if (cm) cm.textContent = "×1";
+    if (mg) { mg.textContent = ""; mg.className = "llk-msg"; }
+    const cells = llkR * llkC; // 必为偶数
+    const pairs = cells / 2;
+    const list = [];
+    for (let i = 0; i < pairs; i++) { const ic = LLK_ICONS[i % LLK_ICONS.length]; list.push(ic, ic); }
+    for (let i = list.length - 1; i > 0; i--) { const j = rand(i + 1); const t = list[i]; list[i] = list[j]; list[j] = t; }
+    llkGrid = []; llkEls = [];
+    for (let r = 0; r <= llkR + 1; r++) { llkGrid[r] = []; llkEls[r] = []; for (let c = 0; c <= llkC + 1; c++) { llkGrid[r][c] = 0; llkEls[r][c] = null; } }
+    let k = 0;
+    for (let r = 1; r <= llkR; r++) for (let c = 1; c <= llkC; c++) llkGrid[r][c] = list[k++];
+    llkTotal = pairs; llkLeft = pairs;
+    const lf = $("llkLeft"); if (lf) lf.textContent = llkLeft;
+    llkRender();
+    llkEnsureMove();
+    llkShowBest();
+    llkInited = true;
+  }
+
+  function llkRender() {
+    llkBoard.style.gridTemplateColumns = "repeat(" + llkC + ", 1fr)";
+    let html = '<svg id="llkSvg" class="llk-svg"></svg>';
+    for (let r = 1; r <= llkR; r++) {
+      for (let c = 1; c <= llkC; c++) {
+        const v = llkGrid[r][c];
+        if (v === 0) html += '<div class="llk-cell empty" data-r="' + r + '" data-c="' + c + '"></div>';
+        else html += '<div class="llk-cell" data-r="' + r + '" data-c="' + c + '">' + v + '</div>';
+      }
+    }
+    llkBoard.innerHTML = html;
+    llkEls = []; for (let r = 0; r <= llkR + 1; r++) llkEls[r] = [];
+    llkBoard.querySelectorAll(".llk-cell").forEach((el) => { const r = +el.dataset.r, c = +el.dataset.c; llkEls[r][c] = el; });
+    llkSvg = $("llkSvg");
+  }
+
+  // 判断 a、b 两格（同图案）能否用 ≤2 个拐弯的线连起来；返回连接路径(含两端)或 null
+  function llkLink(a, b) {
+    const av = llkGrid[a[0]][a[1]], bv = llkGrid[b[0]][b[1]];
+    if (av !== bv) return null;
+    llkGrid[a[0]][a[1]] = 0; llkGrid[b[0]][b[1]] = 0;
+    const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    const OPP = [1, 0, 3, 2];
+    const seen = {};
+    const q = [{ r: a[0], c: a[1], d: -1, t: 0, path: [[a[0], a[1]]] }];
+    let res = null;
+    while (q.length) {
+      const cur = q.shift();
+      for (let nd = 0; nd < 4; nd++) {
+        if (cur.d !== -1 && (nd === OPP[cur.d])) continue; // 不允许 180° 掉头
+        const turns = cur.d === -1 ? 0 : (nd === cur.d ? cur.t : cur.t + 1);
+        if (turns > 2) continue;
+        const nr = cur.r + dirs[nd][0], nc = cur.c + dirs[nd][1];
+        if (nr < 0 || nr > llkR + 1 || nc < 0 || nc > llkC + 1) continue;
+        if (nr === b[0] && nc === b[1]) { res = cur.path.concat([[nr, nc]]); q.length = 0; break; }
+        if (llkGrid[nr][nc] !== 0) continue;
+        const key = nr + "," + nc + "," + nd;
+        if (seen[key] !== undefined && seen[key] <= turns) continue;
+        seen[key] = turns;
+        q.push({ r: nr, c: nc, d: nd, t: turns, path: cur.path.concat([[nr, nc]]) });
+      }
+      if (res) break;
+    }
+    llkGrid[a[0]][a[1]] = av; llkGrid[b[0]][b[1]] = bv;
+    return res;
+  }
+
+  function llkFindMove() {
+    const byIcon = {};
+    for (let r = 1; r <= llkR; r++) for (let c = 1; c <= llkC; c++) {
+      const v = llkGrid[r][c]; if (v === 0) continue;
+      (byIcon[v] = byIcon[v] || []).push([r, c]);
+    }
+    for (const v in byIcon) {
+      const arr = byIcon[v];
+      for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) {
+        if (llkLink(arr[i], arr[j])) return [arr[i], arr[j]];
+      }
+    }
+    return null;
+  }
+
+  function llkShuffle() {
+    const tiles = [], icons = [];
+    for (let r = 1; r <= llkR; r++) for (let c = 1; c <= llkC; c++) if (llkGrid[r][c] !== 0) { tiles.push([r, c]); icons.push(llkGrid[r][c]); }
+    for (let i = icons.length - 1; i > 0; i--) { const j = rand(i + 1); const t = icons[i]; icons[i] = icons[j]; icons[j] = t; }
+    for (let i = 0; i < tiles.length; i++) {
+      llkGrid[tiles[i][0]][tiles[i][1]] = icons[i];
+      const el = llkEls[tiles[i][0]][tiles[i][1]];
+      if (el) { el.textContent = icons[i]; el.classList.remove("sel", "matched", "hint"); }
+    }
+  }
+
+  function llkEnsureMove() {
+    let tries = 0;
+    while (llkLeft > 0 && !llkFindMove() && tries < 40) { llkShuffle(); tries++; }
+  }
+
+  function llkCellCenter(r, c) {
+    const br = llkBoard.getBoundingClientRect();
+    if (r >= 1 && r <= llkR && c >= 1 && c <= llkC) {
+      const el = llkEls[r][c]; if (!el) return [0, 0];
+      const rect = el.getBoundingClientRect();
+      return [rect.left + rect.width / 2 - br.left, rect.top + rect.height / 2 - br.top];
+    }
+    const rr = Math.min(Math.max(r, 1), llkR), cc = Math.min(Math.max(c, 1), llkC);
+    const ref = llkEls[rr][cc]; if (!ref) return [0, 0];
+    const rect = ref.getBoundingClientRect();
+    const cw = rect.width, ch = rect.height;
+    const ix = rect.left + cw / 2 - br.left, iy = rect.top + ch / 2 - br.top;
+    return [ix + (c - cc) * cw, iy + (r - rr) * ch];
+  }
+
+  function llkDrawPath(path) {
+    if (!llkSvg) return;
+    try {
+      const W = llkBoard.clientWidth, H = llkBoard.clientHeight;
+      llkSvg.setAttribute("viewBox", "0 0 " + W + " " + H);
+      const pts = path.map((p) => llkCellCenter(p[0], p[1]));
+      let d = "M " + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+      for (let i = 1; i < pts.length; i++) d += " L " + pts[i][0].toFixed(1) + " " + pts[i][1].toFixed(1);
+      const ns = "http://www.w3.org/2000/svg";
+      const pl = document.createElementNS(ns, "path");
+      pl.setAttribute("d", d); pl.setAttribute("class", "llk-path");
+      llkSvg.appendChild(pl);
+    } catch (e) {}
+  }
+  function llkClearSvg() { if (llkSvg) { while (llkSvg.firstChild) llkSvg.removeChild(llkSvg.firstChild); } }
+
+  function llkShake(el) { if (!el) return; el.classList.add("shake"); setTimeout(() => el.classList.remove("shake"), 440); }
+
+  function llkDoMatch(a, b, path) {
+    llkBlink = true; llkSel = null;
+    llkCombo++;
+    const mult = Math.min(llkCombo, 5);
+    llkScore += 10 * mult;
+    const sc = $("llkScore"), cm = $("llkCombo");
+    if (sc) sc.textContent = llkScore;
+    if (cm) cm.textContent = "×" + mult;
+    if (settings.sound) playDing();
+    llkDrawPath(path);
+    const ea = llkEls[a[0]][a[1]], eb = llkEls[b[0]][b[1]];
+    if (ea) ea.classList.add("matched"); if (eb) eb.classList.add("matched");
+    setTimeout(() => {
+      llkGrid[a[0]][a[1]] = 0; llkGrid[b[0]][b[1]] = 0;
+      if (ea) { ea.classList.add("empty"); ea.classList.remove("matched", "sel"); ea.textContent = ""; }
+      if (eb) { eb.classList.add("empty"); eb.classList.remove("matched"); eb.textContent = ""; }
+      llkLeft--; const lf = $("llkLeft"); if (lf) lf.textContent = llkLeft;
+      llkClearSvg(); llkBlink = false;
+      if (llkLeft <= 0) llkWin(); else llkEnsureMove();
+    }, 260);
+  }
+
+  function llkWin() {
+    const best = llkBestGet();
+    let msg = "🎉 通关！本局得分 " + llkScore + "。";
+    if (llkScore > best) { llkBestSet(llkScore); msg = "🏆 新纪录！本局得分 " + llkScore + "！"; }
+    const el = $("llkMsg"); if (el) { el.textContent = msg; el.className = "llk-msg win"; }
+    confettiBurst(120);
+    if (settings.sound) playDing();
+    bumpUsage("llk");
+  }
+
+  if (llkBoard) {
+    llkBoard.addEventListener("click", (e) => {
+      const cell = e.target.closest(".llk-cell");
+      if (!cell || cell.classList.contains("empty")) return;
+      if (!llkInited || llkBlink) return;
+      const r = +cell.dataset.r, c = +cell.dataset.c;
+      if (llkSel) {
+        if (llkSel.r === r && llkSel.c === c) { cell.classList.remove("sel"); llkSel = null; return; }
+        const a = [llkSel.r, llkSel.c], b = [r, c];
+        const ea = llkEls[a[0]][a[1]];
+        if (llkGrid[a[0]][a[1]] !== llkGrid[b[0]][b[1]]) {
+          if (ea) ea.classList.remove("sel");
+          llkShake(cell); if (ea) llkShake(ea);
+          llkSel = null; llkCombo = 0; const cm = $("llkCombo"); if (cm) cm.textContent = "×1";
+          if (settings.sound) playClick();
+          return;
+        }
+        const path = llkLink(a, b);
+        if (path) llkDoMatch(a, b, path);
+        else {
+          if (ea) ea.classList.remove("sel");
+          llkShake(cell); if (ea) llkShake(ea);
+          llkSel = null;
+        }
+      } else {
+        llkSel = { r, c }; cell.classList.add("sel");
+        if (settings.sound) playClick();
+      }
+    });
+  }
+  const llkChips = $("llkChips");
+  if (llkChips) llkChips.addEventListener("click", (e) => {
+    const ch = e.target.closest(".chip"); if (!ch) return;
+    [...llkChips.children].forEach((x) => x.classList.toggle("active", x === ch));
+    llkDiff = ch.dataset.diff || "easy";
+    llkNewGame();
+  });
+  const llkNewBtn = $("llkNew"); if (llkNewBtn) llkNewBtn.addEventListener("click", llkNewGame);
+  const llkHintBtn = $("llkHint"); if (llkHintBtn) llkHintBtn.addEventListener("click", () => {
+    if (!llkInited) return;
+    const mv = llkFindMove();
+    if (!mv) { toast("暂时没有可消的一对，洗个牌～"); llkShuffle(); llkEnsureMove(); return; }
+    mv.forEach((p) => { const el = llkEls[p[0]][p[1]]; if (el) { el.classList.add("hint"); setTimeout(() => el.classList.remove("hint"), 1200); } });
+    if (settings.sound) playClick();
+  });
+  function llkStart() { if (!llkInited) llkNewGame(); else llkEnsureMove(); }
+  function llkStop() { llkSel = null; }
 
 })();
 
