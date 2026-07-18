@@ -1066,6 +1066,15 @@
   .plane-ov-text{font-size:26px;font-weight:800;color:#fff}
   .plane-ov-sub{font-size:14px;color:#d7d9ff;max-width:300px;line-height:1.5}
 
+  .catch-hud{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .catch-stat{background:rgba(124,108,255,.10);border-radius:14px;padding:8px 14px;text-align:center;min-width:60px}
+  .catch-num{font-size:22px;font-weight:800;color:var(--accent)}
+  .catch-lab{font-size:12px;color:var(--muted);margin-top:2px}
+  .catch-stage{position:relative;max-width:420px;margin:0 auto}
+  .catch-canvas{width:100%;display:block;border-radius:16px;touch-action:none;background:linear-gradient(180deg,#101540,#241b4d)}
+  .catch-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(8,10,30,.66);border-radius:16px;text-align:center;padding:18px}
+  .catch-ov-text{font-size:26px;font-weight:800;color:#fff}
+  .catch-ov-sub{font-size:14px;color:#d7d9ff;max-width:300px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -1153,6 +1162,7 @@
       <button data-tab="suika">🍉 合成大西瓜</button>
       <button data-tab="breath">🌬️ 呼吸冥想</button>
       <button data-tab="plane">🛦 飞机大战</button>
+      <button data-tab="catch">🍎 接水果</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2555,6 +2565,33 @@
     </div>
   </section>
 
+  <!-- 接水果 -->
+  <section class="panel" id="catch">
+    <div class="card">
+      <h2>🍎 接水果</h2>
+      <div class="hint">水果从天上掉下来，用 ← → 或鼠标 / 手指拖动篮子把它们接住。连击越多分越高，🌟 双倍、❤️ 加命、💣 千万别接！漏接水果会掉血，三条命用完就结束。</div>
+      <div class="catch-hud">
+        <div class="catch-stat"><div class="catch-num" id="catchScore">0</div><div class="catch-lab">得分</div></div>
+        <div class="catch-stat"><div class="catch-num" id="catchBest">0</div><div class="catch-lab">最高</div></div>
+        <div class="catch-stat"><div class="catch-num" id="catchCombo">0</div><div class="catch-lab">连击</div></div>
+        <div class="catch-stat"><div class="catch-num" id="catchLives">❤️❤️❤️</div><div class="catch-lab">生命</div></div>
+        <div class="catch-stat"><div class="catch-num" id="catchLevel">1</div><div class="catch-lab">关卡</div></div>
+      </div>
+      <div class="catch-stage">
+        <canvas id="catchCanvas" class="catch-canvas" width="360" height="480"></canvas>
+        <div class="catch-overlay" id="catchOverlay">
+          <div class="catch-ov-text" id="catchOvText">🍎 接水果</div>
+          <div class="catch-ov-sub" id="catchOvSub">点「开始游戏」开接</div>
+          <button class="btn primary" id="catchBtn">开始游戏</button>
+        </div>
+      </div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" id="catchPause">⏸️ 暂停</button>
+        <button class="btn ghost" id="catchRestart">🔄 重开</button>
+      </div>
+    </div>
+  </section>
+
   <!-- 飞机大战 -->
   <section class="panel" id="plane">
     <div class="card">
@@ -2752,6 +2789,7 @@
     if (b.dataset.tab === "sokoban" && typeof window.sokobanStart === "function") window.sokobanStart();
     if (b.dataset.tab === "qfav") renderQfav();
     if (b.dataset.tab === "habit") renderHabit();
+    if (b.dataset.tab !== "catch" && typeof catchStop === "function") catchStop();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -2797,6 +2835,7 @@
     if (id !== "breath" && typeof breathStop === "function") breathStop();
     if (id === "plane") planeStart();
     if (id !== "plane" && typeof planeStop === "function") planeStop();
+    if (id !== "catch" && typeof catchStop === "function") catchStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2888,7 +2927,8 @@
     adventure: "命运 之旅 冒险 骰子 大富翁 掷骰 棋盘 闯关 运气 随机 旅程 人生 旅行 探险 走路 选择 通关 小路 岔路 事件 格子 game",
     suika: "合成 大西瓜 西瓜 水果 合并 合成 消除 物理 掉落 游戏 休闲 甜 堆叠 樱桃 草莓 葡萄 橙子 苹果 菠萝 蜜瓜 合成大西瓜 merge fruit",
     breath: "呼吸 冥想 放松 解压 正念 静心 深呼吸 舒缓 焦虑 助眠 平静 休息 养生 4-7-8 方箱呼吸 放松呼吸 breathing meditation calm 慢下来 安神",
-    plane: "飞机 大战 射击 飞机大战 打飞机 太空 战机 射击游戏 敌机 子弹 闯关 街机 经典 手速 反应 躲 生存 空战 shooter plane 撑住"
+    plane: "飞机 大战 射击 飞机大战 打飞机 太空 战机 射击游戏 敌机 子弹 闯关 街机 经典 手速 反应 躲 生存 空战 shooter plane 撑住",
+    "catch": "接水果 水果 接物 篮子 休闲 反应 手速 躲 掉落 游戏 连击 得分 接住 苹果 西瓜 放松"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4576,7 +4616,9 @@
     { emoji: "🧘", name: "冥想达人", desc: "累计冥想 10 次", test: (u) => (u.breath || 0) >= 10 },
 { emoji: "🏆", name: "西瓜大亨", desc: "合成大西瓜单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_suika") || "0", 10) || 0) >= 500; } catch (e) { return false; } } },
     { emoji: "🛦", name: "王牌飞行员", desc: "起飞一次飞机大战", test: (u) => (u.plane || 0) >= 1 },
-    { emoji: "🌟", name: "空中霸主", desc: "飞机大战单局得分破 2000", test: () => { try { return (parseInt(localStorage.getItem("suibian_plane") || "0", 10) || 0) >= 2000; } catch (e) { return false; } } }
+    { emoji: "🌟", name: "空中霸主", desc: "飞机大战单局得分破 2000", test: () => { try { return (parseInt(localStorage.getItem("suibian_plane") || "0", 10) || 0) >= 2000; } catch (e) { return false; } } },
+    { emoji: "🍎", name: "接水果玩家", desc: "玩过一次接水果", test: (u) => (u.catch || 0) >= 1 },
+    { emoji: "🏆", name: "水果猎人", desc: "接水果单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_catch") || "0", 10) || 0) >= 500; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5654,6 +5696,19 @@
     "宇宙很大，你的战机很小，但每一次拉升都是自己的主场。",
     "生命值会掉，手感会回来——别急着认输。",
     "随便飞一会儿，烦恼就被甩在云层下面了。"
+  );
+  // —— 跟随接水果 / 抓住当下主题的新语录 ——
+  QUOTES.push(
+    "天上掉的不一定是馅饼，也可能是苹果——接住了才算你的。",
+    "机会像水果，掉下来的时候不伸手，就啪嗒摔在地上。",
+    "连击很重要的不是手速，是别在快接住时走神。",
+    "漏接一个不可怕，可怕的是手一抖，后面一串全掉了。",
+    "篮子就那么大，什么都想接，最后什么都接不住。",
+    "双倍分数的星星一旦出现，眼疾手快的人早就挪过去了。",
+    "别去接那颗炸弹，有些热闹看着诱人，碰了就掉血。",
+    "三分靠运气，七分靠手稳——接水果和过日子一个道理。",
+    "关卡越往后越快，习惯就好，生活给你的节奏从来不会慢下来。",
+    "随便接几个，心情就甜了；今天也别让自己空着手。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -9800,6 +9855,225 @@
       const s = $("planeOvSub"); if (s) s.textContent = "切回标签页，点这里接着打";
     }
   }
+
+  /* ================= 接水果（Canvas 接物小游戏） ================= */
+  const catchStop = (function () {
+    const canvas = $("catchCanvas");
+    if (!canvas) return function () {};
+    const ctx = canvas.getContext("2d");
+    const HS_KEY = "suibian_catch";
+    const MAXH = 480;
+    const FRUITS = [
+      { emoji: "🍎", val: 10 }, { emoji: "🍊", val: 10 }, { emoji: "🍇", val: 15 },
+      { emoji: "🍉", val: 20 }, { emoji: "🍓", val: 15 }, { emoji: "🍌", val: 10 },
+      { emoji: "🍑", val: 15 }, { emoji: "🥝", val: 15 }, { emoji: "🍍", val: 20 }, { emoji: "🍒", val: 10 }
+    ];
+    const obj = {
+      canvas, ctx, W: 0, H: MAXH,
+      basket: { x: 0, y: 0, w: 92, h: 30 },
+      items: [], score: 0, best: 0, lives: 3, level: 1, combo: 0,
+      state: "ready", raf: 0, last: 0, running: false,
+      spawnT: 0, spawnGap: 0.95, caught: 0, starT: 0, flash: 0, keyL: false, keyR: false
+    };
+    try { obj.best = parseInt(localStorage.getItem(HS_KEY) || "0", 10) || 0; } catch (e) {}
+    function cssVar(n, fb) { const v = getComputedStyle(document.documentElement).getPropertyValue(n); return (v && v.trim()) || fb; }
+    function fit() {
+      const cw = canvas.clientWidth || (canvas.parentNode ? canvas.parentNode.clientWidth : 0) || 360;
+      obj.W = cw; canvas.style.height = MAXH + "px";
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(cw * dpr); canvas.height = Math.round(MAXH * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      obj.basket.y = obj.H - obj.basket.h - 14;
+    }
+    function newGame() {
+      obj.items = []; obj.score = 0; obj.lives = 3; obj.level = 1; obj.combo = 0; obj.caught = 0;
+      obj.spawnT = 0; obj.spawnGap = 0.95; obj.starT = 0; obj.flash = 0;
+      fit(); obj.basket.x = obj.W / 2; updateHud();
+    }
+    function startGame() {
+      if (obj.state === "playing") return;
+      if (obj.state === "ready" || obj.state === "over") newGame();
+      obj.state = "playing"; hideOverlay(); obj.running = true;
+      try { bumpUsage("catch"); } catch (e) {}
+      obj.last = performance.now(); obj.raf = requestAnimationFrame(loop);
+    }
+    function pause() {
+      if (obj.state !== "playing") return;
+      obj.state = "paused"; obj.running = false; cancelAnimationFrame(obj.raf);
+      showOverlay("已暂停", "继续游戏", "空格或点这里接着接");
+    }
+    function saveBest() {
+      if (obj.score > obj.best) obj.best = obj.score;
+      try { localStorage.setItem(HS_KEY, String(obj.best)); } catch (e) {}
+      try { usage.catchMax = Math.max(usage.catchMax || 0, obj.score); localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+      updateHud();
+    }
+    function gameOver() {
+      const prev = obj.best;
+      obj.state = "over"; obj.running = false; cancelAnimationFrame(obj.raf); saveBest();
+      if (obj.score > prev && obj.score > 0) {
+        if (typeof confettiBurst === "function" && settings && !settings.reduce) confettiBurst(140);
+        if (typeof playDing === "function") playDing();
+      }
+      showOverlay("游戏结束 · 接了 " + obj.score + " 分", "再来一局", "最高分 " + obj.best);
+    }
+    function spawn() {
+      const r = Math.random();
+      let emoji, val = 0, kind = "fruit";
+      if (r < 0.15) {
+        const p = Math.random();
+        if (p < 0.40) { kind = "star"; emoji = "🌟"; }
+        else if (p < 0.75) { kind = "life"; emoji = "❤️"; }
+        else { kind = "bomb"; emoji = "💣"; }
+      } else {
+        const f = FRUITS[rand(FRUITS.length)]; emoji = f.emoji; val = f.val;
+      }
+      const speed = 95 + obj.level * 16 + Math.random() * 45;
+      obj.items.push({ x: 26 + Math.random() * (obj.W - 52), y: -20, r: 16, vy: speed, emoji: emoji, val: val, kind: kind });
+    }
+    function loseLife() {
+      obj.lives--; obj.combo = 0; obj.flash = 0.22;
+      if (typeof tone === "function") { try { tone(150, 0.35, "sawtooth", 0.16); } catch (e) {} }
+      updateHud();
+      if (obj.lives <= 0) gameOver();
+    }
+    function step(dt) {
+      if (obj.keyL) obj.basket.x -= 440 * dt;
+      if (obj.keyR) obj.basket.x += 440 * dt;
+      obj.basket.x = Math.max(obj.basket.w / 2, Math.min(obj.W - obj.basket.w / 2, obj.basket.x));
+      if (obj.starT > 0) obj.starT -= dt;
+      if (obj.flash > 0) obj.flash -= dt;
+      obj.spawnT += dt;
+      obj.spawnGap = Math.max(0.38, 0.95 - obj.level * 0.05);
+      if (obj.spawnT >= obj.spawnGap) { obj.spawnT = 0; spawn(); }
+      const by = obj.basket.y, bw = obj.basket.w;
+      for (const it of obj.items) {
+        it.y += it.vy * dt;
+        if (!it.done && it.y >= by - obj.basket.h / 2 && it.y <= by + obj.basket.h / 2 + 6 && Math.abs(it.x - obj.basket.x) <= bw / 2 + it.r * 0.4) {
+          it.done = true;
+          if (it.kind === "bomb") { loseLife(); }
+          else if (it.kind === "life") { obj.lives = Math.min(5, obj.lives + 1); if (typeof playDing === "function") playDing(); updateHud(); }
+          else if (it.kind === "star") { obj.starT = 6; if (typeof tone === "function") { try { tone(990, 0.12, "sine", 0.14); } catch (e) {} } }
+          else {
+            obj.combo++;
+            const mult = (1 + Math.min(obj.combo, 20) * 0.1) * (obj.starT > 0 ? 2 : 1);
+            obj.score += Math.round(it.val * mult);
+            obj.caught++;
+            if (typeof tone === "function") { try { tone(620 + Math.min(obj.combo, 12) * 24, 0.05, "triangle", 0.10); } catch (e) {} }
+            if (obj.caught % 8 === 0) obj.level++;
+            if (obj.score > obj.best) {
+              obj.best = obj.score;
+              try { localStorage.setItem(HS_KEY, String(obj.best)); } catch (e) {}
+              try { usage.catchMax = Math.max(usage.catchMax || 0, obj.score); localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+            }
+            updateHud();
+          }
+        }
+        if (!it.done && it.y - it.r > obj.H) {
+          it.done = true;
+          if (it.kind === "fruit") loseLife();
+        }
+      }
+      obj.items = obj.items.filter((x) => !x.done);
+      if (!obj.running) return;
+    }
+    function draw() {
+      ctx.clearRect(0, 0, obj.W, obj.H);
+      const g = ctx.createLinearGradient(0, 0, 0, obj.H);
+      g.addColorStop(0, cssVar("--bg2", "#1a1f4d"));
+      g.addColorStop(1, cssVar("--bg", "#0e1230"));
+      ctx.fillStyle = g; ctx.fillRect(0, 0, obj.W, obj.H);
+      const bx = obj.basket.x, by = obj.basket.y, bw = obj.basket.w, bh = obj.basket.h;
+      ctx.fillStyle = cssVar("--accent", "#7c6cff");
+      ctx.beginPath();
+      ctx.moveTo(bx - bw / 2, by);
+      ctx.lineTo(bx + bw / 2, by);
+      ctx.lineTo(bx + bw / 2 - 8, by + bh);
+      ctx.lineTo(bx - bw / 2 + 8, by + bh);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.25)";
+      ctx.fillRect(bx - bw / 2, by, bw, 5);
+      ctx.font = "26px serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      for (const it of obj.items) ctx.fillText(it.emoji, it.x, it.y);
+      if (obj.starT > 0) { ctx.fillStyle = "#ffd166"; ctx.font = "bold 14px sans-serif"; ctx.textAlign = "center"; ctx.fillText("×2 双倍 " + obj.starT.toFixed(1) + "s", obj.W / 2, 20); }
+      if (obj.flash > 0) { ctx.fillStyle = "rgba(255,80,80," + (obj.flash * 1.6) + ")"; ctx.fillRect(0, 0, obj.W, obj.H); }
+    }
+    function loop(t) {
+      if (!obj.running) return;
+      const dt = Math.min((t - obj.last) / 1000, 0.033);
+      obj.last = t;
+      step(dt);
+      if (!obj.running) return;
+      draw();
+      obj.raf = requestAnimationFrame(loop);
+    }
+    function updateHud() {
+      const s = $("catchScore"), b = $("catchBest"), l = $("catchLives"), lv = $("catchLevel"), c = $("catchCombo");
+      if (s) s.textContent = obj.score;
+      if (b) b.textContent = obj.best;
+      if (l) l.textContent = "❤️".repeat(Math.max(0, obj.lives)) + "🤍".repeat(Math.max(0, 5 - obj.lives));
+      if (lv) lv.textContent = obj.level;
+      if (c) c.textContent = obj.combo;
+    }
+    const overlay = $("catchOverlay"), ovText = $("catchOvText"), ovSub = $("catchOvSub"), ovBtn = $("catchBtn");
+    function showOverlay(t, b, s) { if (ovText) ovText.textContent = t; if (ovBtn) ovBtn.textContent = b; if (ovSub) ovSub.textContent = s || ""; if (overlay) overlay.style.display = "flex"; }
+    function hideOverlay() { if (overlay) overlay.style.display = "none"; }
+    function pointerX(e) {
+      const rect = canvas.getBoundingClientRect();
+      return ((e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX) - rect.left);
+    }
+    function onMove(e) {
+      if (obj.state !== "playing") return;
+      const cx = pointerX(e);
+      obj.basket.x = Math.max(obj.basket.w / 2, Math.min(obj.W - obj.basket.w / 2, cx));
+      if (e.cancelable) e.preventDefault();
+    }
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    canvas.addEventListener("touchstart", (e) => { if (obj.state === "playing") { const cx = pointerX(e); obj.basket.x = Math.max(obj.basket.w / 2, Math.min(obj.W - obj.basket.w / 2, cx)); } }, { passive: true });
+    if (ovBtn) ovBtn.addEventListener("click", () => { if (obj.state === "ready" || obj.state === "over") startGame(); });
+    const pauseBtn = $("catchPause"), restartBtn = $("catchRestart");
+    if (pauseBtn) pauseBtn.addEventListener("click", () => { if (obj.state === "playing") pause(); else if (obj.state === "paused") startGame(); if (typeof playClick === "function") playClick(); });
+    if (restartBtn) restartBtn.addEventListener("click", () => {
+      newGame(); obj.state = "playing"; hideOverlay(); obj.running = true;
+      try { bumpUsage("catch"); } catch (e) {}
+      obj.last = performance.now(); obj.raf = requestAnimationFrame(loop);
+      if (typeof playClick === "function") playClick();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (obj.state !== "playing" && obj.state !== "paused") return;
+      const k = e.key;
+      if (k === "ArrowLeft" || k === "a" || k === "A") { obj.keyL = true; if (e.cancelable) e.preventDefault(); }
+      else if (k === "ArrowRight" || k === "d" || k === "D") { obj.keyR = true; if (e.cancelable) e.preventDefault(); }
+      else if (k === " " || k === "Spacebar") { if (e.cancelable) e.preventDefault(); if (obj.state === "playing") pause(); else if (obj.state === "paused") startGame(); }
+    });
+    document.addEventListener("keyup", (e) => {
+      const k = e.key;
+      if (k === "ArrowLeft" || k === "a" || k === "A") obj.keyL = false;
+      else if (k === "ArrowRight" || k === "d" || k === "D") obj.keyR = false;
+    });
+    const panel = $("catch");
+    if (panel && typeof MutationObserver !== "undefined") {
+      new MutationObserver(function () {
+        if (panel.classList.contains("active") && !obj.running) startGame();
+      }).observe(panel, { attributes: true, attributeFilter: ["class"] });
+    }
+    fit(); obj.basket.x = obj.W / 2; updateHud();
+    showOverlay("🍎 接水果", "开始游戏", "← → 或拖动篮子，把掉下来的水果接住！");
+    function stop() {
+      obj.running = false;
+      if (obj.raf) cancelAnimationFrame(obj.raf);
+      obj.raf = 0;
+      if (obj.state === "playing") {
+        obj.state = "paused";
+        const o = $("catchOverlay"); if (o) o.style.display = "flex";
+        const t = $("catchOvText"); if (t) t.textContent = "已暂停";
+        const b = $("catchBtn"); if (b) b.textContent = "继续游戏";
+        const s = $("catchOvSub"); if (s) s.textContent = "切回标签页，点这里接着接";
+      }
+    }
+    return stop;
+  })();
 
 })();
 
