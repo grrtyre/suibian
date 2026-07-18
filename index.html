@@ -1039,6 +1039,22 @@
   .suika-stage{position:relative;max-width:360px;margin:6px auto 12px}
   .suika-canvas{width:100%;height:auto;display:block;background:var(--card-2);border:1px solid var(--line);border-radius:16px;touch-action:none;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.18)}
   .suika-msg{margin-top:8px;text-align:center;font-size:14px;min-height:20px;opacity:.9}
+  /* —— 🌬️ 呼吸冥想 —— */
+  .breath-pats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:4px 0 12px}
+  .breath-pats .chip{font-size:13px;padding:6px 12px}
+  .breath-stage{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0 8px;min-height:300px}
+  .breath-orb{
+    width:170px;height:170px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--accent-2, #ffb15c), var(--accent) 55%, var(--accent-3) 100%);
+    box-shadow:0 0 60px var(--glow-1, rgba(124,108,255,0.25)), inset 0 0 40px rgba(255,255,255,0.18);
+    display:flex;align-items:center;justify-content:center;
+    transform:scale(0.5);transform-origin:center;transition:transform 4s ease-in-out;
+    color:#fff;font-size:30px;font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,0.28);
+    will-change:transform;
+  }
+  .breath-orb.hold{box-shadow:0 0 80px var(--glow-1, rgba(124,108,255,0.32)), inset 0 0 46px rgba(255,255,255,0.22)}
+  .breath-phase{margin-top:18px;font-size:20px;font-weight:600;letter-spacing:2px;color:var(--text)}
+  .breath-stat{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}
 
 </style>
 </head>
@@ -1125,6 +1141,7 @@
       <button data-tab="breakout">🧱 打砖块</button>
       <button data-tab="adventure">🎲 命运之旅</button>
       <button data-tab="suika">🍉 合成大西瓜</button>
+      <button data-tab="breath">🌬️ 呼吸冥想</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2506,6 +2523,27 @@
     </div>
   </section>
 
+  <section class="panel" id="breath">
+    <div class="card">
+      <h2>🌬️ 呼吸冥想</h2>
+      <div class="hint">跟着光球呼吸：吸气时它长大，呼气时它收小。选一种节奏，按「开始」就好——随时暂停，不用勉强。手机党把屏幕亮度调低，效果更好。</div>
+      <div class="breath-pats" id="breathPats">
+        <button class="chip on" data-pat="relax">🌿 放松 4-7-8</button>
+        <button class="chip" data-pat="box">📦 方箱 4-4-4-4</button>
+        <button class="chip" data-pat="balance">⚖️ 平衡 5-5</button>
+      </div>
+      <div class="breath-stage">
+        <div class="breath-orb" id="breathOrb"><span id="breathCount">4</span></div>
+        <div class="breath-phase" id="breathPhase">准备好了吗</div>
+      </div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="breathToggle">▶️ 开始</button>
+        <button class="btn ghost" id="breathReset">🔄 重置</button>
+      </div>
+      <div class="breath-stat" id="breathStat">今日 0 次 · 累计 0 次</div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -2719,6 +2757,7 @@
     if (id !== "adventure" && typeof advStop === "function") advStop();
     if (id === "suika") suikaStart();
     if (id !== "suika" && typeof suikaStop === "function") suikaStop();
+    if (id !== "breath" && typeof breathStop === "function") breathStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
@@ -2808,7 +2847,8 @@
     slot: "老虎机 老虎机 拉霸 拉霸机 转轮 运气 幸运 中奖 金币 赌博 赌场 幸运轮 777 暴富 赌 水果机 吃角子",
     breakout: "打砖块 砖块 弹球 挡板 小球 反弹 砖块游戏 breakout 街机 经典 游戏 休闲 手速 反应 墙壁 通关 关卡 分数 打 消除 接球 小球",
     adventure: "命运 之旅 冒险 骰子 大富翁 掷骰 棋盘 闯关 运气 随机 旅程 人生 旅行 探险 走路 选择 通关 小路 岔路 事件 格子 game",
-    suika: "合成 大西瓜 西瓜 水果 合并 合成 消除 物理 掉落 游戏 休闲 甜 堆叠 樱桃 草莓 葡萄 橙子 苹果 菠萝 蜜瓜 合成大西瓜 merge fruit"
+    suika: "合成 大西瓜 西瓜 水果 合并 合成 消除 物理 掉落 游戏 休闲 甜 堆叠 樱桃 草莓 葡萄 橙子 苹果 菠萝 蜜瓜 合成大西瓜 merge fruit",
+    breath: "呼吸 冥想 放松 解压 正念 静心 深呼吸 舒缓 焦虑 助眠 平静 休息 养生 4-7-8 方箱呼吸 放松呼吸 breathing meditation calm 慢下来 安神"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4492,7 +4532,9 @@
     { emoji: "🎲", name: "命运旅人", desc: "踏上一次命运之旅", test: (u) => (u.adventure || 0) >= 1 },
     { emoji: "💰", name: "人生赢家", desc: "在命运之旅攒到 80 金币通关", test: () => { try { return (parseInt(localStorage.getItem("suibian_adventure_best") || "0", 10) || 0) >= 80; } catch (e) { return false; } } },
     { emoji: "🍉", name: "合成玩家", desc: "玩过一局合成大西瓜", test: (u) => (u.suika || 0) >= 1 },
-    { emoji: "🏆", name: "西瓜大亨", desc: "合成大西瓜单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_suika") || "0", 10) || 0) >= 500; } catch (e) { return false; } } }
+        { emoji: "🌬️", name: "静心一刻", desc: "完成一次呼吸冥想", test: (u) => (u.breath || 0) >= 1 },
+    { emoji: "🧘", name: "冥想达人", desc: "累计冥想 10 次", test: (u) => (u.breath || 0) >= 10 },
+{ emoji: "🏆", name: "西瓜大亨", desc: "合成大西瓜单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_suika") || "0", 10) || 0) >= 500; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -5545,6 +5587,19 @@
     "顶线快到了别慌，往往就差那最后一下轻轻的合并，就通关了。",
     "西瓜不是一天合成的，是无数颗樱桃，一颗一颗凑出来的甜。",
     "随便丢一颗下去，剩下的交给重力——很多事，光想不动永远合不成。"
+  );
+  // —— 跟随呼吸冥想 / 慢下来 / 留白 theme 的新语录 ——
+  QUOTES.push(
+    "深呼吸一次：吸进来的是当下，呼出去的是刚才的紧绷。",
+    "你不需要马上想清楚，先跟着呼吸，把自己安顿好。",
+    "焦虑的时候，身体比脑子诚实——它只想要一口气，慢慢吐出来。",
+    "4-7-8 不是咒语，是给神经的一封温柔请假条。",
+    "方箱呼吸的本质：把乱掉的心，框回一个稳稳的正方形的节奏里。",
+    "很多事急不来，就像呼气不能催——让它自己走完，松就来了。",
+    "留白不是浪费，是让前面的内容喘口气的必要空隙。",
+    "你不必时刻满格运转，偶尔把自己调成「屏息」那一档，也挺好。",
+    "慢下来不是落后，是让随便也有资格认真一次。",
+    "今晚如果睡不着，别数羊，数自己的呼吸——数着数着，就还给自己了。"
   );
     const GENERIC = [
       "这个梦没有标准答案，但它一定和你近来最在意的事有关。试着问问自己：醒来时是什么心情？",
@@ -9285,6 +9340,88 @@
     suikaDraw();
     suika.raf = requestAnimationFrame(suikaLoop);
   }
+  /* ---------- 🌬️ 呼吸冥想 ---------- */
+  const BREATH_KEY = "suibian_breath";
+  const BREATH_PAT = {
+    relax:   { name: "放松 4-7-8", phases: [["吸气", 4, "in"], ["屏息", 7, "hold"], ["呼气", 8, "out"]] },
+    box:     { name: "方箱 4-4-4-4", phases: [["吸气", 4, "in"], ["屏息", 4, "hold"], ["呼气", 4, "out"], ["屏息", 4, "hold"]] },
+    balance: { name: "平衡 5-5", phases: [["吸气", 5, "in"], ["呼气", 5, "out"]] }
+  };
+  const breath = { pat: "relax", phaseIdx: 0, remain: 0, running: false, timer: 0, cycles: 0, logged: false };
+  function breathScale(kind) { return kind === "in" ? 1 : (kind === "out" ? 0.5 : null); }
+  function breathLoad() { try { return JSON.parse(localStorage.getItem(BREATH_KEY) || "[]"); } catch (e) { return []; } }
+  function breathSave(arr) { try { localStorage.setItem(BREATH_KEY, JSON.stringify(arr)); } catch (e) {} }
+  function breathRenderStat() {
+    const arr = breathLoad(); const today = new Date().toISOString().slice(0, 10);
+    const todayN = arr.filter((d) => d === today).length;
+    const el = $("breathStat"); if (el) el.textContent = "今日 " + todayN + " 次 · 累计 " + arr.length + " 次";
+  }
+  function breathApplyPhase() {
+    const p = BREATH_PAT[breath.pat].phases[breath.phaseIdx];
+    const orb = $("breathOrb"), ph = $("breathPhase"), ct = $("breathCount");
+    if (!orb) return;
+    orb.classList.toggle("hold", p[2] === "hold");
+    orb.style.transitionDuration = p[1] + "s";
+    const sc = breathScale(p[2]);
+    if (sc !== null) orb.style.transform = "scale(" + sc + ")";
+    if (ph) ph.textContent = p[0];
+    if (ct) ct.textContent = p[1];
+    if (settings && settings.sound) {
+      const f = p[2] === "in" ? 432 : (p[2] === "out" ? 396 : 528);
+      tone(f, 0.5, "sine", 0.12);
+    }
+  }
+  function breathTick() {
+    breath.remain--;
+    const ct = $("breathCount"); if (ct) ct.textContent = breath.remain;
+    if (breath.remain <= 0) {
+      breath.phaseIdx++;
+      const phases = BREATH_PAT[breath.pat].phases;
+      if (breath.phaseIdx >= phases.length) { breath.phaseIdx = 0; breath.cycles++; }
+      breath.remain = BREATH_PAT[breath.pat].phases[breath.phaseIdx][1];
+      breathApplyPhase();
+    }
+  }
+  function breathStart() {
+    if (breath.running) return;
+    if (!breath.logged) {
+      const arr = breathLoad(); arr.push(new Date().toISOString().slice(0, 10)); breathSave(arr);
+      breath.logged = true; breathRenderStat(); bumpUsage("breath");
+    }
+    breath.running = true;
+    if (breath.remain <= 0) { breath.phaseIdx = 0; breath.remain = BREATH_PAT[breath.pat].phases[0][1]; }
+    breathApplyPhase();
+    breath.timer = setInterval(breathTick, 1000);
+    const tg = $("breathToggle"); if (tg) tg.textContent = "⏸ 暂停";
+  }
+  function breathStop() {
+    breath.running = false;
+    if (breath.timer) clearInterval(breath.timer);
+    breath.timer = 0;
+    const tg = $("breathToggle"); if (tg) tg.textContent = "▶️ 继续";
+  }
+  function breathReset() {
+    breathStop();
+    breath.phaseIdx = 0; breath.cycles = 0; breath.logged = false;
+    breath.remain = BREATH_PAT[breath.pat].phases[0][1];
+    const orb = $("breathOrb"), ph = $("breathPhase"), ct = $("breathCount"), tg = $("breathToggle");
+    if (orb) { orb.classList.remove("hold"); orb.style.transitionDuration = "0.4s"; orb.style.transform = "scale(0.5)"; }
+    if (ph) ph.textContent = "准备好了吗";
+    if (ct) ct.textContent = breath.remain;
+    if (tg) tg.textContent = "▶️ 开始";
+  }
+  function breathSetPat(pat) {
+    breath.pat = pat;
+    [...$("breathPats").children].forEach((b) => b.classList.toggle("on", b.dataset.pat === pat));
+    breathReset();
+  }
+  (function breathInit() {
+    const tg = $("breathToggle"); if (tg) tg.addEventListener("click", () => { if (breath.running) breathStop(); else breathStart(); });
+    const rs = $("breathReset"); if (rs) rs.addEventListener("click", breathReset);
+    const pats = $("breathPats"); if (pats) [...pats.children].forEach((b) => b.addEventListener("click", () => breathSetPat(b.dataset.pat)));
+    breathReset(); breathRenderStat();
+  })();
+
   function suikaStart() {
     if (!suika) suikaInit();
     if (!suika || suika.playing) return;
@@ -9308,3 +9445,7 @@
 </script>
 </body>
 </html>
+
+    { emoji: "🌬️", name: "静心一刻", desc: "完成一次呼吸冥想", test: (u) => (u.breath || 0) >= 1 },
+    { emoji: "🧘", name: "冥想达人", desc: "累计冥想 10 次", test: (u) => (u.breath || 0) >= 10 }
+];
