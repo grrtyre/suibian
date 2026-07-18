@@ -1144,6 +1144,12 @@
   .note-text::placeholder{color:rgba(0,0,0,.32)}
   .note-flash{animation:noteFlash .9s ease}
   @keyframes noteFlash{0%{box-shadow:0 0 0 0 var(--accent)}30%{box-shadow:0 0 0 6px var(--accent-3);transform:scale(1.06) rotate(0deg)}100%{box-shadow:0 8px 18px rgba(0,0,0,.18)}}
+  /* 像素小鸟 */
+  .flap-hud { display:flex; justify-content:space-between; gap:12px; margin-bottom:12px; font-size:14px; color:var(--muted); }
+  .flap-hud b { color:var(--accent); font-size:18px; }
+  .flap-stage { position:relative; max-width:360px; margin:0 auto; }
+  .flap-stage canvas { width:100%; height:auto; display:block; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.25); background:#bfe3ff; touch-action:none; }
+  .flap-msg { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); background:rgba(0,0,0,.55); color:#fff; padding:8px 16px; border-radius:999px; font-size:15px; font-weight:600; pointer-events:none; white-space:nowrap; transition:opacity .15s; }
 </style>
 </head>
 <body>
@@ -1235,6 +1241,7 @@
       <button data-tab="rhythm">🎶 节奏大师</button>
       <button data-tab="emojiq">🧠 emoji 猜词</button>
       <button data-tab="notes">📝 灵感便签</button>
+      <button data-tab="flappy">🐤 像素小鸟</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2788,6 +2795,22 @@
     </div>
   </section>
 
+  <!-- 像素小鸟 -->
+  <section class="panel" id="flappy">
+    <div class="card">
+      <h2>🐤 像素小鸟</h2>
+      <div class="hint">点屏幕 / 按空格 / ↑ 让小鸟振翅，穿过水管别撞上。飞得越远分越高，最好成绩存在本地。</div>
+      <div class="flap-hud"><span>得分 <b id="fpScore">0</b></span><span>最高 <b id="fpBest">0</b></span></div>
+      <div class="flap-stage">
+        <canvas id="flappyCanvas" width="360" height="540"></canvas>
+        <div class="flap-msg" id="fpMsg">点屏幕起飞 🐤</div>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="fpBtn">起飞</button>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3010,6 +3033,8 @@
     if (id !== "rhythm" && typeof rhythmStop === "function") rhythmStop();
     if (id === "qfav") renderQfav();
     if (id === "notes") renderNotes();
+    if (id === "flappy") flappyStart();
+    if (id !== "flappy" && typeof flappyStop === "function") flappyStop();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
     if (id === "sudoku") sudokuResume();
@@ -3104,7 +3129,8 @@
     "catch": "接水果 水果 接物 篮子 休闲 反应 手速 躲 掉落 游戏 连击 得分 接住 苹果 西瓜 放松",
     rhythm: "节奏 音游 音乐 游戏 反应 手速 节奏大师 打拍 下落 音符 按拍 律动 歌曲 弹奏 命中 连击 节拍 神曲 钢琴 演奏 dfjk",
     emojiq: "emoji 猜词 看图 猜成语 脑筋急转弯 字谜 选择题 四选一 测试 脑力 解谜 联想 表情 趣味 问答 猜词游戏 反应 知识 猜意思",
-    notes: "便签 灵感 随手记 笔记 便利贴 备忘录 贴纸 记录 想法 待办 灵感墙 sticky note 写下来 记一笔 闪念 草稿"
+    notes: "便签 灵感 随手记 笔记 便利贴 备忘录 贴纸 记录 想法 待办 灵感墙 sticky note 写下来 记一笔 闪念 草稿",
+    flappy: "像素小鸟 小鸟 飞行 flappy 撞水管 休闲 游戏 振翅 飞翔 躲避 反应 手速 闯关"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4800,7 +4826,9 @@
     { emoji: "🧠", name: "猜词新手", desc: "玩过一次 emoji 猜词", test: (u) => (u.emojiq || 0) >= 1 },
     { emoji: "🏆", name: "词王", desc: "emoji 猜词单局得分破 150", test: () => { try { return (parseInt(localStorage.getItem("suibian_emojiq") || "0", 10) || 0) >= 150; } catch (e) { return false; } } },
     { emoji: "📝", name: "随手记", desc: "新建过一张灵感便签", test: (u) => (u.notes || 0) >= 1 },
-    { emoji: "🗒️", name: "便签达人", desc: "累计贴过 10 张灵感便签", test: (u) => (u.notes || 0) >= 10 }
+    { emoji: "🗒️", name: "便签达人", desc: "累计贴过 10 张灵感便签", test: (u) => (u.notes || 0) >= 10 },
+    { emoji: "🐤", name: "初飞", desc: "起飞一次像素小鸟", test: (u) => (u.flappy || 0) >= 1 },
+    { emoji: "🏆", name: "小鸟王者", desc: "像素小鸟单局得分破 30", test: () => { try { return (parseInt(localStorage.getItem("suibian_flappy") || "0", 10) || 0) >= 30; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -10589,6 +10617,19 @@
     "🎲 抽一张旧便签，看看当初的自己想说点啥。",
     "想法不值钱，记下来的想法才值钱。"
   );
+  // —— 跟随像素小鸟 / 振翅 / 闯关主题的新语录 ——
+  QUOTES.push(
+    "生活像像素小鸟，你不必一直往上冲，只要别让自己一头栽下去。",
+    "每一次振翅都很小，可一直振，就飞过了最难的那段。",
+    "水管挡在前面不是要拦你，是逼你找准节奏再穿过去。",
+    "坠落往往只在一瞬，稳住节奏，比猛地发力更重要。",
+    "别怕一次次重来，小鸟每一局都是从同一起点起飞的。",
+    "所谓手感，不过是摔过足够多次之后，身体替你记住的节奏。",
+    "飞得高不高先不论，能稳稳穿过下一根水管，就是今天的小赢。",
+    "风不会一直顺，但 flap 一下，你总能往上挪一点点。",
+    "最难的不是起飞，是落地前还愿意再振一次翅。",
+    "随便玩玩也别有压力，撞了就重来，小鸟从不记仇。"
+  );
 
   (function () {
     const HS_KEY = "suibian_emojiq", USAGE_ID = "emojiq", TOTAL = 12, TIME = 15;
@@ -10893,6 +10934,146 @@
   if (notesPick) notesPick.addEventListener("click", pickNote);
   if (notesClear) notesClear.addEventListener("click", clearNotes);
   try { renderNotes(); } catch (e) {}
+
+  /* ========== 🐤 像素小鸟（Flappy 风格休闲飞行） ========== */
+  let fpInited = false, fpActive = false, fpRaf = 0;
+  let fpState = "ready", fpScore = 0, fpBest = 0, fpUsed = false;
+  let fpBird = { y: 270, vy: 0, rot: 0 }, fpPipes = [], fpTimer = 0, fpClouds = [];
+  let fpCanvas, fpCtx, fpColorsCache;
+  const FP_W = 360, FP_H = 540, FP_GROUND = 84, FP_BX = 96, FP_R = 15;
+  const FP_G = 1500, FP_FLAP = -440, FP_PW = 62, FP_GAP = 168, FP_SPD = 152, FP_SPAWN = 1.55;
+  function fpReadBest() { try { fpBest = parseInt(localStorage.getItem("suibian_flappy") || "0", 10) || 0; } catch (e) { fpBest = 0; } }
+  function fpColors() {
+    const cs = getComputedStyle(document.documentElement);
+    const g = (n, d) => { const v = (cs.getPropertyValue(n) || "").trim(); return v || d; };
+    return {
+      skyTop: "#8fd0ff", skyBot: "#d6efff",
+      pipe: g("--accent", "#3bb35a"), pipeDk: g("--accent-3", "#2c8a45"),
+      bird: g("--accent-2", "#ffb15c"), birdDk: g("--accent", "#ff7a59"),
+      ground: g("--card", "#caa46a"), groundTop: g("--accent-3", "#5bbf6a"),
+      text: g("--text", "#ffffff")
+    };
+  }
+  function fpReset() {
+    fpState = "ready"; fpScore = 0; fpBird.y = FP_H / 2; fpBird.vy = 0; fpBird.rot = 0;
+    fpPipes = []; fpTimer = 0; fpUsed = false;
+    if (!fpClouds.length) {
+      for (let i = 0; i < 4; i++) fpClouds.push({ x: Math.random() * FP_W, y: 40 + Math.random() * 160, s: 0.3 + Math.random() * 0.4 });
+    }
+    const sc = $("fpScore"), bc = $("fpBest");
+    if (sc) sc.textContent = "0"; if (bc) bc.textContent = String(fpBest);
+    fpSetMsg("点屏幕起飞 🐤");
+  }
+  function fpSetMsg(t) { const m = $("fpMsg"); if (m) { m.textContent = t; m.style.opacity = t ? "1" : "0"; } }
+  function fpFlap() {
+    if (fpState === "over") return;
+    if (fpState === "ready") { fpState = "play"; if (!fpUsed) { fpUsed = true; bumpUsage("flappy"); } }
+    fpBird.vy = FP_FLAP;
+    if (typeof tone === "function") tone(520, 0.06, "square", 0.07);
+  }
+  function fpSpawn() {
+    const minTop = 50, maxTop = FP_H - FP_GROUND - FP_GAP - 50;
+    const top = minTop + Math.random() * (maxTop - minTop);
+    fpPipes.push({ x: FP_W + 10, top: top, gap: FP_GAP, scored: false });
+  }
+  function fpOver() {
+    fpState = "over";
+    const beat = fpScore > fpBest;
+    if (beat) { fpBest = fpScore; try { localStorage.setItem("suibian_flappy", String(fpBest)); } catch (e) {} }
+    const sc = $("fpScore"), bc = $("fpBest"); if (sc) sc.textContent = String(fpScore); if (bc) bc.textContent = String(fpBest);
+    fpSetMsg("撞上了！得分 " + fpScore + (beat ? " · 新纪录 🎉" : "") + " · 点「再来一局」");
+    if (typeof tone === "function") tone(150, 0.22, "sawtooth", 0.12);
+    if (beat && typeof confettiBurst === "function" && (!settings || !settings.reduce)) confettiBurst(120);
+  }
+  function fpUpdate(dt) {
+    if (fpState === "play") {
+      fpBird.vy += FP_G * dt; fpBird.y += fpBird.vy * dt;
+      if (fpBird.y - FP_R < 0) { fpBird.y = FP_R; fpBird.vy = 0; }
+      fpTimer += dt;
+      if (fpTimer >= FP_SPAWN) { fpTimer = 0; fpSpawn(); }
+      for (const p of fpPipes) {
+        p.x -= FP_SPD * dt;
+        if (!p.scored && p.x + FP_PW < FP_BX) { p.scored = true; fpScore++; const sc = $("fpScore"); if (sc) sc.textContent = String(fpScore); if (typeof playClick === "function") playClick(); }
+      }
+      fpPipes = fpPipes.filter((p) => p.x + FP_PW > -10);
+      if (fpBird.y + FP_R >= FP_H - FP_GROUND) { fpOver(); return; }
+      for (const p of fpPipes) {
+        if (FP_BX + FP_R > p.x && FP_BX - FP_R < p.x + FP_PW) {
+          if (fpBird.y - FP_R < p.top || fpBird.y + FP_R > p.top + p.gap) { fpOver(); return; }
+        }
+      }
+      fpBird.rot = Math.max(-0.5, Math.min(1.2, fpBird.vy / 600));
+    } else {
+      fpBird.y = FP_H / 2 + Math.sin(Date.now() / 300) * 8;
+    }
+    for (const c of fpClouds) { c.x -= c.s * 30 * dt; if (c.x < -40) { c.x = FP_W + 20; c.y = 40 + Math.random() * 160; } }
+  }
+  function fpDraw() {
+    if (!fpCtx) return;
+    const c = fpColorsCache;
+    const grd = fpCtx.createLinearGradient(0, 0, 0, FP_H);
+    grd.addColorStop(0, c.skyTop); grd.addColorStop(1, c.skyBot);
+    fpCtx.fillStyle = grd; fpCtx.fillRect(0, 0, FP_W, FP_H);
+    fpCtx.fillStyle = "rgba(255,255,255,.75)";
+    for (const cl of fpClouds) {
+      fpCtx.beginPath();
+      fpCtx.arc(cl.x, cl.y, 18, 0, 7); fpCtx.arc(cl.x + 20, cl.y + 4, 14, 0, 7); fpCtx.arc(cl.x - 18, cl.y + 4, 13, 0, 7);
+      fpCtx.fill();
+    }
+    for (const p of fpPipes) {
+      fpCtx.fillStyle = c.pipe;
+      fpCtx.fillRect(p.x, 0, FP_PW, p.top);
+      fpCtx.fillRect(p.x, p.top + p.gap, FP_PW, FP_H - FP_GROUND - (p.top + p.gap));
+      fpCtx.fillStyle = c.pipeDk;
+      fpCtx.fillRect(p.x - 4, p.top - 16, FP_PW + 8, 16);
+      fpCtx.fillRect(p.x - 4, p.top + p.gap, FP_PW + 8, 16);
+    }
+    fpCtx.fillStyle = c.groundTop; fpCtx.fillRect(0, FP_H - FP_GROUND, FP_W, 12);
+    fpCtx.fillStyle = c.ground; fpCtx.fillRect(0, FP_H - FP_GROUND + 12, FP_W, FP_GROUND - 12);
+    const bx = FP_BX, by = fpBird.y;
+    fpCtx.save(); fpCtx.translate(bx, by); fpCtx.rotate(fpBird.rot);
+    fpCtx.fillStyle = c.bird; fpCtx.beginPath(); fpCtx.arc(0, 0, FP_R, 0, 7); fpCtx.fill();
+    fpCtx.fillStyle = c.birdDk; fpCtx.beginPath(); fpCtx.arc(-4, 4, FP_R * 0.6, 0, 7); fpCtx.fill();
+    fpCtx.fillStyle = "#ff9b3d"; fpCtx.beginPath(); fpCtx.moveTo(FP_R - 2, -2); fpCtx.lineTo(FP_R + 8, 0); fpCtx.lineTo(FP_R - 2, 4); fpCtx.closePath(); fpCtx.fill();
+    fpCtx.restore();
+    fpCtx.fillStyle = "#fff"; fpCtx.beginPath(); fpCtx.arc(bx + 5, by - 4, 5, 0, 7); fpCtx.fill();
+    fpCtx.fillStyle = "#222"; fpCtx.beginPath(); fpCtx.arc(bx + 7, by - 4, 2.4, 0, 7); fpCtx.fill();
+    if (fpState === "play") {
+      fpCtx.fillStyle = c.text; fpCtx.font = "bold 40px system-ui, sans-serif";
+      fpCtx.textAlign = "center"; fpCtx.fillText(String(fpScore), FP_W / 2, 64);
+    }
+  }
+  function fpLoop() {
+    if (!fpActive) return;
+    const now = performance.now();
+    let dt = (now - (fpLoop._t || now)) / 1000; fpLoop._t = now;
+    if (dt > 0.04) dt = 0.04;
+    fpUpdate(dt); fpDraw();
+    fpRaf = requestAnimationFrame(fpLoop);
+  }
+  function fpEnsure() {
+    if (fpInited) return; fpInited = true;
+    fpCanvas = $("flappyCanvas"); if (!fpCanvas) return;
+    fpCtx = fpCanvas.getContext("2d");
+    fpCanvas.addEventListener("pointerdown", (e) => { e.preventDefault(); fpFlap(); });
+    const btn = $("fpBtn"); if (btn) btn.addEventListener("click", () => { if (typeof playClick === "function") playClick(); fpReset(); fpFlap(); });
+    document.addEventListener("keydown", (e) => {
+      if (!fpActive) return;
+      if (e.code === "Space" || e.code === "ArrowUp" || e.key === "w" || e.key === "W") {
+        const tag = (e.target.tagName || "").toLowerCase();
+        if (tag === "input" || tag === "textarea") return;
+        e.preventDefault(); fpFlap();
+      }
+    });
+  }
+  function flappyStart() {
+    fpEnsure(); if (!fpCanvas) return;
+    fpReadBest(); fpColorsCache = fpColors();
+    fpActive = true; fpReset();
+    fpLoop._t = performance.now();
+    cancelAnimationFrame(fpRaf); fpRaf = requestAnimationFrame(fpLoop);
+  }
+  function flappyStop() { fpActive = false; cancelAnimationFrame(fpRaf); }
 
 })();
 
