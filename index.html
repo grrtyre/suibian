@@ -1171,6 +1171,26 @@
   @keyframes llkPop { 0%{transform:scale(1)} 45%{transform:scale(1.28)} 100%{transform:scale(0);opacity:0} }
   @keyframes llkShk { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
   @keyframes llkPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+  .calc { max-width:440px; margin:0 auto; }
+  .calc-screen { background:var(--card-2,#262a47); border-radius:14px; padding:14px 16px; text-align:right; margin-bottom:8px; box-shadow:inset 0 1px 5px rgba(0,0,0,.10); }
+  .calc-expr { font-size:.95rem; color:var(--muted,#9aa0c7); min-height:1.3em; word-break:break-all; }
+  .calc-out { font-size:1.9rem; font-weight:800; color:var(--text,#f3f4ff); line-height:1.2; word-break:break-all; font-variant-numeric:tabular-nums; }
+  .calc-mem { text-align:right; font-size:.78rem; color:var(--muted,#9aa0c7); margin:-2px 2px 8px; }
+  .calc-keys { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .ck { font-size:1.15rem; font-weight:700; padding:14px 0; border:none; border-radius:12px; background:var(--card,#20223a); color:var(--text,#f3f4ff); cursor:pointer; transition:transform .08s, box-shadow .12s; user-select:none; -webkit-user-select:none; }
+  .ck:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.18); }
+  .ck:active { transform:translateY(0) scale(.95); }
+  .ck.op { background:var(--card-2,#262a47); color:var(--accent,#ff7a59); }
+  .ck.fn { background:var(--card-2,#262a47); color:var(--muted,#9aa0c7); }
+  .ck.eq { background:var(--accent,#ff7a59); color:#fff; }
+  .calc-memrow { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+  .ck.sm { font-size:.9rem; padding:9px 0; background:var(--card-2,#262a47); color:var(--muted,#9aa0c7); }
+  .calc-hist { margin-top:12px; max-height:190px; overflow:auto; display:flex; flex-direction:column; gap:6px; }
+  .calc-h-item { display:flex; justify-content:space-between; gap:12px; padding:8px 12px; background:var(--card-2,#262a47); border-radius:10px; cursor:pointer; font-size:.9rem; }
+  .calc-h-item:hover { background:var(--accent-3,#7c6cff); color:#fff; }
+  .calc-h-e { color:var(--muted,#9aa0c7); word-break:break-all; }
+  .calc-h-r { font-weight:700; color:var(--text,#f3f4ff); white-space:nowrap; font-variant-numeric:tabular-nums; }
+  @media (max-width:480px){ .ck{ font-size:1rem; padding:12px 0; } .calc-out{ font-size:1.55rem; } }
 </style>
 </head>
 <body>
@@ -1264,6 +1284,7 @@
       <button data-tab="notes">📝 灵感便签</button>
       <button data-tab="flappy">🐤 像素小鸟</button>
     <button data-tab="llk">🔗 连连看</button>
+    <button data-tab="calc">🧮 计算器</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2858,6 +2879,57 @@
     </div>
   </section>
 
+  <!-- 计算器 -->
+  <section class="panel" id="calc">
+    <div class="card">
+      <h2>🧮 计算器</h2>
+      <div class="hint">随手算一笔：支持 + − × ÷ % 和括号，还有 √、x²、1/x、π、e。键盘也能直接敲，回车出结果。</div>
+      <div class="calc">
+        <div class="calc-screen">
+          <div class="calc-expr" id="calcExpr">0</div>
+          <div class="calc-out" id="calcOut">0</div>
+        </div>
+        <div class="calc-mem" id="calcMem">M: 0</div>
+        <div class="calc-keys" id="calcKeys">
+          <button class="ck fn" data-k="C">C</button>
+          <button class="ck fn" data-k="CE">CE</button>
+          <button class="ck fn" data-k="back">⌫</button>
+          <button class="ck op" data-k="/">÷</button>
+          <button class="ck nm" data-k="7">7</button>
+          <button class="ck nm" data-k="8">8</button>
+          <button class="ck nm" data-k="9">9</button>
+          <button class="ck op" data-k="*">×</button>
+          <button class="ck nm" data-k="4">4</button>
+          <button class="ck nm" data-k="5">5</button>
+          <button class="ck nm" data-k="6">6</button>
+          <button class="ck op" data-k="-">−</button>
+          <button class="ck nm" data-k="1">1</button>
+          <button class="ck nm" data-k="2">2</button>
+          <button class="ck nm" data-k="3">3</button>
+          <button class="ck op" data-k="+">+</button>
+          <button class="ck nm" data-k="0">0</button>
+          <button class="ck nm" data-k=".">.</button>
+          <button class="ck fn" data-k="pi">π</button>
+          <button class="ck eq" data-k="=">=</button>
+          <button class="ck fn" data-k="(">(</button>
+          <button class="ck fn" data-k=")">)</button>
+          <button class="ck fn" data-k="e">e</button>
+          <button class="ck op" data-k="%">%</button>
+          <button class="ck fn" data-k="sqrt">√</button>
+          <button class="ck fn" data-k="sq">x²</button>
+          <button class="ck fn" data-k="inv">1/x</button>
+          <button class="ck fn" data-k="mr">MR</button>
+        </div>
+        <div class="calc-memrow">
+          <button class="ck sm" data-k="mc">MC</button>
+          <button class="ck sm" data-k="mplus">M+</button>
+          <button class="ck sm" data-k="mminus">M−</button>
+        </div>
+        <div class="calc-hist" id="calcHist"></div>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3084,6 +3156,7 @@
     if (id !== "flappy" && typeof flappyStop === "function") flappyStop();
     if (id === "llk") llkStart();
     if (id !== "llk" && typeof llkStop === "function") llkStop();
+    if (id === "calc") calcInit();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
     if (id === "sudoku") sudokuResume();
@@ -3180,7 +3253,8 @@
     emojiq: "emoji 猜词 看图 猜成语 脑筋急转弯 字谜 选择题 四选一 测试 脑力 解谜 联想 表情 趣味 问答 猜词游戏 反应 知识 猜意思",
     notes: "便签 灵感 随手记 笔记 便利贴 备忘录 贴纸 记录 想法 待办 灵感墙 sticky note 写下来 记一笔 闪念 草稿",
     flappy: "像素小鸟 小鸟 飞行 flappy 撞水管 休闲 游戏 振翅 飞翔 躲避 反应 手速 闯关",
-    llk: "连连看 链接 消除 配对 图案 找相同 消一消 益智 连线 转弯 经典 小游戏 休闲 link 一对 消除游戏 通关"
+    llk: "连连看 链接 消除 配对 图案 找相同 消一消 益智 连线 转弯 经典 小游戏 休闲 link 一对 消除游戏 通关",
+    calc: "计算器 计算 算 数学 算式 算数 加减乘除 公式 运算 科学计算 表达式 算一笔"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4880,7 +4954,9 @@
     { emoji: "🐤", name: "初飞", desc: "起飞一次像素小鸟", test: (u) => (u.flappy || 0) >= 1 },
     { emoji: "🏆", name: "小鸟王者", desc: "像素小鸟单局得分破 30", test: () => { try { return (parseInt(localStorage.getItem("suibian_flappy") || "0", 10) || 0) >= 30; } catch (e) { return false; } } },
     { emoji: "🔗", name: "连线新手", desc: "通关一次连连看", test: (u) => (u.llk || 0) >= 1 },
-    { emoji: "🧠", name: "眼疾手快", desc: "连连看单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_llk") || "0", 10) || 0) >= 500; } catch (e) { return false; } } }
+    { emoji: "🧠", name: "眼疾手快", desc: "连连看单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_llk") || "0", 10) || 0) >= 500; } catch (e) { return false; } } },
+    { emoji: "🧮", name: "初算", desc: "用计算器算过一次", test: (u) => (u.calc || 0) >= 1 },
+    { emoji: "🔢", name: "精算师", desc: "累计算出 30 笔", test: (u) => (u.calc || 0) >= 30 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -10695,6 +10771,19 @@
     "别贪心一次连太多，先把眼前这对顺手消了，局面就松了。",
     "随手连一对也挺好，反正整盘迟早会被你一点点清空。"
   );
+  // —— 跟随计算器 / 算一笔 / 数字主题的新语录 ——
+  QUOTES.push(
+    "有些事算得太清反而累，难得糊涂也是一种算法。",
+    "人生这道题没有标准答案，能算出自洽的解就不错。",
+    "括号要成对，话别说满——留个口子，日子才好继续。",
+    "加减乘除里，最难的不是乘除，是学会随时归零重来。",
+    "算来算去，重要的从来不是结果，是你有没有动手去算。",
+    "π 算不到头，但生活不要求你算尽，算到够用就好。",
+    "把大数拆成小数一步步加，再难的总和也会被你凑出来。",
+    "负负得正——摔过的跟头，回头看往往成了你的正分。",
+    "等号后面才是答案，可过程里的每一次试算都有它的意义。",
+    "别怕按错键，计算器有清零，人生也该有「C」这一下。"
+  );
 
   (function () {
     const HS_KEY = "suibian_emojiq", USAGE_ID = "emojiq", TOTAL = 12, TIME = 15;
@@ -11367,6 +11456,224 @@
   });
   function llkStart() { if (!llkInited) llkNewGame(); else llkEnsureMove(); }
   function llkStop() { llkSel = null; }
+
+  /* ---------- 计算器 ---------- */
+  const CALC_HIST_KEY = "suibian_calc_hist";
+  const CALC_MEM_KEY = "suibian_calc_mem";
+  let calcExpr = "0";
+  let calcVal = 0;
+  let calcMem = 0;
+  let calcWired = false;
+  let calcHist = [];
+  try { const _h = JSON.parse(localStorage.getItem(CALC_HIST_KEY) || "[]"); if (Array.isArray(_h)) calcHist = _h.slice(-30); } catch (e) {}
+  try { calcMem = parseFloat(localStorage.getItem(CALC_MEM_KEY) || "0") || 0; } catch (e) {}
+  const CALC_FUNCS = { sqrt: Math.sqrt, abs: Math.abs, sin: Math.sin, cos: Math.cos, tan: Math.tan, log: (Math.log10 || Math.log), ln: Math.log, exp: Math.exp };
+  const CALC_CONSTS = { pi: Math.PI, "π": Math.PI, e: Math.E };
+  function calcfmt(n) {
+    if (typeof n !== "number" || !isFinite(n)) return "错误";
+    if (n === 0) return "0";
+    const r = Math.round(n * 1e12) / 1e12;
+    let s = String(r);
+    if (s.indexOf("e") >= 0 || s.indexOf("E") >= 0) s = r.toFixed(6);
+    return s;
+  }
+  function calcDisp(s) { return s.replace(/\*/g, "×").replace(/\//g, "÷"); }
+  function calcTokenize(s) {
+    const toks = []; let i = 0;
+    while (i < s.length) {
+      const c = s[i];
+      if (c === " ") { i++; continue; }
+      if ((c >= "0" && c <= "9") || c === ".") {
+        let j = i, dot = 0;
+        while (j < s.length && ((s[j] >= "0" && s[j] <= "9") || s[j] === ".")) { if (s[j] === ".") dot++; j++; }
+        if (dot > 1) throw new Error("badnum");
+        toks.push({ t: "num", v: parseFloat(s.slice(i, j)) }); i = j; continue;
+      }
+      if (/[a-zπ]/i.test(c)) {
+        let j = i; while (j < s.length && /[a-zπ]/i.test(s[j])) j++;
+        toks.push({ t: "id", v: s.slice(i, j).toLowerCase() }); i = j; continue;
+      }
+      if ("+-*/%^()".indexOf(c) >= 0) { toks.push({ t: "op", v: c }); i++; continue; }
+      throw new Error("badchar");
+    }
+    return toks;
+  }
+  function calcToRPN(toks) {
+    const out = [], op = [];
+    const prec = { "+": 2, "-": 2, "*": 3, "/": 3, "%": 3, "^": 4, "u-": 5 };
+    const right = { "^": true, "u-": true };
+    let prev = null;
+    const isVal = (p) => p && (p.t === "num" || (p.t === "op" && p.v === ")"));
+    for (const tk of toks) {
+      if (tk.t === "num") { out.push(tk); prev = tk; continue; }
+      if (tk.t === "id") {
+        if (CALC_FUNCS[tk.v] !== undefined) { op.push({ t: "func", v: tk.v }); prev = tk; }
+        else if (CALC_CONSTS[tk.v] !== undefined) { out.push({ t: "num", v: CALC_CONSTS[tk.v] }); prev = { t: "num" }; }
+        else throw new Error("unknown " + tk.v);
+        continue;
+      }
+      if (tk.t === "op" && tk.v === "(") { op.push(tk); prev = tk; continue; }
+      if (tk.t === "op" && tk.v === ")") {
+        while (op.length && op[op.length - 1].v !== "(") out.push(op.pop());
+        if (!op.length) throw new Error("mismatch");
+        op.pop();
+        if (op.length && op[op.length - 1].t === "func") out.push(op.pop());
+        prev = tk; continue;
+      }
+      let v = tk.v;
+      if ((v === "-" || v === "+") && !isVal(prev)) {
+        if (v === "-") { op.push({ t: "op", v: "u-" }); prev = { t: "op", v: "u-" }; }
+        else { prev = tk; }
+        continue;
+      }
+      while (op.length) {
+        const top = op[op.length - 1];
+        if (top.t === "func" || top.v === "(" || top.v === ")") break;
+        if (prec[v] > prec[top.v] || (prec[v] === prec[top.v] && right[v])) break;
+        out.push(op.pop());
+      }
+      op.push({ t: "op", v: v }); prev = tk;
+    }
+    while (op.length) { const t = op.pop(); if (t.v === "(" || t.v === ")") throw new Error("mismatch"); out.push(t); }
+    return out;
+  }
+  function calcEvalRPN(rpn) {
+    const st = [];
+    for (const tk of rpn) {
+      if (tk.t === "num") st.push(tk.v);
+      else if (tk.t === "func") { const a = st.pop(); if (a === undefined) throw new Error("stack"); st.push(CALC_FUNCS[tk.v](a)); }
+      else if (tk.t === "op" && tk.v === "u-") { const a = st.pop(); if (a === undefined) throw new Error("stack"); st.push(-a); }
+      else {
+        const b = st.pop(), a = st.pop();
+        if (a === undefined || b === undefined) throw new Error("stack");
+        if (tk.v === "+") st.push(a + b);
+        else if (tk.v === "-") st.push(a - b);
+        else if (tk.v === "*") st.push(a * b);
+        else if (tk.v === "/") st.push(a / b);
+        else if (tk.v === "%") st.push(a % b);
+        else if (tk.v === "^") st.push(Math.pow(a, b));
+      }
+    }
+    if (st.length !== 1) throw new Error("badexpr");
+    return st[0];
+  }
+  function calcTry(s) {
+    try { const r = calcEvalRPN(calcToRPN(calcTokenize(s))); if (typeof r !== "number" || !isFinite(r)) return null; return r; }
+    catch (e) { return null; }
+  }
+  function calcRender() {
+    const ex = $("calcExpr"), ou = $("calcOut"), me = $("calcMem");
+    if (ex) ex.textContent = calcDisp(calcExpr === "" ? "0" : calcExpr);
+    const pv = calcTry(calcExpr);
+    if (ou) ou.textContent = pv === null ? "…" : calcfmt(pv);
+    if (me) me.textContent = "M: " + calcfmt(calcMem);
+    const h = $("calcHist");
+    if (h) h.innerHTML = calcHist.slice().reverse().map((x) =>
+      '<div class="calc-h-item" data-e="' + escapeHtml(x.e) + '">' +
+      '<span class="calc-h-e">' + escapeHtml(calcDisp(x.e)) + '</span>' +
+      '<span class="calc-h-r">' + escapeHtml(x.r) + '</span></div>').join("");
+  }
+  function calcPushHistory(e, r) {
+    calcHist.push({ e: e, r: r });
+    if (calcHist.length > 30) calcHist = calcHist.slice(-30);
+    try { localStorage.setItem(CALC_HIST_KEY, JSON.stringify(calcHist)); } catch (e2) {}
+  }
+  function isOp(c) { return "+-*/%".indexOf(c) >= 0; }
+  function appendTok(tok) {
+    if (calcExpr === "0") return tok;
+    const last = calcExpr.slice(-1);
+    if (isOp(last) || last === "(") return calcExpr + tok;
+    return calcExpr + "*" + tok;
+  }
+  function saveMem() { try { localStorage.setItem(CALC_MEM_KEY, String(calcMem)); } catch (e) {} }
+  function calcInput(k) {
+    if (k === "C") { calcExpr = "0"; calcVal = 0; calcRender(); return; }
+    if (k === "CE") { calcExpr = "0"; calcRender(); return; }
+    if (k === "back") { calcExpr = calcExpr.length > 1 ? calcExpr.slice(0, -1) : "0"; calcRender(); return; }
+    if (k === "=") {
+      const r = calcTry(calcExpr);
+      const ou = $("calcOut");
+      if (r === null) { if (ou) ou.textContent = "错误"; return; }
+      calcPushHistory(calcExpr, calcfmt(r));
+      if (settings.sound) playClick();
+      bumpUsage("calc");
+      calcExpr = calcfmt(r); calcVal = r; calcRender(); return;
+    }
+    if (k === "sqrt" || k === "sq" || k === "inv") {
+      const base = calcTry(calcExpr);
+      if (base === null) return;
+      let nv;
+      if (k === "sqrt") nv = Math.sqrt(base);
+      else if (k === "sq") nv = base * base;
+      else nv = 1 / base;
+      if (!isFinite(nv)) { const ou = $("calcOut"); if (ou) ou.textContent = "错误"; return; }
+      const lab = k === "sqrt" ? "√" : k === "sq" ? "x²" : "1/x";
+      calcPushHistory(lab + "(" + calcfmt(base) + ")", calcfmt(nv));
+      if (settings.sound) playClick();
+      bumpUsage("calc");
+      calcExpr = calcfmt(nv); calcVal = nv; calcRender(); return;
+    }
+    if (k === "mc") { calcMem = 0; saveMem(); calcRender(); return; }
+    if (k === "mplus") { const r = calcTry(calcExpr); if (r !== null) { calcMem += r; saveMem(); } calcRender(); return; }
+    if (k === "mminus") { const r = calcTry(calcExpr); if (r !== null) { calcMem -= r; saveMem(); } calcRender(); return; }
+    if (k === "mr") { calcExpr = appendTok(calcfmt(calcMem)); calcRender(); return; }
+    if (k === "pi") { calcExpr = appendTok("π"); calcRender(); return; }
+    if (k === "e") { calcExpr = appendTok("e"); calcRender(); return; }
+    if (isOp(k)) {
+      if (calcExpr === "0") { if (k === "-") { calcExpr = "-"; calcRender(); } return; }
+      if (isOp(calcExpr.slice(-1))) calcExpr = calcExpr.slice(0, -1) + k;
+      else calcExpr += k;
+      calcRender(); return;
+    }
+    if (k === "(") { calcExpr = appendTok("("); calcRender(); return; }
+    if (k === ")") { calcExpr += ")"; calcRender(); return; }
+    if (k === ".") {
+      const seg = calcExpr.split(/[+\-*/%()]/).pop();
+      if (seg.indexOf(".") >= 0) return;
+      if (calcExpr === "0") { calcExpr = "0."; calcRender(); return; }
+      if (calcExpr === "" || isOp(calcExpr.slice(-1)) || calcExpr.slice(-1) === "(") calcExpr += "0.";
+      else calcExpr += ".";
+      calcRender(); return;
+    }
+    if (calcExpr === "0") calcExpr = k; else calcExpr += k;
+    calcRender();
+  }
+  function calcKey(e) {
+    const active = document.querySelector(".panel.active");
+    if (!active || active.id !== "calc") return;
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") return;
+    const k = e.key;
+    let handled = true;
+    if (k >= "0" && k <= "9") calcInput(k);
+    else if (k === ".") calcInput(".");
+    else if (k === "+" || k === "-" || k === "*" || k === "/" || k === "%") calcInput(k);
+    else if (k === "(" || k === ")") calcInput(k);
+    else if (k === "Enter" || k === "=") calcInput("=");
+    else if (k === "Backspace") calcInput("back");
+    else if (k === "Escape") calcInput("C");
+    else if (k === "c" || k === "C") calcInput("C");
+    else handled = false;
+    if (handled) { e.preventDefault(); e.stopPropagation(); }
+  }
+  function calcInit() {
+    const grid = $("calcKeys");
+    if (!calcWired && grid) {
+      grid.addEventListener("click", (e) => {
+        const b = e.target.closest(".ck"); if (!b) return;
+        calcInput(b.dataset.k);
+        if (settings.sound) playClick();
+      });
+      const hist = $("calcHist");
+      if (hist) hist.addEventListener("click", (e) => {
+        const it = e.target.closest(".calc-h-item"); if (!it) return;
+        calcExpr = it.dataset.e; calcVal = calcTry(calcExpr) || 0; calcRender();
+      });
+      document.addEventListener("keydown", calcKey, true);
+      calcWired = true;
+    }
+    calcRender();
+  }
 
 })();
 
