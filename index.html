@@ -1093,6 +1093,30 @@
   .rhy-keys{display:flex;gap:8px;max-width:420px;margin:12px auto 4px}
   .rhy-lane{flex:1;padding:14px 0;font-size:18px;font-weight:800;border:1px solid var(--line);background:var(--card-2);color:var(--text);border-radius:14px;cursor:pointer;transition:.08s;user-select:none}
   .rhy-lane:active{transform:scale(.94);background:var(--accent-3)}
+  .emojiq-hud{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+  .emojiq-stat{background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:6px 10px;min-width:56px;text-align:center}
+  .emojiq-num{font-size:18px;font-weight:800;color:var(--text)}
+  .emojiq-lab{font-size:11px;color:var(--muted)}
+  .emojiq-bar{height:9px;background:rgba(128,128,128,.2);border-radius:6px;overflow:hidden;margin:4px 0 12px}
+  .emojiq-bar-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--accent-3),var(--accent));transition:width .1s linear}
+  .emojiq-stage{text-align:center}
+  .emojiq-emoji{font-size:66px;line-height:1.2;margin:6px 0 14px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.18));user-select:none}
+  .emojiq-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:360px;margin:0 auto}
+  .emojiq-opt{font-size:17px;font-weight:700;padding:15px 8px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--accent-3),var(--accent));color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(80,60,200,.25);transition:transform .12s,filter .12s}
+  .emojiq-opt:hover{transform:translateY(-2px);filter:brightness(1.05)}
+  .emojiq-opt:disabled{cursor:default;opacity:.9}
+  .emojiq-opt.right{background:linear-gradient(135deg,#23c552,#16a34a);box-shadow:0 4px 14px rgba(20,160,70,.35)}
+  .emojiq-opt.wrong{background:linear-gradient(135deg,#ff5d6c,#e11d48);box-shadow:0 4px 14px rgba(220,30,60,.35)}
+  .emojiq-hint{margin:12px auto 0;font-size:13px;color:var(--muted);background:rgba(128,128,128,.12);border-radius:10px;padding:8px 12px;display:inline-block;max-width:360px}
+  .result.ok{color:var(--good);font-weight:700}
+  .result.no{color:#ff6b81;font-weight:700}
+  .emojiq-end{display:none;position:fixed;inset:0;background:rgba(10,8,30,.55);align-items:center;justify-content:center;z-index:60;padding:20px}
+  .emojiq-end.show{display:flex}
+  .emojiq-end-card{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:26px 30px;text-align:center;box-shadow:var(--shadow);min-width:240px}
+  .emojiq-end-title{font-size:22px;font-weight:800;margin-bottom:12px}
+  .emojiq-end-row{font-size:16px;margin:6px 0}
+  .emojiq-end-row b{font-size:20px;color:var(--accent-3)}
+  .emojiq-end-card .btn{margin-top:14px}
 </style>
 </head>
 <body>
@@ -1182,6 +1206,7 @@
       <button data-tab="plane">🛦 飞机大战</button>
       <button data-tab="catch">🍎 接水果</button>
       <button data-tab="rhythm">🎶 节奏大师</button>
+      <button data-tab="emojiq">🧠 emoji 猜词</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2676,6 +2701,42 @@
     </div>
   </section>
 
+  <!-- emoji 猜词 -->
+  <section class="panel" id="emojiq">
+    <div class="card">
+      <h2>🧠 emoji 猜词</h2>
+      <div class="hint">看一眼 emoji，从四个选项里挑出它代表的意思。连对越多分越高，三颗 ❤️ 用完就结束，每题 15 秒、超时算错。考考你的联想力！</div>
+      <div class="emojiq-hud">
+        <div class="emojiq-stat"><div class="emojiq-num" id="emojiqRound">0/12</div><div class="emojiq-lab">进度</div></div>
+        <div class="emojiq-stat"><div class="emojiq-num" id="emojiqScore">0</div><div class="emojiq-lab">得分</div></div>
+        <div class="emojiq-stat"><div class="emojiq-num" id="emojiqBest">0</div><div class="emojiq-lab">最高</div></div>
+        <div class="emojiq-stat"><div class="emojiq-num" id="emojiqCombo">×0</div><div class="emojiq-lab">连击</div></div>
+        <div class="emojiq-stat"><div class="emojiq-num" id="emojiqLives">❤️❤️❤️</div><div class="emojiq-lab">生命</div></div>
+      </div>
+      <div class="emojiq-bar"><div class="emojiq-bar-fill" id="emojiqBar"></div></div>
+      <div class="emojiq-stage">
+        <div class="emojiq-emoji" id="emojiqEmoji">🧠</div>
+        <div class="emojiq-opts" id="emojiqOpts"></div>
+        <div class="result" id="emojiqMsg">点「开始游戏」，看 emoji 猜词！</div>
+        <div class="emojiq-hint" id="emojiqHint" style="display:none"></div>
+      </div>
+      <div class="row" style="justify-content:center;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="emojiqStart">▶️ 开始游戏</button>
+        <button class="btn ghost" id="emojiqHintBtn">💡 提示</button>
+        <button class="btn ghost" id="emojiqSkip">⏭️ 跳过</button>
+      </div>
+      <div class="emojiq-end" id="emojiqEnd">
+        <div class="emojiq-end-card">
+          <div class="emojiq-end-title">🎉 本局结束</div>
+          <div class="emojiq-end-row">得分 <b id="emojiqEndScore">0</b></div>
+          <div class="emojiq-end-row">最高 <b id="emojiqEndBest">0</b></div>
+          <div class="emojiq-end-row">评级 <b id="emojiqEndRate">C</b></div>
+          <button class="btn primary" id="emojiqAgain">🔄 再来一局</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -2894,6 +2955,7 @@
     if (id === "plane") planeStart();
     if (id !== "plane" && typeof planeStop === "function") planeStop();
     if (id !== "catch" && typeof catchStop === "function") catchStop();
+    if (id !== "emojiq" && typeof emojiqStop === "function") emojiqStop();
     if (id !== "rhythm" && typeof rhythmStop === "function") rhythmStop();
     if (id === "qfav") renderQfav();
     if (id === "habit") renderHabit();
@@ -2988,7 +3050,8 @@
     breath: "呼吸 冥想 放松 解压 正念 静心 深呼吸 舒缓 焦虑 助眠 平静 休息 养生 4-7-8 方箱呼吸 放松呼吸 breathing meditation calm 慢下来 安神",
     plane: "飞机 大战 射击 飞机大战 打飞机 太空 战机 射击游戏 敌机 子弹 闯关 街机 经典 手速 反应 躲 生存 空战 shooter plane 撑住",
     "catch": "接水果 水果 接物 篮子 休闲 反应 手速 躲 掉落 游戏 连击 得分 接住 苹果 西瓜 放松",
-    rhythm: "节奏 音游 音乐 游戏 反应 手速 节奏大师 打拍 下落 音符 按拍 律动 歌曲 弹奏 命中 连击 节拍 神曲 钢琴 演奏 dfjk"
+    rhythm: "节奏 音游 音乐 游戏 反应 手速 节奏大师 打拍 下落 音符 按拍 律动 歌曲 弹奏 命中 连击 节拍 神曲 钢琴 演奏 dfjk",
+    emojiq: "emoji 猜词 看图 猜成语 脑筋急转弯 字谜 选择题 四选一 测试 脑力 解谜 联想 表情 趣味 问答 猜词游戏 反应 知识 猜意思"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4680,7 +4743,9 @@
     { emoji: "🍎", name: "接水果玩家", desc: "玩过一次接水果", test: (u) => (u.catch || 0) >= 1 },
     { emoji: "🏆", name: "水果猎人", desc: "接水果单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_catch") || "0", 10) || 0) >= 500; } catch (e) { return false; } } },
     { emoji: "🎶", name: "节奏新星", desc: "玩过一次节奏大师", test: (u) => (u.rhythm || 0) >= 1 },
-    { emoji: "🏆", name: "音游大触", desc: "节奏大师单局得分破 3000", test: () => { try { return (parseInt(localStorage.getItem("suibian_rhythm") || "0", 10) || 0) >= 3000; } catch (e) { return false; } } }
+    { emoji: "🏆", name: "音游大触", desc: "节奏大师单局得分破 3000", test: () => { try { return (parseInt(localStorage.getItem("suibian_rhythm") || "0", 10) || 0) >= 3000; } catch (e) { return false; } } },
+    { emoji: "🧠", name: "猜词新手", desc: "玩过一次 emoji 猜词", test: (u) => (u.emojiq || 0) >= 1 },
+    { emoji: "🏆", name: "词王", desc: "emoji 猜词单局得分破 150", test: () => { try { return (parseInt(localStorage.getItem("suibian_emojiq") || "0", 10) || 0) >= 150; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -10436,6 +10501,216 @@
       }
     }
     return stop;
+  })();
+
+  /* ---------- emoji 猜词 ---------- */
+  let emojiqT = null, emojiqK = null;
+  function emojiqStop() {
+    if (emojiqT) { clearTimeout(emojiqT); emojiqT = null; }
+    if (emojiqK) { clearInterval(emojiqK); emojiqK = null; }
+  }
+
+  QUOTES.push(
+    "一个 emoji 胜过千言万语，前提是你能猜对。",
+    "联想力这东西，越随便越灵光。",
+    "看不懂就猜，猜错了就笑，反正只是游戏。",
+    "脑子转得快的，往往都不按常理出牌。",
+    "四选一还选错？说明你和正确答案有缘分，只是还没到。",
+    "题目越刁，通关越爽。",
+    "答案就在眼前，可惜眼睛在别处。",
+    "emoji 是全世界通用的语言，除了考试的时候。",
+    "随便猜一把，说不定就蒙对了——运气也是实力。",
+    "输了不丢人，连 emoji 都读不懂才需要反思一下人生。"
+  );
+
+  (function () {
+    const HS_KEY = "suibian_emojiq", USAGE_ID = "emojiq", TOTAL = 12, TIME = 15;
+    const EMOJIQ = [
+      {e:"🐱",a:"猫",cat:"动物",hint:"会喵喵叫的家伙",ex:"常见的家养小动物，抓老鼠的一把好手。"},
+      {e:"🐶",a:"狗",cat:"动物",hint:"人类最忠实的朋友",ex:"看家护院、卖萌两不误的毛孩子。"},
+      {e:"🐰",a:"兔子",cat:"动物",hint:"长耳朵、爱蹦跶",ex:"温顺的小家伙，最爱吃胡萝卜。"},
+      {e:"🐼",a:"熊猫",cat:"动物",hint:"黑白配色、圆滚滚",ex:"国宝级萌物，一天能干三件事：吃、睡、卖萌。"},
+      {e:"🐯",a:"老虎",cat:"动物",hint:"森林之王",ex:"橙底黑纹的大型猫科动物，百兽之王。"},
+      {e:"🐸",a:"青蛙",cat:"动物",hint:"呱呱叫、会跳水",ex:"捉虫小能手，小时候叫蝌蚪。"},
+      {e:"🐧",a:"企鹅",cat:"动物",hint:"穿西装、不怕冷",ex:"南极的游泳健将，走路一摇一摆。"},
+      {e:"🦄",a:"独角兽",cat:"动物",hint:"额头上有一根角",ex:"只存在于传说里的神奇白马。"},
+      {e:"🐝",a:"蜜蜂",cat:"动物",hint:"会嗡嗡、会蜇人",ex:"勤恳的小昆虫，负责传播花粉和酿蜜。"},
+      {e:"🐙",a:"章鱼",cat:"动物",hint:"八条腿、会喷墨",ex:"海里的高智商软体动物，腿多到数不清。"},
+      {e:"🍎",a:"苹果",cat:"食物",hint:"红红的、咬一口咔嚓",ex:"一天一苹果，医生远离我。"},
+      {e:"🍔",a:"汉堡",cat:"食物",hint:"两片面包夹肉",ex:"快餐界的扛把子，一口下去满足感爆棚。"},
+      {e:"🍕",a:"披萨",cat:"食物",hint:"圆圆的、能拉丝",ex:"源自意大利的饼，上面铺满料。"},
+      {e:"🍜",a:"拉面",cat:"食物",hint:"热气腾腾一大碗",ex:"汤头浓郁的面食，吸溜一口最舒服。"},
+      {e:"🍣",a:"寿司",cat:"食物",hint:"米饭配生鱼",ex:"日本料理代表作，蘸酱油更好吃。"},
+      {e:"🍉",a:"西瓜",cat:"食物",hint:"夏天的解暑神器",ex:"切开红瓤、吐黑子的巨型水果。"},
+      {e:"🍩",a:"甜甜圈",cat:"食物",hint:"中间有个洞",ex:"甜到齁的小点心，淋满糖霜。"},
+      {e:"🥟",a:"饺子",cat:"食物",hint:"过年必吃、蘸醋",ex:"面皮包馅儿，煮蒸煎都好吃。"},
+      {e:"😡",a:"生气",cat:"情绪",hint:"眉头紧锁、想发火",ex:"遇到不顺心时的标准表情。"},
+      {e:"😱",a:"震惊",cat:"情绪",hint:"眼睛瞪得老大",ex:"被吓到或不敢相信时的反应。"},
+      {e:"🥰",a:"喜欢",cat:"情绪",hint:"一脸沉醉、星星眼",ex:"遇到心动事物时的甜蜜表情。"},
+      {e:"😴",a:"困",cat:"情绪",hint:"睁不开眼、想躺平",ex:"熬夜之后的真实写照。"},
+      {e:"🤔",a:"思考",cat:"情绪",hint:"手托下巴、若有所思",ex:"脑子里正在转悠的样子。"},
+      {e:"😭",a:"伤心",cat:"情绪",hint:"眼泪止不住",ex:"难过到爆哭的表情。"},
+      {e:"🌧️",a:"下雨",cat:"自然",hint:"天上掉水珠",ex:"出门记得带伞的天气。"},
+      {e:"🌈",a:"彩虹",cat:"自然",hint:"雨后的七彩桥",ex:"阳光穿过水珠折射出的美景。"},
+      {e:"🔥",a:"火",cat:"自然",hint:"又热又会舔",ex:"能照明也能取暖，小心别烫手。"},
+      {e:"❄️",a:"雪",cat:"自然",hint:"白白的、凉凉的",ex:"冬天从天上飘下来的小冰晶。"},
+      {e:"⭐",a:"星星",cat:"自然",hint:"夜空里一闪一闪",ex:"天黑后挂在天上的小亮点。"},
+      {e:"🌊",a:"海",cat:"自然",hint:"蓝蓝的一大片水",ex:"比湖大得多的咸水水体。"},
+      {e:"📱",a:"手机",cat:"物品",hint:"天天捧在手里的",ex:"现代人的体外器官，离了它寸步难行。"},
+      {e:"💡",a:"灯泡",cat:"物品",hint:"一亮就有主意",ex:"通电就发光的照明小装置。"},
+      {e:"🔑",a:"钥匙",cat:"物品",hint:"开门必备",ex:"一把能解锁一扇门的金属小片。"},
+      {e:"⏰",a:"闹钟",cat:"物品",hint:"把你叫醒的",ex:"早上最让人又爱又恨的小东西。"},
+      {e:"🚪",a:"门",cat:"物品",hint:"进出都要经过",ex:"隔开两个空间的板子。"},
+      {e:"✂️",a:"剪刀",cat:"物品",hint:"咔嚓咔嚓",ex:"两片刀刃交叉，用来裁剪。"},
+      {e:"🕷️",a:"蜘蛛侠",cat:"角色",hint:"会爬墙、吐丝",ex:"被蜘蛛咬了一口就获得超能力的英雄。"},
+      {e:"👻",a:"鬼",cat:"角色",hint:"飘来飘去、吓人",ex:"传说里离开身体的灵魂。"},
+      {e:"🤖",a:"机器人",cat:"角色",hint:"铁皮、听指令",ex:"按程序干活的人造家伙。"},
+      {e:"🧙",a:"巫师",cat:"角色",hint:"戴尖帽、会魔法",ex:"挥挥魔杖就能施法的长者。"},
+      {e:"🧛",a:"吸血鬼",cat:"角色",hint:"怕大蒜、爱吸血",ex:"只在夜里出没的传说生物。"},
+      {e:"🐉",a:"龙",cat:"角色",hint:"能飞、会喷火",ex:"东方文化里的祥瑞神兽。"},
+      {e:"👏",a:"鼓掌",cat:"动作",hint:"双手碰一起",ex:"表示赞赏或欢迎的动作。"},
+      {e:"🏃",a:"跑步",cat:"动作",hint:"迈开腿冲",ex:"用最快速度移动的一种方式。"},
+      {e:"💤",a:"睡觉",cat:"动作",hint:"闭眼、冒泡泡",ex:"每天必做的充电项目。"},
+      {e:"🍻",a:"干杯",cat:"动作",hint:"碰杯、喝一杯",ex:"聚会时庆祝的动作。"},
+      {e:"💪",a:"加油",cat:"动作",hint:"秀肌肉、鼓劲",ex:"表示努力或给你打气。"},
+      {e:"🤝",a:"合作",cat:"动作",hint:"两只手握一起",ex:"一起把事情做成。"}
+    ];
+    let score = 0, lives = 3, round = 0, combo = 0, best = 0, answered = false, playing = false;
+    let cur = null, opts = [], remain = TIME;
+    try { best = parseInt(localStorage.getItem(HS_KEY) || "0", 10) || 0; } catch (e) {}
+    const G = (id) => document.getElementById(id);
+    const el = {
+      score: G("emojiqScore"), best: G("emojiqBest"), combo: G("emojiqCombo"),
+      lives: G("emojiqLives"), round: G("emojiqRound"), emoji: G("emojiqEmoji"),
+      opts: G("emojiqOpts"), hint: G("emojiqHint"), msg: G("emojiqMsg"), bar: G("emojiqBar"),
+      start: G("emojiqStart"), hintBtn: G("emojiqHintBtn"), skipBtn: G("emojiqSkip"),
+      end: G("emojiqEnd"), endScore: G("emojiqEndScore"), endBest: G("emojiqEndBest"),
+      endRate: G("emojiqEndRate"), again: G("emojiqAgain")
+    };
+    function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    function fmtLives() { return "❤️".repeat(Math.max(0, lives)) + "🖤".repeat(Math.max(0, 3 - lives)); }
+    function updateHud() {
+      if (el.score) el.score.textContent = score;
+      if (el.best) el.best.textContent = best;
+      if (el.combo) el.combo.textContent = "×" + combo;
+      if (el.lives) el.lives.textContent = fmtLives();
+      if (el.round) el.round.textContent = Math.min(round + (answered ? 1 : 0), TOTAL) + "/" + TOTAL;
+    }
+    function clearTimers() { if (emojiqT) { clearTimeout(emojiqT); emojiqT = null; } if (emojiqK) { clearInterval(emojiqK); emojiqK = null; } }
+    function reveal() {
+      if (!el.hint || !cur) return;
+      el.hint.style.display = "block";
+      el.hint.textContent = "💡 " + cur.hint + " ｜ " + cur.ex;
+    }
+    function markReveal(correctIdx) {
+      const kids = el.opts ? [].slice.call(el.opts.children) : [];
+      kids.forEach((c, idx) => { c.disabled = true; if (idx === correctIdx) c.classList.add("right"); });
+    }
+    function startTimer() {
+      clearTimers();
+      emojiqK = setInterval(() => {
+        remain -= 0.1;
+        if (remain <= 0) { remain = 0; if (el.bar) el.bar.style.width = "0%"; onTimeout(); return; }
+        if (el.bar) el.bar.style.width = (remain / TIME * 100) + "%";
+      }, 100);
+    }
+    function nextQ() {
+      answered = false;
+      cur = EMOJIQ[Math.floor(Math.random() * EMOJIQ.length)];
+      const same = EMOJIQ.filter((x) => x.a !== cur.a && x.cat === cur.cat);
+      const others = EMOJIQ.filter((x) => x.a !== cur.a && x.cat !== cur.cat);
+      shuffle(same); shuffle(others);
+      const pick = [cur];
+      let i = 0;
+      while (pick.length < 4 && i < same.length) pick.push(same[i++]);
+      i = 0;
+      while (pick.length < 4 && i < others.length) pick.push(others[i++]);
+      opts = shuffle(pick.slice());
+      if (el.emoji) el.emoji.textContent = cur.e;
+      if (el.hint) { el.hint.style.display = "none"; el.hint.textContent = ""; }
+      if (el.msg) { el.msg.textContent = ""; el.msg.className = "result"; }
+      if (el.opts) {
+        el.opts.innerHTML = "";
+        opts.forEach((o, idx) => {
+          const b = document.createElement("button");
+          b.className = "emojiq-opt"; b.textContent = o.a;
+          b.addEventListener("click", () => answer(idx, b));
+          el.opts.appendChild(b);
+        });
+      }
+      remain = TIME; if (el.bar) el.bar.style.width = "100%";
+      updateHud();
+      startTimer();
+    }
+    function answer(idx, btn) {
+      if (answered || !playing || !cur) return;
+      clearTimers(); answered = true;
+      const correct = opts[idx] && opts[idx].a === cur.a;
+      const kids = el.opts ? [].slice.call(el.opts.children) : [];
+      kids.forEach((c, i) => {
+        c.disabled = true;
+        if (opts[i] && opts[i].a === cur.a) c.classList.add("right");
+        else if (i === idx) c.classList.add("wrong");
+      });
+      if (correct) {
+        combo++;
+        const gain = Math.round(10 * (1 + (combo - 1) * 0.2));
+        score += gain;
+        if (el.msg) { el.msg.textContent = "✅ 答对啦！+" + gain + (combo > 1 ? "（连击 ×" + combo + "）" : ""); el.msg.className = "result ok"; }
+        if (typeof tone === "function") tone(660, 0.12, "triangle", 0.14);
+        if (typeof pop === "function" && el.msg) pop(el.msg);
+      } else {
+        combo = 0; lives--;
+        if (el.msg) { el.msg.textContent = "❌ 答错了，正确答案是「" + cur.a + "」"; el.msg.className = "result no"; }
+        if (typeof tone === "function") tone(180, 0.2, "sawtooth", 0.12);
+      }
+      reveal();
+      if (lives <= 0) { endGame(); return; }
+      emojiqT = setTimeout(() => { round++; if (round >= TOTAL) endGame(); else nextQ(); }, 1200);
+    }
+    function onTimeout() {
+      if (answered || !playing || !cur) return;
+      clearTimers(); answered = true; combo = 0; lives--;
+      markReveal(opts.findIndex((o) => o.a === cur.a));
+      if (el.msg) { el.msg.textContent = "⏰ 时间到！正确答案是「" + cur.a + "」"; el.msg.className = "result no"; }
+      reveal();
+      if (lives <= 0) { endGame(); return; }
+      emojiqT = setTimeout(() => { round++; if (round >= TOTAL) endGame(); else nextQ(); }, 1200);
+    }
+    function skip() {
+      if (answered || !playing || !cur) return;
+      clearTimers(); answered = true; combo = 0;
+      markReveal(opts.findIndex((o) => o.a === cur.a));
+      if (el.msg) { el.msg.textContent = "⏭️ 跳过，正确答案「" + cur.a + "」"; el.msg.className = "result"; }
+      reveal();
+      emojiqT = setTimeout(() => { round++; if (round >= TOTAL) endGame(); else nextQ(); }, 900);
+    }
+    function endGame() {
+      playing = false; clearTimers();
+      const beat = score > best;
+      if (beat) { best = score; try { localStorage.setItem(HS_KEY, String(best)); } catch (e) {} }
+      try { usage.emojiq = (usage.emojiq || 0) + 1; localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+      if (el.endScore) el.endScore.textContent = score;
+      if (el.endBest) el.endBest.textContent = best;
+      let rate = "C"; if (score >= 150) rate = "S"; else if (score >= 100) rate = "A"; else if (score >= 60) rate = "B";
+      if (el.endRate) el.endRate.textContent = rate;
+      if (el.end) el.end.classList.add("show");
+      if (beat) { if (typeof confettiBurst === "function") confettiBurst(60); if (typeof tone === "function") tone(880, 0.18, "triangle", 0.16); }
+      updateHud();
+    }
+    function start() {
+      score = 0; lives = 3; round = 0; combo = 0; answered = false; playing = true;
+      if (el.end) el.end.classList.remove("show");
+      if (typeof bumpUsage === "function") bumpUsage(USAGE_ID);
+      updateHud(); nextQ();
+    }
+    if (el.start) el.start.addEventListener("click", start);
+    if (el.again) el.again.addEventListener("click", start);
+    if (el.hintBtn) el.hintBtn.addEventListener("click", () => {
+      if (cur && el.hint) { el.hint.style.display = "block"; el.hint.textContent = "💡 " + cur.hint + " ｜ " + cur.ex; }
+    });
+    if (el.skipBtn) el.skipBtn.addEventListener("click", skip);
+    if (el.best) el.best.textContent = best;
   })();
 
 })();
