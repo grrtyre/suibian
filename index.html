@@ -1117,6 +1117,33 @@
   .emojiq-end-row{font-size:16px;margin:6px 0}
   .emojiq-end-row b{font-size:20px;color:var(--accent-3)}
   .emojiq-end-card .btn{margin-top:14px}
+  /* 灵感便签 */
+  .notes-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .notes-count{margin-left:auto;color:var(--muted);font-size:13px}
+  .notes-palette{display:flex;gap:8px;margin:12px 0 6px}
+  .np{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-shadow:0 2px 6px rgba(0,0,0,.12);transition:.12s}
+  .np:hover{transform:scale(1.08)}
+  .np.sel{border-color:var(--text);box-shadow:0 0 0 3px var(--accent-3)}
+  .notes-board{position:relative;min-height:340px;margin-top:10px;border-radius:16px;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(128,128,128,.18) 1px, transparent 0) 0 0/22px 22px,
+      linear-gradient(160deg, var(--card-2), var(--card));
+    border:1px dashed var(--line);overflow:hidden}
+  .note{position:absolute;width:184px;min-height:120px;border-radius:12px;padding:8px 9px 10px;
+    box-shadow:0 8px 18px rgba(0,0,0,.18);display:flex;flex-direction:column;cursor:grab;
+    transition:box-shadow .15s;user-select:none}
+  .note:active{cursor:grabbing}
+  .note-head{cursor:grab;padding-bottom:4px}
+  .note-bar{display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .note-ts{font-size:10px;color:rgba(0,0,0,.45);font-weight:700}
+  .note-del{border:none;background:rgba(0,0,0,.08);color:rgba(0,0,0,.55);width:18px;height:18px;
+    border-radius:50%;cursor:pointer;font-size:11px;line-height:1;padding:0}
+  .note-del:hover{background:rgba(220,30,60,.85);color:#fff}
+  .note-text{flex:1;border:none;background:transparent;resize:none;outline:none;font:inherit;
+    font-size:14px;line-height:1.45;color:#3a3320;min-height:78px;margin-top:2px;user-select:text}
+  .note-text::placeholder{color:rgba(0,0,0,.32)}
+  .note-flash{animation:noteFlash .9s ease}
+  @keyframes noteFlash{0%{box-shadow:0 0 0 0 var(--accent)}30%{box-shadow:0 0 0 6px var(--accent-3);transform:scale(1.06) rotate(0deg)}100%{box-shadow:0 8px 18px rgba(0,0,0,.18)}}
 </style>
 </head>
 <body>
@@ -1207,6 +1234,7 @@
       <button data-tab="catch">🍎 接水果</button>
       <button data-tab="rhythm">🎶 节奏大师</button>
       <button data-tab="emojiq">🧠 emoji 猜词</button>
+      <button data-tab="notes">📝 灵感便签</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2737,6 +2765,29 @@
     </div>
   </section>
 
+  <!-- 灵感便签 -->
+  <section class="panel" id="notes">
+    <div class="card">
+      <h2>📝 灵感便签</h2>
+      <div class="hint">随手记下脑子里飘过的念头、待办、灵感。便签只留在你的浏览器里，下次打开还在。拖一拖、换个色、🎲 随便抽一张回味一下～</div>
+      <div class="notes-bar">
+        <button class="btn primary" id="notesAdd">➕ 新建便签</button>
+        <button class="btn ghost" id="notesPick">🎲 随便抽一张</button>
+        <button class="btn ghost" id="notesClear">🧹 清空</button>
+        <span class="notes-count" id="notesCount">0 张</span>
+      </div>
+      <div class="notes-palette" id="notesPalette">
+        <span class="np" data-c="#fff3b0" style="background:#fff3b0"></span>
+        <span class="np" data-c="#ffd6e0" style="background:#ffd6e0"></span>
+        <span class="np" data-c="#c8f7c5" style="background:#c8f7c5"></span>
+        <span class="np" data-c="#bfe3ff" style="background:#bfe3ff"></span>
+        <span class="np" data-c="#e6d4ff" style="background:#e6d4ff"></span>
+        <span class="np" data-c="#ffe0b3" style="background:#ffe0b3"></span>
+      </div>
+      <div class="notes-board" id="notesBoard"></div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -2958,6 +3009,7 @@
     if (id !== "emojiq" && typeof emojiqStop === "function") emojiqStop();
     if (id !== "rhythm" && typeof rhythmStop === "function") rhythmStop();
     if (id === "qfav") renderQfav();
+    if (id === "notes") renderNotes();
     if (id === "habit") renderHabit();
     if (id === "mbti") mbtiReset();
     if (id === "sudoku") sudokuResume();
@@ -3051,7 +3103,8 @@
     plane: "飞机 大战 射击 飞机大战 打飞机 太空 战机 射击游戏 敌机 子弹 闯关 街机 经典 手速 反应 躲 生存 空战 shooter plane 撑住",
     "catch": "接水果 水果 接物 篮子 休闲 反应 手速 躲 掉落 游戏 连击 得分 接住 苹果 西瓜 放松",
     rhythm: "节奏 音游 音乐 游戏 反应 手速 节奏大师 打拍 下落 音符 按拍 律动 歌曲 弹奏 命中 连击 节拍 神曲 钢琴 演奏 dfjk",
-    emojiq: "emoji 猜词 看图 猜成语 脑筋急转弯 字谜 选择题 四选一 测试 脑力 解谜 联想 表情 趣味 问答 猜词游戏 反应 知识 猜意思"
+    emojiq: "emoji 猜词 看图 猜成语 脑筋急转弯 字谜 选择题 四选一 测试 脑力 解谜 联想 表情 趣味 问答 猜词游戏 反应 知识 猜意思",
+    notes: "便签 灵感 随手记 笔记 便利贴 备忘录 贴纸 记录 想法 待办 灵感墙 sticky note 写下来 记一笔 闪念 草稿"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4745,7 +4798,9 @@
     { emoji: "🎶", name: "节奏新星", desc: "玩过一次节奏大师", test: (u) => (u.rhythm || 0) >= 1 },
     { emoji: "🏆", name: "音游大触", desc: "节奏大师单局得分破 3000", test: () => { try { return (parseInt(localStorage.getItem("suibian_rhythm") || "0", 10) || 0) >= 3000; } catch (e) { return false; } } },
     { emoji: "🧠", name: "猜词新手", desc: "玩过一次 emoji 猜词", test: (u) => (u.emojiq || 0) >= 1 },
-    { emoji: "🏆", name: "词王", desc: "emoji 猜词单局得分破 150", test: () => { try { return (parseInt(localStorage.getItem("suibian_emojiq") || "0", 10) || 0) >= 150; } catch (e) { return false; } } }
+    { emoji: "🏆", name: "词王", desc: "emoji 猜词单局得分破 150", test: () => { try { return (parseInt(localStorage.getItem("suibian_emojiq") || "0", 10) || 0) >= 150; } catch (e) { return false; } } },
+    { emoji: "📝", name: "随手记", desc: "新建过一张灵感便签", test: (u) => (u.notes || 0) >= 1 },
+    { emoji: "🗒️", name: "便签达人", desc: "累计贴过 10 张灵感便签", test: (u) => (u.notes || 0) >= 10 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -10520,7 +10575,19 @@
     "答案就在眼前，可惜眼睛在别处。",
     "emoji 是全世界通用的语言，除了考试的时候。",
     "随便猜一把，说不定就蒙对了——运气也是实力。",
-    "输了不丢人，连 emoji 都读不懂才需要反思一下人生。"
+      "输了不丢人，连 emoji 都读不懂才需要反思一下人生。"
+  );
+  QUOTES.push(
+    "脑子里的念头，不写下来就飞走了——便签就是给灵感安个家。",
+    "随便记一笔，回头翻翻，也许答案就在里头。",
+    "好记性不如烂笔头，烂笔头不如随手贴。",
+    "把待办写下来，脑子才腾得出地方装别的事。",
+    "灵感这东西，来的时候不记，走的时候不回头。",
+    "一张小纸条，也能装下一个大想法。",
+    "写下来，就等于和未来的自己悄悄说了一句话。",
+    "便签贴满墙，说明你正认真地在生活。",
+    "🎲 抽一张旧便签，看看当初的自己想说点啥。",
+    "想法不值钱，记下来的想法才值钱。"
   );
 
   (function () {
@@ -10712,6 +10779,120 @@
     if (el.skipBtn) el.skipBtn.addEventListener("click", skip);
     if (el.best) el.best.textContent = best;
   })();
+
+  /* ---------- 灵感便签（本地便利贴墙） ---------- */
+  const NOTES_KEY = "suibian_notes";
+  const NOTE_COLORS = ["#fff3b0", "#ffd6e0", "#c8f7c5", "#bfe3ff", "#e6d4ff", "#ffe0b3"];
+  let notes = [];
+  try { const raw = JSON.parse(localStorage.getItem(NOTES_KEY) || "[]"); if (Array.isArray(raw)) notes = raw; } catch (e) {}
+  let notesCurColor = NOTE_COLORS[0];
+  let notesDrag = null;
+  const notesBoard = $("notesBoard");
+  function fmtNoteDate(ts) {
+    try { const d = new Date(ts); const p = (x) => (x < 10 ? "0" + x : "" + x);
+      return (d.getMonth() + 1) + "/" + d.getDate() + " " + p(d.getHours()) + ":" + p(d.getMinutes()); }
+    catch (e) { return ""; }
+  }
+  function saveNotes() { try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch (e) {} }
+  function notesUpdateCount() { const c = $("notesCount"); if (c) c.textContent = notes.length + " 张"; }
+  function renderNotes() {
+    if (!notesBoard) return;
+    notesBoard.innerHTML = "";
+    notes.forEach((n) => {
+      const el = document.createElement("div");
+      el.className = "note";
+      el.style.left = (n.x != null ? n.x : 12) + "px";
+      el.style.top = (n.y != null ? n.y : 12) + "px";
+      el.style.background = n.color || NOTE_COLORS[0];
+      el.style.transform = "rotate(" + (n.rot || 0) + "deg)";
+      el.dataset.id = n.id;
+      const head = document.createElement("div");
+      head.className = "note-head";
+      const bar = document.createElement("div");
+      bar.className = "note-bar";
+      const ts = document.createElement("span");
+      ts.className = "note-ts"; ts.textContent = n.ts ? fmtNoteDate(n.ts) : "";
+      const del = document.createElement("button");
+      del.className = "note-del"; del.textContent = "✕"; del.title = "删除";
+      del.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+      del.addEventListener("click", (ev) => { ev.stopPropagation(); removeNote(n.id); });
+      bar.appendChild(ts); bar.appendChild(del);
+      head.appendChild(bar);
+      const ta = document.createElement("textarea");
+      ta.className = "note-text"; ta.placeholder = "写点什么…"; ta.value = n.text || "";
+      ta.addEventListener("input", () => { n.text = ta.value; saveNotes(); });
+      ta.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+      head.addEventListener("pointerdown", (ev) => startNoteDrag(ev, n, el));
+      el.appendChild(head); el.appendChild(ta);
+      notesBoard.appendChild(el);
+    });
+    notesUpdateCount();
+  }
+  function startNoteDrag(e, n, el) {
+    e.preventDefault();
+    const r = notesBoard.getBoundingClientRect();
+    notesDrag = { n: n, el: el, offX: e.clientX - (r.left + (n.x || 0)), offY: e.clientY - (r.top + (n.y || 0)) };
+    document.addEventListener("pointermove", onNoteDrag);
+    document.addEventListener("pointerup", endNoteDrag);
+  }
+  function onNoteDrag(e) {
+    if (!notesDrag) return;
+    const r = notesBoard.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - r.left - notesDrag.offX, notesBoard.clientWidth - 40));
+    const y = Math.max(0, Math.min(e.clientY - r.top - notesDrag.offY, notesBoard.clientHeight - 24));
+    notesDrag.n.x = Math.round(x); notesDrag.n.y = Math.round(y);
+    notesDrag.el.style.left = x + "px"; notesDrag.el.style.top = y + "px";
+  }
+  function endNoteDrag() {
+    if (notesDrag) { saveNotes(); notesDrag = null; }
+    document.removeEventListener("pointermove", onNoteDrag);
+    document.removeEventListener("pointerup", endNoteDrag);
+  }
+  function addNote() {
+    const id = "n" + Date.now() + "_" + rand(1000);
+    const bw = notesBoard ? notesBoard.clientWidth : 0;
+    const bh = notesBoard ? notesBoard.clientHeight : 0;
+    const x = 16 + rand(Math.max(0, bw - 190));
+    const y = 16 + rand(Math.max(0, bh - 150));
+    notes.push({ id: id, text: "", color: notesCurColor, x: x, y: y, rot: (rand(9) - 4), ts: Date.now() });
+    saveNotes(); renderNotes();
+    bumpUsage("notes"); playClick();
+    const el = notesBoard.querySelector('[data-id="' + id + '"]');
+    if (el) { const t = el.querySelector("textarea"); if (t) t.focus();
+      el.classList.remove("note-flash"); void el.offsetWidth; el.classList.add("note-flash"); }
+  }
+  function removeNote(id) {
+    notes = notes.filter((n) => n.id !== id);
+    saveNotes(); renderNotes(); playClick();
+  }
+  function pickNote() {
+    if (!notes.length) { toast("还没有便签，先点「新建便签」吧 ✍️"); return; }
+    const n = notes[rand(notes.length)];
+    const el = notesBoard.querySelector('[data-id="' + n.id + '"]');
+    if (el) { el.classList.remove("note-flash"); void el.offsetWidth; el.classList.add("note-flash"); }
+    const txt = (n.text || "").trim() || "（这张还是空白的）";
+    toast("🎲 " + txt);
+  }
+  function clearNotes() {
+    if (!notes.length) { toast("已经是空的啦"); return; }
+    if (!confirm("确定清空所有灵感便签？此操作不可撤销。")) return;
+    notes = []; saveNotes(); renderNotes(); toast("已清空便签");
+  }
+  const notesPalette = $("notesPalette");
+  if (notesPalette) {
+    notesPalette.querySelectorAll(".np").forEach((p) => {
+      p.addEventListener("click", () => {
+        notesCurColor = p.dataset.c;
+        notesPalette.querySelectorAll(".np").forEach((q) => q.classList.toggle("sel", q === p));
+      });
+    });
+    const fp = notesPalette.querySelector(".np"); if (fp) fp.classList.add("sel");
+  }
+  const notesAdd = $("notesAdd"), notesPick = $("notesPick"), notesClear = $("notesClear");
+  if (notesAdd) notesAdd.addEventListener("click", addNote);
+  if (notesPick) notesPick.addEventListener("click", pickNote);
+  if (notesClear) notesClear.addEventListener("click", clearNotes);
+  try { renderNotes(); } catch (e) {}
 
 })();
 
