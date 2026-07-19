@@ -1191,6 +1191,22 @@
   .calc-h-e { color:var(--muted,#9aa0c7); word-break:break-all; }
   .calc-h-r { font-weight:700; color:var(--text,#f3f4ff); white-space:nowrap; font-variant-numeric:tabular-nums; }
   @media (max-width:480px){ .ck{ font-size:1rem; padding:12px 0; } .calc-out{ font-size:1.55rem; } }
+  /* ---------- 云养猫 / 虚拟宠物 ---------- */
+  .pet-stage{display:flex;flex-direction:column;align-items:center;gap:6px;margin:12px 0 18px}
+  .pet-avatar{font-size:86px;line-height:1;animation:petBob 2.6s ease-in-out infinite;user-select:none;cursor:default}
+  .pet-avatar.pop{animation:petPop .55s ease}
+  @keyframes petBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+  @keyframes petPop{0%{transform:scale(1)}40%{transform:scale(1.35) rotate(-6deg)}100%{transform:scale(1)}}
+  .pet-name{font-size:21px;font-weight:700}
+  .pet-sub{color:var(--muted);font-size:13px;text-align:center}
+  .pet-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;max-width:440px;margin:0 auto 16px}
+  .pstat{display:flex;align-items:center;gap:8px;font-size:13px}
+  .pstat>span{width:60px;flex:none;color:var(--muted)}
+  .pbar{flex:1;height:13px;background:rgba(127,127,160,.16);border-radius:99px;overflow:hidden}
+  .pbar>i{display:block;height:100%;width:70%;border-radius:99px;background:linear-gradient(90deg,#7ee8a4,#56c6ff);transition:width .4s ease,background .4s ease}
+  .pet-actions{flex-wrap:wrap;justify-content:center}
+  @media(max-width:520px){.pet-stats{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -1285,6 +1301,7 @@
       <button data-tab="flappy">🐤 像素小鸟</button>
     <button data-tab="llk">🔗 连连看</button>
     <button data-tab="calc">🧮 计算器</button>
+    <button data-tab="pet">🐱 云养猫</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2930,6 +2947,33 @@
     </div>
   </section>
 
+  <section class="panel" id="pet">
+    <div class="card">
+      <h2>🐱 云养猫</h2>
+      <div class="hint">领养一只只属于你的「随便猫」：喂它、陪它玩、给它洗澡、摸摸头。它会记得你——关掉网页也还在（本地存档，不上传）。</div>
+      <div class="pet-stage">
+        <div class="pet-avatar" id="petFace">😺</div>
+        <div class="pet-name" id="petName">随便猫</div>
+        <div class="pet-sub" id="petStatus">领养中…</div>
+      </div>
+      <div class="pet-stats">
+        <div class="pstat"><span>🍚 饱食</span><div class="pbar"><i id="petHunger"></i></div></div>
+        <div class="pstat"><span>💗 心情</span><div class="pbar"><i id="petHappy"></i></div></div>
+        <div class="pstat"><span>⚡ 精力</span><div class="pbar"><i id="petEnergy"></i></div></div>
+        <div class="pstat"><span>🛁 清洁</span><div class="pbar"><i id="petClean"></i></div></div>
+      </div>
+      <div class="row pet-actions">
+        <button class="btn" id="petFeed">🍚 喂食</button>
+        <button class="btn" id="petPlay">🎾 玩耍</button>
+        <button class="btn" id="petSleep">😴 睡觉</button>
+        <button class="btn" id="petBath">🛁 洗澡</button>
+        <button class="btn ghost" id="petStroke">💕 抚摸</button>
+        <button class="btn ghost" id="petRename">🏷️ 改名</button>
+        <button class="btn ghost" id="petReset">🔄 重新领养</button>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3254,7 +3298,8 @@
     notes: "便签 灵感 随手记 笔记 便利贴 备忘录 贴纸 记录 想法 待办 灵感墙 sticky note 写下来 记一笔 闪念 草稿",
     flappy: "像素小鸟 小鸟 飞行 flappy 撞水管 休闲 游戏 振翅 飞翔 躲避 反应 手速 闯关",
     llk: "连连看 链接 消除 配对 图案 找相同 消一消 益智 连线 转弯 经典 小游戏 休闲 link 一对 消除游戏 通关",
-    calc: "计算器 计算 算 数学 算式 算数 加减乘除 公式 运算 科学计算 表达式 算一笔"
+    calc: "计算器 计算 算 数学 算式 算数 加减乘除 公式 运算 科学计算 表达式 算一笔",
+    pet: "猫 宠物 养猫 云养猫 撸猫 铲屎 虚拟宠物 互动 喂养 玩耍 照顾 猫咪 电子宠物 喵 领养"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4956,7 +5001,9 @@
     { emoji: "🔗", name: "连线新手", desc: "通关一次连连看", test: (u) => (u.llk || 0) >= 1 },
     { emoji: "🧠", name: "眼疾手快", desc: "连连看单局得分破 500", test: () => { try { return (parseInt(localStorage.getItem("suibian_llk") || "0", 10) || 0) >= 500; } catch (e) { return false; } } },
     { emoji: "🧮", name: "初算", desc: "用计算器算过一次", test: (u) => (u.calc || 0) >= 1 },
-    { emoji: "🔢", name: "精算师", desc: "累计算出 30 笔", test: (u) => (u.calc || 0) >= 30 }
+    { emoji: "🔢", name: "精算师", desc: "累计算出 30 笔", test: (u) => (u.calc || 0) >= 30 },
+    { emoji: "🐱", name: "铲屎官", desc: "撸猫 / 喂养累计 20 次", test: (u) => (u.pet || 0) >= 20 },
+    { emoji: "🏆", name: "猫之王者", desc: "把随便猫养到 8 级", test: () => { try { return (parseInt(localStorage.getItem("suibian_pet_level") || "0", 10) || 0) >= 8; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -11676,6 +11723,136 @@
   }
 
 })();
+
+  QUOTES.push(
+    "养猫和随便很像：你越不勉强它，它越愿意蹭过来。",
+    "喂饱了、陪玩了、洗香香了——有些幸福就是这么具体。",
+    "猫不理你的时候，是在打理它自己；你也该对自己好一点。",
+    "它睡着了你也跟着松口气，原来「什么都不做」也可以是一种成就感。",
+    "撸猫五分钟，快乐两小时；随便撸一把，烦恼少一半。",
+    "猫只待在它舒服的地方，你也该待在让你舒服的圈子里。",
+    "它不记仇，你也学着别记——第二天还是亲亲热热。",
+    "养一只只属于你的猫，就像养一个只属于你的小确幸。",
+    "它饿了会叫，你累了也该说出来：别硬撑。",
+    "升级那声「叮」，是这只随便猫在说：今天也辛苦你啦。"
+  );
+
+  /* ---------- 云养猫 / 虚拟宠物 ---------- */
+  (function () {
+    const PET_KEY = "suibian_pet";
+    const PET_LV_KEY = "suibian_pet_level";
+    const clamp = (v) => Math.max(0, Math.min(100, v));
+    const levelOf = (exp) => Math.floor((exp || 0) / 25) + 1;
+    const els = {
+      face: $("petFace"), name: $("petName"), status: $("petStatus"),
+      hunger: $("petHunger"), happy: $("petHappy"), energy: $("petEnergy"), clean: $("petClean")
+    };
+    function fresh() {
+      return {
+        name: "随便猫", born: Date.now(), lastSeen: Date.now(), lastTick: Date.now(),
+        hunger: 75, happy: 75, energy: 75, clean: 75,
+        level: 1, exp: 0, alive: true, interactions: 0
+      };
+    }
+    let state = null;
+    function save() {
+      try { localStorage.setItem(PET_KEY, JSON.stringify(state)); localStorage.setItem(PET_LV_KEY, String(levelOf(state.exp))); } catch (e) {}
+    }
+    function load() {
+      try {
+        const raw = localStorage.getItem(PET_KEY);
+        if (raw) { const x = JSON.parse(raw); if (x && typeof x === "object") { state = Object.assign(fresh(), x); return; } }
+      } catch (e) {}
+      state = fresh(); save();
+    }
+    function applyDecay(fromTs) {
+      if (!state || !state.alive) return;
+      const hrs = (Date.now() - (fromTs || state.lastSeen)) / 3600000;
+      if (hrs > 0) {
+        state.hunger = clamp(state.hunger - 9 * hrs);
+        state.happy = clamp(state.happy - 7 * hrs);
+        state.energy = clamp(state.energy - 6 * hrs);
+        state.clean = clamp(state.clean - 6 * hrs);
+      }
+    }
+    function mood() {
+      const x = state;
+      if (x.hunger <= 20) return { e: "😿", t: "饿坏了，快喂点东西吧" };
+      if (x.energy <= 20) return { e: "😴", t: "困得睁不开眼，想睡会儿" };
+      if (x.clean <= 20) return { e: "🐱", t: "身上脏兮兮的，该洗澡啦" };
+      if (x.happy <= 20) return { e: "🙀", t: "有点不开心，陪它玩会儿？" };
+      if (x.hunger <= 45 || x.happy <= 45 || x.energy <= 45 || x.clean <= 45) return { e: "😺", t: "状态还行，差一点点就完美" };
+      return { e: "😸", t: "活力满满，今天也是好日子！" };
+    }
+    function barColor(v) {
+      if (v <= 20) return "linear-gradient(90deg,#ff8a8a,#ff5d5d)";
+      if (v <= 45) return "linear-gradient(90deg,#ffd27a,#ffb038)";
+      return "linear-gradient(90deg,#7ee8a4,#56c6ff)";
+    }
+    function render() {
+      if (!state) return;
+      const m = mood();
+      if (els.face) els.face.textContent = m.e;
+      if (els.name) els.name.textContent = state.name;
+      const days = Math.max(0, Math.floor((Date.now() - state.born) / 86400000));
+      if (els.status) els.status.textContent = "Lv." + levelOf(state.exp) + " · 养了 " + days + " 天 · " + m.t;
+      const setBar = (el, v) => { if (el) { el.style.width = clamp(v) + "%"; el.style.background = barColor(v); } };
+      setBar(els.hunger, state.hunger);
+      setBar(els.happy, state.happy);
+      setBar(els.energy, state.energy);
+      setBar(els.clean, state.clean);
+    }
+    function pop() { if (els.face) { els.face.classList.remove("pop"); void els.face.offsetWidth; els.face.classList.add("pop"); } }
+    function act(kind) {
+      if (!state || !state.alive) return;
+      applyDecay(state.lastTick); state.lastTick = Date.now();
+      const before = levelOf(state.exp);
+      if (kind === "feed") { state.hunger = clamp(state.hunger + 22); state.happy = clamp(state.happy + 4); state.exp += 5; state.interactions++; }
+      else if (kind === "play") {
+        if (state.energy < 12) { toast("它太累了，先让它睡会儿 💤"); return; }
+        state.happy = clamp(state.happy + 22); state.energy = clamp(state.energy - 14); state.hunger = clamp(state.hunger - 4); state.exp += 7; state.interactions++;
+      }
+      else if (kind === "sleep") { state.energy = clamp(state.energy + 34); state.hunger = clamp(state.hunger - 10); state.clean = clamp(state.clean - 6); state.exp += 4; state.interactions++; }
+      else if (kind === "bath") { state.clean = clamp(state.clean + 30); state.happy = clamp(state.happy + 6); state.exp += 4; state.interactions++; }
+      else if (kind === "stroke") { state.happy = clamp(state.happy + 10); state.exp += 3; state.interactions++; }
+      const after = levelOf(state.exp);
+      bumpUsage("pet");
+      state.lastSeen = Date.now();
+      save(); render(); pop();
+      if (settings.sound) playClick();
+      if (after > before) {
+        confettiBurst(36);
+        if (settings.sound) tone(660, 0.18, "triangle", 0.18);
+        toast("🎉 随便猫升级啦！现在是 Lv." + after);
+      }
+    }
+    function rename() {
+      let n = "";
+      try { n = (window.prompt("给猫起个名字：", state.name) || "").trim().slice(0, 12); } catch (e) { n = ""; }
+      if (!n) return;
+      state.name = n; save(); render(); toast("以后它就叫「" + n + "」啦 🐾");
+    }
+    function readopt() {
+      let ok = false;
+      try { ok = window.confirm("确定要重新领养一只新猫吗？当前的「" + state.name + "」会离开～"); } catch (e) { ok = false; }
+      if (!ok) return;
+      state = fresh(); save(); render(); toast("🐾 欢迎新成员「" + state.name + "」！");
+    }
+    const wire = (id, fn) => { const b = $(id); if (b) b.addEventListener("click", fn); };
+    wire("petFeed", () => act("feed"));
+    wire("petPlay", () => act("play"));
+    wire("petSleep", () => act("sleep"));
+    wire("petBath", () => act("bath"));
+    wire("petStroke", () => act("stroke"));
+    wire("petRename", rename);
+    wire("petReset", readopt);
+    load(); applyDecay(state.lastSeen); state.lastTick = Date.now(); save(); render();
+    window.petRefresh = function () { if (!state) return; applyDecay(state.lastSeen); state.lastTick = Date.now(); save(); render(); };
+    setInterval(function () {
+      if (!state || !state.alive) return;
+      applyDecay(state.lastTick); state.lastTick = Date.now(); save(); render();
+    }, 15000);
+  })();
 
 </script>
 </body>
