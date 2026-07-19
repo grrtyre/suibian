@@ -1222,6 +1222,27 @@
 .rev-status{text-align:center;margin:6px 0 2px;font-size:14px;min-height:20px;color:var(--accent,#2b7)}
 .rev-tips{margin-top:6px}
 .rev-mode-btn.active,.rev-diff-btn.active{background:var(--accent,#2b7);color:#fff;border-color:var(--accent,#2b7)}
+  /* ---------- 数织 nonogram ---------- */
+  .ng-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 8px}
+  .ng-diff,.ng-modes{display:flex;gap:6px;align-items:center;font-size:13px;opacity:.9}
+  .ng-meta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:2px 0 10px;font-size:14px;min-height:20px}
+  .ng-meta #ngTime{font-variant-numeric:tabular-nums;font-weight:600}
+  .ng-meta #ngMsg{color:var(--accent,#ff7a59)}
+  .ng-wrap{display:flex;justify-content:center;overflow:auto}
+  .ng-board{display:grid;gap:2px;background:var(--card-2,#262a47);padding:10px;border-radius:14px;width:max-content;margin:6px auto 0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+  .ng-cell{width:var(--ngc,34px);height:var(--ngc,34px);background:var(--card,#20223a);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;font-size:calc(var(--ngc,34px)*.42);color:var(--muted,#9aa0c7);transition:background .12s,transform .06s}
+  .ng-cell:hover{filter:brightness(1.12)}
+  .ng-cell:active{transform:scale(.92)}
+  .ng-cell.fill{background:linear-gradient(160deg,var(--accent,#ff7a59),var(--accent-2,#ffb15c));box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);color:transparent}
+  .ng-cell.mark{color:var(--accent-3,#7c6cff)}
+  .ng-cell.err{outline:2px solid #ff5d5d;outline-offset:-2px}
+  .ng-cell.hl{box-shadow:0 0 0 3px var(--accent-3,#7c6cff);z-index:2}
+  .ng-clue{display:flex;align-items:center;justify-content:flex-end;gap:3px;padding:0 5px;font-size:calc(var(--ngc,34px)*.4);color:var(--muted,#9aa0c7);font-variant-numeric:tabular-nums;min-height:var(--ngc,34px);line-height:1.05}
+  .ng-clue.col{flex-direction:column;justify-content:flex-end;align-items:flex-end;min-height:var(--ngc,34px)}
+  .ng-corner{}
+  .ng-tip{margin-top:10px;color:var(--muted,#9aa0c7);font-size:12.5px;text-align:center}
+  .ng-diff-btn.on,.ng-mode-btn.on{background:var(--accent,#ff7a59);color:#fff;border-color:var(--accent,#ff7a59)}
+  @media(max-width:520px){.ng-cell{border-radius:5px}}
 </style>
 </head>
 <body>
@@ -1318,6 +1339,7 @@
     <button data-tab="calc">🧮 计算器</button>
     <button data-tab="pet">🐱 云养猫</button>
     <button data-tab="reversi">♟️ 黑白棋</button>
+    <button data-tab="nonogram">🧩 数织</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3018,6 +3040,32 @@
     </div>
   </section>
 
+  <!-- 数织 nonogram -->
+  <section class="panel" id="nonogram">
+    <div class="card">
+      <h2>🧩 数织 · 逻辑拼图</h2>
+      <div class="hint">根据每行、每列左侧/上方的「连续格数」线索，推理出哪些格子该涂黑。把正确图案完整涂出来就过关！</div>
+      <div class="ng-bar">
+        <div class="ng-diff">
+          难度：
+          <button class="chip ng-diff-btn" data-n="5">简单 5×5</button>
+          <button class="chip ng-diff-btn" data-n="10">中等 10×10</button>
+          <button class="chip ng-diff-btn" data-n="15">困难 15×15</button>
+        </div>
+        <div class="ng-modes">
+          <button class="chip ng-mode-btn on" data-m="fill">✏️ 涂黑</button>
+          <button class="chip ng-mode-btn" data-m="mark">❌ 标记空</button>
+        </div>
+        <button class="btn ghost" id="ngNew">🔄 新一局</button>
+        <button class="btn ghost" id="ngHint">💡 提示</button>
+        <button class="btn ghost" id="ngCheck">🔍 检查</button>
+      </div>
+      <div class="ng-meta"><span id="ngTime">⏱ 00:00</span><span id="ngLevel"></span><span id="ngMsg"></span></div>
+      <div class="ng-wrap"><div class="ng-board" id="ngBoard"></div></div>
+      <div class="ng-tip">左键按当前模式落子（涂黑 / 标记空），右键直接标记空。涂满正确图案即自动过关。</div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3251,6 +3299,8 @@
     if (id !== "sudoku") sudokuStopTimer();
     if (id === "reversi") reversiStart();
     if (id !== "reversi" && typeof reversiStop === "function") reversiStop();
+    if (id === "nonogram") nonogramStart();
+    if (id !== "nonogram" && typeof nonogramStop === "function") nonogramStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -3346,7 +3396,8 @@
     llk: "连连看 链接 消除 配对 图案 找相同 消一消 益智 连线 转弯 经典 小游戏 休闲 link 一对 消除游戏 通关",
     calc: "计算器 计算 算 数学 算式 算数 加减乘除 公式 运算 科学计算 表达式 算一笔",
     pet: "猫 宠物 养猫 云养猫 撸猫 铲屎 虚拟宠物 互动 喂养 玩耍 照顾 猫咪 电子宠物 喵 领养",
-    reversi: "黑白棋 奥赛罗 othello 翻转棋 翻棋 棋 策略 对战 夹子 翻面 占角 棋盘 人机 电脑 五子棋 围棋 落子 反转 reversi 翻盘"
+    reversi: "黑白棋 奥赛罗 othello 翻转棋 翻棋 棋 策略 对战 夹子 翻面 占角 棋盘 人机 电脑 五子棋 围棋 落子 反转 reversi 翻盘",
+    nonogram: "数织 逻辑拼图 填色 nonogram picross griddler 解谜 推理 行列线索 填格子 脑力 安静 专注 线索 宫格 行列"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4190,6 +4241,16 @@
     "一子落下，牵动的是整盘局势——你做的每个决定都算数。",
     "赢了别飘，输了别慌，下一局重新摆子就好。"
   ];
+  QUOTES.push(
+    "数织像人生：横看是一行，竖看是一列，把每道线索对齐，图案自己就显出来了。",
+    "填错一格不可怕，可怕的是一直不敢落笔。",
+    "安静地推理，比慌张地乱涂更接近答案。",
+    "一列线索读到底，剩下的格子就藏不住了。",
+    "有些格要涂黑，有些格要留白——知道哪格不该动，才是真本事。",
+    "卡住时换个方向看同一行，答案常在拐角处。",
+    "数织教会一件事：把大问题拆成一格一格，就不那么吓人了。",
+    "涂满最后一格的瞬间，整幅画都对你笑了。"
+  );
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
     pop($("quoteResult"));
@@ -5062,7 +5123,9 @@
     { emoji: "🐱", name: "铲屎官", desc: "撸猫 / 喂养累计 20 次", test: (u) => (u.pet || 0) >= 20 },
     { emoji: "🏆", name: "猫之王者", desc: "把随便猫养到 8 级", test: () => { try { return (parseInt(localStorage.getItem("suibian_pet_level") || "0", 10) || 0) >= 8; } catch (e) { return false; } } },
     { emoji: "♟️", name: "黑白棋手", desc: "下过一局黑白棋", test: (u) => (u.reversi || 0) >= 1 },
-    { emoji: "🏆", name: "翻盘大师", desc: "在黑白棋里赢下 5 局", test: (u) => (u.reversiWins || 0) >= 5 }
+    { emoji: "🏆", name: "翻盘大师", desc: "在黑白棋里赢下 5 局", test: (u) => (u.reversiWins || 0) >= 5 },
+    { emoji: "🧩", name: "数织新手", desc: "完成一局数织逻辑拼图", test: (u) => (u.nonogram || 0) >= 1 },
+    { emoji: "🏆", name: "数织大师", desc: "解出数织困难 15×15", test: () => { try { return (parseInt(localStorage.getItem("suibian_nonogram_best_15") || "0", 10) || 0) > 0; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -12162,6 +12225,152 @@
     if (rvTimer) { clearTimeout(rvTimer); rvTimer = null; }
     if (rvRaf) { cancelAnimationFrame(rvRaf); rvRaf = null; }
   }
+
+  /* ================= 数织 nonogram ================= */
+  let ngSize = 5, ngSol = null, ngRow = [], ngCol = [], ngState = null;
+  let ngDone = false, ngGen = false, ngRunning = false, ngTimer = 0, ngTimerId = null, ngMode = "fill";
+
+  function ngClues(line) {
+    const out = []; let run = 0;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i]) { run++; } else { if (run) { out.push(run); run = 0; } }
+    }
+    if (run) out.push(run);
+    if (out.length === 0) out.push(0);
+    return out;
+  }
+  function ngGenSol(n) {
+    const p = n <= 5 ? 0.55 : (n <= 10 ? 0.5 : 0.46);
+    const g = new Uint8Array(n * n);
+    for (let i = 0; i < n * n; i++) g[i] = Math.random() < p ? 1 : 0;
+    for (let i = 0; i < n; i++) {
+      let rs = 0, cs = 0;
+      for (let j = 0; j < n; j++) { rs += g[i*n+j]; cs += g[j*n+i]; }
+      if (rs === 0) g[i*n + rand(n)] = 1;
+      if (cs === 0) g[rand(n)*n + i] = 1;
+    }
+    return g;
+  }
+  function ngFmt(sec) { const m = Math.floor(sec/60), x = sec%60; return (m<10?"0":"")+m+":"+(x<10?"0":"")+x; }
+  function ngStartTimer() { ngStopTimer(); ngRunning = true; ngTimerId = setInterval(function(){ ngTimer++; const t = $("ngTime"); if (t) t.textContent = "⏱ " + ngFmt(ngTimer); }, 1000); }
+  function ngStopTimer() { ngRunning = false; if (ngTimerId) { clearInterval(ngTimerId); ngTimerId = null; } }
+  function ngMsg(txt) { const m = $("ngMsg"); if (m) m.textContent = txt || ""; }
+  function ngRender() {
+    const board = $("ngBoard"); if (!board) return;
+    const n = ngSize;
+    const csize = n <= 5 ? 42 : (n <= 10 ? 30 : 22);
+    board.style.setProperty("--ngc", csize + "px");
+    board.style.gridTemplateColumns = "auto repeat(" + n + ", var(--ngc))";
+    board.style.gridTemplateRows = "auto repeat(" + n + ", var(--ngc))";
+    board.innerHTML = "";
+    const corner = document.createElement("div"); corner.className = "ng-corner"; corner.style.gridColumn = "1"; corner.style.gridRow = "1"; board.appendChild(corner);
+    for (let c = 0; c < n; c++) {
+      const d = document.createElement("div"); d.className = "ng-clue col"; d.style.gridColumn = String(c+2); d.style.gridRow = "1";
+      ngCol[c].forEach(function(v){ const sp = document.createElement("span"); sp.textContent = (v === 0 ? "" : String(v)); d.appendChild(sp); });
+      board.appendChild(d);
+    }
+    for (let r = 0; r < n; r++) {
+      const d = document.createElement("div"); d.className = "ng-clue"; d.style.gridColumn = "1"; d.style.gridRow = String(r+2);
+      ngRow[r].forEach(function(v){ const sp = document.createElement("span"); sp.textContent = (v === 0 ? "0" : String(v)); d.appendChild(sp); });
+      board.appendChild(d);
+    }
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+      const i = r*n + c;
+      const el = document.createElement("div"); el.className = "ng-cell"; el.dataset.i = String(i); el.style.gridColumn = String(c+2); el.style.gridRow = String(r+2);
+      const st = ngState[i];
+      if (st === 1) el.classList.add("fill");
+      else if (st === 2) el.textContent = "✕";
+      board.appendChild(el);
+    }
+  }
+  function ngWin() {
+    for (let i = 0; i < ngState.length; i++) {
+      if ((ngState[i] === 1) !== (ngSol[i] === 1)) return false;
+    }
+    return true;
+  }
+  function ngToggle(i) {
+    if (ngDone) return;
+    const st = ngState[i];
+    if (ngMode === "fill") ngState[i] = (st === 1) ? 0 : 1;
+    else ngState[i] = (st === 2) ? 0 : 2;
+    ngRender();
+    if (ngWin()) ngFinish();
+  }
+  function ngMark(i) {
+    if (ngDone) return;
+    const st = ngState[i];
+    ngState[i] = (st === 2) ? 0 : 2;
+    ngRender();
+  }
+  function ngFinish() {
+    ngDone = true; ngStopTimer();
+    if (typeof bumpUsage === "function") bumpUsage("nonogram");
+    const key = "suibian_nonogram_best_" + ngSize;
+    const best = parseInt(localStorage.getItem(key) || "0", 10);
+    let rec = "";
+    if (!best || ngTimer < best) { try { localStorage.setItem(key, String(ngTimer)); } catch(e){} rec = " 🎉新纪录！"; }
+    ngMsg("🎉 完成！用时 " + ngFmt(ngTimer) + rec);
+    if (typeof confettiBurst === "function") confettiBurst(60);
+    if (typeof playDing === "function") playDing();
+    const lv = $("ngLevel"); if (lv) { const b = parseInt(localStorage.getItem(key) || "0", 10); lv.textContent = b ? ("最佳 " + ngFmt(b)) : ""; }
+  }
+  function ngNew(n) {
+    ngSize = n || ngSize || 5;
+    document.querySelectorAll(".ng-diff-btn").forEach(function(b){ b.classList.toggle("on", +b.dataset.n === ngSize); });
+    ngSol = ngGenSol(ngSize);
+    ngRow = []; ngCol = [];
+    for (let r = 0; r < ngSize; r++) { const line = []; for (let c = 0; c < ngSize; c++) line.push(ngSol[r*ngSize+c]); ngRow.push(ngClues(line)); }
+    for (let c = 0; c < ngSize; c++) { const line = []; for (let r = 0; r < ngSize; r++) line.push(ngSol[r*ngSize+c]); ngCol.push(ngClues(line)); }
+    ngState = new Int8Array(ngSize * ngSize);
+    ngDone = false; ngGen = true; ngTimer = 0;
+    ngRender();
+    const t = $("ngTime"); if (t) t.textContent = "⏱ 00:00";
+    const best = parseInt(localStorage.getItem("suibian_nonogram_best_" + ngSize) || "0", 10);
+    const lv = $("ngLevel"); if (lv) lv.textContent = best ? ("最佳 " + ngFmt(best)) : "";
+    ngMsg("「" + ngSize + "×" + ngSize + "」开局，加油！");
+    ngStartTimer();
+  }
+  function nonogramStart() {
+    if (!ngGen) ngNew();
+    else { ngRender(); ngStartTimer(); }
+  }
+  function nonogramStop() { ngStopTimer(); }
+  function ngHint() {
+    if (ngDone || !ngGen) return;
+    const order = []; for (let i = 0; i < ngState.length; i++) order.push(i);
+    for (let k = order.length - 1; k > 0; k--) { const j = rand(k+1); const tmp = order[k]; order[k] = order[j]; order[j] = tmp; }
+    for (let q = 0; q < order.length; q++) {
+      const i = order[q];
+      if (ngSol[i] === 1 && ngState[i] !== 1) { ngState[i] = 1; ngRender(); ngMsg("💡 提示：这格应该是黑的。"); if (ngWin()) ngFinish(); return; }
+      if (ngSol[i] === 0 && ngState[i] === 1) { ngState[i] = 0; ngRender(); ngMsg("💡 提示：这格其实不该涂黑。"); return; }
+    }
+    ngMsg("已经填对啦，检查一下就过关～");
+  }
+  function ngCheck() {
+    if (ngDone || !ngGen) return;
+    const board = $("ngBoard"); if (!board) return;
+    const cells = board.querySelectorAll(".ng-cell");
+    let wrong = 0;
+    cells.forEach(function(cellEl){
+      const i = +cellEl.dataset.i; cellEl.classList.remove("err");
+      if (ngState[i] === 1 && ngSol[i] !== 1) { cellEl.classList.add("err"); wrong++; }
+    });
+    if (wrong === 0) ngMsg("✅ 没有涂错的地方，把剩下的黑格补上就过关！");
+    else ngMsg("🔍 发现 " + wrong + " 处涂错（红框），改改看～");
+  }
+  (function nonogramInit() {
+    const board = $("ngBoard");
+    if (board) {
+      board.addEventListener("click", function(e){ const c = e.target.closest(".ng-cell"); if (c) ngToggle(+c.dataset.i); });
+      board.addEventListener("contextmenu", function(e){ e.preventDefault(); const c = e.target.closest(".ng-cell"); if (c) ngMark(+c.dataset.i); });
+    }
+    document.querySelectorAll(".ng-diff-btn").forEach(function(b){ b.addEventListener("click", function(){ if (typeof playClick === "function") playClick(); ngNew(+b.dataset.n); }); });
+    document.querySelectorAll(".ng-mode-btn").forEach(function(b){ b.addEventListener("click", function(){ document.querySelectorAll(".ng-mode-btn").forEach(function(x){ x.classList.remove("on"); }); b.classList.add("on"); ngMode = b.dataset.m; if (typeof playClick === "function") playClick(); }); });
+    const bn = $("ngNew"); if (bn) bn.addEventListener("click", function(){ if (typeof playClick === "function") playClick(); ngNew(); });
+    const bh = $("ngHint"); if (bh) bh.addEventListener("click", ngHint);
+    const bc = $("ngCheck"); if (bc) bc.addEventListener("click", ngCheck);
+  })();
 
   })();
 
