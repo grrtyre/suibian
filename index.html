@@ -1406,6 +1406,7 @@
     <button data-tab="reversi">♟️ 黑白棋</button>
     <button data-tab="nonogram">🧩 数织</button>
     <button data-tab="life">⏳ 生命日历</button>
+    <button data-tab="matrix">⚖️ 决策矩阵</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3233,6 +3234,46 @@
     </div>
   </section>
 
+  <!-- 决策矩阵 -->
+  <style>
+    .mx-grid { width:100%; border-collapse:collapse; font-size:14px; }
+    .mx-grid th, .mx-grid td { border:1px solid var(--line); padding:6px 8px; text-align:center; vertical-align:middle; }
+    .mx-corner { background:var(--card-2); font-size:13px; }
+    .mx-opt { background:var(--card-2); white-space:nowrap; }
+    .mx-opt-name, .mx-crit-name { width:100%; box-sizing:border-box; border:1px solid var(--line); background:var(--card-2); color:var(--text); border-radius:8px; padding:5px 6px; font-size:14px; text-align:center; }
+    .mx-crit { display:flex; flex-direction:column; gap:5px; align-items:center; min-width:104px; }
+    .mx-w { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--muted); }
+    .mx-w input[type=range] { width:66px; accent-color:var(--accent); }
+    .mx-x { border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:13px; padding:0 2px; }
+    .mx-x:hover { color:#e5484d; }
+    .mx-grid select { width:100%; box-sizing:border-box; border:1px solid var(--line); background:var(--card-2); color:var(--text); border-radius:8px; padding:5px; font-size:14px; text-align:center; }
+    .mx-bars { margin-top:14px; display:flex; flex-direction:column; gap:9px; }
+    .mx-row { display:flex; align-items:center; gap:10px; }
+    .mx-name { width:116px; flex:none; font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mx-track { flex:1; height:18px; background:var(--card-2); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+    .mx-fill { height:100%; background:var(--accent); border-radius:10px; }
+    .mx-val { width:104px; flex:none; text-align:right; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .mx-un { color:#e5a000; font-size:12px; }
+    .mx-concl { margin-top:12px; padding:10px 12px; background:var(--card-2); border:1px solid var(--line); border-radius:12px; font-size:14px; line-height:1.6; }
+  </style>
+  <section class="panel" id="matrix">
+    <div class="card">
+      <h2>⚖️ 决策矩阵 · 给每个选项称称分量</h2>
+      <div class="hint">拿不准的时候，把选项和你最在意的标准列出来，给每条标准定个权重、逐项打分（1–5），让它帮你理性拍板。数据纯本地、不上传。</div>
+      <div class="mx-wrap">
+        <div class="mx-table" id="mxTable"></div>
+        <div class="row" style="justify-content:center;flex-wrap:wrap;gap:8px">
+          <button class="btn ghost" id="mxAddOpt">➕ 选项</button>
+          <button class="btn ghost" id="mxAddCrit">➕ 标准</button>
+          <button class="btn" id="mxRandom">🎲 随机演示</button>
+          <button class="btn" id="mxCompute">✅ 开始评分</button>
+          <button class="btn ghost" id="mxCopy">📋 复制结果</button>
+        </div>
+        <div class="result" id="mxResult">点「开始评分」或「随机演示」看结果。</div>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3471,6 +3512,7 @@
     if (id !== "nonogram" && typeof nonogramStop === "function") nonogramStop();
     if (id === "vault") vaultInit();
     if (id === "life") lifeRender();
+    if (id === "matrix") matrixLoad();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -3569,7 +3611,8 @@
     pet: "猫 宠物 养猫 云养猫 撸猫 铲屎 虚拟宠物 互动 喂养 玩耍 照顾 猫咪 电子宠物 喵 领养",
     reversi: "黑白棋 奥赛罗 othello 翻转棋 翻棋 棋 策略 对战 夹子 翻面 占角 棋盘 人机 电脑 五子棋 围棋 落子 反转 reversi 翻盘",
     nonogram: "数织 逻辑拼图 填色 nonogram picross griddler 解谜 推理 行列线索 填格子 脑力 安静 专注 线索 宫格 行列",
-    life: "生命 日历 人生 周历 一生 生日 星座 生命灵数 年龄 倒计时 时间 活了 剩余 寿命 你的人生 周 年 月份 进度 提醒 珍惜"
+    life: "生命 日历 人生 周历 一生 生日 星座 生命灵数 年龄 倒计时 时间 活了 剩余 寿命 你的人生 周 年 月份 进度 提醒 珍惜",
+    matrix: "决策 矩阵 打分 加权 评估 选择 理性 比较 排序 选项 标准 权重 优先级 拍板"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -13048,6 +13091,142 @@
     if (lifeData.birth) lifeRender();
   }
   lifeInit();
+
+  /* ===== 决策矩阵 matrix ===== */
+  const MX_KEY = "suibian_matrix";
+  function mxLoadState() {
+    try { const r = JSON.parse(localStorage.getItem(MX_KEY) || "null"); if (r && Array.isArray(r.options) && Array.isArray(r.criteria)) return r; } catch (e) {}
+    return {
+      options: ["留在老家", "去大城市", "出国看看"],
+      criteria: [{ name: "收入", weight: 4 }, { name: "生活成本", weight: 3 }, { name: "成长空间", weight: 5 }, { name: "离家远近", weight: 2 }],
+      scores: [[4, 2, 3, 1], [3, 4, 4, 3], [2, 3, 5, 5]]
+    };
+  }
+  let mState = mxLoadState();
+  function mxSave() { try { localStorage.setItem(MX_KEY, JSON.stringify(mState)); } catch (e) {} }
+  const MX_OPT_POOL = ["考研", "考公", "进大厂", "创业", "gap year", "留校", "去深圳", "回老家", "相亲结婚", "单身自在", "买燃油车", "买电车", "存钱", "炒股", "学画画", "健身", "躺平", "报班", "自由职业", "找个搭子"];
+  const MX_CRIT_POOL = ["钱", "时间", "体力", "风险", "开心", "成长性", "自由度", "身边人支持", "确定性", "长期价值"];
+  const MX_WEIGHTS = [1, 1, 2, 2, 3, 3, 4, 5];
+  function mxRi(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+  function mxPick(pool, n) { const out = [], used = new Set(); while (out.length < n) { const x = pool[mxRi(0, pool.length - 1)]; if (!used.has(x)) { used.add(x); out.push(x); } } return out; }
+  function mxRandom() {
+    const no = mxRi(3, 4), nc = mxRi(3, 4);
+    const opts = mxPick(MX_OPT_POOL, no);
+    const crit = mxPick(MX_CRIT_POOL, nc).map((c) => ({ name: c, weight: MX_WEIGHTS[mxRi(0, MX_WEIGHTS.length - 1)] }));
+    const scores = opts.map(() => crit.map(() => mxRi(1, 5)));
+    mState = { options: opts, criteria: crit, scores: scores };
+    mxSave(); mxRender(); mxCompute(true);
+  }
+  function mxRender() {
+    const t = $("mxTable"); if (!t) return;
+    let h = '<table class="mx-grid"><thead><tr><th class="mx-corner">选项 ＼ 标准</th>';
+    mState.criteria.forEach((c, j) => {
+      h += '<th><div class="mx-crit"><input class="mx-crit-name" data-j="' + j + '" value="' + escapeHtml(c.name) + '" maxlength="8"><div class="mx-w"><span>权重</span><input type="range" min="1" max="5" value="' + c.weight + '" data-w="' + j + '"><b>' + c.weight + '</b></div><button class="mx-x" data-delcrit="' + j + '" title="删除该标准">✕</button></div></th>';
+    });
+    h += '</tr></thead><tbody>';
+    mState.options.forEach((o, i) => {
+      h += '<tr><td class="mx-opt"><input class="mx-opt-name" data-i="' + i + '" value="' + escapeHtml(o) + '" maxlength="12"><button class="mx-x" data-delopt="' + i + '" title="删除该选项">✕</button></td>';
+      mState.criteria.forEach((c, j) => {
+        const v = (mState.scores[i] && mState.scores[i][j] != null) ? mState.scores[i][j] : 0;
+        let os = '<option value="0">—</option>';
+        for (let k = 1; k <= 5; k++) os += '<option value="' + k + '"' + (v === k ? " selected" : "") + ">" + k + "</option>";
+        h += '<td><select data-i="' + i + '" data-j="' + j + '">' + os + "</select></td>";
+      });
+      h += "</tr>";
+    });
+    h += "</tbody></table>";
+    t.innerHTML = h;
+  }
+  function mxScore(i, j) { return (mState.scores[i] && mState.scores[i][j]) ? +mState.scores[i][j] : 0; }
+  function mxRows() {
+    const crit = mState.criteria, totW = crit.reduce((a, c) => a + (+c.weight || 1), 0) || 1;
+    return mState.options.map((o, i) => {
+      let sum = 0, any = false;
+      crit.forEach((c, j) => { const s = mxScore(i, j); if (s > 0) { sum += s * (+c.weight || 1); any = true; } });
+      return { name: o, avg: any ? sum / totW : 0, rated: any };
+    });
+  }
+  function mxCompute(silent) {
+    const rows = mxRows();
+    const maxAvg = Math.max(0, ...rows.map((r) => r.avg));
+    rows.sort((a, b) => b.avg - a.avg);
+    let html = '<div class="mx-bars">';
+    rows.forEach((r, idx) => {
+      const pct = maxAvg > 0 ? Math.round((r.avg / maxAvg) * 100) : 0;
+      const medal = idx === 0 ? " 🏆" : "";
+      const un = r.rated ? "" : ' <span class="mx-un">（未评分）</span>';
+      html += '<div class="mx-row"><div class="mx-name">' + escapeHtml(r.name) + medal + '</div><div class="mx-track"><div class="mx-fill" style="width:' + pct + '%;transition:width .6s cubic-bezier(.22,1,.36,1)"></div></div><div class="mx-val">' + r.avg.toFixed(2) + "/5" + un + "</div></div>";
+    });
+    html += "</div>";
+    if (rows.length && rows[0].rated) {
+      const top = rows[0], second = rows[1];
+      let concl = "综合来看，『" + top.name + "』最值得选（" + top.avg.toFixed(2) + "/5）。";
+      if (second && second.rated && top.avg - second.avg < 0.4) concl += " 但和『" + second.name + "』差距很小，凭直觉也行～";
+      else if (!second || !second.rated) concl += " 给剩下的选项也打个分，结论更稳。";
+      html += '<div class="mx-concl">' + concl + "</div>";
+      if (!silent) { try { if (settings && settings.sound) playDing(); } catch (e) {} bumpUsage("matrix"); if (top.avg - (second && second.rated ? second.avg : 0) >= 1.2) confettiBurst(50); }
+    } else {
+      html += '<div class="mx-concl">先给每个选项在每个标准上打个分（1–5），再点「开始评分」。</div>';
+    }
+    const box = $("mxResult"); if (box) box.innerHTML = html;
+  }
+  function mxCopy() {
+    const rows = mxRows();
+    const maxAvg = Math.max(0, ...rows.map((r) => r.avg));
+    rows.sort((a, b) => b.avg - a.avg);
+    let txt = "【决策矩阵结果】\n";
+    rows.forEach((r, idx) => {
+      const pct = maxAvg > 0 ? Math.round((r.avg / maxAvg) * 100) : 0;
+      const bar = "█".repeat(Math.round(pct / 10)) + "░".repeat(10 - Math.round(pct / 10));
+      txt += (idx === 0 ? "🏆 " : "   ") + r.name + "  " + r.avg.toFixed(2) + "/5  " + bar + " " + pct + "%\n";
+    });
+    if (rows[0] && rows[0].rated) txt += "\n推荐：" + rows[0].name;
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast("已复制决策结果"), () => toast(txt));
+    else toast(txt);
+  }
+  function mxBind() {
+    const t = $("mxTable");
+    if (t) {
+      t.addEventListener("input", (e) => {
+        const el = e.target;
+        if (el.classList.contains("mx-opt-name")) { mState.options[+el.dataset.i] = el.value; mxSave(); }
+        else if (el.classList.contains("mx-crit-name")) { mState.criteria[+el.dataset.j].name = el.value; mxSave(); }
+        else if (el.dataset && el.dataset.w != null) { const j = +el.dataset.w; mState.criteria[j].weight = +el.value; const b = el.parentElement.querySelector("b"); if (b) b.textContent = el.value; mxSave(); mxCompute(true); }
+      });
+      t.addEventListener("change", (e) => {
+        const el = e.target;
+        if (el.tagName === "SELECT") { const i = +el.dataset.i, j = +el.dataset.j; if (!mState.scores[i]) mState.scores[i] = []; mState.scores[i][j] = +el.value; mxSave(); mxCompute(true); }
+      });
+      t.addEventListener("click", (e) => {
+        const d = e.target.closest("[data-delopt]"); if (d) { const i = +d.dataset.delopt; mState.options.splice(i, 1); mState.scores.splice(i, 1); mxSave(); mxRender(); mxCompute(true); return; }
+        const c = e.target.closest("[data-delcrit]"); if (c) { const j = +c.dataset.delcrit; mState.criteria.splice(j, 1); mState.scores.forEach((s) => s.splice(j, 1)); mxSave(); mxRender(); mxCompute(true); }
+      });
+    }
+    const ao = $("mxAddOpt"), ac = $("mxAddCrit");
+    if (ao) ao.addEventListener("click", () => { mState.options.push("新选项" + (mState.options.length + 1)); mState.scores.push(mState.criteria.map(() => 0)); mxSave(); mxRender(); mxCompute(true); });
+    if (ac) ac.addEventListener("click", () => { mState.criteria.push({ name: "新标准", weight: 3 }); mState.options.forEach((_, i) => { if (!mState.scores[i]) mState.scores[i] = []; mState.scores[i].push(0); }); mxSave(); mxRender(); mxCompute(true); });
+    const rnd = $("mxRandom"), cmp = $("mxCompute"), cp = $("mxCopy");
+    if (rnd) rnd.addEventListener("click", mxRandom);
+    if (cmp) cmp.addEventListener("click", () => mxCompute(false));
+    if (cp) cp.addEventListener("click", mxCopy);
+  }
+  function matrixLoad() { mxRender(); mxCompute(true); }
+  mxBind();
+  QUOTES.push(
+    "选择困难不是病，是选项太多——列个清单，让数据替你拍板。",
+    "理性不是冷血，是把「想要」和「该要」摆在一杆秤上。",
+    "每个标准都有分量，给重要的那个多加点权重。",
+    "纠结的时候，先想清楚你最在意什么，答案就清楚一半。",
+    "没有完美的选择，只有你愿意为之负责的选择。",
+    "打分表治不了选择困难，但能让你闭眼选得不心虚。",
+    "权重是你心里的优先级，别让别人替你填。",
+    "两难的时候，把「不做」也当成一个选项放进表里。",
+    "决定之后就别回头算账，往前走比算清楚更重要。"
+  );
+  BADGES.push(
+    { emoji: "⚖️", name: "理性派", desc: "用过决策矩阵", test: (u) => (u.matrix || 0) >= 1 },
+    { emoji: "🏆", name: "决策大师", desc: "用决策矩阵做过 5 次评估", test: (u) => (u.matrix || 0) >= 5 }
+  );
 
   })();
 
