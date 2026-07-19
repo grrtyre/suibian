@@ -1407,6 +1407,7 @@
     <button data-tab="nonogram">🧩 数织</button>
     <button data-tab="life">⏳ 生命日历</button>
     <button data-tab="matrix">⚖️ 决策矩阵</button>
+    <button data-tab="ledger">📒 小账簿</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3274,6 +3275,68 @@
     </div>
   </section>
 
+  <style>
+  /* 小账簿 ledger */
+  .ld-form{margin:10px 0 6px}
+  .ld-type{display:flex;gap:8px;margin-bottom:10px}
+  .ld-t{flex:1;opacity:.55;transition:.2s}
+  .ld-t.active{opacity:1;box-shadow:0 0 0 2px var(--accent,#7c5cff) inset}
+  .ld-t.exp.active{background:linear-gradient(135deg,#ff7a7a,#ff9a8b);color:#fff}
+  .ld-t.inc.active{background:linear-gradient(135deg,#36d39a,#3ec9a7);color:#fff}
+  .ld-stats{display:flex;gap:10px;margin:14px 0;flex-wrap:wrap}
+  .ld-stat{flex:1;min-width:88px;background:rgba(125,140,180,.1);border-radius:14px;padding:12px;text-align:center}
+  .ld-stat .num{font-size:22px;font-weight:800}
+  .ld-stat .num.inc{color:#2ecc71}
+  .ld-stat .num.exp{color:#ff7a7a}
+  .ld-stat .lab{font-size:12px;opacity:.7;margin-top:2px}
+  .ld-chart{display:flex;flex-direction:column;gap:7px;margin:8px 0 4px}
+  .ld-bar{display:flex;align-items:center;gap:8px;font-size:13px}
+  .ld-bar-name{width:76px;flex:none;opacity:.85}
+  .ld-bar-track{flex:1;height:14px;background:rgba(125,140,180,.16);border-radius:8px;overflow:hidden}
+  .ld-bar-fill{display:block;height:100%;border-radius:8px;transition:width .5s ease}
+  .ld-bar-val{width:86px;flex:none;text-align:right;font-variant-numeric:tabular-nums}
+  .ld-list{display:flex;flex-direction:column;gap:6px;margin:12px 0;max-height:300px;overflow:auto}
+  .ld-item{display:flex;align-items:center;gap:10px;background:rgba(125,140,180,.08);border-radius:12px;padding:8px 10px}
+  .ld-cat{font-size:20px;flex:none}
+  .ld-meta{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ld-meta i{opacity:.55;font-style:normal;margin:0 4px}
+  .ld-amt{font-weight:800;font-variant-numeric:tabular-nums;flex:none}
+  .ld-amt.ink{color:#2ecc71}
+  .ld-amt.out{color:#ff7a7a}
+  .ld-del{flex:none;border:none;background:transparent;color:#ff7a7a;cursor:pointer;font-size:14px;opacity:.55}
+  .ld-del:hover{opacity:1}
+  .ld-empty{opacity:.55;font-size:13px;padding:8px 2px}
+  </style>
+  <section class="panel" id="ledger">
+    <div class="card">
+      <h2>📒 小账簿 · 把每一笔都记下来</h2>
+      <div class="hint">收入支出随手记，月底一眼看清钱去哪儿了。数据纯本地、绝不上传。</div>
+      <div class="ld-form">
+        <div class="ld-type">
+          <button class="btn ld-t exp active" data-type="exp" type="button">－ 支出</button>
+          <button class="btn ld-t inc" data-type="inc" type="button">＋ 收入</button>
+        </div>
+        <div class="row" style="flex-wrap:wrap;gap:8px;align-items:center">
+          <input class="inp" id="ldAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="金额" style="width:110px">
+          <select class="inp" id="ldCat"></select>
+          <input class="inp" id="ldDate" type="date" style="width:150px">
+          <input class="inp" id="ldNote" type="text" placeholder="备注（可选）" style="flex:1;min-width:110px">
+          <button class="btn" id="ldAdd" type="button">📝 记一笔</button>
+        </div>
+      </div>
+      <div class="ld-stats">
+        <div class="ld-stat"><div class="num" id="ldBalance">¥0</div><div class="lab">本月结余</div></div>
+        <div class="ld-stat"><div class="num inc" id="ldInc">¥0</div><div class="lab">月收入</div></div>
+        <div class="ld-stat"><div class="num exp" id="ldExp">¥0</div><div class="lab">月支出</div></div>
+      </div>
+      <div class="ld-chart" id="ldChart"></div>
+      <div class="ld-list" id="ldList"></div>
+      <div class="row" style="justify-content:flex-end">
+        <button class="btn ghost" id="ldClear" type="button">🧹 清空账簿</button>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3513,6 +3576,7 @@
     if (id === "vault") vaultInit();
     if (id === "life") lifeRender();
     if (id === "matrix") matrixLoad();
+    if (id === "ledger") ledgerLoad();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -3612,7 +3676,8 @@
     reversi: "黑白棋 奥赛罗 othello 翻转棋 翻棋 棋 策略 对战 夹子 翻面 占角 棋盘 人机 电脑 五子棋 围棋 落子 反转 reversi 翻盘",
     nonogram: "数织 逻辑拼图 填色 nonogram picross griddler 解谜 推理 行列线索 填格子 脑力 安静 专注 线索 宫格 行列",
     life: "生命 日历 人生 周历 一生 生日 星座 生命灵数 年龄 倒计时 时间 活了 剩余 寿命 你的人生 周 年 月份 进度 提醒 珍惜",
-    matrix: "决策 矩阵 打分 加权 评估 选择 理性 比较 排序 选项 标准 权重 优先级 拍板"
+    matrix: "决策 矩阵 打分 加权 评估 选择 理性 比较 排序 选项 标准 权重 优先级 拍板",
+    ledger: "记账 账本 小账簿 记账本 收支 支出 收入 理财 花销 花了多少 预算 算账 账单 存钱 钱包 ledger 月支出 财务 管钱 消费 月底"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -13212,6 +13277,7 @@
   }
   function matrixLoad() { mxRender(); mxCompute(true); }
   mxBind();
+  ledgerBind();
   QUOTES.push(
     "选择困难不是病，是选项太多——列个清单，让数据替你拍板。",
     "理性不是冷血，是把「想要」和「该要」摆在一杆秤上。",
@@ -13227,6 +13293,108 @@
     { emoji: "⚖️", name: "理性派", desc: "用过决策矩阵", test: (u) => (u.matrix || 0) >= 1 },
     { emoji: "🏆", name: "决策大师", desc: "用决策矩阵做过 5 次评估", test: (u) => (u.matrix || 0) >= 5 }
   );
+
+  // ===== 小账簿 ledger =====
+  const LD_CATS = [
+    { k: "food", e: "🍜", n: "餐饮", c: "#ff8a5b" },
+    { k: "trans", e: "🚌", n: "交通", c: "#5b9bff" },
+    { k: "shop", e: "🛍️", n: "购物", c: "#c06bff" },
+    { k: "fun", e: "🎮", n: "娱乐", c: "#ffd166" },
+    { k: "home", e: "🏠", n: "居家", c: "#3ec9a7" },
+    { k: "med", e: "💊", n: "医疗", c: "#ff6b9d" },
+    { k: "salary", e: "💰", n: "工资", c: "#2ecc71" },
+    { k: "other", e: "✨", n: "其他", c: "#9aa7c7" }
+  ];
+  const LD_KEY = "suibian_ledger";
+  function ldToday() { const d = new Date(); const p = (n) => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+  function ldLoad() { try { return JSON.parse(localStorage.getItem(LD_KEY)) || { entries: [] }; } catch (e) { return { entries: [] }; } }
+  function ldSave(st) { try { localStorage.setItem(LD_KEY, JSON.stringify(st)); } catch (e) {} }
+  function ldEsc(s) { return (s || "").replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
+  function ldSet(id, t) { const el = $(id); if (el) el.textContent = t; }
+  function ldFmt(n) { const v = Math.round(n * 100) / 100; return "¥" + v.toLocaleString("zh-CN", { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+  function ledgerBind() {
+    const sel = $("ldCat");
+    if (sel) sel.innerHTML = LD_CATS.map((c) => '<option value="' + c.k + '">' + c.e + " " + c.n + "</option>").join("");
+    const dt = $("ldDate"); if (dt) dt.value = ldToday();
+    const add = $("ldAdd"); if (add) add.addEventListener("click", ledgerAdd);
+    const clr = $("ldClear"); if (clr) clr.addEventListener("click", ledgerClear);
+    document.querySelectorAll(".ld-t").forEach((b) => b.addEventListener("click", () => {
+      document.querySelectorAll(".ld-t").forEach((x) => x.classList.remove("active"));
+      b.classList.add("active");
+    }));
+    ledgerRender();
+  }
+  function ledgerLoad() { ledgerRender(); }
+  function ledgerAdd() {
+    const amt = parseFloat($("ldAmount").value);
+    if (!(amt > 0)) { toast("金额得大于 0 哦"); return; }
+    const active = document.querySelector(".ld-t.active");
+    const type = active && active.dataset.type === "inc" ? "inc" : "exp";
+    const st = ldLoad();
+    st.entries.unshift({
+      id: Date.now() + "_" + Math.floor(Math.random() * 1000),
+      type: type,
+      amount: Math.round(amt * 100) / 100,
+      cat: $("ldCat").value,
+      date: $("ldDate").value || ldToday(),
+      note: ($("ldNote").value || "").slice(0, 40)
+    });
+    if (st.entries.length > 500) st.entries.length = 500;
+    ldSave(st);
+    $("ldAmount").value = ""; $("ldNote").value = "";
+    ledgerRender();
+    bumpUsage("ledger"); playDing();
+    const card = $("ledger"); if (card) pop(card.querySelector(".card"));
+    toast(type === "inc" ? "已记一笔收入 💰" : "已记一笔支出 📒");
+  }
+  function ledgerRender() {
+    const st = ldLoad();
+    const ym = ldToday().slice(0, 7);
+    const cur = st.entries.filter((e) => (e.date || "").slice(0, 7) === ym);
+    let inc = 0, exp = 0; const byCat = {};
+    cur.forEach((e) => { if (e.type === "inc") inc += e.amount; else { exp += e.amount; byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; } });
+    ldSet("ldBalance", ldFmt(inc - exp)); ldSet("ldInc", ldFmt(inc)); ldSet("ldExp", ldFmt(exp));
+    const chart = $("ldChart");
+    const vals = Object.values(byCat);
+    const max = vals.length ? Math.max.apply(null, vals) : 1;
+    chart.innerHTML = LD_CATS.map((c) => {
+      const v = byCat[c.k] || 0; if (v <= 0) return "";
+      const pct = Math.max(4, Math.round(v / max * 100));
+      return '<div class="ld-bar"><span class="ld-bar-name">' + c.e + " " + c.n + '</span><span class="ld-bar-track"><span class="ld-bar-fill" style="width:' + pct + "%;background:" + c.c + '"></span></span><span class="ld-bar-val">' + ldFmt(v) + "</span></div>";
+    }).join("") || '<div class="ld-empty">本月还没有支出记录，记一笔看看钱去哪了 💸</div>';
+    const list = $("ldList");
+    list.innerHTML = st.entries.slice(0, 60).map((e) => {
+      const c = LD_CATS.find((x) => x.k === e.cat) || LD_CATS[LD_CATS.length - 1];
+      const sign = e.type === "inc" ? "+" : "−";
+      const cls = e.type === "inc" ? "ink" : "out";
+      const d = (e.date || "").slice(5);
+      return '<div class="ld-item"><span class="ld-cat">' + c.e + '</span><span class="ld-meta"><b>' + c.n + "</b> <i>" + d + "</i>" + (e.note ? " · " + ldEsc(e.note) : "") + '</span><span class="ld-amt ' + cls + '">' + sign + ldFmt(e.amount) + '</span><button class="ld-del" data-del="' + e.id + '" type="button" title="删除">✕</button></div>';
+    }).join("") || '<div class="ld-empty">账簿还是空的，记下第一笔吧 ✍️</div>';
+    list.querySelectorAll(".ld-del").forEach((b) => b.addEventListener("click", () => ledgerDel(b.dataset.del)));
+  }
+  function ledgerDel(id) { const st = ldLoad(); st.entries = st.entries.filter((e) => e.id !== id); ldSave(st); ledgerRender(); }
+  function ledgerClear() {
+    if (!confirm("确定清空全部账簿记录？此操作不可恢复。")) return;
+    ldSave({ entries: [] }); ledgerRender(); toast("账簿已清空 🧹");
+  }
+  QUOTES.push(
+    "记账不是抠门，是和钱把账算清楚，才知道它都去哪儿串门了。",
+    "每一笔小钱都记得，月底才不会对着余额发呆：我的钱呢？",
+    "收入是源头，支出是去处，小账簿就是它们的地图。",
+    "省下的不是钱，是下次随便花的底气。",
+    "记一笔看似麻烦，真到用钱时，它比记忆靠谱多了。",
+    "钱不会自己长腿跑，是你没看清它往哪走了。",
+    "月初豪横月末慌，多半是没给钱包装个记事本。",
+    "理财的第一步不是赚钱，是先看清钱是怎么没的。",
+    "把花销写下来，冲动消费会先在你脑子里过一遍安检。",
+    "小账簿记的不是数字，是你认真过日子的证据。"
+  );
+  BADGES.push(
+    { emoji: "📒", name: "记账新手", desc: "记下第一笔账", test: (u) => (u.ledger || 0) >= 1 },
+    { emoji: "📊", name: "理财达人", desc: "累计记账 30 笔", test: (u) => (u.ledger || 0) >= 30 }
+  );
+
+
 
   })();
 
