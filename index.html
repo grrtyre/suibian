@@ -1207,6 +1207,21 @@
   .pet-actions{flex-wrap:wrap;justify-content:center}
   @media(max-width:520px){.pet-stats{grid-template-columns:1fr}}
 
+
+/* 黑白棋 reversi */
+.rev-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 14px}
+.rev-diff{display:flex;gap:6px;align-items:center;font-size:13px;opacity:.85}
+.rev-board-wrap{display:flex;justify-content:center;background:var(--card,#fff);padding:10px;border-radius:14px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+#revCanvas{display:block;max-width:100%;height:auto;border-radius:8px;touch-action:manipulation;cursor:pointer;background:#1f7a4d;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.rev-score{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:12px 2px 4px;font-weight:600}
+.rev-side{display:flex;align-items:center;gap:6px}
+.rev-side .dot{width:14px;height:14px;border-radius:50%;display:inline-block}
+.rev-side .dot.b{background:#1b1b1b;border:1px solid #000}
+.rev-side .dot.w{background:#fafafa;border:1px solid #999}
+.rev-turn{font-size:14px;opacity:.9}
+.rev-status{text-align:center;margin:6px 0 2px;font-size:14px;min-height:20px;color:var(--accent,#2b7)}
+.rev-tips{margin-top:6px}
+.rev-mode-btn.active,.rev-diff-btn.active{background:var(--accent,#2b7);color:#fff;border-color:var(--accent,#2b7)}
 </style>
 </head>
 <body>
@@ -1302,6 +1317,7 @@
     <button data-tab="llk">🔗 连连看</button>
     <button data-tab="calc">🧮 计算器</button>
     <button data-tab="pet">🐱 云养猫</button>
+    <button data-tab="reversi">♟️ 黑白棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -2974,6 +2990,34 @@
     </div>
   </section>
 
+  <section class="panel" id="reversi">
+    <div class="card">
+      <h2>♟️ 黑白棋</h2>
+      <div class="hint">8×8 经典黑白棋（Othello）：你执黑先手，把自己的棋子落在能「夹住」对手棋子的位置，被夹住的对手棋子就翻成你的颜色。无子可落时自动跳过，棋盘填满或双方都无路可走即终局，比谁占的子多。</div>
+      <div class="rev-bar">
+        <div class="rev-mode">
+          <button class="chip rev-mode-btn active" data-mode="ai">人机对战</button>
+          <button class="chip rev-mode-btn" data-mode="pvp">双人对战</button>
+        </div>
+        <div class="rev-diff">
+          难度：
+          <button class="chip rev-diff-btn" data-diff="easy">简单</button>
+          <button class="chip rev-diff-btn active" data-diff="normal">普通</button>
+          <button class="chip rev-diff-btn" data-diff="hard">困难</button>
+        </div>
+        <button class="btn ghost" id="revRestart">🔄 重新开始</button>
+      </div>
+      <div class="rev-board-wrap"><canvas id="revCanvas" width="384" height="384"></canvas></div>
+      <div class="rev-score">
+        <div class="rev-side"><span class="dot b"></span><b id="revBlack">2</b>&nbsp;黑方</div>
+        <div class="rev-turn" id="revTurn">轮到：黑 ●（你）</div>
+        <div class="rev-side">白方&nbsp;<b id="revWhite">2</b><span class="dot w"></span></div>
+      </div>
+      <div class="rev-status" id="revStatus">点击发光的小点落子（你执黑先手）</div>
+      <div class="hint rev-tips">💡 小提示：角上的子最稳，尽量抢角；边角的「X 位」很危险，别轻易送给对手。</div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3205,6 +3249,8 @@
     if (id === "mbti") mbtiReset();
     if (id === "sudoku") sudokuResume();
     if (id !== "sudoku") sudokuStopTimer();
+    if (id === "reversi") reversiStart();
+    if (id !== "reversi" && typeof reversiStop === "function") reversiStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -3299,7 +3345,8 @@
     flappy: "像素小鸟 小鸟 飞行 flappy 撞水管 休闲 游戏 振翅 飞翔 躲避 反应 手速 闯关",
     llk: "连连看 链接 消除 配对 图案 找相同 消一消 益智 连线 转弯 经典 小游戏 休闲 link 一对 消除游戏 通关",
     calc: "计算器 计算 算 数学 算式 算数 加减乘除 公式 运算 科学计算 表达式 算一笔",
-    pet: "猫 宠物 养猫 云养猫 撸猫 铲屎 虚拟宠物 互动 喂养 玩耍 照顾 猫咪 电子宠物 喵 领养"
+    pet: "猫 宠物 养猫 云养猫 撸猫 铲屎 虚拟宠物 互动 喂养 玩耍 照顾 猫咪 电子宠物 喵 领养",
+    reversi: "黑白棋 奥赛罗 othello 翻转棋 翻棋 棋 策略 对战 夹子 翻面 占角 棋盘 人机 电脑 五子棋 围棋 落子 反转 reversi 翻盘"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -4131,7 +4178,17 @@
     "掉一球不算输，站起来再接一拍就行。",
     "越到后面砖越硬，越说明你离通关近了。",
     "把烦心事当砖块，一下一下，总能敲干净。",
-    "通关那一刻的撒花，是给每一拍都没松手的自己。"
+    "通关那一刻的撒花，是给每一拍都没松手的自己。",
+    "下棋如做人：先把眼前的子稳住，角上的机会才轮得到你。",
+    "被翻盘不可怕，怕的是连落子的勇气一起翻没了。",
+    "黑白之间不是非黑即白，落一子要想到三步之后。",
+    "抢到角，就抢到了大半盘棋的主动权。",
+    "有时候退一步让对手落子，是为了把他的路都堵死。",
+    "棋盘会填满，纠结也会；一行一行走，总有下完的那天。",
+    "对手翻你的子，是在逼你想清楚下一步往哪落。",
+    "先手不等于稳赢，会收官的人才笑到最后。",
+    "一子落下，牵动的是整盘局势——你做的每个决定都算数。",
+    "赢了别飘，输了别慌，下一局重新摆子就好。"
   ];
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -5003,7 +5060,9 @@
     { emoji: "🧮", name: "初算", desc: "用计算器算过一次", test: (u) => (u.calc || 0) >= 1 },
     { emoji: "🔢", name: "精算师", desc: "累计算出 30 笔", test: (u) => (u.calc || 0) >= 30 },
     { emoji: "🐱", name: "铲屎官", desc: "撸猫 / 喂养累计 20 次", test: (u) => (u.pet || 0) >= 20 },
-    { emoji: "🏆", name: "猫之王者", desc: "把随便猫养到 8 级", test: () => { try { return (parseInt(localStorage.getItem("suibian_pet_level") || "0", 10) || 0) >= 8; } catch (e) { return false; } } }
+    { emoji: "🏆", name: "猫之王者", desc: "把随便猫养到 8 级", test: () => { try { return (parseInt(localStorage.getItem("suibian_pet_level") || "0", 10) || 0) >= 8; } catch (e) { return false; } } },
+    { emoji: "♟️", name: "黑白棋手", desc: "下过一局黑白棋", test: (u) => (u.reversi || 0) >= 1 },
+    { emoji: "🏆", name: "翻盘大师", desc: "在黑白棋里赢下 5 局", test: (u) => (u.reversiWins || 0) >= 5 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -11852,6 +11911,258 @@
       if (!state || !state.alive) return;
       applyDecay(state.lastTick); state.lastTick = Date.now(); save(); render();
     }, 15000);
+
+  // ===================== 黑白棋 Reversi / Othello =====================
+  const rvEl = (id) => document.getElementById(id);
+  const rvCanvas = rvEl("revCanvas");
+  const rvCtx = rvCanvas ? rvCanvas.getContext("2d") : null;
+  const RV_SIZE = 8, RV_EMPTY = 0, RV_BLACK = 1, RV_WHITE = 2;
+  const RV_DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+  const RV_W = [
+    [120,-20, 20,  5,  5, 20,-20,120],
+    [-20,-40, -5, -5, -5, -5,-40,-20],
+    [ 20, -5, 15,  3,  3, 15, -5, 20],
+    [  5, -5,  3,  3,  3,  3, -5,  5],
+    [  5, -5,  3,  3,  3,  3, -5,  5],
+    [ 20, -5, 15,  3,  3, 15, -5, 20],
+    [-20,-40, -5, -5, -5, -5,-40,-20],
+    [120,-20, 20,  5,  5, 20,-20,120]
+  ];
+  let rvBoard = [], rvTurn = RV_BLACK, rvMode = "ai", rvLevel = "normal";
+  let rvOver = false, rvLast = null, rvAnim = [], rvRaf = null, rvTimer = null, rvCell = 48, rvWired = false;
+
+  const rvIn = (r,c) => r>=0 && r<RV_SIZE && c>=0 && c<RV_SIZE;
+  const rvOpp = (p) => p === RV_BLACK ? RV_WHITE : RV_BLACK;
+  const rvEmpty = () => Array.from({length:RV_SIZE}, () => new Array(RV_SIZE).fill(RV_EMPTY));
+  const rvInit = () => { const b = rvEmpty(); b[3][3]=RV_WHITE; b[3][4]=RV_BLACK; b[4][3]=RV_BLACK; b[4][4]=RV_WHITE; return b; };
+  const rvClone = (b) => b.map((row) => row.slice());
+  function rvFlips(b, r, c, p) {
+    if (b[r][c] !== RV_EMPTY) return [];
+    const o = rvOpp(p), res = [];
+    for (const [dr,dc] of RV_DIRS) {
+      let rr=r+dr, cc=c+dc; const line=[];
+      while (rvIn(rr,cc) && b[rr][cc]===o) { line.push([rr,cc]); rr+=dr; cc+=dc; }
+      if (line.length && rvIn(rr,cc) && b[rr][cc]===p) res.push.apply(res, line);
+    }
+    return res;
+  }
+  function rvLegal(b, p) {
+    const m = [];
+    for (let r=0;r<RV_SIZE;r++) for (let c=0;c<RV_SIZE;c++)
+      if (b[r][c]===RV_EMPTY && rvFlips(b,r,c,p).length) m.push([r,c]);
+    return m;
+  }
+  function rvApply(b, r, c, p) { const f = rvFlips(b,r,c,p); b[r][c]=p; for (const [fr,fc] of f) b[fr][fc]=p; return f.length; }
+  function rvCount(b) { let x=0,y=0; for (let r=0;r<RV_SIZE;r++) for (let c=0;c<RV_SIZE;c++){ if(b[r][c]===RV_BLACK)x++; else if(b[r][c]===RV_WHITE)y++; } return {black:x, white:y}; }
+  function rvStatic(b, ai) { let s=0; for (let r=0;r<RV_SIZE;r++) for (let c=0;c<RV_SIZE;c++){ if(b[r][c]===ai) s+=RV_W[r][c]; else if(b[r][c]===rvOpp(ai)) s-=RV_W[r][c]; } return s; }
+  function rvDiff(b, ai) { const {black,white}=rvCount(b); const me=ai===RV_BLACK?black:white, them=ai===RV_BLACK?white:black; return me-them; }
+  function rvEval(b, ai) { return rvStatic(b, ai) + rvDiff(b, ai) * 4; }
+  function rvMinimax(b, p, depth, alpha, beta, ai) {
+    const moves = rvLegal(b, p);
+    if (moves.length === 0) {
+      if (rvLegal(b, rvOpp(p)).length === 0 || depth === 0) return rvEval(b, ai);
+      return rvMinimax(b, rvOpp(p), depth - 1, alpha, beta, ai);
+    }
+    if (p === ai) {
+      let val = -1e9;
+      for (const [r,c] of moves) {
+        const nb = rvClone(b); rvApply(nb, r, c, p);
+        val = Math.max(val, rvMinimax(nb, rvOpp(p), depth - 1, alpha, beta, ai));
+        if (val > alpha) alpha = val;
+        if (alpha >= beta) break;
+      }
+      return val;
+    } else {
+      let val = 1e9;
+      for (const [r,c] of moves) {
+        const nb = rvClone(b); rvApply(nb, r, c, p);
+        val = Math.min(val, rvMinimax(nb, rvOpp(p), depth - 1, alpha, beta, ai));
+        if (val < beta) beta = val;
+        if (alpha >= beta) break;
+      }
+      return val;
+    }
+  }
+  function rvChoose(b, p, level) {
+    const moves = rvLegal(b, p);
+    if (!moves.length) return null;
+    if (level === "easy") return moves[Math.floor(Math.random()*moves.length)];
+    if (level === "normal") {
+      let best = moves[0], bs = -1e9;
+      for (const [r,c] of moves) {
+        const sc = rvFlips(b,r,c,p).length * 1 + RV_W[r][c] * 0.15;
+        if (sc > bs) { bs = sc; best = [r,c]; }
+      }
+      return best;
+    }
+    const depth = 4; let best = moves[0], bv = -1e9;
+    for (const [r,c] of moves) {
+      const nb = rvClone(b); rvApply(nb, r, c, p);
+      const v = rvMinimax(nb, rvOpp(p), depth - 1, -1e9, 1e9, p);
+      if (v > bv) { bv = v; best = [r,c]; }
+    }
+    return best;
+  }
+  function rvResize() {
+    if (!rvCanvas) return;
+    const maxW = Math.min(384, (rvCanvas.parentElement ? rvCanvas.parentElement.clientWidth : 384) || 384);
+    rvCell = Math.max(24, Math.floor(maxW / RV_SIZE));
+    rvCanvas.width = rvCell * RV_SIZE; rvCanvas.height = rvCell * RV_SIZE;
+    rvDraw();
+  }
+  function rvDisc(x, y, rad, dark) {
+    if (!rvCtx) return;
+    const g = rvCtx.createRadialGradient(x-rad*0.3, y-rad*0.3, rad*0.1, x, y, rad);
+    g.addColorStop(0, dark ? "#4a4a4a" : "#ffffff");
+    g.addColorStop(1, dark ? "#101010" : "#f2f2f2");
+    rvCtx.fillStyle = g; rvCtx.beginPath(); rvCtx.arc(x, y, rad, 0, 7); rvCtx.fill();
+    rvCtx.strokeStyle = "rgba(0,0,0,0.35)"; rvCtx.lineWidth = 1; rvCtx.stroke();
+  }
+  function rvDraw() {
+    if (!rvCtx) return;
+    const cs = rvCell, n = RV_SIZE;
+    rvCtx.fillStyle = "#1f7a4d"; rvCtx.fillRect(0,0,rvCanvas.width,rvCanvas.height);
+    rvCtx.strokeStyle = "rgba(0,0,0,0.22)"; rvCtx.lineWidth = 1;
+    for (let i=0;i<=n;i++) {
+      rvCtx.beginPath(); rvCtx.moveTo(i*cs+0.5,0); rvCtx.lineTo(i*cs+0.5,rvCanvas.height); rvCtx.stroke();
+      rvCtx.beginPath(); rvCtx.moveTo(0,i*cs+0.5); rvCtx.lineTo(rvCanvas.width,i*cs+0.5); rvCtx.stroke();
+    }
+    const hints = (!rvOver && (rvMode==="pvp" || rvTurn===RV_BLACK)) ? rvLegal(rvBoard, rvTurn) : [];
+    for (let r=0;r<n;r++) for (let c=0;c<n;c++) {
+      const v = rvBoard[r][c], x=c*cs+cs/2, y=r*cs+cs/2;
+      if (hints.some(([hr,hc]) => hr===r && hc===c)) {
+        rvCtx.fillStyle = "rgba(255,255,255,0.30)";
+        rvCtx.beginPath(); rvCtx.arc(x, y, cs*0.12, 0, 7); rvCtx.fill();
+      }
+      if (rvLast && rvLast[0]===r && rvLast[1]===c) {
+        rvCtx.strokeStyle = "rgba(255,235,59,0.95)"; rvCtx.lineWidth = Math.max(2, cs*0.07);
+        rvCtx.beginPath(); rvCtx.arc(x, y, cs*0.42, 0, 7); rvCtx.stroke();
+      }
+      let color = v, scale = 1;
+      const a = rvAnim.find((o) => o.r===r && o.c===c);
+      if (a) {
+        const t = a.t;
+        if (a.from === RV_EMPTY) { color = a.to; scale = Math.min(1, t*1.3); }
+        else { color = t < 0.5 ? a.from : a.to; scale = 0.25 + Math.abs(0.5 - t) * 1.5; }
+      }
+      if (color !== RV_EMPTY) rvDisc(x, y, cs*0.4*scale, color===RV_BLACK);
+    }
+  }
+  function rvStartAnim() {
+    rvAnim.forEach((o) => o.t = 0);
+    const t0 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    const dur = 260;
+    if (rvRaf) cancelAnimationFrame(rvRaf);
+    function step(now) {
+      const k = Math.min(1, ((now || Date.now()) - t0) / dur);
+      rvAnim.forEach((o) => o.t = k);
+      rvDraw();
+      if (k < 1) rvRaf = requestAnimationFrame(step);
+      else { rvAnim = []; rvDraw(); rvAfterMove(); }
+    }
+    rvRaf = requestAnimationFrame(step);
+  }
+  function rvUpdateScore() {
+    const {black, white} = rvCount(rvBoard);
+    if (rvEl("revBlack")) rvEl("revBlack").textContent = black;
+    if (rvEl("revWhite")) rvEl("revWhite").textContent = white;
+  }
+  function rvStatus(msg) { if (rvEl("revStatus")) rvEl("revStatus").textContent = msg; }
+  function rvUpdateTurn() {
+    if (rvOver || !rvEl("revTurn")) return;
+    const who = rvTurn === RV_BLACK ? "黑 ●" : "白 ○";
+    const tag = rvMode === "ai" ? (rvTurn === RV_BLACK ? "（你）" : "（电脑）") : "";
+    rvEl("revTurn").textContent = "轮到：" + who + tag;
+  }
+  function rvCommit(r, c, p) {
+    rvAnim = [{r, c, from: RV_EMPTY, to: p}];
+    for (const [fr,fc] of rvFlips(rvBoard, r, c, p)) rvAnim.push({r:fr, c:fc, from: rvOpp(p), to: p});
+    rvApply(rvBoard, r, c, p);
+    rvLast = [r, c];
+    rvUpdateScore();
+    rvStartAnim();
+  }
+  function rvAfterMove() {
+    if (rvOver) return;
+    const cur = rvTurn, next = rvOpp(cur);
+    if (rvLegal(rvBoard, next).length) rvTurn = next;
+    else if (rvLegal(rvBoard, cur).length) rvStatus("对方无子可落，自动跳过 ✋");
+    else { rvEnd(); return; }
+    rvUpdateTurn();
+    if (!rvOver && rvMode === "ai" && rvTurn === RV_WHITE) rvScheduleAI();
+  }
+  function rvHuman(r, c) {
+    if (rvOver || rvAnim.length) return;
+    if (rvMode === "ai" && rvTurn !== RV_BLACK) return;
+    if (rvBoard[r][c] !== RV_EMPTY) return;
+    if (!rvFlips(rvBoard, r, c, rvTurn).length) { if (typeof toast === "function") toast("这里落不了子"); return; }
+    rvCommit(r, c, rvTurn);
+  }
+  function rvScheduleAI() {
+    if (rvTimer) clearTimeout(rvTimer);
+    rvStatus("电脑思考中… 🤔");
+    rvTimer = setTimeout(() => {
+      rvTimer = null;
+      const mv = rvChoose(rvBoard, RV_WHITE, rvLevel);
+      if (!mv) { rvAfterMove(); return; }
+      rvCommit(mv[0], mv[1], RV_WHITE);
+    }, 420);
+  }
+  function rvEnd() {
+    rvOver = true;
+    const {black, white} = rvCount(rvBoard);
+    rvUpdateScore();
+    let msg;
+    if (black > white) { msg = "🎉 你赢了！ " + black + " : " + white; if (typeof bumpUsage === "function") bumpUsage("reversiWins"); if (typeof confettiBurst === "function") confettiBurst(60); if (typeof playDing === "function") playDing(); }
+    else if (white > black) msg = rvMode === "ai" ? ("💻 电脑赢了，再来一局？ " + white + " : " + black) : ("白方赢了 " + white + " : " + black);
+    else msg = "平局 " + black + " : " + white;
+    rvStatus(msg);
+    if (rvEl("revTurn")) rvEl("revTurn").textContent = "本局结束";
+  }
+  function rvNewGame() {
+    if (rvTimer) clearTimeout(rvTimer); rvTimer = null;
+    if (rvRaf) cancelAnimationFrame(rvRaf); rvRaf = null;
+    rvBoard = rvInit(); rvTurn = RV_BLACK; rvOver = false; rvLast = null; rvAnim = [];
+    if (typeof bumpUsage === "function") bumpUsage("reversi");
+    rvUpdateScore(); rvUpdateTurn();
+    rvStatus(rvMode === "ai" ? "点击发光的小点落子（你执黑先手）" : "黑方先手，点击发光的小点落子");
+    rvResize();
+  }
+  function rvBind() {
+    if (!rvCanvas) return;
+    rvCanvas.addEventListener("click", (e) => {
+      if (rvOver || rvAnim.length) return;
+      const rect = rvCanvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (rvCanvas.width / rect.width);
+      const y = (e.clientY - rect.top) * (rvCanvas.height / rect.height);
+      const c = Math.floor(x / rvCell), r = Math.floor(y / rvCell);
+      if (rvIn(r, c)) rvHuman(r, c);
+    });
+    const md = (sel, fn) => document.querySelectorAll(sel).forEach((b) => b.addEventListener("click", fn));
+    md(".rev-mode-btn", (e) => {
+      document.querySelectorAll(".rev-mode-btn").forEach((x) => x.classList.remove("active"));
+      e.currentTarget.classList.add("active"); rvMode = e.currentTarget.dataset.mode;
+      if (typeof playClick === "function") playClick(); rvNewGame();
+    });
+    md(".rev-diff-btn", (e) => {
+      document.querySelectorAll(".rev-diff-btn").forEach((x) => x.classList.remove("active"));
+      e.currentTarget.classList.add("active"); rvLevel = e.currentTarget.dataset.diff;
+      if (typeof playClick === "function") playClick();
+      rvStatus("难度：" + ({easy:"简单", normal:"普通", hard:"困难"}[rvLevel]));
+    });
+    const rb = rvEl("revRestart"); if (rb) rb.addEventListener("click", () => { if (typeof playClick === "function") playClick(); rvNewGame(); });
+    window.addEventListener("resize", rvResize);
+  }
+  function reversiStart() {
+    if (!rvCanvas) return;
+    if (!rvWired) { rvBind(); rvWired = true; }
+    rvNewGame();
+  }
+  function reversiStop() {
+    if (rvTimer) { clearTimeout(rvTimer); rvTimer = null; }
+    if (rvRaf) { cancelAnimationFrame(rvRaf); rvRaf = null; }
+  }
+
   })();
 
 </script>
