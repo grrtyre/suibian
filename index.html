@@ -1243,6 +1243,45 @@
   .ng-tip{margin-top:10px;color:var(--muted,#9aa0c7);font-size:12.5px;text-align:center}
   .ng-diff-btn.on,.ng-mode-btn.on{background:var(--accent,#ff7a59);color:#fff;border-color:var(--accent,#ff7a59)}
   @media(max-width:520px){.ng-cell{border-radius:5px}}
+  /* ---------- 密码保险箱 vault ---------- */
+  .vault-card { max-width: 360px; margin: 8px auto 0; text-align: center; }
+  .vault-lock-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .vault-lock-sub { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .vault-card input[type=password] { margin-bottom: 10px; text-align: center; }
+  .vault-stat { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .vault-gen { border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 16px; background: var(--card-2); }
+  .vault-gen-row { display: flex; gap: 8px; }
+  .vault-gen-row input { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: 1px; }
+  .vault-meter { height: 8px; border-radius: 999px; background: var(--card); overflow: hidden; margin: 10px 0 8px; }
+  .vault-meter-fill { height: 100%; width: 8%; border-radius: 999px; background: #ff5c5c; transition: width .2s, background .2s; }
+  .vault-gen-opts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 13px; color: var(--muted); }
+  .vault-gen-opts label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+  .vault-gen-opts input[type=range] { flex: 1; min-width: 120px; }
+  .vault-len b { color: var(--accent); }
+  .vault-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .vault-2col { display: flex; gap: 10px; }
+  .vault-2col > * { flex: 1; }
+  .vault-list-head { margin-bottom: 10px; }
+  .vault-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .vault-chip { font-size: 12px; padding: 5px 12px; border-radius: 999px; cursor: pointer; color: var(--muted); background: var(--card); border: 1px solid var(--line); }
+  .vault-chip.on { color: #1a1320; background: linear-gradient(90deg, var(--accent-2), var(--accent)); border-color: transparent; font-weight: 700; }
+  .vault-list { display: flex; flex-direction: column; gap: 10px; }
+  .vault-item { border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: var(--card-2); }
+  .vault-item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .vault-item-name { font-weight: 700; font-size: 16px; }
+  .vault-item-cat { font-size: 12px; color: var(--muted); background: var(--card); border: 1px solid var(--line); padding: 2px 10px; border-radius: 999px; }
+  .vault-item-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .vault-k { width: 42px; color: var(--muted); font-size: 13px; flex: 0 0 auto; }
+  .vault-v { flex: 1; min-width: 0; word-break: break-all; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
+  .vault-pw { letter-spacing: 1px; }
+  .vault-item-note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .vault-item-acts { display: flex; gap: 8px; margin-top: 8px; }
+  .vault-mini { font-size: 12px; padding: 5px 12px; border-radius: 10px; cursor: pointer; color: var(--text); background: var(--card); border: 1px solid var(--line); }
+  .vault-mini.ghost { color: var(--muted); }
+  .vault-mini:hover { border-color: rgba(255,255,255,.25); }
+  .vault-empty { color: var(--muted); text-align: center; padding: 20px; font-size: 14px; }
+  @media (max-width: 520px) { .vault-2col { flex-direction: column; } }
+
 </style>
 </head>
 <body>
@@ -1288,6 +1327,7 @@
     <button data-tab="group">随机分组</button>
     <button data-tab="guess">猜数字</button>
     <button data-tab="pwgen">密码生成器</button>
+    <button data-tab="vault">🔐 密码保险箱</button>
       <button data-tab="tarot">塔罗牌</button>
       <button data-tab="poem">藏头诗</button>
       <button data-tab="bottle">漂流瓶</button>
@@ -3066,6 +3106,81 @@
     </div>
   </section>
 
+  <!-- 密码保险箱 vault -->
+  <section class="panel" id="vault">
+    <div class="card">
+      <h2>🔐 密码保险箱</h2>
+      <div class="hint">本地加密保管你的账号密码，数据只存在这台设备，绝不上传网络。</div>
+
+      <!-- 锁屏：创建 / 解锁 -->
+      <div id="vaultLock"><div id="vaultLockBox"></div></div>
+
+      <!-- 保险箱主体 -->
+      <div id="vaultBody" style="display:none">
+        <div class="vault-stat" id="vaultStat"></div>
+
+        <!-- 生成器 -->
+        <div class="vault-gen">
+          <div class="vault-gen-row">
+            <input type="text" id="vaultGenOut" readonly placeholder="点「生成」造一个强密码">
+            <button class="btn" id="vaultCopyGen">复制</button>
+          </div>
+          <div class="vault-meter"><div class="vault-meter-fill" id="vaultMeter"></div></div>
+          <div class="vault-gen-opts">
+            <span class="vault-len">长度 <b id="vaultLenVal">16</b></span>
+            <input type="range" id="vaultLen" min="6" max="40" value="16">
+            <label><input type="checkbox" id="vaultUp" checked> 大写</label>
+            <label><input type="checkbox" id="vaultLow" checked> 小写</label>
+            <label><input type="checkbox" id="vaultNum" checked> 数字</label>
+            <label><input type="checkbox" id="vaultSym" checked> 符号</label>
+            <label><input type="checkbox" id="vaultNoAmb"> 排除易混</label>
+          </div>
+          <div class="row">
+            <button class="btn" id="vaultGen">🎲 生成密码</button>
+            <button class="btn ghost" id="vaultGenToForm">填入密码框</button>
+          </div>
+        </div>
+
+        <!-- 新增 / 编辑条目 -->
+        <div class="vault-form">
+          <input type="text" id="vaultName" placeholder="名称 / 网站，如：GitHub">
+          <div class="vault-2col">
+            <input type="text" id="vaultUser" placeholder="账号 / 用户名">
+            <input type="text" id="vaultPass" placeholder="密码（可点生成）">
+          </div>
+          <div class="vault-2col">
+            <input type="text" id="vaultCat" placeholder="分类，如：工作 / 社交 / 金融" list="vaultCats">
+            <input type="text" id="vaultNote" placeholder="备注（选填）">
+          </div>
+          <div class="row">
+            <button class="btn" id="vaultAdd">💾 存入保险箱</button>
+            <button class="btn ghost" id="vaultGenForField">🔑 给密码框生成</button>
+          </div>
+        </div>
+        <datalist id="vaultCats">
+          <option value="工作"></option><option value="社交"></option><option value="金融"></option>
+          <option value="购物"></option><option value="邮箱"></option><option value="游戏"></option><option value="未分类"></option>
+        </datalist>
+
+        <!-- 列表 -->
+        <div class="vault-list-head">
+          <input type="text" id="vaultSearch" placeholder="🔍 搜索名称 / 账号 / 备注">
+          <div class="vault-chips" id="vaultChips"></div>
+        </div>
+        <div class="vault-list" id="vaultList"></div>
+
+        <div class="row">
+          <button class="btn ghost" id="vaultLockBtn">🔒 上锁</button>
+          <button class="btn ghost" id="vaultExport">⬇️ 导出备份</button>
+          <button class="btn ghost" id="vaultImport">⬆️ 导入</button>
+          <button class="btn ghost" id="vaultChange">🔑 改主密码</button>
+          <button class="btn ghost" id="vaultClear">🗑️ 清空</button>
+          <input type="file" id="vaultFile" accept="application/json" style="display:none">
+        </div>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3301,6 +3416,7 @@
     if (id !== "reversi" && typeof reversiStop === "function") reversiStop();
     if (id === "nonogram") nonogramStart();
     if (id !== "nonogram" && typeof nonogramStop === "function") nonogramStop();
+    if (id === "vault") vaultInit();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -3334,6 +3450,7 @@
     share: "分享 卡片 图片 生成 海报 截图", speak: "语音 朗读 播报 发音 tts 念",
     group: "分组 随机分组 团队 团建 名单 队伍 分配 分组作业", guess: "猜数字 数字 游戏 猜数 博弈 心思",
     pwgen: "密码 强密码 随机密码 生成 口令 密钥 账号 安全 密码生成器",
+    vault: "密码 保险箱 保管 账号 密钥 加密 本地 安全 密码库 秘钥 保存 隐私 vault 主密码",
     tarot: "塔罗 牌 占卜 命运 玄学 过去 现在 未来 启示 指引 神秘",
     poem: "藏头 诗 写诗 诗歌 诗句 拼诗 名字 藏头诗 文艺 文字",
     bottle: "漂流瓶 瓶子 心事 愿望 碎碎念 匿名 留言 海里 捞 治愈",
@@ -4239,7 +4356,15 @@
     "对手翻你的子，是在逼你想清楚下一步往哪落。",
     "先手不等于稳赢，会收官的人才笑到最后。",
     "一子落下，牵动的是整盘局势——你做的每个决定都算数。",
-    "赢了别飘，输了别慌，下一局重新摆子就好。"
+    "赢了别飘，输了别慌，下一局重新摆子就好。",
+    "密码太长记不住，太短守不住，人生很多事都卡在这两难里。",
+    "把账号交给保险箱，是把记性腾给更重要的事。",
+    "主密码只有一把，想清楚再设，设完就别到处说。",
+    "所有『下次一定改』的密码，最后都成了别人进门的钥匙。",
+    "本地加密的意思很简单：你的秘密，只和你这台设备熟。",
+    "安全感不是不丢东西，是丢了也没人接得住。",
+    "一个好密码，像一句只有你懂的冷笑话。",
+    "别用生日当密码，宇宙已经够容易猜了。"
   ];
   QUOTES.push(
     "数织像人生：横看是一行，竖看是一列，把每道线索对齐，图案自己就显出来了。",
@@ -5125,7 +5250,9 @@
     { emoji: "♟️", name: "黑白棋手", desc: "下过一局黑白棋", test: (u) => (u.reversi || 0) >= 1 },
     { emoji: "🏆", name: "翻盘大师", desc: "在黑白棋里赢下 5 局", test: (u) => (u.reversiWins || 0) >= 5 },
     { emoji: "🧩", name: "数织新手", desc: "完成一局数织逻辑拼图", test: (u) => (u.nonogram || 0) >= 1 },
-    { emoji: "🏆", name: "数织大师", desc: "解出数织困难 15×15", test: () => { try { return (parseInt(localStorage.getItem("suibian_nonogram_best_15") || "0", 10) || 0) > 0; } catch (e) { return false; } } }
+    { emoji: "🏆", name: "数织大师", desc: "解出数织困难 15×15", test: () => { try { return (parseInt(localStorage.getItem("suibian_nonogram_best_15") || "0", 10) || 0) > 0; } catch (e) { return false; } } },
+    { emoji: "🔐", name: "守密人", desc: "在密码保险箱存入 1 条账号", test: (u) => (u.vault || 0) >= 1 },
+    { emoji: "🗝️", name: "宝藏管家", desc: "在密码保险箱累计存入 10 条", test: (u) => (u.vault || 0) >= 10 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -12370,6 +12497,381 @@
     const bn = $("ngNew"); if (bn) bn.addEventListener("click", function(){ if (typeof playClick === "function") playClick(); ngNew(); });
     const bh = $("ngHint"); if (bh) bh.addEventListener("click", ngHint);
     const bc = $("ngCheck"); if (bc) bc.addEventListener("click", ngCheck);
+  })();
+
+  /* ================= 密码保险箱 vault ================= */
+  const VAULT_KEY = "suibian_vault";
+  let vaultData = null;        // { entries: [...] }
+  let vaultPass = "";          // 主密码（仅存于内存）
+  let vaultUnlocked = false;
+  let vaultEditIdx = -1;
+  let vaultFilterCat = "全部";
+  let vaultRevealed = new Set();
+
+  function vaultEsc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function vaultB642buf(b64) {
+    const s = atob(b64); const a = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
+    return a.buffer;
+  }
+  function vaultBuf2b64(buf) {
+    const u = new Uint8Array(buf); let s = "";
+    for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
+    return btoa(s);
+  }
+  async function vaultDeriveKey(pass, salt) {
+    const enc = new TextEncoder();
+    const base = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+    );
+  }
+  async function vaultEncrypt(obj, pass) {
+    const enc = new TextEncoder();
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await vaultDeriveKey(pass, salt);
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, enc.encode(JSON.stringify(obj)));
+    return { v: 1, salt: vaultBuf2b64(salt), iv: vaultBuf2b64(iv), ct: vaultBuf2b64(ct) };
+  }
+  async function vaultDecrypt(blob, pass) {
+    const dec = new TextDecoder();
+    const salt = new Uint8Array(vaultB642buf(blob.salt));
+    const iv = new Uint8Array(vaultB642buf(blob.iv));
+    const key = await vaultDeriveKey(pass, salt);
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, vaultB642buf(blob.ct));
+    return JSON.parse(dec.decode(pt));
+  }
+  function vaultBlob() { try { const r = localStorage.getItem(VAULT_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+  function vaultHasVault() { return !!vaultBlob(); }
+  async function vaultPersist() {
+    if (!vaultData) return;
+    const blob = await vaultEncrypt(vaultData, vaultPass);
+    localStorage.setItem(VAULT_KEY, JSON.stringify(blob));
+    try { bumpUsage("vault"); } catch (e) {}
+  }
+
+  function vaultInit() {
+    if (vaultUnlocked && vaultData) vaultShowBody();
+    else vaultShowLock();
+  }
+  function vaultShowLock() {
+    const lock = $("vaultLock"); if (lock) lock.style.display = "block";
+    const body = $("vaultBody"); if (body) body.style.display = "none";
+    vaultRenderLock(vaultHasVault() ? "unlock" : "create");
+  }
+  function vaultRenderLock(mode) {
+    const box = $("vaultLockBox"); if (!box) return;
+    if (mode === "create") {
+      box.innerHTML =
+        '<div class="vault-card">' +
+        '<div class="vault-lock-title">🔐 设置主密码</div>' +
+        '<div class="vault-lock-sub">这是打开保险箱的唯一钥匙，不会上传、无法找回，请牢记。</div>' +
+        '<input type="password" id="vaultNew1" placeholder="设置主密码（至少 4 位）">' +
+        '<input type="password" id="vaultNew2" placeholder="再输一次确认">' +
+        '<button class="btn" id="vaultCreateBtn">创建并进入</button>' +
+        '</div>';
+      const b = $("vaultCreateBtn"); if (b) b.addEventListener("click", vaultDoCreate);
+    } else {
+      box.innerHTML =
+        '<div class="vault-card">' +
+        '<div class="vault-lock-title">🔐 输入主密码</div>' +
+        '<div class="vault-lock-sub">解锁以查看你的保险箱。</div>' +
+        '<input type="password" id="vaultPassIn" placeholder="主密码">' +
+        '<button class="btn" id="vaultUnlockBtn">解锁</button>' +
+        '<button class="btn ghost" id="vaultForget">忘记密码？清空重设</button>' +
+        '</div>';
+      const b = $("vaultUnlockBtn"); if (b) b.addEventListener("click", vaultDoUnlock);
+      const f = $("vaultForget"); if (f) f.addEventListener("click", vaultDoForget);
+      const inp = $("vaultPassIn"); if (inp) inp.addEventListener("keydown", function (e) { if (e.key === "Enter") vaultDoUnlock(); });
+    }
+  }
+  async function vaultDoCreate() {
+    const p1 = $("vaultNew1"), p2 = $("vaultNew2");
+    const a = p1 ? p1.value : "", b = p2 ? p2.value : "";
+    if (a.length < 4) { toast("主密码至少 4 位"); return; }
+    if (a !== b) { toast("两次输入不一致"); return; }
+    if (typeof playClick === "function") playClick();
+    vaultPass = a; vaultData = { entries: [] }; vaultUnlocked = true;
+    try { await vaultPersist(); }
+    catch (e) { toast("加密失败：当前环境不支持"); vaultUnlocked = false; vaultData = null; return; }
+    vaultShowBody();
+    toast("保险箱已创建 🔐");
+  }
+  async function vaultDoUnlock() {
+    const inp = $("vaultPassIn"); const p = inp ? inp.value : "";
+    if (!p) { toast("请输入主密码"); return; }
+    const blob = vaultBlob(); if (!blob) { vaultShowLock(); return; }
+    try {
+      const data = await vaultDecrypt(blob, p);
+      if (!data || !Array.isArray(data.entries)) throw new Error("bad");
+      vaultPass = p; vaultData = data; vaultUnlocked = true;
+      if (typeof playClick === "function") playClick();
+      vaultShowBody();
+    } catch (e) { toast("密码错误，再试试"); }
+  }
+  function vaultDoForget() {
+    if (!confirm("清空会删除本设备上的全部保险箱数据，且无法恢复。确定？")) return;
+    localStorage.removeItem(VAULT_KEY);
+    vaultPass = ""; vaultData = null; vaultUnlocked = false;
+    vaultShowLock();
+    toast("已清空，可重新创建");
+  }
+  function vaultShowBody() {
+    const lock = $("vaultLock"); if (lock) lock.style.display = "none";
+    const body = $("vaultBody"); if (body) body.style.display = "block";
+    vaultRenderBody();
+  }
+  function vaultRenderBody() {
+    const stat = $("vaultStat");
+    if (stat) {
+      const n = vaultData.entries.length;
+      const cats = new Set(vaultData.entries.map(function (e) { return e.cat || "未分类"; })).size;
+      stat.textContent = "共 " + n + " 条账号 · " + cats + " 个分类";
+    }
+    vaultRenderChips();
+    vaultRenderList();
+  }
+  function vaultRenderChips() {
+    const wrap = $("vaultChips"); if (!wrap) return;
+    const cats = ["全部"];
+    vaultData.entries.forEach(function (e) { const c = e.cat || "未分类"; if (cats.indexOf(c) < 0) cats.push(c); });
+    wrap.innerHTML = "";
+    cats.forEach(function (c) {
+      const el = document.createElement("button");
+      el.className = "vault-chip" + (c === vaultFilterCat ? " on" : "");
+      el.textContent = c;
+      el.addEventListener("click", function () { vaultFilterCat = c; vaultRenderChips(); vaultRenderList(); });
+      wrap.appendChild(el);
+    });
+  }
+  function vaultRenderList() {
+    const list = $("vaultList"); if (!list) return;
+    const q = (($("vaultSearch") && $("vaultSearch").value) || "").toLowerCase().trim();
+    const rows = vaultData.entries
+      .map(function (e, i) { return { e: e, i: i }; })
+      .filter(function (o) { return vaultFilterCat === "全部" || (o.e.cat || "未分类") === vaultFilterCat; })
+      .filter(function (o) {
+        if (!q) return true;
+        return [o.e.name, o.e.user, o.e.note, o.e.cat].some(function (v) { return (v || "").toLowerCase().indexOf(q) >= 0; });
+      });
+    if (!rows.length) { list.innerHTML = '<div class="vault-empty">还没有账号，先在上方存一条吧～</div>'; return; }
+    list.innerHTML = "";
+    rows.forEach(function (o) {
+      const e = o.e, i = o.i;
+      const shown = vaultRevealed.has(i);
+      const pw = shown ? (e.pass || "") : "•".repeat(Math.min(16, (e.pass || "").length || 8));
+      const div = document.createElement("div");
+      div.className = "vault-item";
+      div.innerHTML =
+        '<div class="vault-item-top"><span class="vault-item-name">' + vaultEsc(e.name || "未命名") +
+        '</span><span class="vault-item-cat">' + vaultEsc(e.cat || "未分类") + '</span></div>' +
+        '<div class="vault-item-row"><span class="vault-k">账号</span><span class="vault-v">' + vaultEsc(e.user || "—") + '</span>' +
+        '<button class="vault-mini" data-act="ucopy">复制</button></div>' +
+        '<div class="vault-item-row"><span class="vault-k">密码</span><span class="vault-v vault-pw">' + vaultEsc(pw) + '</span>' +
+        '<button class="vault-mini" data-act="toggle">' + (shown ? "隐藏" : "显示") + '</button>' +
+        '<button class="vault-mini" data-act="pcopy">复制</button></div>' +
+        (e.note ? '<div class="vault-item-note">📝 ' + vaultEsc(e.note) + '</div>' : '') +
+        '<div class="vault-item-acts"><button class="vault-mini ghost" data-act="edit">编辑</button>' +
+        '<button class="vault-mini ghost" data-act="del">删除</button></div>';
+      div.querySelectorAll(".vault-mini").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const act = btn.dataset.act;
+          if (act === "toggle") { if (vaultRevealed.has(i)) vaultRevealed.delete(i); else vaultRevealed.add(i); vaultRenderList(); }
+          else if (act === "pcopy") vaultCopy(e.pass || "");
+          else if (act === "ucopy") vaultCopy(e.user || "");
+          else if (act === "edit") vaultEdit(i);
+          else if (act === "del") vaultDel(i);
+        });
+      });
+      list.appendChild(div);
+    });
+  }
+  function vaultCopy(text) {
+    if (!text) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { toast("已复制 ✓"); }, function () { fallbackCopy(text); });
+      } else fallbackCopy(text);
+    } catch (e) { fallbackCopy(text); }
+  }
+  function fallbackCopy(text) {
+    try {
+      const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+      toast("已复制 ✓");
+    } catch (e) { toast("复制失败，请手动选择"); }
+  }
+  function vaultGen() {
+    const len = parseInt(($("vaultLen") && $("vaultLen").value) || "16", 10);
+    const up = $("vaultUp") && $("vaultUp").checked;
+    const low = $("vaultLow") && $("vaultLow").checked;
+    const num = $("vaultNum") && $("vaultNum").checked;
+    const sym = $("vaultSym") && $("vaultSym").checked;
+    const noamb = $("vaultNoAmb") && $("vaultNoAmb").checked;
+    const U = "ABCDEFGHJKLMNPQRSTUVWXYZ", L = "abcdefghijkmnpqrstuvwxyz", N = "23456789", S = "!@#$%^&*()-_=+[]{};:,.<>?";
+    let pool = "";
+    if (up) pool += U; if (low) pool += L; if (num) pool += N; if (sym) pool += S;
+    if (!pool) { toast("至少选一种字符"); return; }
+    const exclude = noamb ? "0O1lI|" : "";
+    const chars = pool.split("").filter(function (c) { return exclude.indexOf(c) < 0; });
+    if (!chars.length) { toast("字符被排除光了，换个选项"); return; }
+    const arr = new Uint32Array(len);
+    crypto.getRandomValues(arr);
+    let out = "";
+    for (let i = 0; i < len; i++) out += chars[arr[i] % chars.length];
+    const outEl = $("vaultGenOut"); if (outEl) outEl.value = out;
+    vaultStrength(out);
+  }
+  function vaultStrength(pw) {
+    const fill = $("vaultMeter"); if (!fill) return;
+    let chars = 0;
+    if (/[a-z]/.test(pw)) chars += 26;
+    if (/[A-Z]/.test(pw)) chars += 26;
+    if (/[0-9]/.test(pw)) chars += 10;
+    if (/[^a-zA-Z0-9]/.test(pw)) chars += 32;
+    const ent = pw.length * (chars ? Math.log2(chars) : 0);
+    let label = "极弱", color = "#ff5c5c";
+    if (ent >= 60) { label = "极强"; color = "#4be3a5"; }
+    else if (ent >= 40) { label = "强"; color = "#7c6cff"; }
+    else if (ent >= 28) { label = "中"; color = "#ffb15c"; }
+    else if (ent >= 16) { label = "弱"; color = "#ff9a3c"; }
+    const pct = Math.max(8, Math.min(100, (ent / 80) * 100));
+    fill.style.width = pct + "%";
+    fill.style.background = color;
+    fill.title = label + "（熵≈" + ent.toFixed(0) + " bit）";
+  }
+  async function vaultAdd() {
+    const name = $("vaultName"), user = $("vaultUser"), pass = $("vaultPass"), cat = $("vaultCat"), note = $("vaultNote");
+    const nm = name ? name.value.trim() : "";
+    const ps = pass ? pass.value : "";
+    if (!nm) { toast("给账号起个名字"); if (name) name.focus(); return; }
+    if (!ps) { toast("密码不能为空"); if (pass) pass.focus(); return; }
+    const entry = {
+      name: nm, user: user ? user.value.trim() : "",
+      pass: ps, cat: cat && cat.value.trim() ? cat.value.trim() : "未分类",
+      note: note ? note.value.trim() : "", t: Date.now()
+    };
+    const isEdit = vaultEditIdx >= 0;
+    if (isEdit) { vaultData.entries[vaultEditIdx] = entry; vaultEditIdx = -1; }
+    else vaultData.entries.push(entry);
+    vaultRevealed = new Set();
+    await vaultPersist();
+    if (name) name.value = ""; if (user) user.value = ""; if (pass) pass.value = ""; if (cat) cat.value = ""; if (note) note.value = "";
+    const addBtn = $("vaultAdd"); if (addBtn) addBtn.textContent = "💾 存入保险箱";
+    vaultFilterCat = "全部";
+    vaultRenderBody();
+    if (typeof playDing === "function") playDing();
+    if (!isEdit && vaultData.entries.length === 1 && typeof confettiBurst === "function") confettiBurst(70);
+    toast(isEdit ? "已更新" : "已存入 💾");
+  }
+  function vaultEdit(i) {
+    const e = vaultData.entries[i]; if (!e) return;
+    const name = $("vaultName"), user = $("vaultUser"), pass = $("vaultPass"), cat = $("vaultCat"), note = $("vaultNote");
+    if (name) name.value = e.name || "";
+    if (user) user.value = e.user || "";
+    if (pass) pass.value = e.pass || "";
+    if (cat) cat.value = e.cat || "";
+    if (note) note.value = e.note || "";
+    vaultEditIdx = i;
+    const addBtn = $("vaultAdd"); if (addBtn) addBtn.textContent = "💾 保存修改";
+    toast("正在编辑，改完点保存");
+    if (name) name.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  async function vaultDel(i) {
+    const e = vaultData.entries[i]; if (!e) return;
+    if (!confirm("删除「" + (e.name || "未命名") + "」？")) return;
+    vaultData.entries.splice(i, 1);
+    vaultRevealed = new Set(); vaultEditIdx = -1;
+    const addBtn = $("vaultAdd"); if (addBtn) addBtn.textContent = "💾 存入保险箱";
+    await vaultPersist();
+    vaultRenderBody();
+    toast("已删除");
+  }
+  function vaultLockBtn() {
+    vaultUnlocked = false; vaultData = null; vaultPass = ""; vaultRevealed = new Set(); vaultEditIdx = -1;
+    vaultShowLock();
+  }
+  function vaultCopyGen() {
+    const out = $("vaultGenOut");
+    if (out && out.value) vaultCopy(out.value); else toast("先生成一个密码");
+  }
+  function vaultGenToForm() {
+    const out = $("vaultGenOut"), pass = $("vaultPass");
+    if (out && out.value && pass) { pass.value = out.value; if (typeof playClick === "function") playClick(); }
+    else toast("先生成一个密码");
+  }
+  function vaultGenForField() {
+    vaultGen();
+    const out = $("vaultGenOut"), pass = $("vaultPass");
+    if (out && out.value && pass) pass.value = out.value;
+  }
+  function vaultExport() {
+    const blob = vaultBlob(); if (!blob) { toast("没有可导出的数据"); return; }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(blob, null, 2)], { type: "application/json" }));
+    a.download = "suibian-vault-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    toast("已导出加密备份（仍须主密码才能打开）");
+  }
+  function vaultImport() { const f = $("vaultFile"); if (f) f.click(); }
+  async function vaultDoImportFile(file) {
+    try {
+      const text = await file.text();
+      const blob = JSON.parse(text);
+      if (!blob || !blob.salt || !blob.iv || !blob.ct) throw new Error("bad");
+      if (!vaultPass) { toast("请先解锁再导入"); return; }
+      const data = await vaultDecrypt(blob, vaultPass);
+      if (!data || !Array.isArray(data.entries)) throw new Error("bad");
+      const before = vaultData.entries.length;
+      vaultData.entries = vaultData.entries.concat(data.entries || []);
+      vaultRevealed = new Set(); vaultEditIdx = -1;
+      await vaultPersist();
+      vaultRenderBody();
+      toast("已导入 " + (vaultData.entries.length - before) + " 条，合并到保险箱");
+    } catch (e) { toast("导入失败：文件无效或主密码不匹配"); }
+  }
+  function vaultChange() {
+    try {
+      const np = window.prompt("设置新的主密码（至少 4 位）");
+      if (!np) return;
+      if (np.length < 4) { toast("主密码至少 4 位"); return; }
+      const np2 = window.prompt("再输一次确认");
+      if (np !== np2) { toast("两次不一致"); return; }
+      vaultPass = np; vaultPersist();
+      toast("主密码已更新");
+    } catch (e) { toast("操作取消"); }
+  }
+  function vaultClear() {
+    if (!confirm("清空保险箱的全部账号（此操作不可恢复）？")) return;
+    localStorage.removeItem(VAULT_KEY);
+    vaultUnlocked = false; vaultData = null; vaultPass = ""; vaultRevealed = new Set(); vaultEditIdx = -1;
+    vaultShowLock();
+    toast("已清空");
+  }
+  (function vaultBind() {
+    const g = $("vaultGen"); if (g) g.addEventListener("click", vaultGen);
+    const cg = $("vaultCopyGen"); if (cg) cg.addEventListener("click", vaultCopyGen);
+    const tf = $("vaultGenToForm"); if (tf) tf.addEventListener("click", vaultGenToForm);
+    const gf = $("vaultGenForField"); if (gf) gf.addEventListener("click", vaultGenForField);
+    const len = $("vaultLen"); if (len) len.addEventListener("input", function () { const v = $("vaultLenVal"); if (v) v.textContent = len.value; });
+    const add = $("vaultAdd"); if (add) add.addEventListener("click", vaultAdd);
+    const lb = $("vaultLockBtn"); if (lb) lb.addEventListener("click", vaultLockBtn);
+    const ex = $("vaultExport"); if (ex) ex.addEventListener("click", vaultExport);
+    const im = $("vaultImport"); if (im) im.addEventListener("click", vaultImport);
+    const ch = $("vaultChange"); if (ch) ch.addEventListener("click", vaultChange);
+    const cl = $("vaultClear"); if (cl) cl.addEventListener("click", vaultClear);
+    const sr = $("vaultSearch"); if (sr) sr.addEventListener("input", vaultRenderList);
+    const fl = $("vaultFile"); if (fl) fl.addEventListener("change", function () { const f = fl.files && fl.files[0]; if (f) vaultDoImportFile(f); fl.value = ""; });
+    ["vaultUp", "vaultLow", "vaultNum", "vaultSym", "vaultNoAmb"].forEach(function (id) {
+      const el = $(id); if (el) el.addEventListener("change", function () { const o = $("vaultGenOut"); if (o && o.value) vaultStrength(o.value); });
+    });
   })();
 
   })();
