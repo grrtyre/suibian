@@ -1408,6 +1408,7 @@
     <button data-tab="life">⏳ 生命日历</button>
     <button data-tab="matrix">⚖️ 决策矩阵</button>
     <button data-tab="ledger">📒 小账簿</button>
+    <button data-tab="todo">📋 待办清单</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3337,6 +3338,59 @@
     </div>
   </section>
 
+  <section class="panel" id="todo">
+    <style>
+      .todo-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+      .todo-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);transition:.18s}
+      .todo-item:hover{border-color:var(--accent-3)}
+      .todo-item.done{opacity:.62}
+      .todo-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--accent-3);background:transparent;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto;line-height:1}
+      .todo-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+      .todo-text{flex:1;min-width:0;cursor:text;word-break:break-word;font-size:15px}
+      .todo-text.struck{text-decoration:line-through;color:var(--muted)}
+      .todo-prio{font-size:12px;font-weight:700;flex:0 0 auto}
+      .todo-due{font-size:12px;color:var(--muted);flex:0 0 auto}
+      .todo-due.over{color:#ff6b6b;font-weight:700}
+      .todo-act{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;padding:3px 5px;border-radius:6px;flex:0 0 auto}
+      .todo-act:hover{background:rgba(124,108,255,.16);color:var(--text)}
+      .todo-act.del:hover{color:#ff6b6b}
+      #todoStats{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+      #todoStats b{color:var(--text)}
+      #todoFocus{margin-top:6px}
+    </style>
+    <div class="card">
+      <h2>📋 待办清单 · 把脑子里的杂事倒出来</h2>
+      <div class="hint">想到什么就记什么，勾掉一件少一件。数据纯本地，绝不上传。</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <input class="inp" id="todoInput" type="text" placeholder="今天要做什么？回车添加…" style="flex:1;min-width:160px">
+        <input class="inp" id="todoDue" type="date" title="截止日期（可选）" style="width:150px">
+        <select class="inp" id="todoPrio" title="优先级" style="width:92px">
+          <option value="0">低</option>
+          <option value="1" selected>中</option>
+          <option value="2">高</option>
+        </select>
+        <button class="btn" id="todoAdd" type="button">＋ 添加</button>
+      </div>
+      <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px">
+        <div class="chips" id="todoFilters" style="margin:0">
+          <div class="chip on" data-f="all">全部</div>
+          <div class="chip" data-f="active">进行中</div>
+          <div class="chip" data-f="done">已完成</div>
+        </div>
+        <div class="chips" id="todoSorts" style="margin:0">
+          <div class="chip on" data-s="created">按添加</div>
+          <div class="chip" data-s="prio">按优先级</div>
+          <div class="chip" data-s="due">按截止</div>
+        </div>
+        <button class="btn ghost" id="todoClear" type="button" style="margin-left:auto">🧹 清空已完成</button>
+      </div>
+      <div class="todo-prog" id="todoProgressWrap" style="display:flex;align-items:center;gap:10px;margin-top:10px"></div>
+      <div id="todoStats"></div>
+      <div id="todoFocus" class="hint"></div>
+      <div class="todo-list" id="todoList"></div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3577,6 +3631,7 @@
     if (id === "life") lifeRender();
     if (id === "matrix") matrixLoad();
     if (id === "ledger") ledgerLoad();
+    if (id === "todo") todoLoad();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -3677,7 +3732,8 @@
     nonogram: "数织 逻辑拼图 填色 nonogram picross griddler 解谜 推理 行列线索 填格子 脑力 安静 专注 线索 宫格 行列",
     life: "生命 日历 人生 周历 一生 生日 星座 生命灵数 年龄 倒计时 时间 活了 剩余 寿命 你的人生 周 年 月份 进度 提醒 珍惜",
     matrix: "决策 矩阵 打分 加权 评估 选择 理性 比较 排序 选项 标准 权重 优先级 拍板",
-    ledger: "记账 账本 小账簿 记账本 收支 支出 收入 理财 花销 花了多少 预算 算账 账单 存钱 钱包 ledger 月支出 财务 管钱 消费 月底"
+    ledger: "记账 账本 小账簿 记账本 收支 支出 收入 理财 花销 花了多少 预算 算账 账单 存钱 钱包 ledger 月支出 财务 管钱 消费 月底",
+    todo: "待办 任务 清单 待办清单 任务清单 待办事项 打卡 计划 安排 功课 作业 买菜 日程 提醒 勾 完成 办事 今日 todo checklist task 列清单 想做的事 待办列表 干活"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -13392,6 +13448,125 @@
   BADGES.push(
     { emoji: "📒", name: "记账新手", desc: "记下第一笔账", test: (u) => (u.ledger || 0) >= 1 },
     { emoji: "📊", name: "理财达人", desc: "累计记账 30 笔", test: (u) => (u.ledger || 0) >= 30 }
+  );
+
+  // ===== 待办清单 todo =====
+  const TODO_KEY = "suibian_todo";
+  const TODO_PRIO = [
+    { k: 0, n: "低", c: "#9aa7c7" },
+    { k: 1, n: "中", c: "#ffb15c" },
+    { k: 2, n: "高", c: "#ff6b9d" }
+  ];
+  let todoState = { items: [], filter: "all", sort: "created" };
+  function todoLoadData() {
+    try { const raw = JSON.parse(localStorage.getItem(TODO_KEY) || "null"); if (raw && Array.isArray(raw.items)) return raw.items; } catch (e) {}
+    return [];
+  }
+  function todoSaveData(items) { try { localStorage.setItem(TODO_KEY, JSON.stringify({ items: items })); } catch (e) {} }
+  function todoTodayStr() { const d = new Date(), p = (n) => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+  function todoPrioName(k) { const x = TODO_PRIO.find((o) => o.k === k); return x ? x.n : "中"; }
+  function todoPrioColor(k) { const x = TODO_PRIO.find((o) => o.k === k); return x ? x.c : "#ffb15c"; }
+  function todoEsc(s) { return String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
+  function todoLoad() { todoState.items = todoLoadData(); todoRender(); }
+  function todoRender() {
+    const today = todoTodayStr();
+    const list = $("todoList"); if (!list) return;
+    let items = todoState.items.slice();
+    if (todoState.filter === "active") items = items.filter((t) => !t.done);
+    else if (todoState.filter === "done") items = items.filter((t) => t.done);
+    if (todoState.sort === "prio") items.sort((a, b) => (b.prio - a.prio) || (a.created - b.created));
+    else if (todoState.sort === "due") items.sort((a, b) => { const av = a.due || "9999-12-31", bv = b.due || "9999-12-31"; return av < bv ? -1 : av > bv ? 1 : a.created - b.created; });
+    const total = todoState.items.length, done = todoState.items.filter((t) => t.done).length, active = total - done;
+    const overdue = todoState.items.filter((t) => !t.done && t.due && t.due < today).length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const pw = $("todoProgressWrap");
+    if (pw) pw.innerHTML = '<div style="flex:1;height:10px;border-radius:99px;background:rgba(124,108,255,.15);overflow:hidden"><div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:99px;transition:width .3s"></div></div><div style="font-size:13px;color:var(--muted);min-width:54px;text-align:right">' + done + "/" + total + "</div>";
+    const st = $("todoStats");
+    if (st) st.innerHTML = '<span>🟢 进行中 <b>' + active + "</b></span><span>✅ 已完成 <b>" + done + "</b></span>" + (overdue ? '<span style="color:#ff6b6b">⏰ 逾期 <b>' + overdue + "</b></span>" : "");
+    const fz = $("todoFocus");
+    if (fz) { const cand = todoState.items.filter((t) => !t.done).sort((a, b) => (b.prio - a.prio) || ((a.due && b.due) ? (a.due < b.due ? -1 : 1) : 0) || (a.created - b.created))[0]; fz.innerHTML = cand ? ("💡 今日先搞定这件：<b style=\"color:var(--accent-2)\">" + todoEsc(cand.text) + "</b>") : "🎉 没有待办，去随便逛逛吧～"; }
+    if (!items.length) { list.innerHTML = '<div class="ld-empty">这里空空如也，加一件要事吧 ✍️</div>'; return; }
+    list.innerHTML = items.map((t) => {
+      const over = (!t.done && t.due && t.due < today);
+      const pc = todoPrioColor(t.prio);
+      return '<div class="todo-item' + (t.done ? " done" : "") + '" data-id="' + t.id + '">' +
+        '<button class="todo-check" data-act="toggle" type="button" aria-label="完成" style="' + (t.done ? "background:var(--accent);border-color:var(--accent)" : "") + '">' + (t.done ? "✓" : "") + "</button>" +
+        '<span class="todo-dot" style="background:' + pc + '" title="优先级：' + todoPrioName(t.prio) + '"></span>' +
+        '<span class="todo-text' + (t.done ? " struck" : "") + '" data-act="edit" title="点击编辑">' + todoEsc(t.text) + "</span>" +
+        (t.due ? '<span class="todo-due' + (over ? " over" : "") + '">' + (over ? "⏰ " : "📅 ") + t.due.slice(5) + "</span>" : "") +
+        '<span class="todo-prio" style="color:' + pc + '">' + todoPrioName(t.prio) + "</span>" +
+        '<button class="todo-act" data-act="up" type="button" title="提高优先级">▲</button>' +
+        '<button class="todo-act" data-act="down" type="button" title="降低优先级">▼</button>' +
+        '<button class="todo-act del" data-act="del" type="button" title="删除">✕</button>' +
+        "</div>";
+    }).join("");
+  }
+  function todoAdd() {
+    const inp = $("todoInput"); if (!inp) return;
+    const text = inp.value.trim(); if (!text) { toast("先写点什么吧"); return; }
+    const prioSel = $("todoPrio"), dueInp = $("todoDue");
+    const prio = prioSel ? (parseInt(prioSel.value, 10) || 1) : 1;
+    const due = dueInp ? (dueInp.value || "") : "";
+    todoState.items.unshift({ id: Date.now() + "_" + Math.floor(Math.random() * 1000), text: text.slice(0, 200), done: false, prio: prio, due: due, created: Date.now() });
+    if (todoState.items.length > 300) todoState.items.length = 300;
+    todoSaveData(todoState.items); inp.value = ""; if (dueInp) dueInp.value = ""; inp.focus();
+    playClick(); bumpUsage("todo");
+    const card = $("todo"); if (card) pop(card.querySelector(".card"));
+    todoRender(); toast("已添加 ✓");
+  }
+  function todoOnClick(e) {
+    const item = e.target.closest(".todo-item"); if (!item) return;
+    const t = todoState.items.find((x) => x.id === item.dataset.id); if (!t) return;
+    const aEl = e.target.closest("[data-act]"); const act = aEl ? aEl.dataset.act : null;
+    if (act === "toggle") {
+      t.done = !t.done;
+      if (t.done) { bumpUsage("todoDone"); playDing(); }
+      todoSaveData(todoState.items); todoRender();
+      if (t.done && !todoState.items.some((x) => !x.done) && todoState.items.length) confettiBurst(70);
+      return;
+    }
+    if (act === "del") { todoState.items = todoState.items.filter((x) => x.id !== t.id); todoSaveData(todoState.items); todoRender(); playClick(); return; }
+    if (act === "up" || act === "down") { let p = t.prio + (act === "up" ? 1 : -1); if (p < 0) p = 0; if (p > 2) p = 2; t.prio = p; todoSaveData(todoState.items); playClick(); todoRender(); return; }
+    if (act === "edit") todoEditInline(item, t);
+  }
+  function todoEditInline(item, t) {
+    const span = item.querySelector(".todo-text"); if (!span) return;
+    const input = document.createElement("input"); input.type = "text"; input.className = "inp"; input.value = t.text; input.style.flex = "1";
+    span.replaceWith(input); input.focus(); input.select();
+    let closed = false;
+    const finish = (save) => { if (closed) return; closed = true; if (save) { const v = input.value.trim(); if (v) t.text = v.slice(0, 200); } todoSaveData(todoState.items); todoRender(); };
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") finish(true); else if (e.key === "Escape") finish(false); });
+    input.addEventListener("blur", () => finish(true));
+  }
+  function todoClearDone() {
+    if (!todoState.items.some((t) => t.done)) { toast("没有已完成的待清"); return; }
+    todoState.items = todoState.items.filter((t) => !t.done); todoSaveData(todoState.items); todoRender(); playClick(); toast("已清空已完成 🧹");
+  }
+  function todoBind() {
+    const inp = $("todoInput"); if (inp) inp.addEventListener("keydown", (e) => { if (e.key === "Enter") todoAdd(); });
+    const add = $("todoAdd"); if (add) add.addEventListener("click", todoAdd);
+    const clr = $("todoClear"); if (clr) clr.addEventListener("click", todoClearDone);
+    const ff = $("todoFilters"); if (ff) ff.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => { ff.querySelectorAll(".chip").forEach((x) => x.classList.remove("on")); c.classList.add("on"); todoState.filter = c.dataset.f; playClick(); todoRender(); }));
+    const ss = $("todoSorts"); if (ss) ss.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => { ss.querySelectorAll(".chip").forEach((x) => x.classList.remove("on")); c.classList.add("on"); todoState.sort = c.dataset.s; playClick(); todoRender(); }));
+    const list = $("todoList"); if (list) list.addEventListener("click", todoOnClick);
+    todoState.items = todoLoadData(); todoRender();
+  }
+  todoBind();
+
+  BADGES.push(
+    { emoji: "📋", name: "行动派", desc: "记下第一件待办", test: (u) => (u.todo || 0) >= 1 },
+    { emoji: "✅", name: "完成达人", desc: "累计完成 20 件待办", test: (u) => (u.todoDone || 0) >= 20 }
+  );
+
+  QUOTES.push(
+    "待办清单不是负担，是把脑子里的杂事搬出来，给脑袋腾地方。",
+    "一件一件勾掉，比在脑子里打转强一百倍。",
+    "先吃掉那只最丑的青蛙，剩下的一天都轻巧。",
+    "列清单不是为了全做完，是为了知道先做什么。",
+    "想做的事写下来，它就从「总有一天」变成「今天」。",
+    "拖延的反面不是勤奋，是「先写下来，再动一下」。",
+    "完成比完美重要，勾掉一件，底气就多一分。",
+    "把大事拆成小勾，行动就没那么吓人了。"
   );
 
 
