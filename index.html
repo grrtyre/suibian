@@ -1282,6 +1282,31 @@
   .vault-empty { color: var(--muted); text-align: center; padding: 20px; font-size: 14px; }
   @media (max-width: 520px) { .vault-2col { flex-direction: column; } }
 
+  /* ---------- 生命日历 ---------- */
+  .life-form { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; margin:10px 0 4px; }
+  .life-form label { font-size:13px; color:var(--muted); display:flex; flex-direction:column; gap:5px; }
+  .life-form input { padding:9px 11px; border-radius:10px; border:1px solid var(--line); background:var(--bg-soft); color:var(--text); font-size:14px; }
+  .life-form input[type="date"] { min-width:170px; }
+  .life-form input[type="number"] { width:96px; }
+  .life-head { font-size:15px; font-weight:800; color:var(--accent); margin:14px 0 10px; text-align:center; letter-spacing:.3px; }
+  .life-bars { display:flex; flex-direction:column; gap:11px; margin:6px 0 16px; }
+  .life-bar .lab { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .life-bar .lab b { color:var(--accent); font-variant-numeric:tabular-nums; }
+  .life-bar .track { height:13px; border-radius:8px; background:var(--bg-soft); overflow:hidden; border:1px solid var(--line); }
+  .life-bar .fill { height:100%; border-radius:8px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .7s cubic-bezier(.22,1,.36,1); }
+  .life-grid-wrap { margin:8px 0; overflow-x:auto; }
+  .life-grid { display:grid; grid-template-columns:repeat(52,minmax(0,1fr)); gap:2px; min-width:520px; }
+  .lg { display:block; aspect-ratio:1; border-radius:2px; background:var(--bg-soft); border:1px solid var(--line); cursor:default; transition:transform .12s ease; }
+  .lg-past { background:var(--accent); border-color:transparent; }
+  .lg-now { background:#ffd166; border-color:#e0a800; box-shadow:0 0 0 2px rgba(255,209,102,.55); }
+  .lg-future { background:var(--bg-soft); }
+  .life-legend { display:flex; gap:18px; justify-content:center; font-size:12px; color:var(--muted); margin-top:10px; flex-wrap:wrap; }
+  .life-legend i.lg { display:inline-block; width:13px; height:13px; vertical-align:-2px; margin-right:5px; cursor:default; }
+  .life-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); gap:10px; margin-top:16px; }
+  .life-stats .box { background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:12px 8px; text-align:center; }
+  .life-stats .num { font-size:21px; font-weight:800; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .life-stats .lab { font-size:12px; color:var(--muted); margin-top:3px; }
+
 </style>
 </head>
 <body>
@@ -1380,6 +1405,7 @@
     <button data-tab="pet">🐱 云养猫</button>
     <button data-tab="reversi">♟️ 黑白棋</button>
     <button data-tab="nonogram">🧩 数织</button>
+    <button data-tab="life">⏳ 生命日历</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3181,6 +3207,32 @@
     </div>
   </section>
 
+  <!-- 生命日历 life -->
+  <section class="panel" id="life">
+    <div class="card">
+      <h2>⏳ 生命日历 · 你的一生周历</h2>
+      <div class="hint">输入生日，把这一生摊成一张「周」的网格——每一格是一周。纯属提醒自己好好生活，不恐怖、不联网。</div>
+      <div class="life-form">
+        <label>你的生日<input type="date" id="lifeBirth"></label>
+        <label>预期寿命（岁）<input type="number" id="lifeSpan" min="40" max="120" value="80"></label>
+        <button class="btn" id="lifeGo">📅 生成我的人生</button>
+      </div>
+      <div id="lifeOut" style="display:none">
+        <div class="life-head" id="lifeHead"></div>
+        <div class="life-bars" id="lifeBars"></div>
+        <div class="life-grid-wrap">
+          <div class="life-grid" id="lifeGrid"></div>
+          <div class="life-legend">
+            <span><i class="lg lg-past"></i>已度过</span>
+            <span><i class="lg lg-now"></i>本周</span>
+            <span><i class="lg lg-future"></i>未来</span>
+          </div>
+        </div>
+        <div class="life-stats" id="lifeStats"></div>
+      </div>
+    </div>
+  </section>
+
   </footer>
 </div>
 
@@ -3353,6 +3405,7 @@
     if (b.dataset.tab === "qfav") renderQfav();
     if (b.dataset.tab === "habit") renderHabit();
     if (b.dataset.tab !== "catch" && typeof catchStop === "function") catchStop();
+    if (b.dataset.tab === "life") lifeRender();
   });
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
@@ -3417,6 +3470,7 @@
     if (id === "nonogram") nonogramStart();
     if (id !== "nonogram" && typeof nonogramStop === "function") nonogramStop();
     if (id === "vault") vaultInit();
+    if (id === "life") lifeRender();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -3514,7 +3568,8 @@
     calc: "计算器 计算 算 数学 算式 算数 加减乘除 公式 运算 科学计算 表达式 算一笔",
     pet: "猫 宠物 养猫 云养猫 撸猫 铲屎 虚拟宠物 互动 喂养 玩耍 照顾 猫咪 电子宠物 喵 领养",
     reversi: "黑白棋 奥赛罗 othello 翻转棋 翻棋 棋 策略 对战 夹子 翻面 占角 棋盘 人机 电脑 五子棋 围棋 落子 反转 reversi 翻盘",
-    nonogram: "数织 逻辑拼图 填色 nonogram picross griddler 解谜 推理 行列线索 填格子 脑力 安静 专注 线索 宫格 行列"
+    nonogram: "数织 逻辑拼图 填色 nonogram picross griddler 解谜 推理 行列线索 填格子 脑力 安静 专注 线索 宫格 行列",
+    life: "生命 日历 人生 周历 一生 生日 星座 生命灵数 年龄 倒计时 时间 活了 剩余 寿命 你的人生 周 年 月份 进度 提醒 珍惜"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -5252,7 +5307,9 @@
     { emoji: "🧩", name: "数织新手", desc: "完成一局数织逻辑拼图", test: (u) => (u.nonogram || 0) >= 1 },
     { emoji: "🏆", name: "数织大师", desc: "解出数织困难 15×15", test: () => { try { return (parseInt(localStorage.getItem("suibian_nonogram_best_15") || "0", 10) || 0) > 0; } catch (e) { return false; } } },
     { emoji: "🔐", name: "守密人", desc: "在密码保险箱存入 1 条账号", test: (u) => (u.vault || 0) >= 1 },
-    { emoji: "🗝️", name: "宝藏管家", desc: "在密码保险箱累计存入 10 条", test: (u) => (u.vault || 0) >= 10 }
+    { emoji: "🗝️", name: "宝藏管家", desc: "在密码保险箱累计存入 10 条", test: (u) => (u.vault || 0) >= 10 },
+    { emoji: "⏳", name: "初窥生命", desc: "生成过一次生命日历", test: (u) => (u.life || 0) >= 1 },
+    { emoji: "🌳", name: "百年人生", desc: "把预期寿命设为 100 岁以上再看", test: (u) => (u.lifeLong || 0) >= 1 }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -12873,6 +12930,124 @@
       const el = $(id); if (el) el.addEventListener("change", function () { const o = $("vaultGenOut"); if (o && o.value) vaultStrength(o.value); });
     });
   })();
+
+  /* ========== 生命日历 · 一生周历 ========== */
+  const LIFE_KEY = "suibian_life";
+  let lifeData = { birth: "", span: 80 };
+  try { const r = JSON.parse(localStorage.getItem(LIFE_KEY) || "{}"); if (r && typeof r === "object") lifeData = Object.assign({}, lifeData, r); } catch (e) {}
+  function lifeZodiac(mm, dd) {
+    if ((mm === 1 && dd >= 20) || (mm === 2 && dd <= 18)) return "水瓶座";
+    if ((mm === 2 && dd >= 19) || (mm === 3 && dd <= 20)) return "双鱼座";
+    if ((mm === 3 && dd >= 21) || (mm === 4 && dd <= 19)) return "白羊座";
+    if ((mm === 4 && dd >= 20) || (mm === 5 && dd <= 20)) return "金牛座";
+    if ((mm === 5 && dd >= 21) || (mm === 6 && dd <= 21)) return "双子座";
+    if ((mm === 6 && dd >= 22) || (mm === 7 && dd <= 22)) return "巨蟹座";
+    if ((mm === 7 && dd >= 23) || (mm === 8 && dd <= 22)) return "狮子座";
+    if ((mm === 8 && dd >= 23) || (mm === 9 && dd <= 22)) return "处女座";
+    if ((mm === 9 && dd >= 23) || (mm === 10 && dd <= 23)) return "天秤座";
+    if ((mm === 10 && dd >= 24) || (mm === 11 && dd <= 22)) return "天蝎座";
+    if ((mm === 11 && dd >= 23) || (mm === 12 && dd <= 21)) return "射手座";
+    return "摩羯座";
+  }
+  const LIFE_NUMERO = {
+    1: "开拓者：天生冲劲，爱开头、带队，把想法变成现实。",
+    2: "协调者：柔和体贴，是人群里的润滑剂，安静却有分量。",
+    3: "表达者：爱热闹、有创意，聚会气氛担当，点子不重样。",
+    4: "建设者：踏实靠谱，认定了就一步步干，最想组队的人。",
+    5: "自由魂：好奇爱变坐不住，世界那么大，总想多看看。",
+    6: "守护者：有责任心重感情，习惯性把身边人照顾妥帖。",
+    7: "思考者：内敛爱琢磨，表面安静，脑内宇宙比谁都热闹。",
+    8: "掌舵人：有野心也有手腕，赚钱成事都不含糊。",
+    9: "博爱家：豁达有共情，看得到更大的世界，愿为别人撑伞。",
+    11: "灵感体（大师数）：敏感通透，常比别人先一步捕捉气息。",
+    22: "实干家（大师数）：既能看见远方，也有把蓝图落地的笨功夫。",
+    33: "引路人（大师数）：温暖有担当，天生适合照亮和带领别人。"
+  };
+  function lifePath(y, m, d) {
+    let s = 0;
+    String(y).split("").forEach((c) => (s += parseInt(c, 10)));
+    String(m).split("").forEach((c) => (s += parseInt(c, 10)));
+    String(d).split("").forEach((c) => (s += parseInt(c, 10)));
+    while (s > 9 && s !== 11 && s !== 22 && s !== 33) {
+      let t = 0; String(s).split("").forEach((c) => (t += parseInt(c, 10))); s = t;
+    }
+    return s;
+  }
+  function lifeFmtDate(dt) {
+    const mm = ("0" + (dt.getMonth() + 1)).slice(-2), dd = ("0" + dt.getDate()).slice(-2);
+    return dt.getFullYear() + "-" + mm + "-" + dd;
+  }
+  function lifeRender() {
+    const birthEl = $("lifeBirth"), spanEl = $("lifeSpan"), out = $("lifeOut");
+    if (!birthEl || !spanEl || !out) return;
+    const birth = birthEl.value;
+    let span = parseInt(spanEl.value, 10);
+    if (!span || span < 1) span = 80;
+    if (!birth) { out.style.display = "none"; toast("先填一下生日嘛～"); return; }
+    lifeData.birth = birth; lifeData.span = span;
+    try { localStorage.setItem(LIFE_KEY, JSON.stringify(lifeData)); } catch (e) {}
+    bumpUsage("life");
+    if (span >= 100) bumpUsage("lifeLong");
+    const b = new Date(birth + "T00:00:00");
+    if (isNaN(b.getTime())) { out.style.display = "none"; toast("生日格式不对哦"); return; }
+    const now = new Date();
+    const y = b.getFullYear(), m = b.getMonth() + 1, d = b.getDate();
+    const zodiac = lifeZodiac(m, d);
+    const lp = lifePath(y, m, d);
+    out.style.display = "";
+    $("lifeHead").innerHTML = "🎂 " + escapeHtml(birth) + " · <b>" + zodiac + "</b> · 生命灵数 <b>" + lp + "</b>";
+    const yearStart = new Date(now.getFullYear(), 0, 1), yearEnd = new Date(now.getFullYear() + 1, 0, 1);
+    const yearPct = ((now - yearStart) / (yearEnd - yearStart)) * 100;
+    const dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const monthPct = ((now.getDate() - 1 + (now.getHours() * 60 + now.getMinutes()) / 1440) / dim) * 100;
+    const dayPct = (now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60) / 1440 * 100;
+    const totalMs = span * 365.25 * 24 * 3600 * 1000;
+    const elapsedMs = Math.max(0, now - b);
+    const lifePct = Math.min(100, (elapsedMs / totalMs) * 100);
+    const bar = (lab, pct) =>
+      '<div class="life-bar"><div class="lab"><span>' + lab + '</span><b>' + pct.toFixed(1) + '%</b></div>' +
+      '<div class="track"><div class="fill" style="width:' + Math.max(0, Math.min(100, pct)).toFixed(2) + '%"></div></div></div>';
+    $("lifeBars").innerHTML =
+      bar("🌅 今年已过", yearPct) + bar("📆 本月已过", monthPct) +
+      bar("⏱️ 今日已过", dayPct) + bar("⌛ 一生已过（按预期寿命）", lifePct);
+    const weeks = Math.round(span * 52.1775);
+    const nowWeekIdx = Math.floor((now - b) / (7 * 24 * 3600 * 1000));
+    let html = "";
+    for (let i = 0; i < weeks; i++) {
+      const cls = i < nowWeekIdx ? "lg-past" : (i === nowWeekIdx ? "lg-now" : "lg-future");
+      const wd = new Date(b.getTime() + i * 7 * 24 * 3600 * 1000);
+      const yr = Math.floor(i / 52) + 1, wk = (i % 52) + 1;
+      const info = "第 " + yr + " 年 · 第 " + wk + " 周（约 " + lifeFmtDate(wd) + "）";
+      html += '<i class="lg ' + cls + '" data-info="' + escapeHtml(info) + '" title="' + escapeHtml(info) + '"></i>';
+    }
+    $("lifeGrid").innerHTML = html;
+    const daysLived = Math.max(0, Math.floor(elapsedMs / 86400000));
+    const age = Math.floor((now - b) / (365.25 * 24 * 3600 * 1000));
+    let nb = new Date(now.getFullYear(), m - 1, d);
+    if (nb < now) nb = new Date(now.getFullYear() + 1, m - 1, d);
+    const toBday = Math.ceil((nb - now) / 86400000);
+    const remainDays = Math.max(0, Math.round((totalMs - elapsedMs) / 86400000));
+    const stat = (num, lab) => '<div class="box"><div class="num">' + num + '</div><div class="lab">' + lab + '</div></div>';
+    $("lifeStats").innerHTML =
+      stat(daysLived.toLocaleString(), "已活天数") + stat(Math.max(0, age), "当前年龄") +
+      stat(lp, "生命灵数") + stat(toBday, "距下次生日(天)") +
+      stat(remainDays.toLocaleString(), "预计剩余(天)") + stat(zodiac, "星座");
+    if (lifePct > 0 && lifePct < 100) confettiBurst(40);
+  }
+  function lifeCellClick(e) {
+    const t = e.target.closest && e.target.closest(".lg");
+    if (!t || !t.dataset.info) return;
+    toast(t.dataset.info);
+  }
+  function lifeInit() {
+    const birthEl = $("lifeBirth"), spanEl = $("lifeSpan");
+    if (birthEl && lifeData.birth) birthEl.value = lifeData.birth;
+    if (spanEl && lifeData.span) spanEl.value = lifeData.span;
+    const go = $("lifeGo"); if (go) go.addEventListener("click", lifeRender);
+    const grid = $("lifeGrid"); if (grid) grid.addEventListener("click", lifeCellClick);
+    if (lifeData.birth) lifeRender();
+  }
+  lifeInit();
 
   })();
 
