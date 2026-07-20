@@ -1438,6 +1438,7 @@
     <button data-tab="compound">🧮 复利测算</button>
     <button data-tab="pipe">🚰 接水管</button>
     <button data-tab="pomodoro">🍅 番茄钟</button>
+    <button data-tab="md">📝 Markdown 编辑器</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3878,6 +3879,95 @@
     </div>
   </section>
 
+  <section class="panel" id="md">
+    <style>
+      #md .md-wrap{display:flex;flex-direction:column;gap:14px}
+      #md .md-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+      #md .md-toolbar button{padding:6px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--card2);color:var(--fg);cursor:pointer;font-size:13px;transition:.15s}
+      #md .md-toolbar button:hover{transform:translateY(-1px);border-color:var(--accent)}
+      #md .md-toolbar .sep{width:1px;height:22px;background:var(--bd);margin:0 3px}
+      #md .md-main{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-height:440px}
+      #md .md-col{display:flex;flex-direction:column;gap:8px;min-width:0}
+      #md .md-col label{font-size:13px;opacity:.7}
+      #md #md-input{flex:1;min-height:420px;resize:vertical;padding:14px;border-radius:14px;border:1px solid var(--bd);background:var(--card2);color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;line-height:1.7}
+      #md #md-preview{flex:1;min-height:420px;overflow:auto;padding:18px 22px;border-radius:14px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font-size:15px;line-height:1.8}
+      #md #md-preview h1{font-size:25px;border-bottom:2px solid var(--bd);padding-bottom:8px;margin:4px 0 14px}
+      #md #md-preview h2{font-size:20px;border-bottom:1px solid var(--bd);padding-bottom:6px;margin:18px 0 10px}
+      #md #md-preview h3{font-size:17px;margin:14px 0 8px}
+      #md #md-preview p{margin:9px 0}
+      #md #md-preview code{background:var(--card2);padding:2px 6px;border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+      #md #md-preview pre{background:var(--card2);padding:14px 16px;border-radius:12px;overflow:auto;line-height:1.55}
+      #md #md-preview pre code{background:transparent;padding:0}
+      #md #md-preview blockquote{margin:10px 0;padding:6px 16px;border-left:4px solid var(--accent);background:var(--card2);border-radius:0 10px 10px 0;color:var(--fg);opacity:.92}
+      #md #md-preview ul,#md #md-preview ol{margin:9px 0;padding-left:26px}
+      #md #md-preview li{margin:4px 0}
+      #md #md-preview a{color:var(--accent)}
+      #md #md-preview hr{border:0;border-top:1px solid var(--bd);margin:16px 0}
+      #md #md-preview table{border-collapse:collapse;margin:12px 0;width:100%}
+      #md #md-preview th,#md #md-preview td{border:1px solid var(--bd);padding:7px 11px;text-align:left}
+      #md #md-preview th{background:var(--card2)}
+      #md #md-preview img{max-width:100%;border-radius:10px}
+      #md #md-preview input[type=checkbox]{margin-right:6px;vertical-align:middle}
+      #md .md-foot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:13px;opacity:.85}
+      #md .md-stats{display:flex;gap:18px;flex-wrap:wrap}
+      #md .md-stats b{color:var(--accent)}
+      #md .md-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+      #md .md-actions .btn{font-size:13px;padding:7px 14px}
+      @media (max-width:760px){ #md .md-main{grid-template-columns:1fr} #md #md-preview{min-height:260px} #md .md-actions{margin-left:0} }
+    </style>
+    <div class="card">
+      <h2>📝 Markdown 编辑器</h2>
+      <div class="hint">左边写 Markdown，右边实时预览；自动保存草稿，可导出 .md / 独立 HTML、一键复制 HTML。</div>
+      <div class="md-wrap">
+        <div class="md-toolbar" id="md-toolbar">
+          <button data-md="h1">H1</button>
+          <button data-md="h2">H2</button>
+          <button data-md="h3">H3</button>
+          <span class="sep"></span>
+          <button data-md="bold">粗体</button>
+          <button data-md="italic">斜体</button>
+          <button data-md="strike">删除线</button>
+          <button data-md="code">代码</button>
+          <span class="sep"></span>
+          <button data-md="ul">列表</button>
+          <button data-md="ol">有序</button>
+          <button data-md="task">待办</button>
+          <button data-md="quote">引用</button>
+          <span class="sep"></span>
+          <button data-md="link">链接</button>
+          <button data-md="img">图片</button>
+          <button data-md="table">表格</button>
+          <button data-md="hr">分割线</button>
+        </div>
+        <div class="md-main">
+          <div class="md-col">
+            <label>Markdown 源码</label>
+            <textarea id="md-input" spellcheck="false" placeholder="在这里写下你的 Markdown…"></textarea>
+          </div>
+          <div class="md-col">
+            <label>实时预览</label>
+            <div id="md-preview"></div>
+          </div>
+        </div>
+        <div class="md-foot">
+          <div class="md-stats">
+            <span>字数 <b id="md-words">0</b></span>
+            <span>字符 <b id="md-chars">0</b></span>
+            <span>行数 <b id="md-lines">0</b></span>
+            <span>阅读 <b id="md-read">0</b> 分钟</span>
+          </div>
+          <div class="md-actions">
+            <button class="btn ghost" id="md-sample">载入示例</button>
+            <button class="btn ghost" id="md-clear">清空</button>
+            <button class="btn ghost" id="md-copy">复制 HTML</button>
+            <button class="btn" id="md-dlmd">下载 .md</button>
+            <button class="btn" id="md-dlhtml">导出 HTML</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -4267,6 +4357,7 @@
     if (id === "pipe") { if (!pipeState) pipeNew(); pipeStart(); }
     if (id !== "pipe" && typeof pipeStop === "function") pipeStop();
     if (id === "pomodoro") pomodoroStart();
+    if (id === "md") mdRender();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
@@ -4377,7 +4468,8 @@
     gradient: "渐变 配色 gradient css 背景 设计 颜色 色卡 网页 美化 主题 调色 渐变工坊 取色",
     compound: "复利 测算 理财 收益 投资 利息 本金 每月定投 攒钱 存款 增长 收益率 资产 规划 存钱 增值 退休 财务自由 滚雪球 长期",
     pipe: "接水管 水管 管道 通水 旋转 益智 逻辑 puzzle 连通 修水管 进水 出水 拧 布线",
-    pomodoro: "番茄钟 番茄 专注 时间管理 倒计时 休息 工作 效率 任务 待办 专注力 计时 pomodoro 番茄工作法 自律 25分钟 摸鱼  productivity"
+    pomodoro: "番茄钟 番茄 专注 时间管理 倒计时 休息 工作 效率 任务 待办 专注力 计时 pomodoro 番茄工作法 自律 25分钟 摸鱼  productivity",
+    md: "markdown 编辑器 写作 文档 笔记 富文本 预览 导出 语法 文本 排版 文章 md 笔记 草稿 文案 写作工具 标记语言 文档生成"
 
   };
   const toolSearch = $("toolSearch");
@@ -15217,6 +15309,279 @@
   BADGES.push(
     { emoji: "🍅", name: "番茄新手", desc: "完成第一个番茄钟", test: (u) => (u.pomodoro || 0) >= 1 },
     { emoji: "🔥", name: "专注达人", desc: "累计完成 25 个番茄钟", test: (u) => (u.pomodoro || 0) >= 25 }
+  );
+
+  /* ---------- Markdown 编辑器 md ---------- */
+  const MD_SAMPLE = '# 欢迎使用 Markdown 编辑器 ✍️\n\n左边写 **Markdown**，右边**实时预览**。\n\n- 支持 *斜体*、**粗体**、~~删除线~~ 与 `行内代码`\n- 支持 [链接](https://example.com)\n- 支持任务列表：\n  - [x] 写个标题\n  - [ ] 列个清单\n  - [ ] 导出成 HTML\n\n> 引用：把想法写下来，就完成了一半。\n\n## 代码块\n\n```js\nfunction hi() { console.log("你好，随便"); }\n```\n\n## 表格\n\n| 工具 | 用途 |\n| --- | --- |\n| 抽签 | 帮你想决定 |\n| 番茄钟 | 帮你专注 |\n\n---\n\n开始写点什么吧！';
+
+  function mdSafeUrl(url, allowData){
+    url = String(url || "").trim();
+    const low = url.toLowerCase();
+    if (/^(javascript|vbscript):/.test(low)) return "#";
+    if (low.indexOf("data:") === 0 && !(allowData && /^data:image\//.test(low))) return "#";
+    return url;
+  }
+  function mdInline(raw){
+    const codes = [];
+    let s = String(raw == null ? "" : raw).replace(/`([^`]+)`/g, (m, c) => { codes.push(c); return "@@CODE" + (codes.length - 1) + "@@"; });
+    const imgs = [];
+    s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g, (m, alt, url, title) => {
+      const u = mdSafeUrl(url, true);
+      const h = '<img src="' + escapeHtml(u) + '" alt="' + escapeHtml(alt) + '"' + (title ? ' title="' + escapeHtml(title) + '"' : "") + ">";
+      imgs.push(h); return "@@IMG" + (imgs.length - 1) + "@@";
+    });
+    const links = [];
+    s = s.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g, (m, t, url, title) => {
+      const u = mdSafeUrl(url, false);
+      const h = '<a href="' + escapeHtml(u) + '" target="_blank" rel="noopener"' + (title ? ' title="' + escapeHtml(title) + '"' : "") + ">" + escapeHtml(t) + "</a>";
+      links.push(h); return "@@LNK" + (links.length - 1) + "@@";
+    });
+    s = escapeHtml(s);
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/__([^_]+)__/g, "<strong>$1</strong>");
+    s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    s = s.replace(/(^|[^A-Za-z0-9_])_([^_]+)_(?=[^A-Za-z0-9_]|$)/g, "$1<em>$2</em>");
+    s = s.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+    s = s.replace(/@@LNK(\d+)@@/g, (m, i) => links[+i]);
+    s = s.replace(/@@IMG(\d+)@@/g, (m, i) => imgs[+i]);
+    s = s.replace(/@@CODE(\d+)@@/g, (m, i) => "<code>" + escapeHtml(codes[+i]) + "</code>");
+    return s;
+  }
+  function mdSplitRow(s){
+    s = String(s || "").trim();
+    if (s.charAt(0) === "|") s = s.slice(1);
+    if (s.slice(-1) === "|") s = s.slice(0, -1);
+    return s.split("|").map((c) => c.trim());
+  }
+  function mdTable(head, rows, aligns){
+    let h = "<table><thead><tr>";
+    head.forEach((c, i) => { h += "<th" + (aligns[i] ? ' style="text-align:' + aligns[i] + '"' : "") + ">" + mdInline(c) + "</th>"; });
+    h += "</tr></thead><tbody>";
+    rows.forEach((r) => { h += "<tr>"; for (let i = 0; i < head.length; i++) { h += "<td" + (aligns[i] ? ' style="text-align:' + aligns[i] + '"' : "") + ">" + mdInline(r[i] || "") + "</td>"; } h += "</tr>"; });
+    h += "</tbody></table>";
+    return h;
+  }
+  function mdBuildList(items, ctx){
+    const base = items[ctx.i].indent;
+    const ordered = items[ctx.i].ordered;
+    let html = ordered ? "<ol>" : "<ul>";
+    while (ctx.i < items.length){
+      const it = items[ctx.i];
+      if (it.indent !== base) break;
+      ctx.i++;
+      let li = "";
+      if (it.task) li += '<input type="checkbox" disabled' + (it.checked ? " checked" : "") + "> ";
+      li += mdInline(it.content);
+      if (ctx.i < items.length && items[ctx.i].indent > base) li += mdBuildList(items, ctx);
+      html += "<li>" + li + "</li>";
+    }
+    html += ordered ? "</ol>" : "</ul>";
+    return html;
+  }
+  function mdParseList(L, start){
+    const items = []; let i = start;
+    const isBlank = (x) => /^\s*$/.test(x);
+    while (i < L.length){
+      const ln = L[i];
+      if (isBlank(ln)) break;
+      const m = ln.match(/^(\s*)([-*+]|\d+\.)\s+(.*)$/);
+      if (!m) break;
+      const indent = m[1].length;
+      let content = m[3];
+      let task = false, checked = false;
+      const tm = content.match(/^\[([ xX])\]\s+(.*)$/);
+      if (tm){ task = true; checked = tm[1].toLowerCase() === "x"; content = tm[2]; }
+      items.push({ indent, ordered: /\d+\./.test(m[2]), task, checked, content });
+      i++;
+    }
+    const ctx = { i: 0 };
+    return { html: items.length ? mdBuildList(items, ctx) : "", next: i };
+  }
+  function mdRenderSrc(src){
+    src = String(src == null ? "" : src).replace(/\r\n?/g, "\n");
+    const lines = src.split("\n");
+    const blocks = []; const cleaned = [];
+    let inF = false, buf = [], lang = "";
+    for (let i = 0; i < lines.length; i++){
+      const fm = lines[i].match(/^```\s*([\w-]*)\s*$/);
+      if (fm){
+        if (!inF){ inF = true; lang = fm[1] || ""; buf = []; }
+        else { blocks.push({ lang: lang, code: buf.join("\n") }); cleaned.push("@@FENCE" + (blocks.length - 1) + "@@"); inF = false; }
+        continue;
+      }
+      if (inF){ buf.push(lines[i]); continue; }
+      cleaned.push(lines[i]);
+    }
+    if (inF){ blocks.push({ lang: lang, code: buf.join("\n") }); cleaned.push("@@FENCE" + (blocks.length - 1) + "@@"); }
+    const isBlank = (x) => /^\s*$/.test(x);
+    const fenceM = (x) => x.match(/^@@FENCE(\d+)@@$/);
+    const blockStart = (L, idx) => {
+      const line = L[idx];
+      if (isBlank(line)) return true;
+      if (fenceM(line)) return true;
+      if (/^#{1,6}\s+/.test(line)) return true;
+      if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)) return true;
+      if (/^\s*>/.test(line)) return true;
+      if (/^\s*([-*+]|\d+\.)\s+/.test(line)) return true;
+      if (/^```/.test(line)) return true;
+      if (line.indexOf("|") >= 0 && idx + 1 < L.length && /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(L[idx + 1]) && L[idx + 1].indexOf("-") >= 0) return true;
+      return false;
+    };
+    const out = []; let i = 0;
+    while (i < cleaned.length){
+      const line = cleaned[i];
+      const fm = fenceM(line);
+      if (fm){ const b = blocks[+fm[1]]; out.push("<pre><code" + (b.lang ? ' class="lang-' + escapeHtml(b.lang) + '"' : "") + ">" + escapeHtml(b.code) + "</code></pre>"); i++; continue; }
+      const hm = line.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/);
+      if (hm){ const lvl = hm[1].length; out.push("<h" + lvl + ">" + mdInline(hm[2]) + "</h" + lvl + ">"); i++; continue; }
+      if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)){ out.push("<hr>"); i++; continue; }
+      if (/^\s*>/.test(line)){
+        const q = [];
+        while (i < cleaned.length && /^\s*>/.test(cleaned[i])){ q.push(cleaned[i].replace(/^\s*>\s?/, "")); i++; }
+        out.push("<blockquote>" + mdRenderSrc(q.join("\n")) + "</blockquote>"); continue;
+      }
+      if (line.indexOf("|") >= 0 && i + 1 < cleaned.length && /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(cleaned[i + 1]) && cleaned[i + 1].indexOf("-") >= 0){
+        const head = mdSplitRow(line);
+        const aligns = mdSplitRow(cleaned[i + 1]).map((c) => { c = c.trim(); if (/^:.*:$/.test(c)) return "center"; if (/:$/.test(c)) return "right"; if (/^:/.test(c)) return "left"; return ""; });
+        i += 2; const rows = [];
+        while (i < cleaned.length && cleaned[i].indexOf("|") >= 0 && !isBlank(cleaned[i])){ rows.push(mdSplitRow(cleaned[i])); i++; }
+        out.push(mdTable(head, rows, aligns)); continue;
+      }
+      if (/^\s*([-*+]|\d+\.)\s+/.test(line)){
+        const r = mdParseList(cleaned, i); out.push(r.html); i = r.next; continue;
+      }
+      if (isBlank(line)){ i++; continue; }
+      const p = [];
+      while (i < cleaned.length && !blockStart(cleaned, i)){ p.push(cleaned[i]); i++; }
+      out.push("<p>" + mdInline(p.join("\n").replace(/\n/g, "<br>")) + "</p>");
+    }
+    return out.join("\n");
+  }
+  function mdStats(txt){
+    const chars = txt.length;
+    const lines = txt === "" ? 0 : txt.split("\n").length;
+    const cjk = (txt.match(/[一-鿿㐀-䶿]/g) || []).length;
+    const en = (txt.replace(/[一-鿿㐀-䶿]/g, " ").match(/[A-Za-z0-9]+/g) || []).length;
+    const words = cjk + en;
+    const read = words > 0 ? Math.max(1, Math.ceil(cjk / 300 + en / 200)) : 0;
+    $("md-words").textContent = words;
+    $("md-chars").textContent = chars;
+    $("md-lines").textContent = lines;
+    $("md-read").textContent = read;
+  }
+  function mdRender(){
+    const ta = $("md-input"); if (!ta) return;
+    const html = mdRenderSrc(ta.value);
+    $("md-preview").innerHTML = html || '<p style="opacity:.5">预览会显示在这里…</p>';
+    mdStats(ta.value);
+  }
+  function mdSave(){ try { localStorage.setItem("suibian_md", $("md-input").value); } catch (e) {} }
+  let mdUsed = false;
+  function mdInput(){
+    mdRender(); mdSave();
+    if (!mdUsed && $("md-input").value.trim()){ mdUsed = true; bumpUsage("md"); }
+  }
+  function mdWrap(b, a, text){
+    const ta = $("md-input"); const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+    ta.value = v.slice(0, s) + b + text + a + v.slice(e);
+    ta.selectionStart = s + b.length; ta.selectionEnd = s + b.length + text.length;
+    mdInput();
+  }
+  function mdLine(pre, v, s){
+    const ta = $("md-input");
+    const lineStart = v.lastIndexOf("\n", s - 1) + 1;
+    let insert = pre;
+    if (lineStart > 0 && v.charAt(lineStart - 1) !== "\n") insert = "\n" + pre;
+    ta.value = v.slice(0, lineStart) + insert + v.slice(lineStart);
+    ta.selectionStart = ta.selectionEnd = lineStart + insert.length;
+    mdInput();
+  }
+  function mdInsert(text, v, s){
+    const ta = $("md-input");
+    ta.value = v.slice(0, s) + text + v.slice(s);
+    ta.selectionStart = ta.selectionEnd = s + text.length;
+    mdInput();
+  }
+  function mdToolbar(k){
+    const ta = $("md-input"); ta.focus();
+    const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+    const sel = v.slice(s, e);
+    if (k === "bold") return mdWrap("**", "**", sel || "加粗文字");
+    if (k === "italic") return mdWrap("*", "*", sel || "斜体文字");
+    if (k === "strike") return mdWrap("~~", "~~", sel || "删除线");
+    if (k === "code") return mdWrap("`", "`", sel || "代码");
+    if (k === "link") return mdWrap("[", "](https://)", sel || "链接文字");
+    if (k === "img") return mdWrap("![", "](https://)", sel || "图片描述");
+    if (k === "h1") return mdLine("# ", v, s);
+    if (k === "h2") return mdLine("## ", v, s);
+    if (k === "h3") return mdLine("### ", v, s);
+    if (k === "ul") return mdLine("- ", v, s);
+    if (k === "ol") return mdLine("1. ", v, s);
+    if (k === "task") return mdLine("- [ ] ", v, s);
+    if (k === "quote") return mdLine("> ", v, s);
+    if (k === "hr") return mdLine("---", v, s);
+    if (k === "table") return mdInsert("\n| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n| 内容 | 内容 | 内容 |\n", v, s);
+  }
+  function mdCopyHtml(){
+    const html = mdRenderSrc($("md-input").value);
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(html).then(() => toast("已复制 HTML 源码 ✓"), () => mdCopyFallback(html));
+    } else { mdCopyFallback(html); }
+    bumpUsage("mdExports");
+  }
+  function mdCopyFallback(t){
+    const ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast("已复制 HTML 源码 ✓"); } catch (err) { toast("复制失败，请手动选择"); }
+    document.body.removeChild(ta);
+  }
+  function mdDownload(kind){
+    const ta = $("md-input");
+    let blob, name;
+    if (kind === "md"){ blob = new Blob([ta.value], { type: "text/markdown;charset=utf-8" }); name = "document.md"; }
+    else {
+      const css = "body{font-family:-apple-system,'Segoe UI','PingFang SC',sans-serif;max-width:780px;margin:40px auto;padding:0 20px;line-height:1.85;color:#222;word-break:break-word}pre{background:#f5f5f7;padding:14px 16px;border-radius:10px;overflow:auto}code{background:#f5f5f7;padding:2px 6px;border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace}blockquote{border-left:4px solid #7c6cff;margin:0;padding:8px 16px;background:#f7f6ff;color:#555}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px 11px}img{max-width:100%;border-radius:10px}a{color:#7c6cff}";
+      const doc = "<!doctype html><html lang='zh'><head><meta charset='utf-8'><title>随便 · Markdown 导出</title><style>" + css + "</style></head><body>" + mdRenderSrc(ta.value) + "</body></html>";
+      blob = new Blob([doc], { type: "text/html;charset=utf-8" }); name = "document.html";
+    }
+    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) {} }, 1500);
+    bumpUsage("mdExports");
+    toast(kind === "md" ? "已下载 document.md 📄" : "已导出 document.html 🌐");
+  }
+  function mdBind(){
+    const ta = $("md-input"); if (!ta) return;
+    let saved = "";
+    try { saved = localStorage.getItem("suibian_md") || ""; } catch (e) {}
+    if (!saved) saved = MD_SAMPLE;
+    ta.value = saved;
+    mdRender();
+    ta.addEventListener("input", mdInput);
+    const tb = $("md-toolbar");
+    if (tb) tb.addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; mdToolbar(b.dataset.md); });
+    $("md-sample").addEventListener("click", () => { ta.value = MD_SAMPLE; mdRender(); mdSave(); toast("已载入示例 ✍️"); bumpUsage("md"); });
+    $("md-clear").addEventListener("click", () => { if (ta.value && !confirm("确定清空当前内容？此操作不可撤销。")) return; ta.value = ""; mdRender(); mdSave(); toast("已清空"); });
+    $("md-copy").addEventListener("click", mdCopyHtml);
+    $("md-dlmd").addEventListener("click", () => mdDownload("md"));
+    $("md-dlhtml").addEventListener("click", () => mdDownload("html"));
+  }
+  mdBind();
+
+  BADGES.push(
+    { emoji: "📝", name: "写作新手", desc: "用 Markdown 编辑器写过东西", test: (u) => (u.md || 0) >= 1 },
+    { emoji: "📚", name: "文档达人", desc: "导出或复制文档 3 次", test: (u) => (u.mdExports || 0) >= 3 }
+  );
+
+  QUOTES.push(
+    "把想法写下来的那一刻，混乱就少了一半。",
+    "好文章不是写出来的，是一遍遍改出来的。",
+    "先完成，再完美；空白页最吓人，也最该被填满。",
+    "用 Markdown 写东西的好处：格式不抢戏，想法才是主角。",
+    "一段清晰的文档，胜过十句口头解释。",
+    "写不出来的时候，先写下「写不出来」这四个字。",
+    "标题是给读者指路，也是帮自己理清思路。",
+    "排版是第二种表达——留白对了，语气就对了。",
+    "随手记一句，日后可能就是一篇好文的开头。",
+    "把话说清楚，是一种被低估的超能力。"
   );
 
   })();
