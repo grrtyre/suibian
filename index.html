@@ -1437,6 +1437,7 @@
     <button data-tab="todo">📋 待办清单</button>
     <button data-tab="compound">🧮 复利测算</button>
     <button data-tab="pipe">🚰 接水管</button>
+    <button data-tab="pomodoro">🍅 番茄钟</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3807,6 +3808,76 @@
     </div>
   </section>
 
+  <!-- 番茄钟 -->
+  <section class="panel" id="pomodoro">
+    <style>
+      #pomodoro .pm-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+      #pomodoro .pm-ring{position:relative;width:240px;height:240px}
+      #pomodoro .pm-ring svg{transform:rotate(-90deg)}
+      #pomodoro .pm-time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+      #pomodoro .pm-time b{font-size:54px;font-variant-numeric:tabular-nums;line-height:1}
+      #pomodoro .pm-mode{font-size:15px;opacity:.7;margin-top:6px}
+      #pomodoro .pm-modes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+      #pomodoro .pm-modes button{padding:6px 16px;border-radius:999px;border:1px solid var(--bd);background:var(--card2);color:var(--fg);cursor:pointer;font-size:14px;transition:.15s}
+      #pomodoro .pm-modes button:hover{transform:translateY(-1px)}
+      #pomodoro .pm-modes button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+      #pomodoro .pm-ctrls{display:flex;gap:10px}
+      #pomodoro .pm-ctrls .btn{min-width:104px;font-size:16px}
+      #pomodoro .pm-cfg{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;font-size:13px;opacity:.85}
+      #pomodoro .pm-cfg label{display:flex;align-items:center;gap:6px}
+      #pomodoro .pm-cfg input{width:54px;padding:4px 6px;border-radius:8px;border:1px solid var(--bd);background:var(--card2);color:var(--fg);text-align:center}
+      #pomodoro .pm-stats{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;font-size:13px;opacity:.85}
+      #pomodoro .pm-stats b{font-size:20px;display:block;text-align:center;color:var(--accent)}
+      #pomodoro .pm-tasks{width:100%;max-width:460px;margin-top:4px;min-height:8px}
+      #pomodoro .pm-task{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;background:var(--card2);margin-bottom:6px;font-size:14px}
+      #pomodoro .pm-task.active{outline:2px solid var(--accent)}
+      #pomodoro .pm-task .nm{flex:1;cursor:pointer}
+      #pomodoro .pm-task .pg{font-size:12px;opacity:.7;white-space:nowrap}
+      #pomodoro .pm-task .x{cursor:pointer;opacity:.55;font-size:13px}
+      #pomodoro .pm-task.done .nm{text-decoration:line-through;opacity:.5}
+      #pomodoro .pm-add{display:flex;gap:8px;width:100%;max-width:460px}
+      #pomodoro .pm-add input{flex:1;padding:8px 10px;border-radius:10px;border:1px solid var(--bd);background:var(--card2);color:var(--fg)}
+    </style>
+    <div class="card">
+      <h2>🍅 番茄钟</h2>
+      <div class="hint">专注 25 分钟，休息 5 分钟；连续 4 个番茄后放个大假。进度自动存档，关掉网页也不丢。</div>
+      <div class="pm-wrap">
+        <div class="pm-modes" id="pm-modes">
+          <button data-m="focus" class="on">专注</button>
+          <button data-m="short">短休息</button>
+          <button data-m="long">长休息</button>
+        </div>
+        <div class="pm-ring">
+          <svg width="240" height="240" viewBox="0 0 240 240">
+            <circle cx="120" cy="120" r="108" fill="none" stroke="var(--bd)" stroke-width="14"/>
+            <circle id="pm-arc" cx="120" cy="120" r="108" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="678.58" stroke-dashoffset="0" style="transition:stroke-dashoffset .3s linear"/>
+          </svg>
+          <div class="pm-time"><b id="pm-time">25:00</b><span class="pm-mode" id="pm-modeLabel">专注时间</span></div>
+        </div>
+        <div class="pm-ctrls">
+          <button class="btn" id="pm-start">开始</button>
+          <button class="btn ghost" id="pm-reset">重置</button>
+        </div>
+        <div class="pm-cfg">
+          <label>专注 <input type="number" id="pm-focus" min="1" max="90" value="25"> 分</label>
+          <label>短休 <input type="number" id="pm-sb" min="1" max="30" value="5"> 分</label>
+          <label>长休 <input type="number" id="pm-lb" min="1" max="60" value="15"> 分</label>
+          <label>长休间隔 <input type="number" id="pm-iv" min="1" max="12" value="4"></label>
+        </div>
+        <div class="pm-stats">
+          <div><b id="pm-today">0</b>今日番茄</div>
+          <div><b id="pm-total">0</b>累计番茄</div>
+          <div><b id="pm-streak">0</b>本轮连击</div>
+        </div>
+        <div class="pm-add">
+          <input id="pm-taskInput" placeholder="加个任务，比如「写周报」…" maxlength="40"/>
+          <button class="btn" id="pm-taskAdd">添加</button>
+        </div>
+        <div class="pm-tasks" id="pm-tasks"></div>
+      </div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -4195,6 +4266,8 @@
     if (id === "compound") compoundCalc();
     if (id === "pipe") { if (!pipeState) pipeNew(); pipeStart(); }
     if (id !== "pipe" && typeof pipeStop === "function") pipeStop();
+    if (id === "pomodoro") pomodoroStart();
+    if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -4303,7 +4376,8 @@
     codec: "编码 解码 base64 url hex 十六进制 unicode 转换 进制 编解码 编码转换 字符 转码 文本 编码工具 加密 字符串",
     gradient: "渐变 配色 gradient css 背景 设计 颜色 色卡 网页 美化 主题 调色 渐变工坊 取色",
     compound: "复利 测算 理财 收益 投资 利息 本金 每月定投 攒钱 存款 增长 收益率 资产 规划 存钱 增值 退休 财务自由 滚雪球 长期",
-    pipe: "接水管 水管 管道 通水 旋转 益智 逻辑 puzzle 连通 修水管 进水 出水 拧 布线"
+    pipe: "接水管 水管 管道 通水 旋转 益智 逻辑 puzzle 连通 修水管 进水 出水 拧 布线",
+    pomodoro: "番茄钟 番茄 专注 时间管理 倒计时 休息 工作 效率 任务 待办 专注力 计时 pomodoro 番茄工作法 自律 25分钟 摸鱼  productivity"
 
   };
   const toolSearch = $("toolSearch");
@@ -5191,6 +5265,18 @@
     "生活像接水管——这头进、那头出，中间的弯都得自己拧。",
     "拧不动的时候，先松一口气，再转。",
     "接通的那一刻，整盘管子都亮了。"
+  );
+  QUOTES.push(
+    "专注 25 分钟，世界就安静了——剩下的交给那个更靠谱的自己。",
+    "番茄钟不是枷锁，是给拖延症的一记温柔耳光。",
+    "把大任务切成番茄，一口一口啃，就不怕噎着。",
+    "休息不是偷懒，是给下一个番茄蓄力。",
+    "连续四个番茄后的那场长休，是成年人仅有的合法发呆。",
+    "专注力像肌肉，越练越强，越刷手机越软。",
+    "别等状态好再开始，按下「开始」的那一刻，状态就来了。",
+    "一个番茄解决不了的问题，就两个；两个还不行，先去睡一觉。",
+    "把手机反扣的瞬间，你才真正拥有了这 25 分钟。",
+    "效率不是做得多，是把重要的事，在清醒时做完。"
   );
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -15010,6 +15096,127 @@
     { emoji: "🗓️", name: "择日达人", desc: "累计翻看老黄历 10 次", test: (u) => (u.huangli || 0) >= 10 },
     { emoji: "🔡", name: "转码新手", desc: "用过 1 次编码转换", test: (u) => (u.codec || 0) >= 1 },
     { emoji: "🧬", name: "编解码大师", desc: "累计转换 20 次", test: (u) => (u.codec || 0) >= 20 }
+  );
+
+  /* ================= 🍅 番茄钟 ================= */
+  const PM_KEY = "suibian_pomodoro";
+  const pmDef = { focus:25, sb:5, lb:15, iv:4, mode:"focus", running:false, endTime:0, remaining:0,
+                  cycle:0, today:"", todayCount:0, total:0, tasks:[], active:null };
+  function loadPM(){ try { const o = JSON.parse(localStorage.getItem(PM_KEY) || "{}"); return Object.assign({}, pmDef, o); } catch (e) { return Object.assign({}, pmDef); } }
+  function savePM(){ try { localStorage.setItem(PM_KEY, JSON.stringify(pm)); } catch (e) {} }
+  function todayStr(){ const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+  let pm = loadPM();
+  function pmDurMs(){ const m = pm.mode; const min = m === "focus" ? pm.focus : m === "short" ? pm.sb : pm.lb; return Math.max(1, min) * 60000; }
+  function pmRemaining(){ if (pm.running && pm.endTime) { const r = pm.endTime - Date.now(); return r > 0 ? r : 0; } return pm.remaining || 0; }
+  function pmFmt(ms){ const s = Math.ceil(ms / 1000); const m = Math.floor(s / 60); const ss = s % 60; return (m < 10 ? "0" : "") + m + ":" + (ss < 10 ? "0" : "") + ss; }
+  const PM_C = 678.58;
+  let pmTimer = null;
+  function pmDraw(){
+    const total = pmDurMs(), rem = pmRemaining(), frac = total > 0 ? rem / total : 0;
+    const arc = $("pm-arc"); if (arc) arc.style.strokeDashoffset = (PM_C * (1 - frac)).toFixed(2);
+    const t = $("pm-time"); if (t) t.textContent = pmFmt(rem);
+    const ml = $("pm-modeLabel"); if (ml) ml.textContent = pm.mode === "focus" ? "专注时间" : (pm.mode === "short" ? "短休息时间" : "长休息时间");
+    document.querySelectorAll("#pm-modes button").forEach((b) => b.classList.toggle("on", b.dataset.m === pm.mode));
+    const tg = $("pm-today"); if (tg) tg.textContent = pm.todayCount;
+    const tt = $("pm-total"); if (tt) tt.textContent = pm.total;
+    const st = $("pm-streak"); if (st) st.textContent = pm.cycle;
+    const box = $("pm-tasks");
+    if (box) {
+      box.innerHTML = pm.tasks.map((t, i) =>
+        '<div class="pm-task' + (t.done ? " done" : "") + (pm.active === i ? " active" : "") + '">' +
+        '<span class="nm" data-i="' + i + '">' + escapeHtml(t.name) + '</span>' +
+        '<span class="pg">🍅 ' + (t.done_count || 0) + "/" + t.est + '</span>' +
+        '<span class="x" data-x="' + i + '">✕</span></div>'
+      ).join("") || '<div class="hint" style="opacity:.6">还没有任务，加一个开始专注吧。</div>';
+    }
+    const setV = (id, v) => { const el = $(id); if (el && document.activeElement !== el) el.value = v; };
+    setV("pm-focus", pm.focus); setV("pm-sb", pm.sb); setV("pm-lb", pm.lb); setV("pm-iv", pm.iv);
+    const btn = $("pm-start"); if (btn) btn.textContent = pm.running ? "暂停" : "开始";
+  }
+  function pmTick(){
+    const rem = pmRemaining();
+    const t = $("pm-time"); if (t) t.textContent = pmFmt(rem);
+    const total = pmDurMs(), frac = total > 0 ? rem / total : 0;
+    const arc = $("pm-arc"); if (arc) arc.style.strokeDashoffset = (PM_C * (1 - frac)).toFixed(2);
+    if (pm.running && rem <= 0) pmComplete();
+  }
+  function pmStartTimer(){
+    if (pm.running) return;
+    if (!pm.remaining || pm.remaining <= 0) pm.remaining = pmDurMs();
+    pm.endTime = Date.now() + pm.remaining; pm.running = true; savePM();
+    if (!pmTimer) pmTimer = setInterval(pmTick, 250);
+    pmDraw();
+  }
+  function pmPauseTimer(){
+    if (!pm.running) return;
+    pm.remaining = Math.max(0, pm.endTime - Date.now()); pm.running = false; pm.endTime = 0; savePM(); pmDraw();
+  }
+  function pmReset(){ pm.running = false; pm.endTime = 0; pm.remaining = pmDurMs(); savePM(); pmDraw(); }
+  function pmSwitchMode(m){ pm.mode = m; pm.running = false; pm.endTime = 0; pm.remaining = pmDurMs(); savePM(); pmDraw(); }
+  function pmComplete(){
+    pm.running = false; pm.endTime = 0; pm.remaining = 0;
+    if (pm.mode === "focus") {
+      if (pm.today !== todayStr()) { pm.today = todayStr(); pm.todayCount = 0; }
+      pm.todayCount++; pm.total++; pm.cycle++;
+      bumpUsage("pomodoro");
+      if (pm.active != null && pm.tasks[pm.active] && !pm.tasks[pm.active].done) {
+        const tk = pm.tasks[pm.active]; tk.done_count = (tk.done_count || 0) + 1;
+        if (tk.done_count >= tk.est) tk.done = true;
+      }
+      if (settings.sound) playDing();
+      confettiBurst(60);
+      toast("🍅 完成一个番茄！休息一下~");
+      const needLong = (pm.cycle % Math.max(1, pm.iv)) === 0;
+      pm.mode = needLong ? "long" : "short";
+      if (needLong) pm.cycle = 0;
+    } else {
+      if (settings.sound) playDing();
+      toast("☕ 休息结束，继续加油！");
+      pm.mode = "focus";
+    }
+    pm.remaining = pmDurMs(); savePM(); pmDraw();
+    pmStartTimer();
+  }
+  function pmAddTask(){
+    const inp = $("pm-taskInput"); if (!inp) return; const v = inp.value.trim(); if (!v) return;
+    pm.tasks.push({ name: v, est: 1, done_count: 0, done: false }); inp.value = ""; savePM(); pmDraw();
+  }
+  function pmBind(){
+    if (!$("pm-start")) return;
+    $("pm-start").addEventListener("click", () => { if (pm.running) pmPauseTimer(); else pmStartTimer(); });
+    $("pm-reset").addEventListener("click", pmReset);
+    document.querySelectorAll("#pm-modes button").forEach((b) => b.addEventListener("click", () => pmSwitchMode(b.dataset.m)));
+    $("pm-taskAdd").addEventListener("click", pmAddTask);
+    $("pm-taskInput").addEventListener("keydown", (e) => { if (e.key === "Enter") pmAddTask(); });
+    $("pm-tasks").addEventListener("click", (e) => {
+      const x = e.target.closest(".x");
+      if (x) { pm.tasks.splice(+x.dataset.x, 1); if (pm.active >= pm.tasks.length) pm.active = null; savePM(); pmDraw(); return; }
+      const nm = e.target.closest(".nm");
+      if (nm) { const i = +nm.dataset.i; pm.active = (pm.active === i ? null : i); savePM(); pmDraw(); }
+    });
+    [["pm-focus", "focus"], ["pm-sb", "sb"], ["pm-lb", "lb"], ["pm-iv", "iv"]].forEach(([id, key]) => {
+      $(id).addEventListener("change", () => {
+        const v = parseInt($(id).value, 10); if (isNaN(v) || v < 1) return;
+        pm[key] = v; pm.remaining = pmDurMs(); savePM(); pmDraw();
+      });
+    });
+  }
+  function pomodoroStart(){
+    if (pm.running && pm.endTime && pm.endTime - Date.now() <= 0) { pm.remaining = 0; pmDraw(); pmComplete(); return; }
+    if (!pmTimer && pm.running) pmTimer = setInterval(pmTick, 250);
+    pmDraw();
+  }
+  function pomodoroStop(){ if (pmTimer) { clearInterval(pmTimer); pmTimer = null; } }
+  if (pm.today !== todayStr()) { pm.today = todayStr(); pm.todayCount = 0; savePM(); }
+  if (pm.running && pm.endTime) {
+    if (pm.endTime - Date.now() <= 0) { pm.remaining = 0; pmDraw(); pmComplete(); }
+    else { pmTimer = setInterval(pmTick, 250); }
+  }
+  pmBind(); pmDraw();
+
+  BADGES.push(
+    { emoji: "🍅", name: "番茄新手", desc: "完成第一个番茄钟", test: (u) => (u.pomodoro || 0) >= 1 },
+    { emoji: "🔥", name: "专注达人", desc: "累计完成 25 个番茄钟", test: (u) => (u.pomodoro || 0) >= 25 }
   );
 
   })();
