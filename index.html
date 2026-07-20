@@ -1439,6 +1439,7 @@
     <button data-tab="pipe">🚰 接水管</button>
     <button data-tab="pomodoro">🍅 番茄钟</button>
     <button data-tab="md">📝 Markdown 编辑器</button>
+    <button data-tab="mindmap">🗺️ 思维导图</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3743,6 +3744,7 @@
       <h3 style="margin:16px 0 2px">我的收藏</h3>
       <div class="gw-favs" id="gwFavs"></div>
     </div>
+  </section>
   <section class="panel" id="compound">
     <style>
       #compound .cmp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
@@ -3966,6 +3968,59 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- 思维导图 -->
+  <section class="panel" id="mindmap">
+    <div class="card">
+      <h2>🗺️ 思维导图</h2>
+      <div class="hint">把想法摊成一张图：加子节点、拖拽整理、换色分支、折叠收起，一键导出 PNG。</div>
+      <div class="mm-wrap">
+        <div class="mm-side">
+          <div class="mm-row">
+            <select id="mm-maps" class="mm-select" title="切换导图"></select>
+          </div>
+          <div class="mm-row mm-btns">
+            <button class="btn ghost sm" id="mm-new">＋ 新建</button>
+            <button class="btn ghost sm" id="mm-rename">改名</button>
+            <button class="btn ghost sm danger" id="mm-del">删图</button>
+            <button class="btn ghost sm" id="mm-sample">示例</button>
+          </div>
+          <div class="mm-sep">选中节点后可操作：</div>
+          <div class="mm-row mm-btns">
+            <button class="btn sm" id="mm-addchild">＋ 子节点</button>
+            <button class="btn sm" id="mm-addsib">＋ 同级</button>
+            <button class="btn sm" id="mm-rename2">✏ 改名</button>
+            <button class="btn sm" id="mm-color">🎨 换色</button>
+            <button class="btn sm" id="mm-toggle">⤢ 折叠</button>
+            <button class="btn sm danger" id="mm-delnode">🗑 删除</button>
+          </div>
+          <div class="mm-sep">画布：</div>
+          <div class="mm-row mm-btns">
+            <button class="btn ghost sm" id="mm-fit">🔍 适应</button>
+            <button class="btn ghost sm" id="mm-zin">＋</button>
+            <button class="btn ghost sm" id="mm-zout">－</button>
+            <button class="btn ghost sm" id="mm-reset">↺ 重排</button>
+            <button class="btn sm" id="mm-png">📷 导出PNG</button>
+          </div>
+          <div class="mm-saved" id="mm-saved"></div>
+        </div>
+        <div class="mm-canvas" id="mm-canvas"></div>
+      </div>
+    </div>
+    <style>
+      .mm-wrap { display: flex; gap: 16px; align-items: stretch; margin-top: 14px; }
+      .mm-side { width: 236px; flex: none; display: flex; flex-direction: column; gap: 8px; }
+      .mm-row { display: flex; gap: 6px; flex-wrap: wrap; }
+      .mm-btns .btn { flex: 1 1 auto; }
+      .mm-select { width: 100%; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--bd, #e2e2ef); background: var(--card, #fff); color: inherit; font-size: 14px; }
+      .mm-sep { font-size: 12px; opacity: .55; margin-top: 4px; }
+      .mm-saved { font-size: 12px; color: #2ecc71; opacity: 0; transition: opacity .3s; min-height: 16px; }
+      .mm-saved.show { opacity: 1; }
+      .mm-canvas { flex: 1 1 auto; min-height: 470px; border-radius: 14px; overflow: hidden; background: #fbfbff; border: 1px solid var(--bd, #eaeaf3); position: relative; touch-action: none; }
+      .mm-canvas svg { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; }
+      @media (max-width: 720px) { .mm-wrap { flex-direction: column; } .mm-side { width: 100%; } .mm-canvas { min-height: 360px; } }
+    </style>
   </section>
 
 <script>
@@ -4358,6 +4413,7 @@
     if (id !== "pipe" && typeof pipeStop === "function") pipeStop();
     if (id === "pomodoro") pomodoroStart();
     if (id === "md") mdRender();
+    if (id === "mindmap") mmRender();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
@@ -4469,7 +4525,8 @@
     compound: "复利 测算 理财 收益 投资 利息 本金 每月定投 攒钱 存款 增长 收益率 资产 规划 存钱 增值 退休 财务自由 滚雪球 长期",
     pipe: "接水管 水管 管道 通水 旋转 益智 逻辑 puzzle 连通 修水管 进水 出水 拧 布线",
     pomodoro: "番茄钟 番茄 专注 时间管理 倒计时 休息 工作 效率 任务 待办 专注力 计时 pomodoro 番茄工作法 自律 25分钟 摸鱼  productivity",
-    md: "markdown 编辑器 写作 文档 笔记 富文本 预览 导出 语法 文本 排版 文章 md 笔记 草稿 文案 写作工具 标记语言 文档生成"
+    md: "markdown 编辑器 写作 文档 笔记 富文本 预览 导出 语法 文本 排版 文章 md 笔记 草稿 文案 写作工具 标记语言 文档生成",
+    mindmap: "思维导图 脑图 大纲 结构 想法 规划 分支 树状 整理 思路 关系 概念 map mind 笔记 知识 框架 梳理 节点"
 
   };
   const toolSearch = $("toolSearch");
@@ -15582,6 +15639,317 @@
     "排版是第二种表达——留白对了，语气就对了。",
     "随手记一句，日后可能就是一篇好文的开头。",
     "把话说清楚，是一种被低估的超能力。"
+  );
+
+  /* ===== 🗺️ 思维导图 mindmap ===== */
+  const MM_KEY = "suibian_mindmaps";
+  const MM_PALETTE = ["#7c6cff", "#ff6b9d", "#2ecc71", "#ffa94d", "#5b9bff", "#ffd166", "#c06bff", "#e0533d", "#26c6da", "#8d6e63"];
+  let mmState = { maps: [], cur: null, view: { x: 0, y: 0, w: 1200, h: 800 }, sel: null, _t: 0 };
+  function mmUid() { return "n" + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36); }
+  function mmNode(text, color) { return { id: mmUid(), text: text || "新节点", color: color || MM_PALETTE[0], children: [], collapsed: false, dx: 0, dy: 0 }; }
+  function mmCharW(ch) { return /[\x00-\xff]/.test(ch) ? 8.5 : 15; }
+  function mmWrap(text) {
+    const MAXW = 210; const out = []; let line = ""; let w = 0;
+    const chars = Array.from((text || "").toString().trim() || " ");
+    chars.forEach((ch) => { const cw = mmCharW(ch); if (w + cw > MAXW && line) { out.push(line); line = ch; w = cw; } else { line += ch; w += cw; } });
+    if (line) out.push(line);
+    return out;
+  }
+  function mmBoxW(text) { const lines = mmWrap(text); let m = 0; lines.forEach((l) => { let w = 0; Array.from(l).forEach((c) => w += mmCharW(c)); m = Math.max(m, w); }); return Math.min(264, Math.max(74, Math.round(m) + 26)); }
+  function mmBoxH(text) { return Math.max(38, mmWrap(text).length * 20 + 16); }
+  function mmEsc(s) { return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+  function mmLoadAll() { try { const a = JSON.parse(localStorage.getItem(MM_KEY)); if (Array.isArray(a)) return a; } catch (e) {} return null; }
+  function mmSaveAll() { try { localStorage.setItem(MM_KEY, JSON.stringify(mmState.maps)); } catch (e) {} }
+  function mmCur() { return mmState.maps.find((m) => m.id === mmState.cur) || null; }
+  function mmFind(map, id) {
+    let res = null;
+    (function walk(n, parent, idx) { if (n.id === id) { res = { node: n, parent: parent, index: idx }; return; } (n.children || []).forEach((c, i) => walk(c, n, i)); })(map.root, null, -1);
+    return res;
+  }
+  function mmInit() {
+    let maps = mmLoadAll();
+    if (!maps || !maps.length) {
+      const root = mmNode("中心主题", MM_PALETTE[0]);
+      maps = [{ id: mmUid(), name: "我的第一张导图", root: root }];
+      mmState.maps = maps; mmState.cur = maps[0].id; mmSaveAll();
+    } else { mmState.maps = maps; mmState.cur = maps[0].id; }
+    if (!mmCur()) mmState.cur = mmState.maps[0].id;
+  }
+  function mmMeasure(n, depth) { n._w = mmBoxW(n.text); n._depth = depth; (n.children || []).forEach((c) => mmMeasure(c, depth + 1)); }
+  function mmLayout(root) {
+    mmMeasure(root, 0);
+    const maxW = {};
+    (function dw(n) { maxW[n._depth] = Math.max(maxW[n._depth] || 0, n._w); (n.children || []).forEach(dw); })(root);
+    const GAP = 70, MARGIN = 50; const colX = {}; let x = MARGIN;
+    Object.keys(maxW).map(Number).sort((a, b) => a - b).forEach((d) => { colX[d] = x; x += maxW[d] + GAP; });
+    const cur = { y: MARGIN + 50 };
+    (function place(n, depth) {
+      n._x = colX[depth];
+      const kids = (!n.collapsed && n.children) ? n.children : [];
+      if (!kids.length) { n._y = cur.y; cur.y += 54; return n._y; }
+      let first, last;
+      kids.forEach((c) => { const cy = place(c, depth + 1); if (first === undefined) first = cy; last = cy; });
+      n._y = (first + last) / 2;
+      return n._y;
+    })(root, 0);
+  }
+  function mmBuildSVG(forExport) {
+    const map = mmCur(); if (!map) return "";
+    mmLayout(map.root);
+    const nodes = [];
+    (function walk(n) { nodes.push(n); if (!n.collapsed) (n.children || []).forEach(walk); })(map.root);
+    let edges = "";
+    (function walk(n) {
+      if (!n.collapsed) (n.children || []).forEach((c) => {
+        const x1 = n._x + n._w, y1 = n._y, x2 = c._x, y2 = c._y, mx = (x1 + x2) / 2;
+        edges += '<path d="M' + x1 + ' ' + y1 + ' C ' + mx + ' ' + y1 + ' ' + mx + ' ' + y2 + ' ' + x2 + ' ' + y2 + '" stroke="' + n.color + '" stroke-opacity="0.55" stroke-width="2.5" fill="none"/>';
+        walk(c);
+      });
+    })(map.root);
+    let bodies = "";
+    nodes.forEach((n) => {
+      const w = n._w, h = mmBoxH(n), x = n._x + (n.dx || 0), y = n._y + (n.dy || 0) - h / 2;
+      const lines = mmWrap(n.text), lh = 20, ty = y + h / 2 - (lines.length - 1) * lh / 2 - 1;
+      const tspans = lines.map((l, i) => '<tspan x="' + (x + w / 2) + '" y="' + (ty + i * lh) + '">' + mmEsc(l) + '</tspan>').join("");
+      const isRoot = (n.id === map.root.id);
+      const sel = (n.id === mmState.sel);
+      const stroke = sel ? "#222" : (isRoot ? n.color : "rgba(0,0,0,0.13)");
+      const sw = sel ? 3.5 : (isRoot ? 2.5 : 1.6);
+      const fill = isRoot ? n.color : "#ffffff";
+      const txtFill = isRoot ? "#fff" : "#2b2b3a";
+      bodies += '<g class="mm-node" data-id="' + n.id + '" style="cursor:pointer">' +
+        '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="13" ry="13" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + sw + '"/>' +
+        '<text text-anchor="middle" font-size="14" font-family="-apple-system,Segoe UI,PingFang SC,sans-serif" font-weight="' + (isRoot ? 700 : 500) + '" fill="' + txtFill + '">' + tspans + '</text>' +
+        (n.collapsed && (n.children || []).length ? '<g><circle cx="' + (x + w) + '" cy="' + (y + h / 2) + '" r="8" fill="' + n.color + '" stroke="#fff" stroke-width="2"/><text x="' + (x + w) + '" y="' + (y + h / 2 + 3.5) + '" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="sans-serif">' + (n.children || []).length + '</text></g>' : '') +
+        '</g>';
+    });
+    let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    nodes.forEach((n) => { const w = n._w, h = mmBoxH(n); minX = Math.min(minX, n._x + (n.dx || 0)); minY = Math.min(minY, n._y + (n.dy || 0) - h / 2); maxX = Math.max(maxX, n._x + (n.dx || 0) + w); maxY = Math.max(maxY, n._y + (n.dy || 0) + h / 2); });
+    const pad = 40;
+    const vx = minX - pad, vy = minY - pad, vw = Math.max(200, maxX - minX + pad * 2), vh = Math.max(160, maxY - minY + pad * 2);
+    const vb = forExport ? (vx + " " + vy + " " + vw + " " + vh) : (mmState.view.x + " " + mmState.view.y + " " + mmState.view.w + " " + mmState.view.h);
+    const bg = '<rect x="' + (forExport ? vx : mmState.view.x) + '" y="' + (forExport ? vy : mmState.view.y) + '" width="' + (forExport ? vw : mmState.view.w) + '" height="' + (forExport ? vh : mmState.view.h) + '" fill="#fbfbff"/>';
+    const sizeAttr = forExport ? ('width="' + Math.round(vw) + '" height="' + Math.round(vh) + '"') : 'width="100%" height="100%"';
+    return '<svg xmlns="http://www.w3.org/2000/svg" ' + sizeAttr + ' viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet" font-family="-apple-system,Segoe UI,PingFang SC,sans-serif">' + bg + '<g>' + edges + '</g>' + bodies + '</svg>';
+  }
+  function mmRender() { const c = $("mm-canvas"); if (!c) return; c.innerHTML = mmBuildSVG(false); }
+  function mmFit() {
+    const map = mmCur(); if (!map) return;
+    mmLayout(map.root);
+    const nodes = []; (function walk(n) { nodes.push(n); if (!n.collapsed) (n.children || []).forEach(walk); })(map.root);
+    let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    nodes.forEach((n) => { const w = n._w, h = mmBoxH(n); minX = Math.min(minX, n._x + (n.dx || 0)); minY = Math.min(minY, n._y + (n.dy || 0) - h / 2); maxX = Math.max(maxX, n._x + (n.dx || 0) + w); maxY = Math.max(maxY, n._y + (n.dy || 0) + h / 2); });
+    const pad = 50;
+    mmState.view = { x: minX - pad, y: minY - pad, w: Math.max(200, maxX - minX + pad * 2), h: Math.max(160, maxY - minY + pad * 2) };
+    mmRender();
+  }
+  function mmClientToSvg(svg, cx, cy) {
+    const ctm = svg.getScreenCTM(); if (!ctm) return { x: 0, y: 0 };
+    const p = new DOMPoint(cx, cy).matrixTransform(ctm.inverse());
+    return { x: p.x, y: p.y };
+  }
+  function mmSaved() { const el = $("mm-saved"); if (el) { el.textContent = "已自动保存 ✓"; el.classList.add("show"); clearTimeout(mmState._t); mmState._t = setTimeout(() => el.classList.remove("show"), 1200); } }
+  function mmRefreshSelect() {
+    const sel = $("mm-maps"); if (!sel) return;
+    sel.innerHTML = mmState.maps.map((m) => '<option value="' + m.id + '">' + mmEsc(m.name) + '</option>').join("");
+    sel.value = mmState.cur;
+  }
+  function mmBumpEdit() { bumpUsage("mindmap"); try { usage.mindmapMaps = Math.max(usage.mindmapMaps || 0, mmState.maps.length); localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {} }
+  function mmAddChild() {
+    const map = mmCur(); if (!map) return;
+    const f = (mmState.sel && mmFind(map, mmState.sel)) || null;
+    const target = f ? f.node : map.root;
+    const node = mmNode("新节点", target.color);
+    target.children = target.children || [];
+    target.children.push(node);
+    mmState.sel = node.id; mmSaveAll(); mmBumpEdit(); mmFit(); mmSaved();
+    toast("已添加子节点 ✚");
+  }
+  function mmAddSibling() {
+    const map = mmCur(); if (!map) return;
+    const f = mmState.sel ? mmFind(map, mmState.sel) : null;
+    if (!f || !f.parent) { mmAddChild(); return; }
+    const node = mmNode("新节点", f.node.color);
+    f.parent.children.splice(f.index + 1, 0, node);
+    mmState.sel = node.id; mmSaveAll(); mmBumpEdit(); mmFit(); mmSaved();
+    toast("已添加同级节点 ✚");
+  }
+  function mmDelNode() {
+    const map = mmCur(); if (!map) return;
+    const f = mmState.sel ? mmFind(map, mmState.sel) : null;
+    if (!f || !f.parent) { toast("根节点不能删哦"); return; }
+    f.parent.children.splice(f.index, 1);
+    mmState.sel = f.parent.id; mmSaveAll(); mmBumpEdit(); mmFit(); mmSaved();
+    toast("已删除节点 🗑");
+  }
+  function mmRename() {
+    const map = mmCur(); if (!map) return;
+    const f = mmState.sel ? mmFind(map, mmState.sel) : null;
+    const node = f ? f.node : map.root;
+    const v = prompt("修改节点文字：", node.text);
+    if (v === null) return;
+    node.text = v.trim() || "未命名";
+    mmSaveAll(); mmBumpEdit(); mmFit(); mmSaved();
+  }
+  function mmRecolor() {
+    const map = mmCur(); if (!map) return;
+    const f = mmState.sel ? mmFind(map, mmState.sel) : null;
+    const node = f ? f.node : map.root;
+    const i = MM_PALETTE.indexOf(node.color);
+    node.color = MM_PALETTE[(i + 1) % MM_PALETTE.length];
+    mmSaveAll(); mmBumpEdit(); mmRender(); mmSaved();
+  }
+  function mmToggle() {
+    const map = mmCur(); if (!map) return;
+    const f = mmState.sel ? mmFind(map, mmState.sel) : null;
+    const node = f ? f.node : map.root;
+    if (!(node.children || []).length) { toast("这个节点没有下级"); return; }
+    node.collapsed = !node.collapsed;
+    mmSaveAll(); mmBumpEdit(); mmFit(); mmSaved();
+  }
+  function mmNewMap() {
+    const root = mmNode("中心主题", MM_PALETTE[Math.floor(Math.random() * MM_PALETTE.length)]);
+    const m = { id: mmUid(), name: "新导图 " + (mmState.maps.length + 1), root: root };
+    mmState.maps.push(m); mmState.cur = m.id; mmState.sel = null;
+    mmRefreshSelect(); mmSaveAll(); mmBumpEdit(); mmFit(); mmSaved();
+    toast("已新建导图 🗺️");
+  }
+  function mmRenameMap() {
+    const map = mmCur(); if (!map) return;
+    const v = prompt("改名这张导图：", map.name);
+    if (v === null) return;
+    map.name = v.trim() || "未命名导图";
+    mmRefreshSelect(); mmSaveAll(); mmSaved();
+  }
+  function mmDelMap() {
+    if (mmState.maps.length <= 1) { toast("至少保留一张导图"); return; }
+    if (!confirm("确定删除当前这张导图？此操作不可撤销。")) return;
+    mmState.maps = mmState.maps.filter((m) => m.id !== mmState.cur);
+    mmState.cur = mmState.maps[0].id; mmState.sel = null;
+    mmRefreshSelect(); mmSaveAll(); mmFit(); mmSaved();
+    toast("已删除导图");
+  }
+  function mmSample() {
+    const map = mmCur(); if (!map) return;
+    const root = mmNode("如何学一门新技能", MM_PALETTE[0]);
+    const a = mmNode("明确目标", MM_PALETTE[1]); a.children = [mmNode("想达到什么程度", MM_PALETTE[1]), mmNode("为什么想学", MM_PALETTE[1])];
+    const b = mmNode("拆解步骤", MM_PALETTE[2]); b.children = [mmNode("每天 30 分钟", MM_PALETTE[2]), mmNode("先搞定基础", MM_PALETTE[2]), mmNode("做小项目练手", MM_PALETTE[2])];
+    const c = mmNode("找资源", MM_PALETTE[3]); c.children = [mmNode("免费教程", MM_PALETTE[3]), mmNode("同好社群", MM_PALETTE[3])];
+    const d = mmNode("保持动力", MM_PALETTE[4]); d.children = [mmNode("记录进步", MM_PALETTE[4]), mmNode("允许偶尔摆烂", MM_PALETTE[4])];
+    root.children = [a, b, c, d];
+    map.root = root; map.name = "示例：如何学一门新技能"; mmState.sel = null;
+    mmRefreshSelect(); mmSaveAll(); mmBumpEdit(); mmFit(); mmSaved();
+    toast("已载入示例导图 💡");
+  }
+  function mmExportPNG() {
+    const svgStr = mmBuildSVG(true);
+    const blob = new Blob([svgStr], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const scale = 2;
+      const w = img.width || 1200, h = img.height || 800;
+      const cv = document.createElement("canvas"); cv.width = Math.max(1, Math.round(w * scale)); cv.height = Math.max(1, Math.round(h * scale));
+      const ctx = cv.getContext("2d"); ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
+      cv.toBlob((b) => {
+        if (!b) { toast("导出失败"); URL.revokeObjectURL(url); return; }
+        const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "mindmap.png"; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => { try { URL.revokeObjectURL(a.href); } catch (e) {} }, 1500);
+        toast("已导出 mindmap.png 📷"); bumpUsage("mindmapExports");
+      }, "image/png");
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => { toast("导出失败，请重试"); URL.revokeObjectURL(url); };
+    img.src = url;
+  }
+  function mmZoom(f) {
+    const v = mmState.view; const cx = v.x + v.w / 2, cy = v.y + v.h / 2;
+    mmState.view = { x: cx - (cx - v.x) * f, y: cy - (cy - v.y) * f, w: v.w * f, h: v.h * f };
+    mmRender();
+  }
+  function mmBind() {
+    if (!mmState.maps.length) mmInit();
+    mmRefreshSelect();
+    const canvas = $("mm-canvas");
+    if (canvas && !canvas._mmBound) {
+      canvas._mmBound = true;
+      let drag = null, moved = 0, startSvg = null;
+      canvas.addEventListener("pointerdown", (e) => {
+        const svg = canvas.querySelector("svg"); if (!svg) return;
+        const pt = mmClientToSvg(svg, e.clientX, e.clientY);
+        const g = e.target.closest(".mm-node");
+        const found = g ? mmFind(mmCur(), g.dataset.id) : null;
+        const node = found ? found.node : null;
+        drag = g ? { type: "node", id: g.dataset.id, start: pt, node: node, base: { dx: node ? (node.dx || 0) : 0, dy: node ? (node.dy || 0) : 0 } } : { type: "pan", start: pt, view: { x: mmState.view.x, y: mmState.view.y, w: mmState.view.w, h: mmState.view.h } };
+        moved = 0; startSvg = pt;
+        try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+      });
+      canvas.addEventListener("pointermove", (e) => {
+        if (!drag) return;
+        const svg = canvas.querySelector("svg"); if (!svg) return;
+        const pt = mmClientToSvg(svg, e.clientX, e.clientY);
+        moved += Math.abs(pt.x - startSvg.x) + Math.abs(pt.y - startSvg.y);
+        if (drag.type === "node" && drag.node) { drag.node.dx = drag.base.dx + (pt.x - drag.start.x); drag.node.dy = drag.base.dy + (pt.y - drag.start.y); mmRender(); }
+        else if (drag.type === "pan") { mmState.view.x = drag.view.x - (pt.x - drag.start.x); mmState.view.y = drag.view.y - (pt.y - drag.start.y); mmRender(); }
+      });
+      const end = (e) => {
+        if (!drag) return;
+        if (drag.type === "node") {
+          if (moved < 5) { mmState.sel = drag.id; mmRender(); mmSaved(); }
+          else { mmSaveAll(); mmSaved(); }
+        } else if (drag.type === "pan" && moved < 5) { mmState.sel = null; mmRender(); }
+        try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+        drag = null;
+      };
+      canvas.addEventListener("pointerup", end);
+      canvas.addEventListener("pointercancel", end);
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const svg = canvas.querySelector("svg"); if (!svg) return;
+        const pt = mmClientToSvg(svg, e.clientX, e.clientY);
+        const f = e.deltaY > 0 ? 1.12 : 0.89;
+        const v = mmState.view;
+        mmState.view = { x: pt.x - (pt.x - v.x) * f, y: pt.y - (pt.y - v.y) * f, w: v.w * f, h: v.h * f };
+        mmRender();
+      }, { passive: false });
+    }
+    const on = (id, fn) => { const el = $(id); if (el) el.addEventListener("click", fn); };
+    on("mm-new", mmNewMap);
+    on("mm-rename", mmRenameMap);
+    on("mm-del", mmDelMap);
+    on("mm-addchild", mmAddChild);
+    on("mm-addsib", mmAddSibling);
+    on("mm-rename2", mmRename);
+    on("mm-color", mmRecolor);
+    on("mm-toggle", mmToggle);
+    on("mm-delnode", mmDelNode);
+    on("mm-fit", mmFit);
+    on("mm-zin", () => mmZoom(0.85));
+    on("mm-zout", () => mmZoom(1.18));
+    on("mm-reset", () => { const m = mmCur(); if (m) { (function clr(n) { n.dx = 0; n.dy = 0; (n.children || []).forEach(clr); })(m.root); } mmFit(); mmSaved(); });
+    on("mm-png", mmExportPNG);
+    on("mm-sample", mmSample);
+    const sel = $("mm-maps"); if (sel) sel.addEventListener("change", () => { mmState.cur = sel.value; mmState.sel = null; mmFit(); });
+    mmFit();
+  }
+  mmBind();
+
+  BADGES.push(
+    { emoji: "🗺️", name: "思维新手", desc: "用过思维导图", test: (u) => (u.mindmap || 0) >= 1 },
+    { emoji: "🌳", name: "导图达人", desc: "建过 3 张思维导图", test: (u) => (u.mindmapMaps || 0) >= 3 }
+  );
+
+  QUOTES.push(
+    "一张图说不清的事，往往是你还没想清楚。",
+    "先把中心写下来，分支自然就长出来了。",
+    "想法不落地，等于没想法；画出来，才看得见。",
+    "复杂的事，拆成树枝，就没那么吓人了。",
+    "好结构不是规划出来的，是长出来的。",
+    "卡住的时候，换个分支想想，路就通了。",
+    "思维导图不是答案，是帮你把问题看全的镜子。",
+    "一棵树的根越清楚，枝叶越不会乱。",
+    "把脑子里的乱麻摊开，才发现其实没那么乱。",
+    "想得越清楚，画得越简单；越简单，越记得住。"
   );
 
   })();
