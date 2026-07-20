@@ -1408,6 +1408,7 @@
     <button data-tab="life">⏳ 生命日历</button>
     <button data-tab="matrix">⚖️ 决策矩阵</button>
     <button data-tab="ledger">📒 小账簿</button>
+    <button data-tab="chart">📊 图表工坊</button>
     <button data-tab="todo">📋 待办清单</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -3461,6 +3462,57 @@
   <p class="modal-note">所有快捷键在输入框 / 文本框聚焦时自动失效，可放心打字。按 <span class="kbd">?</span> 随时再打开本帮助。</p>
 </div>
 
+  <!-- 图表工坊 chart -->
+  <section class="panel" id="chart">
+    <style>
+      #chart .ch-ctrl { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+      #chart .ch-sel, #chart .ch-in { padding:10px 12px; font-size:15px; border-radius:12px; border:1.5px solid var(--card-border); background:var(--card-2); color:var(--text); }
+      #chart .ch-in { flex:1; min-width:160px; }
+      #chart .ch-ta { width:100%; min-height:152px; box-sizing:border-box; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:14px; line-height:1.6; padding:12px 14px; border-radius:14px; border:1.5px solid var(--card-border); background:var(--card-2); color:var(--text); resize:vertical; }
+      #chart .ch-out { margin-top:14px; background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:14px; overflow:auto; }
+      #chart .ch-stat { text-align:center; color:var(--muted); font-size:13px; margin-top:10px; }
+      #chart .ch-empty { text-align:center; color:var(--muted); font-size:14px; padding:18px 0; }
+      #chart .ch-bar { transform-box:fill-box; transform-origin:bottom; animation:chgrow .55s cubic-bezier(.2,.8,.2,1) both; }
+      #chart .ch-fade { animation:chfade .5s ease both; }
+      @keyframes chgrow { from { transform:scaleY(0);} to { transform:scaleY(1);} }
+      @keyframes chfade { from { opacity:0;} to { opacity:1;} }
+    </style>
+    <div class="card">
+      <h2>📊 图表工坊</h2>
+      <div class="hint">每行写「标签,数值」（逗号 / 空格 / 制表符分隔都行），点「生成图表」即可出图。支持柱状图 / 折线图 / 饼图，随时换配色、加标题，还能下载 SVG / PNG 拿去用。</div>
+      <div class="ch-ctrl">
+        <select id="chartType" class="ch-sel" title="图表类型">
+          <option value="bar">柱状图</option>
+          <option value="line">折线图</option>
+          <option value="pie">饼图</option>
+        </select>
+        <select id="chartTheme" class="ch-sel" title="配色方案">
+          <option value="sunset">晚霞</option>
+          <option value="ocean">海洋</option>
+          <option value="forest">森林</option>
+          <option value="candy">糖果</option>
+          <option value="mono">墨黑</option>
+        </select>
+        <input id="chartTitle" class="ch-in" type="text" placeholder="图表标题（可选）" maxlength="40" />
+      </div>
+      <textarea id="chartInput" class="ch-ta" spellcheck="false">周一,32
+周二,45
+周三,28
+周四,60
+周五,51
+周六,73
+周日,40</textarea>
+      <div class="row">
+        <button class="btn" id="chartGen">🎨 生成图表</button>
+        <button class="btn ghost" id="chartDemo">🎲 来个示例</button>
+        <button class="btn ghost" id="chartSvg">⬇️ SVG</button>
+        <button class="btn ghost" id="chartPng">⬇️ PNG</button>
+      </div>
+      <div id="chartOut" class="ch-out"></div>
+      <div class="ch-stat" id="chartStat"></div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -3631,6 +3683,7 @@
     if (id === "life") lifeRender();
     if (id === "matrix") matrixLoad();
     if (id === "ledger") ledgerLoad();
+    if (id === "chart") chartRender();
     if (id === "todo") todoLoad();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
@@ -3733,6 +3786,7 @@
     life: "生命 日历 人生 周历 一生 生日 星座 生命灵数 年龄 倒计时 时间 活了 剩余 寿命 你的人生 周 年 月份 进度 提醒 珍惜",
     matrix: "决策 矩阵 打分 加权 评估 选择 理性 比较 排序 选项 标准 权重 优先级 拍板",
     ledger: "记账 账本 小账簿 记账本 收支 支出 收入 理财 花销 花了多少 预算 算账 账单 存钱 钱包 ledger 月支出 财务 管钱 消费 月底",
+    chart: "图表 数据 可视化 柱状图 折线图 饼图 统计 绘图 bar line pie chart 报表 图形 分析 数据图",
     todo: "待办 任务 清单 待办清单 任务清单 待办事项 打卡 计划 安排 功课 作业 买菜 日程 提醒 勾 完成 办事 今日 todo checklist task 列清单 想做的事 待办列表 干活"
   };
   const toolSearch = $("toolSearch");
@@ -13334,6 +13388,7 @@
   function matrixLoad() { mxRender(); mxCompute(true); }
   mxBind();
   ledgerBind();
+  chartBind();
   QUOTES.push(
     "选择困难不是病，是选项太多——列个清单，让数据替你拍板。",
     "理性不是冷血，是把「想要」和「该要」摆在一杆秤上。",
@@ -13448,6 +13503,23 @@
   BADGES.push(
     { emoji: "📒", name: "记账新手", desc: "记下第一笔账", test: (u) => (u.ledger || 0) >= 1 },
     { emoji: "📊", name: "理财达人", desc: "累计记账 30 笔", test: (u) => (u.ledger || 0) >= 30 }
+  );
+
+  QUOTES.push(
+    "把数字画成图，脑子一下子就清醒了——眼睛比算盘快。",
+    "柱状图看高低，折线图看趋势，饼图看占比，选对图就是选对角度。",
+    "数据本身不说话，图表是它开口的方式。",
+    "别被平均值骗了，分布图里藏着真正的故事。",
+    "一张好图胜过千行表，尤其是给不搞数字的人看的时候。",
+    "趋势不是预测，是过去在悄悄提醒你接下来可能往哪走。",
+    "做决策前先画张图，很多纠结会自己现出原形。",
+    "横轴是时间，纵轴是努力，连起来的线就是你的轨迹。",
+    "饼图最大的用途，是让你看清谁占了大头、谁只是点缀。",
+    "随手记一笔数据、顺手画一张图，普通的一天也能被量化成形状。"
+  );
+  BADGES.push(
+    { emoji: "📊", name: "制图新手", desc: "生成第一张图表", test: (u) => (u.chart || 0) >= 1 },
+    { emoji: "📈", name: "数据猎人", desc: "累计生成 10 张图表", test: (u) => (u.chart || 0) >= 10 }
   );
 
   // ===== 待办清单 todo =====
@@ -13571,6 +13643,244 @@
 
 
 
+
+  /* ===== 图表工坊 chart ===== */
+  const CH_THEMES = {
+    sunset: ["#ff6b6b","#ff9f43","#feca57","#ff6b9d","#ee5a9b","#fd79a8","#e17055","#ff7675"],
+    ocean:  ["#0984e3","#00b894","#00cec9","#74b9ff","#81ecec","#0abde3","#48dbfb","#54a0ff"],
+    forest: ["#27ae60","#2ecc71","#1abc9c","#55efc4","#00b894","#3ae374","#10ac84","#26de81"],
+    candy:  ["#fd79a8","#a29bfe","#fab1ff","#ff9ff3","#f368e0","#c56cf0","#f8a5c2","#d980fa"],
+    mono:   ["#2d3436","#636e72","#b2bec3","#636e72","#00cec9","#0984e3","#e17055","#fdcb6e"]
+  };
+  function chParse() {
+    const raw = ($("chartInput").value || "");
+    const rows = [];
+    raw.split(/\r?\n/).forEach(function (ln) {
+      ln = ln.trim();
+      if (!ln) return;
+      const parts = ln.split(/[,，\t|]/);
+      let label = (parts[0] || "").trim();
+      let valStr = parts.length > 1 ? (parts[1] || "").trim() : "";
+      if (valStr === "") {
+        const sp = ln.split(/\s+/);
+        if (sp.length >= 2) { label = sp.slice(0, -1).join(" "); valStr = sp[sp.length - 1]; }
+      }
+      const v = parseFloat(valStr);
+      if (isNaN(v)) return;
+      rows.push({ label: label || ("#" + (rows.length + 1)), value: v });
+    });
+    return rows;
+  }
+  function chScale(vmin, vmax, pad) {
+    let lo = vmin, hi = vmax;
+    if (lo === hi) { lo -= 1; hi += 1; }
+    const d = hi - lo;
+    lo -= d * pad; hi += d * pad;
+    return [lo, hi];
+  }
+  function chFmt(v) {
+    const a = Math.abs(v);
+    if (a >= 1000) return (v / 1000).toFixed(a >= 10000 ? 0 : 1) + "k";
+    return (Math.round(v * 100) / 100).toString();
+  }
+  function chBar(rows, colors, W, H, top) {
+    const mL = 44, mR = 16, mB = 42;
+    const plotW = W - mL - mR, plotH = H - top - mB;
+    let vmax = -Infinity, vmin = Infinity;
+    rows.forEach(function (r) { if (r.value > vmax) vmax = r.value; if (r.value < vmin) vmin = r.value; });
+    if (vmax < 0) vmax = 0;
+    if (vmin > 0) vmin = 0;
+    const range = (vmax - vmin) || 1;
+    const yOf = function (v) { return top + plotH * (vmax - v) / range; };
+    const zeroY = yOf(0);
+    let out = "";
+    const steps = 4;
+    for (let i = 0; i <= steps; i++) {
+      const v = vmax - range * i / steps;
+      const y = top + plotH * i / steps;
+      out += '<line x1="' + mL + '" y1="' + y + '" x2="' + (W - mR) + '" y2="' + y + '" stroke="rgba(127,127,127,.18)" stroke-width="1"/>';
+      out += '<text x="' + (mL - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="currentColor" opacity=".6">' + chFmt(v) + '</text>';
+    }
+    const n = rows.length;
+    const slot = plotW / n;
+    const bw = Math.min(slot * 0.62, 64);
+    rows.forEach(function (r, i) {
+      const cx = mL + slot * (i + 0.5);
+      const x = cx - bw / 2;
+      const yTop = yOf(Math.max(r.value, 0));
+      const yBot = yOf(Math.min(r.value, 0));
+      const h = Math.max(2, Math.abs(yBot - yTop));
+      const c = colors[i % colors.length];
+      out += '<g class="ch-bar"><rect x="' + x.toFixed(1) + '" y="' + yTop.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="5" fill="' + c + '"/></g>';
+      const vy = r.value >= 0 ? yTop - 6 : yBot + 14;
+      out += '<text x="' + cx.toFixed(1) + '" y="' + vy.toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">' + chFmt(r.value) + '</text>';
+      let lab = r.label; if (lab.length > 6) lab = lab.slice(0, 6) + "…";
+      out += '<text x="' + cx.toFixed(1) + '" y="' + (H - mB + 16) + '" text-anchor="middle" font-size="11" fill="currentColor" opacity=".75">' + escapeHtml(lab) + '</text>';
+    });
+    out += '<line x1="' + mL + '" y1="' + zeroY.toFixed(1) + '" x2="' + (W - mR) + '" y2="' + zeroY.toFixed(1) + '" stroke="currentColor" stroke-width="1.2" opacity=".5"/>';
+    return out;
+  }
+  function chLine(rows, colors, W, H, top) {
+    const mL = 44, mR = 16, mB = 42;
+    const plotW = W - mL - mR, plotH = H - top - mB;
+    let vmax = -Infinity, vmin = Infinity;
+    rows.forEach(function (r) { if (r.value > vmax) vmax = r.value; if (r.value < vmin) vmin = r.value; });
+    const sc = chScale(vmin, vmax, 0.12);
+    const lo = sc[0], hi = sc[1], range = (hi - lo) || 1;
+    const xOf = function (i) { return rows.length === 1 ? mL + plotW / 2 : mL + plotW * i / (rows.length - 1); };
+    const yOf = function (v) { return top + plotH * (hi - v) / range; };
+    let out = "";
+    const steps = 4;
+    for (let i = 0; i <= steps; i++) {
+      const v = hi - range * i / steps;
+      const y = top + plotH * i / steps;
+      out += '<line x1="' + mL + '" y1="' + y + '" x2="' + (W - mR) + '" y2="' + y + '" stroke="rgba(127,127,127,.18)" stroke-width="1"/>';
+      out += '<text x="' + (mL - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="currentColor" opacity=".6">' + chFmt(v) + '</text>';
+    }
+    const pts = rows.map(function (r, i) { return [xOf(i), yOf(r.value)]; });
+    const dpath = pts.map(function (p, i) { return (i === 0 ? "M" : "L") + p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ");
+    const c0 = colors[0];
+    out += '<path class="ch-fade" d="' + dpath + '" fill="none" stroke="' + c0 + '" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+    pts.forEach(function (p, i) {
+      const c = colors[i % colors.length];
+      out += '<circle class="ch-fade" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4.5" fill="' + c + '" stroke="var(--card-2)" stroke-width="2"/>';
+      let lab = rows[i].label; if (lab.length > 6) lab = lab.slice(0, 6) + "…";
+      out += '<text x="' + p[0].toFixed(1) + '" y="' + (H - mB + 16) + '" text-anchor="middle" font-size="11" fill="currentColor" opacity=".75">' + escapeHtml(lab) + '</text>';
+    });
+    return out;
+  }
+  function chPie(rows, colors, W, H, top) {
+    const data = rows.filter(function (r) { return r.value > 0; });
+    const total = data.reduce(function (a, r) { return a + r.value; }, 0);
+    if (total <= 0) return '<text x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle" font-size="14" fill="currentColor" opacity=".7">饼图只认正数，先填几个大于 0 的数吧 🥧</text>';
+    const cx = 170, cy = H / 2, R = 140;
+    let out = "", a0 = -Math.PI / 2;
+    data.forEach(function (r, i) {
+      const frac = r.value / total;
+      const a1 = a0 + frac * Math.PI * 2;
+      const x0 = cx + R * Math.cos(a0), y0 = cy + R * Math.sin(a0);
+      const x1 = cx + R * Math.cos(a1), y1 = cy + R * Math.sin(a1);
+      const large = (a1 - a0) > Math.PI ? 1 : 0;
+      const c = colors[i % colors.length];
+      const path = "M" + cx + "," + cy + " L" + x0.toFixed(2) + "," + y0.toFixed(2) + " A" + R + "," + R + " 0 " + large + " 1 " + x1.toFixed(2) + "," + y1.toFixed(2) + " Z";
+      out += '<path class="ch-bar" style="transform-origin:center;animation:chfade .5s ease forwards" d="' + path + '" fill="' + c + '" stroke="var(--card-2)" stroke-width="2"/>';
+      const mid = (a0 + a1) / 2;
+      const pct = Math.round(frac * 100);
+      if (pct >= 6) {
+        const lx = cx + (R * 0.62) * Math.cos(mid), ly = cy + (R * 0.62) * Math.sin(mid);
+        out += '<text x="' + lx.toFixed(1) + '" y="' + (ly + 4).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">' + pct + '%</text>';
+      }
+      a0 = a1;
+    });
+    const lx = 340;
+    let ly = top + 6;
+    const step = Math.min(24, Math.max(16, (H - top - 10) / data.length));
+    data.forEach(function (r, i) {
+      const c = colors[i % colors.length];
+      const pct = Math.round(r.value / total * 100);
+      let lab = r.label; if (lab.length > 9) lab = lab.slice(0, 9) + "…";
+      out += '<rect x="' + lx + '" y="' + (ly + 2) + '" width="13" height="13" rx="3" fill="' + c + '"/>';
+      out += '<text x="' + (lx + 19) + '" y="' + (ly + 13) + '" font-size="12.5" fill="currentColor">' + escapeHtml(lab) + '  ' + pct + '%</text>';
+      ly += step;
+    });
+    return out;
+  }
+  function chSvgWrap(inner, W, H, title) {
+    const t = (title || "").trim();
+    const tEl = t ? '<text x="' + (W / 2) + '" y="26" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor">' + escapeHtml(t) + '</text>' : '';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="display:block;color:var(--text);font-family:inherit" role="img">' + tEl + inner + '</svg>';
+  }
+  function chRender() {
+    const out = $("chartOut");
+    if (!out) return;
+    const rows = chParse();
+    if (!rows.length) { out.innerHTML = '<div class="ch-empty">先在上面的框里写点数据吧～每行「标签,数值」📝</div>'; return; }
+    const type = ($("chartType") && $("chartType").value) || "bar";
+    const theme = ($("chartTheme") && $("chartTheme").value) || "sunset";
+    const colors = CH_THEMES[theme] || CH_THEMES.sunset;
+    const title = ($("chartTitle") && $("chartTitle").value) || "";
+    const top = title ? 40 : 14;
+    let inner;
+    if (type === "pie") inner = chPie(rows, colors, 560, 360, top);
+    else if (type === "line") inner = chLine(rows, colors, 560, 360, top);
+    else inner = chBar(rows, colors, 560, 360, top);
+    out.innerHTML = chSvgWrap(inner, 560, 360, title);
+    const st = $("chartStat");
+    if (st) st.textContent = "已生成 " + (usage.chart || 0) + " 张图表 📈";
+  }
+  function chartGenerate() {
+    chRender();
+    const rows = chParse();
+    if (!rows.length) { toast("没解析到有效数字，检查一下格式～"); return; }
+    bumpUsage("chart");
+    if (settings && settings.sound) playDing();
+    const card = $("chart");
+    if (card) pop(card.querySelector(".card"));
+    const st = $("chartStat");
+    if (st) st.textContent = "已生成 " + (usage.chart || 0) + " 张图表 📈";
+  }
+  function chSerialize(svg) {
+    const clone = svg.cloneNode(true);
+    try { clone.setAttribute("color", getComputedStyle(document.body).color); } catch (e) {}
+    return new XMLSerializer().serializeToString(clone);
+  }
+  function chDownloadSvg() {
+    const svg = $("chartOut").querySelector("svg");
+    if (!svg) { toast("先生成一张图表再下载哦"); return; }
+    const xml = '<?xml version="1.0" encoding="UTF-8"?>\n' + chSerialize(svg);
+    const blob = new Blob([xml], { type: "image/svg+xml;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "suibian-chart.svg";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    toast("已导出 SVG 🖼️");
+  }
+  function chDownloadPng() {
+    const svg = $("chartOut").querySelector("svg");
+    if (!svg) { toast("先生成一张图表再下载哦"); return; }
+    const xml = chSerialize(svg);
+    const bg = (function () { try { return getComputedStyle(document.body).getPropertyValue("--card-2").trim() || "#ffffff"; } catch (e) { return "#ffffff"; } })();
+    const img = new Image();
+    img.onload = function () {
+      const scale = 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = 560 * scale; canvas.height = 360 * scale;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = bg || "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(function (blob) {
+        if (!blob) { toast("PNG 导出失败，可改用 SVG"); return; }
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = "suibian-chart.png";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+        toast("已导出 PNG 🖼️");
+      });
+    };
+    img.onerror = function () { toast("PNG 导出失败，可改用 SVG"); };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(xml);
+  }
+  function chDemo() {
+    const sets = [
+      "周一,32\n周二,45\n周三,28\n周四,60\n周五,51\n周六,73\n周日,40",
+      "北京,35\n上海,42\n广州,28\n深圳,39\n杭州,22\n成都,18\n武汉,25",
+      "睡眠,7.5\n工作,9\n通勤,1.5\n健身,1\n娱乐,2\n吃饭,2.5\n发呆,1.5",
+      "奶茶,18\n咖啡,24\n可乐,12\n果汁,9\n白开水,30\n啤酒,7",
+      "Q1,120\nQ2,165\nQ3,210\nQ4,188",
+      "语文,88\n数学,92\n英语,76\n物理,81\n化学,85\n生物,79"
+    ];
+    const ta = $("chartInput");
+    if (ta) ta.value = sets[Math.floor(Math.random() * sets.length)];
+    chRender();
+  }
+  function chartBind() {
+    const g = $("chartGen"); if (g) g.addEventListener("click", chartGenerate);
+    const d = $("chartDemo"); if (d) d.addEventListener("click", chDemo);
+    const s = $("chartSvg"); if (s) s.addEventListener("click", chDownloadSvg);
+    const p = $("chartPng"); if (p) p.addEventListener("click", chDownloadPng);
+    const t = $("chartType"); if (t) t.addEventListener("change", chRender);
+    const th = $("chartTheme"); if (th) th.addEventListener("change", chRender);
+  }
   })();
 
 </script>
