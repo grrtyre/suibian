@@ -1343,6 +1343,7 @@
     <button data-tab="color">灵感色卡</button>
     <button data-tab="gacha">扭蛋机</button>
     <button data-tab="oracle">神谕球</button>
+    <button data-tab="huangli">📅 老黄历</button>
     <button data-tab="sort">随机排序</button>
     <button data-tab="timer">倒计时</button>
     <button data-tab="trivia">冷知识</button>
@@ -1410,6 +1411,7 @@
     <button data-tab="ledger">📒 小账簿</button>
     <button data-tab="chart">📊 图表工坊</button>
     <button data-tab="regex">🔤 正则测试器</button>
+    <button data-tab="codec">🔡 编码转换</button>
     <button data-tab="todo">📋 待办清单</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -3582,6 +3584,92 @@
     </div>
   </section>
 
+  <!-- 老黄历 huangli -->
+  <section class="panel" id="huangli">
+    <style>
+      #huangli .hl-big { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:8px 0 4px; }
+      #huangli .hl-ganzhi { font-size:30px; font-weight:800; letter-spacing:2px;
+        background:linear-gradient(90deg,var(--accent),var(--accent-3)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+      #huangli .hl-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:14px 0; }
+      #huangli .hl-cell { background:var(--card-2); border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+      #huangli .hl-k { color:var(--muted); font-size:12px; margin-bottom:4px; }
+      #huangli .hl-v { font-size:17px; font-weight:700; }
+      #huangli .hl-yiji { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      #huangli .hl-yi, #huangli .hl-ji { border-radius:14px; padding:12px 14px; }
+      #huangli .hl-yi { background:rgba(75,227,165,.10); border:1px solid rgba(75,227,165,.35); }
+      #huangli .hl-ji { background:rgba(255,122,89,.10); border:1px solid rgba(255,122,89,.35); }
+      #huangli .hl-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+      #huangli .hl-tag { font-size:13px; padding:4px 10px; border-radius:999px; background:var(--card-2); border:1px solid var(--line); }
+      #huangli .hl-tag.ok { color:var(--good); border-color:rgba(75,227,165,.4); }
+      #huangli .hl-tag.no { color:var(--accent); border-color:rgba(255,122,89,.4); }
+      #huangli .hl-date { flex:1; min-width:160px; padding:10px 12px; font-size:15px; border-radius:12px; border:1.5px solid var(--card-border); background:var(--card-2); color:var(--text); }
+      @media (max-width:560px){ #huangli .hl-grid,#huangli .hl-yiji{grid-template-columns:1fr;} }
+    </style>
+    <div class="card">
+      <h2>📅 老黄历 · 干支择日</h2>
+      <div class="hint">选个日子，看看那天的干支、生肖、建除十二神、宜忌与冲煞。纯干支历推算，图个乐子～</div>
+      <div class="row" style="align-items:center;gap:10px">
+        <input type="date" id="hlDate" class="hl-date" />
+        <button class="btn" id="hlToday">今天</button>
+      </div>
+      <div class="hl-big">
+        <span class="hl-ganzhi" id="hlGanZhi">甲辰年</span>
+        <span class="hl-v" id="hlZodiac"></span>
+      </div>
+      <div class="hl-grid">
+        <div class="hl-cell"><div class="hl-k">公历</div><div class="hl-v" id="hlSolar"></div></div>
+        <div class="hl-cell"><div class="hl-k">星期</div><div class="hl-v" id="hlWeek"></div></div>
+        <div class="hl-cell"><div class="hl-k">月干支</div><div class="hl-v" id="hlMonth"></div></div>
+        <div class="hl-cell"><div class="hl-k">日干支</div><div class="hl-v" id="hlDay"></div></div>
+        <div class="hl-cell"><div class="hl-k">建除十二神</div><div class="hl-v" id="hlJianchu"></div></div>
+        <div class="hl-cell"><div class="hl-k">冲煞</div><div class="hl-v" id="hlChong"></div></div>
+        <div class="hl-cell"><div class="hl-k">星座</div><div class="hl-v" id="hlStar"></div></div>
+        <div class="hl-cell"><div class="hl-k">日五行</div><div class="hl-v" id="hlElement"></div></div>
+      </div>
+      <div class="hl-yiji">
+        <div class="hl-yi"><div class="hl-k" style="color:var(--good)">宜 · 适合做</div><div class="hl-tags" id="hlYi"></div></div>
+        <div class="hl-ji"><div class="hl-k" style="color:var(--accent)">忌 · 最好别</div><div class="hl-tags" id="hlJi"></div></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost" id="hlCopy">📋 复制这一页</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 编码转换 codec -->
+  <section class="panel" id="codec">
+    <style>
+      #codec .cd-in, #codec .cd-out { width:100%; min-height:120px; box-sizing:border-box; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.6; resize:vertical;
+        padding:12px 14px; font-size:14px; border-radius:14px; border:1.5px solid var(--card-border); background:var(--card-2); color:var(--text); }
+      #codec .cd-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:12px 0 6px; }
+      #codec .cd-sel { padding:10px 12px; font-size:14px; border-radius:12px; border:1.5px solid var(--card-border); background:var(--card-2); color:var(--text); }
+      #codec .cd-meta { color:var(--muted); font-size:12px; margin-top:8px; }
+    </style>
+    <div class="card">
+      <h2>🔡 编码转换 · 文本 ↔ Base64 / URL / Hex / Unicode</h2>
+      <div class="hint">粘一段文本或编码，选好模式，点「转换」即可。支持 UTF-8 中文，输入即转。</div>
+      <textarea id="cdIn" class="cd-in" spellcheck="false" placeholder="在这里输入要转换的内容…"></textarea>
+      <div class="cd-row">
+        <select id="cdMode" class="cd-sel">
+          <option value="b64e">Base64 编码</option>
+          <option value="b64d">Base64 解码</option>
+          <option value="urle">URL 编码</option>
+          <option value="urld">URL 解码</option>
+          <option value="hexe">Hex 编码</option>
+          <option value="hexd">Hex 解码</option>
+          <option value="unie">Unicode 转义（\u）</option>
+          <option value="unid">Unicode 反转义</option>
+        </select>
+        <button class="btn" id="cdGo">🔄 转换</button>
+        <button class="btn ghost" id="cdSwap">⇄ 交换</button>
+        <button class="btn ghost" id="cdCopy">📋 复制结果</button>
+        <button class="btn ghost" id="cdClear">清空</button>
+      </div>
+      <textarea id="cdOut" class="cd-out" spellcheck="false" readonly placeholder="转换结果会显示在这里…"></textarea>
+      <div class="cd-meta" id="cdMeta"></div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -3755,6 +3843,8 @@
     if (id === "ledger") ledgerLoad();
     if (id === "chart") chartRender();
     if (id === "todo") todoLoad();
+    if (id === "huangli") huangliRender();
+    if (id === "codec") codecRender();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -3858,7 +3948,9 @@
     ledger: "记账 账本 小账簿 记账本 收支 支出 收入 理财 花销 花了多少 预算 算账 账单 存钱 钱包 ledger 月支出 财务 管钱 消费 月底",
     chart: "图表 数据 可视化 柱状图 折线图 饼图 统计 绘图 bar line pie chart 报表 图形 分析 数据图",
     todo: "待办 任务 清单 待办清单 任务清单 待办事项 打卡 计划 安排 功课 作业 买菜 日程 提醒 勾 完成 办事 今日 todo checklist task 列清单 想做的事 待办列表 干活",
-    regex: "正则 测试 正则表达式 匹配 regex regexp pattern 模式 提取 替换 校验 邮箱 手机号 规则 表达式 文本 查找 识别 提取 正则测试器"
+    regex: "正则 测试 正则表达式 匹配 regex regexp pattern 模式 提取 替换 校验 邮箱 手机号 规则 表达式 文本 查找 识别 提取 正则测试器",
+    huangli: "黄历 老黄历 农历 干支 宜忌 冲煞 生肖 星座 建除 吉日 择日 玄学 黄道 吉神 凶煞 通书 皇历 日历 每日 看日子",
+    codec: "编码 解码 base64 url hex 十六进制 unicode 转换 进制 编解码 编码转换 字符 转码 文本 编码工具 加密 字符串"
 
   };
   const toolSearch = $("toolSearch");
@@ -13567,6 +13659,8 @@
   mxBind();
   ledgerBind();
   chartBind();
+  huangliBind();
+  codecBind();
   QUOTES.push(
     "选择困难不是病，是选项太多——列个清单，让数据替你拍板。",
     "理性不是冷血，是把「想要」和「该要」摆在一杆秤上。",
@@ -14059,6 +14153,202 @@
     const t = $("chartType"); if (t) t.addEventListener("change", chRender);
     const th = $("chartTheme"); if (th) th.addEventListener("change", chRender);
   }
+
+  /* ===== 老黄历 huangli ===== */
+  const HL_STEMS = ["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+  const HL_BRANCHES = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  const HL_ZODIAC = ["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"];
+  const HL_JIANCHU = ["建","除","满","平","定","执","破","危","成","收","开","闭"];
+  const HL_ELEMENT = ["木","木","火","火","土","土","金","金","水","水"];
+  const HL_YI = {
+    "建":["出行","祈福","动土","订盟","纳采","嫁娶","安门","修造"],
+    "除":["祭祀","祈福","出行","解除","沐浴","疗病","扫舍","搬迁"],
+    "满":["祭祀","祈福","开市","交易","立券","纳财","造仓","安床"],
+    "平":["修造","嫁娶","安葬","出行","拆卸","移徙","动土","装修"],
+    "定":["祭祀","祈福","嫁娶","造屋","装修","入学","安床","纳采"],
+    "执":["造屋","收购","修造","嫁娶","捕捉","纳财","订盟","安床"],
+    "破":["破屋","坏垣","求医","治病","解除","扫舍","破土"],
+    "危":["安床","祭祀","祈福","捕捉","纳财","交易","立券"],
+    "成":["嫁娶","开市","入学","安床","动土","交易","立券","出行","订盟","纳采"],
+    "收":["嫁娶","纳财","收购","入仓","捕捉","安床","订盟","纳畜"],
+    "开":["祭祀","祈福","入学","开市","动土","出行","求医","交易","安床"],
+    "闭":["祭祀","祈福","筑堤","安葬","补垣","纳畜","合帐","迁坟"]
+  };
+  const HL_JI = {
+    "建":["掘井","乘船","开仓","诉讼","栽种"],
+    "除":["求官","上任","远行","嫁娶","开业"],
+    "满":["动土","安葬","嫁娶","移徙","入宅","词讼"],
+    "平":["掘井","栽种","词讼","远行"],
+    "定":["词讼","出行","医疗","入宅"],
+    "执":["开市","移徙","出行","入宅","远行"],
+    "破":["嫁娶","出行","签约","动土","开业","安葬","搬迁"],
+    "危":["登高","出行","乘船","置业","入宅"],
+    "成":["词讼","诉讼","安葬"],
+    "收":["放债","出行","安葬","开市"],
+    "开":["安葬","嫁娶","放债","入宅"],
+    "闭":["开市","出行","求医","手术","动工"]
+  };
+  const HL_SHA = { "子":"南","丑":"东","寅":"北","卯":"西","辰":"南","巳":"东","午":"北","未":"西","申":"南","酉":"东","戌":"北","亥":"西" };
+  function hlZodiacSign(mm, dd) {
+    if ((mm === 1 && dd >= 20) || (mm === 2 && dd <= 18)) return "水瓶";
+    if ((mm === 2 && dd >= 19) || (mm === 3 && dd <= 20)) return "双鱼";
+    if ((mm === 3 && dd >= 21) || (mm === 4 && dd <= 19)) return "白羊";
+    if ((mm === 4 && dd >= 20) || (mm === 5 && dd <= 20)) return "金牛";
+    if ((mm === 5 && dd >= 21) || (mm === 6 && dd <= 21)) return "双子";
+    if ((mm === 6 && dd >= 22) || (mm === 7 && dd <= 22)) return "巨蟹";
+    if ((mm === 7 && dd >= 23) || (mm === 8 && dd <= 22)) return "狮子";
+    if ((mm === 8 && dd >= 23) || (mm === 9 && dd <= 22)) return "处女";
+    if ((mm === 9 && dd >= 23) || (mm === 10 && dd <= 23)) return "天秤";
+    if ((mm === 10 && dd >= 24) || (mm === 11 && dd <= 22)) return "天蝎";
+    if ((mm === 11 && dd >= 23) || (mm === 12 && dd <= 21)) return "射手";
+    return "摩羯";
+  }
+  function hlDateToParts(y, m, d) {
+    const yS = (y - 4) % 10, yB = (y - 4) % 12;
+    const mB = (m + 1) % 12;
+    const mS = ((yS * 2 + 2) + (m - 1)) % 10;
+    const anchor = Date.UTC(2024, 0, 1);
+    const cur = Date.UTC(y, m - 1, d);
+    let dayIdx = Math.round((cur - anchor) / 86400000) % 60;
+    if (dayIdx < 0) dayIdx += 60;
+    const dS = dayIdx % 10, dB = dayIdx % 12;
+    const jc = (dB - mB + 12) % 12;
+    return {
+      yGZ: HL_STEMS[yS] + HL_BRANCHES[yB],
+      zodiac: HL_ZODIAC[yB],
+      mGZ: HL_STEMS[mS] + HL_BRANCHES[mB],
+      dGZ: HL_STEMS[dS] + HL_BRANCHES[dB],
+      dB: dB,
+      jianchu: HL_JIANCHU[jc],
+      element: HL_ELEMENT[dS],
+      chong: "冲" + HL_ZODIAC[(dB + 6) % 12] + " · 煞" + HL_SHA[HL_BRANCHES[dB]]
+    };
+  }
+  function huangliRender() {
+    const inp = $("hlDate"); if (!inp) return;
+    let v = inp.value;
+    if (!v) { const t = new Date(); const pad = (n) => String(n).padStart(2, "0"); v = t.getFullYear() + "-" + pad(t.getMonth() + 1) + "-" + pad(t.getDate()); inp.value = v; }
+    const parts = v.split("-"); const y = +parts[0], m = +parts[1], d = +parts[2];
+    const p = hlDateToParts(y, m, d);
+    const dt = new Date(y, m - 1, d);
+    const wk = ["日","一","二","三","四","五","六"][dt.getDay()];
+    $("hlGanZhi").textContent = p.yGZ + "年";
+    $("hlZodiac").textContent = p.zodiac + "年 · " + p.dGZ + "日";
+    $("hlSolar").textContent = y + "年" + m + "月" + d + "日";
+    $("hlWeek").textContent = "星期" + wk;
+    $("hlMonth").textContent = p.mGZ + "月";
+    $("hlDay").textContent = p.dGZ + "日";
+    $("hlJianchu").textContent = p.jianchu + "日";
+    $("hlChong").textContent = p.chong;
+    $("hlStar").textContent = hlZodiacSign(m, d);
+    $("hlElement").textContent = p.element + "日";
+    const yi = (HL_YI[p.jianchu] || []).map((x) => '<span class="hl-tag ok">' + x + "</span>").join("");
+    const ji = (HL_JI[p.jianchu] || []).map((x) => '<span class="hl-tag no">' + x + "</span>").join("");
+    $("hlYi").innerHTML = yi || '<span class="hl-tag">百无禁忌</span>';
+    $("hlJi").innerHTML = ji || '<span class="hl-tag">无特别禁忌</span>';
+  }
+  function huangliBind() {
+    const inp = $("hlDate"); if (!inp) return;
+    inp.addEventListener("change", function () { bumpUsage("huangli"); huangliRender(); });
+    const t = $("hlToday"); if (t) t.addEventListener("click", function () {
+      const n = new Date(); const pad = (x) => String(x).padStart(2, "0");
+      inp.value = n.getFullYear() + "-" + pad(n.getMonth() + 1) + "-" + pad(n.getDate());
+      bumpUsage("huangli"); huangliRender();
+    });
+    const c = $("hlCopy"); if (c) c.addEventListener("click", function () {
+      const g = (id) => ($(id) ? $(id).textContent : "");
+      const tags = (id) => [...$(id).querySelectorAll(".hl-tag")].map((e) => e.textContent).join("、");
+      const txt = [g("hlSolar"), "星期" + g("hlWeek"), g("hlGanZhi") + "（" + g("hlZodiac") + "）",
+        "月干支：" + g("hlMonth"), "日干支：" + g("hlDay"), "建除：" + g("hlJianchu"),
+        "冲煞：" + g("hlChong"), "星座：" + g("hlStar"), "日五行：" + g("hlElement"),
+        "宜：" + tags("hlYi"), "忌：" + tags("hlJi")].join("\n");
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ toast("已复制今日黄历 📋"); }, function(){ toast("复制失败，请手动选择"); });
+      else toast("当前环境不支持复制");
+    });
+    huangliRender();
+  }
+
+  /* ===== 编码转换 codec ===== */
+  function codecB64Encode(str) {
+    const bytes = new TextEncoder().encode(str); let bin = "";
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+  function codecB64Decode(str) {
+    const bin = atob(str.trim()); const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function codecHexEncode(str) {
+    const bytes = new TextEncoder().encode(str); let s = "";
+    for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(16).padStart(2, "0") + " ";
+    return s.trim();
+  }
+  function codecHexDecode(str) {
+    const parts = str.trim().split(/[\s,;]+/).filter(Boolean);
+    const bytes = parts.map(function (p) { return parseInt(p, 16); });
+    if (bytes.some(function (b) { return isNaN(b); })) throw new Error("含有非法十六进制字符");
+    return new TextDecoder().decode(new Uint8Array(bytes));
+  }
+  function codecUniEncode(str) {
+    let s = "";
+    for (const ch of str) {
+      const cp = ch.codePointAt(0);
+      if (cp < 0x80) s += ch;
+      else if (cp <= 0xffff) s += "\\u" + cp.toString(16).padStart(4, "0");
+      else {
+        const c2 = cp - 0x10000;
+        const hi = 0xd800 + (c2 >> 10), lo = 0xdc00 + (c2 & 0x3ff);
+        s += "\\u" + hi.toString(16).padStart(4, "0") + "\\u" + lo.toString(16).padStart(4, "0");
+      }
+    }
+    return s;
+  }
+  function codecUniDecode(str) {
+    return str.replace(/\\u([0-9a-fA-F]{4})/g, function (_, h) { return String.fromCodePoint(parseInt(h, 16)); });
+  }
+  function codecConvert() {
+    const mode = $("cdMode").value; const inp = $("cdIn").value;
+    if (!inp) { $("cdOut").value = ""; $("cdMeta").textContent = "先输入点内容吧～"; return; }
+    let out = "", meta = "";
+    try {
+      if (mode === "b64e") { out = codecB64Encode(inp); meta = "Base64 编码 · " + out.length + " 字符"; }
+      else if (mode === "b64d") { out = codecB64Decode(inp); meta = "Base64 解码 · " + out.length + " 字符"; }
+      else if (mode === "urle") { out = encodeURIComponent(inp); meta = "URL 编码"; }
+      else if (mode === "urld") { out = decodeURIComponent(inp.trim()); meta = "URL 解码 · " + out.length + " 字符"; }
+      else if (mode === "hexe") { out = codecHexEncode(inp); meta = "Hex 编码"; }
+      else if (mode === "hexd") { out = codecHexDecode(inp); meta = "Hex 解码 · " + out.length + " 字符"; }
+      else if (mode === "unie") { out = codecUniEncode(inp); meta = "Unicode 转义"; }
+      else if (mode === "unid") { out = codecUniDecode(inp); meta = "Unicode 反转义 · " + out.length + " 字符"; }
+      $("cdOut").value = out; $("cdMeta").textContent = meta; bumpUsage("codec");
+    } catch (e) {
+      $("cdOut").value = ""; $("cdMeta").textContent = "转换失败：" + ((e && e.message) ? e.message : "请检查输入格式");
+    }
+  }
+  function codecBind() {
+    const go = $("cdGo"); if (go) go.addEventListener("click", codecConvert);
+    const inp = $("cdIn"); if (inp) inp.addEventListener("input", codecConvert);
+    const mode = $("cdMode"); if (mode) mode.addEventListener("change", codecConvert);
+    const swap = $("cdSwap"); if (swap) swap.addEventListener("click", function () {
+      const o = $("cdOut").value; if (!o) { toast("先转换出结果再交换哦"); return; }
+      $("cdIn").value = o; codecConvert();
+    });
+    const copy = $("cdCopy"); if (copy) copy.addEventListener("click", function () {
+      const v = $("cdOut").value; if (!v) { toast("还没有结果可复制"); return; }
+      if (navigator.clipboard) navigator.clipboard.writeText(v).then(function(){ toast("已复制结果 📋"); }, function(){ toast("复制失败"); });
+      else toast("当前环境不支持复制");
+    });
+    const clr = $("cdClear"); if (clr) clr.addEventListener("click", function () { $("cdIn").value = ""; $("cdOut").value = ""; $("cdMeta").textContent = ""; });
+  }
+  function codecRender() { codecConvert(); }
+
+  BADGES.push(
+    { emoji: "📅", name: "通书先生", desc: "翻过 1 次老黄历", test: (u) => (u.huangli || 0) >= 1 },
+    { emoji: "🗓️", name: "择日达人", desc: "累计翻看老黄历 10 次", test: (u) => (u.huangli || 0) >= 10 },
+    { emoji: "🔡", name: "转码新手", desc: "用过 1 次编码转换", test: (u) => (u.codec || 0) >= 1 },
+    { emoji: "🧬", name: "编解码大师", desc: "累计转换 20 次", test: (u) => (u.codec || 0) >= 20 }
+  );
+
   })();
 
 </script>
