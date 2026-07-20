@@ -1307,6 +1307,27 @@
   .life-stats .num { font-size:21px; font-weight:800; color:var(--accent); font-variant-numeric:tabular-nums; }
   .life-stats .lab { font-size:12px; color:var(--muted); margin-top:3px; }
 
+
+  /* 接水管 pipe */
+  .pipe-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0 4px}
+  .pipe-sel{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .pipe-sel select{background:var(--card-2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font:inherit}
+  .pipe-stat{font-size:14px;color:var(--muted)}
+  .pipe-stat b{color:var(--text)}
+  .pipe-wrap{position:relative;margin:14px auto 6px;max-width:460px}
+  .pipe-board{display:grid;grid-template-columns:repeat(var(--n,5),1fr);gap:6px;aspect-ratio:1;background:var(--card-2);border:1px solid var(--line);border-radius:16px;padding:8px}
+  .pipe-cell{position:relative;background:var(--card);border-radius:10px;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+  .pipe-cell:hover{background:var(--card-2)}
+  .pipe-cell .psvg{width:100%;height:100%;transition:transform .18s ease}
+  .pipe-cell .pipe{stroke:var(--muted);stroke-width:18;fill:none;stroke-linecap:round}
+  .pipe-cell .phub{fill:var(--card)}
+  .pipe-cell.filled .pipe{stroke:var(--accent-3)}
+  .pipe-cell.filled .phub{fill:var(--accent-3)}
+  .pipe-cell.filled{background:rgba(124,108,255,.14)}
+  .pipe-in,.pipe-out{position:absolute;left:-13px;width:13px;height:calc(100% / var(--n,5) * .7);transform:translateY(-50%);background:var(--muted);border-radius:6px 0 0 6px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:background .2s,box-shadow .2s;z-index:2}
+  .pipe-out{left:auto;right:-13px;border-radius:0 6px 6px 0}
+  .pipe-in.on,.pipe-out.on{background:var(--accent-3);box-shadow:0 0 12px var(--accent-3)}
+  .pipe-status{margin-top:10px;text-align:center;color:var(--muted);font-size:14px;min-height:20px}
 </style>
 </head>
 <body>
@@ -1415,6 +1436,7 @@
     <button data-tab="codec">🔡 编码转换</button>
     <button data-tab="todo">📋 待办清单</button>
     <button data-tab="compound">🧮 复利测算</button>
+    <button data-tab="pipe">🚰 接水管</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3758,6 +3780,33 @@
     </div>
   </section>
 
+  <!-- 接水管 -->
+  <section class="panel" id="pipe">
+    <div class="card">
+      <h2>🚰 接水管</h2>
+      <div class="hint">旋转水管，把左边流进来的水接到右边的出口。点一下格子即可旋转 90°。</div>
+      <div class="pipe-controls">
+        <label class="pipe-sel">难度
+          <select id="pipe-diff">
+            <option value="easy">简单 5×5</option>
+            <option value="medium">中等 6×6</option>
+            <option value="hard">困难 7×7</option>
+          </select>
+        </label>
+        <button class="btn" id="pipe-new">🔀 新一局</button>
+        <span class="pipe-stat">步数 <b id="pipe-moves">0</b></span>
+        <span class="pipe-stat">用时 <b id="pipe-time">0:00</b></span>
+        <span class="pipe-stat">最佳 <b id="pipe-best">—</b></span>
+      </div>
+      <div class="pipe-wrap">
+        <div class="pipe-in" id="pipe-in" title="进水"><span>💧</span></div>
+        <div class="pipe-out" id="pipe-out" title="出水"><span>🚿</span></div>
+        <div class="pipe-board" id="pipe-board"></div>
+      </div>
+      <div class="pipe-status" id="pipe-status"></div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -3861,7 +3910,216 @@
     if (b.dataset.tab === "habit") renderHabit();
     if (b.dataset.tab !== "catch" && typeof catchStop === "function") catchStop();
     if (b.dataset.tab === "life") lifeRender();
+    if (b.dataset.tab === "pipe") { if (!pipeState) pipeNew(); pipeStart(); }
+    if (b.dataset.tab !== "pipe") pipeStop();
   });
+
+  /* ====PIPE_MOD_START==== */
+  /* ---------- 接水管 pipe ---------- */
+  let pipeState = null;
+  const DR = [-1, 0, 1, 0], DC = [0, 1, 0, -1];
+  function pipeBaseConns(type) {
+    if (type === "I") return [0, 2];
+    if (type === "L") return [0, 1];
+    if (type === "T") return [3, 0, 1];
+    return [0, 1, 2, 3];
+  }
+  function pipeConns(cell) { return pipeBaseConns(cell.type).map((d) => (d + cell.rot) % 4); }
+  function pipeDirBetween(r, c, nr, nc) {
+    if (nr === r - 1) return 0;
+    if (nc === c + 1) return 1;
+    if (nr === r + 1) return 2;
+    return 3;
+  }
+  function pipeSolveTile(dirs) {
+    const set = [...dirs].sort().join(",");
+    for (let rot = 0; rot < 4; rot++) {
+      const s = pipeBaseConns("I").map((d) => (d + rot) % 4).sort().join(",");
+      if (s === set) return { type: "I", rot };
+    }
+    for (let rot = 0; rot < 4; rot++) {
+      const s = pipeBaseConns("L").map((d) => (d + rot) % 4).sort().join(",");
+      if (s === set) return { type: "L", rot };
+    }
+    return { type: "I", rot: 0 };
+  }
+  function pipeShuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function pipeCarve(N, srcRow, drnRow) {
+    const target = [drnRow, N - 1];
+    const visited = Array.from({ length: N }, () => Array(N).fill(false));
+    const path = [];
+    function dfs(r, c) {
+      visited[r][c] = true; path.push([r, c]);
+      if (r === target[0] && c === target[1]) return true;
+      const dirs = pipeShuffle([[0, 1], [0, -1], [1, 0], [-1, 0]]);
+      for (let k = 0; k < dirs.length; k++) {
+        const dr = dirs[k][0], dc = dirs[k][1];
+        const nr = r + dr, nc = c + dc;
+        if (nr < 0 || nc < 0 || nr >= N || nc >= N) continue;
+        if (visited[nr][nc]) continue;
+        if (dfs(nr, nc)) return true;
+      }
+      path.pop(); visited[r][c] = false; return false;
+    }
+    return dfs(srcRow, 0) ? path : null;
+  }
+  function pipeDiffN() {
+    const v = $("pipe-diff") ? $("pipe-diff").value : "easy";
+    return v === "hard" ? 7 : v === "medium" ? 6 : 5;
+  }
+  function pipeBuild(N) {
+    let srcRow = rand(N), drnRow = rand(N);
+    let path = null;
+    for (let a = 0; a < 300 && !path; a++) path = pipeCarve(N, srcRow, drnRow);
+    if (!path) { drnRow = srcRow; path = []; for (let c = 0; c < N; c++) path.push([srcRow, c]); }
+    const onPath = Array.from({ length: N }, () => Array(N).fill(false));
+    const grid = Array.from({ length: N }, () => Array(N).fill(null));
+    for (let i = 0; i < path.length; i++) {
+      const r = path[i][0], c = path[i][1];
+      onPath[r][c] = true;
+      const dirs = new Set();
+      if (i === 0) dirs.add(3);
+      if (i === path.length - 1) dirs.add(1);
+      if (i > 0) { const pr = path[i - 1][0], pc = path[i - 1][1]; dirs.add(pipeDirBetween(r, c, pr, pc)); }
+      if (i < path.length - 1) { const nr = path[i + 1][0], nc = path[i + 1][1]; dirs.add(pipeDirBetween(r, c, nr, nc)); }
+      const sol = pipeSolveTile(dirs);
+      grid[r][c] = { type: sol.type, solRot: sol.rot, rot: rand(4) };
+    }
+    const decoys = ["I", "L", "T", "X"];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      if (!onPath[r][c]) grid[r][c] = { type: decoys[rand(4)], solRot: -1, rot: rand(4) };
+    }
+    return { grid, srcRow, drnRow };
+  }
+  function pipeSVG(type) {
+    let segs = "";
+    if (type === "I") segs = '<line x1="50" y1="4" x2="50" y2="96"/>';
+    else if (type === "L") segs = '<path d="M50 50 L50 4 M50 50 L96 50"/>';
+    else if (type === "T") segs = '<path d="M4 50 L96 50 M50 50 L50 4"/>';
+    else segs = '<path d="M4 50 L96 50 M50 4 L50 96"/>';
+    return '<svg class="psvg" viewBox="0 0 100 100"><g class="pipe">' + segs + '</g><circle class="phub" cx="50" cy="50" r="11"/></svg>';
+  }
+  function pipeRenderBoard() {
+    const st = pipeState, N = st.N, board = $("pipe-board");
+    const wrap = board.parentElement;
+    if (wrap && wrap.style) wrap.style.setProperty("--n", N);
+    board.style.setProperty("--n", N);
+    board.innerHTML = "";
+    st.cells = Array.from({ length: N }, () => Array(N).fill(null));
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const cell = document.createElement("div");
+      cell.className = "pipe-cell";
+      cell.dataset.r = r; cell.dataset.c = c;
+      cell.innerHTML = pipeSVG(st.grid[r][c].type);
+      const svg = cell.querySelector(".psvg");
+      if (svg && svg.style) svg.style.transform = "rotate(" + (st.grid[r][c].rot * 90) + "deg)";
+      cell.addEventListener("click", function () { pipeRotate(r, c); });
+      board.appendChild(cell);
+      st.cells[r][c] = cell;
+    }
+    const inEl = $("pipe-in"), outEl = $("pipe-out");
+    if (inEl && inEl.style) inEl.style.top = "calc((" + st.srcRow + " + 0.5) / " + N + " * 100%)";
+    if (outEl && outEl.style) outEl.style.top = "calc((" + st.drnRow + " + 0.5) / " + N + " * 100%)";
+  }
+  function pipeFlow() {
+    const st = pipeState, N = st.N, g = st.grid;
+    const filled = Array.from({ length: N }, () => Array(N).fill(false));
+    const q = [];
+    if (pipeConns(g[st.srcRow][0]).indexOf(3) >= 0) q.push([st.srcRow, 0]);
+    while (q.length) {
+      const cur = q.shift();
+      const r = cur[0], c = cur[1];
+      if (filled[r][c]) continue;
+      filled[r][c] = true;
+      const conns = pipeConns(g[r][c]);
+      for (let i = 0; i < conns.length; i++) {
+        const d = conns[i];
+        const nr = r + DR[d], nc = c + DC[d];
+        if (nr < 0 || nc < 0 || nr >= N || nc >= N) continue;
+        if (pipeConns(g[nr][nc]).indexOf((d + 2) % 4) >= 0 && !filled[nr][nc]) q.push([nr, nc]);
+      }
+    }
+    st.filled = filled;
+    return filled[st.drnRow][N - 1] && pipeConns(g[st.drnRow][N - 1]).indexOf(1) >= 0;
+  }
+  function pipePaint() {
+    const st = pipeState;
+    for (let r = 0; r < st.N; r++) for (let c = 0; c < st.N; c++) {
+      if (st.cells[r][c] && st.cells[r][c].classList) st.cells[r][c].classList.toggle("filled", !!st.filled[r][c]);
+    }
+    const inEl = $("pipe-in"), outEl = $("pipe-out");
+    if (inEl && inEl.classList) inEl.classList.toggle("on", !!st.filled[st.srcRow][0]);
+    if (outEl && outEl.classList) outEl.classList.toggle("on", !!st.filled[st.drnRow][st.N - 1]);
+  }
+  function pipeFmt(s) { s = Math.max(0, Math.floor(s)); const m = Math.floor(s / 60), ss = s % 60; return m + ":" + (ss < 10 ? "0" : "") + ss; }
+  function pipeElapsed() { const st = pipeState; if (!st) return 0; return st.acc + (st.t0 ? (Date.now() - st.t0) / 1000 : 0); }
+  function pipeBestKey() { return "suibian_pipe_best_" + (pipeState ? pipeState.diff : "easy"); }
+  function pipeLoadBest() { try { return JSON.parse(localStorage.getItem(pipeBestKey()) || "null"); } catch (e) { return null; } }
+  function pipeSaveBest(b) { try { localStorage.setItem(pipeBestKey(), JSON.stringify(b)); } catch (e) {} }
+  function pipeRenderBest() { const b = pipeLoadBest(); const el = $("pipe-best"); if (el) el.textContent = b ? (b.moves + " 步 / " + pipeFmt(b.time)) : "—"; }
+  function pipeUpdateHUD() {
+    const m = $("pipe-moves"), t = $("pipe-time");
+    if (m) m.textContent = pipeState.moves;
+    if (t) t.textContent = pipeFmt(pipeElapsed());
+  }
+  function pipeStatus(msg) { const el = $("pipe-status"); if (el) el.textContent = msg; }
+  function pipeNew() {
+    const diff = $("pipe-diff") ? $("pipe-diff").value : "easy";
+    const N = pipeDiffN();
+    const built = pipeBuild(N);
+    pipeState = { N: N, grid: built.grid, srcRow: built.srcRow, drnRow: built.drnRow, filled: null, cells: null, moves: 0, over: false, acc: 0, t0: null, timer: null, diff: diff };
+    pipeRenderBoard();
+    const win = pipeFlow();
+    pipePaint();
+    pipeUpdateHUD();
+    pipeRenderBest();
+    pipeStatus("旋转水管，把左边的水接到右边 ➡️（" + N + "×" + N + " · " + ({ easy: "简单", medium: "中等", hard: "困难" }[diff]) + "）");
+    if (win) {
+      let guard = 0;
+      while (pipeFlow() && guard < 4) { const c0 = pipeState.grid[built.srcRow][0]; c0.rot = (c0.rot + 1) % 4; guard++; }
+      pipePaint();
+    }
+  }
+  function pipeRotate(r, c) {
+    const st = pipeState; if (!st || st.over) return;
+    const cell = st.grid[r][c];
+    cell.rot = (cell.rot + 1) % 4;
+    const svg = st.cells[r][c] ? st.cells[r][c].querySelector(".psvg") : null;
+    if (svg && svg.style) svg.style.transform = "rotate(" + (cell.rot * 90) + "deg)";
+    st.moves++;
+    const win = pipeFlow();
+    pipePaint();
+    pipeUpdateHUD();
+    if (win) pipeWin();
+  }
+  function pipeWin() {
+    const st = pipeState; if (!st) return; st.over = true; pipeStop();
+    bumpUsage("pipe");
+    const cur = { moves: st.moves, time: Math.floor(pipeElapsed()) };
+    const rec = pipeLoadBest();
+    const best = { moves: rec ? Math.min(rec.moves, cur.moves) : cur.moves, time: rec ? Math.min(rec.time, cur.time) : cur.time };
+    pipeSaveBest(best); pipeRenderBest();
+    pipeStatus("🎉 通水成功！用了 " + cur.moves + " 步，" + pipeFmt(cur.time) + "，最佳 " + best.moves + " 步 / " + pipeFmt(best.time));
+    if (typeof playDing === "function") playDing();
+    if (typeof confettiBurst === "function") confettiBurst(140);
+    toast("💧 接水管通水成功！");
+  }
+  function pipeStart() {
+    const st = pipeState; if (!st || st.over) return;
+    if (st.t0 == null) st.t0 = Date.now();
+    if (!st.timer) st.timer = setInterval(function () { const t = $("pipe-time"); if (t) t.textContent = pipeFmt(pipeElapsed()); }, 250);
+  }
+  function pipeStop() {
+    const st = pipeState; if (!st) return;
+    if (st.timer) { clearInterval(st.timer); st.timer = null; }
+    if (st.t0 != null) { st.acc += (Date.now() - st.t0) / 1000; st.t0 = null; }
+  }
+  if ($("pipe-board")) {
+    $("pipe-new").addEventListener("click", function () { pipeStop(); pipeNew(); pipeStart(); });
+    $("pipe-diff").addEventListener("change", function () { pipeStop(); pipeNew(); pipeStart(); });
+    pipeNew();
+  }
+  /* ====PIPE_MOD_END==== */
 
   /* ---------- 随便逛逛（彩蛋小功能） ---------- */
   function activateTab(id) {
@@ -3935,6 +4193,8 @@
     if (id === "codec") codecRender();
     if (id === "gradient") gradientRender();
     if (id === "compound") compoundCalc();
+    if (id === "pipe") { if (!pipeState) pipeNew(); pipeStart(); }
+    if (id !== "pipe" && typeof pipeStop === "function") pipeStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -4043,6 +4303,7 @@
     codec: "编码 解码 base64 url hex 十六进制 unicode 转换 进制 编解码 编码转换 字符 转码 文本 编码工具 加密 字符串",
     gradient: "渐变 配色 gradient css 背景 设计 颜色 色卡 网页 美化 主题 调色 渐变工坊 取色",
     compound: "复利 测算 理财 收益 投资 利息 本金 每月定投 攒钱 存款 增长 收益率 资产 规划 存钱 增值 退休 财务自由 滚雪球 长期",
+    pipe: "接水管 水管 管道 通水 旋转 益智 逻辑 puzzle 连通 修水管 进水 出水 拧 布线"
 
   };
   const toolSearch = $("toolSearch");
@@ -4918,6 +5179,18 @@
     "卡住时换个方向看同一行，答案常在拐角处。",
     "数织教会一件事：把大问题拆成一格一格，就不那么吓人了。",
     "涂满最后一格的瞬间，整幅画都对你笑了。"
+  );
+  QUOTES.push(
+    "水管绕点路没关系，只要最后接通的就是好路。",
+    "把左边的水接到右边，靠的不是直，是每一节的配合。",
+    "卡住的时候，转一下视角，路就通了。",
+    "有些连接看似绕远，其实是为了绕开死路。",
+    "一拧一拧地调，再乱的管子也能顺起来。",
+    "通水的瞬间才懂：前面那些旋转都没白转。",
+    "别急着一次对齐，慢慢转，水自己会找到出口。",
+    "生活像接水管——这头进、那头出，中间的弯都得自己拧。",
+    "拧不动的时候，先松一口气，再转。",
+    "接通的那一刻，整盘管子都亮了。"
   );
   $("quoteBtn").addEventListener("click", () => {
     $("quoteResult").textContent = "“" + QUOTES[rand(QUOTES.length)] + "”";
@@ -5800,7 +6073,9 @@
     { emoji: "🌳", name: "百年人生", desc: "把预期寿命设为 100 岁以上再看", test: (u) => (u.lifeLong || 0) >= 1 },
     { emoji: "🧮", name: "理财新手", desc: "用过一次复利测算", test: (u) => (u.compound || 0) >= 1 },
     { emoji: "💎", name: "复利信徒", desc: "复利测算名义终值破 100 万", test: () => { try { return (parseInt(localStorage.getItem("suibian_compound_best") || "0", 10) || 0) >= 1000000; } catch (e) { return false; } } }
-  ];
+,
+    { emoji: "🚰", name: "通水师傅", desc: "接通第一根水管", test: (u) => (u.pipe || 0) >= 1 },
+    { emoji: "💧", name: "管道大亨", desc: "累计接通 10 局接水管", test: (u) => (u.pipe || 0) >= 10 }  ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
   function renderAchv() {
