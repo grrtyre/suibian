@@ -1414,6 +1414,7 @@
     <button data-tab="regex">🔤 正则测试器</button>
     <button data-tab="codec">🔡 编码转换</button>
     <button data-tab="todo">📋 待办清单</button>
+    <button data-tab="compound">🧮 复利测算</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -3718,6 +3719,43 @@
       <h3 style="margin:16px 0 2px">我的收藏</h3>
       <div class="gw-favs" id="gwFavs"></div>
     </div>
+  <section class="panel" id="compound">
+    <style>
+      #compound .cmp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+      #compound .cmp-field{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted)}
+      #compound .cmp-field input,#compound .cmp-field select{padding:9px 10px;border-radius:11px;border:1.5px solid var(--line);background:var(--card-2);color:var(--text);font-size:14px}
+      #compound .cmp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-top:12px}
+      #compound .cmp-stats .box{background:var(--card-2);border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center}
+      #compound .cmp-stats .num{font-size:19px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.25}
+      #compound .cmp-stats .lab{font-size:12px;color:var(--muted);margin-top:3px}
+      #compound .cmp-verdict{margin-top:10px;font-size:13px;color:var(--muted);text-align:center;line-height:1.6}
+      #compound .cmp-table{max-height:236px;overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:8px}
+      #compound .cmp-table table{width:100%;border-collapse:collapse;font-size:13px}
+      #compound .cmp-table th,#compound .cmp-table td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+      #compound .cmp-table th:first-child,#compound .cmp-table td:first-child{text-align:left}
+      #compound .cmp-table thead th{position:sticky;top:0;background:var(--card-2);color:var(--muted);font-weight:600}
+    </style>
+    <div class="card">
+      <h2>🧮 复利测算</h2>
+      <div class="hint">看看「每月攒一点 + 时间」到底能滚出多少。填好本金、定投、年化收益和年限，一键看资产增长曲线。纯测算，不构成投资建议。</div>
+      <div class="cmp-grid">
+        <label class="cmp-field"><span>初始本金（元）</span><input type="number" id="cmpPrincipal" value="10000" min="0" step="1000" /></label>
+        <label class="cmp-field"><span>每月定投（元）</span><input type="number" id="cmpMonthly" value="1000" min="0" step="100" /></label>
+        <label class="cmp-field"><span>预计年化收益（%）</span><input type="number" id="cmpRate" value="6" step="0.1" /></label>
+        <label class="cmp-field"><span>投资年限（年）</span><input type="number" id="cmpYears" value="20" min="1" max="80" step="1" /></label>
+        <label class="cmp-field"><span>复利频率</span><select id="cmpFreq"><option value="12">按月复利</option><option value="1">按年复利</option></select></label>
+        <label class="cmp-field"><span>通胀率（%，可选）</span><input type="number" id="cmpInfl" value="3" step="0.1" /></label>
+      </div>
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap;margin-top:4px">
+        <button class="btn" id="cmpCalc">📈 测算一下</button>
+        <button class="btn ghost" id="cmpReset">↺ 重置</button>
+      </div>
+      <div class="cmp-stats" id="cmpStats"></div>
+      <div class="cmp-verdict" id="cmpVerdict"></div>
+      <canvas id="cmpChart" width="640" height="280" style="width:100%;height:auto;margin-top:12px;border-radius:14px;background:var(--card-2);border:1px solid var(--line)"></canvas>
+      <h3 style="margin:16px 0 2px">逐年明细</h3>
+      <div class="cmp-table" id="cmpTable"></div>
+    </div>
   </section>
 
 <script>
@@ -3896,6 +3934,7 @@
     if (id === "huangli") huangliRender();
     if (id === "codec") codecRender();
     if (id === "gradient") gradientRender();
+    if (id === "compound") compoundCalc();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
   }
@@ -4002,7 +4041,8 @@
     regex: "正则 测试 正则表达式 匹配 regex regexp pattern 模式 提取 替换 校验 邮箱 手机号 规则 表达式 文本 查找 识别 提取 正则测试器",
     huangli: "黄历 老黄历 农历 干支 宜忌 冲煞 生肖 星座 建除 吉日 择日 玄学 黄道 吉神 凶煞 通书 皇历 日历 每日 看日子",
     codec: "编码 解码 base64 url hex 十六进制 unicode 转换 进制 编解码 编码转换 字符 转码 文本 编码工具 加密 字符串",
-    gradient: "渐变 配色 gradient css 背景 设计 颜色 色卡 网页 美化 主题 调色 渐变工坊 取色"
+    gradient: "渐变 配色 gradient css 背景 设计 颜色 色卡 网页 美化 主题 调色 渐变工坊 取色",
+    compound: "复利 测算 理财 收益 投资 利息 本金 每月定投 攒钱 存款 增长 收益率 资产 规划 存钱 增值 退休 财务自由 滚雪球 长期",
 
   };
   const toolSearch = $("toolSearch");
@@ -5757,7 +5797,9 @@
     { emoji: "🔐", name: "守密人", desc: "在密码保险箱存入 1 条账号", test: (u) => (u.vault || 0) >= 1 },
     { emoji: "🗝️", name: "宝藏管家", desc: "在密码保险箱累计存入 10 条", test: (u) => (u.vault || 0) >= 10 },
     { emoji: "⏳", name: "初窥生命", desc: "生成过一次生命日历", test: (u) => (u.life || 0) >= 1 },
-    { emoji: "🌳", name: "百年人生", desc: "把预期寿命设为 100 岁以上再看", test: (u) => (u.lifeLong || 0) >= 1 }
+    { emoji: "🌳", name: "百年人生", desc: "把预期寿命设为 100 岁以上再看", test: (u) => (u.lifeLong || 0) >= 1 },
+    { emoji: "🧮", name: "理财新手", desc: "用过一次复利测算", test: (u) => (u.compound || 0) >= 1 },
+    { emoji: "💎", name: "复利信徒", desc: "复利测算名义终值破 100 万", test: () => { try { return (parseInt(localStorage.getItem("suibian_compound_best") || "0", 10) || 0) >= 1000000; } catch (e) { return false; } } }
   ];
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -8569,6 +8611,103 @@
     bumpUsage("conv");
   });
   convRenderCats();convFillUnits();convUpdate("from");
+
+  /* ---------- 复利测算 compound ---------- */
+  function cmpFmtMoney(x){
+    if(!isFinite(x))return "—";
+    var a=Math.abs(x);
+    if(a>=1e8)return (x/1e8).toFixed(2)+"亿";
+    if(a>=1e4)return (x/1e4).toFixed(1)+"万";
+    return Math.round(x).toLocaleString("zh-CN");
+  }
+  function cmpBox(num,lab){return '<div class="box"><div class="num">'+num+'</div><div class="lab">'+lab+'</div></div>';}
+  var cmpLoaded=false;
+  function compoundCalc(){
+    var P=Math.max(0,parseFloat($("cmpPrincipal").value)||0);
+    var M=Math.max(0,parseFloat($("cmpMonthly").value)||0);
+    var r=parseFloat($("cmpRate").value);
+    var Y=Math.max(1,Math.min(80,parseInt($("cmpYears").value,10)||1));
+    var n=parseInt($("cmpFreq").value,10)||12;
+    var infl=parseFloat($("cmpInfl").value)||0;
+    var rate=(isFinite(r)?r:0)/100/n;
+    var T=Y*n;
+    if(!cmpLoaded){
+      try{var sv=JSON.parse(localStorage.getItem("suibian_compound")||"null");
+        if(sv&&typeof sv==="object"){
+          $("cmpPrincipal").value=sv.P!=null?sv.P:P;
+          $("cmpMonthly").value=sv.M!=null?sv.M:M;
+          $("cmpRate").value=sv.r!=null?sv.r:r;
+          $("cmpYears").value=sv.Y!=null?sv.Y:Y;
+          $("cmpFreq").value=sv.n!=null?sv.n:n;
+          $("cmpInfl").value=sv.infl!=null?sv.infl:infl;
+        }
+      }catch(e){}
+      cmpLoaded=true;
+    }
+    var rows=[{y:0,inv:P,val:P}];
+    var bal=P,inv=P;
+    for(var p=1;p<=T;p++){bal=bal*(1+rate)+M;inv+=M;if(p%n===0)rows.push({y:p/n,inv:inv,val:bal});}
+    var fv=bal,totalInv=inv,gain=fv-totalInv;
+    var real=fv/Math.pow(1+infl/100,Y);
+    var retPct=totalInv>0?(gain/totalInv*100):0;
+    $("cmpStats").innerHTML=cmpBox(cmpFmtMoney(fv),"名义终值")+cmpBox(cmpFmtMoney(real),"实际购买力")+cmpBox(cmpFmtMoney(totalInv),"累计投入")+cmpBox(cmpFmtMoney(gain),"总收益")+cmpBox(retPct.toFixed(0)+"%","总收益率");
+    var mult=totalInv>0?(fv/totalInv).toFixed(1):"—";
+    var verdict="💡 坚持 "+Y+" 年，每月攒 "+cmpFmtMoney(M)+"，资产约翻到 "+mult+" 倍；时间是最稳的复利。";
+    if(fv>=1e6)verdict="💎 资产已破百万！"+verdict;
+    $("cmpVerdict").textContent=verdict;
+    var step=Y>30?5:(Y>15?2:1);
+    var tbl='<table><thead><tr><th>年份</th><th>累计投入</th><th>资产总值</th><th>收益</th></tr></thead><tbody>';
+    rows.forEach(function(rw){
+      if(rw.y===0||rw.y%step===0||rw.y===Y){
+        tbl+='<tr><td>'+rw.y+'</td><td>'+cmpFmtMoney(rw.inv)+'</td><td>'+cmpFmtMoney(rw.val)+'</td><td>'+cmpFmtMoney(rw.val-rw.inv)+'</td></tr>';
+      }
+    });
+    tbl+='</tbody></table>';
+    $("cmpTable").innerHTML=tbl;
+    cmpDrawChart(rows);
+    try{localStorage.setItem("suibian_compound",JSON.stringify({P:P,M:M,r:isFinite(r)?r:0,Y:Y,n:n,infl:infl}));}catch(e){}
+    try{var best=parseInt(localStorage.getItem("suibian_compound_best")||"0",10)||0;if(fv>best)localStorage.setItem("suibian_compound_best",String(Math.round(fv)));}catch(e){}
+  }
+  function cmpDrawChart(rows){
+    var cv=$("cmpChart");if(!cv)return;var ctx=cv.getContext("2d");
+    var W=cv.width,H=cv.height,padL=56,padR=14,padT=16,padB=26;
+    ctx.clearRect(0,0,W,H);
+    var css=getComputedStyle(document.body);
+    var cAcc=(css.getPropertyValue("--accent")||"").trim()||"#7c5cff";
+    var cMut=(css.getPropertyValue("--muted")||"").trim()||"#9aa0b5";
+    var cLine=(css.getPropertyValue("--line")||"").trim()||"#e2e5ef";
+    var Y=rows[rows.length-1].y;
+    var maxV=1;rows.forEach(function(r){if(r.val>maxV)maxV=r.val;});
+    var xOf=function(y){return padL+(Y>0?y/Y:0)*(W-padL-padR);};
+    var yOf=function(v){return H-padB-(v/maxV)*(H-padT-padB);};
+    ctx.font="11px sans-serif";ctx.lineWidth=1;
+    var ticks=4;
+    for(var i=0;i<=ticks;i++){var v=maxV*i/ticks,yy=yOf(v);ctx.strokeStyle=cLine;ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(W-padR,yy);ctx.stroke();ctx.fillStyle=cMut;ctx.textAlign="left";ctx.fillText(cmpFmtMoney(v),4,yy+3);}
+    ctx.textAlign="center";ctx.fillStyle=cMut;[0,Y/2,Y].forEach(function(yv){ctx.fillText(yv+"年",xOf(yv),H-8);});ctx.textAlign="left";
+    var drawLine=function(key,color,dash){ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.setLineDash(dash||[]);ctx.beginPath();rows.forEach(function(r,idx){var x=xOf(r.y),y=yOf(r[key]);if(idx)ctx.lineTo(x,y);else ctx.moveTo(x,y);});ctx.stroke();ctx.setLineDash([]);};
+    drawLine("inv",cMut,[4,4]);
+    drawLine("val",cAcc,null);
+    ctx.fillStyle=cMut;ctx.fillText("— 累计投入",padL+6,padT+4);
+    ctx.fillStyle=cAcc;ctx.fillText("— 资产总值",padL+92,padT+4);
+  }
+  ["cmpPrincipal","cmpMonthly","cmpRate","cmpYears","cmpFreq","cmpInfl"].forEach(function(id){var el=$(id);if(el)el.addEventListener("input",compoundCalc);});
+  $("cmpCalc").addEventListener("click",function(){
+    playClick();compoundCalc();bumpUsage("compound");
+    var P=Math.max(0,parseFloat($("cmpPrincipal").value)||0);
+    var M=Math.max(0,parseFloat($("cmpMonthly").value)||0);
+    var r=parseFloat($("cmpRate").value)||0;
+    var Y=Math.max(1,Math.min(80,parseInt($("cmpYears").value,10)||1));
+    var n=parseInt($("cmpFreq").value,10)||12;
+    var rate=(isFinite(r)?r:0)/100/n;var T=Y*n;var bal=P;
+    for(var p=1;p<=T;p++)bal=bal*(1+rate)+M;
+    if(bal>=1e6){playDing();toast("资产破百万 💎");}else toast("已测算 · 名义终值 "+cmpFmtMoney(bal));
+  });
+  $("cmpReset").addEventListener("click",function(){
+    playClick();
+    $("cmpPrincipal").value=10000;$("cmpMonthly").value=1000;$("cmpRate").value=6;
+    $("cmpYears").value=20;$("cmpFreq").value=12;$("cmpInfl").value=3;
+    compoundCalc();
+  });
 
   /* ---------- 节拍器 ---------- */
   let metroPlaying=false,metroTimer=null,metroRAF=null,metroNext=0,metroBeat=0,metroQueue=[];
@@ -13977,6 +14116,19 @@
     "拖延的反面不是勤奋，是「先写下来，再动一下」。",
     "完成比完美重要，勾掉一件，底气就多一分。",
     "把大事拆成小勾，行动就没那么吓人了。"
+  );
+
+  QUOTES.push(
+    "时间是最好的复利，你今天偷的懒，明天会连本带利收回来。",
+    "别小看每月那一点点，攒着攒着，它就长成了你想象不到的数。",
+    "理财不是一夜暴富，是把「以后再说」变成「现在就开始」。",
+    "复利的秘密不在利率，在「不中断」三个字。",
+    "钱不会自己长大，但你让它躺着的地方，会决定它长成什么样。",
+    "越早开始攒，时间就越多替你打工；越晚开始，越要靠自己拼命。",
+    "把每月定投当成给未来的自己发工资，雷打不动。",
+    "真正的自由，是某天发现「钱生钱」已经覆盖了你的日常开销。",
+    "上上下下的是市场，稳稳增值的是纪律。",
+    "算得清的是数字，算不清的是早出发十年带来的差距。"
   );
 
 
