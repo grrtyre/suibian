@@ -1440,6 +1440,7 @@
     <button data-tab="pomodoro">🍅 番茄钟</button>
     <button data-tab="md">📝 Markdown 编辑器</button>
     <button data-tab="mindmap">🗺️ 思维导图</button>
+    <button data-tab="lifegame">🧬 生命游戏</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4023,6 +4024,69 @@
     </style>
   </section>
 
+  <section class="panel" id="lifegame">
+    <div class="card">
+      <h2>🧬 生命游戏</h2>
+      <div class="hint">康威生命游戏：每个细胞看周围 8 个邻居，按「独生/拥挤/复活」规则生死演化。点击或拖动绘制，▶ 让它自己跑起来，看混沌中涌现的秩序。</div>
+      <div class="lg-toolbar">
+        <button class="btn sm" id="lg-play">▶ 播放</button>
+        <button class="btn ghost sm" id="lg-step">⏭ 单步</button>
+        <button class="btn ghost sm" id="lg-rand">🎲 随机</button>
+        <button class="btn ghost sm" id="lg-clear">🗑 清空</button>
+        <select id="lg-preset" class="lg-select" title="载入预设图案">
+          <option value="">— 预设图案 —</option>
+          <option value="glider">滑翔机</option>
+          <option value="ship">轻量飞船</option>
+          <option value="gun">高斯炮</option>
+          <option value="block">方块（静物）</option>
+          <option value="beehive">蜂巢（静物）</option>
+          <option value="blinker">闪烁（振荡子）</option>
+          <option value="random">随机大爆炸</option>
+        </select>
+        <button class="btn sm" id="lg-save">💾 存图案</button>
+      </div>
+      <div class="lg-row">
+        <label class="lg-lbl">速度</label>
+        <input type="range" id="lg-speed" min="1" max="30" value="12" class="lg-range">
+        <label class="lg-lbl">网格</label>
+        <select id="lg-size" class="lg-select sm">
+          <option value="small">小</option>
+          <option value="medium" selected>中</option>
+          <option value="large">大</option>
+        </select>
+        <label class="lg-chk"><input type="checkbox" id="lg-wrap" checked> 环形边界</label>
+      </div>
+      <div class="lg-stage">
+        <canvas id="lg-canvas" class="lg-canvas"></canvas>
+      </div>
+      <div class="lg-stats">
+        <span>第 <b id="lg-gen">0</b> 代</span>
+        <span>活细胞 <b id="lg-alive">0</b></span>
+        <span>峰值 <b id="lg-peak">0</b></span>
+      </div>
+      <div class="lg-gallery" id="lg-gallery"></div>
+    </div>
+    <style>
+      .lg-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+      .lg-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+      .lg-lbl { font-size: 13px; opacity: .7; }
+      .lg-select { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--bd, #e2e2ef); background: var(--card, #fff); color: inherit; font-size: 14px; }
+      .lg-select.sm { padding: 6px 8px; font-size: 13px; }
+      .lg-range { width: 160px; accent-color: #7c5cff; }
+      .lg-chk { font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+      .lg-stage { margin-top: 14px; background: #0e1020; border-radius: 14px; padding: 10px; border: 1px solid var(--bd, #eaeaf3); overflow: auto; }
+      .lg-canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; border-radius: 8px; cursor: crosshair; touch-action: none; }
+      .lg-stats { display: flex; gap: 18px; margin-top: 12px; font-size: 14px; opacity: .85; }
+      .lg-stats b { color: #7c5cff; }
+      .lg-gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+      .lg-empty { font-size: 13px; opacity: .55; }
+      .lg-pat { display: flex; gap: 6px; align-items: center; background: #f5f5fb; border: 1px solid var(--bd, #eaeaf3); border-radius: 10px; padding: 6px 8px; font-size: 13px; }
+      .lg-pat button { border: none; background: transparent; cursor: pointer; font-size: 13px; color: #7c5cff; padding: 0 2px; }
+      .lg-pat .del { color: #e74c3c; }
+      @media (max-width: 720px) { .lg-range { width: 120px; } .lg-stats { gap: 12px; } }
+    </style>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -4414,6 +4478,8 @@
     if (id === "pomodoro") pomodoroStart();
     if (id === "md") mdRender();
     if (id === "mindmap") mmRender();
+    if (id === "lifegame") lgRender();
+    if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
     if (panel) pop(panel.querySelector(".card"));
@@ -4526,7 +4592,8 @@
     pipe: "接水管 水管 管道 通水 旋转 益智 逻辑 puzzle 连通 修水管 进水 出水 拧 布线",
     pomodoro: "番茄钟 番茄 专注 时间管理 倒计时 休息 工作 效率 任务 待办 专注力 计时 pomodoro 番茄工作法 自律 25分钟 摸鱼  productivity",
     md: "markdown 编辑器 写作 文档 笔记 富文本 预览 导出 语法 文本 排版 文章 md 笔记 草稿 文案 写作工具 标记语言 文档生成",
-    mindmap: "思维导图 脑图 大纲 结构 想法 规划 分支 树状 整理 思路 关系 概念 map mind 笔记 知识 框架 梳理 节点"
+    mindmap: "思维导图 脑图 大纲 结构 想法 规划 分支 树状 整理 思路 关系 概念 map mind 笔记 知识 框架 梳理 节点",
+    lifegame: "生命游戏 康威 细胞 自动机 演化 模拟 元胞 规则 生死 种群 细胞自动机 game of life 混沌 涌现 系统 滑翔机 振荡"
 
   };
   const toolSearch = $("toolSearch");
@@ -15950,6 +16017,258 @@
     "一棵树的根越清楚，枝叶越不会乱。",
     "把脑子里的乱麻摊开，才发现其实没那么乱。",
     "想得越清楚，画得越简单；越简单，越记得住。"
+  );
+
+  /* ===== 🧬 生命游戏 lifegame (Conway's Game of Life) ===== */
+  const LG_KEY = "suibian_lifegame_patterns";
+  const lgState = { cols: 70, rows: 48, cell: 12, grid: null, gen: 0, alive: 0, peak: 0, running: false, timer: null, speed: 12, wrap: true, patterns: [] };
+  const lgCanvas = $("lg-canvas");
+  const lgCtx = lgCanvas ? lgCanvas.getContext("2d") : null;
+  const LG_PATTERNS = {
+    glider: [[0,1],[1,2],[2,0],[2,1],[2,2]],
+    ship: [[0,1],[0,4],[1,0],[2,0],[2,4],[3,0],[3,1],[3,2],[3,4]],
+    block: [[0,0],[0,1],[1,0],[1,1]],
+    beehive: [[0,1],[0,2],[1,0],[1,3],[2,1],[2,2]],
+    blinker: [[0,1],[1,1],[2,1]],
+    gun: [[4,0],[5,0],[4,1],[5,1],[4,10],[5,10],[6,10],[3,11],[7,11],[2,12],[8,12],[2,13],[8,13],[5,14],[3,15],[7,15],[4,16],[5,16],[6,16],[5,17],[2,20],[3,20],[4,20],[2,21],[3,21],[4,21],[1,22],[5,22],[0,24],[1,24],[5,24],[6,24],[2,34],[3,34],[2,35],[3,35]]
+  };
+  let lgInited = false;
+  function lgPersist() { try { localStorage.setItem(LG_KEY, JSON.stringify(lgState.patterns)); } catch (e) {} }
+  function lgLoadPatterns() { try { const a = JSON.parse(localStorage.getItem(LG_KEY) || "[]"); if (Array.isArray(a)) lgState.patterns = a; } catch (e) {} }
+  function lgCount(g, r, c, cols, rows, wrap) {
+    let n = 0;
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      if (!dr && !dc) continue;
+      let rr = r + dr, cc = c + dc;
+      if (wrap) { rr = (rr + rows) % rows; cc = (cc + cols) % cols; }
+      else if (rr < 0 || rr >= rows || cc < 0 || cc >= cols) continue;
+      n += g[rr * cols + cc];
+    }
+    return n;
+  }
+  function countAlive() { const g = lgState.grid; let n = 0; for (let i = 0; i < g.length; i++) n += g[i]; return n; }
+  function lgBuild() {
+    const cols = lgState.cols, rows = lgState.rows, cell = lgState.cell;
+    lgCanvas.width = cols * cell; lgCanvas.height = rows * cell;
+    if (!lgState.grid || lgState.grid.length !== cols * rows) lgState.grid = new Uint8Array(cols * rows);
+    lgDraw();
+  }
+  function lgDraw() {
+    if (!lgCtx) return;
+    const cols = lgState.cols, rows = lgState.rows, cell = lgState.cell, grid = lgState.grid;
+    lgCtx.fillStyle = "#0e1020";
+    lgCtx.fillRect(0, 0, lgCanvas.width, lgCanvas.height);
+    const hue = (lgState.gen * 4) % 360;
+    lgCtx.fillStyle = "hsl(" + hue + ",78%,60%)";
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      if (grid[r * cols + c]) lgCtx.fillRect(c * cell, r * cell, cell - 1, cell - 1);
+    }
+  }
+  function lgUpdateStats() {
+    const a = $("lg-gen"), b = $("lg-alive"), p = $("lg-peak");
+    if (a) a.textContent = lgState.gen;
+    if (b) b.textContent = lgState.alive;
+    if (p) p.textContent = lgState.peak;
+  }
+  function lgStamp(cells) {
+    let maxR = 0, maxC = 0;
+    cells.forEach(function (x) { if (x[0] > maxR) maxR = x[0]; if (x[1] > maxC) maxC = x[1]; });
+    const offR = Math.floor(lgState.rows / 2 - maxR / 2), offC = Math.floor(lgState.cols / 2 - maxC / 2);
+    cells.forEach(function (x) {
+      const rr = offR + x[0], cc = offC + x[1];
+      if (rr >= 0 && rr < lgState.rows && cc >= 0 && cc < lgState.cols) lgState.grid[rr * lgState.cols + cc] = 1;
+    });
+  }
+  function lgStep() {
+    const cols = lgState.cols, rows = lgState.rows, wrap = lgState.wrap;
+    const g = lgState.grid, ng = new Uint8Array(cols * rows);
+    let alive = 0;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const i = r * cols + c, n = lgCount(g, r, c, cols, rows, wrap);
+      const v = (g[i] && (n === 2 || n === 3)) || (!g[i] && n === 3) ? 1 : 0;
+      ng[i] = v; if (v) alive++;
+    }
+    lgState.grid = ng; lgState.gen++; lgState.alive = alive;
+    if (alive > lgState.peak) lgState.peak = alive;
+    lgDraw(); lgUpdateStats();
+  }
+  function lgLoop() {
+    if (!lgState.running) return;
+    lgStep();
+  }
+  function lgPlay() {
+    if (lgState.running || !lgCtx) return;
+    lgState.running = true; bumpUsage("lifegame");
+    lgState.timer = setInterval(lgLoop, Math.max(33, Math.round(1000 / lgState.speed)));
+    const btn = $("lg-play"); if (btn) btn.textContent = "⏸ 暂停";
+  }
+  function lgPause() {
+    lgState.running = false;
+    if (lgState.timer) { clearInterval(lgState.timer); lgState.timer = null; }
+    const btn = $("lg-play"); if (btn) btn.textContent = "▶ 播放";
+  }
+  function lgStop() { lgPause(); }
+  function lgToggle() { lgState.running ? lgPause() : lgPlay(); }
+  function lgRandom() {
+    lgPause();
+    const g = lgState.grid;
+    for (let i = 0; i < g.length; i++) g[i] = Math.random() < 0.24 ? 1 : 0;
+    lgState.gen = 0; lgState.alive = countAlive(); lgState.peak = lgState.alive;
+    lgDraw(); lgUpdateStats(); bumpUsage("lifegame");
+  }
+  function lgClear() {
+    lgPause(); lgState.grid.fill(0); lgState.gen = 0; lgState.alive = 0; lgState.peak = 0;
+    lgDraw(); lgUpdateStats();
+  }
+  function lgPreset(name) {
+    lgPause();
+    if (name === "random") { lgRandom(); return; }
+    if (name === "gun") {
+      lgState.cols = 92; lgState.rows = 62;
+      const sz = $("lg-size"); if (sz) sz.value = "large";
+      lgBuild();
+      lgState.wrap = false; const w = $("lg-wrap"); if (w) w.checked = false;
+      lgState.grid.fill(0);
+    } else {
+      lgState.grid.fill(0);
+    }
+    const cells = LG_PATTERNS[name];
+    if (cells) lgStamp(cells);
+    lgState.gen = 0; lgState.alive = countAlive(); lgState.peak = lgState.alive;
+    lgDraw(); lgUpdateStats(); bumpUsage("lifegame");
+  }
+  function lgSetSize(s) {
+    const map = { small: [50, 34], medium: [70, 48], large: [92, 62] };
+    const m = map[s] || map.medium;
+    lgState.cols = m[0]; lgState.rows = m[1];
+    const sz = $("lg-size"); if (sz) sz.value = s;
+    lgBuild();
+  }
+  function sizeName(cols, rows) {
+    if (cols <= 50) return "small";
+    if (cols >= 92) return "large";
+    return "medium";
+  }
+  function lgRefreshGallery() {
+    const box = $("lg-gallery"); if (!box) return;
+    if (!lgState.patterns.length) { box.innerHTML = '<span class="lg-empty">还没有保存的图案，画一个后点「💾 存图案」。</span>'; return; }
+    box.innerHTML = "";
+    lgState.patterns.forEach(function (p, idx) {
+      const el = document.createElement("div"); el.className = "lg-pat";
+      const nm = document.createElement("span"); nm.textContent = p.name; nm.style.marginRight = "4px";
+      const ld = document.createElement("button"); ld.textContent = "载入"; ld.title = "载入此图案";
+      ld.addEventListener("click", function () { lgLoadPattern(idx); });
+      const dl = document.createElement("button"); dl.textContent = "✕"; dl.className = "del"; dl.title = "删除";
+      dl.addEventListener("click", function () { lgState.patterns.splice(idx, 1); lgPersist(); lgRefreshGallery(); });
+      el.appendChild(nm); el.appendChild(ld); el.appendChild(dl); box.appendChild(el);
+    });
+  }
+  function lgSavePattern() {
+    let name = null;
+    try { name = window.prompt("给这个图案起个名字：", "图案" + (lgState.patterns.length + 1)); } catch (e) {}
+    if (name === null) return;
+    name = (name || "").trim() || ("图案" + (lgState.patterns.length + 1));
+    const arr = [];
+    for (let i = 0; i < lgState.grid.length; i++) if (lgState.grid[i]) arr.push(i);
+    lgState.patterns.push({ name: name, cols: lgState.cols, rows: lgState.rows, cells: arr, at: Date.now() });
+    if (lgState.patterns.length > 30) lgState.patterns.shift();
+    lgPersist(); lgRefreshGallery(); lgBumpSaved(); toast("已保存图案：「" + name + "」💾");
+  }
+  function lgLoadPattern(idx) {
+    const p = lgState.patterns[idx]; if (!p) return;
+    lgPause();
+    lgState.cols = p.cols; lgState.rows = p.rows;
+    const sz = $("lg-size"); if (sz) sz.value = sizeName(p.cols, p.rows);
+    lgBuild(); lgState.grid.fill(0);
+    (p.cells || []).forEach(function (i) { if (i >= 0 && i < lgState.grid.length) lgState.grid[i] = 1; });
+    lgState.gen = 0; lgState.alive = countAlive(); lgState.peak = lgState.alive;
+    lgDraw(); lgUpdateStats(); bumpUsage("lifegame");
+  }
+  function lgBumpSaved() {
+    bumpUsage("lifegame");
+    try { usage.lifegamePatterns = Math.max(usage.lifegamePatterns || 0, lgState.patterns.length); localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+  }
+  function lgCellAt(e) {
+    if (!lgCtx) return null;
+    const rect = lgCanvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width * lgCanvas.width;
+    const y = (e.clientY - rect.top) / rect.height * lgCanvas.height;
+    const c = Math.floor(x / lgState.cell), r = Math.floor(y / lgState.cell);
+    if (r < 0 || r >= lgState.rows || c < 0 || c >= lgState.cols) return null;
+    return r * lgState.cols + c;
+  }
+  function lgInit() {
+    if (lgInited) return;
+    lgLoadPatterns();
+    lgBuild();
+    lgStamp(LG_PATTERNS.glider);
+    lgState.alive = countAlive(); lgState.peak = lgState.alive;
+    lgInited = true;
+  }
+  function lgRender() {
+    if (!lgInited) lgInit();
+    if (!lgState.grid) lgInit();
+    if (lgCanvas.width !== lgState.cols * lgState.cell) lgBuild();
+    lgDraw(); lgUpdateStats(); lgRefreshGallery();
+  }
+  function lgBind() {
+    lgInit();
+    if (lgCanvas && !lgCanvas._lgBound) {
+      lgCanvas._lgBound = true;
+      let drawing = false, paintVal = 1;
+      lgCanvas.addEventListener("pointerdown", function (e) {
+        const i = lgCellAt(e); if (i == null) return;
+        paintVal = lgState.grid[i] ? 0 : 1;
+        lgState.grid[i] = paintVal; drawing = true;
+        try { lgCanvas.setPointerCapture(e.pointerId); } catch (err) {}
+        lgPause(); lgDraw(); lgUpdateStats();
+      });
+      lgCanvas.addEventListener("pointermove", function (e) {
+        if (!drawing) return;
+        const i = lgCellAt(e); if (i == null) return;
+        lgState.grid[i] = paintVal; lgDraw(); lgUpdateStats();
+      });
+      const end = function (e) { drawing = false; try { lgCanvas.releasePointerCapture(e.pointerId); } catch (err) {} };
+      lgCanvas.addEventListener("pointerup", end);
+      lgCanvas.addEventListener("pointercancel", end);
+    }
+    const on = function (id, fn) { const el = $(id); if (el) el.addEventListener("click", fn); };
+    on("lg-play", lgToggle);
+    on("lg-step", function () { lgPause(); lgStep(); });
+    on("lg-rand", lgRandom);
+    on("lg-clear", lgClear);
+    on("lg-save", lgSavePattern);
+    const preset = $("lg-preset");
+    if (preset) preset.addEventListener("change", function () { lgPreset(preset.value); preset.value = ""; });
+    const speed = $("lg-speed");
+    if (speed) speed.addEventListener("input", function () {
+      lgState.speed = parseInt(speed.value, 10) || 12;
+      if (lgState.running) { clearInterval(lgState.timer); lgState.timer = setInterval(lgLoop, Math.max(33, Math.round(1000 / lgState.speed))); }
+    });
+    const size = $("lg-size");
+    if (size) size.addEventListener("change", function () { lgPause(); lgSetSize(size.value); lgState.gen = 0; lgState.alive = countAlive(); lgState.peak = lgState.alive; lgUpdateStats(); });
+    const wrap = $("lg-wrap");
+    if (wrap) wrap.addEventListener("change", function () { lgState.wrap = wrap.checked; });
+    lgRefreshGallery();
+  }
+  lgBind();
+
+  BADGES.push(
+    { emoji: "🧬", name: "生命玩家", desc: "玩过生命游戏", test: (u) => (u.lifegame || 0) >= 1 },
+    { emoji: "🌅", name: "创世神", desc: "保存过 5 个生命图案", test: (u) => (u.lifegamePatterns || 0) >= 5 }
+  );
+
+  QUOTES.push(
+    "一颗粒子按简单规则活着，整片世界却自己长出了秩序。",
+    "生命游戏的秘密：没有设计师，秩序也能涌现。",
+    "别小看一个格子——它周围八个邻居，决定了它明天是生是死。",
+    "混沌里跑久了，总会撞见一两个稳定不灭的结构。",
+    "滑翔机一遍遍飞过，提醒你：简单也能一直向前。",
+    "把规则定好，剩下的交给时间，复杂会自己长出来。",
+    "有些图案转着转着就消失了，有些却能一直振荡下去。",
+    "你画的不是画，是一套会自己演化的小宇宙。",
+    "按一下播放，看确定性里开出的不确定性之花。",
+    "生命从不规划全局，它只关心这一刻的邻居。"
   );
 
   })();
