@@ -1329,6 +1329,17 @@
   .pipe-in.on,.pipe-out.on{background:var(--accent-3);box-shadow:0 0 12px var(--accent-3)}
   .pipe-status{margin-top:10px;text-align:center;color:var(--muted);font-size:14px;min-height:20px}
 </style>
+<style id="catCss">
+  /* ---------- 分类筛选栏 ---------- */
+  .catbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px auto 0;max-width:940px;padding:0 12px;}
+  .catbar .cat{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card-2);color:var(--text);border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;transition:transform .16s,border-color .16s,box-shadow .16s,background .16s;user-select:none;white-space:nowrap;}
+  .catbar .cat:hover{border-color:var(--accent);transform:translateY(-1px);}
+  .catbar .cat.on{background:linear-gradient(90deg,var(--accent-2),var(--accent));color:#fff;border-color:transparent;box-shadow:0 6px 18px var(--glow-1);font-weight:700;}
+  .catbar .cat .c{font-size:11px;line-height:1;opacity:.7;background:rgba(127,127,127,.2);border-radius:999px;padding:2px 7px;min-width:18px;text-align:center;}
+  .catbar .cat.on .c{opacity:.92;background:rgba(255,255,255,.25);}
+  body.compact .catbar{margin-top:7px;}
+  @media(max-width:560px){ .catbar .cat{padding:6px 11px;font-size:12px;} }
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -4700,7 +4711,8 @@
       const label = ((b.dataset.label || b.textContent) || "").toLowerCase();
       const kw = (TAB_KW[b.dataset.tab] || "").toLowerCase();
       const hit = !q || label.indexOf(q) >= 0 || kw.indexOf(q) >= 0;
-      b.style.display = hit ? "" : "none";
+      const catOk = !activeCat || activeCat === "all" || b.dataset.cat === activeCat;
+      b.style.display = (hit && catOk) ? "" : "none";
     });
   }
   if (toolSearch) toolSearch.addEventListener("input", (e) => filterTabs(e.target.value));
@@ -4756,6 +4768,44 @@
   });
   buildFavStars();
   renderFavbar();
+
+  /* ---------- 分类筛选（站点级导航增强，惠及全部 94 工具） ---------- */
+  const TAB_CAT = {
+    pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
+    fortune:"fortune", tarot:"fortune", iching:"fortune", huangli:"fortune", oracle:"fortune", gacha:"fortune", lotto:"fortune", dream:"fortune", bottle:"fortune", cp:"fortune",
+    snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
+    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools",
+    mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
+    poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create",
+    pet:"life", mood:"life", life:"life",
+    achv:"more"
+  };
+  const CAT_LABEL = { all:"全部", decide:"决策", fortune:"运势", games:"游戏", tools:"工具", prod:"效率", create:"创作", life:"生活", more:"更多" };
+  const CAT_KEY = "suibian_cat";
+  let activeCat = "all";
+  try { const _c = localStorage.getItem(CAT_KEY); if (_c && (_c === "all" || CAT_LABEL[_c])) activeCat = _c; } catch (e) {}
+  [...tabs.children].forEach((b) => { b.dataset.cat = TAB_CAT[b.dataset.tab] || "more"; });
+  const catbar = document.createElement("div");
+  catbar.className = "catbar"; catbar.id = "catbar";
+  function renderCatbar() {
+    const order = ["all", "decide", "fortune", "games", "tools", "prod", "create", "life", "more"];
+    catbar.innerHTML = order.map((c) => {
+      const n = c === "all" ? tabs.children.length : [...tabs.children].filter((b) => b.dataset.cat === c).length;
+      if (c !== "all" && !n) return "";
+      return '<div class="cat' + (activeCat === c ? " on" : "") + '" data-cat="' + c + '">' + CAT_LABEL[c] + '<span class="c">' + n + '</span></div>';
+    }).join("");
+  }
+  renderCatbar();
+  tabs.insertAdjacentElement("afterend", catbar);
+  catbar.addEventListener("click", (e) => {
+    const el = e.target.closest(".cat"); if (!el) return;
+    activeCat = el.dataset.cat;
+    try { localStorage.setItem(CAT_KEY, activeCat); } catch (_) {}
+    renderCatbar();
+    filterTabs(toolSearch ? toolSearch.value : "");
+    if (activeCat !== "all") { bumpUsage("cat"); if (typeof renderAchv === "function") renderAchv(); }
+    playClick();
+  });
 
   /* ---------- 今日宜忌（按日期种子，每天一变，确定性） ---------- */
   const YI = [
@@ -6484,6 +6534,17 @@
 ,
     { emoji: "🚰", name: "通水师傅", desc: "接通第一根水管", test: (u) => (u.pipe || 0) >= 1 },
     { emoji: "💧", name: "管道大亨", desc: "累计接通 10 局接水管", test: (u) => (u.pipe || 0) >= 10 }  ];
+
+  BADGES.push(
+    { emoji: "🗂️", name: "分类控", desc: "切换分类筛选 5 次", test: (u) => (u.cat || 0) >= 5 }
+  );
+
+  QUOTES.push(
+    "94 个工具摆在一起会迷路，分好类，想要的自然就出现了。",
+    "找不到答案的时候，先整理一下手里的选项。",
+    "工具再多，顺手的才用得上；收藏夹里躺着的，不如常打开的那个。",
+    "分类不是限制，是给选择减负——把不相关的挡在门外，重要的才看得清。"
+  );
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
   function renderAchv() {
