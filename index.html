@@ -1493,6 +1493,7 @@
       <button data-tab="worldclock">🌍 世界时钟</button>
       <button data-tab="rpgdice">🎲 掷骰机</button>
       <button data-tab="wordcloud">🎐 词云工坊</button>
+      <button data-tab="scratch">🎫 刮刮乐</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4350,6 +4351,34 @@
     </div>
   </section>
 
+  <section class="panel" id="scratch">
+    <div class="card">
+      <h2>🎫 刮刮乐</h2>
+      <div class="hint">手指 / 鼠标在卡片上刮开涂层，看看今天的手气！刮到一半自动开奖，点「再来一张」继续。</div>
+      <div class="scratch-wrap">
+        <div class="scratch-card" id="scratchCard">
+          <div class="scratch-prize" id="scratchPrize"></div>
+          <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn" id="scratchNew">🎫 再来一张</button>
+        <span class="scratch-stat" id="scratchStat"></span>
+      </div>
+      <div class="hint">历史最佳：<b id="scratchBest">—</b></div>
+    </div>
+    <style>
+      .scratch-wrap { display:flex; justify-content:center; margin:10px 0; }
+      .scratch-card { position:relative; width:320px; max-width:100%; height:180px; border-radius:16px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25); user-select:none; touch-action:none; background:#2a2f4a; }
+      .scratch-prize { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:14px; background:linear-gradient(135deg,#ffe29f,#ffa99f,#ff719a); color:#3a1d2b; font-weight:800; }
+      .scratch-prize .big { font-size:28px; line-height:1.2; }
+      .scratch-prize .sub { font-size:13px; opacity:.85; margin-top:6px; }
+      .scratch-canvas { position:absolute; inset:0; width:100%; height:100%; cursor:grab; }
+      .scratch-stat { font-size:13px; opacity:.8; }
+      @media (max-width:720px){ .scratch-card{ height:160px; } .scratch-prize .big{ font-size:24px; } }
+    </style>
+  </section>
+
 <section class="panel" id="wordcloud">
     <div class="card">
       <h2>🎐 词云工坊</h2>
@@ -4508,6 +4537,8 @@
     if (b.dataset.tab !== "worldclock") worldclockStop();
     if (b.dataset.tab === "rpgdice") rpgRollReady();
     if (b.dataset.tab !== "rpgdice") rpgStop();
+    if (b.dataset.tab === "scratch") scratchInit();
+    if (b.dataset.tab !== "scratch") scratchStop();
   });
 
   /* ====PIPE_MOD_START==== */
@@ -4802,6 +4833,8 @@
     if (id === "wordcloud") wcRender();
     if (id === "base") baseRender();
     if (id !== "rpgdice") rpgStop();
+    if (id === "scratch") scratchInit();
+    if (id !== "scratch") scratchStop();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
@@ -4921,7 +4954,8 @@
 
 ,
     wordcloud: "词云 文字云 关键词 频率 标签云 分词 文本 可视化 词频 热词 表达 文字 高频 提炼 词频图",
-    base: "进制 转换 二进制 八进制 十六进制 十进制 进位 编码 数字 位运算 进位数 bigint 计算机 换算 0b 0x 0o 补码"
+    base: "进制 转换 二进制 八进制 十六进制 十进制 进位 编码 数字 位运算 进位数 bigint 计算机 换算 0b 0x 0o 补码",
+    scratch: "刮刮乐 刮卡 抽奖 运气 中奖 福利 红包 惊喜 卡片 解压 刮一刮 幸运 欧气 手气 开奖"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -6758,11 +6792,23 @@
     { emoji: "🗂️", name: "分类控", desc: "切换分类筛选 5 次", test: (u) => (u.cat || 0) >= 5 }
   );
 
+  BADGES.push(
+    { emoji: "🪙", name: "刮卡新手", desc: "刮过一次刮刮乐", test: (u) => (u.scratch || 0) >= 1 },
+    { emoji: "🍀", name: "手气爆棚", desc: "累计刮开 25 张刮刮乐", test: (u) => (u.scratch || 0) >= 25 }
+  );
+
   QUOTES.push(
     "94 个工具摆在一起会迷路，分好类，想要的自然就出现了。",
     "找不到答案的时候，先整理一下手里的选项。",
     "工具再多，顺手的才用得上；收藏夹里躺着的，不如常打开的那个。",
     "分类不是限制，是给选择减负——把不相关的挡在门外，重要的才看得清。"
+  );
+
+  QUOTES.push(
+    "刮刮乐刮的不是奖，是那一刻「会是什么」的期待。",
+    "谢谢参与也是一种答案，至少你动手刮了。",
+    "运气藏在你愿意多刮两下的那张卡里。",
+    "人生像刮刮乐，不刮开永远不知道下一张是不是大的。"
   );
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -17209,7 +17255,111 @@
     "键盘比鼠标快，懒人是最高效的工程师。"
   );
 
-  })();
+  
+  /* ===== 刮刮乐 scratch（自动化大更新） ===== */
+  const SCRATCH_KEY = "suibian_scratch_best";
+  const SCRATCH_PRIZES = [
+    { txt: "🎉 终极大奖", sub: "10000 元红包（虚拟）", w: 1, tier: 5 },
+    { txt: "💰 金币 +500", sub: "欧气满满", w: 6, tier: 4 },
+    { txt: "🍰 甜品一份", sub: "奶茶也行", w: 12, tier: 3 },
+    { txt: "☕ 咖啡一杯", sub: "续命必备", w: 16, tier: 2 },
+    { txt: "🍀 好运 +1", sub: "明天会更好", w: 25, tier: 1 },
+    { txt: "😅 谢谢参与", sub: "再来一张吧", w: 40, tier: 0 }
+  ];
+  let scratchCanvas = null, sctx = null, scratchRevealed = false, scratchBound = false, scratchPrize = null, scratchRAF = null, scratchDown = false;
+  function scratchPick() {
+    let total = 0; for (const p of SCRATCH_PRIZES) total += p.w;
+    let r = Math.random() * total;
+    for (const p of SCRATCH_PRIZES) { r -= p.w; if (r < 0) return p; }
+    return SCRATCH_PRIZES[SCRATCH_PRIZES.length - 1];
+  }
+  function scratchDrawFoil() {
+    if (!sctx) return;
+    const w = scratchCanvas.width, h = scratchCanvas.height;
+    const g = sctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, "#9aa6c4"); g.addColorStop(0.5, "#c2cbe6"); g.addColorStop(1, "#8b97ba");
+    sctx.globalCompositeOperation = "source-over";
+    sctx.fillStyle = g; sctx.fillRect(0, 0, w, h);
+    sctx.fillStyle = "rgba(255,255,255,0.42)";
+    sctx.font = "bold 16px sans-serif"; sctx.textAlign = "center"; sctx.textBaseline = "middle";
+    sctx.fillText("刮开有惊喜 ✨", w / 2, h / 2);
+  }
+  function scratchSize() {
+    const card = $("scratchCard"); if (!card || !scratchCanvas) return;
+    const rect = card.getBoundingClientRect();
+    const w = Math.max(280, Math.round(rect.width || 320));
+    const h = Math.max(150, Math.round(rect.height || 180));
+    if (scratchCanvas.width !== w || scratchCanvas.height !== h) { scratchCanvas.width = w; scratchCanvas.height = h; }
+    scratchDrawFoil();
+  }
+  function scratchPct() {
+    if (!sctx) return 0;
+    const w = scratchCanvas.width, h = scratchCanvas.height;
+    let data; try { data = sctx.getImageData(0, 0, w, h).data; } catch (e) { return 0; }
+    let clear = 0, count = 0; const step = 4 * 12;
+    for (let i = 3; i < data.length; i += step) { count++; if (data[i] === 0) clear++; }
+    return count ? clear / count : 0;
+  }
+  function scratchMove(e) {
+    if (scratchRevealed || !sctx) return;
+    const rect = scratchCanvas.getBoundingClientRect();
+    const t = (e.touches && e.touches[0]) ? e.touches[0] : e;
+    const x = (t.clientX - rect.left) * (scratchCanvas.width / rect.width);
+    const y = (t.clientY - rect.top) * (scratchCanvas.height / rect.height);
+    sctx.globalCompositeOperation = "destination-out";
+    sctx.beginPath(); sctx.arc(x, y, 18, 0, Math.PI * 2); sctx.fill();
+    if (!scratchRAF) scratchRAF = requestAnimationFrame(scratchCheck);
+  }
+  function scratchCheck() {
+    scratchRAF = null;
+    if (scratchRevealed) return;
+    if (scratchPct() > 0.5) scratchReveal();
+  }
+  function scratchReveal() {
+    if (scratchRevealed) return;
+    scratchRevealed = true;
+    if (sctx) { sctx.globalCompositeOperation = "destination-out"; sctx.fillStyle = "#000"; sctx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height); }
+    if (scratchPrize && scratchPrize.tier >= 3) {
+      if (typeof confettiBurst === "function") confettiBurst(80);
+      try { if (settings && settings.sound && typeof playDing === "function") playDing(); } catch (e) {}
+    }
+    if (typeof bumpUsage === "function") bumpUsage("scratch");
+    scratchUpdateStat();
+  }
+  function scratchUpdateStat() {
+    const el = $("scratchStat");
+    if (el) el.textContent = scratchPrize ? ("本张：" + scratchPrize.txt) : "";
+    const best = $("scratchBest");
+    if (best) { try { const b = parseInt(localStorage.getItem(SCRATCH_KEY) || "0", 10) || 0; best.textContent = b > 0 ? ("最高 T" + b) : "—"; } catch (e) {} }
+  }
+  function scratchNew() {
+    scratchRevealed = false;
+    scratchPrize = scratchPick();
+    const pr = $("scratchPrize");
+    if (pr) pr.innerHTML = '<div class="big">' + (scratchPrize ? scratchPrize.txt : "") + '</div><div class="sub">' + (scratchPrize ? scratchPrize.sub : "") + '</div>';
+    scratchSize();
+    scratchUpdateStat();
+  }
+  function scratchInit() {
+    if (!scratchCanvas) scratchCanvas = $("scratchCanvas");
+    if (!scratchCanvas) return;
+    if (!sctx) sctx = scratchCanvas.getContext("2d");
+    if (!scratchBound) {
+      scratchBound = true;
+      scratchCanvas.addEventListener("mousedown", function () { scratchDown = true; });
+      scratchCanvas.addEventListener("mousemove", function (e) { if (scratchDown) scratchMove(e); });
+      window.addEventListener("mouseup", function () { scratchDown = false; });
+      scratchCanvas.addEventListener("touchstart", function (e) { if (e.cancelable) e.preventDefault(); scratchMove(e); }, { passive: false });
+      scratchCanvas.addEventListener("touchmove", function (e) { if (e.cancelable) e.preventDefault(); scratchMove(e); }, { passive: false });
+      const nb = $("scratchNew"); if (nb) nb.addEventListener("click", scratchNew);
+      window.addEventListener("resize", function () { const sc = document.getElementById("scratch"); if (sc && sc.classList.contains("active")) scratchSize(); });
+    }
+    scratchNew();
+    if (typeof bumpUsage === "function") bumpUsage("scratch");
+  }
+  function scratchStop() { scratchRevealed = true; }
+
+})();
 
 /* ===== 🎐 词云工坊 wordcloud (Word Cloud Studio) ===== */
   // === WC_PURE_START ===
