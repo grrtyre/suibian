@@ -1440,7 +1440,8 @@
     <button data-tab="pomodoro">🍅 番茄钟</button>
     <button data-tab="md">📝 Markdown 编辑器</button>
     <button data-tab="mindmap">🗺️ 思维导图</button>
-    <button data-tab="lifegame">🧬 生命游戏</button>
+      <button data-tab="lifegame">🧬 生命游戏</button>
+      <button data-tab="palette">🌈 配色方案</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4087,6 +4088,58 @@
     </style>
   </section>
 
+  <section class="panel" id="palette">
+    <div class="card">
+      <h2>🌈 配色方案生成器</h2>
+      <div class="hint">一键生成和谐的配色方案：锁定喜欢的颜色、其余重新随机；点色块复制 HEX，一键导出 CSS 变量或收藏起来慢慢挑。</div>
+      <div class="pal-controls">
+        <label>规则
+          <select id="palRule">
+            <option value="random">随机</option>
+            <option value="analogous">类似色</option>
+            <option value="complementary">互补色</option>
+            <option value="split">分裂互补</option>
+            <option value="triadic">三角色</option>
+            <option value="mono">单色阶</option>
+          </select>
+        </label>
+        <label>数量
+          <select id="palCount">
+            <option>3</option>
+            <option selected>5</option>
+            <option>4</option>
+            <option>6</option>
+          </select>
+        </label>
+        <button class="btn" id="palGen">🎲 重新生成</button>
+        <button class="btn ghost" id="palCopy">📋 复制 HEX</button>
+        <button class="btn ghost" id="palCss">💾 复制 CSS</button>
+        <button class="btn ghost" id="palSave">⭐ 收藏</button>
+      </div>
+      <div class="pal-bars" id="palBars"></div>
+      <div class="pal-fav" id="palFav"></div>
+    </div>
+    <style>
+      .pal-controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; }
+      .pal-controls label { font-size:13px; opacity:.8; display:flex; gap:6px; align-items:center; }
+      .pal-controls select { padding:7px 9px; border-radius:10px; border:1px solid var(--line); background:var(--card-2); color:var(--text); font-size:14px; }
+      .pal-bars { display:flex; gap:10px; margin-top:16px; height:240px; }
+      .pal-bar { flex:1; border-radius:14px; position:relative; cursor:pointer; overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end; padding:10px; transition:transform .12s; min-width:0; }
+      .pal-bar:hover { transform:translateY(-4px); }
+      .pal-hex { font-weight:700; font-size:14px; letter-spacing:.5px; background:rgba(0,0,0,.28); padding:3px 8px; border-radius:8px; align-self:flex-start; backdrop-filter:blur(2px); }
+      .pal-lock { position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; border:none; background:rgba(0,0,0,.32); color:#fff; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+      .pal-lock.on { background:rgba(255,255,255,.9); color:#222; }
+      .pal-fav { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+      .pal-swatch { display:flex; flex-direction:column; gap:4px; cursor:pointer; }
+      .pal-swatch .row { display:flex; height:26px; border-radius:8px; overflow:hidden; }
+      .pal-swatch .row span { flex:1; }
+      .pal-swatch .meta { display:flex; justify-content:space-between; font-size:11px; opacity:.7; }
+      .pal-swatch .del { border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:12px; }
+      .pal-empty { font-size:13px; opacity:.55; }
+      @media (max-width:720px) { .pal-bars { height:200px; } }
+    </style>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -4479,6 +4532,7 @@
     if (id === "md") mdRender();
     if (id === "mindmap") mmRender();
     if (id === "lifegame") lgRender();
+    if (id === "palette") paletteStart();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
@@ -4593,7 +4647,8 @@
     pomodoro: "番茄钟 番茄 专注 时间管理 倒计时 休息 工作 效率 任务 待办 专注力 计时 pomodoro 番茄工作法 自律 25分钟 摸鱼  productivity",
     md: "markdown 编辑器 写作 文档 笔记 富文本 预览 导出 语法 文本 排版 文章 md 笔记 草稿 文案 写作工具 标记语言 文档生成",
     mindmap: "思维导图 脑图 大纲 结构 想法 规划 分支 树状 整理 思路 关系 概念 map mind 笔记 知识 框架 梳理 节点",
-    lifegame: "生命游戏 康威 细胞 自动机 演化 模拟 元胞 规则 生死 种群 细胞自动机 game of life 混沌 涌现 系统 滑翔机 振荡"
+    lifegame: "生命游戏 康威 细胞 自动机 演化 模拟 元胞 规则 生死 种群 细胞自动机 game of life 混沌 涌现 系统 滑翔机 振荡",
+    palette: "配色 调色板 色板 取色 设计方案 灵感 渐变 配色方案 色彩搭配 设计 调色 颜色 组合 和谐 配色生成器 色卡"
 
   };
   const toolSearch = $("toolSearch");
@@ -4733,7 +4788,10 @@
     { name: "赛博青", bg: "#08141c", bgSoft: "#10202c", accent: "#5cc8ff", accent2: "#4be3a5", accent3: "#b388ff", rgb3: "92,200,255", glow1: "rgba(92,200,255,0.24)", glow2: "rgba(124,108,255,0.18)" },
     { name: "暗夜莓", bg: "#140a1a", bgSoft: "#20142a", accent: "#b388ff", accent2: "#ff6c9c", accent3: "#7c6cff", rgb3: "179,136,255", glow1: "rgba(179,136,255,0.24)", glow2: "rgba(255,108,156,0.16)" },
     { name: "森野", bg: "#08140f", bgSoft: "#0f2018", accent: "#5fd6a0", accent2: "#ffd166", accent3: "#4be3c2", rgb3: "95,214,160", glow1: "rgba(95,214,160,0.22)", glow2: "rgba(75,227,194,0.16)" },
-    { name: "蜜桃", bg: "#1a0f16", bgSoft: "#2a1622", accent: "#ff7eb3", accent2: "#ffb15c", accent3: "#ff8fc7", rgb3: "255,126,179", glow1: "rgba(255,126,179,0.22)", glow2: "rgba(255,177,92,0.16)" }
+    { name: "蜜桃", bg: "#1a0f16", bgSoft: "#2a1622", accent: "#ff7eb3", accent2: "#ffb15c", accent3: "#ff8fc7", rgb3: "255,126,179", glow1: "rgba(255,126,179,0.22)", glow2: "rgba(255,177,92,0.16)" },
+    { name: "纸感白", bg: "#f4f5fa", bgSoft: "#eceef5", accent: "#ff6b4a", accent2: "#ffa23c", accent3: "#6a5cff", rgb3: "106,92,255", glow1: "rgba(106,92,255,0.15)", glow2: "rgba(255,107,74,0.12)", text: "#1b1f33", muted: "#646b88", card: "#ffffff", card2: "#f3f5fb", line: "rgba(20,24,50,0.10)", shadow: "0 18px 50px rgba(30,40,90,0.12)" },
+    { name: "晴空蓝", bg: "#eef4fb", bgSoft: "#e2ecf6", accent: "#2f8fe0", accent2: "#5cc8ff", accent3: "#6a5cff", rgb3: "47,143,224", glow1: "rgba(47,143,224,0.14)", glow2: "rgba(92,200,255,0.12)", text: "#16243a", muted: "#5b6b85", card: "#ffffff", card2: "#eef4fb", line: "rgba(20,40,70,0.10)", shadow: "0 18px 50px rgba(20,50,90,0.12)" },
+    { name: "墨韵黑", bg: "#050608", bgSoft: "#0e0f15", accent: "#ff7a59", accent2: "#ffb15c", accent3: "#7c6cff", rgb3: "124,108,255", glow1: "rgba(124,108,255,0.28)", glow2: "rgba(255,122,89,0.20)", text: "#f3f4ff", muted: "#9aa0c7", card: "#121320", card2: "#181a2b", line: "rgba(255,255,255,0.08)", shadow: "0 18px 50px rgba(0,0,0,0.6)" }
   ];
   function applyTheme(t) {
     const r = document.documentElement.style;
@@ -4745,6 +4803,12 @@
     r.setProperty("--accent-3-rgb", t.rgb3);
     r.setProperty("--glow-1", t.glow1);
     r.setProperty("--glow-2", t.glow2);
+    if (t.text) r.setProperty("--text", t.text);
+    if (t.muted) r.setProperty("--muted", t.muted);
+    if (t.card) r.setProperty("--card", t.card);
+    if (t.card2) r.setProperty("--card-2", t.card2);
+    if (t.line) r.setProperty("--line", t.line);
+    if (t.shadow) r.setProperty("--shadow", t.shadow);
   }
 
   /* ---------- 设置 & 全局音效系统 ---------- */
@@ -16269,6 +16333,123 @@
     "你画的不是画，是一套会自己演化的小宇宙。",
     "按一下播放，看确定性里开出的不确定性之花。",
     "生命从不规划全局，它只关心这一刻的邻居。"
+  );
+
+  /* ===== 配色方案生成器 palette ===== */
+  let palState = null;
+  const PAL_FAV_KEY = "suibian_palette_fav";
+  function palHarmonyOffsets(rule, n) {
+    if (rule === "complementary") return Array.from({ length: n }, (_, i) => (i < Math.ceil(n / 2) ? 0 : 180));
+    if (rule === "split") { const o = [0, 150, 210]; return Array.from({ length: n }, (_, i) => o[i % 3]); }
+    if (rule === "triadic") { const o = [0, 120, 240]; return Array.from({ length: n }, (_, i) => o[i % 3]); }
+    if (rule === "analogous") { const spread = Math.min(60, 24 * (n - 1)); return Array.from({ length: n }, (_, i) => (n > 1 ? -spread / 2 + spread * i / (n - 1) : 0)); }
+    if (rule === "mono") return Array.from({ length: n }, () => 0);
+    return Array.from({ length: n }, () => 0);
+  }
+  function palGenerate() {
+    const rule = $("palRule").value;
+    const n = parseInt($("palCount").value, 10) || 5;
+    const offsets = palHarmonyOffsets(rule, n);
+    let baseH, baseS, baseL;
+    const firstUnlocked = palState && palState.find((c) => !c.locked);
+    if (firstUnlocked) { baseH = firstUnlocked.h; baseS = firstUnlocked.s; baseL = firstUnlocked.l; }
+    else { baseH = rand(360); baseS = 55 + rand(30); baseL = 48 + rand(22); }
+    const next = [];
+    for (let i = 0; i < n; i++) {
+      const prev = palState && palState[i];
+      if (prev && prev.locked) { next.push(prev); continue; }
+      let h, s, l;
+      if (rule === "random") { h = rand(360); s = 45 + rand(45); l = 35 + rand(40); }
+      else if (rule === "mono") { h = baseH + (rand(8) - 4); s = baseS + (rand(10) - 5); l = 32 + i * (44 / Math.max(n - 1, 1)); }
+      else { h = (baseH + offsets[i] + (rand(8) - 4) + 360) % 360; s = baseS + (rand(10) - 5); l = baseL + (rand(10) - 5); }
+      s = Math.max(20, Math.min(95, s)); l = Math.max(18, Math.min(88, l));
+      next.push({ h: h, s: s, l: l, locked: false, hex: hslToHex(h, s, l) });
+    }
+    palState = next;
+    palRender();
+    bumpUsage("palette");
+  }
+  function palRender() {
+    const wrap = $("palBars"); if (!wrap || !palState) return;
+    wrap.innerHTML = "";
+    palState.forEach((c, i) => {
+      const bar = document.createElement("div");
+      bar.className = "pal-bar";
+      bar.style.background = c.hex;
+      const tc = c.l > 60 ? "#1b1f33" : "#ffffff";
+      bar.innerHTML = '<button class="pal-lock ' + (c.locked ? "on" : "") + '" data-i="' + i + '" title="锁定/解锁">' + (c.locked ? "🔒" : "🔓") + '</button>' +
+        '<span class="pal-hex" style="color:' + tc + '">' + c.hex.toUpperCase() + '</span>';
+      bar.addEventListener("click", function (e) { if (e.target.classList.contains("pal-lock")) return; palCopyOne(c.hex); });
+      bar.querySelector(".pal-lock").addEventListener("click", function (e) { e.stopPropagation(); c.locked = !c.locked; palRender(); });
+      wrap.appendChild(bar);
+    });
+  }
+  function palClip(t) { try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t); } catch (e) {} }
+  function palCopyOne(hex) { const t = hex.toUpperCase(); palClip(t); toast("已复制 " + t); }
+  function palCopyAll() { if (!palState) return; const t = palState.map((c) => c.hex.toUpperCase()).join(", "); palClip(t); toast("已复制全部 HEX 📋"); }
+  function palCopyCss() {
+    if (!palState) return;
+    const css = ":root {\n" + palState.map((c, i) => "  --c" + (i + 1) + ": " + c.hex.toUpperCase() + ";").join("\n") + "\n}";
+    palClip(css); toast("已复制 CSS 变量 💾");
+  }
+  function palSaveFav() {
+    if (!palState) return;
+    let fav = [];
+    try { fav = JSON.parse(localStorage.getItem(PAL_FAV_KEY) || "[]"); if (!Array.isArray(fav)) fav = []; } catch (e) {}
+    fav.unshift(palState.map((c) => ({ h: c.h, s: c.s, l: c.l, hex: c.hex })));
+    fav = fav.slice(0, 30);
+    try { localStorage.setItem(PAL_FAV_KEY, JSON.stringify(fav)); } catch (e) {}
+    palRenderFav(); toast("已收藏这组配色 ⭐"); bumpUsage("palette");
+    if (settings && !settings.reduce) confettiBurst(60);
+  }
+  function palRenderFav() {
+    const wrap = $("palFav"); if (!wrap) return;
+    let fav = [];
+    try { fav = JSON.parse(localStorage.getItem(PAL_FAV_KEY) || "[]"); if (!Array.isArray(fav)) fav = []; } catch (e) {}
+    wrap.innerHTML = "";
+    if (!fav.length) { wrap.innerHTML = '<div class="pal-empty">还没有收藏的配色，生成一组点「⭐ 收藏」吧～</div>'; return; }
+    fav.forEach(function (cols, idx) {
+      const el = document.createElement("div");
+      el.className = "pal-swatch";
+      const row = cols.map((c) => '<span style="background:' + c.hex + '"></span>').join("");
+      el.innerHTML = '<div class="row">' + row + '</div><div class="meta"><span>配色 ' + (idx + 1) + '</span><button class="del" data-i="' + idx + '">删除</button></div>';
+      el.addEventListener("click", function (e) { if (e.target.classList.contains("del")) return; palLoad(cols); });
+      el.querySelector(".del").addEventListener("click", function (e) { e.stopPropagation(); fav.splice(idx, 1); try { localStorage.setItem(PAL_FAV_KEY, JSON.stringify(fav)); } catch (e) {} palRenderFav(); });
+      wrap.appendChild(el);
+    });
+  }
+  function palLoad(cols) { palState = cols.map((c) => ({ h: c.h, s: c.s, l: c.l, locked: false, hex: c.hex })); palRender(); toast("已载入收藏配色"); }
+  function paletteStart() {
+    if (!palState || !palState.length) palGenerate();
+    else palRender();
+    palRenderFav();
+  }
+  function palBind() {
+    const g = $("palGen"); if (g) g.addEventListener("click", function () { palGenerate(); });
+    const cp = $("palCopy"); if (cp) cp.addEventListener("click", palCopyAll);
+    const css = $("palCss"); if (css) css.addEventListener("click", palCopyCss);
+    const sv = $("palSave"); if (sv) sv.addEventListener("click", palSaveFav);
+    const rule = $("palRule"); if (rule) rule.addEventListener("change", function () { palGenerate(); });
+    const cnt = $("palCount"); if (cnt) cnt.addEventListener("change", function () { palGenerate(); });
+  }
+  palBind();
+
+  BADGES.push(
+    { emoji: "🎨", name: "配色新手", desc: "生成过一组配色方案", test: (u) => (u.palette || 0) >= 1 },
+    { emoji: "🌟", name: "调色大师", desc: "生成 20 组配色方案", test: (u) => (u.palette || 0) >= 20 }
+  );
+
+  QUOTES.push(
+    "颜色是沉默的语言，挑对一组，整件事就对了味。",
+    "不会配色？先定一个主色，剩下的交给和谐。",
+    "好的配色像好心情——一眼就舒服，说不出道理。",
+    "锁住你爱的那个色，让随机去填满其余的空白。",
+    "设计不是堆颜色，是做减法，留下最对的几支。",
+    "一组舒服的配色，能让最普通的内容发光。",
+    "随机也有审美：多摇几次，运气会撞上品味。",
+    "深色沉稳，浅色清爽，换套主题，换种心情。",
+    "配色没有标准答案，只有「看着顺眼」这一条。",
+    "把灵感色卡存下来，下次做图直接抄自己。"
   );
 
   })();
