@@ -1493,6 +1493,7 @@
       <button data-tab="worldclock">🌍 世界时钟</button>
       <button data-tab="rpgdice">🎲 掷骰机</button>
       <button data-tab="wordcloud">🎐 词云工坊</button>
+      <button data-tab="hash">🔐 哈希工具</button>
       <button data-tab="scratch">🎫 刮刮乐</button>
       <button data-tab="json">🔧 JSON 工具</button>
   </nav>
@@ -4484,6 +4485,54 @@
       @media (max-width:720px){ .wc-range{ width:96px; } .wc-lbl{ font-size:12px; } }
     </style>
   </section>
+  <style>
+  .hash-bar{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  .hash-bar .btn.active{ outline:2px solid var(--accent,#7c6cff); }
+  #hashInput{ width:100%; min-height:120px; box-sizing:border-box; padding:10px; border-radius:10px; border:1px solid var(--line,#ddd); background:var(--card,#fff); color:var(--text,#222); font-family:ui-monospace,Menlo,Consolas,monospace; resize:vertical; }
+  .hash-drop{ border:2px dashed var(--line,#ccc); border-radius:12px; padding:24px; text-align:center; color:var(--muted,#888); margin:8px 0; }
+  .hash-drop.hash-drag{ border-color:var(--accent,#7c6cff); background:rgba(124,108,255,.08); }
+  .hash-meta{ font-size:13px; color:var(--muted,#888); margin:6px 0; }
+  .hash-out{ margin:10px 0; display:flex; flex-direction:column; gap:6px; }
+  .hash-row{ display:flex; gap:10px; align-items:center; background:var(--card-2,#f6f7fb); border:1px solid var(--line,#eee); border-radius:8px; padding:8px 10px; }
+  .hash-name{ font-weight:700; min-width:96px; color:var(--accent,#7c6cff); }
+  .hash-val{ font-family:ui-monospace,Menlo,Consolas,monospace; word-break:break-all; font-size:13px; }
+  .hash-verify{ margin-top:10px; }
+  .hash-verify-res{ margin-top:6px; font-weight:600; min-height:18px; }
+  .hash-verify-res.ok{ color:#16a34a; }
+  .hash-verify-res.no{ color:#dc2626; }
+  </style>
+  <section class="panel" id="hash">
+    <div class="card">
+      <h2>🔐 哈希工具</h2>
+      <div class="hint">把文本或文件算成 MD5 / SHA-1 / SHA-256 / SHA-512 摘要；支持 HMAC 与哈希校验比对。纯前端、数据不出本机。</div>
+      <div class="hash-bar">
+        <button class="btn" id="hashModeText">📝 文本</button>
+        <button class="btn" id="hashModeFile">📁 文件</button>
+        <button class="btn" id="hashHmac">🔑 HMAC</button>
+        <button class="btn" id="hashAll">⚡ 全算法</button>
+        <button class="btn" id="hashCopy">📋 复制</button>
+        <button class="btn" id="hashClear">🗑 清空</button>
+      </div>
+      <div id="hashTextView">
+        <textarea id="hashInput" spellcheck="false" placeholder="在这里输入要哈希的文本，或切到「文件」模式拖入文件…"></textarea>
+      </div>
+      <div id="hashFileView" style="display:none">
+        <div id="hashDrop" class="hash-drop">把文件拖到这里，或 <label class="btn" for="hashFile" style="display:inline-block;margin:0 4px">📁 选择文件</label></div>
+        <input type="file" id="hashFile" hidden>
+        <div id="hashFileMeta" class="hash-meta"></div>
+      </div>
+      <div id="hashHmacView" style="display:none">
+        <label>HMAC 密钥（留空则用空密钥）：</label>
+        <input type="text" id="hashKey" placeholder="输入密钥…" style="width:100%;box-sizing:border-box;padding:8px;margin-top:6px">
+      </div>
+      <div class="hash-out" id="hashOut"></div>
+      <div class="hash-verify">
+        <label>🔍 校验比对：粘贴已知哈希值，自动判断是否一致</label>
+        <input type="text" id="hashVerify" placeholder="粘贴要核对的哈希值…" style="width:100%;box-sizing:border-box;padding:8px;margin-top:6px">
+        <div id="hashVerifyRes" class="hash-verify-res"></div>
+      </div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -4892,6 +4941,7 @@
     if (id === "scratch") scratchInit();
     if (id !== "scratch") scratchStop();
     if (id === "json") jsonRender();
+    if (id === "hash") hashRender();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
@@ -5013,7 +5063,8 @@
     wordcloud: "词云 文字云 关键词 频率 标签云 分词 文本 可视化 词频 热词 表达 文字 高频 提炼 词频图",
     base: "进制 转换 二进制 八进制 十六进制 十进制 进位 编码 数字 位运算 进位数 bigint 计算机 换算 0b 0x 0o 补码",
     scratch: "刮刮乐 刮卡 抽奖 运气 中奖 福利 红包 惊喜 卡片 解压 刮一刮 幸运 欧气 手气 开奖",
-    json: "json 格式化 校验 压缩 美化 解析 数据 对象 数组 键 值 树视图 排序 转义 unicode 复制 导出 前端"
+    json: "json 格式化 校验 压缩 美化 解析 数据 对象 数组 键 值 树视图 排序 转义 unicode 复制 导出 前端",
+    hash: "哈希 散列 md5 sha1 sha256 sha512 hmac 校验 完整性 摘要 文件 文本 加密 比对 指纹 一致性 安全 摘要值",
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -5085,7 +5136,7 @@
     pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
     fortune:"fortune", tarot:"fortune", iching:"fortune", huangli:"fortune", oracle:"fortune", gacha:"fortune", lotto:"fortune", dream:"fortune", bottle:"fortune", cp:"fortune",
     snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
-    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools",
+    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools", hash:"tools",
     mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
     poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create",
     pet:"life", mood:"life", life:"life",
@@ -17595,6 +17646,174 @@
     if (!r.ok) { let msg = "⚠️ JSON 解析失败：" + r.error; if (r.line) msg += "（第 " + r.line + " 行" + (r.col ? " 第 " + r.col + " 列" : "") + " 附近）"; jsonSetStatus("err", msg); return; }
     jsonRenderTree(r.value, $("jsonTreeView")); jsonStats(r.value, raw); jsonSetStatus("ok", "✅ 解析成功，树视图已就绪。");
   }
+
+
+  /* ---------- 🔐 哈希工具 hash (Hash Tool) ---------- */
+  const HASH_KEY0 = "suibian_hash_input";
+  const HASH_ALGOS = [
+    { id: "MD5", label: "MD5" },
+    { id: "SHA-1", label: "SHA-1" },
+    { id: "SHA-256", label: "SHA-256" },
+    { id: "SHA-512", label: "SHA-512" }
+  ];
+  const HASH_HMAC_ALGOS = [
+    { id: "SHA-256", label: "SHA-256 (HMAC)" },
+    { id: "SHA-512", label: "SHA-512 (HMAC)" }
+  ];
+  let hashMode = "text";
+  let hashFileBuf = null, hashFileName = "", hashFileSize = 0;
+  let hashBound = false;
+
+  function md5hex(bytes) {
+    function add32(a,b){ return (a+b) & 0xffffffff; }
+    function rol(n,c){ return (n<<c) | ((n>>>0) >>> (32-c)); }
+    function cmn(q,a,b,x,s,t){ a = add32(add32(a,q), add32(x,t)); return add32(rol(a,s), b); }
+    function ff(a,b,c,d,x,s,t){ return cmn((b&c)|((~b)&d), a, b, x, s, t); }
+    function gg(a,b,c,d,x,s,t){ return cmn((b&d)|(c&(~d)), a, b, x, s, t); }
+    function hh(a,b,c,d,x,s,t){ return cmn(b^c^d, a, b, x, s, t); }
+    function ii(a,b,c,d,x,s,t){ return cmn(c^(b|(~d)), a, b, x, s, t); }
+    var x = bytes.slice ? bytes.slice() : Array.from(bytes);
+    var len = x.length;
+    var nblk = ((len + 8) >> 6) + 1;
+    var blks = new Array(nblk*16); for (var z=0; z<blks.length; z++) blks[z]=0;
+    for (var i=0; i<len; i++) blks[i>>2] |= (x[i] & 0xff) << ((i%4)*8);
+    blks[len>>2] |= 0x80 << ((len%4)*8);
+    var bitLen = len * 8;
+    blks[nblk*16-2] = bitLen & 0xffffffff;
+    blks[nblk*16-1] = Math.floor(bitLen / 0x100000000);
+    var a = 1732584193, b = -271733879, c = -1732584194, d = 271733878;
+    for (var k=0; k<nblk*16; k+=16) {
+      var oa=a, ob=b, oc=c, od=d;
+      a=ff(a,b,c,d,blks[k+0],7,-680876936); d=ff(d,a,b,c,blks[k+1],12,-389564586); c=ff(c,d,a,b,blks[k+2],17,606105819); b=ff(b,c,d,a,blks[k+3],22,-1044525330);
+      a=ff(a,b,c,d,blks[k+4],7,-176418897); d=ff(d,a,b,c,blks[k+5],12,1200080426); c=ff(c,d,a,b,blks[k+6],17,-1473231341); b=ff(b,c,d,a,blks[k+7],22,-45705983);
+      a=ff(a,b,c,d,blks[k+8],7,1770035416); d=ff(d,a,b,c,blks[k+9],12,-1958414417); c=ff(c,d,a,b,blks[k+10],17,-42063); b=ff(b,c,d,a,blks[k+11],22,-1990404162);
+      a=ff(a,b,c,d,blks[k+12],7,1804603682); d=ff(d,a,b,c,blks[k+13],12,-40341101); c=ff(c,d,a,b,blks[k+14],17,-1502002290); b=ff(b,c,d,a,blks[k+15],22,1236535329);
+      a=gg(a,b,c,d,blks[k+1],5,-165796510); d=gg(d,a,b,c,blks[k+6],9,-1069501632); c=gg(c,d,a,b,blks[k+11],14,643717713); b=gg(b,c,d,a,blks[k+0],20,-373897302);
+      a=gg(a,b,c,d,blks[k+5],5,-701558691); d=gg(d,a,b,c,blks[k+10],9,38016083); c=gg(c,d,a,b,blks[k+15],14,-660478335); b=gg(b,c,d,a,blks[k+4],20,-405537848);
+      a=gg(a,b,c,d,blks[k+9],5,568446438); d=gg(d,a,b,c,blks[k+14],9,-1019803690); c=gg(c,d,a,b,blks[k+3],14,-187363961); b=gg(b,c,d,a,blks[k+8],20,1163531501);
+      a=gg(a,b,c,d,blks[k+13],5,-1444681467); d=gg(d,a,b,c,blks[k+2],9,-51403784); c=gg(c,d,a,b,blks[k+7],14,1735328473); b=gg(b,c,d,a,blks[k+12],20,-1926607734);
+      a=hh(a,b,c,d,blks[k+5],4,-378558); d=hh(d,a,b,c,blks[k+8],11,-2022574463); c=hh(c,d,a,b,blks[k+11],16,1839030562); b=hh(b,c,d,a,blks[k+14],23,-35309556);
+      a=hh(a,b,c,d,blks[k+1],4,-1530992060); d=hh(d,a,b,c,blks[k+4],11,1272893353); c=hh(c,d,a,b,blks[k+7],16,-155497632); b=hh(b,c,d,a,blks[k+10],23,-1094730640);
+      a=hh(a,b,c,d,blks[k+13],4,681279174); d=hh(d,a,b,c,blks[k+0],11,-358537222); c=hh(c,d,a,b,blks[k+3],16,-722521979); b=hh(b,c,d,a,blks[k+6],23,76029189);
+      a=hh(a,b,c,d,blks[k+9],4,-640364487); d=hh(d,a,b,c,blks[k+12],11,-421815835); c=hh(c,d,a,b,blks[k+15],16,530742520); b=hh(b,c,d,a,blks[k+2],23,-995338651);
+      a=ii(a,b,c,d,blks[k+0],6,-198630844); d=ii(d,a,b,c,blks[k+7],10,1126891415); c=ii(c,d,a,b,blks[k+14],15,-1416354905); b=ii(b,c,d,a,blks[k+5],21,-57434055);
+      a=ii(a,b,c,d,blks[k+12],6,1700485571); d=ii(d,a,b,c,blks[k+3],10,-1894986606); c=ii(c,d,a,b,blks[k+10],15,-1051523); b=ii(b,c,d,a,blks[k+1],21,-2054922799);
+      a=ii(a,b,c,d,blks[k+8],6,1873313359); d=ii(d,a,b,c,blks[k+15],10,-30611744); c=ii(c,d,a,b,blks[k+6],15,-1560198380); b=ii(b,c,d,a,blks[k+13],21,1309151649);
+      a=ii(a,b,c,d,blks[k+4],6,-145523070); d=ii(d,a,b,c,blks[k+11],10,-1120210379); c=ii(c,d,a,b,blks[k+2],15,718787259); b=ii(b,c,d,a,blks[k+9],21,-343485551);
+      a=add32(a,oa); b=add32(b,ob); c=add32(c,oc); d=add32(d,od);
+    }
+    function hex(n){ var s=""; for (var j=0;j<4;j++){ var v=(n>>>(j*8))&0xff; s += ("0"+v.toString(16)).slice(-2); } return s; }
+    return hex(a)+hex(b)+hex(c)+hex(d);
+  }
+
+  function hashBytesFromText(t){ var e=new TextEncoder(); return Array.from(e.encode(t)); }
+  async function hashCompute(algo, bytes){ if(algo==="MD5") return md5hex(bytes); var buf=await crypto.subtle.digest(algo, new Uint8Array(bytes)); return Array.from(new Uint8Array(buf)).map(function(b){return ("0"+b.toString(16)).slice(-2);}).join(""); }
+  async function hashHmac(algo, keyStr, bytes){ var enc=new TextEncoder(); var key=await crypto.subtle.importKey("raw", enc.encode(keyStr), {name:"HMAC", hash:algo}, false, ["sign"]); var sig=await crypto.subtle.sign("HMAC", key, new Uint8Array(bytes)); return Array.from(new Uint8Array(sig)).map(function(b){return ("0"+b.toString(16)).slice(-2);}).join(""); }
+
+  function hashList(){ return (hashMode==="hmac") ? HASH_HMAC_ALGOS : HASH_ALGOS; }
+
+  async function hashRun(){
+    var out=$("hashOut"); if(!out) return;
+    var bytes;
+    if(hashMode==="file"){ bytes=hashFileBuf; if(!bytes){ out.innerHTML='<div class="hash-row"><span class="hash-val">请先选择或拖入文件。</span></div>'; return; } }
+    else { bytes=hashBytesFromText(($("hashInput").value)||""); }
+    var useHmac=(hashMode==="hmac");
+    var key=($("hashKey")?$("hashKey").value:"");
+    var list=hashList();
+    out.innerHTML=list.map(function(a){ return '<div class="hash-row" data-algo="'+a.id+'"><span class="hash-name">'+a.label+'</span><span class="hash-val">计算中…</span></div>'; }).join("");
+    for(var i=0;i<list.length;i++){
+      var a=list[i]; var val;
+      try{
+        if(useHmac){ val=await hashHmac(a.id, key, bytes); }
+        else { val=await hashCompute(a.id, bytes); }
+        var row=out.querySelector('[data-algo="'+a.id+'"] .hash-val');
+        if(row){ row.textContent=val; row.style.cursor="pointer"; row.title="点击复制"; row.onclick=function(){ hashCopyText(val); toast("📋 已复制 "+a.label); }; }
+      }catch(e){
+        var row2=out.querySelector('[data-algo="'+a.id+'"] .hash-val');
+        if(row2) row2.textContent="⚠️ 出错";
+      }
+    }
+    bumpUsage("hash");
+    hashVerifyCheck();
+  }
+
+  function hashVerifyCheck(){
+    var res=$("hashVerifyRes"); if(!res) return;
+    var want=(($("hashVerify").value)||"").trim().toLowerCase().replace(/\s+/g,"");
+    if(!want){ res.textContent=""; res.className="hash-verify-res"; return; }
+    var rows=$("hashOut").querySelectorAll(".hash-val"); var match=false;
+    for(var i=0;i<rows.length;i++){ var v=(rows[i].textContent||"").toLowerCase().replace(/\s+/g,""); if(v&&v===want) match=true; }
+    if(match){ res.textContent="✅ 校验通过：与上方某个哈希值完全一致"; res.className="hash-verify-res ok"; bumpUsage("hashCheck"); }
+    else { res.textContent="❌ 不一致：粘贴的值与当前结果不匹配"; res.className="hash-verify-res no"; }
+  }
+
+  function hashCopyText(t){ try{ var ta=document.createElement("textarea"); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta); }catch(e){} }
+
+  function hashSetMode(m){
+    hashMode=m;
+    $("hashTextView").style.display=(m==="file")?"none":"block";
+    $("hashFileView").style.display=(m==="file")?"block":"none";
+    $("hashHmacView").style.display=(m==="hmac")?"block":"none";
+    $("hashHmac").classList.toggle("active", m==="hmac");
+    hashRun();
+  }
+
+  function hashReadFile(f){
+    var rd=new FileReader();
+    rd.onload=function(){ hashFileBuf=new Uint8Array(rd.result); hashFileName=f.name; hashFileSize=f.size; var meta=$("hashFileMeta"); if(meta) meta.textContent="📄 "+f.name+" · "+(f.size>=1048576?(f.size/1048576).toFixed(2)+" MB":(f.size/1024).toFixed(1)+" KB"); hashRun(); };
+    rd.readAsArrayBuffer(f);
+  }
+
+  function hashBind(){
+    if(hashBound) return; hashBound=true;
+    var ta=$("hashInput");
+    if(ta){ try{ var s=localStorage.getItem(HASH_KEY0); if(s!==null) ta.value=s; }catch(e){}
+      ta.addEventListener("input", function(){ try{ localStorage.setItem(HASH_KEY0, ta.value); }catch(e){} hashRun(); }); }
+    $("hashModeText").addEventListener("click", function(){ hashSetMode("text"); });
+    $("hashModeFile").addEventListener("click", function(){ hashSetMode("file"); });
+    $("hashHmac").addEventListener("click", function(){ hashSetMode(hashMode==="hmac"?"text":"hmac"); });
+    $("hashAll").addEventListener("click", hashRun);
+    $("hashCopy").addEventListener("click", function(){
+      var rows=$("hashOut").querySelectorAll(".hash-row"); var t="";
+      for(var i=0;i<rows.length;i++){ var n=rows[i].querySelector(".hash-name"); var v=rows[i].querySelector(".hash-val"); t+=(n?n.textContent:"")+"："+(v?v.textContent:"")+"\n"; }
+      hashCopyText(t); toast("📋 已复制全部哈希");
+    });
+    $("hashClear").addEventListener("click", function(){
+      if(ta) ta.value=""; try{ localStorage.removeItem(HASH_KEY0); }catch(e){}
+      hashFileBuf=null; var meta=$("hashFileMeta"); if(meta) meta.textContent="";
+      $("hashOut").innerHTML=""; $("hashVerify").value=""; $("hashVerifyRes").textContent=""; toast("已清空");
+    });
+    var fi=$("hashFile"); if(fi) fi.addEventListener("change", function(e){ var f=fi.files[0]; if(f) hashReadFile(f); });
+    var drop=$("hashDrop");
+    if(drop){
+      drop.addEventListener("dragover", function(e){ e.preventDefault(); drop.classList.add("hash-drag"); });
+      drop.addEventListener("dragleave", function(){ drop.classList.remove("hash-drag"); });
+      drop.addEventListener("drop", function(e){ e.preventDefault(); drop.classList.remove("hash-drag"); var f=e.dataTransfer.files[0]; if(f) hashReadFile(f); });
+    }
+    var vf=$("hashVerify"); if(vf) vf.addEventListener("input", hashVerifyCheck);
+
+    var hk=$("hashKey"); if(hk) hk.addEventListener("input", function(){ if(hashMode==="hmac") hashRun(); });
+  }
+
+  function hashRender(){ if(!hashBound) hashBind(); hashRun(); }
+
+  BADGES.push(
+    { emoji: "🔐", name: "哈希新手", desc: "用过一次哈希工具", test: function(u){ return (u.hash||0)>=1; } },
+    { emoji: "🧮", name: "校验达人", desc: "成功校验过一次哈希一致性", test: function(u){ return (u.hashCheck||0)>=1; } }
+  );
+
+  QUOTES.push(
+    "同样的输入，永远得到同样的哈希——确定性是信任的起点。",
+    "一串看不懂的字符，可能是整本书的指纹。",
+    "校验哈希就像给文件量指纹，对不上就是它被动过。",
+    "MD5 老了，SHA-256 正当红，密码学也有自己的潮流。",
+    "把秘密和消息揉在一起，HMAC 让伪造者无从下手。",
+    "不可逆的哈希，是互联网记住你又不泄露你的方式。",
+    "下载完先对一遍哈希，比事后后悔强。",
+    "哈希不是加密，它不藏着原文，只证明「是不是同一份」。",
+    "一串十六进制背后，是一整套数学的体面。",
+    "校验通过的那一刻，数据完整性才算落袋为安。"
+  );
 
 })();
 
