@@ -1494,6 +1494,7 @@
       <button data-tab="rpgdice">🎲 掷骰机</button>
       <button data-tab="wordcloud">🎐 词云工坊</button>
       <button data-tab="scratch">🎫 刮刮乐</button>
+      <button data-tab="json">🔧 JSON 工具</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4378,6 +4379,61 @@
       @media (max-width:720px){ .scratch-card{ height:160px; } .scratch-prize .big{ font-size:24px; } }
     </style>
   </section>
+  <section class="panel" id="json">
+    <div class="card">
+      <h2>🔧 JSON 工具</h2>
+      <div class="hint">粘贴 JSON，一键格式化 / 校验 / 压缩 / 树视图；支持排序键、Unicode 转义、本地导出。纯前端、数据不出本机。</div>
+      <div class="json-bar">
+        <button class="btn" id="jsonFormat">✨ 格式化</button>
+        <button class="btn" id="jsonMinify">🗜 压缩</button>
+        <button class="btn" id="jsonTree">🌳 树视图</button>
+        <button class="btn" id="jsonSort">🔤 排序键</button>
+        <button class="btn" id="jsonEscape">🔡 转义</button>
+        <button class="btn" id="jsonUnescape">🔁 反转义</button>
+        <button class="btn" id="jsonSample">🎲 示例</button>
+        <button class="btn" id="jsonCopy">📋 复制</button>
+        <button class="btn" id="jsonExport">💾 导出</button>
+        <label class="json-ind">缩进<select id="jsonIndent"><option value="2">2</option><option value="4">4</option></select></label>
+      </div>
+      <div class="json-status" id="jsonStatus">就绪。把 JSON 粘到左边，或点「🎲 示例」。</div>
+      <div class="json-grid">
+        <div class="json-col">
+          <label>输入 / 输出</label>
+          <textarea id="jsonInput" spellcheck="false" placeholder='{"随便": "suibian", "list": [1,2,3], "ok": true}'></textarea>
+        </div>
+        <div class="json-col">
+          <label>树视图（点 ▸ 展开 / 收起）</label>
+          <div class="json-tree" id="jsonTreeView"><span class="json-empty">这里会显示可折叠的树状结构。</span></div>
+        </div>
+      </div>
+      <div class="json-stats" id="jsonStats"></div>
+    </div>
+    <style>
+      .json-bar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:10px 0; }
+      .json-ind { font-size:13px; opacity:.85; margin-left:auto; }
+      .json-status { font-size:13px; padding:8px 12px; border-radius:10px; background:rgba(127,127,127,.12); margin-bottom:10px; }
+      .json-status.ok { background:rgba(60,200,120,.16); color:#1e8e54; }
+      .json-status.err { background:rgba(230,80,80,.16); color:#c0392b; }
+      .json-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+      .json-col { display:flex; flex-direction:column; gap:6px; min-width:0; }
+      .json-col > label { font-size:13px; opacity:.8; }
+      #jsonInput { width:100%; height:340px; resize:vertical; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; line-height:1.5; padding:10px; border-radius:10px; border:1px solid rgba(127,127,127,.25); background:rgba(127,127,127,.07); color:inherit; box-sizing:border-box; }
+      .json-tree { height:340px; overflow:auto; padding:10px; border-radius:10px; border:1px solid rgba(127,127,127,.25); background:rgba(127,127,127,.07); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; line-height:1.6; box-sizing:border-box; }
+      .json-tree ul { list-style:none; margin:0 0 0 16px; padding:0; border-left:1px dashed rgba(127,127,127,.3); }
+      .json-tree li { margin:2px 0; }
+      .json-key { color:#3a7bd5; font-weight:600; }
+      .json-str { color:#1e9e57; }
+      .json-num { color:#e08a00; }
+      .json-bool { color:#9b59b6; }
+      .json-null { color:#999; font-style:italic; }
+      .json-toggle { cursor:pointer; user-select:none; display:inline-block; width:14px; color:#888; }
+      .json-collapsed > ul { display:none; }
+      .json-empty { opacity:.6; font-style:italic; }
+      .json-stats { margin-top:10px; font-size:13px; opacity:.85; display:flex; flex-wrap:wrap; gap:14px; }
+      @media (max-width:720px){ .json-grid{ grid-template-columns:1fr; } #jsonInput,.json-tree{ height:240px; } }
+    </style>
+  </section>
+
 
 <section class="panel" id="wordcloud">
     <div class="card">
@@ -4835,6 +4891,7 @@
     if (id !== "rpgdice") rpgStop();
     if (id === "scratch") scratchInit();
     if (id !== "scratch") scratchStop();
+    if (id === "json") jsonRender();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
@@ -4955,7 +5012,8 @@
 ,
     wordcloud: "词云 文字云 关键词 频率 标签云 分词 文本 可视化 词频 热词 表达 文字 高频 提炼 词频图",
     base: "进制 转换 二进制 八进制 十六进制 十进制 进位 编码 数字 位运算 进位数 bigint 计算机 换算 0b 0x 0o 补码",
-    scratch: "刮刮乐 刮卡 抽奖 运气 中奖 福利 红包 惊喜 卡片 解压 刮一刮 幸运 欧气 手气 开奖"
+    scratch: "刮刮乐 刮卡 抽奖 运气 中奖 福利 红包 惊喜 卡片 解压 刮一刮 幸运 欧气 手气 开奖",
+    json: "json 格式化 校验 压缩 美化 解析 数据 对象 数组 键 值 树视图 排序 转义 unicode 复制 导出 前端"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -5027,7 +5085,7 @@
     pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
     fortune:"fortune", tarot:"fortune", iching:"fortune", huangli:"fortune", oracle:"fortune", gacha:"fortune", lotto:"fortune", dream:"fortune", bottle:"fortune", cp:"fortune",
     snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
-    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools",
+    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools",
     mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
     poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create",
     pet:"life", mood:"life", life:"life",
@@ -6794,7 +6852,9 @@
 
   BADGES.push(
     { emoji: "🪙", name: "刮卡新手", desc: "刮过一次刮刮乐", test: (u) => (u.scratch || 0) >= 1 },
-    { emoji: "🍀", name: "手气爆棚", desc: "累计刮开 25 张刮刮乐", test: (u) => (u.scratch || 0) >= 25 }
+    { emoji: "🍀", name: "手气爆棚", desc: "累计刮开 25 张刮刮乐", test: (u) => (u.scratch || 0) >= 25 },
+    { emoji: "🧰", name: "JSON 新手", desc: "用过一次 JSON 工具", test: (u) => (u.json || 0) >= 1 },
+    { emoji: "🔍", name: "结构猎人", desc: "用 JSON 工具格式化 20 次", test: (u) => (u.json || 0) >= 20 }
   );
 
   QUOTES.push(
@@ -6808,7 +6868,17 @@
     "刮刮乐刮的不是奖，是那一刻「会是什么」的期待。",
     "谢谢参与也是一种答案，至少你动手刮了。",
     "运气藏在你愿意多刮两下的那张卡里。",
-    "人生像刮刮乐，不刮开永远不知道下一张是不是大的。"
+    "人生像刮刮乐，不刮开永远不知道下一张是不是大的。",
+    "结构清晰的数据，比聪明的代码更省事。",
+    "JSON 不挑语言，是程序员之间最通用的问候。",
+    "把混乱的括号理顺，思路也就跟着顺了。",
+    "格式化不是为了好看，是给未来的自己留一条好走的路。",
+    "校验报错的那个位置，往往正是你忽略的细节。",
+    "树视图一展开，再深的嵌套也藏不住秘密。",
+    "转义非 ASCII，是让中文乖乖待进 .js 的小魔法。",
+    "复制粘贴前先格式化，是对接手的人最基本的尊重。",
+    "键的顺序不重要，但排好序的 JSON 读起来就是舒服。",
+    "会读 JSON 的人，才看得懂这个世界在说什么。",
   );
   function totalUses(u) { return Object.keys(u).reduce((a, k) => a + (u[k] || 0), 0); }
   function safeTest(b) { try { return !!b.test(usage); } catch (e) { return false; } }
@@ -17358,6 +17428,173 @@
     if (typeof bumpUsage === "function") bumpUsage("scratch");
   }
   function scratchStop() { scratchRevealed = true; }
+
+  /* ===== JSON 工具 json（自动化大更新） ===== */
+  const JSON_KEY = "suibian_json_input";
+  let jsonTreeNodes = 0, jsonBound = false;
+  const JSON_NODE_CAP = 8000;
+  function jsonParseSafe(text) {
+    try { return { ok: true, value: JSON.parse(text) }; }
+    catch (e) {
+      const m = String((e && e.message) || e);
+      let line = null, col = null;
+      const pm = m.match(/position (\d+)/);
+      if (pm) { const pos = parseInt(pm[1], 10); const before = text.slice(0, pos); line = before.split("\n").length; col = pos - before.lastIndexOf("\n"); }
+      else { const lc = m.match(/line (\d+) column (\d+)/); if (lc) { line = parseInt(lc[1], 10); col = parseInt(lc[2], 10); } }
+      return { ok: false, error: m, line: line, col: col };
+    }
+  }
+  function jsonSetStatus(kind, msg) {
+    const el = $("jsonStatus"); if (!el) return;
+    el.className = "json-status" + (kind ? " " + kind : "");
+    el.textContent = msg;
+  }
+  function jsonStats(value, raw) {
+    const el = $("jsonStats"); if (!el) return;
+    const bytes = (typeof TextEncoder !== "undefined") ? new TextEncoder().encode(raw).length : raw.length;
+    const lines = raw.split("\n").length;
+    let keys = 0, maxDepth = 0;
+    (function walk(v, d) {
+      maxDepth = Math.max(maxDepth, d);
+      if (Array.isArray(v)) { keys += v.length; v.forEach(function (x) { walk(x, d + 1); }); }
+      else if (v && typeof v === "object") { const ks = Object.keys(v); keys += ks.length; ks.forEach(function (k) { walk(v[k], d + 1); }); }
+    })(value, 0);
+    el.innerHTML = "<span>字节：" + bytes + "</span><span>行数：" + lines + "</span><span>元素/键：" + keys + "</span><span>最大深度：" + maxDepth + "</span>";
+  }
+  function jsonNode(value, key) {
+    const li = document.createElement("li");
+    jsonTreeNodes++;
+    if (jsonTreeNodes > JSON_NODE_CAP) { li.innerHTML = '<span class="json-empty">… 节点过多，已截断展示（共 ' + JSON_NODE_CAP + ' 个）</span>'; return li; }
+    const type = (value === null) ? "null" : (Array.isArray(value) ? "array" : typeof value);
+    if (type === "object" || type === "array") {
+      const isArr = (type === "array");
+      const entries = isArr ? value.map(function (v, i) { return [i, v]; }) : Object.keys(value).map(function (k) { return [k, value[k]]; });
+      const head = document.createElement("div");
+      const tg = document.createElement("span"); tg.className = "json-toggle"; tg.textContent = "▾";
+      const label = document.createElement("span");
+      if (key !== null && key !== undefined) { const kk = document.createElement("span"); kk.className = "json-key"; kk.textContent = key + ": "; label.appendChild(kk); }
+      const meta = document.createElement("span"); meta.className = "json-empty";
+      meta.textContent = isArr ? ("数组[" + entries.length + "]") : ("对象{" + entries.length + "}");
+      label.appendChild(meta);
+      head.appendChild(tg); head.appendChild(label);
+      const ul = document.createElement("ul");
+      entries.forEach(function (e) { ul.appendChild(jsonNode(e[1], e[0])); });
+      li.appendChild(head); li.appendChild(ul);
+      head.addEventListener("click", function () { const c = li.classList.toggle("json-collapsed"); tg.textContent = c ? "▸" : "▾"; });
+    } else {
+      let cls = "json-num", text = String(value);
+      if (type === "string") { cls = "json-str"; text = '"' + value + '"'; }
+      else if (type === "boolean") { cls = "json-bool"; }
+      else if (type === "null") { cls = "json-null"; text = "null"; }
+      const label = document.createElement("span");
+      if (key !== null && key !== undefined) { const kk = document.createElement("span"); kk.className = "json-key"; kk.textContent = key + ": "; label.appendChild(kk); }
+      const vv = document.createElement("span"); vv.className = cls; vv.textContent = text;
+      label.appendChild(vv); li.appendChild(label);
+    }
+    return li;
+  }
+  function jsonRenderTree(value, container) {
+    jsonTreeNodes = 0; container.innerHTML = "";
+    const root = document.createElement("ul"); root.style.marginLeft = "0"; root.style.borderLeft = "none";
+    root.appendChild(jsonNode(value, null)); container.appendChild(root);
+  }
+  function jsonStrEscaped(s) {
+    return JSON.stringify(s).replace(/[^\x00-\x7F]/g, function (c) { return "\\u" + ("0000" + c.charCodeAt(0).toString(16)).slice(-4); });
+  }
+  function jsonBuild(value, indent, lvl) {
+    const padIn = indent ? "\n" + " ".repeat(indent * (lvl + 1)) : "";
+    const padEnd = indent ? "\n" + " ".repeat(indent * lvl) : "";
+    if (value === null) return "null";
+    if (typeof value === "boolean") return value ? "true" : "false";
+    if (typeof value === "number") return (isFinite(value) ? String(value) : "null");
+    if (typeof value === "string") return jsonStrEscaped(value);
+    if (Array.isArray(value)) {
+      if (value.length === 0) return "[]";
+      return "[" + padIn + value.map(function (v) { return jsonBuild(v, indent, lvl + 1); }).join("," + padIn) + padEnd + "]";
+    }
+    if (typeof value === "object") {
+      const ks = Object.keys(value);
+      if (ks.length === 0) return "{}";
+      return "{" + padIn + ks.map(function (k) { return jsonStrEscaped(k) + ":" + (indent ? " " : "") + jsonBuild(value[k], indent, lvl + 1); }).join("," + padIn) + padEnd + "}";
+    }
+    return JSON.stringify(value);
+  }
+  function jsonUnescapeUnicode(s) {
+    return s.replace(/\\u([0-9a-fA-F]{4})/g, function (_, h) { return String.fromCharCode(parseInt(h, 16)); });
+  }
+  function jsonDeepSort(value) {
+    if (Array.isArray(value)) return value.map(jsonDeepSort);
+    if (value && typeof value === "object") { const out = {}; Object.keys(value).sort().forEach(function (k) { out[k] = jsonDeepSort(value[k]); }); return out; }
+    return value;
+  }
+  function jsonGetIndent() { const v = $("jsonIndent"); return v ? (parseInt(v.value, 10) || 2) : 2; }
+  function jsonDo(action) {
+    const ta = $("jsonInput"); if (!ta) return;
+    if (action === "sample") {
+      ta.value = JSON.stringify({ app: "suibian", version: 2, ok: true, count: 3, items: [{ id: 1, name: "随便", tags: ["决策", "工具"] }, { id: 2, name: "运气", tags: ["刮刮乐", "转盘"] }], meta: { author: "grrtyre", "中文键": "值", nested: { a: 1, b: [true, false, null] } } }, null, 2);
+    }
+    const raw = ta.value;
+    if (action === "escape") {
+      const r = jsonParseSafe(raw);
+      if (!r.ok) { jsonSetStatus("err", "⚠️ 先修好 JSON 再转义：" + r.error); return; }
+      ta.value = jsonBuild(r.value, jsonGetIndent(), 0);
+      jsonRenderTree(r.value, $("jsonTreeView")); jsonStats(r.value, ta.value);
+      jsonSetStatus("ok", "✅ 非 ASCII 已转义为 \\uXXXX（可直接塞进 .js 源码）。"); bumpUsage("json"); return;
+    }
+    if (action === "unescape") {
+      ta.value = jsonUnescapeUnicode(raw);
+      const r = jsonParseSafe(ta.value);
+      if (!r.ok) { jsonSetStatus("err", "⚠️ 反转义后无法解析为 JSON：" + r.error); return; }
+      jsonRenderTree(r.value, $("jsonTreeView")); jsonStats(r.value, ta.value);
+      jsonSetStatus("ok", "✅ 已把 \\uXXXX 还原为正常字符。"); bumpUsage("json"); return;
+    }
+    const r = jsonParseSafe(raw);
+    if (!r.ok) { let msg = "⚠️ JSON 解析失败：" + r.error; if (r.line) msg += "（第 " + r.line + " 行" + (r.col ? " 第 " + r.col + " 列" : "") + " 附近）"; jsonSetStatus("err", msg); return; }
+    let out;
+    if (action === "minify") out = JSON.stringify(r.value);
+    else if (action === "sort") out = jsonBuild(jsonDeepSort(r.value), jsonGetIndent(), 0);
+    else if (action === "tree") { jsonRenderTree(r.value, $("jsonTreeView")); jsonStats(r.value, raw); jsonSetStatus("ok", "🌳 树视图已生成，点 ▸ 折叠分支。"); bumpUsage("json"); return; }
+    else out = JSON.stringify(r.value, null, jsonGetIndent());
+    ta.value = out; jsonRenderTree(r.value, $("jsonTreeView")); jsonStats(r.value, out);
+    const labels = { format: "格式化", minify: "压缩", sort: "排序键" };
+    jsonSetStatus("ok", "✅ " + (labels[action] || "处理") + "完成。"); bumpUsage("json");
+  }
+  function jsonCopy() {
+    const ta = $("jsonInput"); if (!ta) return;
+    const text = ta.value;
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast("📋 已复制 JSON"); }, function () { jsonFallbackCopy(text); });
+    else jsonFallbackCopy(text);
+  }
+  function jsonFallbackCopy(text) {
+    const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast("📋 已复制 JSON"); } catch (e) { toast("复制失败"); }
+    document.body.removeChild(ta);
+  }
+  function jsonExport() {
+    const ta = $("jsonInput"); if (!ta) return;
+    const blob = new Blob([ta.value], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "suibian.json"; a.click();
+    URL.revokeObjectURL(url); toast("💾 已导出 suibian.json");
+  }
+  function jsonBind() {
+    if (jsonBound) return; jsonBound = true;
+    const map = { jsonFormat: "format", jsonMinify: "minify", jsonTree: "tree", jsonSort: "sort", jsonEscape: "escape", jsonUnescape: "unescape", jsonSample: "sample" };
+    Object.keys(map).forEach(function (id) { const b = $(id); if (b) b.addEventListener("click", function () { jsonDo(map[id]); }); });
+    const cp = $("jsonCopy"); if (cp) cp.addEventListener("click", jsonCopy);
+    const ex = $("jsonExport"); if (ex) ex.addEventListener("click", jsonExport);
+    const ta = $("jsonInput");
+    if (ta) { try { const s = localStorage.getItem(JSON_KEY); if (s !== null) ta.value = s; } catch (e) {} ta.addEventListener("input", function () { try { localStorage.setItem(JSON_KEY, ta.value); } catch (e) {} }); }
+  }
+  function jsonRender() {
+    if (!jsonBound) jsonBind();
+    const ta = $("jsonInput"); if (!ta) return;
+    const raw = ta.value.trim();
+    if (!raw) { jsonSetStatus("", "就绪。把 JSON 粘到左边，或点「🎲 示例」。"); return; }
+    const r = jsonParseSafe(raw);
+    if (!r.ok) { let msg = "⚠️ JSON 解析失败：" + r.error; if (r.line) msg += "（第 " + r.line + " 行" + (r.col ? " 第 " + r.col + " 列" : "") + " 附近）"; jsonSetStatus("err", msg); return; }
+    jsonRenderTree(r.value, $("jsonTreeView")); jsonStats(r.value, raw); jsonSetStatus("ok", "✅ 解析成功，树视图已就绪。");
+  }
 
 })();
 
