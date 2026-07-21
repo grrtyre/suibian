@@ -1342,6 +1342,7 @@
     <div class="hero-actions">
       <button class="shuffle" id="shuffleTab" title="随便跳到一个工具逛逛 🎲">🎲 随便逛逛</button>
       <button class="gear" id="helpBtn" title="键盘快捷键 ⌨️（按 ? 打开）">⌨️ 快捷键</button>
+      <button class="gear" id="cmdkBtn" title="快捷命令面板（Ctrl / ⌘ + K）">⌘K 搜工具</button>
       <button class="gear" id="settingsBtn" title="设置 ⚙️">⚙️ 设置</button>
     </div>
     <div class="daily" id="daily"></div>
@@ -3558,9 +3559,50 @@
     <li><span class="kbd">Esc</span> 关闭设置抽屉 / 帮助弹窗</li>
     <li><span class="kbd">点 logo</span> 切换主题配色 🎨</li>
     <li><span class="kbd">★</span> 点导航按钮上的 ★，把常用工具钉到「常用」</li>
+    <li><span class="kbd">⌘K</span> / <span class="kbd">Ctrl K</span> 打开快捷命令面板，搜任意工具一键直达</li>
   </ul>
   <p class="modal-note">所有快捷键在输入框 / 文本框聚焦时自动失效，可放心打字。按 <span class="kbd">?</span> 随时再打开本帮助。</p>
 </div>
+
+  <!-- 快捷命令面板 cmdk -->
+  <style>
+  #cmdk{position:fixed;inset:0;z-index:9999;display:none;align-items:flex-start;justify-content:center;}
+  #cmdk.show{display:flex;}
+  #cmdk .cmdk-backdrop{position:absolute;inset:0;background:rgba(8,10,20,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+  #cmdk .cmdk-box{position:relative;margin-top:12vh;width:min(560px,92vw);max-height:72vh;display:flex;flex-direction:column;background:var(--card,#1a1622);color:var(--text,#f3f4ff);border:1px solid var(--line,rgba(255,255,255,.10));border-radius:18px;box-shadow:var(--shadow,0 24px 70px rgba(0,0,0,.5));overflow:hidden;animation:cmdkPop .18s cubic-bezier(.2,.8,.2,1) both;}
+  @keyframes cmdkPop{from{transform:translateY(-10px) scale(.98);opacity:0;}to{transform:none;opacity:1;}}
+  #cmdk .cmdk-inputwrap{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line,rgba(255,255,255,.10));}
+  #cmdk .cmdk-icon{font-size:18px;opacity:.6;}
+  #cmdk .cmdk-input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text,#f3f4ff);font-size:16px;}
+  #cmdk .cmdk-input::placeholder{color:var(--muted,#9aa0c7);}
+  #cmdk .cmdk-esc{font-size:11px;color:var(--muted,#9aa0c7);border:1px solid var(--line,rgba(255,255,255,.10));border-radius:6px;padding:2px 7px;}
+  #cmdk .cmdk-list{overflow:auto;padding:8px;flex:1;}
+  #cmdk .cmdk-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border-radius:12px;cursor:pointer;font-size:15px;color:var(--text,#f3f4ff);}
+  #cmdk .cmdk-item.active{background:linear-gradient(90deg,var(--accent-2,#ffa23c),var(--accent,#ff6b9d));color:#fff;}
+  #cmdk .cmdk-item.active .cmdk-recent{color:#fff;border-color:rgba(255,255,255,.7);}
+  #cmdk .cmdk-recent{font-size:11px;color:var(--accent-3,#6a5cff);border:1px solid var(--accent-3,#6a5cff);border-radius:999px;padding:1px 8px;}
+  #cmdk .cmdk-empty{padding:26px 12px;text-align:center;color:var(--muted,#9aa0c7);font-size:14px;}
+  #cmdk .cmdk-foot{display:flex;gap:16px;padding:9px 14px;border-top:1px solid var(--line,rgba(255,255,255,.10));color:var(--muted,#9aa0c7);font-size:12px;flex-wrap:wrap;}
+  #cmdk .cmdk-foot span{display:inline-flex;align-items:center;gap:5px;}
+  #cmdk kbd{background:var(--card-2,#241f30);border:1px solid var(--line,rgba(255,255,255,.10));border-radius:6px;padding:1px 7px;font-size:11px;color:var(--text,#f3f4ff);font-family:inherit;}
+  </style>
+  <div id="cmdk" aria-hidden="true">
+    <div class="cmdk-backdrop" data-cmdk-close></div>
+    <div class="cmdk-box" role="dialog" aria-modal="true" aria-label="快捷命令面板">
+      <div class="cmdk-inputwrap">
+        <span class="cmdk-icon">⌕</span>
+        <input id="cmdkInput" class="cmdk-input" type="text" placeholder="搜全部工具，或输入关键词（抽签 / 运势 / 取名…）" autocomplete="off" />
+        <span class="cmdk-esc">Esc</span>
+      </div>
+      <div class="cmdk-list" id="cmdkList"></div>
+      <div class="cmdk-foot">
+        <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
+        <span><kbd>↵</kbd> 打开</span>
+        <span><kbd>Esc</kbd> 关闭</span>
+        <span><kbd>⌘K</kbd> 随时唤出</span>
+      </div>
+    </div>
+  </div>
 
   <!-- 图表工坊 chart -->
   <section class="panel" id="chart">
@@ -16450,6 +16492,133 @@
     "深色沉稳，浅色清爽，换套主题，换种心情。",
     "配色没有标准答案，只有「看着顺眼」这一条。",
     "把灵感色卡存下来，下次做图直接抄自己。"
+  );
+
+  /* ===== 快捷命令面板 cmdk（Ctrl / ⌘ + K 搜一切工具） ===== */
+  const CMK = (function () {
+    const root = $("cmdk");
+    const input = $("cmdkInput");
+    const list = $("cmdkList");
+    if (!root || !input || !list) return { init: function () {}, open: function () {}, close: function () {} };
+    let open = false, items = [], idx = 0;
+    function buildIndex() {
+      const btns = document.querySelectorAll("#tabs button[data-tab]");
+      items = [];
+      for (let i = 0; i < btns.length; i++) {
+        const b = btns[i];
+        const id = b.getAttribute("data-tab");
+        if (!id) continue;
+        const label = (b.textContent || "").replace(/\s+/g, " ").trim();
+        const kw = (TAB_KW && TAB_KW[id]) ? (TAB_KW[id] || "").toLowerCase() : "";
+        items.push({ id: id, label: label, kw: kw, use: (usage && usage[id]) || 0 });
+      }
+    }
+    function norm(s) { return (s || "").toLowerCase().replace(/\s+/g, ""); }
+    function score(it, q) {
+      if (!q) return it.use;
+      const nq = norm(q), nl = norm(it.label), nk = norm(it.kw);
+      if (nl.indexOf(nq) === 0) return 1000 + it.use;
+      if (nl.indexOf(nq) > -1) return 800 + it.use;
+      if (nk.indexOf(nq) > -1) return 500 + it.use;
+      let li = 0, ok = true;
+      for (let i = 0; i < nq.length; i++) {
+        const p = nl.indexOf(nq[i], li);
+        if (p < 0) { ok = false; break; }
+        li = p + 1;
+      }
+      return ok ? 300 + it.use : -1;
+    }
+    function render() {
+      const q = input.value;
+      const res = [];
+      for (let i = 0; i < items.length; i++) {
+        const s = score(items[i], q);
+        if (s >= 0) res.push({ it: items[i], s: s });
+      }
+      res.sort(function (a, b) { return b.s - a.s; });
+      if (res.length === 0) {
+        list.innerHTML = '<div class="cmdk-empty">没有匹配的工具，换个词试试 🤔</div>';
+        idx = 0;
+        return;
+      }
+      let html = "";
+      for (let i = 0; i < res.length; i++) {
+        const x = res[i];
+        const recent = (!q && x.it.use > 0) ? '<span class="cmdk-recent">最近</span>' : "";
+        html += '<div class="cmdk-item' + (i === idx ? " active" : "") + '" data-i="' + i + '" data-id="' + x.it.id + '"><span class="cmdk-name">' + x.it.label + "</span>" + recent + "</div>";
+      }
+      list.innerHTML = html;
+      if (idx > res.length - 1) idx = res.length - 1;
+      if (idx < 0) idx = 0;
+      const els = list.querySelectorAll(".cmdk-item");
+      for (let i = 0; i < els.length; i++) {
+        (function (el) {
+          el.addEventListener("click", function () { choose(el.getAttribute("data-id")); });
+          el.addEventListener("mousemove", function () { idx = +el.getAttribute("data-i"); paintActive(); });
+        })(els[i]);
+      }
+      paintActive();
+    }
+    function paintActive() {
+      const els = list.querySelectorAll(".cmdk-item");
+      for (let i = 0; i < els.length; i++) {
+        els[i].classList.toggle("active", (+els[i].getAttribute("data-i")) === idx);
+      }
+      const act = list.querySelector(".cmdk-item.active");
+      if (act && act.scrollIntoView) act.scrollIntoView({ block: "nearest" });
+    }
+    function choose(id) {
+      if (!id) return;
+      close();
+      try { activateTab(id); } catch (e) {}
+    }
+    function openPanel() {
+      if (open) { try { input.focus(); } catch (e) {} return; }
+      buildIndex();
+      open = true;
+      root.setAttribute("aria-hidden", "false");
+      root.classList.add("show");
+      input.value = "";
+      idx = 0;
+      render();
+      try { bumpUsage("cmdk"); } catch (e) {}
+      setTimeout(function () { try { input.focus(); } catch (e) {} }, 10);
+    }
+    function close() {
+      open = false;
+      root.setAttribute("aria-hidden", "true");
+      root.classList.remove("show");
+    }
+    function bind() {
+      input.addEventListener("input", function () { idx = 0; render(); });
+      input.addEventListener("keydown", function (e) {
+        const n = list.querySelectorAll(".cmdk-item").length;
+        if (e.key === "ArrowDown") { e.preventDefault(); if (n) idx = Math.min(idx + 1, n - 1); paintActive(); }
+        else if (e.key === "ArrowUp") { e.preventDefault(); if (n) idx = Math.max(idx - 1, 0); paintActive(); }
+        else if (e.key === "Enter") { e.preventDefault(); const act = list.querySelector(".cmdk-item.active"); if (act) choose(act.getAttribute("data-id")); }
+        else if (e.key === "Escape") { e.preventDefault(); close(); }
+      });
+      root.addEventListener("click", function (e) {
+        if (e.target && e.target.hasAttribute && e.target.hasAttribute("data-cmdk-close")) close();
+      });
+      document.addEventListener("keydown", function (e) {
+        if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) { e.preventDefault(); openPanel(); }
+      });
+      const btn = $("cmdkBtn");
+      if (btn) btn.addEventListener("click", openPanel);
+    }
+    return { init: bind, open: openPanel, close: close };
+  })();
+  try { CMK.init(); } catch (e) {}
+
+  BADGES.push(
+    { emoji: "⌨️", name: "快捷键党", desc: "打开过快捷命令面板", test: (u) => (u.cmdk || 0) >= 1 },
+    { emoji: "🚀", name: "键盘侠", desc: "用命令面板 20 次", test: (u) => (u.cmdk || 0) >= 20 }
+  );
+
+  QUOTES.push(
+    "好工具不该藏得深——按 ⌘K，想要的立刻到手。",
+    "键盘比鼠标快，懒人是最高效的工程师。"
   );
 
   })();
