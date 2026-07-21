@@ -1340,6 +1340,41 @@
   body.compact .catbar{margin-top:7px;}
   @media(max-width:560px){ .catbar .cat{padding:6px 11px;font-size:12px;} }
 </style>
+
+  <style id="modWorldDice">
+  /* ===== 世界时钟 / 掷骰机（自动化大更新） ===== */
+  .wc-controls { align-items:center; }
+  .wc-controls select { width:auto; min-width:140px; }
+  .wc-toggle { display:inline-flex; align-items:center; gap:6px; color:var(--muted); font-size:13px; cursor:pointer; }
+  .wc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; margin-top:16px; }
+  .wc-card { position:relative; border:1px solid var(--line); border-radius:16px; padding:14px 14px 30px; background:linear-gradient(180deg,var(--card),var(--bg-soft)); overflow:hidden; }
+  .wc-card.wc-day { box-shadow: inset 0 0 0 1px rgba(255,209,102,.25), var(--shadow); }
+  .wc-card.wc-night { box-shadow: inset 0 0 30px rgba(124,108,255,.18), var(--shadow); }
+  .wc-top { display:flex; align-items:center; gap:6px; }
+  .wc-flag { font-size:18px; }
+  .wc-city { font-weight:700; font-size:15px; }
+  .wc-icon { margin-left:auto; font-size:16px; }
+  .wc-time { font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:1px; margin-top:6px; }
+  .wc-meta { color:var(--muted); font-size:12px; margin-top:2px; }
+  .wc-off { color:var(--accent-2); font-size:12px; margin-top:4px; }
+  .wc-del { position:absolute; right:8px; bottom:6px; border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:12px; opacity:.7; }
+  .wc-del:hover { opacity:1; color:var(--accent); }
+  .dice-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+  .dice-chip { border:1px solid var(--line); border-radius:14px; padding:10px 12px; background:linear-gradient(180deg,var(--card),var(--bg-soft)); text-align:center; min-width:72px; }
+  .dc-name { font-weight:800; font-size:16px; color:var(--accent-2); }
+  .dc-ctrl { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:6px; }
+  .dc-ctrl button { width:26px; height:26px; border-radius:8px; border:1px solid var(--line); background:var(--card-2); color:var(--text); cursor:pointer; font-size:16px; line-height:1; }
+  .dc-n { min-width:18px; font-weight:700; font-size:15px; }
+  .dice-mod { display:inline-flex; align-items:center; gap:6px; color:var(--muted); font-size:14px; }
+  .dice-mod input { width:84px; }
+  .dice-total { display:block; margin-top:8px; font-size:30px; font-weight:800; color:var(--accent); }
+  .dice-hist { margin-top:14px; display:flex; flex-direction:column; gap:6px; }
+  .dh-item { display:flex; gap:10px; align-items:center; font-size:13px; border:1px solid var(--line); border-radius:10px; padding:6px 10px; background:rgba(255,255,255,.02); }
+  .dh-t { color:var(--muted); white-space:nowrap; }
+  .dh-s { flex:1; color:var(--text); word-break:break-all; }
+  .dh-tot { font-weight:800; color:var(--accent-2); }
+  </style>
+
 </head>
 <body>
 <div class="wrap">
@@ -1454,6 +1489,8 @@
     <button data-tab="mindmap">🗺️ 思维导图</button>
       <button data-tab="lifegame">🧬 生命游戏</button>
       <button data-tab="palette">🌈 配色方案</button>
+      <button data-tab="worldclock">🌍 世界时钟</button>
+      <button data-tab="rpgdice">🎲 掷骰机</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4193,6 +4230,42 @@
     </style>
   </section>
 
+
+  <section class="panel" id="worldclock">
+    <div class="card">
+      <h2>🌍 世界时钟</h2>
+      <div class="hint">一眼看遍全球此刻：添加城市、秒级同步，自动昼夜与本地时差。</div>
+      <div class="row wc-controls">
+        <select id="wcAdd" class="btn ghost"></select>
+        <button class="btn" id="wcAddBtn">＋ 添加</button>
+        <button class="btn ghost" id="wcReset">重置</button>
+        <label class="wc-toggle"><input type="checkbox" id="wc12"> 12 小时制</label>
+      </div>
+      <div class="wc-grid" id="wcGrid"></div>
+      <div class="hint" id="wcEmpty" style="display:none">还没有添加城市，挑几个吧 👆</div>
+    </div>
+  </section>
+
+  <section class="panel" id="rpgdice">
+    <div class="card">
+      <h2>🎲 TRPG 掷骰机</h2>
+      <div class="hint">跑团 / 桌游好帮手：多骰种、加值、优势 / 劣势，一键开团。</div>
+      <div class="dice-row" id="diceRow"></div>
+      <div class="row">
+        <label class="dice-mod">加值 <input type="number" id="diceMod" value="0" step="1"></label>
+        <select id="diceAdv" class="btn ghost">
+          <option value="none">普通</option>
+          <option value="adv">优势（d20 取高）</option>
+          <option value="dis">劣势（d20 取低）</option>
+        </select>
+        <button class="btn" id="diceRoll">🎲 掷骰</button>
+        <button class="btn ghost" id="diceClear">清空记录</button>
+      </div>
+      <div class="result" id="diceOut">点「掷骰」开始 ✨</div>
+      <div class="dice-hist" id="diceHist"></div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -4298,6 +4371,10 @@
     if (b.dataset.tab === "life") lifeRender();
     if (b.dataset.tab === "pipe") { if (!pipeState) pipeNew(); pipeStart(); }
     if (b.dataset.tab !== "pipe") pipeStop();
+    if (b.dataset.tab === "worldclock") worldclockStart();
+    if (b.dataset.tab !== "worldclock") worldclockStop();
+    if (b.dataset.tab === "rpgdice") rpgRollReady();
+    if (b.dataset.tab !== "rpgdice") rpgStop();
   });
 
   /* ====PIPE_MOD_START==== */
@@ -4586,6 +4663,10 @@
     if (id === "mindmap") mmRender();
     if (id === "lifegame") lgRender();
     if (id === "palette") paletteStart();
+    if (id === "worldclock") worldclockStart();
+    if (id !== "worldclock") worldclockStop();
+    if (id === "rpgdice") rpgRollReady();
+    if (id !== "rpgdice") rpgStop();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
@@ -16671,6 +16752,191 @@
     return { init: bind, open: openPanel, close: close };
   })();
   try { CMK.init(); } catch (e) {}
+
+  /* ===== 世界时钟 worldclock & TRPG 掷骰 rpgdice（自动化大更新） ===== */
+  const WC_KEY = "suibian_clocks";
+  const WC_CITIES = [
+    { c: "北京", f: "🇨🇳", tz: "Asia/Shanghai" },
+    { c: "香港", f: "🇭🇰", tz: "Asia/Hong_Kong" },
+    { c: "东京", f: "🇯🇵", tz: "Asia/Tokyo" },
+    { c: "首尔", f: "🇰🇷", tz: "Asia/Seoul" },
+    { c: "新加坡", f: "🇸🇬", tz: "Asia/Singapore" },
+    { c: "孟买", f: "🇮🇳", tz: "Asia/Kolkata" },
+    { c: "迪拜", f: "🇦🇪", tz: "Asia/Dubai" },
+    { c: "莫斯科", f: "🇷🇺", tz: "Europe/Moscow" },
+    { c: "伦敦", f: "🇬🇧", tz: "Europe/London" },
+    { c: "巴黎", f: "🇫🇷", tz: "Europe/Paris" },
+    { c: "柏林", f: "🇩🇪", tz: "Europe/Berlin" },
+    { c: "纽约", f: "🇺🇸", tz: "America/New_York" },
+    { c: "多伦多", f: "🇨🇦", tz: "America/Toronto" },
+    { c: "洛杉矶", f: "🇺🇸", tz: "America/Los_Angeles" },
+    { c: "圣保罗", f: "🇧🇷", tz: "America/Sao_Paulo" },
+    { c: "开罗", f: "🇪🇬", tz: "Africa/Cairo" },
+    { c: "悉尼", f: "🇦🇺", tz: "Australia/Sydney" }
+  ];
+  let wcState = [];
+  let wcTimer = null;
+  let wc12 = false;
+  try {
+    const _r = JSON.parse(localStorage.getItem(WC_KEY) || "null");
+    if (Array.isArray(_r) && _r.length) wcState = _r;
+  } catch (e) {}
+  if (!wcState.length) wcState = ["Asia/Shanghai", "Asia/Tokyo", "Europe/London", "America/New_York", "Australia/Sydney"];
+  function wcSave() { try { localStorage.setItem(WC_KEY, JSON.stringify(wcState)); } catch (e) {} }
+  function wcZoned(date, tz) {
+    const dtf = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", weekday: "short" });
+    const p = {};
+    dtf.formatToParts(date).forEach(function (x) { if (x.type !== "literal") p[x.type] = x.value; });
+    let h = parseInt(p.hour, 10); if (h === 24) h = 0;
+    return { y: p.year, m: p.month, d: p.day, h: h, mi: parseInt(p.minute, 10), s: parseInt(p.second, 10), wd: p.weekday };
+  }
+  function wcOffset(tz, date) {
+    const p = wcZoned(date, tz);
+    const asUTC = Date.UTC(+p.y, +p.m - 1, +p.d, p.h, p.mi, p.s);
+    const tzAbs = (asUTC - date.getTime()) / 3600000;
+    const localOff = -date.getTimezoneOffset() / 60;
+    return tzAbs - localOff;
+  }
+  function wcRender() {
+    const grid = $("wcGrid"); if (!grid) return;
+    const now = new Date();
+    if (!wcState.length) { grid.innerHTML = ""; const e = $("wcEmpty"); if (e) e.style.display = "block"; return; }
+    const e = $("wcEmpty"); if (e) e.style.display = "none";
+    let html = "";
+    wcState.forEach(function (tz) {
+      const city = WC_CITIES.filter(function (c) { return c.tz === tz; })[0] || { c: tz, f: "🏙" };
+      const z = wcZoned(now, tz);
+      const day = z.h >= 6 && z.h < 18;
+      const off = wcOffset(tz, now);
+      let offTxt;
+      if (Math.abs(off) < 0.001) offTxt = "与本地同步";
+      else { const a = Math.abs(off); const hh = Math.floor(a); const mm = Math.round((a - hh) * 60); offTxt = (off > 0 ? "快 " : "慢 ") + hh + " 小时" + (mm ? " " + mm + " 分" : ""); }
+      const time = wc12
+        ? (function () { let h = z.h % 12; if (h === 0) h = 12; return (h < 10 ? "0" + h : h) + ":" + (z.mi < 10 ? "0" + z.mi : z.mi) + (z.h < 12 ? " AM" : " PM"); })()
+        : (z.h < 10 ? "0" + z.h : z.h) + ":" + (z.mi < 10 ? "0" + z.mi : z.mi) + ":" + (z.s < 10 ? "0" + z.s : z.s);
+      html += '<div class="wc-card ' + (day ? "wc-day" : "wc-night") + '">'
+        + '<div class="wc-top"><span class="wc-flag">' + city.f + '</span><span class="wc-city">' + city.c + '</span><span class="wc-icon">' + (day ? "☀️" : "🌙") + '</span></div>'
+        + '<div class="wc-time">' + time + '</div>'
+        + '<div class="wc-meta">' + z.y + '-' + z.m + '-' + z.d + ' ' + z.wd + '</div>'
+        + '<div class="wc-off">' + offTxt + '</div>'
+        + '<button class="wc-del" data-tz="' + tz + '">移除</button>'
+        + '</div>';
+    });
+    grid.innerHTML = html;
+    const dels = grid.querySelectorAll(".wc-del");
+    for (let i = 0; i < dels.length; i++) {
+      dels[i].addEventListener("click", function () {
+        const tz = this.getAttribute("data-tz");
+        wcState = wcState.filter(function (t) { return t !== tz; });
+        wcSave(); wcRender();
+      });
+    }
+  }
+  function worldclockStart() {
+    if (wcTimer) clearInterval(wcTimer);
+    wcRender();
+    wcTimer = setInterval(wcRender, 1000);
+    if (typeof bumpUsage === "function") bumpUsage("worldclock");
+  }
+  function worldclockStop() { if (wcTimer) { clearInterval(wcTimer); wcTimer = null; } }
+  (function wcInit() {
+    const sel = $("wcAdd");
+    if (sel) {
+      WC_CITIES.forEach(function (c) { const o = document.createElement("option"); o.value = c.tz; o.textContent = c.f + " " + c.c; sel.appendChild(o); });
+    }
+    const add = $("wcAddBtn"); if (add) add.addEventListener("click", function () { const v = sel && sel.value; if (v && wcState.indexOf(v) === -1) { wcState.push(v); wcSave(); wcRender(); } });
+    const reset = $("wcReset"); if (reset) reset.addEventListener("click", function () { wcState = ["Asia/Shanghai", "Asia/Tokyo", "Europe/London", "America/New_York", "Australia/Sydney"]; wcSave(); wcRender(); });
+    const t12 = $("wc12"); if (t12) t12.addEventListener("change", function () { wc12 = t12.checked; wcRender(); });
+  })();
+
+  /* ===== TRPG 掷骰 rpgdice ===== */
+  const DICE_TYPES = [4, 6, 8, 10, 12, 20, 100];
+  const RD_KEY = "suibian_rpg_hist";
+  let rdCounts = {};
+  let rdHist = [];
+  try { const _r = JSON.parse(localStorage.getItem(RD_KEY) || "null"); if (Array.isArray(_r)) rdHist = _r.slice(0, 50); } catch (e) {}
+  function rdSave() { try { localStorage.setItem(RD_KEY, JSON.stringify(rdHist)); } catch (e) {} }
+  function rdRollOne(sides) { return 1 + Math.floor(Math.random() * sides); }
+  function rpgBuild() {
+    const row = $("diceRow"); if (!row) return;
+    let html = "";
+    DICE_TYPES.forEach(function (s) {
+      const n = rdCounts[s] || 0;
+      html += '<div class="dice-chip" data-s="' + s + '">'
+        + '<div class="dc-name">d' + s + '</div>'
+        + '<div class="dc-ctrl"><button class="dc-minus">−</button><span class="dc-n">' + n + '</span><button class="dc-plus">＋</button></div>'
+        + '</div>';
+    });
+    row.innerHTML = html;
+    const chips = row.querySelectorAll(".dice-chip");
+    for (let i = 0; i < chips.length; i++) {
+      (function (chip) {
+        const s = +chip.getAttribute("data-s");
+        chip.querySelector(".dc-plus").addEventListener("click", function () { rdCounts[s] = (rdCounts[s] || 0) + 1; rpgBuild(); });
+        chip.querySelector(".dc-minus").addEventListener("click", function () { rdCounts[s] = Math.max(0, (rdCounts[s] || 0) - 1); rpgBuild(); });
+      })(chips[i]);
+    }
+  }
+  function rpgRoll() {
+    let total = 0; const parts = [];
+    const adv = $("diceAdv") ? $("diceAdv").value : "none";
+    DICE_TYPES.forEach(function (s) {
+      const n = rdCounts[s] || 0;
+      if (!n) return;
+      if (s === 20 && adv !== "none") {
+        for (let i = 0; i < n; i++) {
+          const a = rdRollOne(20), b = rdRollOne(20);
+          const chosen = adv === "adv" ? Math.max(a, b) : Math.min(a, b);
+          total += chosen; parts.push("d20(" + (adv === "adv" ? "高" : "低") + ")=" + chosen + "[" + a + "/" + b + "]");
+        }
+      } else {
+        for (let i = 0; i < n; i++) { const v = rdRollOne(s); total += v; parts.push("d" + s + "=" + v); }
+      }
+    });
+    const mod = parseInt(($("diceMod") ? $("diceMod").value : "0"), 10) || 0;
+    total += mod;
+    const out = $("diceOut");
+    if (out) {
+      let txt = parts.length ? parts.join("  +  ") + "<br>" : "";
+      if (mod) txt += "加值 " + mod + "<br>";
+      txt += '<span class="dice-total">合计 ' + total + "</span>";
+      out.innerHTML = txt;
+      out.classList.remove("pop"); void out.offsetWidth; out.classList.add("pop");
+    }
+    if (typeof playDing === "function") playDing();
+    rdHist.unshift({ t: Date.now(), s: parts.join(" + "), m: mod, tot: total });
+    if (rdHist.length > 50) rdHist.pop();
+    rdSave(); rpgRenderHist();
+    if (typeof bumpUsage === "function") bumpUsage("rpgdice");
+  }
+  function rpgRenderHist() {
+    const h = $("diceHist"); if (!h) return;
+    if (!rdHist.length) { h.innerHTML = '<div class="hint">还没有掷骰记录。</div>'; return; }
+    let html = "";
+    rdHist.slice(0, 12).forEach(function (e) {
+      const time = new Date(e.t);
+      const ts = (time.getMonth() + 1) + "/" + time.getDate() + " " + (time.getHours() < 10 ? "0" + time.getHours() : time.getHours()) + ":" + (time.getMinutes() < 10 ? "0" + time.getMinutes() : time.getMinutes());
+      html += '<div class="dh-item"><span class="dh-t">' + ts + '</span><span class="dh-s">' + (e.s || "—") + '</span><span class="dh-tot">=' + e.tot + "</span></div>";
+    });
+    h.innerHTML = html;
+  }
+  function rpgRollReady() { rpgBuild(); rpgRenderHist(); }
+  function rpgStop() { /* 无计时器 */ }
+  (function rdInit() {
+    const roll = $("diceRoll"); if (roll) roll.addEventListener("click", rpgRoll);
+    const clr = $("diceClear"); if (clr) clr.addEventListener("click", function () { rdHist = []; rdSave(); rpgRenderHist(); });
+  })();
+
+  BADGES.push(
+    { emoji: "🌍", name: "环球旅人", desc: "打开过世界时钟", test: function (u) { return (u.worldclock || 0) >= 1; } },
+    { emoji: "🎲", name: "掷骰大师", desc: "用掷骰机 20 次", test: function (u) { return (u.rpgdice || 0) >= 20; } }
+  );
+  QUOTES.push(
+    "同一个瞬间，有人正迎着朝阳，有人刚数完星星——世界从不停下。",
+    "骰子落地之前，命运还只是一团温柔的概率。",
+    "拿不定主意就掷一把：二十面骰给的勇气，比犹豫更值钱。"
+  );
+
 
   BADGES.push(
     { emoji: "⌨️", name: "快捷键党", desc: "打开过快捷命令面板", test: (u) => (u.cmdk || 0) >= 1 },
