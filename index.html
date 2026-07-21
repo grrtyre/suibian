@@ -1491,6 +1491,7 @@
       <button data-tab="palette">🌈 配色方案</button>
       <button data-tab="worldclock">🌍 世界时钟</button>
       <button data-tab="rpgdice">🎲 掷骰机</button>
+      <button data-tab="wordcloud">🎐 词云工坊</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4266,6 +4267,55 @@
     </div>
   </section>
 
+<section class="panel" id="wordcloud">
+    <div class="card">
+      <h2>🎐 词云工坊</h2>
+      <div class="hint">贴一段文字（演讲 / 文章 / 评论 / 歌词都行），一键生成词频词云；支持多种配色与形状，可导出 PNG、可收藏反复把玩。中文按 2–3 字词组、英文按单词统计词频。</div>
+      <textarea id="wcInput" rows="6" placeholder="把要分析的文字贴到这里，或点「示例」载入一段…"></textarea>
+      <div class="row">
+        <button class="btn" id="wcGo">✨ 生成词云</button>
+        <button class="btn ghost" id="wcSample">📄 示例</button>
+        <button class="btn ghost" id="wcClearInput">清空文字</button>
+        <select id="wcTheme" class="btn ghost" title="配色主题">
+          <option value="neon">霓虹</option>
+          <option value="candy">糖果</option>
+          <option value="ink">水墨</option>
+          <option value="aurora">极光</option>
+          <option value="sunset">日落</option>
+        </select>
+        <select id="wcShape" class="btn ghost" title="形状">
+          <option value="rect">矩形</option>
+          <option value="circle">圆形</option>
+          <option value="heart">心形</option>
+        </select>
+      </div>
+      <div class="row">
+        <label class="wc-lbl">最大词数 <b id="wcMaxV">120</b></label>
+        <input type="range" id="wcMax" min="20" max="200" value="120" class="wc-range">
+        <label class="wc-lbl">字号上限 <b id="wcSizeV">48</b></label>
+        <input type="range" id="wcSize" min="24" max="96" value="48" class="wc-range">
+        <button class="btn ghost" id="wcSave">💾 收藏词云</button>
+        <button class="btn ghost" id="wcPng">⬇️ 导出 PNG</button>
+      </div>
+      <div class="wc-stage">
+        <canvas id="wc-canvas" class="wc-canvas"></canvas>
+        <div class="wc-empty" id="wcEmpty">还没有词云，贴段文字点「✨ 生成词云」吧～</div>
+      </div>
+      <div class="wc-gallery" id="wcGallery"></div>
+    </div>
+    <style>
+      .wc-stage { margin-top:14px; background: var(--card-2,#171a2e); border-radius:14px; padding:10px; border:1px solid var(--line,rgba(255,255,255,.08)); overflow:auto; position:relative; }
+      .wc-canvas { display:block; width:100%; height:auto; border-radius:8px; cursor:pointer; background:transparent; }
+      .wc-empty { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:.5; font-size:14px; pointer-events:none; text-align:center; padding:0 12px; }
+      .wc-lbl { font-size:13px; opacity:.78; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+      .wc-range { width:130px; accent-color:#ff7a59; }
+      .wc-gallery { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+      .wc-pat { display:flex; gap:6px; align-items:center; background:var(--card,#20223a); border:1px solid var(--line,rgba(255,255,255,.08)); border-radius:10px; padding:6px 8px; font-size:13px; }
+      .wc-pat button { border:none; background:transparent; cursor:pointer; font-size:13px; color:#ff7a59; padding:0 2px; }
+      .wc-pat .del { color:#e74c3c; }
+      @media (max-width:720px){ .wc-range{ width:96px; } .wc-lbl{ font-size:12px; } }
+    </style>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -4666,6 +4716,7 @@
     if (id === "worldclock") worldclockStart();
     if (id !== "worldclock") worldclockStop();
     if (id === "rpgdice") rpgRollReady();
+    if (id === "wordcloud") wcRender();
     if (id !== "rpgdice") rpgStop();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
@@ -4784,6 +4835,8 @@
     lifegame: "生命游戏 康威 细胞 自动机 演化 模拟 元胞 规则 生死 种群 细胞自动机 game of life 混沌 涌现 系统 滑翔机 振荡",
     palette: "配色 调色板 色板 取色 设计方案 灵感 渐变 配色方案 色彩搭配 设计 调色 颜色 组合 和谐 配色生成器 色卡"
 
+,
+    wordcloud: "词云 文字云 关键词 频率 标签云 分词 文本 可视化 词频 热词 表达 文字 高频 提炼 词频图"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -16950,6 +17003,307 @@
 
   })();
 
+/* ===== 🎐 词云工坊 wordcloud (Word Cloud Studio) ===== */
+  // === WC_PURE_START ===
+  const WC_EN_STOP = new Set("the a an and or but if then else of to in on at by for with as is are was were be been being am this that these those it its he she they we you i me my your our their his her them us do does did has have had not no yes can could will would should may might must about into over under again more most other some such own same than too very just also get got go going one two three new now who what when where why how which while up out off down who's".split(" "));
+  const WC_CJK_STOP = new Set("的 了 是 在 我 你 他 她 它 我们 你们 他们 这 那 这个 那个 有 和 就 不 人 都 一个 上 下 来 去 说 知道 看 要 会 着 没有 自己 什么 怎么 这样 那样 因为 所以 但是 如果 可以 把 被 让 给 从 到 对 跟 与 及 或 等 之 其 而 于 也 还 很 更 最 再 又 已 已经 但 却 并 且 若 即 啊 吧 呢 吗 嘛 哦 呀 啦 咯 嗯 个 们 后 前 中 里 边 面 内 外 好 不是 就是 还是 或者 比如 例如 于是 然后 后来 一直 一样 一种 一些 这些 那些 这种 那种 什么 怎么 怎样 如何 为什么 多少 时候 现在 以后 以前 起来 出来 过来 过去 上去 下来 这里 那里 哪里 这儿 那儿 我们 你们 他们 它们".split(/\s+/));
+
+  function wcTokenize(text) {
+    const counts = Object.create(null);
+    const en = (text || "").toLowerCase().match(/[a-z0-9]+(?:['’-][a-z0-9]+)*/g) || [];
+    for (let k = 0; k < en.length; k++) {
+      const w = en[k];
+      if (w.length < 2) continue;
+      if (WC_EN_STOP.has(w)) continue;
+      counts[w] = (counts[w] || 0) + 1;
+    }
+    const cjk = (text || "").match(/[一-鿿]+/g) || [];
+    for (let r = 0; r < cjk.length; r++) {
+      const run = cjk[r];
+      for (let n = 2; n <= 3; n++) {
+        for (let i = 0; i + n <= run.length; i++) {
+          const g = run.slice(i, i + n);
+          if (WC_CJK_STOP.has(g)) continue;
+          counts[g] = (counts[g] || 0) + 1;
+        }
+      }
+    }
+    return counts;
+  }
+
+  function wcInShape(nx, ny, shape) {
+    if (shape === "rect") return true;
+    if (shape === "circle") return nx * nx + ny * ny <= 1;
+    if (shape === "heart") {
+      const a = nx * nx + ny * ny - 1;
+      return a * a * a - nx * nx * ny * ny * ny <= 0;
+    }
+    return true;
+  }
+
+  // words: sorted desc, each has {text,count,size,font}. returns placed rects.
+  function wcLayout(ctx, words, W, H, opts) {
+    const placed = [];
+    const cx = W / 2, cy = H / 2;
+    for (let wi = 0; wi < words.length; wi++) {
+      const wd = words[wi];
+      let done = false;
+      let angle = Math.random() * Math.PI * 2;
+      let radius = 0;
+      const step = 0.3;
+      ctx.font = wd.font;
+      for (let i = 0; i < 2600 && !done; i++) {
+        const x = cx + radius * Math.cos(angle);
+        const y = cy + radius * Math.sin(angle);
+        angle += step; radius += 0.55;
+        const tw = ctx.measureText(wd.text).width;
+        const th = wd.size * 1.12;
+        const bx = x - tw / 2, by = y - th / 2;
+        if (bx < 6 || by < 6 || bx + tw > W - 6 || by + th > H - 6) continue;
+        const nx = (x - cx) / (W / 2), ny = (cy - y) / (H / 2);
+        if (!wcInShape(nx, ny, opts.shape)) continue;
+        let hit = false;
+        for (let p = 0; p < placed.length; p++) {
+          const q = placed[p];
+          if (bx < q.x + q.w + 3 && bx + tw + 3 > q.x && by < q.y + q.h + 3 && by + th + 3 > q.y) { hit = true; break; }
+        }
+        if (hit) continue;
+        placed.push({ x: bx, y: by, w: tw, h: th, word: wd });
+        done = true;
+      }
+      if (!done && wd.size > 16) {
+        wd.size = Math.round(wd.size * 0.8);
+        wd.font = "700 " + wd.size + "px " + opts.font;
+        ctx.font = wd.font;
+        for (let i = 0; i < 1400 && !done; i++) {
+          const x = cx + radius * Math.cos(angle);
+          const y = cy + radius * Math.sin(angle);
+          angle += step; radius += 0.55;
+          const tw = ctx.measureText(wd.text).width;
+          const th = wd.size * 1.12;
+          const bx = x - tw / 2, by = y - th / 2;
+          if (bx < 6 || by < 6 || bx + tw > W - 6 || by + th > H - 6) continue;
+          const nx = (x - cx) / (W / 2), ny = (cy - y) / (H / 2);
+          if (!wcInShape(nx, ny, opts.shape)) continue;
+          let hit = false;
+          for (let p = 0; p < placed.length; p++) {
+            const q = placed[p];
+            if (bx < q.x + q.w + 3 && bx + tw + 3 > q.x && by < q.y + q.h + 3 && by + th + 3 > q.y) { hit = true; break; }
+          }
+          if (hit) continue;
+          placed.push({ x: bx, y: by, w: tw, h: th, word: wd });
+          done = true;
+        }
+      }
+    }
+    return placed;
+  }
+  // === WC_PURE_END ===
+
+  const WC_KEY = "suibian_wordclouds";
+  const WC_THEMES = {
+    neon: ["#ff5ca8", "#7c6cff", "#22d3ee", "#a3e635", "#fbbf24", "#f472b6", "#60a5fa"],
+    candy: ["#ff9a9e", "#fad0c4", "#ffd1ff", "#a18cd1", "#fbc2eb", "#ffecd2", "#f6d365"],
+    ink: ["#e2e8f0", "#94a3b8", "#60a5fa", "#cbd5e1", "#38bdf8", "#475569", "#f1f5f9"],
+    aurora: ["#34d399", "#22d3ee", "#818cf8", "#c084fc", "#f472b6", "#38bdf8", "#a78bfa"],
+    sunset: ["#fb7185", "#fbbf24", "#f97316", "#f43f5e", "#f59e0b", "#ef4444", "#fb923c"]
+  };
+  const WC_FONT = '"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  const wcCanvas = $("wc-canvas");
+  const wcCtx = wcCanvas ? wcCanvas.getContext("2d") : null;
+  const wcState = { placed: [], focus: null, words: [] };
+
+  function wcBuildWords(counts, maxWords, maxSize) {
+    const arr = [];
+    for (const k in counts) arr.push({ text: k, count: counts[k] });
+    arr.sort((a, b) => b.count - a.count);
+    const top = arr.slice(0, maxWords);
+    if (!top.length) return top;
+    const maxC = top[0].count, minC = top[top.length - 1].count;
+    const minSize = 14;
+    for (let i = 0; i < top.length; i++) {
+      const wd = top[i];
+      let t = 1;
+      if (maxC > minC) t = (Math.sqrt(wd.count) - Math.sqrt(minC)) / (Math.sqrt(maxC) - Math.sqrt(minC));
+      wd.size = Math.round(minSize + t * (maxSize - minSize));
+      if (wd.size < 12) wd.size = 12;
+      wd.font = "700 " + wd.size + "px " + WC_FONT;
+    }
+    return top;
+  }
+
+  function wcDraw() {
+    if (!wcCtx) return;
+    const W = wcCanvas.width, H = wcCanvas.height;
+    wcCtx.clearRect(0, 0, W, H);
+    const themeSel = $("wcTheme");
+    const theme = WC_THEMES[themeSel ? themeSel.value : "neon"] || WC_THEMES.neon;
+    const focus = wcState.focus;
+    for (let i = 0; i < wcState.placed.length; i++) {
+      const p = wcState.placed[i];
+      const wd = p.word;
+      let color = theme[i % theme.length];
+      let alpha = 1, size = wd.size;
+      if (focus) {
+        if (wd.text === focus) { color = "#ff7a59"; alpha = 1; size = Math.round(wd.size * 1.18); }
+        else { alpha = 0.26; }
+      }
+      wcCtx.globalAlpha = alpha;
+      wcCtx.fillStyle = color;
+      wcCtx.font = "700 " + size + "px " + WC_FONT;
+      wcCtx.textAlign = "center";
+      wcCtx.textBaseline = "middle";
+      wcCtx.fillText(wd.text, p.x + p.w / 2, p.y + p.h / 2);
+    }
+    wcCtx.globalAlpha = 1;
+    const empty = $("wcEmpty");
+    if (empty) empty.style.display = wcState.placed.length ? "none" : "block";
+  }
+
+  function wcGenerate() {
+    if (!wcCtx) { toast("词云画布尚未就绪"); return; }
+    const ta = $("wcInput");
+    const text = ta ? ta.value : "";
+    if (!text || !text.trim()) { toast("先贴点文字再生成吧～"); return; }
+    const maxWords = parseInt($("wcMax") ? $("wcMax").value : "120", 10) || 120;
+    const maxSize = parseInt($("wcSize") ? $("wcSize").value : "48", 10) || 48;
+    const shapeSel = $("wcShape");
+    const shape = shapeSel ? shapeSel.value : "rect";
+    let W = 820;
+    try { if (wcCanvas.parentElement && wcCanvas.parentElement.clientWidth) W = wcCanvas.parentElement.clientWidth; } catch (e) {}
+    if (W < 320) W = 320; if (W > 1100) W = 1100;
+    const H = 520;
+    wcCanvas.width = W; wcCanvas.height = H;
+    const counts = wcTokenize(text);
+    const words = wcBuildWords(counts, maxWords, maxSize);
+    if (!words.length) { toast("这段文字里没找到足够的词～"); return; }
+    wcState.words = words;
+    wcState.focus = null;
+    wcState.placed = wcLayout(wcCtx, words, W, H, { shape: shape, font: WC_FONT });
+    wcDraw();
+    bumpUsage("wordcloud");
+    toast("生成完毕，摆下了 " + wcState.placed.length + " 个词 ✨");
+  }
+
+  function wcSample() {
+    const ta = $("wcInput");
+    if (ta) ta.value = "随便，是一种生活态度。不知道吃什么，就随便；不知道去哪，就随便；人生有太多选择，随手一抛，交给运气，反而轻松。我们总在纠结，却忘了很多时候，随便选一个，结果都不差。做决定很累，把选择交出去，是一种放过自己。今天也要开心，随便就好。随便不是敷衍，是给生活留点余地。";
+    wcGenerate();
+  }
+
+  function wcExportPng() {
+    if (!wcCanvas || !wcState.placed.length) { toast("先生成词云再导出～"); return; }
+    try {
+      const a = document.createElement("a");
+      a.download = "词云.png";
+      a.href = wcCanvas.toDataURL("image/png");
+      a.click();
+      toast("已导出 PNG ⬇️");
+    } catch (e) { toast("导出失败：" + (e && e.message ? e.message : e)); }
+  }
+
+  function wcLoadGallery() {
+    const gal = $("wcGallery"); if (!gal) return;
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(WC_KEY) || "[]"); } catch (e) {}
+    if (!list.length) { gal.innerHTML = ""; return; }
+    gal.innerHTML = list.map(function (c, i) {
+      const name = c.name || ("词云" + (i + 1));
+      return '<div class="wc-pat"><span title="' + name + '">' + name + '</span>' +
+        '<button data-i="' + i + '" data-act="load">载入</button>' +
+        '<button class="del" data-i="' + i + '" data-act="del">删</button></div>';
+    }).join("");
+    const btns = gal.querySelectorAll("button");
+    for (let i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function () {
+        const idx = parseInt(this.dataset.i, 10);
+        const act = this.dataset.act;
+        let arr = [];
+        try { arr = JSON.parse(localStorage.getItem(WC_KEY) || "[]"); } catch (e) {}
+        if (act === "del") { arr.splice(idx, 1); try { localStorage.setItem(WC_KEY, JSON.stringify(arr)); } catch (e) {} wcLoadGallery(); }
+        else if (act === "load" && arr[idx]) {
+          const c = arr[idx];
+          const ta = $("wcInput"); if (ta) ta.value = c.text;
+          if ($("wcTheme")) $("wcTheme").value = c.theme || "neon";
+          if ($("wcShape")) $("wcShape").value = c.shape || "rect";
+          if ($("wcMax") && c.maxWords) $("wcMax").value = c.maxWords;
+          if ($("wcSize") && c.size) $("wcSize").value = c.size;
+          wcGenerate();
+        }
+      });
+    }
+  }
+
+  function wcSave() {
+    const ta = $("wcInput");
+    const text = ta ? ta.value : "";
+    if (!text || !text.trim()) { toast("没什么可收藏的～"); return; }
+    const c = {
+      name: (text.trim().slice(0, 8) || "词云"),
+      text: text,
+      theme: $("wcTheme") ? $("wcTheme").value : "neon",
+      shape: $("wcShape") ? $("wcShape").value : "rect",
+      maxWords: parseInt($("wcMax") ? $("wcMax").value : "120", 10),
+      size: parseInt($("wcSize") ? $("wcSize").value : "48", 10)
+    };
+    let arr = [];
+    try { arr = JSON.parse(localStorage.getItem(WC_KEY) || "[]"); } catch (e) {}
+    arr.unshift(c);
+    if (arr.length > 20) arr = arr.slice(0, 20);
+    try { localStorage.setItem(WC_KEY, JSON.stringify(arr)); } catch (e) {}
+    wcLoadGallery();
+    try { usage.wordcloudClouds = Math.max(usage.wordcloudClouds || 0, arr.length); localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e) {}
+    toast("已收藏到本地 💾");
+  }
+
+  function wcRender() {
+    if (wcState.placed.length) { wcDraw(); return; }
+    const ta = $("wcInput");
+    if (ta && ta.value && ta.value.trim()) { wcGenerate(); return; }
+  }
+
+  function wcBind() {
+    const go = $("wcGo"); if (go) go.addEventListener("click", wcGenerate);
+    const sm = $("wcSample"); if (sm) sm.addEventListener("click", wcSample);
+    const cl = $("wcClearInput"); if (cl) cl.addEventListener("click", function () { const t = $("wcInput"); if (t) t.value = ""; wcState.placed = []; wcState.focus = null; wcDraw(); });
+    const sv = $("wcSave"); if (sv) sv.addEventListener("click", wcSave);
+    const png = $("wcPng"); if (png) png.addEventListener("click", wcExportPng);
+    const mx = $("wcMax"); if (mx) mx.addEventListener("input", function () { const v = $("wcMaxV"); if (v) v.textContent = mx.value; });
+    const sz = $("wcSize"); if (sz) sz.addEventListener("input", function () { const v = $("wcSizeV"); if (v) v.textContent = sz.value; });
+    if (wcCanvas) wcCanvas.addEventListener("click", function (e) {
+      if (!wcState.placed.length) return;
+      const r = wcCanvas.getBoundingClientRect();
+      const sx = wcCanvas.width / (r.width || wcCanvas.width), sy = wcCanvas.height / (r.height || wcCanvas.height);
+      const x = (e.clientX - r.left) * sx, y = (e.clientY - r.top) * sy;
+      let found = null;
+      for (let i = 0; i < wcState.placed.length; i++) {
+        const p = wcState.placed[i];
+        if (x >= p.x && x <= p.x + p.w && y >= p.y && y <= p.y + p.h) { found = p.word.text; break; }
+      }
+      wcState.focus = (wcState.focus === found) ? null : found;
+      wcDraw();
+    });
+    wcLoadGallery();
+  }
+  wcBind();
+
+  BADGES.push(
+    { emoji: "🎐", name: "词云新手", desc: "生成过词云", test: (u) => (u.wordcloud || 0) >= 1 },
+    { emoji: "🌟", name: "词海捕手", desc: "收藏过 5 张词云", test: (u) => (u.wordcloudClouds || 0) >= 5 }
+  );
+
+  QUOTES.push(
+    "语言是思想的皮肤，词云是思想的轮廓。",
+    "说得越多，越该知道哪些词真正重要。",
+    "把一肚子话摊开，高频词会替你说出真心。",
+    "纠结时说不清，写下来，词云比脑子诚实。",
+    "一句话里反复出现的词，往往就是你放不下的事。",
+    "文字会骗人，但词频不会。",
+    "表达的第一步，是知道自己到底在反复说啥。",
+    "同样的词说一百遍，就变成了信念。",
+    "看词云像看自己的影子，轮廓比细节更真。",
+    "把想法变成词，再变成图，灵感就落地了。"
+  );
 </script>
 </body>
 </html>
