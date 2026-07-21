@@ -1481,6 +1481,7 @@
     <button data-tab="chart">📊 图表工坊</button>
     <button data-tab="regex">🔤 正则测试器</button>
     <button data-tab="codec">🔡 编码转换</button>
+    <button data-tab="base">🔢 进制转换</button>
     <button data-tab="todo">📋 待办清单</button>
     <button data-tab="compound">🧮 复利测算</button>
     <button data-tab="pipe">🚰 接水管</button>
@@ -3757,6 +3758,88 @@
   </section>
 
   <!-- 编码转换 codec -->
+  <section class="panel" id="base">
+    <style>
+      .base-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+      .base-col{background:rgba(255,255,255,.05);border:1px solid var(--bd,#2a2f3a);border-radius:12px;padding:10px}
+      .base-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:#9aa3b2}
+      .base-head select{margin-left:auto}
+      .base-quick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;font-size:13px;color:#9aa3b2}
+      .base-readout{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+      .base-chip{background:rgba(255,255,255,.04);border:1px solid var(--bd,#2a2f3a);border-radius:10px;padding:6px 8px;text-align:center}
+      .base-chip b{display:block;font-size:11px;color:#7f8aa0;margin-bottom:2px}
+      .base-chip span{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;word-break:break-all}
+      .base-bit{margin:10px 0;background:rgba(255,255,255,.04);border:1px solid var(--bd,#2a2f3a);border-radius:12px;padding:10px}
+      .base-bit-row{display:flex;align-items:center;gap:8px;margin:6px 0}
+      .base-bit-row label{width:42px;font-size:13px;color:#9aa3b2}
+      .base-bit-row input{flex:1}
+      .base-op{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;word-break:break-all;color:#ffd479}
+    </style>
+    <div class="card">
+      <h2>🔢 进制转换</h2>
+      <div class="hint">BigInt 任意精度，支持 2–62 进制，输入即转换。改「从」任意一边，右边的「到」与下方多进制速览实时跟随；位运算以十进制值为准。</div>
+      <div class="base-grid">
+        <div class="base-col">
+          <div class="base-head"><span>从</span>
+            <select id="baseFromSel" class="conv-unit">
+              <option value="2">二进制 2</option>
+              <option value="8">八进制 8</option>
+              <option value="10" selected>十进制 10</option>
+              <option value="16">十六进制 16</option>
+              <option value="32">三十二 32</option>
+              <option value="36">三十六 36</option>
+              <option value="62">六十二 62</option>
+              <option value="0">自定义…</option>
+            </select>
+          </div>
+          <input id="baseFrom" class="conv-val" value="255" spellcheck="false" />
+          <input id="baseFromCustom" type="number" min="2" max="62" value="2" style="display:none;width:70px;margin-top:6px" />
+        </div>
+        <div class="base-col">
+          <div class="base-head"><span>到</span>
+            <select id="baseToSel" class="conv-unit">
+              <option value="2">二进制 2</option>
+              <option value="8">八进制 8</option>
+              <option value="10">十进制 10</option>
+              <option value="16" selected>十六进制 16</option>
+              <option value="32">三十二 32</option>
+              <option value="36">三十六 36</option>
+              <option value="62">六十二 62</option>
+              <option value="0">自定义…</option>
+            </select>
+          </div>
+          <input id="baseTo" class="conv-val" readonly />
+          <input id="baseToCustom" type="number" min="2" max="62" value="2" style="display:none;width:70px;margin-top:6px" />
+        </div>
+      </div>
+      <div class="base-quick" id="baseQuick">
+        <span>快捷：</span>
+        <button class="btn ghost" data-bq="2">BIN</button>
+        <button class="btn ghost" data-bq="8">OCT</button>
+        <button class="btn ghost" data-bq="10">DEC</button>
+        <button class="btn ghost" data-bq="16">HEX</button>
+        <button class="btn ghost" data-bq="32">B32</button>
+        <button class="btn ghost" data-bq="36">B36</button>
+        <button class="btn ghost" data-bq="62">B62</button>
+      </div>
+      <div class="base-readout" id="baseReadout"></div>
+      <div class="base-bit">
+        <div class="base-head"><span>位运算（以十进制值为准，结果按十进制显示）</span></div>
+        <div class="base-bit-row"><label>AND</label><input id="baseAnd" class="conv-val" placeholder="操作数(10)" /><span id="baseAndR" class="base-op">—</span></div>
+        <div class="base-bit-row"><label>OR</label><input id="baseOr" class="conv-val" placeholder="操作数(10)" /><span id="baseOrR" class="base-op">—</span></div>
+        <div class="base-bit-row"><label>XOR</label><input id="baseXor" class="conv-val" placeholder="操作数(10)" /><span id="baseXorR" class="base-op">—</span></div>
+        <div class="base-bit-row"><label>NOT</label><span id="baseNot" class="base-op">—</span></div>
+      </div>
+      <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost" id="baseSwap">⇄ 交换</button>
+        <button class="btn ghost" id="baseRand">🎲 随机</button>
+        <button class="btn ghost" id="baseCopy">📋 复制</button>
+        <button class="btn ghost" id="baseClear">🗑 清空</button>
+      </div>
+      <div class="result" id="baseMsg">输入一个数字，开始换算。</div>
+    </div>
+  </section>
+
   <section class="panel" id="codec">
     <style>
       #codec .cd-in, #codec .cd-out { width:100%; min-height:120px; box-sizing:border-box; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.6; resize:vertical;
@@ -4717,6 +4800,7 @@
     if (id !== "worldclock") worldclockStop();
     if (id === "rpgdice") rpgRollReady();
     if (id === "wordcloud") wcRender();
+    if (id === "base") baseRender();
     if (id !== "rpgdice") rpgStop();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
@@ -4836,7 +4920,8 @@
     palette: "配色 调色板 色板 取色 设计方案 灵感 渐变 配色方案 色彩搭配 设计 调色 颜色 组合 和谐 配色生成器 色卡"
 
 ,
-    wordcloud: "词云 文字云 关键词 频率 标签云 分词 文本 可视化 词频 热词 表达 文字 高频 提炼 词频图"
+    wordcloud: "词云 文字云 关键词 频率 标签云 分词 文本 可视化 词频 热词 表达 文字 高频 提炼 词频图",
+    base: "进制 转换 二进制 八进制 十六进制 十进制 进位 编码 数字 位运算 进位数 bigint 计算机 换算 0b 0x 0o 补码"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -14744,6 +14829,23 @@
   chartBind();
   huangliBind();
   codecBind();
+  baseBind();
+  BADGES.push(
+    { emoji: "🔢", name: "进制新手", desc: "用过 1 次进制转换", test: (u) => (u.base || 0) >= 1 },
+    { emoji: "🧮", name: "进位大师", desc: "累计进制转换 20 次", test: (u) => (u.base || 0) >= 20 }
+  );
+  QUOTES.push(
+    "二进制里没有 2，只有 0 和 1，却装得下整个世界。",
+    "进制只是看世界的镜子：同一捆柴，有人数根，有人数捆。",
+    "十六进制是程序员的 shorthand，把四个比特压成一个字母。",
+    "把十进制换成二进制，很多「玄学」不过是 0 和 1 的排列。",
+    "计算机的浪漫：它只懂开和关，却算得出你明天的天气。",
+    "位运算像乐高：AND 取交集，OR 取并集，XOR 找不同。",
+    "一个负号，就能让一串 0 和 1 瞬间换个半边天。",
+    "理解进制，就理解了一半的「计算机为什么这么想」。",
+    "大数不用怕，BigInt 把位数也变成了可以数清楚的东西。",
+    "换算的本质是翻译：换种进制，意思一点没变。"
+  );
   QUOTES.push(
     "选择困难不是病，是选项太多——列个清单，让数据替你拍板。",
     "理性不是冷血，是把「想要」和「该要」摆在一杆秤上。",
@@ -15437,6 +15539,112 @@
     const clr = $("cdClear"); if (clr) clr.addEventListener("click", function () { $("cdIn").value = ""; $("cdOut").value = ""; $("cdMeta").textContent = ""; });
   }
   function codecRender() { codecConvert(); }
+
+  /* ---------- 🔢 进制转换 base ---------- */
+  const BASE_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  function baseDigitsOf(base) { return BASE_DIGITS.slice(0, base); }
+  function parseToBigInt(str, base) {
+    str = (str || "").trim();
+    if (str === "") return null;
+    let neg = false;
+    if (str[0] === "-") { neg = true; str = str.slice(1); }
+    if (str === "") return null;
+    const d = baseDigitsOf(base);
+    const map = Object.create(null);
+    for (let i = 0; i < d.length; i++) map[d[i]] = i;
+    if (base <= 36) { for (let i = 0; i < d.length; i++) { map[d[i].toUpperCase()] = i; map[d[i].toLowerCase()] = i; } }
+    let val = 0n; const b = BigInt(base);
+    for (const ch of str) {
+      if (!(ch in map)) return null;
+      val = val * b + BigInt(map[ch]);
+    }
+    return neg ? -val : val;
+  }
+  function bigIntToBase(num, base) {
+    if (num === 0n) return "0";
+    const neg = num < 0n;
+    let n = neg ? -num : num;
+    const d = baseDigitsOf(base); const b = BigInt(base);
+    let s = "";
+    while (n > 0n) { s = d[Number(n % b)] + s; n = n / b; }
+    return neg ? "-" + s : s;
+  }
+  function baseGetBase(side) {
+    const sel = $("base" + side + "Sel");
+    const v = parseInt(sel.value, 10);
+    if (v > 0) return v;
+    const c = parseInt($("base" + side + "Custom").value, 10);
+    return (c >= 2 && c <= 62) ? c : 10;
+  }
+  let _baseReady = false;
+  function baseBind() {
+    if (_baseReady) return; _baseReady = true;
+    const from = $("baseFrom"), to = $("baseTo");
+    const fsel = $("baseFromSel"), tsel = $("baseToSel");
+    const fcus = $("baseFromCustom"), tcus = $("baseToCustom");
+    function syncCustom() {
+      fcus.style.display = fsel.value === "0" ? "" : "none";
+      tcus.style.display = tsel.value === "0" ? "" : "none";
+    }
+    fsel.addEventListener("change", function () { syncCustom(); baseConvert(); });
+    tsel.addEventListener("change", function () { syncCustom(); baseConvert(); });
+    fcus.addEventListener("input", baseConvert);
+    tcus.addEventListener("input", baseConvert);
+    from.addEventListener("input", baseConvert);
+    $("baseQuick").addEventListener("click", function (e) {
+      const b = e.target.dataset.bq; if (!b) return;
+      fsel.value = "10"; tsel.value = b; syncCustom(); baseConvert();
+    });
+    $("baseSwap").addEventListener("click", function () {
+      const a = fsel.value; fsel.value = tsel.value; tsel.value = a;
+      const ac = fcus.value; fcus.value = tcus.value; tcus.value = ac;
+      syncCustom(); baseConvert();
+    });
+    $("baseRand").addEventListener("click", function () {
+      let v = 0n; for (let i = 0; i < 10; i++) v = v * 65536n + BigInt(Math.floor(Math.random() * 65536));
+      from.value = v.toString(); baseConvert();
+    });
+    $("baseCopy").addEventListener("click", function () {
+      const t = to.value; if (!t) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast("已复制：" + t); }, function () { toast("复制失败"); });
+      else toast(t);
+    });
+    $("baseClear").addEventListener("click", function () {
+      from.value = ""; to.value = "";
+      $("baseReadout").innerHTML = ""; $("baseNot").textContent = "—";
+      $("baseAnd").value = ""; $("baseOr").value = ""; $("baseXor").value = "";
+      ["baseAndR","baseOrR","baseXorR"].forEach(function (i) { $(i).textContent = "—"; });
+      $("baseMsg").textContent = "已清空。";
+    });
+    ["baseAnd","baseOr","baseXor"].forEach(function (id) { $(id).addEventListener("input", baseBitwise); });
+    syncCustom();
+  }
+  function baseBitwise() {
+    const raw = ($("baseFrom").value || "").trim();
+    const num = raw === "" ? null : parseToBigInt(raw, baseGetBase("From"));
+    if (num === null) { ["baseAndR","baseOrR","baseXorR"].forEach(function (i) { $(i).textContent = "—"; }); $("baseNot").textContent = "—"; return; }
+    const g = function (id) { const s = $(id).value.trim(); return s === "" ? null : parseToBigInt(s, 10); };
+    const a = g("baseAnd"), o = g("baseOr"), x = g("baseXor");
+    $("baseAndR").textContent = a === null ? "—" : (num & a).toString();
+    $("baseOrR").textContent  = o === null ? "—" : (num | o).toString();
+    $("baseXorR").textContent = x === null ? "—" : (num ^ x).toString();
+    $("baseNot").textContent = (~num).toString();
+  }
+  function baseConvert() {
+    const from = $("baseFrom");
+    const fb = baseGetBase("From"), tb = baseGetBase("To");
+    const raw = (from.value || "").trim();
+    if (raw === "") { $("baseTo").value = ""; $("baseReadout").innerHTML = ""; $("baseNot").textContent = "—"; $("baseMsg").textContent = "输入一个数字，开始换算。"; return; }
+    const num = parseToBigInt(raw, fb);
+    if (num === null) { $("baseTo").value = ""; $("baseMsg").textContent = "「" + raw + "」不是合法的 " + fb + " 进制数（字符需在 0-9 a-z A-Z 内，且不超过该进制）。"; return; }
+    $("baseTo").value = bigIntToBase(num, tb);
+    const bases = [2, 8, 10, 16, 32, 36];
+    $("baseReadout").innerHTML = bases.map(function (b) { return '<div class="base-chip"><b>' + b + '</b><span>' + bigIntToBase(num, b) + '</span></div>'; }).join("");
+    baseBitwise();
+    $("baseMsg").textContent = "十进制值：" + num.toString();
+    if (typeof bumpUsage === "function") bumpUsage("base");
+  }
+  function baseRender() { baseConvert(); }
 
   /* ---------- 渐变工坊 gradient ---------- */
   const GW_FAV_KEY = "suibian_gradient_fav";
