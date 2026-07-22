@@ -1499,6 +1499,7 @@
       <button data-tab="ascii">🎨 图片转字符画</button>
       <button data-tab="countdown">📅 倒数日</button>
       <button data-tab="diff">🔍 文本对比</button>
+      <button data-tab="photo">🖼️ 图片滤镜</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4647,6 +4648,58 @@
     </style>
   </section>
   <!-- 文本对比 -->
+  <section class="panel" id="photo">
+    <div class="card">
+      <h2>🖼️ 图片滤镜工坊</h2>
+      <div class="hint">上传一张照片，套用滤镜、调亮度 / 对比度 / 饱和度 / 色相，还能像素化、反相、加圆角，一键导出美图。照片全程在本机处理，不会上传。</div>
+      <div class="ph-drop" id="phDrop">
+        <input type="file" id="phFile" accept="image/*" hidden>
+        <div class="ph-drop-in" id="phDropIn">点击 / 拖拽 / 粘贴（Ctrl+V）一张图片到这里</div>
+      </div>
+      <div class="ph-main" id="phMain" style="display:none">
+        <div class="ph-canvas-wrap"><canvas id="phCanvas"></canvas></div>
+        <div class="ph-side">
+          <div class="ph-presets" id="phPresets"></div>
+          <div class="ph-sliders">
+            <label>亮度 <span id="phBrightVal">100%</span><input type="range" id="phBright" min="0" max="200" value="100"></label>
+            <label>对比度 <span id="phContrastVal">100%</span><input type="range" id="phContrast" min="0" max="200" value="100"></label>
+            <label>饱和度 <span id="phSatVal">100%</span><input type="range" id="phSat" min="0" max="200" value="100"></label>
+            <label>色相 <span id="phHueVal">0°</span><input type="range" id="phHue" min="0" max="360" value="0"></label>
+            <label>模糊 <span id="phBlurVal">0px</span><input type="range" id="phBlur" min="0" max="20" value="0"></label>
+            <label>圆角 <span id="phRadiusVal">0px</span><input type="range" id="phRadius" min="0" max="80" value="0"></label>
+            <label>像素化 <span id="phPixVal">1×</span><input type="range" id="phPix" min="1" max="40" value="1"></label>
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="phInvert">🔁 反相</button>
+            <button class="btn ghost" id="phReset">↺ 复位</button>
+          </div>
+          <div class="row">
+            <button class="btn" id="phDownload">⬇️ 导出 PNG</button>
+            <button class="btn ghost" id="phChange">🔄 换图</button>
+          </div>
+          <div class="ph-msg" id="phMsg"></div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .ph-drop{ border:2px dashed var(--line, rgba(255,255,255,.18)); border-radius:16px; padding:34px 18px; text-align:center; cursor:pointer; transition:.18s; background:var(--card-2, #14172a); }
+      .ph-drop.drag{ border-color:var(--accent,#7c6cff); background:rgba(124,108,255,.10); }
+      .ph-drop-in{ font-size:15px; opacity:.85; }
+      .ph-main{ display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; margin-top:6px; }
+      .ph-canvas-wrap{ flex:1; min-width:260px; background:#0e1116; border-radius:14px; padding:10px; display:flex; align-items:center; justify-content:center; overflow:auto; max-height:62vh; }
+      #phCanvas{ max-width:100%; height:auto; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.35); }
+      .ph-side{ width:300px; max-width:100%; display:flex; flex-direction:column; gap:12px; }
+      .ph-presets{ display:flex; flex-wrap:wrap; gap:7px; }
+      .ph-preset{ font-size:13px; padding:6px 11px; }
+      .ph-preset.on{ outline:2px solid var(--accent,#7c6cff); }
+      .ph-sliders{ display:flex; flex-direction:column; gap:9px; }
+      .ph-sliders label{ display:flex; align-items:center; gap:8px; font-size:13px; }
+      .ph-sliders label span{ width:46px; text-align:right; opacity:.7; font-variant-numeric:tabular-nums; }
+      .ph-sliders input[type=range]{ flex:1; }
+      .ph-msg{ font-size:13px; color:var(--accent,#7c6cff); min-height:18px; }
+      @media(max-width:640px){ .ph-side{ width:100%; } }
+    </style>
+  </section>
   <section class="panel" id="diff">
     <div class="card">
       <h2>🔍 文本对比</h2>
@@ -5128,6 +5181,7 @@
     if (id === "rpgdice") rpgRollReady();
     if (id === "wordcloud") wcRender();
     if (id === "countdown") cdRender();
+    if (id === "photo") photoStart();
     if (id === "base") baseRender();
     if (id !== "rpgdice") rpgStop();
     if (id === "scratch") scratchInit();
@@ -5262,6 +5316,7 @@
     ascii: "图片 字符画 ascii 像素 艺术 照片 头像 文本 复古 终端 黑白 转换 生成 文字画 像素画",
     hash: "哈希 散列 md5 sha1 sha256 sha512 hmac 校验 完整性 摘要 文件 文本 加密 比对 指纹 一致性 安全 摘要值",
     diff: "文本对比 diff 差异 比对 修改 版本 代码 配置 改稿 找不同 对比工具 相似度 行 词 字符",
+    photo: "图片 滤镜 美图 照片 调色 怀旧 复古 黑白 滤镜工坊 修图 饱和度 色相 像素 反相 圆角 自拍 风景 滤镜 photo filter 图片处理 调色板"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -5335,7 +5390,7 @@
     snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
     rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools", hash:"tools", ascii:"create",
     mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
-    poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create",
+    poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create", photo:"create",
     pet:"life", mood:"life", life:"life",
     achv:"more"
   };
@@ -18983,6 +19038,141 @@
     "给日子起个名字，平淡的周三也能变成某种纪念日。",
     "倒数最怕两件事：忘了开始，也忘了结束。",
     "记录日子，其实是在记录你真正在意什么。"
+  );
+
+  /* ===== 🖼️ 图片滤镜工坊 photo (Photo Filter Studio) ===== */
+  const PH_KEY = "suibian_photo_preset";
+  let phImg = null, phInvertOn = false, phRadius = 0, phPix = 1;
+  const ph$ = (id) => document.getElementById(id);
+  const PH_PRESETS = [
+    { name: "原图", f: { bright:100, contrast:100, sat:100, hue:0, blur:0 }, inv:false, pix:1, radius:0 },
+    { name: "黑白", f: { bright:100, contrast:112, sat:0, hue:0, blur:0 }, inv:false, pix:1, radius:0 },
+    { name: "复古", f: { bright:106, contrast:94, sat:78, hue:344, blur:0 }, inv:false, pix:1, radius:0 },
+    { name: "鲜艳", f: { bright:105, contrast:116, sat:162, hue:0, blur:0 }, inv:false, pix:1, radius:0 },
+    { name: "冷调", f: { bright:100, contrast:106, sat:112, hue:200, blur:0 }, inv:false, pix:1, radius:0 },
+    { name: "暖阳", f: { bright:110, contrast:100, sat:122, hue:26, blur:0 }, inv:false, pix:1, radius:0 },
+    { name: "梦幻", f: { bright:108, contrast:96, sat:120, hue:0, blur:4 }, inv:false, pix:1, radius:0 },
+    { name: "反相", f: { bright:100, contrast:100, sat:100, hue:0, blur:0 }, inv:true, pix:1, radius:0 },
+    { name: "像素", f: { bright:100, contrast:100, sat:124, hue:0, blur:0 }, inv:false, pix:14, radius:0 },
+    { name: "拍立得", f: { bright:104, contrast:108, sat:96, hue:34, blur:0 }, inv:false, pix:1, radius:26 }
+  ];
+  function phMsg(t){ const e = ph$("phMsg"); if (e) e.textContent = t || ""; }
+  function phSyncLabels(){
+    const b=+ph$("phBright").value, c=+ph$("phContrast").value, s2=+ph$("phSat").value, h=+ph$("phHue").value, bl=+ph$("phBlur").value, r=+ph$("phRadius").value, p=+ph$("phPix").value;
+    ph$("phBrightVal").textContent=b+"%"; ph$("phContrastVal").textContent=c+"%"; ph$("phSatVal").textContent=s2+"%";
+    ph$("phHueVal").textContent=h+"°"; ph$("phBlurVal").textContent=bl+"px"; ph$("phRadiusVal").textContent=r+"px"; ph$("phPixVal").textContent=p+"×";
+  }
+  function roundRectPath(ctx,w,h,r){
+    ctx.beginPath(); ctx.moveTo(r,0); ctx.arcTo(w,0,w,h,r); ctx.arcTo(w,h,0,h,r); ctx.arcTo(0,h,0,0,r); ctx.arcTo(0,0,w,0,r); ctx.closePath();
+  }
+  function phRender(){
+    const cv = ph$("phCanvas"); if (!cv || !phImg) return;
+    const ctx = cv.getContext("2d"); const w = phImg.naturalWidth, h = phImg.naturalHeight;
+    cv.width = w; cv.height = h;
+    const bright=+ph$("phBright").value, contrast=+ph$("phContrast").value, sat=+ph$("phSat").value, hue=+ph$("phHue").value, blur=+ph$("phBlur").value;
+    phPix = +ph$("phPix").value; phRadius = +ph$("phRadius").value;
+    let filt = "brightness("+bright+"%) contrast("+contrast+"%) saturate("+sat+"%) hue-rotate("+hue+"deg) blur("+blur+"px)";
+    if (phInvertOn) filt += " invert(1)";
+    ctx.clearRect(0,0,w,h);
+    ctx.filter = filt;
+    ctx.imageSmoothingEnabled = phPix <= 1;
+    if (phPix > 1){
+      const pw = Math.max(1, Math.round(w/phPix)), phh = Math.max(1, Math.round(h/phPix));
+      const tmp = document.createElement("canvas"); tmp.width = pw; tmp.height = phh;
+      const tctx = tmp.getContext("2d"); tctx.imageSmoothingEnabled=false; tctx.drawImage(phImg,0,0,pw,phh);
+      ctx.drawImage(tmp,0,0,w,h);
+    } else {
+      ctx.drawImage(phImg,0,0,w,h);
+    }
+    ctx.filter = "none";
+    if (phRadius > 0){
+      const r = Math.min(phRadius, w/2, h/2);
+      ctx.save(); ctx.globalCompositeOperation = "destination-in"; roundRectPath(ctx,w,h,r); ctx.fill(); ctx.restore();
+    }
+  }
+  function phApplyPreset(p){
+    ph$("phBright").value=p.f.bright; ph$("phContrast").value=p.f.contrast; ph$("phSat").value=p.f.sat; ph$("phHue").value=p.f.hue; ph$("phBlur").value=p.f.blur;
+    phInvertOn=p.inv; phPix=p.pix; phRadius=p.radius;
+    try { localStorage.setItem(PH_KEY, p.name); } catch(e){}
+    phSyncLabels(); phRender(); phMarkPreset(p.name);
+  }
+  function phMarkPreset(name){
+    const btns = document.querySelectorAll(".ph-preset");
+    for (let i=0;i<btns.length;i++) btns[i].classList.toggle("on", btns[i].textContent===name);
+  }
+  function phBuildPresets(){
+    const box = ph$("phPresets"); if (!box) return; box.innerHTML="";
+    PH_PRESETS.forEach(function(p){
+      const b = document.createElement("button"); b.className="btn ghost ph-preset"; b.textContent=p.name;
+      b.addEventListener("click", function(){ phApplyPreset(p); phMsg("已套用「"+p.name+"」"); });
+      box.appendChild(b);
+    });
+  }
+  function phLoadFile(file){
+    if (!file || !(/^image\//.test(file.type))){ phMsg("请选择图片文件"); return; }
+    const rd = new FileReader();
+    rd.onload = function(){ const img = new Image(); img.onload = function(){ phImg=img; ph$("phDrop").style.display="none"; ph$("phMain").style.display="flex"; phRender(); }; img.onerror=function(){ phMsg("图片加载失败"); }; img.src=rd.result; };
+    rd.readAsDataURL(file);
+  }
+  function phPaste(e){
+    const panel = ph$("photo"); if (!panel || !panel.classList.contains("active")) return;
+    const items = e.clipboardData && e.clipboardData.items; if (!items) return;
+    for (let i=0;i<items.length;i++){ const it=items[i]; if (it.type && it.type.indexOf("image")===0){ const f=it.getAsFile(); if (f){ phLoadFile(f); e.preventDefault(); break; } } }
+  }
+  function phDownload(){
+    const cv = ph$("phCanvas"); if (!cv || !phImg){ phMsg("先上传一张图片吧"); return; }
+    try { phRender(); } catch(e){}
+    let url; try { url = cv.toDataURL("image/png"); } catch(e){ phMsg("导出失败："+(e&&e.message)); return; }
+    const a = document.createElement("a"); a.href=url; a.download="suibian-photo.png"; a.click();
+    if (typeof bumpUsage==="function") bumpUsage("photo");
+    if (typeof playDing==="function") playDing();
+    try { if (typeof confettiBurst==="function") confettiBurst(36); } catch(e){}
+    phMsg("已导出 ✅");
+  }
+  function phReset(){
+    ph$("phBright").value=100; ph$("phContrast").value=100; ph$("phSat").value=100; ph$("phHue").value=0; ph$("phBlur").value=0; ph$("phRadius").value=0; ph$("phPix").value=1;
+    phInvertOn=false; phSyncLabels(); phRender(); phMarkPreset("原图");
+  }
+  function photoStart(){
+    phBuildPresets();
+    if (phImg) phRender();
+  }
+  function phBind(){
+    const drop=ph$("phDrop"), file=ph$("phFile"), dropIn=ph$("phDropIn");
+    if (dropIn) dropIn.addEventListener("click", function(){ if (file) file.click(); });
+    if (drop){
+      drop.addEventListener("dragover", function(e){ e.preventDefault(); drop.classList.add("drag"); });
+      drop.addEventListener("dragleave", function(e){ e.preventDefault(); drop.classList.remove("drag"); });
+      drop.addEventListener("drop", function(e){ e.preventDefault(); drop.classList.remove("drag"); const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if (f) phLoadFile(f); });
+    }
+    if (file) file.addEventListener("change", function(e){ const f=e.target.files&&e.target.files[0]; if (f) phLoadFile(f); if (e.target) e.target.value=""; });
+    ["phBright","phContrast","phSat","phHue","phBlur","phRadius","phPix"].forEach(function(id){ const el=ph$(id); if (el) el.addEventListener("input", function(){ phSyncLabels(); phRender(); }); });
+    const inv=ph$("phInvert"); if (inv) inv.addEventListener("click", function(){ phInvertOn=!phInvertOn; phRender(); phMarkPreset(""); phMsg(phInvertOn?"已反相":"已取消反相"); });
+    const dl=ph$("phDownload"); if (dl) dl.addEventListener("click", phDownload);
+    const rs=ph$("phReset"); if (rs) rs.addEventListener("click", phReset);
+    const ch=ph$("phChange"); if (ch) ch.addEventListener("click", function(){ phImg=null; ph$("phMain").style.display="none"; ph$("phDrop").style.display="block"; phMsg(""); });
+    document.addEventListener("paste", phPaste);
+    let last=""; try { last = localStorage.getItem(PH_KEY)||""; } catch(e){}
+    if (last){ const p=PH_PRESETS.find(function(x){ return x.name===last; }); if (p) phApplyPreset(p); }
+  }
+  phBind();
+
+  BADGES.push(
+    { emoji: "🖼️", name: "美图新手", desc: "导出第一张滤镜美图", test: (u) => (u.photo || 0) >= 1 },
+    { emoji: "✨", name: "调色师", desc: "累计导出 20 张美图", test: (u) => (u.photo || 0) >= 20 }
+  );
+
+  QUOTES.push(
+    "滤镜给不了你没发生过的故事，但能让你记住的样子更好看。",
+    "同一张照片，不同的滤镜，像同一件事的不同心情。",
+    "修图不是欺骗，是替眼睛做一次温柔的编辑。",
+    "最好的滤镜，是拍照那一刻刚好在场的你。",
+    "把生活调亮一点，不是为了骗谁，是给自己一点光。",
+    "反相之后，黑暗变成光，像换了个角度看同一个人。",
+    "像素化的世界模糊了细节，却留下了最该被记住的轮廓。",
+    "圆角里装着的，是你想好好收藏的那一帧。",
+    "饱和度拉满的日子很吵，偶尔黑白反而更清楚。",
+    "导出键按下的瞬间，这张图才算真正属于你。"
   );
 </script>
 </body>
