@@ -1497,6 +1497,7 @@
       <button data-tab="scratch">🎫 刮刮乐</button>
       <button data-tab="json">🔧 JSON 工具</button>
       <button data-tab="ascii">🎨 图片转字符画</button>
+      <button data-tab="countdown">📅 倒数日</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4486,6 +4487,59 @@
       @media (max-width:720px){ .wc-range{ width:96px; } .wc-lbl{ font-size:12px; } }
     </style>
   </section>
+<section class="panel" id="countdown">
+    <div class="card">
+      <h2>📅 倒数日 · 纪念日</h2>
+      <div class="hint">记下重要的日子——生日、节日、目标 deadline、纪念日。自动算「还有几天」，临近一周会高亮提醒；生日 / 纪念日还会算第几周年。数据只存本机，可一键导出备份、也能导入恢复。</div>
+      <div class="cd-stats" id="cdStats"></div>
+      <div class="cd-form">
+        <input type="text" id="cdName" placeholder="日子名称，如：阿强的生日" maxlength="40">
+        <input type="date" id="cdDate">
+        <select id="cdCat" class="btn ghost" title="类别">
+          <option value="生日">🎂 生日</option>
+          <option value="纪念日">💕 纪念日</option>
+          <option value="节日">🎉 节日</option>
+          <option value="目标">🎯 目标</option>
+          <option value="自定义">⭐ 自定义</option>
+        </select>
+        <button class="btn" id="cdAdd">➕ 添加</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn ghost" id="cdExport">⬇️ 导出</button>
+        <button class="btn ghost" id="cdImportBtn">⬆️ 导入</button>
+        <input type="file" id="cdImport" accept="application/json" hidden>
+        <button class="btn ghost" id="cdSample">🌱 恢复示例</button>
+        <span class="cd-msg" id="cdMsg"></span>
+      </div>
+      <div class="cd-list" id="cdList"></div>
+    </div>
+    <style>
+      .cd-stats{ font-size:13px; opacity:.85; margin:6px 0 12px; padding:8px 12px; background:var(--card-2,#171a2e); border-radius:10px; border:1px solid var(--line,rgba(255,255,255,.08)); }
+      .cd-stats b{ color:var(--accent,#7c6cff); }
+      .cd-form{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+      .cd-form input[type=text]{ flex:1; min-width:180px; padding:9px 12px; border-radius:10px; border:1px solid var(--line,#ddd); background:var(--card,#fff); color:var(--text,#222); }
+      .cd-form input[type=date]{ padding:8px 10px; border-radius:10px; border:1px solid var(--line,#ddd); background:var(--card,#fff); color:var(--text,#222); }
+      .cd-msg{ margin-left:auto; font-size:13px; color:var(--accent,#7c6cff); opacity:.9; }
+      .cd-list{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+      .cd-empty{ opacity:.5; text-align:center; padding:20px; font-size:14px; }
+      .cd-item{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px; background:var(--card-2,#171a2e); border:1px solid var(--line,rgba(255,255,255,.08)); border-left:4px solid var(--cc,#7c6cff); }
+      .cd-emoji{ font-size:26px; line-height:1; }
+      .cd-main{ flex:1; min-width:0; }
+      .cd-name{ font-weight:700; font-size:15px; }
+      .cd-tag{ font-size:11px; font-weight:600; padding:1px 7px; border-radius:8px; background:var(--cc,#7c6cff); color:#fff; margin-left:6px; opacity:.92; }
+      .cd-date{ font-size:12px; opacity:.65; margin-top:2px; }
+      .cd-sub{ font-size:12px; opacity:.8; margin-top:2px; color:var(--cc,#7c6cff); }
+      .cd-bar{ height:5px; border-radius:4px; background:rgba(127,127,127,.22); margin-top:6px; overflow:hidden; }
+      .cd-bar i{ display:block; height:100%; background:var(--cc,#7c6cff); border-radius:4px; transition:width .4s; }
+      .cd-days{ text-align:right; min-width:88px; }
+      .cd-days b{ font-size:16px; color:var(--cc,#7c6cff); }
+      .cd-soon{ display:block; margin-top:3px; font-size:11px; font-weight:700; color:#fff; background:#ff5a5f; border-radius:8px; padding:1px 6px; text-align:center; }
+      .cd-actions{ display:flex; flex-direction:column; gap:6px; }
+      .cd-actions button{ border:none; background:transparent; cursor:pointer; font-size:16px; padding:2px 4px; border-radius:8px; }
+      .cd-actions button:hover{ background:rgba(127,127,127,.18); }
+      @media (max-width:640px){ .cd-item{ flex-wrap:wrap; } .cd-days{ text-align:left; } .cd-actions{ flex-direction:row; } }
+    </style>
+  </section>
   <style>
   .hash-bar{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
   .hash-bar .btn.active{ outline:2px solid var(--accent,#7c6cff); }
@@ -4995,6 +5049,7 @@
     if (id !== "worldclock") worldclockStop();
     if (id === "rpgdice") rpgRollReady();
     if (id === "wordcloud") wcRender();
+    if (id === "countdown") cdRender();
     if (id === "base") baseRender();
     if (id !== "rpgdice") rpgStop();
     if (id === "scratch") scratchInit();
@@ -5121,6 +5176,7 @@
 
 ,
     wordcloud: "词云 文字云 关键词 频率 标签云 分词 文本 可视化 词频 热词 表达 文字 高频 提炼 词频图",
+    countdown: "倒数日 纪念日 倒计时 日期 天数 目标 生日 节日 周年 还有几天 日子 提醒 日历 打卡 重要",
     base: "进制 转换 二进制 八进制 十六进制 十进制 进位 编码 数字 位运算 进位数 bigint 计算机 换算 0b 0x 0o 补码",
     scratch: "刮刮乐 刮卡 抽奖 运气 中奖 福利 红包 惊喜 卡片 解压 刮一刮 幸运 欧气 手气 开奖",
     json: "json 格式化 校验 压缩 美化 解析 数据 对象 数组 键 值 树视图 排序 转义 unicode 复制 导出 前端",
@@ -18425,6 +18481,245 @@
     "同样的词说一百遍，就变成了信念。",
     "看词云像看自己的影子，轮廓比细节更真。",
     "把想法变成词，再变成图，灵感就落地了。"
+  );
+
+/* ===== 📅 倒数日 countdown (Countdown / Anniversary Tracker) ===== */
+  const CD_KEY = "suibian_countdown";
+  const CD_CATS = {
+    "生日":   { emoji: "🎂", recur: true,  year: true,  color: "#ff7a59" },
+    "纪念日": { emoji: "💕", recur: true,  year: true,  color: "#ff5fa2" },
+    "节日":   { emoji: "🎉", recur: true,  year: false, color: "#ffb02e" },
+    "目标":   { emoji: "🎯", recur: false, year: false, color: "#5b9bff" },
+    "自定义": { emoji: "⭐", recur: false, year: false, color: "#9b7bff" }
+  };
+  let cdEvents = [];
+  let cdEditId = null;
+
+  function cdId() { return "cd_" + Date.now().toString(36) + Math.floor(Math.random() * 1296).toString(36); }
+  function cdFmt(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+  function cdParse(s) { const p = (s || "").split("-"); if (p.length < 3) return null; const d = new Date(+p[0], +p[1] - 1, +p[2]); return isNaN(d.getTime()) ? null : d; }
+  function cdDayStart(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function cdDiff(a, b) { return Math.round((cdDayStart(a) - cdDayStart(b)) / 86400000); }
+  function cdEsc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function cdLoad() {
+    let raw = null;
+    try { raw = localStorage.getItem(CD_KEY); } catch (e) {}
+    if (raw === null) { cdSeed(); return; }
+    try { const a = JSON.parse(raw); if (Array.isArray(a)) cdEvents = a; else cdEvents = []; } catch (e) { cdEvents = []; }
+  }
+  function cdSave() { try { localStorage.setItem(CD_KEY, JSON.stringify(cdEvents)); } catch (e) {} }
+  function cdSeed() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const jan1 = new Date(y + 1, 0, 1);
+    const bd = new Date(now); bd.setDate(bd.getDate() + 100);
+    const goal = new Date(y, 11, 31);
+    cdEvents = [
+      { id: cdId(), name: "🎉 元旦", date: cdFmt(jan1), cat: "节日" },
+      { id: cdId(), name: "🎂 我的生日（示例）", date: cdFmt(bd), cat: "生日" },
+      { id: cdId(), name: "🎯 今年的小目标", date: cdFmt(goal), cat: "目标" }
+    ];
+    cdSave();
+  }
+  function cdCompute(ev) {
+    const cat = CD_CATS[ev.cat] || CD_CATS["自定义"];
+    const target = cdParse(ev.date);
+    const today = cdDayStart(new Date());
+    if (!target) return { days: 0, recur: false, bad: true, prog: 0 };
+    if (cat.recur) {
+      let next = new Date(today.getFullYear(), target.getMonth(), target.getDate());
+      if (cdDiff(next, today) < 0) next = new Date(today.getFullYear() + 1, target.getMonth(), target.getDate());
+      const days = cdDiff(next, today);
+      let yearN = null, prog = 0;
+      if (cat.year) {
+        yearN = next.getFullYear() - target.getFullYear();
+        const last = new Date(next.getFullYear() - 1, target.getMonth(), target.getDate());
+        const span = cdDiff(next, last) || 1;
+        prog = Math.max(0, Math.min(100, Math.round(cdDiff(today, last) / span * 100)));
+      } else {
+        const yStart = new Date(today.getFullYear(), 0, 1);
+        const span = Math.round((new Date(today.getFullYear() + 1, 0, 1) - yStart) / 86400000) || 1;
+        prog = Math.max(0, Math.min(100, Math.round(cdDiff(today, yStart) / span * 100)));
+      }
+      return { days: days, recur: true, yearN: yearN, prog: prog, next: next };
+    }
+    const days = cdDiff(target, today);
+    return { days: days, recur: false, past: days < 0, prog: 0 };
+  }
+
+  function cdRender() {
+    cdLoad();
+    const list = $("cdList"); if (!list) return;
+    const arr = cdEvents.map(function (e) { return { e: e, c: cdCompute(e) }; });
+    arr.sort(function (a, b) {
+      const ap = (!a.c.recur && a.c.days < 0) ? 1 : 0;
+      const bp = (!b.c.recur && b.c.days < 0) ? 1 : 0;
+      if (ap !== bp) return ap - bp;
+      return a.c.days - b.c.days;
+    });
+    let soon = 0, nearest = null;
+    arr.forEach(function (o) {
+      if (o.c.bad) return;
+      if (o.c.days >= 0 && o.c.days <= 7) soon++;
+      if (nearest === null || o.c.days < nearest.c.days) nearest = o;
+    });
+    const stats = $("cdStats");
+    if (stats) {
+      let s = "共 " + cdEvents.length + " 个日子";
+      if (nearest) {
+        const nt = nearest.c.days >= 0 ? ("还有 " + nearest.c.days + " 天") : ("已过去 " + (-nearest.c.days) + " 天");
+        s += " · 最近：<b>" + cdEsc(nearest.e.name) + "</b> " + nt;
+      }
+      s += " · 本周将至 <b>" + soon + "</b> 个";
+      stats.innerHTML = s;
+    }
+    let html = "";
+    if (!arr.length) html = '<div class="cd-empty">还没有记录任何日子，上面加一个吧～</div>';
+    arr.forEach(function (o) {
+      const ev = o.e, c = o.c;
+      const cat = CD_CATS[ev.cat] || CD_CATS["自定义"];
+      let daysTxt, sub = "", bar = "", soonBadge = "";
+      if (c.bad) {
+        daysTxt = "日期无效";
+      } else if (c.recur) {
+        daysTxt = "还有 " + c.days + " 天";
+        if (c.yearN != null) sub = "第 " + c.yearN + " 周年";
+        bar = '<div class="cd-bar"><i style="width:' + c.prog + '%"></i></div>';
+        if (c.days >= 0 && c.days <= 7) soonBadge = '<span class="cd-soon">即将到来</span>';
+      } else {
+        if (c.days >= 0) { daysTxt = "还有 " + c.days + " 天"; if (c.days <= 7) soonBadge = '<span class="cd-soon">即将到来</span>'; }
+        else daysTxt = "已过去 " + (-c.days) + " 天";
+      }
+      html += '<div class="cd-item" data-id="' + ev.id + '" style="--cc:' + cat.color + '">'
+        + '<div class="cd-emoji">' + cat.emoji + '</div>'
+        + '<div class="cd-main">'
+        + '<div class="cd-name">' + cdEsc(ev.name) + ' <span class="cd-tag">' + ev.cat + '</span></div>'
+        + '<div class="cd-date">' + cdEsc(ev.date) + (c.recur && !c.bad ? '（每年）' : '') + '</div>'
+        + (sub ? '<div class="cd-sub">' + sub + '</div>' : '')
+        + bar
+        + '</div>'
+        + '<div class="cd-days"><b>' + daysTxt + '</b>' + soonBadge + '</div>'
+        + '<div class="cd-actions"><button class="cd-edit" data-act="edit" title="编辑">✏️</button><button class="cd-del" data-act="del" title="删除">🗑</button></div>'
+        + '</div>';
+    });
+    list.innerHTML = html;
+  }
+
+  function cdResetForm() {
+    cdEditId = null;
+    const n = $("cdName"), d = $("cdDate"), b = $("cdAdd");
+    if (n) n.value = "";
+    if (d) d.value = "";
+    if (b) b.textContent = "➕ 添加";
+  }
+  function cdMsg(t) { const m = $("cdMsg"); if (m) m.textContent = t; }
+  function cdAdd() {
+    const n = $("cdName"), d = $("cdDate"), c = $("cdCat");
+    const name = (n && n.value || "").trim();
+    const date = d && d.value;
+    const cat = c && c.value || "自定义";
+    if (!name) { cdMsg("先写个名字～"); if (n) n.focus(); return; }
+    if (!cdParse(date)) { cdMsg("选个有效日期～"); if (d) d.focus(); return; }
+    if (cdEditId) {
+      const ev = cdEvents.find(function (x) { return x.id === cdEditId; });
+      if (ev) { ev.name = name; ev.date = date; ev.cat = cat; }
+      cdMsg("已更新");
+    } else {
+      cdEvents.push({ id: cdId(), name: name, date: date, cat: cat });
+      if (typeof bumpUsage === "function") bumpUsage("countdown");
+      cdMsg("已添加");
+    }
+    cdSave(); cdResetForm(); cdRender();
+  }
+  function cdEdit(id) {
+    const ev = cdEvents.find(function (x) { return x.id === id; });
+    if (!ev) return;
+    cdEditId = id;
+    const n = $("cdName"), d = $("cdDate"), c = $("cdCat"), b = $("cdAdd");
+    if (n) n.value = ev.name;
+    if (d) d.value = ev.date;
+    if (c) c.value = ev.cat;
+    if (b) b.textContent = "💾 保存";
+    if (n) n.focus();
+    cdMsg("编辑中…");
+  }
+  function cdDel(id) {
+    cdEvents = cdEvents.filter(function (x) { return x.id !== id; });
+    if (cdEditId === id) cdResetForm();
+    cdSave(); cdRender(); cdMsg("已删除");
+  }
+  function cdExport() {
+    try {
+      const blob = new Blob([JSON.stringify(cdEvents, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "suibian-countdown.json";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      cdMsg("已导出 " + cdEvents.length + " 个日子");
+    } catch (e) { cdMsg("导出失败"); }
+  }
+  function cdImport(file) {
+    if (!file) return;
+    const rd = new FileReader();
+    rd.onload = function () {
+      try {
+        const a = JSON.parse(rd.result);
+        if (!Array.isArray(a)) throw 0;
+        const clean = a.filter(function (x) { return x && x.name && cdParse(x.date); }).map(function (x) {
+          return { id: x.id || cdId(), name: String(x.name), date: x.date, cat: CD_CATS[x.cat] ? x.cat : "自定义" };
+        });
+        if (!clean.length) { cdMsg("没有有效数据"); return; }
+        cdEvents = clean; cdSave(); cdResetForm(); cdRender();
+        cdMsg("已导入 " + clean.length + " 个日子");
+      } catch (e) { cdMsg("文件解析失败"); }
+    };
+    rd.readAsText(file);
+  }
+  function cdSample() { cdSeed(); cdResetForm(); cdRender(); cdMsg("已恢复示例"); }
+
+  function cdBind() {
+    const add = $("cdAdd"); if (add) add.addEventListener("click", cdAdd);
+    const exp = $("cdExport"); if (exp) exp.addEventListener("click", cdExport);
+    const impB = $("cdImportBtn"); if (impB) impB.addEventListener("click", function () { const f = $("cdImport"); if (f) f.click(); });
+    const imp = $("cdImport"); if (imp) imp.addEventListener("change", function (e) { const f = e.target.files && e.target.files[0]; if (f) cdImport(f); e.target.value = ""; });
+    const smp = $("cdSample"); if (smp) smp.addEventListener("click", cdSample);
+    const list = $("cdList");
+    if (list) list.addEventListener("click", function (e) {
+      const btn = e.target.closest("[data-act]"); if (!btn) return;
+      const item = btn.closest(".cd-item"); if (!item) return;
+      const id = item.getAttribute("data-id");
+      if (btn.getAttribute("data-act") === "edit") cdEdit(id); else cdDel(id);
+    });
+  }
+  cdBind();
+
+  BADGES.push(
+    { emoji: "📅", name: "倒数新手", desc: "记下第一个重要日子", test: (u) => (u.countdown || 0) >= 1 },
+    { emoji: "🔔", name: "日子控", desc: "累计记录 10 个日子", test: (u) => (u.countdown || 0) >= 10 }
+  );
+
+  QUOTES.push(
+    "重要的不是还有几天，而是你打算拿这几天做什么。",
+    "倒数日像一根线，把漂浮的日子拴在了某个锚点上。",
+    "把目标写进日历，它就从愿望变成了期限。",
+    "生日年年有，但陪你过的人未必年年都在。",
+    "纪念日存在的意义，是提醒你有些事值得年年重提。",
+    "临近的日子里，连空气都带着仪式感。",
+    "算得出还有几天，算不出你会不会辜负这几天。",
+    "给日子起个名字，平淡的周三也能变成某种纪念日。",
+    "倒数最怕两件事：忘了开始，也忘了结束。",
+    "记录日子，其实是在记录你真正在意什么。"
   );
 </script>
 </body>
