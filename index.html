@@ -1501,6 +1501,7 @@
       <button data-tab="diff">🔍 文本对比</button>
       <button data-tab="photo">🖼️ 图片滤镜</button>
       <button data-tab="fractal">🌀 分形工坊</button>
+      <button data-tab="pwdcheck">🔐 密码强度</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4841,6 +4842,48 @@
     </style>
   </section>
 
+  <style>
+    .pwd-wrap { display:flex; flex-direction:column; gap:10px; }
+    .pwd-row { display:flex; gap:8px; align-items:stretch; }
+    .pwd-input { flex:1; min-width:0; padding:10px 12px; border-radius:12px; border:1px solid rgba(127,127,127,.18); background:rgba(127,127,127,.10); color:inherit; font-size:15px; outline:none; }
+    .pwd-input:focus { border-color:rgba(127,127,127,.4); }
+    .pwd-input.small { font-size:13px; opacity:.92; }
+    .pwd-meter { height:12px; border-radius:99px; background:rgba(127,127,127,.15); overflow:hidden; }
+    .pwd-meter-fill { height:100%; width:0; border-radius:99px; transition:width .35s ease, background .35s ease; }
+    .pwd-label { font-weight:800; font-size:15px; }
+    .pwd-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 16px; }
+    .pwd-check { font-size:13px; line-height:1.5; opacity:.92; }
+    .pwd-check.ok { color:#1dd1a1; }
+    .pwd-check.bad { color:#ff7b7b; }
+    .pwd-stats { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:13px; opacity:.85; margin:2px 0 4px; }
+    .pwd-stats span { white-space:nowrap; }
+    @media (max-width:560px){ .pwd-grid { grid-template-columns:1fr; } }
+  </style>
+  <section class="panel" id="pwdcheck">
+    <div class="card">
+      <h2>🔐 密码强度检测</h2>
+      <div class="hint">输入密码即时分析强度、熵值、破解时长估算与风险点。全程在本机完成，不会上传任何内容。</div>
+      <div class="pwd-wrap">
+        <div class="pwd-row">
+          <input id="pwInput" type="password" class="pwd-input" placeholder="输入要检测的密码…" autocomplete="off" spellcheck="false" />
+          <button class="btn ghost" id="pwToggle">显示</button>
+        </div>
+        <input id="pwUser" type="text" class="pwd-input small" placeholder="关联账号 / 用户名（可选，用于检测是否被包含）" autocomplete="off" spellcheck="false" />
+        <div class="pwd-meter"><div class="pwd-meter-fill" id="pwFill"></div></div>
+        <div class="pwd-label" id="pwLabel">等待输入…</div>
+        <div class="pwd-grid" id="pwChecks"></div>
+        <div class="pwd-stats" id="pwStats"></div>
+        <div class="row">
+          <button class="btn" id="pwGen">🎲 生成强密码</button>
+          <button class="btn ghost" id="pwCopy">复制强密码</button>
+          <button class="btn ghost" id="pwClear">清空</button>
+        </div>
+        <div class="result" id="pwOut"></div>
+        <div class="hint" style="opacity:.65;font-size:12px">破解时长为基于随机熵的理论估算（离线 100 亿次/秒、在线 1000 次/秒），仅供参考，不代表真实被攻破概率。</div>
+      </div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -5256,6 +5299,7 @@
     if (id === "hash") hashRender();
     if (id === "ascii") asciiRender();
     if (id === "diff") diffRender();
+    if (id === "pwdcheck") pwdcheckRender();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
@@ -5292,6 +5336,7 @@
     group: "分组 随机分组 团队 团建 名单 队伍 分配 分组作业", guess: "猜数字 数字 游戏 猜数 博弈 心思",
     pwgen: "密码 强密码 随机密码 生成 口令 密钥 账号 安全 密码生成器",
     vault: "密码 保险箱 保管 账号 密钥 加密 本地 安全 密码库 秘钥 保存 隐私 vault 主密码",
+    pwdcheck: "密码 强度 安全 口令 加密 泄露 弱密码 强密码 检测 评估 破解 黑客 账号 隐私 信息安全",
     tarot: "塔罗 牌 占卜 命运 玄学 过去 现在 未来 启示 指引 神秘",
     poem: "藏头 诗 写诗 诗歌 诗句 拼诗 名字 藏头诗 文艺 文字",
     bottle: "漂流瓶 瓶子 心事 愿望 碎碎念 匿名 留言 海里 捞 治愈",
@@ -5455,7 +5500,7 @@
     pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
     fortune:"fortune", tarot:"fortune", iching:"fortune", huangli:"fortune", oracle:"fortune", gacha:"fortune", lotto:"fortune", dream:"fortune", bottle:"fortune", cp:"fortune",
     snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
-    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools", hash:"tools", ascii:"create",
+    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools", hash:"tools", pwdcheck:"tools", ascii:"create",
     mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
     poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create", photo:"create", fractal:"create",
     pet:"life", mood:"life", life:"life",
@@ -15737,6 +15782,128 @@
     { emoji: "🧬", name: "找不同大师", desc: "累计文本对比 20 次", test: (u) => (u.diff || 0) >= 20 }
   );
 
+  /* ===== 🔐 密码强度检测 pwdcheck (Password Strength) ===== */
+  let pwBound = false, pwLastGood = "", _pwBumpT = 0;
+  const PW_COMMON = ["password","123456","12345678","123456789","1234567890","qwerty","abc123","letmein","iloveyou","admin","welcome","monkey","dragon","passw0rd","111111","000000","123123","1q2w3e4r","qwerty123","password1","123qwe","a123456","123456a","p@ssw0rd","root","toor","666666","888888","5201314","1314520","123456789a","aaaaaa","qwertyuiop","asdfghjkl","zxcvbnm","1qaz2wsx","1q2w3e","password123","admin123","test","guest","1234","12345","1234567","1q2w3e4","qwert","q1w2e3","1qaz","pass","pw123456","iloveyou1","sunshine","princess","football","baseball","666888","520520","woaini","1314","147258369","112233","123abc","aabbcc"];
+  function pwHasSeq(s) {
+    const low = (s || "").toLowerCase(), L = 3;
+    for (let i = 0; i + L <= low.length; i++) {
+      let asc = true, desc = true;
+      for (let j = 1; j < L; j++) {
+        const a = low.charCodeAt(i + j - 1), b = low.charCodeAt(i + j);
+        if (b !== a + 1) asc = false;
+        if (b !== a - 1) desc = false;
+      }
+      if (asc || desc) return true;
+    }
+    const kb = ["qwertyuiop", "asdfghjkl", "zxcvbnm", "poiuytrewq", "lkjhgfdsa", "mnbvcxz"];
+    for (let k = 0; k < kb.length; k++) {
+      const row = kb[k];
+      for (let i = 0; i + 3 <= row.length; i++) {
+        if (low.indexOf(row.slice(i, i + 3)) >= 0) return true;
+      }
+    }
+    return false;
+  }
+  function pwTime(sec) {
+    if (!isFinite(sec) || sec <= 0) return "瞬间";
+    if (sec < 1) return "不到 1 秒";
+    const yr = sec / 31536000;
+    if (yr > 1e12) return "≈ 永久（理论上亿年+）";
+    if (yr >= 1) { const ys = (yr < 10 ? (Math.round(yr * 10) / 10) : Math.round(yr)); return ys + " 年"; }
+    if (sec >= 86400) return Math.round(sec / 86400) + " 天";
+    if (sec >= 3600) return Math.round(sec / 3600) + " 时";
+    if (sec >= 60) return Math.round(sec / 60) + " 分";
+    return Math.round(sec) + " 秒";
+  }
+  function pwAnalyze(s, user) {
+    const n = (s || "").length;
+    const lower = /[a-z]/.test(s), upper = /[A-Z]/.test(s), digit = /\d/.test(s), sym = /[^a-zA-Z0-9]/.test(s);
+    let pool = 0;
+    if (lower) pool += 26; if (upper) pool += 26; if (digit) pool += 10; if (sym) pool += 33;
+    const entropy = (n > 0 && pool > 0) ? n * Math.log2(pool) : 0;
+    const rep = /(.)\1{2,}/.test(s);
+    const seq = pwHasSeq(s);
+    const common = PW_COMMON.indexOf((s || "").toLowerCase()) >= 0;
+    let hasUser = false;
+    if (user && user.length >= 2) { if ((s || "").toLowerCase().indexOf(user.toLowerCase()) >= 0) hasUser = true; }
+    const pureNum = /^\d+$/.test(s), pureAlpha = /^[a-zA-Z]+$/.test(s);
+    const kinds = (lower ? 1 : 0) + (upper ? 1 : 0) + (digit ? 1 : 0) + (sym ? 1 : 0);
+    const checks = [
+      { ok: n >= 8, t: "长度至少 8 位" },
+      { ok: n >= 12, t: "长度达到 12 位（更安全）" },
+      { ok: lower, t: "包含小写字母" },
+      { ok: upper, t: "包含大写字母" },
+      { ok: digit, t: "包含数字" },
+      { ok: sym, t: "包含符号 (!@#…)" },
+      { ok: kinds >= 3, t: "字符种类 ≥ 3 种" },
+      { ok: !rep, t: "无 3 位以上重复 (aaa)" },
+      { ok: !seq, t: "无明显连续序列 (123/abc/qwerty)" },
+      { ok: !common, t: "不在常见弱密码榜" },
+      { ok: !hasUser, t: "不包含关联账号名" },
+      { ok: !pureNum, t: "不是纯数字" },
+      { ok: !pureAlpha, t: "不是纯字母" }
+    ];
+    let pen = 0;
+    if (common) pen += 40;
+    if (seq) pen += 20;
+    if (rep) pen += 15;
+    if (hasUser) pen += 25;
+    if (pureNum) pen += 20;
+    if (n > 0 && n < 8) pen += 15;
+    const eff = Math.max(0, entropy - pen);
+    let score = Math.max(0, Math.min(100, Math.round(eff / 128 * 100)));
+    let label, color;
+    if (n === 0) { label = "等待输入…"; color = "#888"; score = 0; }
+    else if (eff < 28) { label = "极弱"; color = "#ff6b6b"; }
+    else if (eff < 40) { label = "弱"; color = "#ff9f43"; }
+    else if (eff < 60) { label = "中等"; color = "#feca57"; }
+    else if (eff < 90) { label = "强"; color = "#1dd1a1"; }
+    else { label = "极强"; color = "#10ac84"; }
+    const guesses = Math.pow(2, eff);
+    const offline = guesses / 1e10, online = guesses / 1e3;
+    return { n: n, entropy: entropy, eff: eff, score: score, label: label, color: color, checks: checks, common: common, offline: offline, online: online };
+  }
+  function pwGenPw(len) {
+    len = len || 16;
+    const set = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*";
+    let out = "";
+    const c = (typeof window !== "undefined") ? (window.crypto || window.msCrypto) : null;
+    if (c && c.getRandomValues) {
+      const arr = new Uint32Array(len);
+      c.getRandomValues(arr);
+      for (let i = 0; i < len; i++) out += set[arr[i] % set.length];
+    } else {
+      for (let i = 0; i < len; i++) out += set[Math.floor(Math.random() * set.length)];
+    }
+    return out;
+  }
+  function pwRender() {
+    const inp = $("pwInput"); if (!inp) return;
+    const s = inp.value, user = ($("pwUser") ? $("pwUser").value : "");
+    const a = pwAnalyze(s, user);
+    const fill = $("pwFill"); if (fill) { fill.style.width = a.score + "%"; fill.style.background = a.color; }
+    const lab = $("pwLabel"); if (lab) { lab.textContent = (a.n === 0) ? "等待输入…" : (a.label + "（强度 " + a.score + "/100）"); lab.style.color = a.color; }
+    const cw = $("pwChecks");
+    if (cw) cw.innerHTML = (a.n === 0) ? "" : a.checks.map(function (c) { return '<div class="pwd-check ' + (c.ok ? "ok" : "bad") + '">' + (c.ok ? "✓" : "✗") + " " + c.t + "</div>"; }).join("");
+    const st = $("pwStats");
+    if (a.n === 0) { if (st) st.innerHTML = ""; const o = $("pwOut"); if (o) o.textContent = ""; return; }
+    if (st) st.innerHTML = '<span>长度 ' + a.n + '</span><span>熵值 ' + a.entropy.toFixed(1) + ' bit</span><span>有效熵 ' + a.eff.toFixed(1) + ' bit</span><span>离线破解 ≈ ' + pwTime(a.offline) + '</span><span>在线破解 ≈ ' + pwTime(a.online) + '</span>';
+    const o = $("pwOut");
+    if (o) o.textContent = a.common ? "⚠️ 这是常见弱密码，已被无数撞库库收录，强烈建议更换！" : ((a.label === "极强" || a.label === "强") ? "✅ 不错的密码，继续保持字符多样与足够长度。" : "⚠️ 还可更强：加长、混入符号与大小写，避开连续与常见词。");
+    if (a.n > 0) { const now = Date.now(); if (now - _pwBumpT > 1500) { _pwBumpT = now; if (typeof bumpUsage === "function") bumpUsage("pwdcheck"); } }
+  }
+  function pwdcheckRender() { pwRender(); }
+  function pwBind() {
+    if (pwBound) return; pwBound = true;
+    const inp = $("pwInput"); if (inp) inp.addEventListener("input", pwRender);
+    const usr = $("pwUser"); if (usr) usr.addEventListener("input", pwRender);
+    const tg = $("pwToggle"); if (tg) tg.addEventListener("click", function () { const i = $("pwInput"); if (!i) return; i.type = (i.type === "password") ? "text" : "password"; tg.textContent = (i.type === "password") ? "显示" : "隐藏"; });
+    const gen = $("pwGen"); if (gen) gen.addEventListener("click", function () { const p = pwGenPw(16); const i = $("pwInput"); if (i) { i.value = p; i.type = "text"; const t = $("pwToggle"); if (t) t.textContent = "隐藏"; } pwLastGood = p; pwRender(); if (typeof playClick === "function") playClick(); });
+    const cp = $("pwCopy"); if (cp) cp.addEventListener("click", function () { if (!pwLastGood) { if (typeof toast === "function") toast("先点「生成强密码」"); return; } try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pwLastGood).then(function () { if (typeof toast === "function") toast("已复制强密码 ✓"); }).catch(function () { if (typeof toast === "function") toast("复制失败，请手动选择"); }); else if (typeof toast === "function") toast("当前环境不支持自动复制"); } catch (e) { if (typeof toast === "function") toast("复制失败"); } });
+    const cl = $("pwClear"); if (cl) cl.addEventListener("click", function () { const i = $("pwInput"); if (i) i.value = ""; const u = $("pwUser"); if (u) u.value = ""; pwLastGood = ""; pwRender(); });
+  }
+  function pwdcheckBind() { pwBind(); }
   rxBind();
   mxBind();
   ledgerBind();
@@ -15746,6 +15913,21 @@
   baseBind();
   asciiBind();
   diffBind();
+  pwdcheckBind();
+  BADGES.push(
+    { emoji: "🔐", name: "密码哨兵", desc: "用过 1 次密码强度检测", test: (u) => (u.pwdcheck || 0) >= 1 },
+    { emoji: "🛡️", name: "安全洁癖", desc: "累计检测密码 20 次", test: (u) => (u.pwdcheck || 0) >= 20 }
+  );
+  QUOTES.push(
+    "好密码像好笑话：自己笑，别人猜不到。",
+    "长度胜过一切花活——多敲几个字符，黑客就多算几年。",
+    "密码里藏生日，等于把钥匙挂在门上。",
+    "123456 不是密码，是给黑客的请柬。",
+    "符号大小写混着来，熵值才肯往上爬。",
+    "别用同一个密码走天下，一处漏，处处漏。",
+    "密码管理器记得住，你的大脑该歇歇了。",
+    "强密码的浪漫：它随机得毫无意义，却意义非凡。"
+  );
   BADGES.push(
     { emoji: "🔢", name: "进制新手", desc: "用过 1 次进制转换", test: (u) => (u.base || 0) >= 1 },
     { emoji: "🧮", name: "进位大师", desc: "累计进制转换 20 次", test: (u) => (u.base || 0) >= 20 }
