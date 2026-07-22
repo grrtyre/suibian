@@ -1502,6 +1502,7 @@
       <button data-tab="photo">🖼️ 图片滤镜</button>
       <button data-tab="fractal">🌀 分形工坊</button>
       <button data-tab="pwdcheck">🔐 密码强度</button>
+      <button data-tab="pixel">🎨 像素画板</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4765,6 +4766,78 @@
       <div class="fr-msg" id="frMsg"></div>
     </div>
   </section>
+  <section class="panel" id="pixel">
+    <div class="card">
+      <style>
+        .px-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 12px}
+        .px-seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+        .px-seg .seg-btn{background:transparent;color:var(--muted);border:0;padding:7px 13px;cursor:pointer;font-size:14px;font-family:inherit}
+        .px-seg .seg-btn.on{background:var(--accent);color:#fff;font-weight:700}
+        .px-row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;margin-top:6px}
+        .px-stage-wrap{flex:0 0 auto}
+        #pxStage{display:grid;width:min(76vw,440px);height:min(76vw,440px);border:1px solid var(--line);border-radius:10px;overflow:hidden;background:repeating-conic-gradient(#1b1f2e 0% 25%, #232838 0% 50%) 50%/18px 18px;touch-action:none;box-shadow:0 8px 30px rgba(0,0,0,.3);user-select:none}
+        .px-cell{width:100%;height:100%}
+        .px-side{width:262px;max-width:100%;display:flex;flex-direction:column;gap:12px}
+        .px-swatches{display:flex;flex-wrap:wrap;gap:6px}
+        .px-sw{width:26px;height:26px;border-radius:7px;cursor:pointer;border:2px solid transparent;box-sizing:border-box}
+        .px-sw.on{border-color:#fff;box-shadow:0 0 0 2px var(--accent)}
+        .px-recent{display:flex;flex-wrap:wrap;gap:6px;min-height:26px}
+        .px-color-row{display:flex;align-items:center;gap:10px}
+        .px-color-row input[type=color]{width:42px;height:34px;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer;padding:2px}
+        .px-actions{display:flex;flex-wrap:wrap;gap:8px}
+        .px-gallery{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+        .px-thumb{position:relative;width:64px;height:64px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#0e1116;cursor:pointer}
+        .px-thumb canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
+        .px-thumb .px-del{position:absolute;top:2px;right:2px;width:16px;height:16px;line-height:14px;text-align:center;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:11px}
+        .px-msg{color:var(--good);min-height:18px;font-size:13px}
+        @media(max-width:640px){ .px-side{width:100%} }
+      </style>
+      <h2>🎨 像素画板</h2>
+      <div class="hint">在网格上画画：挑颜色、选画笔 / 橡皮 / 填充 / 取色，按住拖动就能涂。支持撤销重做、清空、存进画廊、一键导出 PNG。作品只存在你本机，关掉网页也不丢。</div>
+      <div class="px-toolbar">
+        <div class="px-seg" id="pxSize">
+          <button class="seg-btn" data-size="8">8×8</button>
+          <button class="seg-btn on" data-size="16">16×16</button>
+          <button class="seg-btn" data-size="32">32×32</button>
+        </div>
+        <div class="px-seg" id="pxTool">
+          <button class="seg-btn on" data-tool="pen">✏️ 画笔</button>
+          <button class="seg-btn" data-tool="eraser">🧽 橡皮</button>
+          <button class="seg-btn" data-tool="fill">🪣 填充</button>
+          <button class="seg-btn" data-tool="pick">💉 取色</button>
+        </div>
+        <div class="px-color-row">
+          <input type="color" id="pxColor" value="#7c6cff">
+          <span style="color:var(--muted);font-size:13px">当前颜色</span>
+        </div>
+      </div>
+      <div class="px-row">
+        <div class="px-stage-wrap"><div id="pxStage"></div></div>
+        <div class="px-side">
+          <div>
+            <div style="color:var(--muted);font-size:13px;margin-bottom:6px">调色板</div>
+            <div class="px-swatches" id="pxSwatches"></div>
+          </div>
+          <div>
+            <div style="color:var(--muted);font-size:13px;margin-bottom:6px">最近用过的颜色</div>
+            <div class="px-recent" id="pxRecent"></div>
+          </div>
+          <div class="px-actions">
+            <button class="btn ghost" id="pxUndo">↶ 撤销</button>
+            <button class="btn ghost" id="pxRedo">↷ 重做</button>
+            <button class="btn ghost" id="pxClear">🗑 清空</button>
+            <button class="btn ghost" id="pxSave">💾 存画廊</button>
+            <button class="btn" id="pxExport">⬇️ 导出 PNG</button>
+          </div>
+          <div class="px-msg" id="pxMsg"></div>
+        </div>
+      </div>
+      <div>
+        <div style="color:var(--muted);font-size:13px;margin:14px 0 4px">我的画廊</div>
+        <div class="px-gallery" id="pxGallery"></div>
+      </div>
+    </div>
+  </section>
   <section class="panel" id="diff">
     <div class="card">
       <h2>🔍 文本对比</h2>
@@ -5290,6 +5363,7 @@
     if (id === "countdown") cdRender();
     if (id === "photo") photoStart();
     if (id === "fractal") fractalStart();
+    if (id === "pixel") pixelStart();
     if (id !== "fractal") fractalStop();
     if (id === "base") baseRender();
     if (id !== "rpgdice") rpgStop();
@@ -5428,7 +5502,8 @@
     hash: "哈希 散列 md5 sha1 sha256 sha512 hmac 校验 完整性 摘要 文件 文本 加密 比对 指纹 一致性 安全 摘要值",
     diff: "文本对比 diff 差异 比对 修改 版本 代码 配置 改稿 找不同 对比工具 相似度 行 词 字符",
     photo: "图片 滤镜 美图 照片 调色 怀旧 复古 黑白 滤镜工坊 修图 饱和度 色相 像素 反相 圆角 自拍 风景 滤镜 photo filter 图片处理 调色板",
-    fractal: "分形 曼德博 曼德勃罗 朱利亚 朱利亚集合 集合 缩放 探索 数学 复数 混沌 自相似 图案 几何 迭代 复平面 无限 放大 艺术 渲染 分形工坊 脑洞 mandelbrot julia fractal"
+    fractal: "分形 曼德博 曼德勃罗 朱利亚 朱利亚集合 集合 缩放 探索 数学 复数 混沌 自相似 图案 几何 迭代 复平面 无限 放大 艺术 渲染 分形工坊 脑洞 mandelbrot julia fractal",
+    pixel: "像素 画板 像素风 8bit 像素画 画画 涂色 网格 艺术 创作 草稿 导出 png 调色 图标 头像 像素艺术 画图 填色 pixel art"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -5502,7 +5577,7 @@
     snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
     rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools", hash:"tools", pwdcheck:"tools", ascii:"create",
     mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
-    poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create", photo:"create", fractal:"create",
+    poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create", photo:"create", fractal:"create", pixel:"create",
     pet:"life", mood:"life", life:"life",
     achv:"more"
   };
@@ -19610,6 +19685,283 @@
     "一根线绕回自己，就成了整个世界的形状。",
     "有些图案，算到第一千次才肯露面。",
     "盯着分形看久了，会相信无限其实是温柔的。"
+  );
+
+  /* ===== 🎨 像素画板 pixel (Pixel Art Studio) ===== */
+  const PX_KEY = "suibian_pixel_draft";
+  const PX_GKEY = "suibian_pixel_gallery";
+  const px$ = (id) => document.getElementById(id);
+  const PX_PALETTE = ["#000000","#ffffff","#7c6cff","#ff5d8f","#ff9f43","#ffd23f","#3ddc97","#22d3ee","#4f8cff","#a855f7","#ef4444","#10b981","#f97316","#e11d48","#0ea5e9","#84cc16"];
+  let pxSize = 16, pxColor = "#7c6cff", pxTool = "pen";
+  let pxGrid = [], pxUndo = [], pxRedo = [], pxRecent = [];
+  let pxDrawing = false;
+
+  function pxBlank(n){ const g = []; for (let r=0;r<n;r++){ const row=[]; for (let c=0;c<n;c++) row.push(null); g.push(row); } return g; }
+  function pxInit(n){
+    pxSize = n;
+    pxGrid = pxBlank(n);
+    pxUndo = []; pxRedo = [];
+    pxRenderGrid();
+    pxSaveDraft();
+  }
+  function pxRenderGrid(){
+    const st = px$("pxStage"); if (!st) return;
+    st.style.gridTemplateColumns = "repeat(" + pxSize + ",1fr)";
+    st.style.gridTemplateRows = "repeat(" + pxSize + ",1fr)";
+    st.innerHTML = "";
+    for (let r=0;r<pxSize;r++){
+      for (let c=0;c<pxSize;c++){
+        const cell = document.createElement("div");
+        cell.className = "px-cell";
+        cell.dataset.r = r; cell.dataset.c = c;
+        const col = pxGrid[r][c];
+        cell.style.background = col || "transparent";
+        st.appendChild(cell);
+      }
+    }
+  }
+  function pxCellAt(r,c){ const st = px$("pxStage"); return st ? st.querySelector('.px-cell[data-r="'+r+'"][data-c="'+c+'"]') : null; }
+  function pxPaint(r,c){
+    if (r<0||c<0||r>=pxSize||c>=pxSize) return;
+    if (pxTool === "pick"){
+      const col = pxGrid[r][c];
+      if (col){ pxColor = col; const ci = px$("pxColor"); if (ci) ci.value = col; pxRenderSwatches(); }
+      return;
+    }
+    const val = (pxTool === "eraser") ? null : pxColor;
+    if (pxGrid[r][c] === val) return;
+    pxGrid[r][c] = val;
+    const cell = pxCellAt(r,c);
+    if (cell) cell.style.background = val || "transparent";
+  }
+  function pxPushUndo(){ pxUndo.push(JSON.stringify(pxGrid)); if (pxUndo.length>50) pxUndo.shift(); pxRedo = []; }
+  function pxFill(r,c){
+    const target = pxGrid[r][c];
+    const repl = pxColor;
+    if (target === repl) return;
+    const stack = [[r,c]];
+    while (stack.length){
+      const cur = stack.pop();
+      const cr = cur[0], cc = cur[1];
+      if (cr<0||cc<0||cr>=pxSize||cc>=pxSize) continue;
+      if (pxGrid[cr][cc] !== target) continue;
+      pxGrid[cr][cc] = repl;
+      const cell = pxCellAt(cr,cc); if (cell) cell.style.background = repl;
+      stack.push([cr+1,cc]); stack.push([cr-1,cc]); stack.push([cr,cc+1]); stack.push([cr,cc-1]);
+    }
+  }
+  function pxAddRecent(col){
+    if (!col) return;
+    pxRecent = pxRecent.filter((x)=>x!==col);
+    pxRecent.unshift(col);
+    if (pxRecent.length>10) pxRecent.pop();
+    pxRenderRecent();
+  }
+  function pxRenderSwatches(){
+    const box = px$("pxSwatches"); if (!box) return;
+    box.innerHTML = "";
+    PX_PALETTE.forEach((col)=>{
+      const s = document.createElement("div");
+      s.className = "px-sw" + (col.toLowerCase()===pxColor.toLowerCase() ? " on" : "");
+      s.style.background = col;
+      s.title = col;
+      s.addEventListener("click", ()=>{ pxColor = col; const ci = px$("pxColor"); if (ci) ci.value = col; pxAddRecent(col); pxRenderSwatches(); });
+      box.appendChild(s);
+    });
+  }
+  function pxRenderRecent(){
+    const box = px$("pxRecent"); if (!box) return;
+    box.innerHTML = "";
+    pxRecent.forEach((col)=>{
+      const s = document.createElement("div");
+      s.className = "px-sw";
+      s.style.background = col;
+      s.title = col;
+      s.addEventListener("click", ()=>{ pxColor = col; const ci = px$("pxColor"); if (ci) ci.value = col; pxRenderSwatches(); });
+      box.appendChild(s);
+    });
+  }
+  function pxSaveDraft(){
+    try { localStorage.setItem(PX_KEY, JSON.stringify({ size:pxSize, color:pxColor, tool:pxTool, grid:pxGrid, recent:pxRecent })); } catch(e){}
+  }
+  function pxLoadDraft(){
+    try {
+      const raw = localStorage.getItem(PX_KEY);
+      if (!raw) return false;
+      const d = JSON.parse(raw);
+      if (!d || !Array.isArray(d.grid)) return false;
+      pxSize = d.size || 16; pxColor = d.color || "#7c6cff"; pxTool = d.tool || "pen";
+      pxGrid = d.grid; pxRecent = Array.isArray(d.recent) ? d.recent : [];
+      return true;
+    } catch(e){ return false; }
+  }
+  function pxUndoDo(){
+    if (!pxUndo.length) return;
+    pxRedo.push(JSON.stringify(pxGrid));
+    pxGrid = JSON.parse(pxUndo.pop());
+    pxRenderGrid(); pxSaveDraft();
+  }
+  function pxRedoDo(){
+    if (!pxRedo.length) return;
+    pxUndo.push(JSON.stringify(pxGrid));
+    pxGrid = JSON.parse(pxRedo.pop());
+    pxRenderGrid(); pxSaveDraft();
+  }
+  function pxClear(){
+    pxPushUndo();
+    pxGrid = pxBlank(pxSize);
+    pxRenderGrid(); pxSaveDraft();
+    pxMsg("已清空");
+  }
+  function pxExport(){
+    const scale = 32;
+    const cv = document.createElement("canvas");
+    cv.width = pxSize*scale; cv.height = pxSize*scale;
+    const ctx = cv.getContext("2d");
+    for (let r=0;r<pxSize;r++) for (let c=0;c<pxSize;c++){
+      const col = pxGrid[r][c];
+      if (col){ ctx.fillStyle = col; ctx.fillRect(c*scale, r*scale, scale, scale); }
+    }
+    try {
+      const a = document.createElement("a");
+      a.download = "pixel-art-" + Date.now() + ".png";
+      a.href = cv.toDataURL("image/png");
+      a.click();
+      pxMsg("已导出 PNG ✅");
+    } catch(e){ pxMsg("导出失败：" + (e && e.message ? e.message : e)); }
+  }
+  function pxRenderGallery(){
+    const box = px$("pxGallery"); if (!box) return;
+    box.innerHTML = "";
+    let arr = [];
+    try { arr = JSON.parse(localStorage.getItem(PX_GKEY) || "[]"); } catch(e){ arr = []; }
+    if (!arr.length){ box.innerHTML = '<span style="color:var(--muted);font-size:13px">画廊还是空的，画好点「存画廊」吧～</span>'; return; }
+    arr.forEach((art, idx)=>{
+      const t = document.createElement("div");
+      t.className = "px-thumb";
+      const cv = document.createElement("canvas");
+      const sc = 8;
+      cv.width = art.size*sc; cv.height = art.size*sc;
+      const ctx = cv.getContext("2d");
+      for (let r=0;r<art.size;r++) for (let c=0;c<art.size;c++){
+        const col = art.grid[r] && art.grid[r][c];
+        if (col){ ctx.fillStyle = col; ctx.fillRect(c*sc, r*sc, sc, sc); }
+      }
+      t.appendChild(cv);
+      const del = document.createElement("div");
+      del.className = "px-del"; del.textContent = "×";
+      del.addEventListener("click", (e)=>{ e.stopPropagation(); pxDelFromGallery(idx); });
+      t.appendChild(del);
+      t.addEventListener("click", ()=> pxLoadFromGallery(idx));
+      box.appendChild(t);
+    });
+  }
+  function pxSaveToGallery(){
+    let arr = [];
+    try { arr = JSON.parse(localStorage.getItem(PX_GKEY) || "[]"); } catch(e){ arr = []; }
+    arr.unshift({ size:pxSize, grid:pxGrid, ts:Date.now() });
+    if (arr.length>60) arr.pop();
+    try { localStorage.setItem(PX_GKEY, JSON.stringify(arr)); } catch(e){}
+    pxRenderGallery();
+    bumpUsage("pixel");
+    pxMsg("已存进画廊 ✨");
+    if (typeof confettiBurst === "function") confettiBurst(24);
+  }
+  function pxDelFromGallery(idx){
+    let arr = [];
+    try { arr = JSON.parse(localStorage.getItem(PX_GKEY) || "[]"); } catch(e){ arr = []; }
+    arr.splice(idx,1);
+    try { localStorage.setItem(PX_GKEY, JSON.stringify(arr)); } catch(e){}
+    pxRenderGallery();
+  }
+  function pxLoadFromGallery(idx){
+    let arr = [];
+    try { arr = JSON.parse(localStorage.getItem(PX_GKEY) || "[]"); } catch(e){ arr = []; }
+    const art = arr[idx]; if (!art) return;
+    pxPushUndo();
+    pxSize = art.size; pxGrid = art.grid.map((row)=>row.slice());
+    pxRenderGrid(); pxSaveDraft();
+    const sz = px$("pxSize");
+    if (sz) sz.querySelectorAll(".seg-btn").forEach((b)=> b.classList.toggle("on", +b.dataset.size===pxSize));
+    pxMsg("已从画廊载入");
+  }
+  function pxMsg(m){ const el = px$("pxMsg"); if (el) el.textContent = m; }
+  function pxBind(){
+    const st = px$("pxStage");
+    if (st){
+      st.addEventListener("pointerdown", (e)=>{
+        const cell = e.target && e.target.closest ? e.target.closest(".px-cell") : null; if (!cell) return;
+        const r = +cell.dataset.r, c = +cell.dataset.c;
+        if (pxTool === "fill"){ e.preventDefault(); pxPushUndo(); pxFill(r,c); pxSaveDraft(); pxAddRecent(pxColor); return; }
+        if (pxTool === "pick"){ pxPaint(r,c); return; }
+        e.preventDefault(); pxPushUndo(); pxDrawing = true; pxPaint(r,c); pxAddRecent(pxColor);
+      });
+      st.addEventListener("pointermove", (e)=>{
+        if (!pxDrawing) return;
+        const cell = document.elementFromPoint(e.clientX, e.clientY);
+        if (cell && cell.classList && cell.classList.contains("px-cell")){ pxPaint(+cell.dataset.r, +cell.dataset.c); }
+      });
+      window.addEventListener("pointerup", ()=>{ if (pxDrawing){ pxDrawing=false; pxSaveDraft(); } });
+    }
+    const sz = px$("pxSize");
+    if (sz) sz.querySelectorAll(".seg-btn").forEach((b)=> b.addEventListener("click", ()=>{
+      const n = +b.dataset.size;
+      if (n === pxSize){ return; }
+      const hasArt = pxGrid.some((row)=> row.some((x)=> x));
+      if (hasArt && typeof window.confirm === "function" && !window.confirm("切换画布尺寸会清空当前作品，确定吗？")){
+        sz.querySelectorAll(".seg-btn").forEach((x)=> x.classList.toggle("on", +x.dataset.size===pxSize));
+        return;
+      }
+      sz.querySelectorAll(".seg-btn").forEach((x)=> x.classList.remove("on"));
+      b.classList.add("on");
+      pxInit(n);
+    }));
+    const tl = px$("pxTool");
+    if (tl) tl.querySelectorAll(".seg-btn").forEach((b)=> b.addEventListener("click", ()=>{
+      tl.querySelectorAll(".seg-btn").forEach((x)=> x.classList.remove("on"));
+      b.classList.add("on");
+      pxTool = b.dataset.tool;
+      pxSaveDraft();
+    }));
+    const ci = px$("pxColor");
+    if (ci) ci.addEventListener("input", ()=>{ pxColor = ci.value; pxAddRecent(pxColor); pxRenderSwatches(); });
+    const undo = px$("pxUndo"); if (undo) undo.addEventListener("click", pxUndoDo);
+    const redo = px$("pxRedo"); if (redo) redo.addEventListener("click", pxRedoDo);
+    const clr = px$("pxClear"); if (clr) clr.addEventListener("click", pxClear);
+    const exp = px$("pxExport"); if (exp) exp.addEventListener("click", pxExport);
+    const sav = px$("pxSave"); if (sav) sav.addEventListener("click", pxSaveToGallery);
+  }
+  function pixelStart(){
+    if (!pxLoadDraft()){
+      pxGrid = pxBlank(pxSize);
+    } else {
+      const ci = px$("pxColor"); if (ci) ci.value = pxColor;
+      const sz = px$("pxSize"); if (sz) sz.querySelectorAll(".seg-btn").forEach((b)=> b.classList.toggle("on", +b.dataset.size===pxSize));
+      const tl = px$("pxTool"); if (tl) tl.querySelectorAll(".seg-btn").forEach((b)=> b.classList.toggle("on", b.dataset.tool===pxTool));
+    }
+    pxRenderGrid();
+    pxRenderSwatches();
+    pxRenderRecent();
+    pxRenderGallery();
+  }
+  pxBind();
+
+  BADGES.push(
+    { emoji: "🎨", name: "像素新手", desc: "在像素画板存下第一幅作品", test: (u) => (u.pixel || 0) >= 1 },
+    { emoji: "🖌️", name: "像素大师", desc: "累计创作 20 幅像素作品", test: (u) => (u.pixel || 0) >= 20 }
+  );
+
+  QUOTES.push(
+    "像素很小，拼在一起就成了整个世界。",
+    "一格一格涂，着急的人画不出好画。",
+    "限制尺寸反而解放想象：8×8 也能装下一颗心。",
+    "橡皮不是失败，是给更好的颜色腾地方。",
+    "取色教会我们：好看的配色早就藏在画面里。",
+    "导出键一按，草稿就变成了作品。",
+    "画廊里那一排小方块，是你随手留下的宇宙。",
+    "画错不可怕，撤销键就是后悔药。",
+    "像素艺术最浪漫的地方，是近看是点、远看是梦。",
+    "随便涂一笔，说不定就是明天要用的图标。"
   );
 
 </script>
