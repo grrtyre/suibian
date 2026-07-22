@@ -1496,6 +1496,7 @@
       <button data-tab="hash">🔐 哈希工具</button>
       <button data-tab="scratch">🎫 刮刮乐</button>
       <button data-tab="json">🔧 JSON 工具</button>
+      <button data-tab="ascii">🎨 图片转字符画</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4533,6 +4534,64 @@
       </div>
     </div>
   </section>
+
+  <section class="panel" id="ascii">
+    <div class="card">
+      <h2>🎨 图片转字符画</h2>
+      <div class="hint">上传一张图片（或粘贴 / 拖拽），一键把它变成终端风格的字符画；可调宽度、字符集、亮度对比、是否上色，能复制文本、导出 PNG 与彩色 HTML。纯前端、图片不出本机。</div>
+
+      <div class="ascii-drop" id="asciiDrop">
+        <div>📂 点击选择图片，或把图片拖到这里 / 直接 Ctrl+V 粘贴</div>
+        <input type="file" id="asciiFile" accept="image/*" hidden>
+      </div>
+
+      <div class="row ascii-ctrls">
+        <label>宽度 <b id="asciiWVal">120</b></label>
+        <input type="range" id="asciiW" min="30" max="240" value="120">
+        <label>亮度 <b id="asciiBVal">0</b></label>
+        <input type="range" id="asciiB" min="-100" max="100" value="0">
+        <label>对比 <b id="asciiCVal">0</b></label>
+        <input type="range" id="asciiC" min="-100" max="100" value="0">
+      </div>
+      <div class="row ascii-ctrls">
+        <label>字符集</label>
+        <select id="asciiSet" class="btn ghost">
+          <option value="std">标准 70 级</option>
+          <option value="blocks">方块 █▓▒░</option>
+          <option value="simple">简洁 10 级</option>
+          <option value="dots">点阵 ·:</option>
+        </select>
+        <label class="ascii-check"><input type="checkbox" id="asciiInvert"> 反相</label>
+        <label class="ascii-check"><input type="checkbox" id="asciiColor"> 彩色</label>
+        <button class="btn" id="asciiGo">✨ 生成字符画</button>
+        <button class="btn ghost" id="asciiSample">🎲 示例图</button>
+      </div>
+
+      <div class="ascii-out-wrap">
+        <pre class="ascii-out" id="asciiOut">这里会显示字符画。先选张图，或点「🎲 示例图」试试～</pre>
+      </div>
+
+      <div class="row ascii-ctrls" style="margin-top:8px;">
+        <button class="btn ghost" id="asciiCopy">📋 复制文本</button>
+        <button class="btn ghost" id="asciiPng">⬇️ 导出 PNG</button>
+        <button class="btn ghost" id="asciiHtml">🌈 导出彩色 HTML</button>
+        <button class="btn ghost" id="asciiClear">🧹 清空</button>
+        <span class="ascii-stat" id="asciiStat"></span>
+      </div>
+    </div>
+    <style>
+      .ascii-drop { border:2px dashed rgba(127,127,127,.35); border-radius:14px; padding:18px; text-align:center; cursor:pointer; margin:12px 0; font-size:14px; opacity:.9; transition:.2s; }
+      .ascii-drop:hover, .ascii-drop.over { border-color:var(--accent,#5b9bff); background:rgba(91,155,255,.08); }
+      .ascii-ctrls { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; margin:6px 0; font-size:13px; }
+      .ascii-ctrls label { opacity:.85; display:flex; align-items:center; gap:6px; }
+      .ascii-ctrls input[type=range]{ width:110px; }
+      .ascii-check { display:flex; align-items:center; gap:4px; }
+      .ascii-out-wrap { margin:12px 0; overflow:auto; border-radius:12px; border:1px solid rgba(127,127,127,.22); background:#0e1116; padding:14px; }
+      pre.ascii-out { margin:0; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:7px; line-height:7px; letter-spacing:0; white-space:pre; color:#d6e1ff; background:transparent; min-height:40px; }
+      .ascii-stat { margin-left:auto; opacity:.7; font-size:12px; }
+    </style>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -4942,6 +5001,7 @@
     if (id !== "scratch") scratchStop();
     if (id === "json") jsonRender();
     if (id === "hash") hashRender();
+    if (id === "ascii") asciiRender();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
@@ -5064,6 +5124,7 @@
     base: "进制 转换 二进制 八进制 十六进制 十进制 进位 编码 数字 位运算 进位数 bigint 计算机 换算 0b 0x 0o 补码",
     scratch: "刮刮乐 刮卡 抽奖 运气 中奖 福利 红包 惊喜 卡片 解压 刮一刮 幸运 欧气 手气 开奖",
     json: "json 格式化 校验 压缩 美化 解析 数据 对象 数组 键 值 树视图 排序 转义 unicode 复制 导出 前端",
+    ascii: "图片 字符画 ascii 像素 艺术 照片 头像 文本 复古 终端 黑白 转换 生成 文字画 像素画",
     hash: "哈希 散列 md5 sha1 sha256 sha512 hmac 校验 完整性 摘要 文件 文本 加密 比对 指纹 一致性 安全 摘要值",
   };
   const toolSearch = $("toolSearch");
@@ -5136,7 +5197,7 @@
     pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
     fortune:"fortune", tarot:"fortune", iching:"fortune", huangli:"fortune", oracle:"fortune", gacha:"fortune", lotto:"fortune", dream:"fortune", bottle:"fortune", cp:"fortune",
     snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
-    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools", hash:"tools",
+    rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools", hash:"tools", ascii:"create",
     mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
     poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create",
     pet:"life", mood:"life", life:"life",
@@ -14990,6 +15051,252 @@
     { emoji: "🧠", name: "正则大师", desc: "累计使用正则测试器 20 次", test: (u) => (u.regex || 0) >= 20 }
   );
 
+  /* ===================== 图片转字符画 ascii ===================== */
+  const ASCII_KEY = "suibian_ascii_last";
+  let asciiBound = false;
+  let asciiGrid = null;
+  const ASCII_SETS = {
+    std: " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
+    blocks: " ░▒▓█",
+    simple: " .:-=+*#%@",
+    dots: " .·:•●"
+  };
+  function asciiLoad() { try { return JSON.parse(localStorage.getItem(ASCII_KEY) || "null"); } catch (e) { return null; } }
+  function asciiCompute(img) {
+    const cols = parseInt($("asciiW").value, 10) || 120;
+    const setKey = $("asciiSet").value;
+    const invert = $("asciiInvert").checked;
+    const brightness = parseInt($("asciiB").value, 10) || 0;
+    const contrast = parseInt($("asciiC").value, 10) || 0;
+    const color = $("asciiColor").checked;
+    const ramp = ASCII_SETS[setKey] || ASCII_SETS.std;
+    const L = ramp.length;
+    const cw = img.naturalWidth || img.width, ch = img.naturalHeight || img.height;
+    if (!(cw > 0 && ch > 0)) return null;
+    const rows = Math.max(1, Math.round(cols * (ch / cw) * 0.5));
+    const cv = document.createElement("canvas");
+    cv.width = cols; cv.height = rows;
+    const ctx = cv.getContext("2d");
+    ctx.drawImage(img, 0, 0, cols, rows);
+    let data;
+    try { data = ctx.getImageData(0, 0, cols, rows).data; }
+    catch (e) { return null; }
+    const cc = contrast / 100;
+    const grid = [];
+    for (let y = 0; y < rows; y++) {
+      const line = [];
+      for (let x = 0; x < cols; x++) {
+        const i = (y * cols + x) * 4;
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        let lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        lum = lum + brightness;
+        lum = (lum - 128) * (1 + cc) + 128;
+        if (lum < 0) lum = 0; else if (lum > 255) lum = 255;
+        if (invert) lum = 255 - lum;
+        let idx = Math.round(lum / 255 * (L - 1));
+        if (idx < 0) idx = 0; else if (idx > L - 1) idx = L - 1;
+        line.push({ ch: ramp[idx], color: color ? "rgb(" + r + "," + g + "," + b + ")" : null });
+      }
+      grid.push(line);
+    }
+    return { grid: grid, cols: cols, rows: rows };
+  }
+  function asciiDraw(grid) {
+    const out = $("asciiOut");
+    if (!grid || grid.cols === 0 || grid.rows === 0) { out.textContent = "这里会显示字符画。先选张图，或点「🎲 示例图」试试～"; $("asciiStat").textContent = ""; return; }
+    if (grid.grid[0][0].color) {
+      let html = "";
+      for (let y = 0; y < grid.rows; y++) {
+        const row = grid.grid[y];
+        for (let x = 0; x < grid.cols; x++) {
+          const c = row[x];
+          const e = c.ch === " " ? "&nbsp;" : escapeHtml(c.ch);
+          html += '<span style="color:' + c.color + '">' + e + "</span>";
+        }
+        html += "\n";
+      }
+      out.innerHTML = html;
+    } else {
+      out.textContent = grid.grid.map((row) => row.map((c) => c.ch).join("")).join("\n");
+    }
+    const chars = grid.rows * grid.cols;
+    $("asciiStat").textContent = grid.cols + "×" + grid.rows + " = " + chars.toLocaleString() + " 字符";
+  }
+  function asciiGridToText(grid) { return grid.grid.map((row) => row.map((c) => c.ch).join("")).join("\n"); }
+  function asciiSaveState(img) {
+    const last = asciiLoad() || {};
+    last.cols = parseInt($("asciiW").value, 10) || 120;
+    last.setKey = $("asciiSet").value;
+    last.invert = $("asciiInvert").checked;
+    last.brightness = parseInt($("asciiB").value, 10) || 0;
+    last.contrast = parseInt($("asciiC").value, 10) || 0;
+    last.color = $("asciiColor").checked;
+    if (img && img.src && img.src.length < 200000) last.src = img.src;
+    if (asciiGrid && asciiGrid.cols * asciiGrid.rows <= 60000) last.grid = asciiGrid;
+    try { localStorage.setItem(ASCII_KEY, JSON.stringify(last)); } catch (e) {}
+  }
+  function asciiGenerate(img) {
+    const grid = asciiCompute(img);
+    if (!grid) { toast("读不到这张图，换个图片试试（远程图可能被跨域挡住）"); return; }
+    asciiGrid = grid; asciiDraw(grid); asciiSaveState(img); bumpUsage("ascii"); playDing();
+  }
+  function asciiSample() {
+    const cv = document.createElement("canvas");
+    cv.width = 240; cv.height = 240;
+    const x = cv.getContext("2d");
+    const g = x.createLinearGradient(0, 0, 240, 240);
+    g.addColorStop(0, "#1e3c72"); g.addColorStop(0.5, "#2a5298"); g.addColorStop(1, "#ffd200");
+    x.fillStyle = g; x.fillRect(0, 0, 240, 240);
+    x.fillStyle = "rgba(255,255,255,.92)"; x.beginPath(); x.arc(120, 100, 56, 0, Math.PI * 2); x.fill();
+    x.fillStyle = "#1e3c72"; x.beginPath(); x.arc(120, 100, 40, 0, Math.PI * 2); x.fill();
+    x.fillStyle = "#ffd200"; x.beginPath(); x.arc(120, 100, 24, 0, Math.PI * 2); x.fill();
+    x.fillStyle = "rgba(255,255,255,.88)"; x.font = "bold 30px sans-serif"; x.textAlign = "center";
+    x.fillText("随便", 120, 205);
+    const img = new Image();
+    img.onload = () => asciiGenerate(img);
+    img.src = cv.toDataURL("image/png");
+  }
+  function asciiExportPng() {
+    if (!asciiGrid) { toast("先生成一张字符画"); return; }
+    const cellH = 12, cellW = Math.round(cellH * 0.6);
+    const cv = document.createElement("canvas");
+    cv.width = asciiGrid.cols * cellW + 24;
+    cv.height = asciiGrid.rows * cellH + 24;
+    const x = cv.getContext("2d");
+    x.fillStyle = "#0e1116"; x.fillRect(0, 0, cv.width, cv.height);
+    x.font = cellH + "px ui-monospace, Menlo, Consolas, monospace";
+    x.textBaseline = "top";
+    const color = asciiGrid.grid[0][0].color;
+    for (let y = 0; y < asciiGrid.rows; y++) {
+      const row = asciiGrid.grid[y];
+      for (let xx = 0; xx < asciiGrid.cols; xx++) {
+        const c = row[xx];
+        x.fillStyle = color ? c.color : "#d6e1ff";
+        x.fillText(c.ch, 12 + xx * cellW, 12 + y * cellH);
+      }
+    }
+    cv.toBlob(function (blob) {
+      if (!blob) { toast("导出失败"); return; }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "ascii-art.png";
+      a.click();
+      toast("已导出 ascii-art.png ⬇️");
+    });
+  }
+  function asciiExportHtml() {
+    if (!asciiGrid) { toast("先生成一张字符画"); return; }
+    const color = asciiGrid.grid[0][0].color;
+    let body = '<pre style="background:#0e1116;color:#d6e1ff;padding:16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:7px;line-height:7px;white-space:pre;">';
+    for (let y = 0; y < asciiGrid.rows; y++) {
+      const row = asciiGrid.grid[y];
+      for (let xx = 0; xx < asciiGrid.cols; xx++) {
+        const c = row[xx];
+        const e = c.ch === " " ? "&nbsp;" : escapeHtml(c.ch);
+        body += color ? '<span style="color:' + c.color + '">' + e + "</span>" : e;
+      }
+      body += "\n";
+    }
+    body += "</pre>";
+    const html = "<!doctype html><html><head><meta charset=\"utf-8\"><title>字符画</title></head><body style=\"margin:0;background:#0e1116;\">" + body + "</body></html>";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+    a.download = "ascii-art.html";
+    a.click();
+    toast("已导出 ascii-art.html 🌈");
+  }
+  function asciiCopy() {
+    if (!asciiGrid) { toast("先生成一张字符画"); return; }
+    const txt = asciiGridToText(asciiGrid);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(() => toast("已复制字符画文本 📋"), () => asciiFallbackCopy(txt));
+    } else asciiFallbackCopy(txt);
+  }
+  function asciiFallbackCopy(txt) {
+    const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); toast("已复制字符画文本 📋"); } catch (e) { toast("复制失败，请手动选择"); }
+    document.body.removeChild(ta);
+  }
+  function asciiReadFile(f) {
+    if (!f || !f.type || f.type.indexOf("image") !== 0) { toast("请选择图片文件"); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => asciiGenerate(img);
+      img.onerror = () => toast("图片加载失败");
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(f);
+  }
+  function asciiRegenerate() {
+    const last = asciiLoad();
+    if (last && last.src) {
+      const img = new Image();
+      img.onload = () => asciiGenerate(img);
+      img.onerror = () => toast("重新生成失败，请重新选图");
+      img.src = last.src;
+    } else {
+      toast("先选一张图，或点「🎲 示例图」");
+    }
+  }
+  function asciiOnPaste(e) {
+    const panel = document.getElementById("ascii");
+    if (!panel || !panel.classList.contains("active")) return;
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") === 0) { const f = items[i].getAsFile(); if (f) { asciiReadFile(f); e.preventDefault(); } break; }
+    }
+  }
+  function asciiBind() {
+    if (asciiBound) return; asciiBound = true;
+    const drop = $("asciiDrop"), file = $("asciiFile");
+    if (drop) {
+      drop.addEventListener("click", () => file.click());
+      ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+      ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+      drop.addEventListener("drop", (e) => { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) asciiReadFile(f); });
+    }
+    if (file) file.addEventListener("change", () => { if (file.files[0]) asciiReadFile(file.files[0]); });
+    document.addEventListener("paste", asciiOnPaste);
+    const W = $("asciiW"), B = $("asciiB"), C = $("asciiC");
+    if (W) W.addEventListener("input", () => $("asciiWVal").textContent = W.value);
+    if (B) B.addEventListener("input", () => $("asciiBVal").textContent = B.value);
+    if (C) C.addEventListener("input", () => $("asciiCVal").textContent = C.value);
+    const go = $("asciiGo"); if (go) go.addEventListener("click", asciiRegenerate);
+    const sm = $("asciiSample"); if (sm) sm.addEventListener("click", asciiSample);
+    const cp = $("asciiCopy"); if (cp) cp.addEventListener("click", asciiCopy);
+    const png = $("asciiPng"); if (png) png.addEventListener("click", asciiExportPng);
+    const htm = $("asciiHtml"); if (htm) htm.addEventListener("click", asciiExportHtml);
+    const cl = $("asciiClear"); if (cl) cl.addEventListener("click", () => { asciiGrid = null; asciiDraw(null); try { localStorage.removeItem(ASCII_KEY); } catch (e) {} toast("已清空"); });
+  }
+  function asciiRender() {
+    if (!asciiBound) asciiBind();
+    const last = asciiLoad();
+    if (!last) return;
+    if (last.grid) { asciiGrid = last.grid; asciiDraw(asciiGrid); return; }
+    if (last.src) {
+      const img = new Image();
+      img.onload = () => { const g = asciiCompute(img); if (g) { asciiGrid = g; asciiDraw(g); } };
+      img.onerror = () => {};
+      img.src = last.src;
+    }
+  }
+  QUOTES.push(
+    "把一张照片拆成点阵，才发现每一张图都是无数小决定的堆叠。",
+    "字符画教会我们：限制往往逼出创意——只有 70 个符号，也能画出整个世界。",
+    "像素是数字时代的颜料，字符是终端时代的笔。",
+    "当你只能选黑或白，反而更看清了形状本身。",
+    "一张图压成一行行字符，信息少了，味道却浓了。",
+    "复古不是倒退，是把旧工具玩出新花样。",
+    "把复杂的东西翻译成简单符号，本身就是一种创造。",
+    "屏幕上每一个亮点，都是有人写下的 0 和 1 在发光。"
+  );
+  BADGES.push(
+    { emoji: "🎨", name: "字符画新手", desc: "生成过 1 张字符画", test: (u) => (u.ascii || 0) >= 1 },
+    { emoji: "🖼️", name: "像素诗人", desc: "累计生成 10 张字符画", test: (u) => (u.ascii || 0) >= 10 }
+  );
+
   rxBind();
   mxBind();
   ledgerBind();
@@ -14997,6 +15304,7 @@
   huangliBind();
   codecBind();
   baseBind();
+  asciiBind();
   BADGES.push(
     { emoji: "🔢", name: "进制新手", desc: "用过 1 次进制转换", test: (u) => (u.base || 0) >= 1 },
     { emoji: "🧮", name: "进位大师", desc: "累计进制转换 20 次", test: (u) => (u.base || 0) >= 20 }
