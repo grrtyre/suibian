@@ -1503,6 +1503,7 @@
       <button data-tab="fractal">🌀 分形工坊</button>
       <button data-tab="pwdcheck">🔐 密码强度</button>
       <button data-tab="pixel">🎨 像素画板</button>
+      <button data-tab="danmu">🎉 弹幕墙</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4838,6 +4839,73 @@
       </div>
     </div>
   </section>
+  <section class="panel" id="danmu">
+    <div class="card">
+      <style>
+        .dm-stage{position:relative;height:440px;border-radius:14px;overflow:hidden;background:radial-gradient(120% 120% at 50% 0%,#241b3a 0%,#16121f 55%,#0d0b14 100%);border:1px solid var(--line);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+        .dm-stage canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+        .dm-item{position:absolute;white-space:nowrap;font-weight:800;line-height:1;padding:4px 8px;text-shadow:0 1px 3px rgba(0,0,0,.65);will-change:transform;user-select:none}
+        .dm-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
+        .dm-seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+        .dm-seg .seg-btn{background:transparent;color:var(--muted);border:0;padding:7px 13px;cursor:pointer;font-size:14px;font-family:inherit}
+        .dm-seg .seg-btn.on{background:var(--accent);color:#fff;font-weight:700}
+        .dm-sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;box-sizing:border-box;display:inline-block;vertical-align:middle}
+        .dm-sw.on{border-color:#fff;box-shadow:0 0 0 2px var(--accent)}
+        .dm-swatches{display:flex;gap:8px;align-items:center}
+        .dm-input{flex:1;min-width:180px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(127,127,127,.06);color:inherit;font-size:15px;font-family:inherit}
+        .dm-fav{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+        .dm-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(127,127,127,.1);border:1px solid var(--line);cursor:pointer;font-size:13px}
+        .dm-chip .x{cursor:pointer;opacity:.6}
+        .dm-color-row{display:flex;align-items:center;gap:8px}
+        .dm-color-row input[type=color]{width:38px;height:32px;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer;padding:2px}
+        .dm-msg{color:var(--good);min-height:18px;font-size:13px;margin-top:6px}
+        @media(max-width:640px){ .dm-stage{height:340px} }
+      </style>
+      <h2>🎉 弹幕墙</h2>
+      <div class="hint">把想说的话「发射」到墙上，它会从右往左飘过。挑颜色、字号、速度，放满屏祝福、点一发烟花，把庆贺的气氛拉满。常用弹幕可收藏，下次一点就发。全程本机、纯前端。</div>
+      <div class="dm-stage" id="dmStage">
+        <canvas id="dmFw"></canvas>
+      </div>
+      <div class="dm-toolbar">
+        <input class="dm-input" id="dmText" maxlength="60" placeholder="写点什么，回车发射…">
+        <div class="dm-color-row">
+          <input type="color" id="dmColor" value="#ffd166">
+        </div>
+        <div class="dm-seg" id="dmSize">
+          <button class="seg-btn" data-size="18">小</button>
+          <button class="seg-btn on" data-size="26">中</button>
+          <button class="seg-btn" data-size="38">大</button>
+        </div>
+        <div class="dm-seg" id="dmSpeed">
+          <button class="seg-btn" data-spd="70">慢</button>
+          <button class="seg-btn on" data-spd="120">中</button>
+          <button class="seg-btn" data-spd="200">快</button>
+        </div>
+        <button class="btn" id="dmSend">🚀 发射</button>
+      </div>
+      <div class="dm-toolbar">
+        <div class="dm-swatches" id="dmSwatches"></div>
+        <button class="btn ghost" id="dmPause">⏸ 暂停</button>
+        <button class="btn ghost" id="dmClear">🧹 清屏</button>
+        <button class="btn ghost" id="dmFwBtn">🎆 放烟花</button>
+        <button class="btn ghost" id="dmBurst">💥 满屏祝福</button>
+      </div>
+      <div class="dm-toolbar">
+        <select id="dmPack" class="btn ghost">
+          <option value="custom">主题弹幕包…</option>
+          <option value="newyear">🧧 新年快乐</option>
+          <option value="birthday">🎂 生日快乐</option>
+          <option value="cheer">💪 加油打气</option>
+          <option value="grad">🎓 毕业快乐</option>
+        </select>
+        <button class="btn ghost" id="dmPackFire">🚀 发射主题包</button>
+        <button class="btn ghost" id="dmFavAdd">⭐ 收藏当前</button>
+      </div>
+      <div style="color:var(--muted);font-size:13px;margin:10px 0 4px">常用弹幕</div>
+      <div class="dm-fav" id="dmFav"><span style="opacity:.6;font-size:13px">还没有收藏，写一句点「收藏当前」吧～</span></div>
+      <div class="dm-msg" id="dmMsg"></div>
+    </div>
+  </section>
   <section class="panel" id="diff">
     <div class="card">
       <h2>🔍 文本对比</h2>
@@ -5364,6 +5432,8 @@
     if (id === "photo") photoStart();
     if (id === "fractal") fractalStart();
     if (id === "pixel") pixelStart();
+    if (id === "danmu") danmuStart();
+    if (id !== "danmu") danmuStop();
     if (id !== "fractal") fractalStop();
     if (id === "base") baseRender();
     if (id !== "rpgdice") rpgStop();
@@ -5503,7 +5573,8 @@
     diff: "文本对比 diff 差异 比对 修改 版本 代码 配置 改稿 找不同 对比工具 相似度 行 词 字符",
     photo: "图片 滤镜 美图 照片 调色 怀旧 复古 黑白 滤镜工坊 修图 饱和度 色相 像素 反相 圆角 自拍 风景 滤镜 photo filter 图片处理 调色板",
     fractal: "分形 曼德博 曼德勃罗 朱利亚 朱利亚集合 集合 缩放 探索 数学 复数 混沌 自相似 图案 几何 迭代 复平面 无限 放大 艺术 渲染 分形工坊 脑洞 mandelbrot julia fractal",
-    pixel: "像素 画板 像素风 8bit 像素画 画画 涂色 网格 艺术 创作 草稿 导出 png 调色 图标 头像 像素艺术 画图 填色 pixel art"
+    pixel: "像素 画板 像素风 8bit 像素画 画画 涂色 网格 艺术 创作 草稿 导出 png 调色 图标 头像 像素艺术 画图 填色 pixel art",
+    danmu: "弹幕 弹幕墙 祝福 满屏 飞字 滚动字幕 文字 氛围 庆祝 祝福墙 表白 刷屏 直播间 飘屏 喜庆 弹幕墙 barrage danmaku 氛围墙 满屏祝福"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -5579,7 +5650,7 @@
     mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
     poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create", photo:"create", fractal:"create", pixel:"create",
     pet:"life", mood:"life", life:"life",
-    achv:"more"
+    achv:"more", danmu:"more"
   };
   const CAT_LABEL = { all:"全部", decide:"决策", fortune:"运势", games:"游戏", tools:"工具", prod:"效率", create:"创作", life:"生活", more:"更多" };
   const CAT_KEY = "suibian_cat";
@@ -19962,6 +20033,216 @@
     "画错不可怕，撤销键就是后悔药。",
     "像素艺术最浪漫的地方，是近看是点、远看是梦。",
     "随便涂一笔，说不定就是明天要用的图标。"
+  );
+
+  /* ===================== 🎉 弹幕墙 danmu ===================== */
+  function dm$(id){ return document.getElementById(id); }
+  function dmNow(){ return (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now(); }
+
+  let dmItems = [];
+  let dmFw = [];
+  let dmRAF = 0, dmRAFOn = false, dmLast = 0;
+  let dmPaused = false;
+  let dmSize = 26, dmSpd = 120, dmColor = "#ffd166";
+  let dmLanes = [];
+  const DM_PALETTE = ["#ffd166","#ff6b6b","#4be3a5","#5b9bff","#c792ea","#ff9f43","#ffffff","#ff7eb6"];
+  const DM_PACKS = {
+    newyear: ["新年快乐 🧧","恭喜发财","万事如意","岁岁平安","前程似锦","红包拿来","心想事成","龙马精神"],
+    birthday:["生日快乐 🎂","天天开心","永远年轻","许个愿吧","吹蜡烛咯","岁岁年年","被爱包围","惊喜不断"],
+    cheer:   ["你可以的 💪","冲鸭","稳住能赢","别放弃","你超棒","加油加油","未来可期","相信自己"],
+    grad:    ["毕业快乐 🎓","前程似锦","山水万程","江湖再见","保持热爱","奔赴山海","不负韶华","下站更好"]
+  };
+  const DM_BLESS = ["哈哈哈","666","前排","好耶","绝了","太棒了","喜欢","冲","好家伙","羡慕了","学到了","牛","妙啊","笑死","慕了","优雅","到位"];
+  const DM_FAV_KEY = "suibian_danmu_fav";
+  let dmFav = [];
+  try { const _r = JSON.parse(localStorage.getItem(DM_FAV_KEY) || "[]"); if (Array.isArray(_r)) dmFav = _r; } catch(e){}
+
+  function dmSaveFav(){ try { localStorage.setItem(DM_FAV_KEY, JSON.stringify(dmFav)); } catch(e){} }
+  function dmMsg(m){ const el = dm$("dmMsg"); if (el) el.textContent = m || ""; }
+
+  function dmInitStage(){
+    const stage = dm$("dmStage"); const cv = dm$("dmFw");
+    if (stage && cv){ cv.width = stage.clientWidth || 600; cv.height = stage.clientHeight || 440; }
+    const h = (stage && stage.clientHeight) || 440;
+    const laneH = 40;
+    const n = Math.max(4, Math.floor(h / laneH));
+    if (dmLanes.length !== n) dmLanes = new Array(n).fill(0);
+  }
+
+  function dmRenderSwatches(){
+    const box = dm$("dmSwatches"); if (!box) return;
+    box.innerHTML = "";
+    DM_PALETTE.forEach((c) => {
+      const s = document.createElement("span");
+      s.className = "dm-sw" + (c === dmColor ? " on" : "");
+      s.style.background = c; s.dataset.col = c;
+      s.addEventListener("click", () => { dmColor = c; const ci = dm$("dmColor"); if (ci) ci.value = c; dmRenderSwatches(); });
+      box.appendChild(s);
+    });
+  }
+
+  function dmRenderFav(){
+    const box = dm$("dmFav"); if (!box) return;
+    if (!dmFav.length){ box.innerHTML = '<span style="opacity:.6;font-size:13px">还没有收藏，写一句点「收藏当前」吧～</span>'; return; }
+    box.innerHTML = dmFav.map((t, i) => '<span class="dm-chip" data-i="'+i+'">'+escapeHtml(t)+' <span class="x">✕</span></span>').join("");
+  }
+
+  function dmFire(text, color, size){
+    const stage = dm$("dmStage"); if (!stage) return false;
+    text = (text || "").trim();
+    if (!text) return false;
+    color = color || dmColor; size = size || dmSize;
+    const el = document.createElement("div");
+    el.className = "dm-item"; el.textContent = text;
+    el.style.color = color; el.style.fontSize = size + "px";
+    stage.appendChild(el);
+    const w = el.offsetWidth || (text.length * size * 0.62) || 80;
+    const sw = stage.clientWidth || 600;
+    const t = dmNow();
+    let lane = 0, best = Infinity;
+    for (let i = 0; i < dmLanes.length; i++){
+      if (dmLanes[i] <= t){ lane = i; break; }
+      if (dmLanes[i] < best){ best = dmLanes[i]; lane = i; }
+    }
+    const laneH = 40;
+    el.style.top = (lane * laneH + 6) + "px";
+    const x0 = sw + 4;
+    el.style.transform = "translateX(" + x0 + "px)";
+    dmLanes[lane] = t + ((w + 24) / dmSpd) * 1000;
+    dmItems.push({ el, x: x0, w, spd: dmSpd });
+    return true;
+  }
+
+  function dmBurstFirework(){
+    const cv = dm$("dmFw"); if (!cv) return;
+    const W = cv.width || 600, H = cv.height || 440;
+    const cx = W * (0.25 + 0.5 * rand(1));
+    const cy = H * (0.2 + 0.4 * rand(1));
+    const color = DM_PALETTE[Math.floor(rand(DM_PALETTE.length))];
+    for (let i = 0; i < 26; i++){
+      const a = (Math.PI * 2 * i) / 26 + rand(0.3);
+      const sp = 60 + rand(120);
+      dmFw.push({ x: cx, y: cy, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, col: color });
+    }
+  }
+
+  function dmTick(){
+    if (!dmRAFOn) return;
+    const now = dmNow();
+    let dt = (now - dmLast) / 1000; dmLast = now;
+    if (dt > 0.1) dt = 0.1;
+    if (!dmPaused){
+      const stage = dm$("dmStage");
+      const sw = stage ? stage.clientWidth : 600;
+      for (let i = dmItems.length - 1; i >= 0; i--){
+        const it = dmItems[i];
+        it.x -= it.spd * dt;
+        it.el.style.transform = "translateX(" + it.x + "px)";
+        if (it.x < -it.w){ if (it.el.parentNode) it.el.parentNode.removeChild(it.el); dmItems.splice(i, 1); }
+      }
+      const cv = dm$("dmFw");
+      if (cv && dmFw.length){
+        const ctx = cv.getContext("2d");
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        ctx.globalCompositeOperation = "lighter";
+        for (let i = dmFw.length - 1; i >= 0; i--){
+          const p = dmFw[i];
+          p.vy += 140 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt * 0.7;
+          if (p.life <= 0){ dmFw.splice(i, 1); continue; }
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fillStyle = p.col;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+      } else if (cv){
+        const ctx = cv.getContext("2d"); ctx.clearRect(0, 0, cv.width, cv.height);
+      }
+    }
+    dmRAF = requestAnimationFrame(dmTick);
+  }
+
+  function danmuStart(){
+    const stage = dm$("dmStage"); if (!stage) return;
+    dmInitStage(); dmRenderSwatches(); dmRenderFav();
+    if (!dmRAFOn){ dmRAFOn = true; dmLast = dmNow(); dmRAF = requestAnimationFrame(dmTick); }
+  }
+  function danmuStop(){
+    dmRAFOn = false;
+    if (dmRAF){ cancelAnimationFrame(dmRAF); dmRAF = 0; }
+    for (const it of dmItems){ if (it.el && it.el.parentNode) it.el.parentNode.removeChild(it.el); }
+    dmItems.length = 0; dmFw.length = 0;
+  }
+
+  function dmBind(){
+    const send = () => {
+      const inp = dm$("dmText"); const text = inp ? inp.value : "";
+      if (!text.trim()){ dmMsg("先写点什么再发射吧～"); return; }
+      if (dmFire(text, dmColor, dmSize)){ bumpUsage("danmu"); if (inp) inp.value = ""; playClick(); }
+    };
+    const sb = dm$("dmSend"); if (sb) sb.addEventListener("click", send);
+    const inp = dm$("dmText"); if (inp) inp.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+    const sz = dm$("dmSize");
+    if (sz) sz.querySelectorAll(".seg-btn").forEach((b) => b.addEventListener("click", () => {
+      dmSize = +b.dataset.size; sz.querySelectorAll(".seg-btn").forEach((x) => x.classList.toggle("on", x === b));
+    }));
+    const sp = dm$("dmSpeed");
+    if (sp) sp.querySelectorAll(".seg-btn").forEach((b) => b.addEventListener("click", () => {
+      dmSpd = +b.dataset.spd; sp.querySelectorAll(".seg-btn").forEach((x) => x.classList.toggle("on", x === b));
+    }));
+    const ci = dm$("dmColor"); if (ci) ci.addEventListener("input", () => { dmColor = ci.value; dmRenderSwatches(); });
+    const pause = dm$("dmPause"); if (pause) pause.addEventListener("click", () => {
+      dmPaused = !dmPaused; pause.textContent = dmPaused ? "▶ 继续" : "⏸ 暂停";
+    });
+    const clr = dm$("dmClear"); if (clr) clr.addEventListener("click", () => {
+      for (const it of dmItems){ if (it.el && it.el.parentNode) it.el.parentNode.removeChild(it.el); }
+      dmItems.length = 0; dmFw.length = 0; dmMsg("已清屏");
+    });
+    const fw = dm$("dmFwBtn"); if (fw) fw.addEventListener("click", () => { dmBurstFirework(); bumpUsage("danmu"); });
+    const burst = dm$("dmBurst"); if (burst) burst.addEventListener("click", () => {
+      let i = 0;
+      const fire = () => { dmFire(DM_BLESS[Math.floor(rand(DM_BLESS.length))], DM_PALETTE[Math.floor(rand(DM_PALETTE.length))], [18,26,38][Math.floor(rand(3))]); if (++i < 16) setTimeout(fire, 120); };
+      fire(); bumpUsage("danmu"); dmMsg("满屏祝福来啦 💥");
+    });
+    const pf = dm$("dmPackFire"); if (pf) pf.addEventListener("click", () => {
+      const sel = dm$("dmPack"); const key = sel ? sel.value : "custom"; const arr = DM_PACKS[key];
+      if (!arr){ dmMsg("先选一个主题弹幕包～"); return; }
+      let i = 0;
+      const fire = () => { dmFire(arr[i % arr.length], DM_PALETTE[Math.floor(rand(DM_PALETTE.length))], 30); if (++i < arr.length) setTimeout(fire, 200); };
+      fire(); bumpUsage("danmu"); dmMsg("发射主题包：" + key);
+    });
+    const fa = dm$("dmFavAdd"); if (fa) fa.addEventListener("click", () => {
+      const t = (dm$("dmText") ? dm$("dmText").value : "").trim();
+      if (!t){ dmMsg("写点什么再收藏吧～"); return; }
+      if (dmFav.indexOf(t) < 0){ dmFav.push(t); dmSaveFav(); dmRenderFav(); dmMsg("已收藏：" + t); }
+      else dmMsg("已经在收藏里啦");
+    });
+    const favBox = dm$("dmFav");
+    if (favBox) favBox.addEventListener("click", (e) => {
+      const chip = e.target.closest(".dm-chip"); if (!chip) return;
+      const i = +chip.dataset.i;
+      if (e.target.classList && e.target.classList.contains("x")){ dmFav.splice(i, 1); dmSaveFav(); dmRenderFav(); return; }
+      const t = dmFav[i]; if (t){ dmFire(t, dmColor, dmSize); bumpUsage("danmu"); }
+    });
+    if (typeof window !== "undefined" && window.addEventListener) window.addEventListener("resize", () => dmInitStage());
+  }
+  dmBind();
+
+  BADGES.push(
+    { emoji: "🎉", name: "弹幕新手", desc: "发射第一条弹幕", test: (u) => (u.danmu || 0) >= 1 },
+    { emoji: "🚀", name: "弹幕大师", desc: "累计发射 30 条弹幕", test: (u) => (u.danmu || 0) >= 30 }
+  );
+
+  QUOTES.push(
+    "话要趁热说，弹幕要趁热闹发。",
+    "一句祝福飘过去，屏幕就暖了一度。",
+    "满屏的 666，是陌生人给的温柔。",
+    "把想说的话发射出去，比憋在心里痛快。",
+    "烟花会落，弹幕会走，但此刻的热闹是真的。",
+    "再小的声音，飘在墙上也是一道光。",
+    "表白要大胆，弹幕就是你的勇气。",
+    "喜庆这件事，自己造也行。",
+    "字从右边来，祝福往左边去，世界就这么流动。",
+    "随便发一句，说不定就成了别人的开心。"
   );
 
 </script>
