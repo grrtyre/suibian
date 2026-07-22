@@ -1500,6 +1500,7 @@
       <button data-tab="countdown">📅 倒数日</button>
       <button data-tab="diff">🔍 文本对比</button>
       <button data-tab="photo">🖼️ 图片滤镜</button>
+      <button data-tab="fractal">🌀 分形工坊</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4700,6 +4701,69 @@
       @media(max-width:640px){ .ph-side{ width:100%; } }
     </style>
   </section>
+  <section class="panel" id="fractal">
+    <div class="card">
+      <style>
+        .fr-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 12px}
+        .fr-seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+        .fr-seg .seg-btn{background:transparent;color:var(--muted);border:0;padding:7px 14px;cursor:pointer;font-size:14px;font-family:inherit}
+        .fr-seg .seg-btn.on{background:var(--accent);color:#1a1020;font-weight:700}
+        .fr-select{background:var(--card-2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:14px;font-family:inherit}
+        .fr-stage{position:relative;width:100%;max-width:560px;margin:0 auto;border-radius:14px;overflow:hidden;background:#04040f;border:1px solid var(--line)}
+        #frCanvas{width:100%;height:auto;display:block;cursor:crosshair}
+        .fr-sel{position:absolute;border:1.5px dashed #fff;background:rgba(255,255,255,.14);pointer-events:none;display:none;z-index:2}
+        .fr-prog{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.55);color:#fff;padding:4px 10px;border-radius:8px;font-size:12px;z-index:3}
+        .fr-controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:14px 0}
+        .fr-controls label{display:flex;flex-direction:column;font-size:13px;color:var(--muted);gap:5px;min-width:170px;flex:1}
+        .fr-controls input[type=range]{width:100%}
+        .fr-julia{margin:6px 0 14px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+        .fr-julia label{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-top:8px}
+        .fr-julia input[type=range]{flex:1}
+        .fr-fav-title{font-weight:700;margin:10px 0 6px}
+        .fr-fav-grid{display:flex;flex-wrap:wrap;gap:10px}
+        .fr-thumb{position:relative;width:86px;cursor:pointer;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#04040f}
+        .fr-thumb img{width:100%;display:block}
+        .fr-thumb b{position:absolute;left:0;right:0;bottom:0;font-size:10px;text-align:center;padding:3px;background:rgba(0,0,0,.6);color:#fff;font-weight:400}
+        .fr-thumb .fr-del{position:absolute;top:3px;right:3px;width:18px;height:18px;line-height:16px;text-align:center;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:11px}
+        .fr-msg{color:var(--good);min-height:18px;font-size:13px;margin-top:8px}
+      </style>
+      <h2>🌀 分形工坊</h2>
+      <div class="hint">在复数平面上无限放大的数学之美。点击放大、框选区域放大、右键缩小；在曼德博 / 朱利亚集合间切换，挑一套配色，把喜欢的视图收藏起来。全程本机计算、毫秒级渲染，无需联网。</div>
+      <div class="fr-toolbar">
+        <div class="fr-seg" id="frMode">
+          <button class="seg-btn on" data-mode="mandelbrot">曼德博集合</button>
+          <button class="seg-btn" data-mode="julia">朱利亚集合</button>
+        </div>
+        <select id="frPalette" class="fr-select"></select>
+        <button class="btn ghost" id="frRandPal">🎨 随机配色</button>
+        <button class="btn ghost" id="frRandJulia">🎲 随机朱利亚</button>
+        <button class="btn ghost" id="frReset">↺ 复位</button>
+      </div>
+      <div class="fr-stage">
+        <canvas id="frCanvas" width="560" height="560"></canvas>
+        <div class="fr-sel" id="frSel"></div>
+        <div class="fr-prog" id="frProg" style="display:none">渲染中…</div>
+      </div>
+      <div class="fr-controls">
+        <label>迭代上限 <span id="frIterVal">200</span><input type="range" id="frIter" min="50" max="1000" step="10" value="200"></label>
+        <label>精细度 <span id="frQualVal">高</span><input type="range" id="frQual" min="0" max="2" step="1" value="2"></label>
+        <div class="row">
+          <button class="btn" id="frIn">🔍 放大</button>
+          <button class="btn" id="frOut">🔎 缩小</button>
+          <button class="btn ghost" id="frShot">📥 导出 PNG</button>
+          <button class="btn ghost" id="frSave">⭐ 收藏视图</button>
+        </div>
+      </div>
+      <div class="fr-julia" id="frJuliaBox" style="display:none">
+        <div><b>朱利亚常数 c = <span id="frCval">-0.700, 0.270</span></b></div>
+        <div class="hint" style="margin:4px 0 0">拖动滑块改变 c，或点「🎲 随机朱利亚」一键生成；切到曼德博集合探索、再切回来欣赏不同的分形宇宙。</div>
+        <label>实部 c.re <input type="range" id="frCr" min="-2" max="2" step="0.001" value="-0.7"></label>
+        <label>虚部 c.im <input type="range" id="frCi" min="-2" max="2" step="0.001" value="0.27"></label>
+      </div>
+      <div class="fr-favs" id="frFavs"></div>
+      <div class="fr-msg" id="frMsg"></div>
+    </div>
+  </section>
   <section class="panel" id="diff">
     <div class="card">
       <h2>🔍 文本对比</h2>
@@ -5182,6 +5246,8 @@
     if (id === "wordcloud") wcRender();
     if (id === "countdown") cdRender();
     if (id === "photo") photoStart();
+    if (id === "fractal") fractalStart();
+    if (id !== "fractal") fractalStop();
     if (id === "base") baseRender();
     if (id !== "rpgdice") rpgStop();
     if (id === "scratch") scratchInit();
@@ -5316,7 +5382,8 @@
     ascii: "图片 字符画 ascii 像素 艺术 照片 头像 文本 复古 终端 黑白 转换 生成 文字画 像素画",
     hash: "哈希 散列 md5 sha1 sha256 sha512 hmac 校验 完整性 摘要 文件 文本 加密 比对 指纹 一致性 安全 摘要值",
     diff: "文本对比 diff 差异 比对 修改 版本 代码 配置 改稿 找不同 对比工具 相似度 行 词 字符",
-    photo: "图片 滤镜 美图 照片 调色 怀旧 复古 黑白 滤镜工坊 修图 饱和度 色相 像素 反相 圆角 自拍 风景 滤镜 photo filter 图片处理 调色板"
+    photo: "图片 滤镜 美图 照片 调色 怀旧 复古 黑白 滤镜工坊 修图 饱和度 色相 像素 反相 圆角 自拍 风景 滤镜 photo filter 图片处理 调色板",
+    fractal: "分形 曼德博 曼德勃罗 朱利亚 朱利亚集合 集合 缩放 探索 数学 复数 混沌 自相似 图案 几何 迭代 复平面 无限 放大 艺术 渲染 分形工坊 脑洞 mandelbrot julia fractal"
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -5390,7 +5457,7 @@
     snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
     rand:"tools", color:"tools", gradient:"tools", palette:"tools", share:"tools", speak:"tools", pwgen:"tools", vault:"tools", conv:"tools", metro:"tools", calc:"tools", timer:"tools", codec:"tools", regex:"tools", chart:"tools", md:"tools", ambient:"tools", breath:"tools", morse:"tools", mbti:"tools", json:"tools", hash:"tools", ascii:"create",
     mindmap:"prod", qfav:"prod", habit:"prod", todo:"prod", ledger:"prod", compound:"prod", pomodoro:"prod", trivia:"prod",
-    poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create", photo:"create",
+    poem:"create", idiom:"create", moments:"create", notes:"create", draw:"create", nick:"create", quote:"create", photo:"create", fractal:"create",
     pet:"life", mood:"life", life:"life",
     achv:"more"
   };
@@ -19174,6 +19241,195 @@
     "饱和度拉满的日子很吵，偶尔黑白反而更清楚。",
     "导出键按下的瞬间，这张图才算真正属于你。"
   );
+  /* ===== 🌀 分形工坊 fractal (Fractal Studio) ===== */
+  const FR_KEY = "suibian_fractal_favs";
+  const fr$ = (id) => document.getElementById(id);
+  const FR_PALETTES = [
+    { name: "极光", stops: [[10,14,60],[20,110,170],[40,210,180],[225,255,205],[255,170,90]] },
+    { name: "烈焰", stops: [[8,4,12],[120,18,18],[230,70,20],[255,170,40],[255,245,200]] },
+    { name: "海洋", stops: [[6,10,40],[14,60,130],[20,130,180],[80,210,210],[200,250,250]] },
+    { name: "霓虹", stops: [[40,6,70],[150,20,150],[255,40,170],[255,140,210],[120,230,255]] },
+    { name: "落日", stops: [[20,8,60],[120,20,120],[230,70,90],[255,160,60],[255,225,140]] },
+    { name: "翡翠", stops: [[4,20,14],[10,80,50],[30,150,90],[120,220,140],[220,250,200]] },
+    { name: "水墨", stops: [[245,245,245],[180,180,180],[110,110,110],[50,50,50],[12,12,12]] },
+    { name: "彩虹", rainbow: true }
+  ];
+  let frMode = "mandelbrot", frPalIdx = 0, frBound = false, fractalToken = 0;
+  let frCenter = { x: -0.6, y: 0 }, frScale = 0.005, frJulia = { x: -0.7, y: 0.27 };
+  let frDrag = null;
+  function hsl2rgb(h, s, l){
+    h = ((h % 360) + 360) % 360;
+    const c = (1 - Math.abs(2*l - 1)) * s, x = c * (1 - Math.abs((h/60) % 2 - 1)), m = l - c/2;
+    let r = 0, g = 0, b = 0;
+    if (h < 60){ r = c; g = x; } else if (h < 120){ r = x; g = c; } else if (h < 180){ g = c; b = x; } else if (h < 240){ g = x; b = c; } else if (h < 300){ r = x; b = c; } else { r = c; b = x; }
+    return [Math.round((r+m)*255), Math.round((g+m)*255), Math.round((b+m)*255)];
+  }
+  function colorFor(t, pal){
+    if (pal.rainbow) return hsl2rgb((1 - t) * 300, 0.9, 0.55);
+    const st = pal.stops, f = t * (st.length - 1), i = Math.floor(f), frac = f - i;
+    const a = st[i], b = st[Math.min(i+1, st.length-1)];
+    return [Math.round(a[0]+(b[0]-a[0])*frac), Math.round(a[1]+(b[1]-a[1])*frac), Math.round(a[2]+(b[2]-a[2])*frac)];
+  }
+  function iterc(cr, ci, maxIter){
+    let zr = 0, zi = 0, zr2 = 0, zi2 = 0, n = 0;
+    while (n < maxIter && (zr2 + zi2) <= 16){ zi = 2*zr*zi + ci; zr = zr2 - zi2 + cr; zr2 = zr*zr; zi2 = zi*zi; n++; }
+    if (n >= maxIter) return -1;
+    const lz = Math.log(zr2 + zi2) / 2, nu = Math.log(lz / Math.LN2) / Math.LN2;
+    return n + 1 - nu;
+  }
+  function iterj(zr, zi, cr, ci, maxIter){
+    let zr2 = zr*zr, zi2 = zi*zi, n = 0;
+    while (n < maxIter && (zr2 + zi2) <= 16){ zi = 2*zr*zi + ci; zr = zr2 - zi2 + cr; zr2 = zr*zr; zi2 = zi*zi; n++; }
+    if (n >= maxIter) return -1;
+    const lz = Math.log(zr2 + zi2) / 2, nu = Math.log(lz / Math.LN2) / Math.LN2;
+    return n + 1 - nu;
+  }
+  function frQualRes(){ const q = +fr$("frQual").value; return q <= 0 ? 320 : (q === 1 ? 440 : 560); }
+  function fractalRender(){
+    const cv = fr$("frCanvas"); if (!cv) return;
+    const ctx = cv.getContext("2d"); if (!ctx) return;
+    const res = frQualRes();
+    if (cv.width !== res){ cv.width = res; cv.height = res; }
+    const W = cv.width, H = cv.height;
+    let img; try { img = ctx.createImageData(W, H); } catch(e){ return; }
+    const data = img.data;
+    const token = ++fractalToken;
+    const maxIter = +fr$("frIter").value;
+    const pal = FR_PALETTES[frPalIdx];
+    const mode = frMode, cx0 = frCenter.x, cy0 = frCenter.y, sc = frScale;
+    const jCr = frJulia.x, jCi = frJulia.y;
+    const chunk = res >= 520 ? 6 : (res >= 400 ? 10 : 16);
+    const prog = fr$("frProg"); if (prog) prog.style.display = "block";
+    let y = 0;
+    function row(){
+      if (token !== fractalToken) return;
+      const end = Math.min(y + chunk, H);
+      for (; y < end; y++){
+        for (let x = 0; x < W; x++){
+          const cx = cx0 + (x - W/2)*sc, cy = cy0 + (y - H/2)*sc;
+          const v = mode === "mandelbrot" ? iterc(cx, cy, maxIter) : iterj(cx, cy, jCr, jCi, maxIter);
+          const idx = (y*W + x)*4;
+          if (v < 0){ data[idx]=7; data[idx+1]=5; data[idx+2]=16; data[idx+3]=255; }
+          else { const t = Math.sqrt(Math.max(0, v)/maxIter); const c = colorFor(t, pal); data[idx]=c[0]; data[idx+1]=c[1]; data[idx+2]=c[2]; data[idx+3]=255; }
+        }
+      }
+      try { ctx.putImageData(img, 0, 0); } catch(e){}
+      if (y < H) setTimeout(row, 0);
+      else if (prog) prog.style.display = "none";
+    }
+    row();
+  }
+  function frComplexAt(clientX, clientY){
+    const cv = fr$("frCanvas"); const r = cv.getBoundingClientRect();
+    return { px: (clientX - r.left)/r.width*cv.width, py: (clientY - r.top)/r.height*cv.height };
+  }
+  function frZoomAt(px, py, factor){
+    const cv = fr$("frCanvas");
+    frCenter = { x: frCenter.x + (px - cv.width/2)*frScale, y: frCenter.y + (py - cv.height/2)*frScale };
+    frScale = Math.max(1e-15, Math.min(0.02, frScale*factor));
+    fractalRender(); fractalUse();
+  }
+  function frZoomRect(x0, y0, x1, y1){
+    const cv = fr$("frCanvas");
+    const minx = Math.min(x0,x1), maxx = Math.max(x0,x1), miny = Math.min(y0,y1), maxy = Math.max(y0,y1);
+    if (maxx - minx < 4 || maxy - miny < 4){ frZoomAt(x0, y0, 0.5); return; }
+    frCenter = { x: frCenter.x + ((minx+maxx)/2 - cv.width/2)*frScale, y: frCenter.y + ((miny+maxy)/2 - cv.height/2)*frScale };
+    const sx = cv.width/(maxx - minx), sy = cv.height/(maxy - miny);
+    frScale = Math.max(1e-15, Math.min(0.02, frScale*Math.min(sx, sy)));
+    fractalRender(); fractalUse();
+  }
+  function fractalUse(){ try { if (typeof bumpUsage === "function") bumpUsage("fractal"); } catch(e){} }
+  function frSetMode(m){
+    frMode = m;
+    document.querySelectorAll("#frMode .seg-btn").forEach((b)=> b.classList.toggle("on", b.dataset.mode === m));
+    fr$("frJuliaBox").style.display = (m === "julia") ? "block" : "none";
+    fractalRender(); fractalUse();
+  }
+  function frLoadFavs(){ try { return JSON.parse(localStorage.getItem(FR_KEY) || "[]"); } catch(e){ return []; } }
+  function frRenderFavs(){
+    const box = fr$("frFavs"); if (!box) return;
+    const favs = frLoadFavs();
+    if (!favs.length){ box.innerHTML = '<div class="hint">还没有收藏的视图，挑一处喜欢的分形，点「⭐ 收藏视图」存下来。</div>'; return; }
+    box.innerHTML = '<div class="fr-fav-title">⭐ 收藏的视图 ('+favs.length+')</div><div class="fr-fav-grid">' +
+      favs.map((f,i)=> '<div class="fr-thumb" data-i="'+i+'"><img src="'+f.thumb+'" alt=""><span class="fr-del" data-i="'+i+'">✕</span><b>'+f.name+'</b></div>').join("") + '</div>';
+    box.querySelectorAll(".fr-thumb").forEach((el)=>{
+      el.addEventListener("click", (e)=>{ if (e.target.classList.contains("fr-del")) return; const f = frLoadFavs()[+el.dataset.i]; if (!f) return; frMode = f.mode; frCenter = { x:f.cx, y:f.cy }; frScale = f.scale; frJulia = { x:f.jx, y:f.jy }; frPalIdx = f.pal; fr$("frIter").value = f.iter; fr$("frIterVal").textContent = f.iter; fr$("frPalette").value = f.pal; frSyncJulia(); frSetMode(f.mode); });
+    });
+    box.querySelectorAll(".fr-del").forEach((el)=>{
+      el.addEventListener("click", (e)=>{ e.stopPropagation(); const fs = frLoadFavs(); fs.splice(+el.dataset.i, 1); try { localStorage.setItem(FR_KEY, JSON.stringify(fs)); } catch(_){} frRenderFavs(); });
+    });
+  }
+  function frSaveFav(){
+    const cv = fr$("frCanvas"); const t = document.createElement("canvas"); t.width = 72; t.height = 72;
+    try { t.getContext("2d").drawImage(cv, 0, 0, 72, 72); } catch(e){}
+    const thumb = t.toDataURL("image/png");
+    const favs = frLoadFavs();
+    const name = (frMode === "mandelbrot" ? "曼德博" : "朱利亚") + " · " + favs.length;
+    favs.unshift({ name: name, mode: frMode, cx: frCenter.x, cy: frCenter.y, scale: frScale, jx: frJulia.x, jy: frJulia.y, pal: frPalIdx, iter: +fr$("frIter").value, thumb: thumb, t: Date.now() });
+    try { localStorage.setItem(FR_KEY, JSON.stringify(favs)); } catch(e){}
+    frRenderFavs(); frMsg("已收藏当前视图 ⭐"); fractalUse();
+  }
+  function frMsg(t){ const e = fr$("frMsg"); if (e) e.textContent = t || ""; }
+  function frSyncJulia(){
+    fr$("frCr").value = frJulia.x; fr$("frCi").value = frJulia.y;
+    fr$("frCval").textContent = frJulia.x.toFixed(3) + ", " + frJulia.y.toFixed(3);
+  }
+  function fractalStop(){ fractalToken++; }
+  function fractalStart(){
+    if (!fr$("frCanvas")) return;
+    if (!frBound){
+      const sel = fr$("frPalette");
+      sel.innerHTML = FR_PALETTES.map((p,i)=> '<option value="'+i+'">'+p.name+'</option>').join("");
+      sel.value = frPalIdx;
+      sel.addEventListener("change", ()=>{ frPalIdx = +sel.value; fractalRender(); fractalUse(); });
+      fr$("frMode").querySelectorAll(".seg-btn").forEach((b)=> b.addEventListener("click", ()=> frSetMode(b.dataset.mode)));
+      fr$("frIter").addEventListener("input", ()=>{ fr$("frIterVal").textContent = fr$("frIter").value; fractalRender(); });
+      fr$("frQual").addEventListener("input", ()=>{ fr$("frQualVal").textContent = ["快","中","高"][+fr$("frQual").value]; fractalRender(); });
+      fr$("frRandPal").addEventListener("click", ()=>{ frPalIdx = Math.floor(Math.random()*FR_PALETTES.length); sel.value = frPalIdx; fractalRender(); fractalUse(); });
+      fr$("frRandJulia").addEventListener("click", ()=>{ frJulia = { x: Math.random()*3 - 1.5, y: Math.random()*2.6 - 1.3 }; if (frMode !== "julia") frSetMode("julia"); else { frSyncJulia(); fractalRender(); } fractalUse(); });
+      fr$("frReset").addEventListener("click", ()=>{ frMode = "mandelbrot"; frCenter = { x:-0.6, y:0 }; frScale = 0.005; frJulia = { x:-0.7, y:0.27 }; frPalIdx = 0; sel.value = 0; frSyncJulia(); frSetMode("mandelbrot"); fractalRender(); fractalUse(); });
+      fr$("frIn").addEventListener("click", ()=> frZoomAt(fr$("frCanvas").width/2, fr$("frCanvas").height/2, 0.5));
+      fr$("frOut").addEventListener("click", ()=> frZoomAt(fr$("frCanvas").width/2, fr$("frCanvas").height/2, 2));
+      fr$("frShot").addEventListener("click", ()=>{ const a = document.createElement("a"); a.href = fr$("frCanvas").toDataURL("image/png"); a.download = "suibian-fractal.png"; a.click(); fractalUse(); });
+      fr$("frSave").addEventListener("click", frSaveFav);
+      fr$("frCr").addEventListener("input", ()=>{ frJulia.x = +fr$("frCr").value; frSyncJulia(); if (frMode === "julia") fractalRender(); });
+      fr$("frCi").addEventListener("input", ()=>{ frJulia.y = +fr$("frCi").value; frSyncJulia(); if (frMode === "julia") fractalRender(); });
+      const cv = fr$("frCanvas");
+      cv.addEventListener("contextmenu", (e)=>{ e.preventDefault(); const p = frComplexAt(e.clientX, e.clientY); frZoomAt(p.px, p.py, 2); });
+      cv.addEventListener("mousedown", (e)=>{ if (e.button !== 0) return; const r = cv.getBoundingClientRect(); frDrag = { x0: e.clientX, y0: e.clientY, r: r }; const sl = fr$("frSel"); sl.style.display = "block"; sl.style.left = "0px"; sl.style.top = "0px"; sl.style.width = "0px"; sl.style.height = "0px"; });
+      window.addEventListener("mousemove", (e)=>{ if (!frDrag) return; const sl = fr$("frSel"); sl.style.left = Math.min(0, e.clientX - frDrag.x0) + "px"; sl.style.top = Math.min(0, e.clientY - frDrag.y0) + "px"; sl.style.width = Math.abs(e.clientX - frDrag.x0) + "px"; sl.style.height = Math.abs(e.clientY - frDrag.y0) + "px"; });
+      window.addEventListener("mouseup", (e)=>{
+        if (!frDrag) return;
+        const r = frDrag.r, sx = frDrag.x0, sy = frDrag.y0; frDrag = null; fr$("frSel").style.display = "none";
+        const cvv = fr$("frCanvas");
+        const toC = (cx, cy)=> ({ px: (cx - r.left)/r.width*cvv.width, py: (cy - r.top)/r.height*cvv.height });
+        const a = toC(sx, sy), b = toC(e.clientX, e.clientY);
+        if (Math.abs(e.clientX - sx) < 5 && Math.abs(e.clientY - sy) < 5) frZoomAt(a.px, a.py, 0.5);
+        else frZoomRect(a.px, a.py, b.px, b.py);
+      });
+      frBound = true;
+    }
+    frSyncJulia(); frSetMode(frMode); frRenderFavs();
+  }
+
+  BADGES.push(
+    { emoji: "🌀", name: "分形新手", desc: "打开分形工坊并探索一次", test: (u) => (u.fractal || 0) >= 1 },
+    { emoji: "🌌", name: "分形迷", desc: "累计探索分形 10 次", test: (u) => (u.fractal || 0) >= 10 }
+  );
+
+  QUOTES.push(
+    "在小数点后面第无数位，藏着一片你从没去过的风景。",
+    "放大再放大，分形告诉我们：边界之外还是边界。",
+    "数学里最浪漫的事，是无限循环却不曾重复。",
+    "朱利亚集合像一颗被定格的宇宙，每个 c 都是一种命运。",
+    "每放大一次，世界就换一张脸，但秩序一直都在。",
+    "混沌不是乱，是规则藏得太深，肉眼看不见。",
+    "分形的美在于：你把镜头推多近，它就有多深。",
+    "一根线绕回自己，就成了整个世界的形状。",
+    "有些图案，算到第一千次才肯露面。",
+    "盯着分形看久了，会相信无限其实是温柔的。"
+  );
+
 </script>
 </body>
 </html>
