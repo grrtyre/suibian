@@ -1498,6 +1498,7 @@
       <button data-tab="json">🔧 JSON 工具</button>
       <button data-tab="ascii">🎨 图片转字符画</button>
       <button data-tab="countdown">📅 倒数日</button>
+      <button data-tab="diff">🔍 文本对比</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -4645,6 +4646,83 @@
       .ascii-stat { margin-left:auto; opacity:.7; font-size:12px; }
     </style>
   </section>
+  <!-- 文本对比 -->
+  <section class="panel" id="diff">
+    <div class="card">
+      <h2>🔍 文本对比</h2>
+      <div class="hint">把两段文字贴进来，一键看出哪里改了：支持按行 / 词 / 字符三种粒度，并排与统一两种视图，删除标红、新增标绿，并给出相似度。常用于改稿、比对配置、看代码差异。纯前端、文本不出本机。</div>
+
+      <div class="diff-cols">
+        <div class="diff-col">
+          <label class="diff-lab">原始文本（旧）</label>
+          <textarea id="diffOld" class="diff-ta" placeholder="在这里粘贴旧版本…"></textarea>
+        </div>
+        <div class="diff-col">
+          <label class="diff-lab">修改后（新）</label>
+          <textarea id="diffNew" class="diff-ta" placeholder="在这里粘贴新版本…"></textarea>
+        </div>
+      </div>
+
+      <div class="row diff-ctrls">
+        <label class="diff-sel">粒度
+          <select id="diffMode" class="btn ghost">
+            <option value="line">按行</option>
+            <option value="word">按词</option>
+            <option value="char">按字符</option>
+          </select>
+        </label>
+        <label class="diff-sel">视图
+          <select id="diffView" class="btn ghost">
+            <option value="split">并排</option>
+            <option value="unified">统一</option>
+          </select>
+        </label>
+        <button class="btn" id="diffGo">🔍 开始对比</button>
+        <button class="btn ghost" id="diffSample">📋 示例</button>
+        <button class="btn ghost" id="diffSwap">⇄ 交换</button>
+        <button class="btn ghost" id="diffClear">🧹 清空</button>
+      </div>
+
+      <div class="diff-stat" id="diffStat">等待对比…</div>
+      <div class="diff-out" id="diffOut"><div style="padding:14px;opacity:.6">还没有可对比的内容，贴两段文字点「开始对比」吧～</div></div>
+
+      <div class="row diff-ctrls" style="margin-top:8px;">
+        <button class="btn ghost" id="diffCopy">📋 复制 diff</button>
+        <button class="btn ghost" id="diffExport">⬇️ 导出 .txt</button>
+      </div>
+    </div>
+    <style>
+      .diff-cols { display:flex; gap:14px; margin:12px 0; }
+      .diff-col { flex:1; min-width:0; display:flex; flex-direction:column; }
+      .diff-lab { font-size:13px; opacity:.8; margin-bottom:6px; }
+      .diff-ta { width:100%; height:170px; resize:vertical; border-radius:12px; border:1px solid rgba(127,127,127,.25); background:rgba(127,127,127,.06); color:inherit; padding:10px 12px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; line-height:1.5; box-sizing:border-box; }
+      .diff-ctrls { display:flex; flex-wrap:wrap; gap:10px 12px; align-items:center; margin:8px 0; font-size:13px; }
+      .diff-sel { display:flex; align-items:center; gap:6px; opacity:.9; }
+      .diff-stat { font-size:13px; opacity:.9; margin:6px 0; padding:7px 11px; border-radius:10px; background:rgba(127,127,127,.08); line-height:1.6; }
+      .diff-stat b { color:var(--accent,#5b9bff); }
+      .diff-stat .del { color:#ff6b6b; font-weight:600; }
+      .diff-stat .add { color:#4be3a5; font-weight:600; }
+      .diff-out { margin:10px 0; border-radius:12px; border:1px solid rgba(127,127,127,.22); background:rgba(127,127,127,.05); overflow:auto; max-height:580px; font-size:13px; }
+      .diff-out table { border-collapse:collapse; width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; line-height:1.55; }
+      .diff-out td { padding:1px 10px; vertical-align:top; white-space:pre-wrap; word-break:break-word; border:none; }
+      .diff-out .ln { width:34px; text-align:right; opacity:.4; user-select:none; color:#9aa; }
+      .diff-out tr.del td.txt { background:rgba(255,107,107,.16); }
+      .diff-out tr.add td.txt { background:rgba(75,227,165,.16); }
+      .diff-out tr.del td.num { color:#ff6b6b; }
+      .diff-out tr.add td.num { color:#4be3a5; }
+      .diff-out .sign { width:16px; text-align:center; opacity:.6; user-select:none; }
+      .diff-out.split { overflow:visible; display:flex; }
+      .diff-out.split > div { flex:1; min-width:0; max-height:580px; overflow:auto; border-right:1px solid rgba(127,127,127,.18); }
+      .diff-out.split > div:last-child { border-right:none; }
+      .diff-out.split pre { margin:0; padding:2px 10px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; line-height:1.55; white-space:pre-wrap; word-break:break-word; }
+      .diff-out.split pre .ln { opacity:.4; margin-right:8px; user-select:none; }
+      .diff-out.split pre.del { background:rgba(255,107,107,.16); }
+      .diff-out.split pre.add { background:rgba(75,227,165,.16); }
+      @media (max-width:680px) {
+        .diff-cols { flex-direction:column; }
+      }
+    </style>
+  </section>
 
 <script>
 (function () {
@@ -5057,6 +5135,7 @@
     if (id === "json") jsonRender();
     if (id === "hash") hashRender();
     if (id === "ascii") asciiRender();
+    if (id === "diff") diffRender();
     if (id !== "lifegame" && typeof lgStop === "function") lgStop();
     if (id !== "pomodoro" && typeof pomodoroStop === "function") pomodoroStop();
     const panel = document.getElementById(id);
@@ -5182,6 +5261,7 @@
     json: "json 格式化 校验 压缩 美化 解析 数据 对象 数组 键 值 树视图 排序 转义 unicode 复制 导出 前端",
     ascii: "图片 字符画 ascii 像素 艺术 照片 头像 文本 复古 终端 黑白 转换 生成 文字画 像素画",
     hash: "哈希 散列 md5 sha1 sha256 sha512 hmac 校验 完整性 摘要 文件 文本 加密 比对 指纹 一致性 安全 摘要值",
+    diff: "文本对比 diff 差异 比对 修改 版本 代码 配置 改稿 找不同 对比工具 相似度 行 词 字符",
   };
   const toolSearch = $("toolSearch");
   function filterTabs(q) {
@@ -15352,6 +15432,188 @@
     { emoji: "🎨", name: "字符画新手", desc: "生成过 1 张字符画", test: (u) => (u.ascii || 0) >= 1 },
     { emoji: "🖼️", name: "像素诗人", desc: "累计生成 10 张字符画", test: (u) => (u.ascii || 0) >= 10 }
   );
+  /* ---------- 文本对比（diff） ---------- */
+  let diffBound = false, diffLast = null;
+  const DIFF_KEY = "suibian_diff_last";
+  const SAMPLE_OLD = "产品发布会定在下周五，地点在总部三楼大厅。\n我们需要准备演示用的样机三台，以及一份精简版PPT。\n市场部负责邀约媒体，技术部确保现场网络稳定。\n会后整理一份复盘，重点记录用户提出的疑问。";
+  const SAMPLE_NEW = "产品发布会定在下周三，地点在总部五楼报告厅。\n我们需要准备演示用的样机五台，以及一份完整版PPT。\n市场部负责邀约媒体与行业KOL，技术部确保现场网络与直播稳定。\n新增环节：现场抽奖，由运营部统筹。\n会后整理一份复盘，重点记录用户提出的疑问与改进建议。";
+  function diffTokenize(s, mode) {
+    s = String(s == null ? "" : s).replace(/\r\n?/g, "\n");
+    if (mode === "char") return Array.from(s);
+    if (mode === "word") return s.split(/(\s+)/);
+    return s.split("\n");
+  }
+  function diffLCS(a, b) {
+    const n = a.length, m = b.length;
+    const dp = [];
+    for (let i = 0; i <= n; i++) dp.push(new Int32Array(m + 1));
+    for (let i = n - 1; i >= 0; i--)
+      for (let j = m - 1; j >= 0; j--)
+        dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : (dp[i + 1][j] >= dp[i][j + 1] ? dp[i + 1][j] : dp[i][j + 1]);
+    const out = [];
+    let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (a[i] === b[j]) { out.push({ t: "=", v: a[i] }); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) { out.push({ t: "-", v: a[i] }); i++; }
+      else { out.push({ t: "+", v: b[j] }); j++; }
+    }
+    while (i < n) { out.push({ t: "-", v: a[i] }); i++; }
+    while (j < m) { out.push({ t: "+", v: b[j] }); j++; }
+    return out;
+  }
+  function diffCompute(oldStr, newStr, mode, cap) {
+    let a = diffTokenize(oldStr, mode), b = diffTokenize(newStr, mode);
+    let truncated = false;
+    if (a.length > cap) { a = a.slice(0, cap); truncated = true; }
+    if (b.length > cap) { b = b.slice(0, cap); truncated = true; }
+    const ops = diffLCS(a, b);
+    let del = 0, add = 0, same = 0;
+    for (const o of ops) { if (o.t === "-") del++; else if (o.t === "+") add++; else same++; }
+    const total = a.length + b.length;
+    const sim = total ? Math.round((2 * same) / total * 100) : 100;
+    return { ops: ops, del: del, add: add, same: same, sim: sim, truncated: truncated, cap: cap };
+  }
+  function diffStatHtml(res, mode) {
+    const unit = mode === "line" ? "行" : (mode === "word" ? "词" : "字符");
+    let s = "删除 <b class=\"del\">" + res.del + "</b> " + unit + " · 新增 <b class=\"add\">" + res.add + "</b> " + unit + " · 相同 " + res.same + " " + unit + " · 相似度 <b>" + res.sim + "%</b>";
+    if (res.truncated) s += " <span class=\"del\">（已限到各 " + res.cap + " " + unit + "，超长部分未对比）</span>";
+    return s;
+  }
+  function diffDraw(res, view) {
+    const out = $("diffOut");
+    if (!out) return;
+    out.className = "diff-out " + (view === "split" ? "split" : "unified");
+    if (!res) { out.innerHTML = '<div style="padding:14px;opacity:.6">还没有可对比的内容，贴两段文字点「开始对比」吧～</div>'; return; }
+    if (view === "split") {
+      let left = "", right = "", lo = 0, ln = 0;
+      for (const o of res.ops) {
+        if (o.t === "=") { lo++; ln++; left += '<pre><span class="ln">' + lo + '</span>' + escapeHtml(o.v) + '</pre>'; right += '<pre><span class="ln">' + ln + '</span>' + escapeHtml(o.v) + '</pre>'; }
+        else if (o.t === "-") { lo++; left += '<pre class="del"><span class="ln">' + lo + '</span>' + escapeHtml(o.v) + '</pre>'; }
+        else { ln++; right += '<pre class="add"><span class="ln">' + ln + '</span>' + escapeHtml(o.v) + '</pre>'; }
+      }
+      out.innerHTML = "<div>" + left + "</div><div>" + right + "</div>";
+      const c = out.children;
+      if (c[0] && c[1]) {
+        c[0].onscroll = function () { c[1].scrollTop = c[0].scrollTop; };
+        c[1].onscroll = function () { c[0].scrollTop = c[1].scrollTop; };
+      }
+    } else {
+      let lo = 0, ln = 0, rows = "";
+      for (const o of res.ops) {
+        if (o.t === "=") { lo++; ln++; rows += '<tr><td class="ln">' + lo + '</td><td class="ln">' + ln + '</td><td class="sign"> </td><td class="txt">' + escapeHtml(o.v) + '</td></tr>'; }
+        else if (o.t === "-") { lo++; rows += '<tr class="del"><td class="ln">' + lo + '</td><td class="ln"></td><td class="sign">-</td><td class="txt">' + escapeHtml(o.v) + '</td></tr>'; }
+        else { ln++; rows += '<tr class="add"><td class="ln"></td><td class="ln">' + ln + '</td><td class="sign">+</td><td class="txt">' + escapeHtml(o.v) + '</td></tr>'; }
+      }
+      out.innerHTML = '<table><tbody>' + rows + '</tbody></table>';
+    }
+  }
+  function diffCap(mode) { return mode === "line" ? 2000 : 3000; }
+  function diffGo() {
+    const oldS = $("diffOld").value, newS = $("diffNew").value;
+    const mode = $("diffMode").value, view = $("diffView").value;
+    const cap = diffCap(mode);
+    const res = diffCompute(oldS, newS, mode, cap);
+    diffLast = { old: oldS, new: newS, mode: mode, view: view };
+    try { localStorage.setItem(DIFF_KEY, JSON.stringify(diffLast)); } catch (e) {}
+    $("diffStat").innerHTML = diffStatHtml(res, mode);
+    diffDraw(res, view);
+    if (typeof pop === "function") pop($("diffStat"));
+    bumpUsage("diff");
+  }
+  function diffRender() {
+    if (!diffBound) diffBind();
+    let st = diffLast;
+    if (!st) { try { st = JSON.parse(localStorage.getItem(DIFF_KEY) || "null"); } catch (e) {} }
+    if (!st) return;
+    diffLast = st;
+    $("diffOld").value = st.old || "";
+    $("diffNew").value = st.new || "";
+    if (st.mode) $("diffMode").value = st.mode;
+    if (st.view) $("diffView").value = st.view;
+    const res = diffCompute(st.old || "", st.new || "", st.mode || "line", diffCap(st.mode || "line"));
+    $("diffStat").innerHTML = diffStatHtml(res, st.mode || "line");
+    diffDraw(res, st.view || "split");
+  }
+  function diffSample() {
+    $("diffOld").value = SAMPLE_OLD;
+    $("diffNew").value = SAMPLE_NEW;
+    diffGo();
+  }
+  function diffSwap() {
+    const o = $("diffOld"), n = $("diffNew");
+    const t = o.value; o.value = n.value; n.value = t;
+    if (diffLast) diffGo();
+  }
+  function diffClear() {
+    $("diffOld").value = ""; $("diffNew").value = "";
+    diffLast = null;
+    try { localStorage.removeItem(DIFF_KEY); } catch (e) {}
+    $("diffStat").innerHTML = "等待对比…";
+    diffDraw(null, "split");
+    toast("已清空");
+  }
+  function diffToText(res) {
+    let lo = 0, ln = 0, lines = [];
+    for (const o of res.ops) {
+      if (o.t === "=") { lo++; ln++; lines.push("  " + o.v); }
+      else if (o.t === "-") { lo++; lines.push("- " + o.v); }
+      else { ln++; lines.push("+ " + o.v); }
+    }
+    return lines.join("\n");
+  }
+  function diffCopy() {
+    if (!diffLast) { toast("先对比一下再复制～"); return; }
+    const res = diffCompute(diffLast.old || "", diffLast.new || "", diffLast.mode || "line", diffCap(diffLast.mode || "line"));
+    const txt = diffToText(res);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { toast("已复制 diff 文本 ✓"); }, function () { diffFallbackCopy(txt); });
+    } else { diffFallbackCopy(txt); }
+  }
+  function diffFallbackCopy(txt) {
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); document.body.removeChild(ta);
+      toast("已复制 diff 文本 ✓");
+    } catch (e) { toast("复制失败，请手动选择"); }
+  }
+  function diffExport() {
+    if (!diffLast) { toast("先对比一下再导出～"); return; }
+    const res = diffCompute(diffLast.old || "", diffLast.new || "", diffLast.mode || "line", diffCap(diffLast.mode || "line"));
+    const txt = diffToText(res);
+    const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "diff.txt"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast("已导出 diff.txt");
+  }
+  function diffBind() {
+    if (diffBound) return; diffBound = true;
+    const go = $("diffGo"); if (go) go.addEventListener("click", diffGo);
+    const sample = $("diffSample"); if (sample) sample.addEventListener("click", diffSample);
+    const swap = $("diffSwap"); if (swap) swap.addEventListener("click", diffSwap);
+    const clear = $("diffClear"); if (clear) clear.addEventListener("click", diffClear);
+    const copy = $("diffCopy"); if (copy) copy.addEventListener("click", diffCopy);
+    const exp = $("diffExport"); if (exp) exp.addEventListener("click", diffExport);
+    const mode = $("diffMode"); if (mode) mode.addEventListener("change", function () { if (diffLast) diffGo(); });
+    const view = $("diffView"); if (view) view.addEventListener("change", function () { if (diffLast) diffGo(); });
+  }
+  QUOTES.push(
+    "把两段文字放在一起对比，差异才显形——人和人之间也一样。",
+    "改稿的乐趣，在于看见自己思路拐过的每一个弯。",
+    "一模一样的句子最安全，也最无趣；差异里才藏着进步。",
+    "对比不是挑错，是看清「从哪里走到了哪里」。",
+    "一行红、一行绿，像极了做选择时心里的两个声音。",
+    "写代码最怕「我以为没改」——diff 会老老实实告诉你改了。",
+    "相似度 100% 未必好，0% 也未必坏，关键看差的那一点值不值。",
+    "把旧版本和新版本并排，时间就变成了一条看得见的线。"
+  );
+  BADGES.push(
+    { emoji: "🔍", name: "对比新手", desc: "用过 1 次文本对比", test: (u) => (u.diff || 0) >= 1 },
+    { emoji: "🧬", name: "找不同大师", desc: "累计文本对比 20 次", test: (u) => (u.diff || 0) >= 20 }
+  );
 
   rxBind();
   mxBind();
@@ -15361,6 +15623,7 @@
   codecBind();
   baseBind();
   asciiBind();
+  diffBind();
   BADGES.push(
     { emoji: "🔢", name: "进制新手", desc: "用过 1 次进制转换", test: (u) => (u.base || 0) >= 1 },
     { emoji: "🧮", name: "进位大师", desc: "累计进制转换 20 次", test: (u) => (u.base || 0) >= 20 }
