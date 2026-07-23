@@ -1510,6 +1510,7 @@
         <button data-tab="muyu">🪷 电子木鱼</button>
         <button data-tab="hanoi">🗼 汉诺塔</button>
         <button data-tab="dino">🦖 恐龙快跑</button>
+        <button data-tab="pong">🏓 弹球对战</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5335,6 +5336,32 @@
     <div class="dino-tip">🖱 点击画布 / 空格 / ↑ 起跳（长按跳得更高），↓ 空中速降、贴地时下蹲躲翼龙<br>每 100 分有提示音，每 300 分昼夜交替；单局突破 1000 分解锁「荒漠飞人」成就 🌵</div>
   </div>
 </section>
+<section class="panel" id="pong">
+  <style>
+    #pong .pong-wrap{max-width:680px;margin:0 auto;text-align:center}
+    #pong .pong-stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+    #pong .pong-stat{min-width:96px;padding:10px 14px;border-radius:12px;border:1px solid rgba(128,128,128,.25);background:rgba(128,128,128,.06)}
+    #pong .pong-stat b{display:block;font-size:22px;color:#8f7be8}
+    #pong .pong-stat i{font-style:normal;font-size:12px;opacity:.72}
+    #pong canvas{width:100%;max-width:640px;display:block;margin:10px auto;border-radius:14px;border:1px solid rgba(128,128,128,.3);touch-action:none;cursor:pointer;-webkit-user-select:none;user-select:none}
+    #pong .pong-ctl{display:flex;gap:12px;justify-content:center;margin:10px 0 4px}
+    #pong .pong-ctl button{padding:8px 20px;border-radius:999px;border:1px solid rgba(128,128,128,.35);background:rgba(128,128,128,.08);cursor:pointer;font-size:14px;transition:all .15s}
+    #pong .pong-ctl button:hover{background:linear-gradient(135deg,#6a5acd,#8f7be8);color:#fff;border-color:#6a5acd}
+    #pong .pong-tip{font-size:13px;opacity:.75;margin-top:8px;line-height:1.7}
+  </style>
+  <h2>🏓 弹球对战</h2>
+  <p class="desc">经典 Pong 复刻：用鼠标 / 手指拖动或 ↑↓ 控制左侧球拍，和电脑 AI 拼手速。球每次被击回都会更快，先拿 7 分者获胜！AI 会随比分越打越猛，纪录只存本地浏览器。</p>
+  <div class="pong-wrap">
+    <div class="pong-stats">
+      <div class="pong-stat"><b id="pongStreak">0</b><i>当前连胜</i></div>
+      <div class="pong-stat"><b id="pongBest">0</b><i>最高连胜</i></div>
+      <div class="pong-stat"><b id="pongPlays">0</b><i>累计对局</i></div>
+    </div>
+    <canvas id="pongCanvas" width="640" height="380"></canvas>
+    <div class="pong-ctl"><button type="button" id="pongStart" class="primary">🏓 开始 / 重开一局</button></div>
+    <div class="pong-tip">🖱 拖动画布或按 ↑ / ↓ 移动球拍，点击画布开始 / 暂停后继续<br>球拍中心击球回得更平，边缘击球角度更刁；先到 7 分获胜，累计取胜 3 场解锁「乒坛高手」🏆</div>
+  </div>
+</section>
 <script>
 (function () {
   "use strict";
@@ -5666,6 +5693,8 @@
     if (id === "muyu") muyuRender();
     if (id === "hanoi") hanoiRender();
     if (id === "dino") dinoRender();
+    if (id === "pong") pongRender();
+    if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
     if (id !== "muyu" && typeof muyuStop === "function") muyuStop();
     if (id === "fortune") drawFortune(true);
@@ -5786,6 +5815,7 @@
   const TAB_KW = {
     hanoi: "汉诺塔 河内塔 移动圆盘 递归 益智 解谜 tower of hanoi 圆盘 三柱 经典 puzzle 搬盘子",
     dino: "恐龙快跑 小恐龙 跑酷 dino run runner 无尽 跳跃 仙人掌 翼龙 chrome 断网 游戏 t-rex 霸王龙",
+  pong: "弹球对战 pong 乒乓 乒乓球 球拍 弹球 ai 对战 反弹 报销 游戏 接球 挡板",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -5969,6 +5999,7 @@
   const TAB_CAT = {
     hanoi:"games",
     dino:"games",
+pong:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -17160,6 +17191,290 @@
     });
     dinoStatsDom(); dinoDraw();
   }
+  /* ================= 弹球对战 (Pong) ================= */
+  var PONG_KEY = "suibian_pong";
+  var pongData = null, pongS = null, pongRAF = null, pongLast = 0, pongAC = null;
+  var PONG_W = 640, PONG_H = 380, PONG_PW = 12, PONG_PH = 70, PONG_R = 8, PONG_WIN = 7;
+  var pongKeyUp = false, pongKeyDown = false;
+  function pongLoad() {
+    if (pongData) return pongData;
+    try { pongData = JSON.parse(localStorage.getItem(PONG_KEY)) || {}; } catch (e) { pongData = {}; }
+    pongData.plays = pongData.plays || 0;
+    pongData.wins = pongData.wins || 0;
+    pongData.streak = pongData.streak || 0;
+    pongData.best = pongData.best || 0;
+    return pongData;
+  }
+  function pongSave() { try { localStorage.setItem(PONG_KEY, JSON.stringify(pongData)); } catch (e) {} }
+  function pongBeep(freq, dur, type, vol) {
+    try {
+      if (!pongAC) pongAC = new (window.AudioContext || window.webkitAudioContext)();
+      var o = pongAC.createOscillator(), g = pongAC.createGain();
+      o.type = type || "square"; o.frequency.value = freq;
+      g.gain.value = vol || 0.05; o.connect(g); g.connect(pongAC.destination);
+      var t = pongAC.currentTime; o.start(t);
+      g.gain.setValueAtTime(g.gain.value, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.06));
+      o.stop(t + (dur || 0.06) + 0.02);
+    } catch (e) {}
+  }
+  function pongClamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function pongServe(dir) {
+    var s = pongS; if (!s) return;
+    s.bx = PONG_W / 2; s.by = PONG_H / 2;
+    var ang = (Math.random() * 0.6 - 0.3);
+    var sp = 5.2;
+    s.vx = (dir || (Math.random() < 0.5 ? -1 : 1)) * sp * Math.cos(ang);
+    s.vy = sp * Math.sin(ang) + (Math.random() * 2 - 1);
+    s.rally = 0; s.serveWait = 48;
+  }
+  function pongStart() {
+    pongLoad();
+    pongS = { py: PONG_H / 2 - PONG_PH / 2, ay: PONG_H / 2 - PONG_PH / 2,
+      bx: PONG_W / 2, by: PONG_H / 2, vx: 0, vy: 0,
+      ps: 0, as: 0, rally: 0, serveWait: 60, over: false, winner: 0, paused: false };
+    pongServe(Math.random() < 0.5 ? -1 : 1);
+    pongLast = 0;
+    if (pongRAF) cancelAnimationFrame(pongRAF);
+    pongRAF = requestAnimationFrame(pongLoop);
+    try { if (pongAC && pongAC.state === "suspended") pongAC.resume(); } catch (e) {}
+  }
+  function pongEndGame(playerWon) {
+    var s = pongS; if (!s) return;
+    s.over = true; s.winner = playerWon ? 1 : 2;
+    var d = pongLoad(); d.plays += 1;
+    if (playerWon) {
+      d.wins += 1; d.streak += 1; if (d.streak > d.best) d.best = d.streak;
+      pongSave();
+      if (typeof bumpUsage === "function") { bumpUsage("pong"); bumpUsage("pongwin"); }
+      if (typeof confettiBurst === "function") confettiBurst(120);
+      if (typeof toast === "function") toast("🏆 你赢了！比分 " + s.ps + " : " + s.as + "，连胜 " + d.streak);
+      pongBeep(660, 0.12, "triangle", 0.08);
+      setTimeout(function () { pongBeep(880, 0.18, "triangle", 0.08); }, 130);
+    } else {
+      d.streak = 0; pongSave();
+      if (typeof bumpUsage === "function") bumpUsage("pong");
+      if (typeof toast === "function") toast("😵 惜败 " + s.ps + " : " + s.as + "，再来一局？");
+      pongBeep(160, 0.3, "sawtooth", 0.09);
+    }
+    pongStatsDom();
+  }
+  function pongStep() {
+    var s = pongS; if (!s || s.over || s.paused) return;
+    // 玩家球拍：键盘
+    var pv = 7.4;
+    if (pongKeyUp) s.py -= pv;
+    if (pongKeyDown) s.py += pv;
+    s.py = pongClamp(s.py, 0, PONG_H - PONG_PH);
+    // AI 球拍
+    var aiMax = 4.4 + Math.min(3.4, (s.as + s.ps) * 0.32 + s.rally * 0.05);
+    var target;
+    if (s.vx > 0) {
+      target = s.by - PONG_PH / 2 + (Math.sin(s.by * 0.05) * 10);
+    } else {
+      target = PONG_H / 2 - PONG_PH / 2;
+      aiMax = 3.2;
+    }
+    var ac = s.ay + PONG_PH / 2;
+    var diff = (target + PONG_PH / 2) - ac;
+    if (Math.abs(diff) > 2) s.ay += pongClamp(diff, -aiMax, aiMax);
+    s.ay = pongClamp(s.ay, 0, PONG_H - PONG_PH);
+    // 发球停顿
+    if (s.serveWait > 0) { s.serveWait--; return; }
+    // 球移动
+    s.bx += s.vx; s.by += s.vy;
+    // 上下墙
+    if (s.by < PONG_R) { s.by = PONG_R; s.vy = Math.abs(s.vy); pongBeep(300, 0.03, "square", 0.04); }
+    if (s.by > PONG_H - PONG_R) { s.by = PONG_H - PONG_R; s.vy = -Math.abs(s.vy); pongBeep(300, 0.03, "square", 0.04); }
+    // 左拍（玩家）
+    var lpx = 18;
+    if (s.vx < 0 && s.bx - PONG_R <= lpx + PONG_PW && s.bx - PONG_R >= lpx - 6 &&
+        s.by >= s.py - PONG_R && s.by <= s.py + PONG_PH + PONG_R) {
+      s.bx = lpx + PONG_PW + PONG_R;
+      var rel = (s.by - (s.py + PONG_PH / 2)) / (PONG_PH / 2);
+      var sp = Math.min(13, Math.hypot(s.vx, s.vy) * 1.05 + 0.35);
+      var ang = rel * 0.9;
+      s.vx = Math.abs(sp * Math.cos(ang));
+      s.vy = sp * Math.sin(ang);
+      s.rally++;
+      pongBeep(520, 0.05, "square", 0.06);
+    }
+    // 右拍（AI）
+    var rpx = PONG_W - 18 - PONG_PW;
+    if (s.vx > 0 && s.bx + PONG_R >= rpx && s.bx + PONG_R <= rpx + PONG_PW + 6 &&
+        s.by >= s.ay - PONG_R && s.by <= s.ay + PONG_PH + PONG_R) {
+      s.bx = rpx - PONG_R;
+      var rel2 = (s.by - (s.ay + PONG_PH / 2)) / (PONG_PH / 2);
+      var sp2 = Math.min(13, Math.hypot(s.vx, s.vy) * 1.05 + 0.35);
+      var ang2 = rel2 * 0.9;
+      s.vx = -Math.abs(sp2 * Math.cos(ang2));
+      s.vy = sp2 * Math.sin(ang2);
+      s.rally++;
+      pongBeep(440, 0.05, "square", 0.06);
+    }
+    // 得分
+    if (s.bx < -PONG_R) {
+      s.as++; pongBeep(200, 0.14, "sawtooth", 0.07);
+      if (s.as >= PONG_WIN) { pongEndGame(false); return; }
+      pongServe(1);
+    } else if (s.bx > PONG_W + PONG_R) {
+      s.ps++; pongBeep(700, 0.12, "triangle", 0.06);
+      if (s.ps >= PONG_WIN) { pongEndGame(true); return; }
+      pongServe(-1);
+    }
+  }
+  function pongRoundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function pongDraw() {
+    var cv = document.getElementById("pongCanvas"); if (!cv) return;
+    var ctx = cv.getContext("2d"); if (!ctx) return;
+    var s = pongS;
+    // 背景球场
+    var g = ctx.createLinearGradient(0, 0, 0, PONG_H);
+    g.addColorStop(0, "#12101e"); g.addColorStop(1, "#1c1330");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, PONG_W, PONG_H);
+    // 中线
+    ctx.strokeStyle = "rgba(255,255,255,.18)"; ctx.lineWidth = 3;
+    ctx.setLineDash([10, 12]);
+    ctx.beginPath(); ctx.moveTo(PONG_W / 2, 0); ctx.lineTo(PONG_W / 2, PONG_H); ctx.stroke();
+    ctx.setLineDash([]);
+    // 边框微光
+    ctx.strokeStyle = "rgba(143,123,232,.35)"; ctx.lineWidth = 2;
+    ctx.strokeRect(3, 3, PONG_W - 6, PONG_H - 6);
+    if (!s) {
+      ctx.fillStyle = "rgba(255,255,255,.9)"; ctx.font = "bold 24px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🏓 点击开始弹球对战", PONG_W / 2, PONG_H / 2 - 6);
+      ctx.font = "14px sans-serif"; ctx.fillStyle = "rgba(255,255,255,.6)";
+      ctx.fillText("先到 7 分者胜 · 拖动或 ↑↓ 控制左拍", PONG_W / 2, PONG_H / 2 + 24);
+      return;
+    }
+    // 比分
+    ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.font = "bold 40px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(String(s.ps), PONG_W / 2 - 60, 52);
+    ctx.fillText(String(s.as), PONG_W / 2 + 60, 52);
+    ctx.font = "12px sans-serif"; ctx.fillStyle = "rgba(255,255,255,.5)";
+    ctx.fillText("你", PONG_W / 2 - 60, 70);
+    ctx.fillText("AI", PONG_W / 2 + 60, 70);
+    // 左拍（玩家 紫）
+    var pg = ctx.createLinearGradient(18, 0, 30, 0);
+    pg.addColorStop(0, "#6a5acd"); pg.addColorStop(1, "#a99cf0");
+    ctx.fillStyle = pg; pongRoundRect(ctx, 18, s.py, PONG_PW, PONG_PH, 6); ctx.fill();
+    // 右拍（AI 青橙）
+    ctx.fillStyle = "#ff9f6a"; pongRoundRect(ctx, PONG_W - 18 - PONG_PW, s.ay, PONG_PW, PONG_PH, 6); ctx.fill();
+    // 球
+    ctx.save();
+    ctx.shadowColor = "rgba(143,123,232,.9)"; ctx.shadowBlur = 16;
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.arc(s.bx, s.by, PONG_R, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // 发球提示
+    if (s.serveWait > 0 && !s.over) {
+      ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.font = "14px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("准备……", PONG_W / 2, PONG_H - 24);
+    }
+    // 暂停/结束遮罩
+    if (s.paused && !s.over) {
+      ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.fillRect(0, 0, PONG_W, PONG_H);
+      ctx.fillStyle = "#fff"; ctx.font = "bold 26px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("⏸ 已暂停 · 点击继续", PONG_W / 2, PONG_H / 2);
+    }
+    if (s.over) {
+      ctx.fillStyle = "rgba(0,0,0,.5)"; ctx.fillRect(0, 0, PONG_W, PONG_H);
+      ctx.fillStyle = s.winner === 1 ? "#a99cf0" : "#ff9f6a";
+      ctx.font = "bold 30px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(s.winner === 1 ? "🏆 你赢了！" : "😵 AI 获胜", PONG_W / 2, PONG_H / 2 - 6);
+      ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = "16px sans-serif";
+      ctx.fillText("比分 " + s.ps + " : " + s.as + " · 点击再来一局", PONG_W / 2, PONG_H / 2 + 26);
+    }
+  }
+  function pongLoop(ts) {
+    if (!pongS) { pongRAF = null; return; }
+    if (!pongLast) pongLast = ts;
+    var steps = 0;
+    var dt = ts - pongLast; pongLast = ts;
+    // 以约 60fps 步进，最多补 3 帧防卡顿
+    var n = Math.min(3, Math.max(1, Math.round(dt / 16.7)));
+    for (var k = 0; k < n; k++) { pongStep(); if (pongS.over) break; }
+    pongDraw();
+    if (pongS && !pongS.over && !pongS.paused) {
+      pongRAF = requestAnimationFrame(pongLoop);
+    } else {
+      pongRAF = null;
+    }
+  }
+  function pongStop() {
+    if (pongRAF) { cancelAnimationFrame(pongRAF); pongRAF = null; }
+    if (pongS && !pongS.over) pongS.paused = true;
+  }
+  function pongStatsDom() {
+    var d = pongLoad();
+    var a = document.getElementById("pongStreak"); if (a) a.textContent = d.streak;
+    var b = document.getElementById("pongBest"); if (b) b.textContent = d.best;
+    var c = document.getElementById("pongPlays"); if (c) c.textContent = d.plays;
+  }
+  function pongRender() { pongLoad(); pongStatsDom(); pongDraw(); }
+  function pongPointerY(cv, e) {
+    var r = cv.getBoundingClientRect();
+    var y = (e.clientY - r.top) * (PONG_H / r.height);
+    return pongClamp(y - PONG_PH / 2, 0, PONG_H - PONG_PH);
+  }
+  function pongBind() {
+    pongLoad();
+    var cv = document.getElementById("pongCanvas"); if (!cv) return;
+    var dragging = false;
+    cv.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      try { if (pongAC && pongAC.state === "suspended") pongAC.resume(); } catch (er) {}
+      if (!pongS || pongS.over) { pongStart(); return; }
+      if (pongS.paused) { pongS.paused = false; pongLast = 0; if (!pongRAF) pongRAF = requestAnimationFrame(pongLoop); }
+      dragging = true;
+      pongS.py = pongPointerY(cv, e);
+    });
+    cv.addEventListener("pointermove", function (e) {
+      if (!dragging || !pongS || pongS.over) return;
+      e.preventDefault();
+      pongS.py = pongPointerY(cv, e);
+    });
+    cv.addEventListener("pointerup", function () { dragging = false; });
+    cv.addEventListener("pointercancel", function () { dragging = false; });
+    cv.addEventListener("pointerleave", function () { dragging = false; });
+    var sb = document.getElementById("pongStart");
+    if (sb) sb.addEventListener("click", function () { pongStart(); });
+    document.addEventListener("keydown", function (e) {
+      var p = document.getElementById("pong"); if (!p || !p.classList.contains("active")) return;
+      if (e.code === "ArrowUp") { e.preventDefault(); pongKeyUp = true; }
+      else if (e.code === "ArrowDown") { e.preventDefault(); pongKeyDown = true; }
+      else if (e.code === "Space") { e.preventDefault(); if (!pongS || pongS.over) pongStart(); else pongS.paused = !pongS.paused; if (pongS && !pongS.paused && !pongRAF) { pongLast = 0; pongRAF = requestAnimationFrame(pongLoop); } }
+    });
+    document.addEventListener("keyup", function (e) {
+      if (e.code === "ArrowUp") pongKeyUp = false;
+      if (e.code === "ArrowDown") pongKeyDown = false;
+    });
+    pongStatsDom(); pongDraw();
+  }
+  pongBind();
+  BADGES.push(
+    { emoji: "🏓", name: "球台首秀", desc: "完成 1 局弹球对战", test: function (u) { return (u.pong || 0) >= 1; } },
+    { emoji: "🏆", name: "乒坛高手", desc: "弹球对战累计取胜 3 场", test: function (u) { return (u.pongwin || 0) >= 3; } }
+  );
+  QUOTES.push(
+    "球拍来回之间，胜负只在一念的专注。",
+    "球越打越快，别慌，跟上它的节奏就好。",
+    "对手越强，你的手速也被逼得越快。",
+    "输一分不要紧，下一发球就是新的开始。",
+    "盯住球，而不是比分。",
+    "七分之内，任何落后都还有机会翻盘。"
+  );
+
   dinoBind();
   BADGES.push(
     { emoji: "🦖", name: "恐龙起跑", desc: "完成 1 局恐龙快跑", test: function (u) { return (u.dino || 0) >= 1; } },
