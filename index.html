@@ -1509,6 +1509,7 @@
         <button data-tab="horo">⭐ 星座运势</button>
         <button data-tab="muyu">🪷 电子木鱼</button>
         <button data-tab="hanoi">🗼 汉诺塔</button>
+        <button data-tab="dino">🦖 恐龙快跑</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5307,6 +5308,33 @@
   <p class="hanoi-tip">目标：把全部圆盘从 A 柱搬到 C 柱。理论最少步数 = 2ⁿ − 1，用最少步数通关可解锁「完美搬运工」成就 🏆</p>
 </section>
 
+<!-- 恐龙快跑 -->
+<section class="panel" id="dino">
+  <style>
+    #dino .dino-wrap{max-width:680px;margin:0 auto;text-align:center}
+    #dino .dino-stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+    #dino .dino-stat{min-width:96px;padding:10px 14px;border-radius:12px;border:1px solid rgba(128,128,128,.25);background:rgba(128,128,128,.06)}
+    #dino .dino-stat b{display:block;font-size:22px;color:#8f7be8}
+    #dino .dino-stat i{font-style:normal;font-size:12px;opacity:.72}
+    #dino canvas{width:100%;max-width:640px;display:block;margin:10px auto;border-radius:14px;border:1px solid rgba(128,128,128,.3);touch-action:manipulation;cursor:pointer;-webkit-user-select:none;user-select:none}
+    #dino .dino-ctl{display:flex;gap:12px;justify-content:center;margin:10px 0 4px}
+    #dino .dino-ctl button{padding:8px 20px;border-radius:999px;border:1px solid rgba(128,128,128,.35);background:rgba(128,128,128,.08);cursor:pointer;font-size:14px;transition:all .15s}
+    #dino .dino-ctl button:hover{background:linear-gradient(135deg,#6a5acd,#8f7be8);color:#fff;border-color:#6a5acd}
+    #dino .dino-tip{font-size:13px;opacity:.75;margin-top:8px;line-height:1.7}
+  </style>
+  <h2>🦖 恐龙快跑</h2>
+  <p class="desc">向 Chrome 断网小恐龙致敬的无尽跑酷：跳过仙人掌、躲开翼龙，速度越跑越快，昼夜不停交替，看你能撑多久！最高纪录只存本地浏览器。</p>
+  <div class="dino-wrap">
+    <div class="dino-stats">
+      <div class="dino-stat"><b id="dinoScore">0</b><i>本局得分</i></div>
+      <div class="dino-stat"><b id="dinoHi">0</b><i>最高纪录</i></div>
+      <div class="dino-stat"><b id="dinoPlays">0</b><i>累计局数</i></div>
+    </div>
+    <canvas id="dinoCanvas" width="640" height="200"></canvas>
+    <div class="dino-ctl"><button type="button" id="dinoStart" class="primary">🎮 开始 / 重开一局</button></div>
+    <div class="dino-tip">🖱 点击画布 / 空格 / ↑ 起跳（长按跳得更高），↓ 空中速降、贴地时下蹲躲翼龙<br>每 100 分有提示音，每 300 分昼夜交替；单局突破 1000 分解锁「荒漠飞人」成就 🌵</div>
+  </div>
+</section>
 <script>
 (function () {
   "use strict";
@@ -5637,6 +5665,8 @@
     if (id === "horo") horoRender();
     if (id === "muyu") muyuRender();
     if (id === "hanoi") hanoiRender();
+    if (id === "dino") dinoRender();
+    if (id !== "dino" && typeof dinoStop === "function") dinoStop();
     if (id !== "muyu" && typeof muyuStop === "function") muyuStop();
     if (id === "fortune") drawFortune(true);
     if (id === "share") drawShareCard();
@@ -5755,6 +5785,7 @@
   /* ---------- 工具搜索（按名称 / 关键词过滤导航） ---------- */
   const TAB_KW = {
     hanoi: "汉诺塔 河内塔 移动圆盘 递归 益智 解谜 tower of hanoi 圆盘 三柱 经典 puzzle 搬盘子",
+    dino: "恐龙快跑 小恐龙 跑酷 dino run runner 无尽 跳跃 仙人掌 翼龙 chrome 断网 游戏 t-rex 霸王龙",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -5937,6 +5968,7 @@
   /* ---------- 分类筛选（站点级导航增强，惠及全部 94 工具） ---------- */
   const TAB_CAT = {
     hanoi:"games",
+    dino:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -16923,6 +16955,224 @@
     var a = $("hanoiAuto"); if (a) a.addEventListener("click", function () { hanoiAuto(); });
     hanoiInit(4);
   }
+  /* ---------- 🦖 恐龙快跑（Chrome 断网小恐龙致敬版） ---------- */
+  var dinoStore = { hi: 0, plays: 0 };
+  var dinoRAF = null, dinoLast = 0, dinoAC = null, dinoS = null;
+  function dinoLoad() { try { var d = JSON.parse(localStorage.getItem("suibian_dino") || "{}"); dinoStore.hi = d.hi || 0; dinoStore.plays = d.plays || 0; } catch (e) {} }
+  function dinoSaveStore() { try { localStorage.setItem("suibian_dino", JSON.stringify(dinoStore)); } catch (e) {} }
+  function dinoBeep(freq, dur, type, vol) {
+    try {
+      if (!dinoAC) dinoAC = new (window.AudioContext || window.webkitAudioContext)();
+      var o = dinoAC.createOscillator(), g = dinoAC.createGain();
+      o.type = type || "square"; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.07, dinoAC.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, dinoAC.currentTime + dur);
+      o.connect(g); g.connect(dinoAC.destination);
+      o.start(); o.stop(dinoAC.currentTime + dur);
+    } catch (e) {}
+  }
+  function dinoNewState() {
+    return { alive: false, started: false, paused: false, over: false,
+      speed: 6, score: 0, frame: 0, y: 0, vy: 0, duck: false, hold: false,
+      obs: [], clouds: [{ x: 480, y: 40 }, { x: 200, y: 66 }], nextObs: 70, nextCloud: 130, mile: 100 };
+  }
+  function dinoStatsDom() {
+    var s = $("dinoScore"), h = $("dinoHi"), p = $("dinoPlays");
+    if (s) s.textContent = dinoS ? Math.floor(dinoS.score) : 0;
+    if (h) h.textContent = dinoStore.hi;
+    if (p) p.textContent = dinoStore.plays;
+  }
+  function dinoDraw() {
+    var cv = $("dinoCanvas"); if (!cv) return;
+    var c = cv.getContext("2d"), W = cv.width, H = cv.height, G = 170;
+    var d = dinoS || dinoNewState();
+    var night = Math.floor(d.score / 300) % 2 === 1;
+    var bg = night ? "#151726" : "#f7f8fa", fg = night ? "#e8e8f2" : "#4d5158", acc = night ? "#8f7be8" : "#6a5acd";
+    c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    if (night) {
+      c.fillStyle = "rgba(255,255,255,.75)";
+      for (var i = 0; i < 14; i++) { c.fillRect((i * 97 + 31) % W, (i * 53 + 17) % 110, 2, 2); }
+      c.fillStyle = "#ffe9a8"; c.beginPath(); c.arc(560, 42, 15, 0, Math.PI * 2); c.fill();
+      c.fillStyle = bg; c.beginPath(); c.arc(553, 38, 13, 0, Math.PI * 2); c.fill();
+    } else {
+      c.fillStyle = "#ffd76e"; c.beginPath(); c.arc(566, 40, 16, 0, Math.PI * 2); c.fill();
+    }
+    c.fillStyle = night ? "rgba(255,255,255,.18)" : "rgba(120,130,150,.3)";
+    d.clouds.forEach(function (cl) { c.fillRect(cl.x, cl.y, 34, 8); c.fillRect(cl.x + 8, cl.y - 6, 20, 8); });
+    c.strokeStyle = fg; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(0, G + 0.5); c.lineTo(W, G + 0.5); c.stroke();
+    c.fillStyle = fg;
+    var off = (d.frame * 2) % 24;
+    for (var gx = -off; gx < W; gx += 24) c.fillRect(gx, G + 7, 8, 2);
+    d.obs.forEach(function (o) {
+      if (o.bird) {
+        c.fillStyle = fg;
+        c.fillRect(o.x + 8, o.y + 6, 22, 8);
+        c.fillRect(o.x, o.y + 8, 10, 4);
+        c.fillRect(o.x + 14, o.f < 10 ? o.y - 4 : o.y + 10, 6, o.f < 10 ? 12 : 10);
+      } else {
+        c.fillStyle = night ? "#7fd48a" : "#3e9d52";
+        c.fillRect(o.x + o.w / 2 - 3, G - o.h, 6, o.h);
+        c.fillRect(o.x, G - o.h + 8, o.w, 5);
+        c.fillRect(o.x, G - o.h, 4, 10);
+        c.fillRect(o.x + o.w - 4, G - o.h + 6, 4, 12);
+      }
+    });
+    var duck = d.duck && d.y <= 0 && d.alive && !d.paused;
+    var dw = duck ? 44 : 26, dh = duck ? 22 : 36;
+    var dx = 46, dyTop = G - dh - d.y;
+    var body = d.over ? (night ? "#ff8f8f" : "#d05a5a") : acc;
+    c.fillStyle = body;
+    c.fillRect(dx, dyTop, dw, dh - 6);
+    if (duck) c.fillRect(dx + dw - 12, dyTop - 4, 16, 10);
+    else c.fillRect(dx + dw - 14, dyTop - 10, 20, 14);
+    c.fillRect(dx - 8, dyTop + 5, 10, 5);
+    c.fillStyle = bg;
+    c.fillRect(duck ? dx + dw - 2 : dx + dw + 1, duck ? dyTop - 1 : dyTop - 7, 3, 3);
+    c.fillStyle = body;
+    var legUp = d.alive && !d.paused && d.y <= 0 && (Math.floor(d.frame / 5) % 2 === 0);
+    c.fillRect(dx + 3, dyTop + dh - 6, 5, legUp ? 4 : 6);
+    c.fillRect(dx + dw - 10, dyTop + dh - 6, 5, legUp ? 6 : 4);
+    c.fillStyle = fg; c.font = "bold 13px monospace"; c.textAlign = "right";
+    var hiS = ("00000" + dinoStore.hi).slice(-5), scS = ("00000" + Math.floor(d.score)).slice(-5);
+    c.fillText("HI " + hiS + "  " + scS, W - 12, 24);
+    c.textAlign = "center";
+    if (!d.started) { c.font = "bold 16px sans-serif"; c.fillText("点击画布 / 按空格，开始奔跑 🦖", W / 2, 92); }
+    else if (d.over) {
+      c.font = "bold 22px sans-serif"; c.fillText("G A M E   O V E R", W / 2, 82);
+      c.font = "13px sans-serif"; c.fillText("得分 " + Math.floor(d.score) + " · 点击画布 / 空格 再来一局", W / 2, 106);
+    } else if (d.paused) { c.font = "bold 16px sans-serif"; c.fillText("⏸ 已暂停 · 点击画布继续", W / 2, 92); }
+    c.textAlign = "left";
+  }
+  function dinoDie() {
+    var d = dinoS;
+    d.alive = false; d.over = true;
+    if (dinoRAF) { cancelAnimationFrame(dinoRAF); dinoRAF = null; }
+    dinoBeep(150, 0.3, "sawtooth", 0.1);
+    var sc = Math.floor(d.score);
+    dinoStore.plays++;
+    var rec = sc > dinoStore.hi;
+    if (rec) dinoStore.hi = sc;
+    dinoSaveStore();
+    if (typeof bumpUsage === "function") { bumpUsage("dino"); if (sc >= 1000) bumpUsage("dino1000"); }
+    if (rec && sc >= 50) {
+      if (typeof confettiBurst === "function") confettiBurst(70);
+      if (typeof toast === "function") toast("🎉 恐龙快跑新纪录：" + sc + " 分！");
+    }
+    dinoStatsDom(); dinoDraw();
+  }
+  function dinoStep(n) {
+    var d = dinoS, G = 170;
+    for (var k = 0; k < n; k++) {
+      d.frame++;
+      d.speed = Math.min(13, d.speed + 0.0022);
+      d.score += d.speed * 0.018;
+      if (d.score >= d.mile) {
+        d.mile += 100;
+        dinoBeep(660, 0.07);
+        setTimeout(function () { dinoBeep(880, 0.07); }, 90);
+      }
+      if (d.y > 0 || d.vy > 0) {
+        d.vy -= (d.hold && d.vy > 0) ? 0.38 : 0.62;
+        d.y += d.vy;
+        if (d.y <= 0) { d.y = 0; d.vy = 0; }
+      }
+      d.nextCloud--;
+      if (d.nextCloud <= 0) { d.clouds.push({ x: 660, y: 24 + Math.random() * 70 }); d.nextCloud = 90 + Math.random() * 160; }
+      d.clouds.forEach(function (cl) { cl.x -= d.speed * 0.25; });
+      d.clouds = d.clouds.filter(function (cl) { return cl.x > -60; });
+      d.nextObs--;
+      if (d.nextObs <= 0) {
+        if (d.score > 150 && Math.random() < 0.28) {
+          var lv = [G - 38, G - 62, G - 92][Math.floor(Math.random() * 3)];
+          d.obs.push({ bird: true, x: 660, y: lv, w: 30, h: 16, f: 0 });
+        } else {
+          var big = Math.random() < 0.4, cnt = Math.random() < 0.3 ? 2 : 1;
+          for (var j = 0; j < cnt; j++) d.obs.push({ x: 660 + j * 22, w: big ? 18 : 14, h: big ? 44 : 30 });
+        }
+        d.nextObs = Math.max(38, 95 - d.speed * 3) + Math.random() * 55;
+      }
+      d.obs.forEach(function (o) { o.x -= d.speed * (o.bird ? 1.15 : 1); if (o.bird) o.f = (o.f + 1) % 20; });
+      d.obs = d.obs.filter(function (o) { return o.x > -70; });
+      var duck = d.duck && d.y <= 0;
+      var dw = duck ? 44 : 26, dh = duck ? 22 : 36;
+      var dx1 = 49, dy1 = G - dh - d.y + 2, dx2 = dx1 + dw - 6, dy2 = G - d.y - 2;
+      for (var m = 0; m < d.obs.length; m++) {
+        var o = d.obs[m];
+        var oy1 = o.bird ? o.y + 2 : G - o.h + 3;
+        var oy2 = o.bird ? o.y + o.h - 2 : G;
+        var ox1 = o.x + 2, ox2 = o.x + o.w - 2;
+        if (dx1 < ox2 && dx2 > ox1 && dy1 < oy2 && dy2 > oy1) { dinoDie(); return; }
+      }
+    }
+  }
+  function dinoLoop(ts) {
+    dinoRAF = null;
+    var d = dinoS;
+    if (!d || !d.alive || d.paused) return;
+    if (!dinoLast) dinoLast = ts;
+    var steps = Math.max(1, Math.min(3, Math.round((ts - dinoLast) / 16.7)));
+    dinoLast = ts;
+    dinoStep(steps);
+    if (d.alive && !d.paused) { dinoStatsDom(); dinoDraw(); dinoRAF = requestAnimationFrame(dinoLoop); }
+  }
+  function dinoStart() {
+    if (dinoRAF) { cancelAnimationFrame(dinoRAF); dinoRAF = null; }
+    dinoS = dinoNewState();
+    dinoS.alive = true; dinoS.started = true;
+    dinoLast = 0;
+    dinoStatsDom();
+    dinoRAF = requestAnimationFrame(dinoLoop);
+  }
+  function dinoJumpPress() {
+    var d = dinoS;
+    if (!d || !d.started || d.over) { dinoStart(); return; }
+    if (d.paused) { d.paused = false; dinoLast = 0; if (!dinoRAF) dinoRAF = requestAnimationFrame(dinoLoop); return; }
+    d.hold = true;
+    if (d.alive && d.y <= 0) { d.vy = 10.4; d.y = 0.1; d.duck = false; dinoBeep(520, 0.06); }
+  }
+  function dinoRelease() { if (dinoS) dinoS.hold = false; }
+  function dinoStop() {
+    if (dinoRAF) { cancelAnimationFrame(dinoRAF); dinoRAF = null; }
+    if (dinoS && dinoS.alive) dinoS.paused = true;
+  }
+  function dinoRender() { dinoLoad(); dinoStatsDom(); dinoDraw(); }
+  function dinoBind() {
+    dinoLoad();
+    var cv = $("dinoCanvas"); if (!cv) return;
+    cv.addEventListener("pointerdown", function (e) { e.preventDefault(); dinoJumpPress(); });
+    cv.addEventListener("pointerup", function () { dinoRelease(); });
+    cv.addEventListener("pointercancel", function () { dinoRelease(); });
+    var sb = $("dinoStart"); if (sb) sb.addEventListener("click", function () { dinoStart(); });
+    document.addEventListener("keydown", function (e) {
+      var p = $("dino"); if (!p || !p.classList.contains("active")) return;
+      if (e.code === "Space" || e.code === "ArrowUp") {
+        e.preventDefault();
+        if (!e.repeat) dinoJumpPress(); else if (dinoS) dinoS.hold = true;
+      } else if (e.code === "ArrowDown") {
+        e.preventDefault();
+        if (dinoS && dinoS.alive && !dinoS.paused) { if (dinoS.y > 0) dinoS.vy = -12; else dinoS.duck = true; }
+      }
+    });
+    document.addEventListener("keyup", function (e) {
+      if (e.code === "Space" || e.code === "ArrowUp") dinoRelease();
+      if (e.code === "ArrowDown" && dinoS) dinoS.duck = false;
+    });
+    dinoStatsDom(); dinoDraw();
+  }
+  dinoBind();
+  BADGES.push(
+    { emoji: "🦖", name: "恐龙起跑", desc: "完成 1 局恐龙快跑", test: function (u) { return (u.dino || 0) >= 1; } },
+    { emoji: "🌵", name: "荒漠飞人", desc: "恐龙快跑单局得分突破 1000", test: function (u) { return (u.dino1000 || 0) >= 1; } }
+  );
+  QUOTES.push(
+    "断网的时候，恐龙也在奔跑；迷茫的时候，你也可以。",
+    "跳过眼前这棵仙人掌，就离新纪录更近一步。",
+    "速度会越来越快，但你的反应也是。",
+    "翼龙来了别慌，低下头也是一种智慧。",
+    "昼夜交替，奔跑不息。",
+    "摔倒了没关系，按下空格，随时重新开始。"
+  );
   hanoiBind();
   BADGES.push(
     { emoji: "🗼", name: "初通汉诺塔", desc: "完成 1 次汉诺塔通关", test: function (u) { return (u.hanoi || 0) >= 1; } },
