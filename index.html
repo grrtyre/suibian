@@ -1505,6 +1505,7 @@
       <button data-tab="pixel">🎨 像素画板</button>
       <button data-tab="danmu">🎉 弹幕墙</button>
       <button data-tab="vote">🗳️ 快速投票</button>
+      <button data-tab="connect4">🔴 四子棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5079,6 +5080,64 @@
       </div>
     </div>
   </section>
+  <section class="panel" id="connect4">
+    <style>
+      #connect4 .c4-wrap{max-width:560px;margin:0 auto}
+      #connect4 .c4-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:6px 0 10px}
+      #connect4 .c4-bar label{font-size:13px;opacity:.85;display:inline-flex;align-items:center;gap:5px}
+      #connect4 select{padding:6px 10px;border-radius:10px;border:1px solid rgba(128,128,128,.35);background:rgba(128,128,128,.08);color:inherit;font-size:13px}
+      #connect4 .c4-status{text-align:center;font-weight:700;font-size:16px;min-height:24px;margin:8px 0}
+      #connect4 .c4-canvas-box{display:flex;justify-content:center}
+      #connect4 canvas{width:100%;max-width:448px;height:auto;border-radius:16px;touch-action:none;cursor:pointer;box-shadow:0 10px 30px rgba(30,95,214,.28)}
+      #connect4 .c4-score{display:flex;gap:14px;justify-content:center;margin:12px 0 4px;flex-wrap:wrap}
+      #connect4 .c4-score .c4-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-weight:700;font-size:14px;background:rgba(128,128,128,.1)}
+      #connect4 .c4-dot{width:14px;height:14px;border-radius:50%;display:inline-block}
+      #connect4 .c4-dot.r{background:#ff4d4f}
+      #connect4 .c4-dot.y{background:#ffcc00}
+      #connect4 .c4-dot.d{background:#9aa4b2}
+      #connect4 .c4-actions{display:flex;gap:10px;justify-content:center;margin-top:6px;flex-wrap:wrap}
+      #connect4 .c4-tip{text-align:center;font-size:12px;opacity:.6;margin-top:10px}
+    </style>
+    <div class="c4-wrap">
+      <h2 style="text-align:center;margin:4px 0 2px">🔴 四子棋</h2>
+      <p style="text-align:center;opacity:.7;font-size:13px;margin:0 0 6px">重力四连 · 落子从底部堆叠，先连成横/竖/斜四子者胜</p>
+      <div class="c4-bar">
+        <label>模式
+          <select id="c4Mode">
+            <option value="ai">🤖 人机对战</option>
+            <option value="pvp">👥 双人对战</option>
+          </select>
+        </label>
+        <label id="c4LevelWrap">难度
+          <select id="c4Level">
+            <option value="1">😌 简单</option>
+            <option value="2" selected>🙂 普通</option>
+            <option value="3">😈 困难</option>
+          </select>
+        </label>
+        <label id="c4FirstWrap">执子
+          <select id="c4First">
+            <option value="1" selected>🔴 我先手</option>
+            <option value="2">🟡 AI先手</option>
+          </select>
+        </label>
+      </div>
+      <div class="c4-status" id="c4Status">点击列即可落子</div>
+      <div class="c4-canvas-box">
+        <canvas id="c4Canvas" width="448" height="384"></canvas>
+      </div>
+      <div class="c4-score">
+        <span class="c4-chip"><span class="c4-dot r"></span>红 <b id="c4ScoreR">0</b></span>
+        <span class="c4-chip"><span class="c4-dot y"></span>黄 <b id="c4ScoreY">0</b></span>
+        <span class="c4-chip"><span class="c4-dot d"></span>平 <b id="c4ScoreD">0</b></span>
+      </div>
+      <div class="c4-actions">
+        <button class="btn" id="c4New">🔄 新局</button>
+        <button class="btn ghost" id="c4Undo">↩ 悔棋</button>
+      </div>
+      <div class="c4-tip">提示：AI 采用 α-β 剪枝极小化极大搜索，困难模式向前看 6 步。</div>
+    </div>
+  </section>
 
 <script>
 (function () {
@@ -5406,6 +5465,7 @@
     document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === id));
     if (id === "wheel") drawWheel();
     if (id === "vote") voteRender();
+    if (id === "connect4") c4Render();
     if (id === "fortune") drawFortune(true);
     if (id === "share") drawShareCard();
     if (id === "achv") renderAchv();
@@ -5522,6 +5582,7 @@
 
   /* ---------- 工具搜索（按名称 / 关键词过滤导航） ---------- */
   const TAB_KW = {
+    connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
     vote: "投票 表决 投票器 举手 民主 少数服从多数 决定 live poll", 
     pick: "抽签 选择 决定 随机 选择困难", wheel: "转盘 幸运转盘 抽奖 旋转 wheel",
     scale: "天平 决策 权衡 比较 选择 拍板", coin: "硬币 抛硬币 正反面 决定",
@@ -5700,6 +5761,7 @@
 
   /* ---------- 分类筛选（站点级导航增强，惠及全部 94 工具） ---------- */
   const TAB_CAT = {
+    connect4:"games",
     vote:"decide",
     pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
     fortune:"fortune", tarot:"fortune", iching:"fortune", huangli:"fortune", oracle:"fortune", gacha:"fortune", lotto:"fortune", dream:"fortune", bottle:"fortune", cp:"fortune",
@@ -16230,6 +16292,267 @@
     "平局不可怕，可怕的是没人敢投。",
     "好的投票题，选项少而精，人心自然易集中。",
     "把选择摆上台面，比藏在心里猜来猜去强。"
+  );
+
+  // ===== 🔴 四子棋 connect4 (Connect Four) =====
+  var C4_ROWS = 6, C4_COLS = 7, C4_KEY = "suibian_connect4";
+  var c4 = null;
+  function c4El(id) { return document.getElementById(id); }
+  function c4LoadScore() { try { var s = JSON.parse(localStorage.getItem(C4_KEY)); if (s && typeof s.r === "number") return s; } catch (e) {} return { r: 0, y: 0, d: 0 }; }
+  function c4SaveScore(s) { try { localStorage.setItem(C4_KEY, JSON.stringify(s)); } catch (e) {} }
+
+  // ---- 纯逻辑（可单测） ----
+  function c4NewCells(rows, cols) { var a = [], r, c; for (r = 0; r < rows; r++) { var row = []; for (c = 0; c < cols; c++) row.push(0); a.push(row); } return a; }
+  function c4Clone(cells) { return cells.map(function (row) { return row.slice(); }); }
+  function c4Cols(cells) { var v = [], c, cols = cells[0].length; for (c = 0; c < cols; c++) if (cells[0][c] === 0) v.push(c); return v; }
+  function c4DropRow(cells, col) { var r; for (r = cells.length - 1; r >= 0; r--) if (cells[r][col] === 0) return r; return -1; }
+  function c4Place(cells, col, player) { var r = c4DropRow(cells, col); if (r < 0) return -1; cells[r][col] = player; return r; }
+  function c4Full(cells) { return c4Cols(cells).length === 0; }
+  function c4WinCells(cells, player) {
+    var R = cells.length, C = cells[0].length, dirs = [[0, 1], [1, 0], [1, 1], [1, -1]], r, c, d, k;
+    for (r = 0; r < R; r++) for (c = 0; c < C; c++) {
+      if (cells[r][c] !== player) continue;
+      for (d = 0; d < 4; d++) {
+        var dr = dirs[d][0], dc = dirs[d][1], line = [[r, c]], ok = true;
+        for (k = 1; k < 4; k++) {
+          var nr = r + dr * k, nc = c + dc * k;
+          if (nr < 0 || nr >= R || nc < 0 || nc >= C || cells[nr][nc] !== player) { ok = false; break; }
+          line.push([nr, nc]);
+        }
+        if (ok) return line;
+      }
+    }
+    return null;
+  }
+  function c4ScoreWindow(w, me, opp) {
+    var m = 0, o = 0, e = 0, i;
+    for (i = 0; i < 4; i++) { if (w[i] === me) m++; else if (w[i] === opp) o++; else e++; }
+    if (m === 4) return 100000;
+    if (o === 4) return -100000;
+    var s = 0;
+    if (m === 3 && e === 1) s += 100; else if (m === 2 && e === 2) s += 10; else if (m === 1 && e === 3) s += 1;
+    if (o === 3 && e === 1) s -= 120; else if (o === 2 && e === 2) s -= 12;
+    return s;
+  }
+  function c4Eval(cells, me) {
+    var opp = me === 1 ? 2 : 1, R = cells.length, C = cells[0].length, score = 0, r, c, d, i;
+    var center = Math.floor(C / 2);
+    for (r = 0; r < R; r++) if (cells[r][center] === me) score += 6;
+    var dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    for (r = 0; r < R; r++) for (c = 0; c < C; c++) for (d = 0; d < 4; d++) {
+      var dr = dirs[d][0], dc = dirs[d][1], er = r + dr * 3, ec = c + dc * 3;
+      if (er < 0 || er >= R || ec < 0 || ec >= C) continue;
+      var w = []; for (i = 0; i < 4; i++) w.push(cells[r + dr * i][c + dc * i]);
+      score += c4ScoreWindow(w, me, opp);
+    }
+    return score;
+  }
+  function c4Minimax(cells, depth, alpha, beta, maximizing, aiP) {
+    var humanP = aiP === 1 ? 2 : 1;
+    if (c4WinCells(cells, aiP)) return { score: 1000000 + depth, col: -1 };
+    if (c4WinCells(cells, humanP)) return { score: -1000000 - depth, col: -1 };
+    var valid = c4Cols(cells);
+    if (depth === 0 || valid.length === 0) return { score: c4Eval(cells, aiP), col: -1 };
+    var mid = (cells[0].length - 1) / 2;
+    valid.sort(function (a, b) { return Math.abs(a - mid) - Math.abs(b - mid); });
+    var bestCol = valid[0], i, col, nb, val;
+    if (maximizing) {
+      var best = -Infinity;
+      for (i = 0; i < valid.length; i++) {
+        col = valid[i]; nb = c4Clone(cells); c4Place(nb, col, aiP);
+        val = c4Minimax(nb, depth - 1, alpha, beta, false, aiP).score;
+        if (val > best) { best = val; bestCol = col; }
+        alpha = Math.max(alpha, best); if (alpha >= beta) break;
+      }
+      return { score: best, col: bestCol };
+    } else {
+      var best2 = Infinity;
+      for (i = 0; i < valid.length; i++) {
+        col = valid[i]; nb = c4Clone(cells); c4Place(nb, col, humanP);
+        val = c4Minimax(nb, depth - 1, alpha, beta, true, aiP).score;
+        if (val < best2) { best2 = val; bestCol = col; }
+        beta = Math.min(beta, best2); if (alpha >= beta) break;
+      }
+      return { score: best2, col: bestCol };
+    }
+  }
+  function c4AiChoose(cells, aiP, level) {
+    var valid = c4Cols(cells); if (!valid.length) return -1;
+    var depth = level === 1 ? 2 : (level === 2 ? 4 : 6);
+    if (level === 1 && Math.random() < 0.35) return valid[Math.floor(Math.random() * valid.length)];
+    var res = c4Minimax(cells, depth, -Infinity, Infinity, true, aiP);
+    return res.col >= 0 ? res.col : valid[Math.floor(Math.random() * valid.length)];
+  }
+
+  // ---- 状态 / UI ----
+  function c4InitState() {
+    c4 = { cells: c4NewCells(C4_ROWS, C4_COLS), rows: C4_ROWS, cols: C4_COLS, turn: 1, mode: "ai", level: 2, humanColor: 1, over: false, winLine: null, hist: [], anim: false, hoverCol: -1, score: c4LoadScore() };
+  }
+  function c4DiscColor(v) { return v === 1 ? "#ff4d4f" : (v === 2 ? "#ffcc00" : null); }
+  function c4Draw(fall) {
+    var cv = c4El("c4Canvas"); if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext("2d"), W = cv.width, H = cv.height, cell = W / c4.cols, R = c4.rows, C = c4.cols, r, c;
+    ctx.clearRect(0, 0, W, H);
+    var rad = cell * 0.4;
+    // 蓝色棋盘
+    ctx.fillStyle = "#1e5fd6";
+    if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(0, 0, W, H, 16); ctx.fill(); } else { ctx.fillRect(0, 0, W, H); }
+    // 悬停高亮
+    if (!c4.over && !c4.anim && c4.hoverCol >= 0 && c4.hoverCol < C && (c4.mode !== "ai" || c4.turn === c4.humanColor)) {
+      ctx.fillStyle = "rgba(255,255,255,.12)";
+      ctx.fillRect(c4.hoverCol * cell, 0, cell, H);
+    }
+    // 落格与棋子
+    for (r = 0; r < R; r++) for (c = 0; c < C; c++) {
+      var cx = (c + 0.5) * cell, cy = (r + 0.5) * cell, v = c4.cells[r][c], col = c4DiscColor(v);
+      ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.fillStyle = col || "#0e1430"; ctx.fill();
+      if (col) {
+        ctx.beginPath(); ctx.arc(cx - rad * 0.28, cy - rad * 0.28, rad * 0.42, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,.28)"; ctx.fill();
+      }
+    }
+    // 下落中的棋子
+    if (fall) {
+      ctx.beginPath(); ctx.arc(fall.x, fall.y, rad, 0, Math.PI * 2);
+      ctx.fillStyle = c4DiscColor(fall.player); ctx.fill();
+      ctx.beginPath(); ctx.arc(fall.x - rad * 0.28, fall.y - rad * 0.28, rad * 0.42, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,.28)"; ctx.fill();
+    }
+    // 胜利连线高亮
+    if (c4.winLine) {
+      var i;
+      for (i = 0; i < c4.winLine.length; i++) {
+        var wr = c4.winLine[i][0], wc = c4.winLine[i][1];
+        ctx.beginPath(); ctx.arc((wc + 0.5) * cell, (wr + 0.5) * cell, rad + 3, 0, Math.PI * 2);
+        ctx.lineWidth = 4; ctx.strokeStyle = "#ffffff"; ctx.stroke();
+      }
+      var a = c4.winLine[0], b = c4.winLine[c4.winLine.length - 1];
+      ctx.beginPath(); ctx.moveTo((a[1] + 0.5) * cell, (a[0] + 0.5) * cell); ctx.lineTo((b[1] + 0.5) * cell, (b[0] + 0.5) * cell);
+      ctx.lineWidth = 6; ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineCap = "round"; ctx.stroke();
+    }
+  }
+  function c4AnimateDrop(col, row, player, cb) {
+    var cv = c4El("c4Canvas");
+    if (!cv || !cv.getContext || typeof requestAnimationFrame !== "function") { c4.cells[row][col] = player; c4Draw(); if (cb) cb(); return; }
+    var cell = cv.width / c4.cols, targetY = (row + 0.5) * cell, y = -cell * 0.5, v = 0, g = cell * 0.05, bounced = false;
+    c4.anim = true;
+    function step() {
+      v += g; y += v;
+      if (y >= targetY) {
+        if (!bounced && v > cell * 0.14) { y = targetY; v = -v * 0.26; bounced = true; }
+        else { y = targetY; c4.anim = false; c4.cells[row][col] = player; c4Draw(); if (cb) cb(); return; }
+      }
+      c4Draw({ x: (col + 0.5) * cell, y: y, player: player });
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function c4WinnerName(p) {
+    if (c4.mode === "ai") return p === c4.humanColor ? "你" : "AI";
+    return p === 1 ? "红方" : "黄方";
+  }
+  function c4Status(msg) {
+    var el = c4El("c4Status"); if (!el) return;
+    if (msg) { el.textContent = msg; return; }
+    if (c4.over) return;
+    var who = c4WinnerName(c4.turn), dot = c4.turn === 1 ? "🔴" : "🟡";
+    el.textContent = dot + " 轮到" + who + "落子";
+  }
+  function c4RenderScore() {
+    var r = c4El("c4ScoreR"), y = c4El("c4ScoreY"), d = c4El("c4ScoreD");
+    if (r) r.textContent = c4.score.r; if (y) y.textContent = c4.score.y; if (d) d.textContent = c4.score.d;
+  }
+  function c4ToggleAiOpts() {
+    var show = c4.mode === "ai" ? "" : "none";
+    var lw = c4El("c4LevelWrap"), fw = c4El("c4FirstWrap");
+    if (lw) lw.style.display = show; if (fw) fw.style.display = show;
+  }
+  function c4AfterMove(p) {
+    if (typeof bumpUsage === "function") bumpUsage("connect4");
+    var win = c4WinCells(c4.cells, p);
+    if (win) {
+      c4.over = true; c4.winLine = win;
+      if (p === 1) c4.score.r++; else c4.score.y++;
+      c4SaveScore(c4.score); c4RenderScore();
+      c4Status("🎉 " + c4WinnerName(p) + "连成四子，获胜！");
+      c4Draw();
+      if (typeof confettiBurst === "function") confettiBurst(90);
+      return;
+    }
+    if (c4Full(c4.cells)) {
+      c4.over = true; c4.score.d++; c4SaveScore(c4.score); c4RenderScore();
+      c4Status("🤝 平局！棋盘满了"); c4Draw(); return;
+    }
+    c4.turn = p === 1 ? 2 : 1; c4Status(); c4Draw();
+    if (c4.mode === "ai" && c4.turn !== c4.humanColor && !c4.over) {
+      c4.anim = true;
+      setTimeout(function () { c4.anim = false; c4AiMove(); }, 340);
+    }
+  }
+  function c4HumanMove(col) {
+    if (!c4 || c4.over || c4.anim) return;
+    if (c4.mode === "ai" && c4.turn !== c4.humanColor) return;
+    var row = c4DropRow(c4.cells, col); if (row < 0) return;
+    var p = c4.turn; c4.hist.push({ col: col, row: row, player: p });
+    c4AnimateDrop(col, row, p, function () { c4AfterMove(p); });
+  }
+  function c4AiMove() {
+    if (!c4 || c4.over) return;
+    var aiP = c4.turn, col = c4AiChoose(c4.cells, aiP, c4.level); if (col < 0) return;
+    var row = c4DropRow(c4.cells, col); if (row < 0) return;
+    c4.hist.push({ col: col, row: row, player: aiP });
+    c4AnimateDrop(col, row, aiP, function () { c4AfterMove(aiP); });
+  }
+  function c4Undo() {
+    if (!c4 || c4.anim || !c4.hist.length) return;
+    var steps = (c4.mode === "ai") ? Math.min(2, c4.hist.length) : 1, i, m = null;
+    for (i = 0; i < steps; i++) { m = c4.hist.pop(); if (!m) break; c4.cells[m.row][m.col] = 0; }
+    if (m) c4.turn = m.player;
+    c4.over = false; c4.winLine = null; c4Draw(); c4Status();
+  }
+  function c4New() {
+    if (!c4) c4InitState();
+    c4.cells = c4NewCells(C4_ROWS, C4_COLS); c4.over = false; c4.winLine = null; c4.hist = []; c4.anim = false; c4.turn = 1; c4.hoverCol = -1;
+    c4Draw(); c4Status();
+    if (c4.mode === "ai" && c4.humanColor === 2) {
+      c4.anim = true; setTimeout(function () { c4.anim = false; c4AiMove(); }, 320);
+    }
+  }
+  function c4Render() { if (!c4) c4InitState(); c4ToggleAiOpts(); c4Draw(); c4Status(); c4RenderScore(); }
+  function c4Bind() {
+    var cv = c4El("c4Canvas"); if (!cv) return;
+    if (!c4) c4InitState();
+    function colFromEvent(e) {
+      var rect = cv.getBoundingClientRect(); if (!rect.width) return -1;
+      var x = (e.clientX - rect.left) * (cv.width / rect.width);
+      return Math.floor(x / (cv.width / c4.cols));
+    }
+    cv.addEventListener("mousemove", function (e) { var c = colFromEvent(e); if (c !== c4.hoverCol) { c4.hoverCol = c; if (!c4.anim) c4Draw(); } });
+    cv.addEventListener("mouseleave", function () { c4.hoverCol = -1; if (!c4.anim) c4Draw(); });
+    cv.addEventListener("click", function (e) { var c = colFromEvent(e); if (c >= 0 && c < c4.cols) c4HumanMove(c); });
+    cv.addEventListener("touchstart", function (e) {
+      if (e.touches && e.touches[0]) { var c = colFromEvent(e.touches[0]); if (c >= 0 && c < c4.cols) { e.preventDefault(); c4HumanMove(c); } }
+    }, { passive: false });
+    var mode = c4El("c4Mode"); if (mode) mode.onchange = function () { c4.mode = mode.value; c4ToggleAiOpts(); c4New(); };
+    var lvl = c4El("c4Level"); if (lvl) lvl.onchange = function () { c4.level = parseInt(lvl.value, 10) || 2; };
+    var first = c4El("c4First"); if (first) first.onchange = function () { c4.humanColor = parseInt(first.value, 10) || 1; c4New(); };
+    var nw = c4El("c4New"); if (nw) nw.onclick = c4New;
+    var un = c4El("c4Undo"); if (un) un.onclick = c4Undo;
+    c4ToggleAiOpts(); c4RenderScore(); c4Draw();
+  }
+  c4Bind();
+  BADGES.push(
+    { emoji: "🔴", name: "四连新手", desc: "玩了 1 局四子棋", test: function (u) { return (u.connect4 || 0) >= 1; } },
+    { emoji: "🏆", name: "四连大师", desc: "累计落子 20 次", test: function (u) { return (u.connect4 || 0) >= 20; } }
+  );
+  QUOTES.push(
+    "四子棋教会你：抢中路的人，往往先赢一半。",
+    "别只盯着自己连线，也要堵住对手的三连。",
+    "一步一格往下掉，人生的选择也常常没有回头路。",
+    "先手是优势，但用不好照样翻车。",
+    "看似随手一落，胜负早在三步之前埋下。",
+    "困难模式赢一局，比简单模式赢十局更甜。"
   );
   BADGES.push(
     { emoji: "🔐", name: "密码哨兵", desc: "用过 1 次密码强度检测", test: (u) => (u.pwdcheck || 0) >= 1 },
