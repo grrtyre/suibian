@@ -1507,6 +1507,7 @@
       <button data-tab="vote">🗳️ 快速投票</button>
       <button data-tab="connect4">🔴 四子棋</button>
         <button data-tab="horo">⭐ 星座运势</button>
+        <button data-tab="muyu">🪷 电子木鱼</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5201,6 +5202,60 @@
   </div>
 </section>
 
+<section class="panel" id="muyu">
+  <style>
+    #muyu .muyu-inst{display:flex;gap:8px;justify-content:center;margin:12px 0}
+    #muyu .muyu-inst button{padding:8px 16px;border-radius:999px;border:1px solid rgba(128,128,128,.35);background:rgba(128,128,128,.08);cursor:pointer;font-size:15px;transition:all .15s}
+    #muyu .muyu-inst button.on{background:linear-gradient(135deg,#c9a227,#e7c765);color:#fff;border-color:#c9a227;font-weight:700}
+    #muyu .muyu-stage{position:relative;width:280px;height:250px;margin:0 auto;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none}
+    #muyu .muyu-tap{font-size:118px;line-height:1;cursor:pointer;transition:transform .06s ease;filter:drop-shadow(0 12px 26px rgba(0,0,0,.28))}
+    #muyu .muyu-tap.hit{transform:scale(.86)}
+    #muyu .muyu-float{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:hidden}
+    #muyu .muyu-float span{position:absolute;font-weight:700;font-size:20px;color:#c9a227;animation:muyuUp 1s ease-out forwards;text-shadow:0 1px 6px rgba(0,0,0,.2);white-space:nowrap}
+    #muyu .muyu-float span.gold{font-size:26px;color:#ff9f1c}
+    @keyframes muyuUp{0%{opacity:0;transform:translateY(0) scale(.8)}15%{opacity:1}100%{opacity:0;transform:translateY(-110px) scale(1.15)}}
+    #muyu .muyu-combo{position:absolute;right:4px;top:4px;font-weight:800;font-size:18px;color:#ff9f1c;opacity:0;transition:opacity .25s}
+    #muyu .muyu-combo.show{opacity:1}
+    #muyu .muyu-stats{display:grid;grid-template-columns:repeat(4,minmax(70px,1fr));gap:10px;margin:14px auto;max-width:540px}
+    #muyu .muyu-stat{padding:10px 6px;border-radius:12px;border:1px solid rgba(128,128,128,.25);background:rgba(128,128,128,.06);text-align:center}
+    #muyu .muyu-stat b{display:block;font-size:22px;color:#c9a227}
+    #muyu .muyu-stat i{font-style:normal;font-size:12px;opacity:.72}
+    #muyu .muyu-ctl{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;margin:10px 0;font-size:14px}
+    #muyu .muyu-chart{display:flex;gap:8px;align-items:flex-end;justify-content:center;height:118px;max-width:540px;margin:16px auto 4px}
+    #muyu .muyu-bar{width:44px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+    #muyu .muyu-bar .bg{width:100%;border-radius:8px 8px 4px 4px;background:linear-gradient(180deg,#e7c765,#c9a227);min-height:3px}
+    #muyu .muyu-bar.today .bg{background:linear-gradient(180deg,#ffb85c,#ff9f1c)}
+    #muyu .muyu-bar em{font-style:normal;font-size:11px;opacity:.65}
+    #muyu .muyu-bar u{text-decoration:none;font-size:11px;font-weight:700}
+    #muyu .muyu-tip{text-align:center;font-size:12px;opacity:.7;margin-top:6px}
+  </style>
+  <h2>🪷 电子木鱼</h2>
+  <p class="desc">敲一敲，功德 +1。烦恼是别人的，功德是自己的——木鱼 / 颂钵 / 太鼓三种音色（WebAudio 本地合成），支持连击、自动敲与近 7 日功德统计，空格键也能敲，数据只存本地浏览器。</p>
+  <div class="muyu-inst">
+    <button type="button" data-inst="wood" class="on">🪵 木鱼</button>
+    <button type="button" data-inst="bowl">🔔 颂钵</button>
+    <button type="button" data-inst="drum">🥁 太鼓</button>
+  </div>
+  <div class="muyu-stage">
+    <div class="muyu-tap" id="muyuTap" title="点我敲一下">🪵</div>
+    <div class="muyu-float" id="muyuFloat"></div>
+    <div class="muyu-combo" id="muyuCombo"></div>
+  </div>
+  <div class="muyu-stats">
+    <div class="muyu-stat"><b id="muyuToday">0</b><i>今日功德</i></div>
+    <div class="muyu-stat"><b id="muyuTotal">0</b><i>累计功德</i></div>
+    <div class="muyu-stat"><b id="muyuNow">0</b><i>当前连击</i></div>
+    <div class="muyu-stat"><b id="muyuBest">0</b><i>最高连击</i></div>
+  </div>
+  <div class="muyu-ctl">
+    <label><input type="checkbox" id="muyuAuto"> 自动敲</label>
+    <label>速度 <input type="range" id="muyuSpeed" min="1" max="10" value="4" style="vertical-align:middle"> <span id="muyuSpeedVal">2.0 次/秒</span></label>
+    <label><input type="checkbox" id="muyuMute"> 静音</label>
+  </div>
+  <div class="muyu-chart" id="muyuChart"></div>
+  <p class="muyu-tip">近 7 日功德 · 功德满 100 / 520 / 1000 / 5000 / 10000 有惊喜 🎉</p>
+</section>
+
 <script>
 (function () {
   "use strict";
@@ -5529,6 +5584,8 @@
     if (id === "vote") voteRender();
     if (id === "connect4") c4Render();
     if (id === "horo") horoRender();
+    if (id === "muyu") muyuRender();
+    if (id !== "muyu" && typeof muyuStop === "function") muyuStop();
     if (id === "fortune") drawFortune(true);
     if (id === "share") drawShareCard();
     if (id === "achv") renderAchv();
@@ -5646,6 +5703,7 @@
   /* ---------- 工具搜索（按名称 / 关键词过滤导航） ---------- */
   const TAB_KW = {
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
+    muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
     vote: "投票 表决 投票器 举手 民主 少数服从多数 决定 live poll", 
     pick: "抽签 选择 决定 随机 选择困难", wheel: "转盘 幸运转盘 抽奖 旋转 wheel",
@@ -5826,6 +5884,7 @@
   /* ---------- 分类筛选（站点级导航增强，惠及全部 94 工具） ---------- */
   const TAB_CAT = {
     horo:"fortune",
+    muyu:"life",
     connect4:"games",
     vote:"decide",
     pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
@@ -16432,6 +16491,196 @@
     var sh=document.getElementById("horoShare");
     if(sh){ sh.addEventListener("click",function(){ var d=horoState._last; if(!d){ return; } var txt="⭐ "+d.sign.nm+"座 "+d.dstr+" 运势：综合 "+d.overall+"分\n爱情"+horoStars(d.love)+" 事业"+horoStars(d.career)+" 财运"+horoStars(d.wealth)+" 健康"+horoStars(d.health)+"\n幸运色："+d.color+" 幸运数："+d.num+" 方位："+d.dir+"\n宜："+d.yi+"\n忌："+d.ji+"\n"+d.adv+"\n—— 随便·决策工具箱"; if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ horoMsg("✅ 运势文案已复制"); },function(){ horoMsg("复制失败，请手动选择"); }); } else { horoMsg("当前环境不支持自动复制"); } }); }
   }
+  /* ---------- 🪷 电子木鱼 ---------- */
+  var muyuState = null;
+  var muyuTimer = null;
+  var muyuCtx = null;
+  var muyuComboN = 0;
+  var muyuLastKnock = 0;
+  var muyuComboHide = null;
+  var MUYU_MILES = [100, 520, 1000, 5000, 10000];
+  function muyuYmd(off) {
+    var d = new Date(); if (off) d.setDate(d.getDate() + off);
+    var m = d.getMonth() + 1, dd = d.getDate();
+    return d.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (dd < 10 ? "0" + dd : dd);
+  }
+  function muyuLoad() {
+    if (muyuState) return muyuState;
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem("suibian_muyu") || "null"); } catch (e) { s = null; }
+    if (!s || typeof s !== "object") s = {};
+    muyuState = { t: +s.t || 0, b: +s.b || 0, d: (s.d && typeof s.d === "object") ? s.d : {}, inst: s.inst === "bowl" || s.inst === "drum" ? s.inst : "wood" };
+    return muyuState;
+  }
+  function muyuSave() {
+    if (!muyuState) return;
+    try { localStorage.setItem("suibian_muyu", JSON.stringify(muyuState)); } catch (e) {}
+  }
+  function muyuAudio() {
+    if (muyuCtx) return muyuCtx;
+    try {
+      var AC = (typeof window !== "undefined") && (window.AudioContext || window.webkitAudioContext);
+      if (AC) muyuCtx = new AC();
+    } catch (e) { muyuCtx = null; }
+    return muyuCtx;
+  }
+  function muyuSound(inst) {
+    var mute = $("muyuMute"); if (mute && mute.checked) return;
+    var ctx = muyuAudio(); if (!ctx) return;
+    try {
+      if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+      var t = ctx.currentTime;
+      var beep = function (type, f0, f1, dur, vol) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = type; o.frequency.setValueAtTime(f0, t);
+        if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(Math.max(f1, 1), t + dur);
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + dur + 0.05);
+      };
+      if (inst === "bowl") { beep("sine", 392, 392, 2.2, 0.22); beep("sine", 588, 586, 1.6, 0.12); beep("sine", 784, 782, 1.1, 0.07); }
+      else if (inst === "drum") { beep("sine", 150, 52, 0.32, 0.5); beep("triangle", 90, 45, 0.22, 0.25); }
+      else { beep("sine", 830, 520, 0.085, 0.4); beep("sine", 620, 400, 0.07, 0.22); }
+    } catch (e) {}
+  }
+  function muyuFloatText(txt, gold) {
+    var layer = $("muyuFloat"); if (!layer) return;
+    var sp = document.createElement("span");
+    sp.textContent = txt;
+    if (gold) sp.className = "gold";
+    sp.style.left = (26 + Math.random() * 40) + "%";
+    sp.style.top = (34 + Math.random() * 14) + "%";
+    layer.appendChild(sp);
+    setTimeout(function () { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 1050);
+  }
+  function muyuKnock() {
+    var st = muyuLoad();
+    var now = Date.now();
+    muyuComboN = (now - muyuLastKnock <= 1500) ? muyuComboN + 1 : 1;
+    muyuLastKnock = now;
+    if (muyuComboN > st.b) st.b = muyuComboN;
+    var old = st.t;
+    st.t += 1;
+    var ymd = muyuYmd(0);
+    st.d[ymd] = (st.d[ymd] || 0) + 1;
+    var keys = Object.keys(st.d);
+    if (keys.length > 40) { keys.sort(); while (keys.length > 30) delete st.d[keys.shift()]; }
+    muyuSave();
+    if (typeof bumpUsage === "function") bumpUsage("muyu");
+    var gold = muyuComboN > 1 && muyuComboN % 10 === 0;
+    muyuFloatText(gold ? "功德 +1 · " + muyuComboN + " 连击" : "功德 +1", gold);
+    var tap = $("muyuTap");
+    if (tap) { tap.classList.remove("hit"); void tap.offsetWidth; tap.classList.add("hit"); setTimeout(function () { tap.classList.remove("hit"); }, 70); }
+    muyuSound(st.inst);
+    for (var i = 0; i < MUYU_MILES.length; i++) {
+      var m = MUYU_MILES[i];
+      if (old < m && st.t >= m) {
+        if (typeof confettiBurst === "function") { try { confettiBurst(90); } catch (e) {} }
+        if (typeof toast === "function") toast("🪷 功德满 " + m + "！佛光普照，好运常伴");
+      }
+    }
+    muyuStatsDraw();
+  }
+  function muyuStatsDraw() {
+    var st = muyuLoad();
+    var ymd = muyuYmd(0);
+    var e1 = $("muyuToday"); if (e1) e1.textContent = st.d[ymd] || 0;
+    var e2 = $("muyuTotal"); if (e2) e2.textContent = st.t;
+    var e3 = $("muyuNow"); if (e3) e3.textContent = muyuComboN;
+    var e4 = $("muyuBest"); if (e4) e4.textContent = st.b;
+    var cb = $("muyuCombo");
+    if (cb && muyuComboN >= 5) {
+      cb.textContent = muyuComboN + " 连击 🔥";
+      cb.classList.add("show");
+      if (muyuComboHide) clearTimeout(muyuComboHide);
+      muyuComboHide = setTimeout(function () { cb.classList.remove("show"); }, 1800);
+    }
+    muyuChartDraw();
+  }
+  function muyuChartDraw() {
+    var box = $("muyuChart"); if (!box) return;
+    var st = muyuLoad();
+    var days = [], max = 1, i;
+    for (i = 6; i >= 0; i--) {
+      var k = muyuYmd(-i);
+      var n = st.d[k] || 0;
+      if (n > max) max = n;
+      days.push({ k: k, n: n, today: i === 0 });
+    }
+    var html = "";
+    for (i = 0; i < days.length; i++) {
+      var d = days[i];
+      var h = Math.max(3, Math.round(d.n / max * 78));
+      html += '<div class="muyu-bar' + (d.today ? " today" : "") + '"><u>' + d.n + '</u><div class="bg" style="height:' + h + 'px"></div><em>' + d.k.slice(5) + "</em></div>";
+    }
+    box.innerHTML = html;
+  }
+  function muyuSetInst(inst) {
+    var st = muyuLoad(); st.inst = inst; muyuSave();
+    var tap = $("muyuTap");
+    if (tap) tap.textContent = inst === "bowl" ? "🔔" : inst === "drum" ? "🥁" : "🪵";
+    var btns = document.querySelectorAll("#muyu .muyu-inst button");
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle("on", btns[i].getAttribute("data-inst") === inst);
+  }
+  function muyuAutoStart() {
+    if (muyuTimer) { clearInterval(muyuTimer); muyuTimer = null; }
+    var sp = $("muyuSpeed");
+    var perSec = sp ? (+sp.value || 4) / 2 : 2;
+    muyuTimer = setInterval(function () { muyuKnock(); }, Math.max(100, Math.round(1000 / perSec)));
+  }
+  function muyuStop() {
+    if (muyuTimer) { clearInterval(muyuTimer); muyuTimer = null; }
+    var a = $("muyuAuto"); if (a) a.checked = false;
+  }
+  function muyuRender() {
+    var st = muyuLoad();
+    muyuSetInst(st.inst);
+    muyuStatsDraw();
+  }
+  function muyuBind() {
+    var tap = $("muyuTap"); if (!tap) return;
+    tap.addEventListener("click", function () { muyuKnock(); });
+    tap.addEventListener("touchstart", function (e) { e.preventDefault(); muyuKnock(); }, { passive: false });
+    var btns = document.querySelectorAll("#muyu .muyu-inst button");
+    for (var i = 0; i < btns.length; i++) {
+      (function (b) {
+        b.addEventListener("click", function () { muyuSetInst(b.getAttribute("data-inst")); muyuSound(muyuLoad().inst); });
+      })(btns[i]);
+    }
+    var auto = $("muyuAuto");
+    if (auto) auto.addEventListener("change", function () { if (auto.checked) muyuAutoStart(); else { if (muyuTimer) { clearInterval(muyuTimer); muyuTimer = null; } } });
+    var sp = $("muyuSpeed");
+    if (sp) sp.addEventListener("input", function () {
+      var v = ((+sp.value || 4) / 2).toFixed(1);
+      var sv = $("muyuSpeedVal"); if (sv) sv.textContent = v + " 次/秒";
+      if (auto && auto.checked) muyuAutoStart();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.code !== "Space" && e.key !== " ") return;
+      var p = document.querySelector(".panel.active");
+      if (!p || p.id !== "muyu") return;
+      var tgt = e.target;
+      if (tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA" || tgt.isContentEditable)) return;
+      e.preventDefault();
+      muyuKnock();
+    });
+  }
+  muyuBind();
+  BADGES.push(
+    { emoji: "🪷", name: "初入禅门", desc: "敲响第 1 声电子木鱼", test: function (u) { return (u.muyu || 0) >= 1; } },
+    { emoji: "🌸", name: "功德无量", desc: "累计敲击木鱼 1000 次", test: function (u) { return (u.muyu || 0) >= 1000; } }
+  );
+  QUOTES.push(
+    "敲一下木鱼，烦恼就少一分，功德就多一分。",
+    "佛系不是躺平，是把在意留给值得的事。",
+    "功德是自己的，KPI 是老板的。",
+    "心烦意乱的时候，就来敲两下，声音会替你叹气。",
+    "电子木鱼一响，胜过咖啡两杯。",
+    "今天攒的功德，都是明天的好运。",
+    "万物皆可随缘，唯独功德要自己敲。",
+    "静下来的那一秒，世界就宽了一寸。"
+  );
   horoBind();
   BADGES.push(
     { emoji: "⭐", name: "星盘初启", desc: "查看过 1 次星座运势", test: function(u){ return (u.horo || 0) >= 1; } },
