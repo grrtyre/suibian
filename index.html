@@ -1511,6 +1511,7 @@
         <button data-tab="hanoi">🗼 汉诺塔</button>
         <button data-tab="dino">🦖 恐龙快跑</button>
         <button data-tab="pong">🏓 弹球对战</button>
+        <button data-tab="stock">💹 股市大亨</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5362,6 +5363,60 @@
     <div class="pong-tip">🖱 拖动画布或按 ↑ / ↓ 移动球拍，点击画布开始 / 暂停后继续<br>球拍中心击球回得更平，边缘击球角度更刁；先到 7 分获胜，累计取胜 3 场解锁「乒坛高手」🏆</div>
   </div>
 </section>
+<section class="panel" id="stock">
+  <style>
+    #stock .stk-wrap { max-width: 720px; margin: 0 auto; }
+    #stock .stk-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+    #stock .stk-cell { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 8px 6px; text-align: center; }
+    #stock .stk-cell b { display: block; font-size: 1.05em; margin-top: 2px; }
+    #stock .stk-cell span { font-size: .75em; opacity: .75; }
+    #stock .stk-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    #stock .stk-pill { flex: 1 1 150px; cursor: pointer; border-radius: 12px; padding: 8px 10px; border: 2px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05); text-align: left; transition: all .15s; }
+    #stock .stk-pill.on { border-color: #f6c94a; background: rgba(246,201,74,.12); }
+    #stock .stk-pill .nm { font-weight: 700; font-size: .92em; }
+    #stock .stk-pill .pr { font-size: 1.02em; font-weight: 700; margin-top: 2px; }
+    #stock .stk-pill .hd { font-size: .72em; opacity: .8; margin-top: 2px; }
+    #stock .stk-up { color: #ff6b6b; }
+    #stock .stk-dn { color: #4cd39a; }
+    #stock canvas { width: 100%; max-width: 680px; border-radius: 12px; background: #10141f; border: 1px solid rgba(255,255,255,.14); display: block; margin: 0 auto; touch-action: manipulation; }
+    #stock .stk-day { display: flex; align-items: center; gap: 10px; margin: 10px 0 6px; font-size: .85em; }
+    #stock .stk-prog { flex: 1; height: 8px; border-radius: 6px; background: rgba(255,255,255,.1); overflow: hidden; }
+    #stock .stk-prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#f6c94a,#ff8a5c); border-radius: 6px; transition: width .3s; }
+    #stock .stk-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 10px 0; }
+    #stock .stk-btns button { min-width: 96px; }
+    #stock .stk-news { list-style: none; padding: 0; margin: 10px auto; max-width: 680px; text-align: left; }
+    #stock .stk-news li { font-size: .82em; padding: 5px 10px; border-left: 3px solid rgba(255,255,255,.2); margin: 4px 0; background: rgba(255,255,255,.04); border-radius: 0 8px 8px 0; }
+    #stock .stk-rec { font-size: .82em; opacity: .8; margin-top: 8px; }
+    #stock .stk-tip { font-size: .78em; opacity: .65; margin-top: 10px; line-height: 1.7; }
+  </style>
+  <h2>💹 股市大亨</h2>
+  <p class="desc">虚拟盘模拟炒股：10 万本金、60 个交易日、4 只妖股，K 线随机漫步 + 突发新闻，看你能赚几个点（纯属娱乐，数据不出本机）</p>
+  <div class="stk-wrap">
+    <div class="stk-stats">
+      <div class="stk-cell"><span>💵 现金</span><b id="stockCash">--</b></div>
+      <div class="stk-cell"><span>📦 持仓市值</span><b id="stockMkt">--</b></div>
+      <div class="stk-cell"><span>💰 总资产</span><b id="stockTotal">--</b></div>
+      <div class="stk-cell"><span>📊 收益率</span><b id="stockRet">--</b></div>
+    </div>
+    <div class="stk-pills" id="stockPills"></div>
+    <canvas id="stockCanvas" width="680" height="300"></canvas>
+    <div class="stk-day"><span id="stockDayLbl">第 0 / 60 天</span><div class="stk-prog"><i id="stockProg"></i></div></div>
+    <div class="stk-btns">
+      <button type="button" id="stockB100">买入 100 股</button>
+      <button type="button" id="stockBAll">🈵 全仓买入</button>
+      <button type="button" id="stockS100">卖出 100 股</button>
+      <button type="button" id="stockSAll">🧹 清仓</button>
+    </div>
+    <div class="stk-btns">
+      <button type="button" id="stockNext" class="primary">⏭ 下一天</button>
+      <button type="button" id="stockAuto">▶ 自动播放</button>
+      <button type="button" id="stockNew">🆕 开新局</button>
+    </div>
+    <ul class="stk-news" id="stockNews"></ul>
+    <div class="stk-rec" id="stockRec"></div>
+    <div class="stk-tip">📌 玩法：点股票卡切换标的，K 线红涨绿跌（A 股配色），带 MA5 均线；每天约两成概率爆出利好 / 利空新闻，影响未来三天走势；买卖收取 0.1% 手续费；60 天收盘自动结算，正收益撒花庆祝，历史最佳收益率永久保存在本地。中途关页面不怕，进度自动存档。</div>
+  </div>
+</section>
 <script>
 (function () {
   "use strict";
@@ -5694,7 +5749,9 @@
     if (id === "hanoi") hanoiRender();
     if (id === "dino") dinoRender();
     if (id === "pong") pongRender();
+    if (id === "stock") stockRender();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
+    if (id !== "stock" && typeof stockStop === "function") stockStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
     if (id !== "muyu" && typeof muyuStop === "function") muyuStop();
     if (id === "fortune") drawFortune(true);
@@ -5816,6 +5873,7 @@
     hanoi: "汉诺塔 河内塔 移动圆盘 递归 益智 解谜 tower of hanoi 圆盘 三柱 经典 puzzle 搬盘子",
     dino: "恐龙快跑 小恐龙 跑酷 dino run runner 无尽 跳跃 仙人掌 翼龙 chrome 断网 游戏 t-rex 霸王龙",
   pong: "弹球对战 pong 乒乓 乒乓球 球拍 弹球 ai 对战 反弹 报销 游戏 接球 挡板",
+    stock: "股市大亨 stock 炒股 模拟炒股 股票 k线 K线 均线 牛市 熊市 韭菜 交易 买入 卖出 虚拟盘 投资 理财 收益率 游戏",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6000,6 +6058,7 @@
     hanoi:"games",
     dino:"games",
 pong:"games",
+stock:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -17461,6 +17520,307 @@ pong:"games",
     });
     pongStatsDom(); pongDraw();
   }
+  /* ── 💹 股市大亨 ── */
+  var stockG = null, stockAutoTimer = null, stockSelIdx = 0;
+  var STOCK_DAYS = 60, STOCK_CASH0 = 100000, STOCK_FEE = 0.001;
+  var STOCK_DEFS = [
+    { name: "随便科技", code: "SB001", p0: 128, drift: 0.0014, vol: 0.03 },
+    { name: "摸鱼白酒", code: "SB002", p0: 188, drift: 0.0008, vol: 0.018 },
+    { name: "躺平新能源", code: "SB003", p0: 66, drift: 0.0011, vol: 0.036 },
+    { name: "干饭医疗", code: "SB004", p0: 88, drift: 0.0006, vol: 0.023 }
+  ];
+  var STOCK_NEWS_GOOD = ["签下天价大单，订单排到后年", "新品发布会好评如潮", "财报大超预期，净利翻倍", "获国家级补贴力挺", "神秘游资连续扫货", "官宣与巨头战略合作", "核心专利获批，护城河加深", "被纳入明星指数成分股"];
+  var STOCK_NEWS_BAD = ["高管组团减持套现", "产品爆出质量问题连夜召回", "财报暴雷，业绩变脸", "遭遇做空机构狙击", "行业新规收紧，前景蒙尘", "大客户流失，订单腰斩", "工厂意外停产检修", "券商集体下调评级"];
+  function stockRandn() {
+    var u = 0, v = 0;
+    while (!u) u = Math.random();
+    while (!v) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  function stockFmt(n) {
+    return "\u00a5" + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  function stockLoadRec() {
+    try { return JSON.parse(localStorage.getItem("suibian_stock") || "{}"); } catch (e) { return {}; }
+  }
+  function stockSaveRec(r) {
+    try { localStorage.setItem("suibian_stock", JSON.stringify(r)); } catch (e) {}
+  }
+  function stockSaveGame() {
+    try {
+      if (stockG && !stockG.over) localStorage.setItem("suibian_stock_game", JSON.stringify({ g: stockG, sel: stockSelIdx }));
+      else localStorage.removeItem("suibian_stock_game");
+    } catch (e) {}
+  }
+  function stockStep1(s) {
+    var o = s.price;
+    var d = s.drift + (s.nd || 0);
+    var c = Math.max(1, o * (1 + d + s.vol * stockRandn()));
+    var hi = Math.max(o, c) * (1 + Math.abs(stockRandn()) * s.vol * 0.35);
+    var lo = Math.max(0.5, Math.min(o, c) * (1 - Math.abs(stockRandn()) * s.vol * 0.35));
+    s.hist.push({ o: o, h: hi, l: lo, c: c });
+    if (s.hist.length > 90) s.hist.shift();
+    s.prev = o;
+    s.price = c;
+    if (s.ndDays > 0) { s.ndDays--; if (!s.ndDays) s.nd = 0; }
+  }
+  function stockNewGame() {
+    stockAutoStop();
+    var stocks = STOCK_DEFS.map(function (d) {
+      var s = { name: d.name, code: d.code, drift: d.drift, vol: d.vol, price: d.p0 * (0.9 + Math.random() * 0.2), prev: 0, hold: 0, cost: 0, nd: 0, ndDays: 0, hist: [] };
+      for (var i = 0; i < 30; i++) stockStep1(s);
+      return s;
+    });
+    stockG = { day: 0, cash: STOCK_CASH0, stocks: stocks, news: [], over: false };
+    stockSelIdx = 0;
+    stockG.news.unshift({ d: 0, t: "🔔 新的一局开始！10 万本金已到账，祝你旗开得胜。" });
+    stockSaveGame();
+    stockDomAll();
+  }
+  function stockAsset(g) {
+    var t = g.cash;
+    for (var i = 0; i < g.stocks.length; i++) t += g.stocks[i].hold * g.stocks[i].price;
+    return t;
+  }
+  function stockNextDay() {
+    if (!stockG || stockG.over) return;
+    var g = stockG;
+    g.day++;
+    for (var i = 0; i < g.stocks.length; i++) stockStep1(g.stocks[i]);
+    if (Math.random() < 0.18) {
+      var idx = Math.floor(Math.random() * g.stocks.length);
+      var s = g.stocks[idx];
+      var good = Math.random() < 0.5;
+      s.nd = (good ? 1 : -1) * (0.015 + Math.random() * 0.025);
+      s.ndDays = 3;
+      var pool = good ? STOCK_NEWS_GOOD : STOCK_NEWS_BAD;
+      g.news.unshift({ d: g.day, t: (good ? "📈 利好 · " : "📉 利空 · ") + s.name + "：" + pool[Math.floor(Math.random() * pool.length)] });
+      if (g.news.length > 6) g.news.length = 6;
+    }
+    if (g.day >= STOCK_DAYS) stockFinish();
+    else stockSaveGame();
+    stockDomAll();
+  }
+  function stockTrade(kind) {
+    if (!stockG) return;
+    if (stockG.over) { toast("本局已收盘，点「开新局」再战 💹"); return; }
+    var g = stockG, s = g.stocks[stockSelIdx];
+    if (kind === "b100" || kind === "ball") {
+      var unit = s.price * (1 + STOCK_FEE);
+      var qty = kind === "b100" ? 100 : Math.floor(g.cash / unit / 100) * 100;
+      if (qty < 100 || g.cash < qty * unit - 1e-6) { toast("现金不够啦，先卖点别的 💸"); return; }
+      s.cost = (s.cost * s.hold + qty * s.price) / (s.hold + qty);
+      s.hold += qty;
+      g.cash -= qty * unit;
+      toast("买入 " + s.name + " " + qty + " 股 ✅");
+    } else {
+      var q = kind === "s100" ? 100 : s.hold;
+      if (s.hold <= 0 || q <= 0) { toast("手里没有 " + s.name + "，先买点吧"); return; }
+      if (q > s.hold) q = s.hold;
+      g.cash += q * s.price * (1 - STOCK_FEE);
+      s.hold -= q;
+      if (!s.hold) s.cost = 0;
+      toast("卖出 " + s.name + " " + q + " 股 ✅");
+    }
+    stockSaveGame();
+    stockDomAll();
+  }
+  function stockFinish() {
+    var g = stockG;
+    g.over = true;
+    stockAutoStop();
+    var total = stockAsset(g);
+    var ret = (total - STOCK_CASH0) / STOCK_CASH0 * 100;
+    var r = stockLoadRec();
+    r.plays = (r.plays || 0) + 1;
+    if (r.best == null || ret > r.best) r.best = +ret.toFixed(2);
+    stockSaveRec(r);
+    bumpUsage("stock");
+    if (ret > 0) {
+      bumpUsage("stockwin");
+      if (typeof confettiBurst === "function") confettiBurst(ret >= 20 ? 140 : 80);
+      toast("🎉 收盘！最终收益率 +" + ret.toFixed(2) + "%，落袋为安！");
+    } else {
+      toast("📉 收盘！最终收益率 " + ret.toFixed(2) + "%，股市有风险，下局再来。");
+    }
+    try { localStorage.removeItem("suibian_stock_game"); } catch (e) {}
+  }
+  function stockAutoStop() {
+    if (stockAutoTimer) { clearInterval(stockAutoTimer); stockAutoTimer = null; }
+    var b = $("stockAuto");
+    if (b) b.textContent = "▶ 自动播放";
+  }
+  function stockAutoToggle() {
+    if (stockAutoTimer) { stockAutoStop(); return; }
+    if (!stockG || stockG.over) { toast("先开一局再自动播放哦"); return; }
+    stockAutoTimer = setInterval(function () {
+      if (!stockG || stockG.over) { stockAutoStop(); return; }
+      stockNextDay();
+    }, 650);
+    var b = $("stockAuto");
+    if (b) b.textContent = "⏸ 暂停播放";
+  }
+  function stockStop() {
+    stockAutoStop();
+  }
+  function stockPillsDom() {
+    var box = $("stockPills");
+    if (!box || !stockG) return;
+    box.innerHTML = "";
+    stockG.stocks.forEach(function (s, i) {
+      var pct = s.prev ? (s.price - s.prev) / s.prev * 100 : 0;
+      var cls = pct >= 0 ? "stk-up" : "stk-dn";
+      var d = document.createElement("div");
+      d.className = "stk-pill" + (i === stockSelIdx ? " on" : "");
+      d.innerHTML = '<div class="nm">' + s.name + ' <small>' + s.code + '</small></div>' +
+        '<div class="pr ' + cls + '">' + s.price.toFixed(2) + ' <small>' + (pct >= 0 ? "+" : "") + pct.toFixed(2) + '%</small></div>' +
+        '<div class="hd">持仓 ' + s.hold + ' 股' + (s.hold ? ' · 成本 ' + s.cost.toFixed(2) : '') + '</div>';
+      d.addEventListener("click", function () {
+        stockSelIdx = i;
+        stockDomAll();
+      });
+      box.appendChild(d);
+    });
+  }
+  function stockStatsDom() {
+    if (!stockG) return;
+    var g = stockG, mkt = stockAsset(g) - g.cash, total = stockAsset(g);
+    var ret = (total - STOCK_CASH0) / STOCK_CASH0 * 100;
+    if ($("stockCash")) $("stockCash").textContent = stockFmt(g.cash);
+    if ($("stockMkt")) $("stockMkt").textContent = stockFmt(mkt);
+    if ($("stockTotal")) $("stockTotal").textContent = stockFmt(total);
+    var rEl = $("stockRet");
+    if (rEl) {
+      rEl.textContent = (ret >= 0 ? "+" : "") + ret.toFixed(2) + "%";
+      rEl.className = ret >= 0 ? "stk-up" : "stk-dn";
+    }
+    if ($("stockDayLbl")) $("stockDayLbl").textContent = g.over ? "已收盘 🔔" : "第 " + g.day + " / " + STOCK_DAYS + " 天";
+    if ($("stockProg")) $("stockProg").style.width = Math.min(100, g.day / STOCK_DAYS * 100) + "%";
+  }
+  function stockNewsDom() {
+    var ul = $("stockNews");
+    if (!ul || !stockG) return;
+    ul.innerHTML = "";
+    stockG.news.forEach(function (n) {
+      var li = document.createElement("li");
+      li.textContent = "第" + n.d + "天 · " + n.t;
+      ul.appendChild(li);
+    });
+  }
+  function stockRecDom() {
+    var el = $("stockRec");
+    if (!el) return;
+    var r = stockLoadRec();
+    el.textContent = r.plays ? "🏅 历史最佳收益率 " + (r.best >= 0 ? "+" : "") + r.best + "% · 累计 " + r.plays + " 局" : "还没有战绩，打完第一局就有啦";
+  }
+  function stockDrawChart() {
+    var cv = $("stockCanvas");
+    if (!cv || !stockG || !cv.getContext) return;
+    var ctx = cv.getContext("2d");
+    if (!ctx) return;
+    var W = cv.width, H = cv.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#10141f";
+    ctx.fillRect(0, 0, W, H);
+    var s = stockG.stocks[stockSelIdx];
+    var data = s.hist.slice(-45);
+    if (!data.length) return;
+    var pad = { l: 52, r: 12, t: 16, b: 14 };
+    var lo = Infinity, hi = -Infinity;
+    data.forEach(function (k) { if (k.l < lo) lo = k.l; if (k.h > hi) hi = k.h; });
+    var span = Math.max(0.01, hi - lo);
+    lo -= span * 0.06; hi += span * 0.06; span = hi - lo;
+    var cw = (W - pad.l - pad.r) / data.length;
+    function Y(p) { return pad.t + (hi - p) / span * (H - pad.t - pad.b); }
+    ctx.strokeStyle = "rgba(255,255,255,.08)";
+    ctx.fillStyle = "rgba(255,255,255,.45)";
+    ctx.font = "11px sans-serif";
+    ctx.textAlign = "right";
+    for (var gI = 0; gI <= 4; gI++) {
+      var p = lo + span * gI / 4, y = Y(p);
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+      ctx.fillText(p.toFixed(1), pad.l - 6, y + 4);
+    }
+    data.forEach(function (k, i) {
+      var x = pad.l + i * cw + cw / 2;
+      var up = k.c >= k.o;
+      ctx.strokeStyle = ctx.fillStyle = up ? "#e0484f" : "#2fae70";
+      ctx.beginPath(); ctx.moveTo(x, Y(k.h)); ctx.lineTo(x, Y(k.l)); ctx.stroke();
+      var bw = Math.max(2, cw * 0.6);
+      var yo = Y(k.o), yc = Y(k.c);
+      var top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yo - yc));
+      if (up) { ctx.fillStyle = "#10141f"; ctx.fillRect(x - bw / 2, top, bw, hgt); ctx.strokeRect(x - bw / 2, top, bw, hgt); }
+      else ctx.fillRect(x - bw / 2, top, bw, hgt);
+    });
+    ctx.strokeStyle = "#5b9bff";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    var started = false;
+    for (var mi = 0; mi < data.length; mi++) {
+      if (mi < 4) continue;
+      var sum = 0;
+      for (var mj = mi - 4; mj <= mi; mj++) sum += data[mj].c;
+      var mx = pad.l + mi * cw + cw / 2, my = Y(sum / 5);
+      if (!started) { ctx.moveTo(mx, my); started = true; } else ctx.lineTo(mx, my);
+    }
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = "rgba(246,201,74,.7)";
+    var ly = Y(s.price);
+    ctx.beginPath(); ctx.moveTo(pad.l, ly); ctx.lineTo(W - pad.r, ly); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#f6c94a";
+    ctx.textAlign = "left";
+    ctx.fillText(s.price.toFixed(2), pad.l + 4, ly - 5);
+    ctx.fillStyle = "rgba(255,255,255,.6)";
+    ctx.fillText(s.name + " · MA5", pad.l + 4, pad.t - 4 + 10);
+  }
+  function stockDomAll() {
+    stockPillsDom();
+    stockStatsDom();
+    stockDrawChart();
+    stockNewsDom();
+    stockRecDom();
+  }
+  function stockRender() {
+    if (!stockG) {
+      var saved = null;
+      try { saved = JSON.parse(localStorage.getItem("suibian_stock_game") || "null"); } catch (e) { saved = null; }
+      if (saved && saved.g && saved.g.stocks && saved.g.stocks.length === 4 && !saved.g.over) {
+        stockG = saved.g;
+        stockSelIdx = saved.sel || 0;
+        toast("已恢复上次的持仓进度 📂");
+      } else {
+        stockNewGame();
+        return;
+      }
+    }
+    stockDomAll();
+  }
+  function stockBind() {
+    if (!$("stockCanvas")) return;
+    if ($("stockNew")) $("stockNew").addEventListener("click", function () { stockNewGame(); toast("新的一局，祝大赚 💹"); });
+    if ($("stockNext")) $("stockNext").addEventListener("click", stockNextDay);
+    if ($("stockAuto")) $("stockAuto").addEventListener("click", stockAutoToggle);
+    if ($("stockB100")) $("stockB100").addEventListener("click", function () { stockTrade("b100"); });
+    if ($("stockBAll")) $("stockBAll").addEventListener("click", function () { stockTrade("ball"); });
+    if ($("stockS100")) $("stockS100").addEventListener("click", function () { stockTrade("s100"); });
+    if ($("stockSAll")) $("stockSAll").addEventListener("click", function () { stockTrade("sall"); });
+  }
+  stockBind();
+  BADGES.push(
+    { emoji: "💹", name: "股海新丁", desc: "完成 1 局股市大亨模拟盘", test: function (u) { return (u.stock || 0) >= 1; } },
+    { emoji: "🐂", name: "牛市之子", desc: "股市大亨累计 3 局正收益收盘", test: function (u) { return (u.stockwin || 0) >= 3; } }
+  );
+  QUOTES.push(
+    "K 线红红绿绿，不过是人心起起伏伏。",
+    "会买的是徒弟，会卖的是师父，拿得住的是大师。",
+    "别人恐惧我贪婪，别人贪婪我随便。",
+    "满仓一时爽，清仓保健康。",
+    "行情永远在绝望中诞生，在犹豫中上涨。",
+    "模拟盘赚一个亿，也别急着辞职。"
+  );
   pongBind();
   BADGES.push(
     { emoji: "🏓", name: "球台首秀", desc: "完成 1 局弹球对战", test: function (u) { return (u.pong || 0) >= 1; } },
