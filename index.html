@@ -1512,6 +1512,7 @@
         <button data-tab="dino">🦖 恐龙快跑</button>
         <button data-tab="pong">🏓 弹球对战</button>
         <button data-tab="stock">💹 股市大亨</button>
+        <button data-tab="splitbill">🧾 AA 分摊</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5417,6 +5418,111 @@
     <div class="stk-tip">📌 玩法：点股票卡切换标的，K 线红涨绿跌（A 股配色），带 MA5 均线；每天约两成概率爆出利好 / 利空新闻，影响未来三天走势；买卖收取 0.1% 手续费；60 天收盘自动结算，正收益撒花庆祝，历史最佳收益率永久保存在本地。中途关页面不怕，进度自动存档。</div>
   </div>
 </section>
+  <section class="panel" id="splitbill">
+    <style>
+      #splitbill .sb-wrap { max-width: 760px; margin: 0 auto; }
+      #splitbill .sb-card { background: var(--card, rgba(255,255,255,.06)); border: 1px solid var(--line, rgba(255,255,255,.12)); border-radius: 14px; padding: 14px; margin: 12px 0; }
+      #splitbill .sb-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      #splitbill .sb-row.mt { margin-top: 10px; }
+      #splitbill .sb-lab { font-size: .82em; opacity: .8; margin: 2px 0 6px; }
+      #splitbill input.sb-in, #splitbill select.sb-in {
+        background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18); color: var(--text, #fff);
+        border-radius: 10px; padding: 9px 10px; font-size: .95em; outline: none; min-width: 0;
+      }
+      #splitbill input.sb-in:focus, #splitbill select.sb-in:focus { border-color: var(--accent, #f6c94a); }
+      #splitbill .sb-name { flex: 1 1 140px; }
+      #splitbill .sb-amount { width: 130px; }
+      #splitbill .sb-members { display: flex; flex-wrap: wrap; gap: 8px; }
+      #splitbill .sb-chip {
+        display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px;
+        background: rgba(246,201,74,.14); border: 1px solid rgba(246,201,74,.4); font-size: .9em; cursor: pointer; user-select: none;
+      }
+      #splitbill .sb-chip.on { background: var(--accent, #f6c94a); color: #1a1a1a; font-weight: 700; border-color: var(--accent, #f6c94a); }
+      #splitbill .sb-chip .x { opacity: .6; font-weight: 700; }
+      #splitbill .sb-chip:hover .x { opacity: 1; }
+      #splitbill .sb-btn {
+        cursor: pointer; border: none; border-radius: 10px; padding: 9px 14px; font-size: .92em; font-weight: 700;
+        background: var(--accent, #f6c94a); color: #1a1a1a; transition: transform .1s, filter .15s;
+      }
+      #splitbill .sb-btn:hover { filter: brightness(1.06); }
+      #splitbill .sb-btn:active { transform: scale(.96); }
+      #splitbill .sb-btn.ghost { background: rgba(255,255,255,.08); color: var(--text, #fff); border: 1px solid rgba(255,255,255,.18); }
+      #splitbill .sb-btn.danger { background: #ff6b6b; color: #fff; }
+      #splitbill .sb-hint { font-size: .8em; opacity: .75; margin-top: 8px; }
+      #splitbill .sb-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+      #splitbill .sb-exp {
+        display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 12px;
+        background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+      }
+      #splitbill .sb-exp .sb-exp-main { flex: 1 1 200px; }
+      #splitbill .sb-exp .sb-exp-t { font-weight: 700; font-size: .96em; }
+      #splitbill .sb-exp .sb-exp-d { font-size: .78em; opacity: .8; margin-top: 2px; }
+      #splitbill .sb-exp .sb-exp-amt { font-weight: 700; font-size: 1.05em; color: var(--accent, #f6c94a); }
+      #splitbill .sb-exp .sb-exp-x { cursor: pointer; opacity: .6; font-weight: 800; padding: 4px 8px; border-radius: 8px; }
+      #splitbill .sb-exp .sb-exp-x:hover { opacity: 1; background: rgba(255,107,107,.2); }
+      #splitbill .sb-net { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 4px; }
+      #splitbill .sb-net-cell { border-radius: 12px; padding: 10px; text-align: center; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); }
+      #splitbill .sb-net-cell b { display: block; font-size: 1.05em; }
+      #splitbill .sb-net-cell span { font-size: .74em; opacity: .75; }
+      #splitbill .sb-pos { color: #f6c94a; }
+      #splitbill .sb-neg { color: #ff6b6b; }
+      #splitbill .sb-settle { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+      #splitbill .sb-set { padding: 9px 12px; border-radius: 10px; background: rgba(76,211,154,.1); border: 1px solid rgba(76,211,154,.35); font-size: .92em; }
+      #splitbill .sb-set .fr { font-weight: 700; color: #4cd39a; }
+      #splitbill .sb-set .to { font-weight: 700; color: var(--accent, #f6c94a); }
+      #splitbill .sb-empty { opacity: .6; font-size: .9em; padding: 8px 4px; }
+      #splitbill .sb-tip { font-size: .82em; opacity: .8; margin-top: 8px; line-height: 1.6; }
+    </style>
+    <div class="sb-wrap">
+      <h2>🧾 AA 分摊神器</h2>
+      <p class="sb-hint">多人聚餐、旅行、合租一键平账。记谁付了钱、谁参与了，自动算出「谁该给谁转多少」的最简方案。</p>
+
+      <div class="sb-card">
+        <div class="sb-lab">① 添加成员（2–12 人）</div>
+        <div class="sb-row">
+          <input class="sb-in sb-name" id="sbillName" placeholder="成员名字，如 小明" maxlength="12" />
+          <button class="sb-btn" id="sbillAddMember">＋ 加人</button>
+        </div>
+        <div class="sb-row mt"><div class="sb-members" id="sbillMembers"></div></div>
+      </div>
+
+      <div class="sb-card">
+        <div class="sb-lab">② 记录一笔消费（付款人 + 金额 + 参与平摊的人）</div>
+        <div class="sb-row">
+          <select class="sb-in sb-name" id="sbillPayer"></select>
+          <input class="sb-in sb-amount" id="sbillAmount" type="number" min="0.01" step="0.01" placeholder="金额 ¥" />
+          <input class="sb-in sb-name" id="sbillNote" placeholder="用途，如 火锅" maxlength="20" style="flex:1 1 160px" />
+          <button class="sb-btn" id="sbillAddExp">＋ 记一笔</button>
+        </div>
+        <div class="sb-row mt"><div class="sb-members" id="sbillParticipants"></div></div>
+        <div class="sb-row mt">
+          <button class="sb-btn ghost" id="sbillSample">🎲 示例账目</button>
+          <button class="sb-btn ghost" id="sbillAllPart">全选参与人</button>
+        </div>
+      </div>
+
+      <div class="sb-card">
+        <div class="sb-lab">③ 消费清单</div>
+        <div class="sb-list" id="sbillList"></div>
+      </div>
+
+      <div class="sb-card">
+        <div class="sb-lab">④ 每人净额（绿/金＝应收回，红＝应付）</div>
+        <div class="sb-net" id="sbillNet"></div>
+      </div>
+
+      <div class="sb-card">
+        <div class="sb-lab">⑤ 最简还款方案（转完即结清）</div>
+        <div class="sb-settle" id="sbillSettle"></div>
+        <div class="sb-row mt">
+          <button class="sb-btn" id="sbillCopy">📋 复制方案</button>
+          <button class="sb-btn ghost" id="sbillClear">🗑️ 清空重来</button>
+        </div>
+      </div>
+
+      <div class="sb-tip">📌 规则：金额按「参与人均摊」，精确到位（分）；多退少补后，总额自动平衡。数据存在本机浏览器（suibian_splitbill），关页面不丢，可随时继续。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -5750,6 +5856,7 @@
     if (id === "dino") dinoRender();
     if (id === "pong") pongRender();
     if (id === "stock") stockRender();
+    if (id === "splitbill") sbillRender();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
@@ -5874,6 +5981,7 @@
     dino: "恐龙快跑 小恐龙 跑酷 dino run runner 无尽 跳跃 仙人掌 翼龙 chrome 断网 游戏 t-rex 霸王龙",
   pong: "弹球对战 pong 乒乓 乒乓球 球拍 弹球 ai 对战 反弹 报销 游戏 接球 挡板",
     stock: "股市大亨 stock 炒股 模拟炒股 股票 k线 K线 均线 牛市 熊市 韭菜 交易 买入 卖出 虚拟盘 投资 理财 收益率 游戏",
+    splitbill: "AA 分摊神器 splitbill aa AA制 分摊 平账 算账 结算 拼单 聚餐 旅行 合租 分账 转账 还钱 均摊 谁给谁 工具",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6059,6 +6167,7 @@
     dino:"games",
 pong:"games",
 stock:"games",
+splitbill:"tools",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -17808,6 +17917,281 @@ stock:"games",
     if ($("stockS100")) $("stockS100").addEventListener("click", function () { stockTrade("s100"); });
     if ($("stockSAll")) $("stockSAll").addEventListener("click", function () { stockTrade("sall"); });
   }
+  /* ================= 🧾 AA 分摊神器 splitbill ================= */
+  var sbillData = { members: [], expenses: [] };
+  var sbillSel = {}; // 当前勾选的参与人 name -> true
+
+  function sbillLoad() {
+    try {
+      var raw = localStorage.getItem("suibian_splitbill");
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && Array.isArray(d.members) && Array.isArray(d.expenses)) sbillData = d;
+      }
+    } catch (e) {}
+  }
+  function sbillSave() {
+    try { localStorage.setItem("suibian_splitbill", JSON.stringify(sbillData)); } catch (e) {}
+  }
+  function sbillFmt(cents) {
+    var neg = cents < 0; var v = Math.abs(cents);
+    return (neg ? "-" : "") + "¥" + (v / 100).toFixed(2);
+  }
+  function sbillAddMemberFn(name) {
+    name = String(name || "").trim();
+    if (!name) { if (typeof toast === "function") toast("先输入名字"); return false; }
+    if (name.length > 12) name = name.slice(0, 12);
+    if (sbillData.members.indexOf(name) >= 0) { if (typeof toast === "function") toast("已经有 " + name + " 啦"); return false; }
+    if (sbillData.members.length >= 12) { if (typeof toast === "function") toast("最多 12 人"); return false; }
+    sbillData.members.push(name);
+    sbillSel[name] = true;
+    sbillSave(); sbillRender();
+    return true;
+  }
+  function sbillDelMemberFn(name) {
+    var used = sbillData.expenses.some(function (e) { return e.payer === name || e.parts.indexOf(name) >= 0; });
+    if (used) { if (typeof toast === "function") toast(name + " 已有账目，先删掉相关消费"); return false; }
+    sbillData.members = sbillData.members.filter(function (m) { return m !== name; });
+    delete sbillSel[name];
+    sbillSave(); sbillRender();
+    return true;
+  }
+  function sbillAddExpenseFn(payer, amountYuan, note, parts) {
+    var cents = Math.round(Number(amountYuan) * 100);
+    if (!payer || sbillData.members.indexOf(payer) < 0) { if (typeof toast === "function") toast("先选付款人"); return false; }
+    if (!isFinite(cents) || cents <= 0) { if (typeof toast === "function") toast("金额要大于 0"); return false; }
+    if (cents > 999999900) { if (typeof toast === "function") toast("金额太大了吧！"); return false; }
+    parts = (parts || []).filter(function (p) { return sbillData.members.indexOf(p) >= 0; });
+    if (!parts.length) { if (typeof toast === "function") toast("至少勾选 1 个参与人"); return false; }
+    sbillData.expenses.push({ payer: payer, cents: cents, note: String(note || "").trim().slice(0, 20) || "未备注", parts: parts });
+    sbillSave(); sbillRender();
+    return true;
+  }
+  function sbillDelExpenseFn(idx) {
+    if (idx < 0 || idx >= sbillData.expenses.length) return;
+    sbillData.expenses.splice(idx, 1);
+    sbillSave(); sbillRender();
+  }
+  /* 计算每人净额（分）：正=应收，负=应付；余数分逐个补给前几位参与人，保证总和恒为 0 */
+  function sbillComputeNets() {
+    var nets = {};
+    sbillData.members.forEach(function (m) { nets[m] = 0; });
+    sbillData.expenses.forEach(function (e, ei) {
+      var n = e.parts.length;
+      var base = Math.floor(e.cents / n);
+      var rem = e.cents - base * n;
+      e.parts.forEach(function (p, i) {
+        var share = base + (((i + ei) % n) < rem ? 1 : 0);
+        nets[p] -= share;
+      });
+      nets[e.payer] += e.cents;
+    });
+    return nets;
+  }
+  /* 最简转账：贪心配对最大欠款人与最大债权人 */
+  function sbillSettleFn(nets) {
+    var debt = [], cred = [];
+    Object.keys(nets).forEach(function (m) {
+      if (nets[m] < 0) debt.push({ m: m, v: -nets[m] });
+      else if (nets[m] > 0) cred.push({ m: m, v: nets[m] });
+    });
+    var plan = [];
+    var guard = 0;
+    while (debt.length && cred.length && guard++ < 500) {
+      debt.sort(function (a, b) { return b.v - a.v; });
+      cred.sort(function (a, b) { return b.v - a.v; });
+      var d = debt[0], c = cred[0];
+      var pay = Math.min(d.v, c.v);
+      plan.push({ from: d.m, to: c.m, cents: pay });
+      d.v -= pay; c.v -= pay;
+      if (d.v === 0) debt.shift();
+      if (c.v === 0) cred.shift();
+    }
+    return plan;
+  }
+  function sbillPlanText() {
+    var nets = sbillComputeNets();
+    var plan = sbillSettleFn(nets);
+    var total = sbillData.expenses.reduce(function (s, e) { return s + e.cents; }, 0);
+    var lines = ["🧾 AA 分摊结算单（随便·决策工具箱）", "总消费：" + sbillFmt(total) + "，共 " + sbillData.expenses.length + " 笔 / " + sbillData.members.length + " 人"];
+    if (!plan.length) lines.push("互不相欠，完美平账 🎉");
+    else plan.forEach(function (p) { lines.push(p.from + " → " + p.to + "：" + sbillFmt(p.cents)); });
+    return lines.join("\n");
+  }
+  function sbillRenderMembers() {
+    var box = $("sbillMembers"); if (!box) return;
+    if (!sbillData.members.length) { box.innerHTML = '<div class="sb-empty">还没有成员，先加两个人吧</div>'; return; }
+    box.innerHTML = "";
+    sbillData.members.forEach(function (m) {
+      var chip = document.createElement("span");
+      chip.className = "sb-chip";
+      chip.innerHTML = "👤 " + sbillEsc(m) + ' <span class="x">×</span>';
+      chip.title = "点 × 删除成员";
+      chip.addEventListener("click", function () { sbillDelMemberFn(m); });
+      box.appendChild(chip);
+    });
+  }
+  function sbillRenderPayerAndParts() {
+    var sel = $("sbillPayer");
+    if (sel) {
+      var cur = sel.value;
+      sel.innerHTML = "";
+      var opt0 = document.createElement("option"); opt0.value = ""; opt0.textContent = "谁付的钱？"; sel.appendChild(opt0);
+      sbillData.members.forEach(function (m) {
+        var o = document.createElement("option"); o.value = m; o.textContent = m; sel.appendChild(o);
+      });
+      if (sbillData.members.indexOf(cur) >= 0) sel.value = cur;
+    }
+    var box = $("sbillParticipants"); if (!box) return;
+    if (!sbillData.members.length) { box.innerHTML = '<div class="sb-empty">加了成员才能勾选参与人</div>'; return; }
+    box.innerHTML = "";
+    sbillData.members.forEach(function (m) {
+      var chip = document.createElement("span");
+      chip.className = "sb-chip" + (sbillSel[m] ? " on" : "");
+      chip.textContent = (sbillSel[m] ? "✓ " : "") + m;
+      chip.addEventListener("click", function () { sbillSel[m] = !sbillSel[m]; sbillRenderPayerAndParts(); });
+      box.appendChild(chip);
+    });
+  }
+  function sbillRenderExpenses() {
+    var box = $("sbillList"); if (!box) return;
+    if (!sbillData.expenses.length) { box.innerHTML = '<div class="sb-empty">还没有账目，上面记一笔试试</div>'; return; }
+    box.innerHTML = "";
+    sbillData.expenses.forEach(function (e, i) {
+      var row = document.createElement("div");
+      row.className = "sb-exp";
+      row.innerHTML = '<div class="sb-exp-main"><div class="sb-exp-t">' + sbillEsc(e.note) + '</div>' +
+        '<div class="sb-exp-d">' + sbillEsc(e.payer) + " 付 · " + e.parts.length + " 人摊（" + e.parts.map(sbillEsc).join("、") + "）</div></div>" +
+        '<div class="sb-exp-amt">' + sbillFmt(e.cents) + "</div>" +
+        '<div class="sb-exp-x" title="删除这笔">×</div>';
+      row.querySelector(".sb-exp-x").addEventListener("click", function () { sbillDelExpenseFn(i); });
+      box.appendChild(row);
+    });
+  }
+  function sbillRenderResult() {
+    var netBox = $("sbillNet"), setBox = $("sbillSettle");
+    if (!netBox || !setBox) return;
+    if (!sbillData.members.length || !sbillData.expenses.length) {
+      netBox.innerHTML = '<div class="sb-empty">记完账这里自动出结果</div>';
+      setBox.innerHTML = '<div class="sb-empty">——</div>';
+      return;
+    }
+    var nets = sbillComputeNets();
+    netBox.innerHTML = "";
+    sbillData.members.forEach(function (m) {
+      var v = nets[m] || 0;
+      var cell = document.createElement("div");
+      cell.className = "sb-net-cell";
+      var cls = v > 0 ? "sb-pos" : (v < 0 ? "sb-neg" : "");
+      var tag = v > 0 ? "应收 " : (v < 0 ? "应付 " : "已平 ");
+      cell.innerHTML = "<span>👤 " + sbillEsc(m) + '</span><b class="' + cls + '">' + tag + sbillFmt(Math.abs(v)) + "</b>";
+      netBox.appendChild(cell);
+    });
+    var plan = sbillSettleFn(nets);
+    setBox.innerHTML = "";
+    if (!plan.length) {
+      setBox.innerHTML = '<div class="sb-set">🎉 互不相欠，完美平账！</div>';
+    } else {
+      plan.forEach(function (p) {
+        var d = document.createElement("div");
+        d.className = "sb-set";
+        d.innerHTML = '💸 <span class="fr">' + sbillEsc(p.from) + '</span> 转给 <span class="to">' + sbillEsc(p.to) + "</span> " + sbillFmt(p.cents);
+        setBox.appendChild(d);
+      });
+    }
+  }
+  function sbillEsc(s) {
+    return String(s).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+  function sbillRender() {
+    sbillRenderMembers();
+    sbillRenderPayerAndParts();
+    sbillRenderExpenses();
+    sbillRenderResult();
+  }
+  function sbillSampleFn() {
+    sbillData = {
+      members: ["小明", "阿花", "老王", "妹妹"],
+      expenses: [
+        { payer: "小明", cents: 32800, note: "火锅", parts: ["小明", "阿花", "老王", "妹妹"] },
+        { payer: "阿花", cents: 6600, note: "奶茶", parts: ["阿花", "妹妹"] },
+        { payer: "老王", cents: 12000, note: "KTV", parts: ["小明", "阿花", "老王"] },
+        { payer: "妹妹", cents: 4500, note: "打车", parts: ["小明", "阿花", "老王", "妹妹"] }
+      ]
+    };
+    sbillSel = {};
+    sbillData.members.forEach(function (m) { sbillSel[m] = true; });
+    sbillSave(); sbillRender();
+    if (typeof toast === "function") toast("已载入示例：4 人聚会账本 🎲");
+  }
+  function sbillClearAll() {
+    sbillData = { members: [], expenses: [] };
+    sbillSel = {};
+    sbillSave(); sbillRender();
+    if (typeof toast === "function") toast("已清空，从头开始");
+  }
+  function sbillCopyPlan() {
+    if (!sbillData.expenses.length) { if (typeof toast === "function") toast("还没有账目可复制"); return; }
+    var txt = sbillPlanText();
+    if (typeof bumpUsage === "function") bumpUsage("splitbill");
+    if (typeof confettiBurst === "function") confettiBurst(40);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function () { if (typeof toast === "function") toast("结算单已复制，去群里甩链接吧 📋"); })
+          .catch(function () { if (typeof toast === "function") toast("复制失败，请手动选择文本"); });
+      } else if (typeof toast === "function") toast("当前环境不支持自动复制");
+    } catch (e) { if (typeof toast === "function") toast("复制失败"); }
+  }
+  function sbillBind() {
+    if (!$("sbillAddMember")) return;
+    sbillLoad();
+    sbillData.members.forEach(function (m) { if (!(m in sbillSel)) sbillSel[m] = true; });
+    $("sbillAddMember").addEventListener("click", function () {
+      var inp = $("sbillName");
+      if (sbillAddMemberFn(inp.value)) inp.value = "";
+    });
+    var nameInp = $("sbillName");
+    if (nameInp) nameInp.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") { if (sbillAddMemberFn(nameInp.value)) nameInp.value = ""; }
+    });
+    $("sbillAddExp").addEventListener("click", function () {
+      var payer = $("sbillPayer").value;
+      var amt = $("sbillAmount").value;
+      var note = $("sbillNote").value;
+      var parts = sbillData.members.filter(function (m) { return sbillSel[m]; });
+      if (sbillAddExpenseFn(payer, amt, note, parts)) {
+        $("sbillAmount").value = ""; $("sbillNote").value = "";
+        if (typeof bumpUsage === "function") bumpUsage("splitbill");
+      }
+    });
+    var amtInp = $("sbillAmount");
+    if (amtInp) amtInp.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") $("sbillAddExp").click();
+    });
+    $("sbillAllPart").addEventListener("click", function () {
+      sbillData.members.forEach(function (m) { sbillSel[m] = true; });
+      sbillRenderPayerAndParts();
+    });
+    $("sbillSample").addEventListener("click", sbillSampleFn);
+    $("sbillClear").addEventListener("click", sbillClearAll);
+    $("sbillCopy").addEventListener("click", sbillCopyPlan);
+    sbillRender();
+  }
+  sbillBind();
+  BADGES.push(
+    { emoji: "🧾", name: "分账小能手", desc: "用 AA 分摊神器记过 1 笔账", test: function (u) { return (u.splitbill || 0) >= 1; } },
+    { emoji: "🤝", name: "亲兄弟明算账", desc: "AA 分摊神器累计使用 20 次", test: function (u) { return (u.splitbill || 0) >= 20; } }
+  );
+  QUOTES.push(
+    "亲兄弟，明算账，算完还是好兄弟。",
+    "AA 不是小气，是让友谊没有利息。",
+    "这顿我请？不，这顿我们 AA。",
+    "账算得清，饭才吃得香。",
+    "钱要算明白，情要留得住。",
+    "最好的关系，是谁也不欠谁。"
+  );
   stockBind();
   BADGES.push(
     { emoji: "💹", name: "股海新丁", desc: "完成 1 局股市大亨模拟盘", test: function (u) { return (u.stock || 0) >= 1; } },
