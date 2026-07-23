@@ -1506,6 +1506,7 @@
       <button data-tab="danmu">🎉 弹幕墙</button>
       <button data-tab="vote">🗳️ 快速投票</button>
       <button data-tab="connect4">🔴 四子棋</button>
+        <button data-tab="horo">⭐ 星座运势</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5139,6 +5140,67 @@
     </div>
   </section>
 
+<section class="panel" id="horo">
+  <style>
+    #horo .horo-wrap{max-width:640px;margin:0 auto}
+    #horo .horo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+    #horo .horo-sign{cursor:pointer;border:1px solid rgba(128,128,128,.28);border-radius:14px;padding:10px 4px;text-align:center;background:rgba(128,128,128,.06);transition:transform .15s,border-color .2s,background .2s}
+    #horo .horo-sign:hover{transform:translateY(-3px);border-color:#a78bfa}
+    #horo .horo-sign.on{background:linear-gradient(135deg,#7c3aed,#db2777);border-color:transparent;color:#fff;box-shadow:0 8px 22px rgba(124,58,237,.35)}
+    #horo .horo-sign .em{font-size:24px;display:block;line-height:1}
+    #horo .horo-sign .nm{font-size:13px;font-weight:700;margin-top:4px}
+    #horo .horo-sign .dt{font-size:10px;opacity:.7;margin-top:2px}
+    #horo .horo-days{display:flex;gap:8px;justify-content:center;margin:6px 0 4px}
+    #horo .horo-days button{cursor:pointer;border:1px solid rgba(128,128,128,.3);background:transparent;color:inherit;border-radius:999px;padding:6px 16px;font-size:13px;font-weight:600}
+    #horo .horo-days button.on{background:#7c3aed;border-color:#7c3aed;color:#fff}
+    #horo .horo-card{margin-top:14px;border-radius:20px;padding:20px;background:linear-gradient(160deg,rgba(124,58,237,.14),rgba(219,39,119,.10));border:1px solid rgba(124,58,237,.25);position:relative;overflow:hidden}
+    #horo .horo-head{display:flex;align-items:center;gap:14px}
+    #horo .horo-head .big{font-size:46px;line-height:1}
+    #horo .horo-head h3{margin:0;font-size:20px}
+    #horo .horo-head .sub{font-size:12px;opacity:.75;margin-top:2px}
+    #horo .horo-score{margin-left:auto;text-align:center}
+    #horo .horo-score .n{font-size:34px;font-weight:800;background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    #horo .horo-score .l{font-size:11px;opacity:.7}
+    #horo .horo-dims{margin:16px 0;display:grid;gap:10px}
+    #horo .horo-dim{display:flex;align-items:center;gap:10px;font-size:13px}
+    #horo .horo-dim .k{width:52px;font-weight:700;opacity:.85}
+    #horo .horo-bar{flex:1;height:10px;border-radius:999px;background:rgba(128,128,128,.2);overflow:hidden}
+    #horo .horo-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#7c3aed,#db2777);width:0;transition:width .7s ease}
+    #horo .horo-dim .st{width:88px;text-align:right;font-size:13px;letter-spacing:1px}
+    #horo .horo-lucky{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
+    #horo .horo-lucky .box{background:rgba(128,128,128,.08);border-radius:12px;padding:10px 12px;font-size:13px}
+    #horo .horo-lucky .box b{display:block;font-size:11px;opacity:.6;font-weight:600;margin-bottom:3px}
+    #horo .horo-yj{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+    #horo .horo-yj .yi,#horo .horo-yj .ji{border-radius:12px;padding:10px 12px;font-size:14px}
+    #horo .horo-yj .yi{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.3)}
+    #horo .horo-yj .ji{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3)}
+    #horo .horo-yj .tag{font-weight:800;margin-right:6px}
+    #horo .horo-tip{background:rgba(128,128,128,.08);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.6}
+    #horo .horo-tip .kw{display:inline-block;margin-top:8px;font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(124,58,237,.2);color:#a78bfa;font-weight:700}
+    #horo .horo-acts{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+    #horo .horo-acts button{cursor:pointer;border:none;border-radius:999px;padding:9px 18px;font-size:14px;font-weight:700}
+    #horo .horo-acts .primary{background:linear-gradient(135deg,#7c3aed,#db2777);color:#fff}
+    #horo .horo-acts .ghost{background:rgba(128,128,128,.15);color:inherit}
+    #horo .horo-msg{min-height:18px;font-size:12px;opacity:.8;margin-top:8px;text-align:center}
+  </style>
+  <h2>⭐ 星座运势</h2>
+  <p class="desc">选一个星座，看看你的今日运势——爱情 / 事业 / 财运 / 健康四维评分，幸运色、幸运数字、贵人与速配，宜忌与今日建议。同一天同一星座结果稳定，纯本地生成不联网。</p>
+  <div class="horo-wrap">
+    <div class="horo-grid" id="horoGrid"></div>
+    <div class="horo-days">
+      <button data-off="0" class="on">今天</button>
+      <button data-off="1">明天</button>
+      <button data-off="2">后天</button>
+    </div>
+    <div class="horo-card" id="horoCard"></div>
+    <div class="horo-acts">
+      <button class="primary" id="horoRoll">🔮 重新占卜</button>
+      <button class="ghost" id="horoShare">📋 复制运势</button>
+    </div>
+    <div class="horo-msg" id="horoMsg"></div>
+  </div>
+</section>
+
 <script>
 (function () {
   "use strict";
@@ -5466,6 +5528,7 @@
     if (id === "wheel") drawWheel();
     if (id === "vote") voteRender();
     if (id === "connect4") c4Render();
+    if (id === "horo") horoRender();
     if (id === "fortune") drawFortune(true);
     if (id === "share") drawShareCard();
     if (id === "achv") renderAchv();
@@ -5582,6 +5645,7 @@
 
   /* ---------- 工具搜索（按名称 / 关键词过滤导航） ---------- */
   const TAB_KW = {
+    horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
     vote: "投票 表决 投票器 举手 民主 少数服从多数 决定 live poll", 
     pick: "抽签 选择 决定 随机 选择困难", wheel: "转盘 幸运转盘 抽奖 旋转 wheel",
@@ -5761,6 +5825,7 @@
 
   /* ---------- 分类筛选（站点级导航增强，惠及全部 94 工具） ---------- */
   const TAB_CAT = {
+    horo:"fortune",
     connect4:"games",
     vote:"decide",
     pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
@@ -16280,6 +16345,107 @@
     const ed=voteEl("voteEdit"); if(ed) ed.onclick=function(){ voteState.live=false; voteSave(); voteRenderSetup(); };
   }
   voteBind();
+
+  /* ===== ⭐ 星座运势 horo ===== */
+  var HORO_SIGNS = [
+    {k:"aries",em:"♈",nm:"白羊",dt:"3.21-4.19",el:"火"},
+    {k:"taurus",em:"♉",nm:"金牛",dt:"4.20-5.20",el:"土"},
+    {k:"gemini",em:"♊",nm:"双子",dt:"5.21-6.21",el:"风"},
+    {k:"cancer",em:"♋",nm:"巨蟹",dt:"6.22-7.22",el:"水"},
+    {k:"leo",em:"♌",nm:"狮子",dt:"7.23-8.22",el:"火"},
+    {k:"virgo",em:"♍",nm:"处女",dt:"8.23-9.22",el:"土"},
+    {k:"libra",em:"♎",nm:"天秤",dt:"9.23-10.23",el:"风"},
+    {k:"scorpio",em:"♏",nm:"天蝎",dt:"10.24-11.22",el:"水"},
+    {k:"sagittarius",em:"♐",nm:"射手",dt:"11.23-12.21",el:"火"},
+    {k:"capricorn",em:"♑",nm:"摩羯",dt:"12.22-1.19",el:"土"},
+    {k:"aquarius",em:"♒",nm:"水瓶",dt:"1.20-2.18",el:"风"},
+    {k:"pisces",em:"♓",nm:"双鱼",dt:"2.19-3.20",el:"水"}
+  ];
+  var HORO_COLORS = ["中国红","馗草绿","马卡龙蓝","鹅黄","蒔草紫","珊瑚橘","藄青","樱花粉","奈米白","金橘黄","蔗黄绿","星空黑"];
+  var HORO_DIRS = ["正东","东南","正南","西南","正西","西北","正北","东北"];
+  var HORO_YI = ["向喜欢的人主动打招呼","把拖延很久的事做了","整理桌面与房间","请朋友吃一顶好饭","尝试一条新路线","早睡早起","复盘这周的得失","买一束花献给自己","完成一次运动出汗","把想法写下来","主动道歉化解误会","学一个新技能","把钱存进存钱罐","给家人打个电话"];
+  var HORO_JI = ["冲动消费大额账单","熔夜熟夜","轻易相信陈迹与小道消息","在情绪上头时做决定","扬口与人争辞","空腹喉喀咖啡","把心事憋在心里","频繁刷手机到深夜","揽下不属于自己的活","为小事钻牛角尖","给自己设不切实际的目标","忽略身体发出的信号","跟去年的自己去比"];
+  var HORO_KW = ["行动力","温柔","沉住气","好奇心","敏锐","自信","共情","专注","勇气","平衡","直觉","耐心","清醒","热情","利落","温暖"];
+  var HORO_ADVICE = [
+    "今天的机会藏在主动里，别等别人先开口。",
+    "少想多做，你担心的大多数不会发生。",
+    "把注意力收回到自己身上，今天适合充电。",
+    "一个小小的善意，会给你带回意外的好运。",
+    "遇到分歧时，先听完，再表态。",
+    "别把完美当废物，先把第一步踏出去。",
+    "今天适合做决定，相信你的第一直觉。",
+    "给自己一点独处的时间，灵感会自己浮上来。",
+    "针对人而不针对事是今天最大的雷区。",
+    "把“以后再说”换成“现在就做”，今天会很不一样。"
+  ];
+  function horoHash(str){ var h=2166136261>>>0; for(var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+  function horoRng(seed){ var a=seed>>>0; return function(){ a=(a+0x6D2B79F5)|0; var t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+  function horoPick(rng,arr){ return arr[Math.floor(rng()*arr.length)]; }
+  function horoStars(n){ var full="★".repeat(n), empty="☆".repeat(5-n); return full+empty; }
+  var horoState = { sign:"aries", off:0 };
+  try{ var _hs=localStorage.getItem("suibian_horo"); if(_hs){ horoState.sign=_hs; } }catch(e){}
+  function horoSignObj(k){ for(var i=0;i<HORO_SIGNS.length;i++){ if(HORO_SIGNS[i].k===k) return HORO_SIGNS[i]; } return HORO_SIGNS[0]; }
+  function horoDateStr(off){ var d=new Date(); d.setDate(d.getDate()+off); return d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日"; }
+  function horoBuildGrid(){ var g=document.getElementById("horoGrid"); if(!g) return; var h=""; for(var i=0;i<HORO_SIGNS.length;i++){ var s=HORO_SIGNS[i]; h+='<div class="horo-sign'+(s.k===horoState.sign?" on":"")+'" data-sign="'+s.k+'"><span class="em">'+s.em+'</span><span class="nm">'+s.nm+'</span><span class="dt">'+s.dt+'</span></div>'; } g.innerHTML=h; }
+  function horoRender(){
+    horoBuildGrid();
+    var sign=horoSignObj(horoState.sign);
+    var dstr=horoDateStr(horoState.off);
+    var rng=horoRng(horoHash(dstr+"|"+sign.k));
+    var love=1+Math.floor(rng()*5), career=1+Math.floor(rng()*5), wealth=1+Math.floor(rng()*5), health=1+Math.floor(rng()*5);
+    var overall=Math.round((love+career+wealth+health)/20*100);
+    var color=horoPick(rng,HORO_COLORS), num=1+Math.floor(rng()*99), dir=horoPick(rng,HORO_DIRS);
+    var gr=HORO_SIGNS[Math.floor(rng()*HORO_SIGNS.length)], cp=HORO_SIGNS[Math.floor(rng()*HORO_SIGNS.length)];
+    var yi=horoPick(rng,HORO_YI), ji=horoPick(rng,HORO_JI), adv=horoPick(rng,HORO_ADVICE), kw=horoPick(rng,HORO_KW);
+    var card=document.getElementById("horoCard"); if(!card) return;
+    var dayLabel=["今日","明日","后日"][horoState.off]||"今日";
+    card.innerHTML=
+      '<div class="horo-head"><div class="big">'+sign.em+'</div>'+
+      '<div><h3>'+sign.nm+'座 · '+dayLabel+'运势</h3><div class="sub">'+dstr+'  ·  '+sign.el+'象星座  ·  '+sign.dt+'</div></div>'+
+      '<div class="horo-score"><div class="n">'+overall+'</div><div class="l">综合运势</div></div></div>'+
+      '<div class="horo-dims">'+
+        horoDim("爱情",love)+horoDim("事业",career)+horoDim("财运",wealth)+horoDim("健康",health)+
+      '</div>'+
+      '<div class="horo-lucky">'+
+        '<div class="box"><b>幸运颜色</b>'+color+'</div>'+
+        '<div class="box"><b>幸运数字</b>'+num+'</div>'+
+        '<div class="box"><b>幸运方位</b>'+dir+'</div>'+
+        '<div class="box"><b>贵人星座</b>'+gr.em+" "+gr.nm+'座</div>'+
+        '<div class="box" style="grid-column:1/3"><b>今日速配</b>'+cp.em+" "+cp.nm+'座  —  两人在一起容易撞出火花</div>'+
+      '</div>'+
+      '<div class="horo-yj"><div class="yi"><span class="tag">宜</span>'+yi+'</div><div class="ji"><span class="tag">忌</span>'+ji+'</div></div>'+
+      '<div class="horo-tip">'+adv+'<br><span class="kw">今日关键词：'+kw+'</span></div>';
+    setTimeout(function(){ var bars=card.querySelectorAll(".horo-bar i"); var vals=[love,career,wealth,health]; for(var i=0;i<bars.length;i++){ bars[i].style.width=(vals[i]*20)+"%"; } },40);
+    horoState._last={sign:sign,dstr:dstr,overall:overall,love:love,career:career,wealth:wealth,health:health,color:color,num:num,dir:dir,yi:yi,ji:ji,adv:adv};
+    try{ localStorage.setItem("suibian_horo",horoState.sign); }catch(e){}
+    if(typeof bumpUsage==="function"){ try{ bumpUsage("horo"); }catch(e){} }
+  }
+  function horoDim(name,n){ return '<div class="horo-dim"><span class="k">'+name+'</span><div class="horo-bar"><i></i></div><span class="st">'+horoStars(n)+'</span></div>'; }
+  function horoMsg(t){ var m=document.getElementById("horoMsg"); if(m){ m.textContent=t; if(t){ setTimeout(function(){ if(m.textContent===t) m.textContent=""; },2200); } } }
+  function horoBind(){
+    var g=document.getElementById("horoGrid");
+    if(g){ g.addEventListener("click",function(e){ var el=e.target.closest?e.target.closest(".horo-sign"):null; if(el&&el.dataset.sign){ horoState.sign=el.dataset.sign; horoRender(); } }); }
+    var days=document.querySelectorAll("#horo .horo-days button");
+    for(var i=0;i<days.length;i++){ (function(btn){ btn.addEventListener("click",function(){ for(var j=0;j<days.length;j++){ days[j].classList.remove("on"); } btn.classList.add("on"); horoState.off=parseInt(btn.getAttribute("data-off"),10)||0; horoRender(); }); })(days[i]); }
+    var roll=document.getElementById("horoRoll");
+    if(roll){ roll.addEventListener("click",function(){ horoRender(); if(typeof confettiBurst==="function"){ try{ confettiBurst(40); }catch(e){} } horoMsg("✨ 已为你重新占卜"); }); }
+    var sh=document.getElementById("horoShare");
+    if(sh){ sh.addEventListener("click",function(){ var d=horoState._last; if(!d){ return; } var txt="⭐ "+d.sign.nm+"座 "+d.dstr+" 运势：综合 "+d.overall+"分\n爱情"+horoStars(d.love)+" 事业"+horoStars(d.career)+" 财运"+horoStars(d.wealth)+" 健康"+horoStars(d.health)+"\n幸运色："+d.color+" 幸运数："+d.num+" 方位："+d.dir+"\n宜："+d.yi+"\n忌："+d.ji+"\n"+d.adv+"\n—— 随便·决策工具箱"; if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ horoMsg("✅ 运势文案已复制"); },function(){ horoMsg("复制失败，请手动选择"); }); } else { horoMsg("当前环境不支持自动复制"); } }); }
+  }
+  horoBind();
+  BADGES.push(
+    { emoji: "⭐", name: "星盘初启", desc: "查看过 1 次星座运势", test: function(u){ return (u.horo || 0) >= 1; } },
+    { emoji: "🔮", name: "星座常客", desc: "累计占卜 30 次", test: function(u){ return (u.horo || 0) >= 30; } }
+  );
+  QUOTES.push(
+    "星星不会替你做决定，但它会提醒你：你本来就很发光。",
+    "运势只是建议，行动才是答案。",
+    "今日宜：对自己好一点。",
+    "无论什么星座，真诚都是最好的魅力。",
+    "该来的会来，该遇的会遇，你只需准备好。",
+    "把今天过好，就是对未来最好的占卜。",
+    "每一个星座都有自己的光，别拿别人的银河比自己的星。"
+  );
   BADGES.push(
     { emoji: "🗳️", name: "投票发起人", desc: "开过 1 次快速投票", test: function(u){ return (u.vote || 0) >= 1; } },
     { emoji: "📊", name: "民意代言人", desc: "累计投出 30 票", test: function(u){ return (u.vote || 0) >= 30; } }
