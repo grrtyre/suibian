@@ -1508,6 +1508,7 @@
       <button data-tab="connect4">🔴 四子棋</button>
         <button data-tab="horo">⭐ 星座运势</button>
         <button data-tab="muyu">🪷 电子木鱼</button>
+        <button data-tab="hanoi">🗼 汉诺塔</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5256,6 +5257,56 @@
   <p class="muyu-tip">近 7 日功德 · 功德满 100 / 520 / 1000 / 5000 / 10000 有惊喜 🎉</p>
 </section>
 
+<section class="panel" id="hanoi">
+  <style>
+    #hanoi .hanoi-top{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin:10px 0}
+    #hanoi .hanoi-disks{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+    #hanoi .hanoi-disks button{padding:6px 13px;border-radius:999px;border:1px solid rgba(128,128,128,.35);background:rgba(128,128,128,.08);cursor:pointer;font-size:14px;transition:all .15s}
+    #hanoi .hanoi-disks button.on{background:linear-gradient(135deg,#6a5acd,#8f7be8);color:#fff;border-color:#6a5acd;font-weight:700}
+    #hanoi .hanoi-stats{display:grid;grid-template-columns:repeat(4,minmax(70px,1fr));gap:10px;margin:12px auto;max-width:560px}
+    #hanoi .hanoi-stat{padding:10px 6px;border-radius:12px;border:1px solid rgba(128,128,128,.25);background:rgba(128,128,128,.06);text-align:center}
+    #hanoi .hanoi-stat b{display:block;font-size:22px;color:#8f7be8}
+    #hanoi .hanoi-stat i{font-style:normal;font-size:12px;opacity:.72}
+    #hanoi .hanoi-board{display:flex;gap:12px;justify-content:center;align-items:flex-end;max-width:660px;height:250px;margin:10px auto 30px;padding:0 6px}
+    #hanoi .hanoi-peg{position:relative;flex:1;height:100%;display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;cursor:pointer;border-radius:10px;transition:background .15s;padding-top:6px}
+    #hanoi .hanoi-peg::before{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:9px;height:90%;background:linear-gradient(180deg,#b7a98f,#8a7a5c);border-radius:6px;z-index:0}
+    #hanoi .hanoi-peg::after{content:"";position:absolute;left:6%;bottom:-12px;width:88%;height:12px;background:linear-gradient(180deg,#b7a98f,#8a7a5c);border-radius:6px}
+    #hanoi .hanoi-peg.sel{background:rgba(143,123,232,.16)}
+    #hanoi .hanoi-peg .lab{position:absolute;bottom:-30px;left:0;width:100%;text-align:center;font-size:13px;opacity:.7;font-weight:700}
+    #hanoi .hanoi-disk{position:relative;z-index:1;height:24px;border-radius:8px;margin-bottom:3px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.28);transition:transform .12s}
+    #hanoi .hanoi-disk.lift{transform:translateY(-8px) scale(1.04);outline:2px solid #fff;outline-offset:-1px}
+    #hanoi .hanoi-ctl{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:8px 0 4px}
+    #hanoi .hanoi-ctl button{padding:8px 18px;border-radius:999px;border:1px solid rgba(128,128,128,.35);background:rgba(128,128,128,.08);cursor:pointer;font-size:14px;transition:all .15s}
+    #hanoi .hanoi-ctl button:hover{border-color:#8f7be8}
+    #hanoi .hanoi-ctl button:disabled{opacity:.45;cursor:not-allowed}
+    #hanoi .hanoi-ctl button.primary{background:linear-gradient(135deg,#6a5acd,#8f7be8);color:#fff;border-color:#6a5acd;font-weight:700}
+    #hanoi .hanoi-msg{text-align:center;min-height:22px;font-weight:700;color:#8f7be8;margin-top:2px}
+    #hanoi .hanoi-rec{text-align:center;font-size:12px;opacity:.8;margin-top:4px}
+    #hanoi .hanoi-tip{text-align:center;font-size:12px;opacity:.7;margin-top:4px}
+  </style>
+  <h2>🗼 汉诺塔</h2>
+  <p class="desc">经典益智解谜：把 A 柱上的所有圆盘搬到 C 柱，一次只能移动一个圆盘，且大盘永远不能压在小盘上。点一下柱子选中起点、再点目标柱落子；支持撤销、自动演示与最佳成绩记录，数据只存本地浏览器。</p>
+  <div class="hanoi-top">
+    <span style="font-size:13px;opacity:.7">圆盘数</span>
+    <div class="hanoi-disks" id="hanoiDisks"></div>
+  </div>
+  <div class="hanoi-stats">
+    <div class="hanoi-stat"><b id="hanoiMoves">0</b><i>已用步数</i></div>
+    <div class="hanoi-stat"><b id="hanoiMin">1</b><i>最少步数</i></div>
+    <div class="hanoi-stat"><b id="hanoiTime">0.0s</b><i>用时</i></div>
+    <div class="hanoi-stat"><b id="hanoiWinCnt">0</b><i>通关次数</i></div>
+  </div>
+  <div class="hanoi-board" id="hanoiBoard"></div>
+  <div class="hanoi-msg" id="hanoiMsg"></div>
+  <div class="hanoi-ctl">
+    <button type="button" id="hanoiUndo">↩ 撤销</button>
+    <button type="button" id="hanoiReset" class="primary">🔄 重开</button>
+    <button type="button" id="hanoiAuto">🤖 自动演示</button>
+  </div>
+  <div class="hanoi-rec" id="hanoiRec"></div>
+  <p class="hanoi-tip">目标：把全部圆盘从 A 柱搬到 C 柱。理论最少步数 = 2ⁿ − 1，用最少步数通关可解锁「完美搬运工」成就 🏆</p>
+</section>
+
 <script>
 (function () {
   "use strict";
@@ -5585,6 +5636,7 @@
     if (id === "connect4") c4Render();
     if (id === "horo") horoRender();
     if (id === "muyu") muyuRender();
+    if (id === "hanoi") hanoiRender();
     if (id !== "muyu" && typeof muyuStop === "function") muyuStop();
     if (id === "fortune") drawFortune(true);
     if (id === "share") drawShareCard();
@@ -5702,6 +5754,7 @@
 
   /* ---------- 工具搜索（按名称 / 关键词过滤导航） ---------- */
   const TAB_KW = {
+    hanoi: "汉诺塔 河内塔 移动圆盘 递归 益智 解谜 tower of hanoi 圆盘 三柱 经典 puzzle 搬盘子",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -5883,6 +5936,7 @@
 
   /* ---------- 分类筛选（站点级导航增强，惠及全部 94 工具） ---------- */
   const TAB_CAT = {
+    hanoi:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -16666,6 +16720,222 @@
       muyuKnock();
     });
   }
+  /* ================= 🗼 汉诺塔 hanoi ================= */
+  var hanoiN = 4;                 // 当前圆盘数
+  var hanoiPegs = [[], [], []];   // 每柱数组：索引0=底部(大盘) -> 顶部(小盘)
+  var hanoiMoves = 0;             // 已用步数
+  var hanoiSel = -1;              // 当前选中的柱
+  var hanoiHist = [];             // 撤销历史 [from,to]
+  var hanoiT0 = 0;                // 计时起点
+  var hanoiTick = null;           // 计时器
+  var hanoiDemo = false;          // 自动演示中(不计成绩)
+  var hanoiDemoTimer = null;
+  function hanoiLoad() {
+    try {
+      var o = JSON.parse(localStorage.getItem("suibian_hanoi") || "{}");
+      if (!o || typeof o !== "object") o = {};
+      if (typeof o.win !== "number") o.win = 0;
+      if (!o.best || typeof o.best !== "object") o.best = {};
+      return o;
+    } catch (e) { return { win: 0, best: {} }; }
+  }
+  function hanoiSave(o) { try { localStorage.setItem("suibian_hanoi", JSON.stringify(o)); } catch (e) {} }
+  function hanoiMin(n) { return Math.pow(2, n) - 1; }
+  function hanoiFmt(ms) { return (ms / 1000).toFixed(1) + "s"; }
+  function hanoiDiskColor(size, total) {
+    var h = Math.round(260 - (size - 1) / Math.max(1, total - 1) * 210); // 紫->青->绿
+    return "hsl(" + h + ",62%,55%)";
+  }
+  function hanoiInit(n) {
+    hanoiN = n; hanoiPegs = [[], [], []];
+    for (var s = n; s >= 1; s--) hanoiPegs[0].push(s); // 底大顶小
+    hanoiMoves = 0; hanoiSel = -1; hanoiHist = [];
+    hanoiStop(); hanoiT0 = 0;
+    hanoiDemo = false;
+    hanoiRender();
+  }
+  function hanoiStop() { if (hanoiTick) { clearInterval(hanoiTick); hanoiTick = null; } }
+  function hanoiTimerStart() {
+    if (hanoiT0) return;
+    hanoiT0 = Date.now();
+    hanoiTick = setInterval(function () {
+      var el = $("hanoiTime"); if (el) el.textContent = hanoiFmt(Date.now() - hanoiT0);
+    }, 100);
+  }
+  function hanoiDisksBar() {
+    var box = $("hanoiDisks"); if (!box) return;
+    box.innerHTML = "";
+    for (var n = 3; n <= 8; n++) {
+      (function (n) {
+        var b = document.createElement("button");
+        b.type = "button"; b.textContent = n;
+        if (n === hanoiN) b.className = "on";
+        b.addEventListener("click", function () { if (hanoiDemo) return; hanoiInit(n); });
+        box.appendChild(b);
+      })(n);
+    }
+  }
+  function hanoiBoardDraw() {
+    var board = $("hanoiBoard"); if (!board) return;
+    board.innerHTML = "";
+    var names = ["A", "B", "C"];
+    for (var p = 0; p < 3; p++) {
+      (function (p) {
+        var peg = document.createElement("div");
+        peg.className = "hanoi-peg" + (hanoiSel === p ? " sel" : "");
+        var stack = hanoiPegs[p];
+        for (var i = 0; i < stack.length; i++) {
+          var size = stack[i];
+          var d = document.createElement("div");
+          d.className = "hanoi-disk";
+          var top = i === stack.length - 1;
+          if (hanoiSel === p && top) d.className += " lift";
+          var pct = 34 + (size - 1) / Math.max(1, hanoiN - 1) * 60; // 34%~94%
+          d.style.width = pct + "%";
+          d.style.background = hanoiDiskColor(size, hanoiN);
+          d.textContent = size;
+          peg.appendChild(d);
+        }
+        var lab = document.createElement("div");
+        lab.className = "lab"; lab.textContent = names[p];
+        peg.appendChild(lab);
+        peg.addEventListener("click", function () { hanoiPegClick(p); });
+        board.appendChild(peg);
+      })(p);
+    }
+  }
+  function hanoiRender() {
+    hanoiDisksBar();
+    hanoiBoardDraw();
+    var m = $("hanoiMoves"); if (m) m.textContent = hanoiMoves;
+    var mn = $("hanoiMin"); if (mn) mn.textContent = hanoiMin(hanoiN);
+    var tm = $("hanoiTime"); if (tm && !hanoiT0) tm.textContent = "0.0s";
+    var st = hanoiLoad();
+    var wc = $("hanoiWinCnt"); if (wc) wc.textContent = st.win || 0;
+    var rec = $("hanoiRec");
+    if (rec) {
+      var b = st.best[String(hanoiN)];
+      rec.textContent = b ? ("🏅 " + hanoiN + " 盘最佳：" + b.moves + " 步 / " + hanoiFmt(b.time)) : ("🏅 " + hanoiN + " 盘暂无记录，快来创造第一条！");
+    }
+    var undo = $("hanoiUndo"); if (undo) undo.disabled = hanoiDemo || hanoiHist.length === 0;
+  }
+  function hanoiMsg(t, ok) {
+    var el = $("hanoiMsg"); if (!el) return;
+    el.textContent = t || "";
+    el.style.color = ok === false ? "#e05a5a" : "#8f7be8";
+  }
+  function hanoiPegClick(p) {
+    if (hanoiDemo) return;
+    if (hanoiSel === -1) {
+      if (hanoiPegs[p].length === 0) { hanoiMsg("这根柱子是空的，选个有盘的柱子吧", false); return; }
+      hanoiSel = p; hanoiMsg(""); hanoiBoardDraw();
+      var undo = $("hanoiUndo"); if (undo) undo.disabled = hanoiHist.length === 0;
+      return;
+    }
+    if (p === hanoiSel) { hanoiSel = -1; hanoiMsg(""); hanoiBoardDraw(); return; }
+    hanoiDoMove(hanoiSel, p, true);
+    hanoiSel = -1;
+  }
+  function hanoiDoMove(from, to, byUser) {
+    var src = hanoiPegs[from], dst = hanoiPegs[to];
+    if (src.length === 0) { if (byUser) hanoiMsg("起点没有圆盘", false); hanoiBoardDraw(); return false; }
+    var disk = src[src.length - 1];
+    if (dst.length && dst[dst.length - 1] < disk) {
+      if (byUser) hanoiMsg("大盘不能压在小盘上哦 🚫", false);
+      hanoiBoardDraw(); return false;
+    }
+    src.pop(); dst.push(disk);
+    hanoiMoves++;
+    if (byUser) hanoiHist.push([from, to]);
+    hanoiTimerStart();
+    hanoiRender();
+    if (byUser) hanoiMsg("");
+    hanoiCheckWin();
+    return true;
+  }
+  function hanoiUndo() {
+    if (hanoiDemo || hanoiHist.length === 0) return;
+    var mv = hanoiHist.pop();
+    var from = mv[0], to = mv[1];
+    var disk = hanoiPegs[to].pop();       // 把刚落下的盘取回
+    hanoiPegs[from].push(disk);           // 放回原柱顶部
+    hanoiMoves = Math.max(0, hanoiMoves - 1);
+    hanoiSel = -1;
+    hanoiMsg("");
+    hanoiRender();
+  }
+  function hanoiCheckWin() {
+    if (hanoiPegs[2].length !== hanoiN) return;
+    hanoiStop();
+    var elapsed = hanoiT0 ? (Date.now() - hanoiT0) : 0;
+    hanoiT0 = 0;
+    if (hanoiDemo) {
+      hanoiMsg("🤖 自动演示完成：" + hanoiMoves + " 步（演示不计入成绩）");
+      hanoiDemo = false;
+      hanoiRender();
+      return;
+    }
+    var st = hanoiLoad();
+    st.win = (st.win || 0) + 1;
+    var key = String(hanoiN);
+    var prev = st.best[key];
+    var better = !prev || hanoiMoves < prev.moves || (hanoiMoves === prev.moves && elapsed < prev.time);
+    if (better) st.best[key] = { moves: hanoiMoves, time: elapsed };
+    hanoiSave(st);
+    if (typeof bumpUsage === "function") bumpUsage("hanoi");
+    var optimal = hanoiMoves === hanoiMin(hanoiN);
+    if (optimal && typeof bumpUsage === "function") bumpUsage("hanoiopt");
+    if (typeof confettiBurst === "function") confettiBurst(optimal ? 120 : 60);
+    if (optimal) {
+      hanoiMsg("🏆 完美通关！" + hanoiMoves + " 步正是理论最优，用时 " + hanoiFmt(elapsed));
+      if (typeof toast === "function") toast("🏆 最少步数通关，太强了！");
+    } else {
+      hanoiMsg("🎉 通关！共 " + hanoiMoves + " 步，用时 " + hanoiFmt(elapsed) + "（最优 " + hanoiMin(hanoiN) + " 步）");
+      if (typeof toast === "function") toast("🎉 汉诺塔通关！");
+    }
+    hanoiRender();
+  }
+  function hanoiSolveSeq(n, from, aux, to, out) {
+    if (n <= 0) return;
+    hanoiSolveSeq(n - 1, from, to, aux, out);
+    out.push([from, to]);
+    hanoiSolveSeq(n - 1, aux, from, to, out);
+  }
+  function hanoiAuto() {
+    if (hanoiDemo) return;
+    hanoiInit(hanoiN);          // 从初始局面开始演示
+    hanoiDemo = true;
+    hanoiRender();
+    hanoiMsg("🤖 自动演示中…");
+    var seq = []; hanoiSolveSeq(hanoiN, 0, 1, 2, seq);
+    var i = 0;
+    var delay = Math.max(160, 620 - hanoiN * 40);
+    hanoiTimerStart();
+    hanoiDemoTimer = setInterval(function () {
+      if (i >= seq.length) { clearInterval(hanoiDemoTimer); hanoiDemoTimer = null; return; }
+      var mv = seq[i++];
+      hanoiDoMove(mv[0], mv[1], false);
+    }, delay);
+  }
+  function hanoiBind() {
+    var u = $("hanoiUndo"); if (u) u.addEventListener("click", function () { hanoiUndo(); });
+    var r = $("hanoiReset"); if (r) r.addEventListener("click", function () { if (hanoiDemoTimer) { clearInterval(hanoiDemoTimer); hanoiDemoTimer = null; } hanoiDemo = false; hanoiInit(hanoiN); hanoiMsg(""); });
+    var a = $("hanoiAuto"); if (a) a.addEventListener("click", function () { hanoiAuto(); });
+    hanoiInit(4);
+  }
+  hanoiBind();
+  BADGES.push(
+    { emoji: "🗼", name: "初通汉诺塔", desc: "完成 1 次汉诺塔通关", test: function (u) { return (u.hanoi || 0) >= 1; } },
+    { emoji: "🏆", name: "完美搬运工", desc: "用最少步数通关一次汉诺塔", test: function (u) { return (u.hanoiopt || 0) >= 1; } }
+  );
+  QUOTES.push(
+    "汉诺塔告诉你：再复杂的事，也能拆成一步一步来。",
+    "一次只搬一个盘，急不得，也少不得。",
+    "大盘不压小盘——做人做事，都别本末倒置。",
+    "递归的浪漫：把难题交给更小的自己去解。",
+    "第 64 个金盘搬完时，世界会终结——好在你只有几个盘要搬。",
+    "看似绕远，其实每一步都在逼近终点。"
+  );
   muyuBind();
   BADGES.push(
     { emoji: "🪷", name: "初入禅门", desc: "敲响第 1 声电子木鱼", test: function (u) { return (u.muyu || 0) >= 1; } },
