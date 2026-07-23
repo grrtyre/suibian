@@ -1513,6 +1513,7 @@
         <button data-tab="pong">🏓 弹球对战</button>
         <button data-tab="stock">💹 股市大亨</button>
         <button data-tab="splitbill">🧾 AA 分摊</button>
+        <button data-tab="metronome">🎼 节拍器</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5523,6 +5524,100 @@
       <div class="sb-tip">📌 规则：金额按「参与人均摊」，精确到位（分）；多退少补后，总额自动平衡。数据存在本机浏览器（suibian_splitbill），关页面不丢，可随时继续。</div>
     </div>
   </section>
+  <!-- 节拍器 -->
+  <section class="panel" id="metronome">
+    <style>
+    #metronome .mt-wrap{max-width:520px;margin:0 auto;text-align:center}
+    #metronome .mt-pend{position:relative;height:120px;margin:6px auto 2px;width:180px}
+    #metronome .mt-pivot{position:absolute;left:50%;bottom:8px;width:14px;height:14px;border-radius:50%;background:var(--accent-3);transform:translateX(-50%);box-shadow:0 0 12px var(--glow-1)}
+    #metronome .mt-arm{position:absolute;left:50%;bottom:12px;width:6px;height:96px;border-radius:6px;background:linear-gradient(var(--accent),var(--accent-2));transform-origin:bottom center;transform:translateX(-50%) rotate(0deg);transition:transform .09s linear}
+    #metronome .mt-bob{position:absolute;top:-9px;left:50%;width:20px;height:20px;border-radius:50%;background:var(--accent-2);transform:translateX(-50%);box-shadow:0 0 10px var(--glow-2)}
+    #metronome .mt-bpm{font-size:64px;font-weight:800;line-height:1;color:var(--text);letter-spacing:1px}
+    #metronome .mt-term{color:var(--muted);margin:2px 0 10px;font-size:14px}
+    #metronome .mt-term b{color:var(--accent-2)}
+    #metronome .mt-slider{width:100%;margin:6px 0 4px;accent-color:var(--accent)}
+    #metronome .mt-adj{display:flex;gap:8px;justify-content:center;margin:4px 0 12px}
+    #metronome .mt-adj button{flex:0 0 auto;min-width:52px;padding:8px 0;border-radius:12px;border:1px solid var(--line);background:var(--card-2);color:var(--text);cursor:pointer;font-weight:700}
+    #metronome .mt-adj button:hover{border-color:var(--accent)}
+    #metronome .mt-dots{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:8px 0 14px;min-height:22px}
+    #metronome .mt-dot{width:18px;height:18px;border-radius:50%;background:var(--card-2);border:1px solid var(--line);transition:transform .05s,background .05s,box-shadow .05s}
+    #metronome .mt-dot.on{background:var(--accent);transform:scale(1.35);box-shadow:0 0 14px var(--glow-2)}
+    #metronome .mt-dot.acc{background:var(--accent-2)}
+    #metronome .mt-dot.acc.on{background:var(--accent-2);box-shadow:0 0 18px var(--accent-2)}
+    #metronome .mt-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+    #metronome .mt-row label{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:6px}
+    #metronome select,#metronome input[type=number]{background:var(--card-2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+    #metronome input[type=number]{width:58px}
+    #metronome .mt-main{display:flex;gap:12px;justify-content:center;margin:14px 0}
+    #metronome .mt-start{padding:12px 30px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#1a1220;font-weight:800;font-size:17px;cursor:pointer;box-shadow:var(--shadow)}
+    #metronome .mt-start.playing{background:linear-gradient(135deg,var(--accent-3),#b06cff);color:#fff}
+    #metronome .mt-tap{padding:12px 22px;border-radius:14px;border:1px solid var(--line);background:var(--card-2);color:var(--text);font-weight:700;cursor:pointer}
+    #metronome .mt-tap:active{transform:scale(.96)}
+    #metronome .mt-train{color:var(--muted);font-size:13px;margin:8px 0;line-height:2}
+    #metronome .mt-train label{color:var(--text)}
+    #metronome .mt-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+    #metronome .mt-presets button{padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;font-size:13px}
+    #metronome .mt-presets button:hover{color:var(--text);border-color:var(--accent-2)}
+    #metronome .mt-stat{color:var(--muted);font-size:13px;margin-top:8px}
+    </style>
+    <h2>🎼 节拍器</h2>
+    <p class="sub">精准节拍 · 点按测速 · 重音拍与细分 · 渐快训练</p>
+    <div class="mt-wrap">
+      <div class="mt-pend">
+        <div class="mt-arm" id="mtArm"><div class="mt-bob"></div></div>
+        <div class="mt-pivot"></div>
+      </div>
+      <div class="mt-bpm" id="mtBpm">120</div>
+      <div class="mt-term">BPM · <b id="mtTerm">Moderato</b></div>
+      <input type="range" id="mtSlider" class="mt-slider" min="30" max="300" value="120">
+      <div class="mt-adj">
+        <button data-d="-5">−5</button>
+        <button data-d="-1">−1</button>
+        <button data-d="1">+1</button>
+        <button data-d="5">+5</button>
+      </div>
+      <div class="mt-dots" id="mtDots"></div>
+      <div class="mt-row">
+        <label>拍号
+          <select id="mtBeats">
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+            <option value="4" selected>4</option><option value="5">5</option><option value="6">6</option>
+            <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+            <option value="12">12</option>
+          </select>
+        </label>
+        <label>细分
+          <select id="mtSub">
+            <option value="1">♩ 整拍</option>
+            <option value="2">♫ 八分</option>
+            <option value="3">三连音</option>
+            <option value="4">十六分</option>
+          </select>
+        </label>
+        <label>音色
+          <select id="mtSound">
+            <option value="0">木鱼</option>
+            <option value="1">电子</option>
+            <option value="2">方波</option>
+          </select>
+        </label>
+      </div>
+      <div class="mt-main">
+        <button id="mtStart" class="mt-start">▶ 开始</button>
+        <button id="mtTap" class="mt-tap">👆 点按测速</button>
+      </div>
+      <div class="mt-train">
+        <label><input type="checkbox" id="mtTrainOn"> 渐快训练</label>：每
+        <input type="number" id="mtTrainBars" value="4" min="1" max="16"> 小节 +
+        <input type="number" id="mtTrainStep" value="4" min="1" max="20"> BPM（上限
+        <input type="number" id="mtTrainMax" value="200" min="40" max="300">）
+      </div>
+      <div class="mt-presets" id="mtPresets"></div>
+      <div class="mt-stat" id="mtStat"></div>
+      <div class="sb-tip">📌 空格键开始/停止；“点按测速”取最近多次间隔的中位数；重音拍音高更亮。纯前端 WebAudio 实时合成，不联网、不录音。</div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -5857,6 +5952,8 @@
     if (id === "pong") pongRender();
     if (id === "stock") stockRender();
     if (id === "splitbill") sbillRender();
+    if (id === "metronome") metroRender();
+    if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
@@ -5982,6 +6079,7 @@
   pong: "弹球对战 pong 乒乓 乒乓球 球拍 弹球 ai 对战 反弹 报销 游戏 接球 挡板",
     stock: "股市大亨 stock 炒股 模拟炒股 股票 k线 K线 均线 牛市 熊市 韭菜 交易 买入 卖出 虚拟盘 投资 理财 收益率 游戏",
     splitbill: "AA 分摊神器 splitbill aa AA制 分摊 平账 算账 结算 拼单 聚餐 旅行 合租 分账 转账 还钱 均摊 谁给谁 工具",
+    metronome: "节拍器 metronome 节拍 bpm 测速 tap tempo 拍号 细分 重音 渐快 练习 音乐 鼓点 速度 allegro andante 钢琴 吉他 工具",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6168,6 +6266,7 @@
 pong:"games",
 stock:"games",
 splitbill:"tools",
+    metronome:"tools",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -18179,6 +18278,59 @@ splitbill:"tools",
     $("sbillCopy").addEventListener("click", sbillCopyPlan);
     sbillRender();
   }
+  (function(){
+    var AC=null, timer=null, nextT=0, beat=0, playing=false, bars=0;
+    var st={bpm:120,beats:4,sub:1,sound:0};
+    var taps=[];
+    var TERMS=[[40,"Grave"],[60,"Largo"],[76,"Adagio"],[108,"Andante"],[120,"Moderato"],[156,"Allegro"],[176,"Vivace"],[300,"Presto"]];
+    var PRESETS=[["Largo",50],["Adagio",70],["Andante",92],["Moderato",114],["Allegro",140],["Vivace",172],["Presto",200]];
+    function term(b){for(var i=0;i<TERMS.length;i++){if(b<=TERMS[i][0])return TERMS[i][1];}return "Presto";}
+    function clamp(b){b=Math.round(b);if(b<30)b=30;if(b>300)b=300;return b;}
+    function bpmFromIvs(ivs){if(!ivs.length)return 0;var a=ivs.slice().sort(function(x,y){return x-y;});var m=a.length%2?a[(a.length-1)/2]:(a[a.length/2-1]+a[a.length/2])/2;return m>0?60000/m:0;}
+    function trainNext(b,step,max){return Math.min(b+step,max);}
+    function load(){try{var s=JSON.parse(localStorage.getItem("suibian_metro"));if(s){st.bpm=clamp(s.bpm||120);st.beats=s.beats||4;st.sub=s.sub||1;st.sound=(s.sound|0)||0;}}catch(e){}}
+    function save(){try{localStorage.setItem("suibian_metro",JSON.stringify(st));}catch(e){}}
+    function el(id){return document.getElementById(id);}
+    function drawDots(){var d=el("mtDots");if(!d)return;var h="";for(var i=0;i<st.beats;i++){h+='<div class="mt-dot'+(i===0?" acc":"")+'" data-i="'+i+'"></div>';}d.innerHTML=h;}
+    function syncUI(){var b=el("mtBpm");if(b)b.textContent=st.bpm;var t=el("mtTerm");if(t)t.textContent=term(st.bpm);var s=el("mtSlider");if(s)s.value=st.bpm;var arm=el("mtArm");if(arm&&!playing)arm.style.transform="translateX(-50%) rotate(0deg)";}
+    function setBpm(b){st.bpm=clamp(b);syncUI();save();}
+    function click(time,accent,sub){if(!AC)return;var o=AC.createOscillator(),g=AC.createGain();var f=sub?1200:(accent?(st.sound===2?1568:1480):(st.sound===2?880:820));o.type=st.sound===1?"sine":(st.sound===2?"square":"triangle");o.frequency.value=f;var vol=sub?0.22:(accent?0.9:0.55);g.gain.setValueAtTime(0.0001,time);g.gain.linearRampToValueAtTime(vol,time+0.001);g.gain.exponentialRampToValueAtTime(0.0001,time+0.06);o.connect(g);g.connect(AC.destination);o.start(time);o.stop(time+0.07);}
+    function flash(idx,accent,delayMs){setTimeout(function(){if(!playing)return;var dots=document.querySelectorAll("#mtDots .mt-dot");for(var i=0;i<dots.length;i++)dots[i].classList.remove("on");if(dots[idx])dots[idx].classList.add("on");var arm=el("mtArm");if(arm){var ang=(idx%2===0)?-24:24;arm.style.transform="translateX(-50%) rotate("+ang+"deg)";}},Math.max(0,delayMs));}
+    function schedule(){if(!AC)return;var LA=0.12;while(nextT<AC.currentTime+LA){var spb=60/st.bpm;var pos=beat%st.beats;var accent=(pos===0);click(nextT,accent,false);if(st.sub>1){for(var s=1;s<st.sub;s++){click(nextT+spb*s/st.sub,false,true);}}flash(pos,accent,(nextT-AC.currentTime)*1000);beat++;if(beat%st.beats===0){bars++;var on=el("mtTrainOn");if(on&&on.checked){var nb=parseInt((el("mtTrainBars")||{}).value,10)||4;if(bars>=nb){bars=0;var step=parseInt((el("mtTrainStep")||{}).value,10)||4;var mx=parseInt((el("mtTrainMax")||{}).value,10)||200;var nx=trainNext(st.bpm,step,mx);if(nx!==st.bpm){setBpm(nx);}}}}nextT+=spb;}timer=setTimeout(schedule,25);}
+    function start(){if(playing)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();}catch(e){AC=null;}playing=true;beat=0;bars=0;nextT=(AC?AC.currentTime:0)+0.06;var btn=el("mtStart");if(btn){btn.textContent="⏸ 停止";btn.classList.add("playing");}if(AC)schedule();if(typeof bumpUsage==="function")bumpUsage("metro");var stt=el("mtStat");if(stt)stt.textContent="正在走拍……保持节奏！";}
+    function stop(){playing=false;if(timer){clearTimeout(timer);timer=null;}var btn=el("mtStart");if(btn){btn.textContent="▶ 开始";btn.classList.remove("playing");}var dots=document.querySelectorAll("#mtDots .mt-dot");for(var i=0;i<dots.length;i++)dots[i].classList.remove("on");var arm=el("mtArm");if(arm)arm.style.transform="translateX(-50%) rotate(0deg)";}
+    function toggle(){if(playing)stop();else start();}
+    function tap(){var now=(window.performance&&performance.now)?performance.now():Date.now();if(taps.length&&now-taps[taps.length-1]>2000)taps=[];taps.push(now);if(taps.length>6)taps.shift();if(taps.length>=2){var ivs=[];for(var i=1;i<taps.length;i++)ivs.push(taps[i]-taps[i-1]);var b=bpmFromIvs(ivs);if(b>0)setBpm(clamp(b));}var stt=el("mtStat");if(stt)stt.textContent="已采集 "+taps.length+" 下……继续稳定地点！";}
+    function drawPresets(){var p=el("mtPresets");if(!p)return;var h="";for(var i=0;i<PRESETS.length;i++){h+='<button data-b="'+PRESETS[i][1]+'">'+PRESETS[i][0]+" "+PRESETS[i][1]+"</button>";}p.innerHTML=h;}
+    function metroRender(){load();syncUI();drawDots();drawPresets();var bs=el("mtBeats");if(bs)bs.value=String(st.beats);var sb=el("mtSub");if(sb)sb.value=String(st.sub);var sd=el("mtSound");if(sd)sd.value=String(st.sound);}
+    function metroStop(){stop();}
+    function metroBind(){var sl=el("mtSlider");if(!sl)return;if(sl.dataset&&sl.dataset.b)return;if(sl.dataset)sl.dataset.b="1";
+      sl.addEventListener("input",function(){setBpm(parseInt(sl.value,10)||120);});
+      var adj=document.querySelectorAll("#metronome .mt-adj button");for(var i=0;i<adj.length;i++){(function(btn){btn.addEventListener("click",function(){setBpm(st.bpm+(parseInt(btn.getAttribute("data-d"),10)||0));});})(adj[i]);}
+      var bs=el("mtBeats");if(bs)bs.addEventListener("change",function(){st.beats=parseInt(bs.value,10)||4;drawDots();save();});
+      var sb=el("mtSub");if(sb)sb.addEventListener("change",function(){st.sub=parseInt(sb.value,10)||1;save();});
+      var sd=el("mtSound");if(sd)sd.addEventListener("change",function(){st.sound=parseInt(sd.value,10)||0;save();});
+      var stbtn=el("mtStart");if(stbtn)stbtn.addEventListener("click",toggle);
+      var tp=el("mtTap");if(tp)tp.addEventListener("click",tap);
+      var pr=el("mtPresets");if(pr)pr.addEventListener("click",function(e){var t=e.target;if(t&&t.getAttribute("data-b")){setBpm(parseInt(t.getAttribute("data-b"),10));}});
+      document.addEventListener("keydown",function(e){if(e.code==="Space"||e.key===" "){var sec=el("metronome");if(sec&&sec.classList.contains("active")){var tag=(e.target&&e.target.tagName)||"";if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;e.preventDefault();toggle();}}});
+    }
+    window.metroRender=metroRender;window.metroStop=metroStop;window.metroBind=metroBind;
+    window.__metroTest={term:term,clamp:clamp,bpmFromIvs:bpmFromIvs,trainNext:trainNext};
+  })();
+  metroBind();
+  BADGES.push(
+    { emoji: "🎼", name: "打拍启蒙", desc: "第一次开动节拍器", test: function (u) { return (u.metro || 0) >= 1; } },
+    { emoji: "🥁", name: "节拍大师", desc: "节拍器累计使用 20 次", test: function (u) { return (u.metro || 0) >= 20; } }
+  );
+  QUOTES.push(
+    "人生需要一个稳定的节拍，也需要偶尔的即兴。",
+    "快慢都行，关键是你开始走拍。",
+    "节奏不是束缚，是让你不跑偏的阳光。",
+    "先跟上拍子，再谈自由发挥。",
+    "一下一下，慌乱就变成了秩序。",
+    "多快算快？你的心跳说了算。"
+  );
   sbillBind();
   BADGES.push(
     { emoji: "🧾", name: "分账小能手", desc: "用 AA 分摊神器记过 1 笔账", test: function (u) { return (u.splitbill || 0) >= 1; } },
