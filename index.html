@@ -1504,6 +1504,7 @@
       <button data-tab="pwdcheck">🔐 密码强度</button>
       <button data-tab="pixel">🎨 像素画板</button>
       <button data-tab="danmu">🎉 弹幕墙</button>
+      <button data-tab="vote">🗳️ 快速投票</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5025,6 +5026,60 @@
     </div>
   </section>
 
+  <section class="panel" id="vote">
+    <div class="card">
+      <h2>🗳️ 快速投票</h2>
+      <div class="hint">列出选项，大家轮流点一点，实时柱状图告诉你人心所向——聚餐去哪、周末干吗、看哪部电影，一键表决。全程本机保存，不上传。</div>
+      <style>
+        #vote .vote-presets{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
+        #vote .vote-chip{background:var(--card-2);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:13px;cursor:pointer;font-family:inherit;transition:.15s}
+        #vote .vote-chip:hover{color:var(--text);border-color:var(--accent-3);transform:translateY(-1px)}
+        #vote .vote-q{width:100%;background:var(--card-2);border:1px solid var(--line);border-radius:12px;color:var(--text);font-size:17px;font-weight:700;padding:12px 14px;font-family:inherit;margin-bottom:12px}
+        #vote .vote-opt-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+        #vote .vote-opt-row .vo-dot{width:14px;height:14px;border-radius:50%;flex:none}
+        #vote .vote-opt-row input{flex:1;background:var(--card-2);border:1px solid var(--line);border-radius:10px;color:var(--text);font-size:15px;padding:10px 12px;font-family:inherit}
+        #vote .vote-opt-row .vo-del{background:transparent;border:0;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:2px 8px;border-radius:8px}
+        #vote .vote-opt-row .vo-del:hover{color:var(--accent);background:var(--card)}
+        #vote .vote-board{display:flex;flex-direction:column;gap:12px;margin:6px 0 14px}
+        #vote .vb-item{background:var(--card-2);border:1px solid var(--line);border-radius:14px;padding:13px 15px;cursor:pointer;position:relative;overflow:hidden;transition:transform .12s,box-shadow .12s;user-select:none}
+        #vote .vb-item:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.28)}
+        #vote .vb-item:active{transform:scale(.98)}
+        #vote .vb-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:14px;opacity:.22;transition:width .5s cubic-bezier(.22,1,.36,1);z-index:0}
+        #vote .vb-row{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px}
+        #vote .vb-name{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px;min-width:0}
+        #vote .vb-name .vb-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        #vote .vb-dot{width:12px;height:12px;border-radius:50%;flex:none}
+        #vote .vb-num{font-variant-numeric:tabular-nums;font-weight:800;font-size:17px}
+        #vote .vb-pct{color:var(--muted);font-size:13px;margin-left:6px;font-weight:600}
+        #vote .vb-lead{box-shadow:0 0 0 2px var(--accent-2) inset}
+        #vote .vote-total{color:var(--muted);font-size:14px;margin:2px 0 12px;text-align:center}
+        #vote .vote-winner{text-align:center;font-size:19px;font-weight:800;margin:10px 0 4px;padding:15px;border-radius:14px;background:linear-gradient(135deg,var(--glow-1),var(--glow-2));border:1px solid var(--line);animation:votepop .4s cubic-bezier(.22,1.4,.4,1)}
+        @keyframes votepop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+      </style>
+      <div id="voteSetup">
+        <div class="vote-presets" id="votePresets"></div>
+        <input id="voteQ" class="vote-q" maxlength="40" placeholder="投票主题，例如：今晚吃什么？" />
+        <div id="voteOpts"></div>
+        <div class="row">
+          <button class="btn ghost" id="voteAdd">➕ 加一个选项</button>
+          <button class="btn" id="voteStart">🚀 开始投票</button>
+        </div>
+      </div>
+      <div id="voteLive" style="display:none">
+        <div id="voteTitle" style="font-size:19px;font-weight:800;text-align:center;margin:4px 0 10px"></div>
+        <div class="vote-total" id="voteTotal"></div>
+        <div class="vote-board" id="voteBoard"></div>
+        <div id="voteWinnerBox"></div>
+        <div class="row">
+          <button class="btn" id="voteDice">🎲 随机投一票</button>
+          <button class="btn" id="voteResult">🏆 宣布结果</button>
+          <button class="btn ghost" id="voteResetCount">↺ 清零票数</button>
+          <button class="btn ghost" id="voteEdit">✎ 改选项</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -5350,6 +5405,7 @@
     [...tabs.children].forEach((x) => x.classList.toggle("active", x.dataset.tab === id));
     document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === id));
     if (id === "wheel") drawWheel();
+    if (id === "vote") voteRender();
     if (id === "fortune") drawFortune(true);
     if (id === "share") drawShareCard();
     if (id === "achv") renderAchv();
@@ -5466,6 +5522,7 @@
 
   /* ---------- 工具搜索（按名称 / 关键词过滤导航） ---------- */
   const TAB_KW = {
+    vote: "投票 表决 投票器 举手 民主 少数服从多数 决定 live poll", 
     pick: "抽签 选择 决定 随机 选择困难", wheel: "转盘 幸运转盘 抽奖 旋转 wheel",
     scale: "天平 决策 权衡 比较 选择 拍板", coin: "硬币 抛硬币 正反面 决定",
     dice: "骰子 掷骰子 赌 随机 点数", eat: "吃 吃什么 饭 美食 点外卖 口味 餐厅",
@@ -5643,6 +5700,7 @@
 
   /* ---------- 分类筛选（站点级导航增强，惠及全部 94 工具） ---------- */
   const TAB_CAT = {
+    vote:"decide",
     pick:"decide", wheel:"decide", scale:"decide", coin:"decide", dice:"decide", eat:"decide", sort:"decide", rate:"decide", guess:"decide", rps:"decide", dart:"decide", tod:"decide", group:"decide", matrix:"decide",
     fortune:"fortune", tarot:"fortune", iching:"fortune", huangli:"fortune", oracle:"fortune", gacha:"fortune", lotto:"fortune", dream:"fortune", bottle:"fortune", cp:"fortune",
     snake:"games", tetris:"games", gm2048:"games", gomoku:"games", reversi:"games", sudoku:"games", maze:"games", sokoban:"games", slide:"games", match3:"games", simon:"games", slot:"games", breakout:"games", adventure:"games", suika:"games", plane:"games", catch:"games", rhythm:"games", emojiq:"games", flappy:"games", llk:"games", mine:"games", pipe:"games", blackjack:"games", whack:"games", nonogram:"games", lifegame:"games", memory:"games", react:"games", typing:"games", piano:"games",
@@ -16060,6 +16118,119 @@
   asciiBind();
   diffBind();
   pwdcheckBind();
+
+  // ===== 快速投票 vote =====
+  const VOTE_KEY = "suibian_vote";
+  const VOTE_COLORS = ["#ff7a59","#7c6cff","#4be3a5","#ffb15c","#5bc0ff","#ff6b9d","#c084fc","#facc15","#34d399","#f87171","#60a5fa","#fb923c"];
+  const VOTE_PRESETS = [
+    { q:"今晚吃什么？", o:["火锅","烧烤","日料","随便点个外卖"] },
+    { q:"周末去哪玩？", o:["爬山","逆商场","宅家躺平","看展"] },
+    { q:"看哪部电影？", o:["科幻大片","悬疑烧脑","轻松喜剧","经典重温"] },
+    { q:"这事儿要不要做？", o:["果断上","再等等","算了吧"] }
+  ];
+  let voteState = null;
+  function voteDefault(){ return { q:"", opts:[{n:"",v:0},{n:"",v:0},{n:"",v:0}], live:false }; }
+  function voteLoadState(){
+    try{ const d=JSON.parse(localStorage.getItem(VOTE_KEY)); if(d&&Array.isArray(d.opts)&&d.opts.length>=2) return d; }catch(e){}
+    return voteDefault();
+  }
+  function voteSave(){ try{ localStorage.setItem(VOTE_KEY, JSON.stringify(voteState)); }catch(e){} }
+  function voteColor(i){ return VOTE_COLORS[i % VOTE_COLORS.length]; }
+  function voteEsc(s){ return String(s).replace(/[&<>\"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+  function voteEl(id){ return document.getElementById(id); }
+  function voteToast(m){ try{ if(typeof toast==="function") toast(m); }catch(e){} }
+  function votePresetsRender(){
+    const box=voteEl("votePresets"); if(!box) return; box.innerHTML="";
+    VOTE_PRESETS.forEach(function(p){
+      const b=document.createElement("button"); b.className="vote-chip"; b.textContent=p.q;
+      b.onclick=function(){ voteState={ q:p.q, opts:p.o.map(function(n){return {n:n,v:0};}), live:false }; voteSave(); voteRenderSetup(); };
+      box.appendChild(b);
+    });
+  }
+  function voteRenderSetup(){
+    const wrap=voteEl("voteOpts"); if(!wrap) return;
+    voteEl("voteSetup").style.display=""; voteEl("voteLive").style.display="none";
+    voteEl("voteQ").value = voteState.q || "";
+    wrap.innerHTML="";
+    voteState.opts.forEach(function(o,i){
+      const row=document.createElement("div"); row.className="vote-opt-row";
+      const dot=document.createElement("span"); dot.className="vo-dot"; dot.style.background=voteColor(i);
+      const inp=document.createElement("input"); inp.type="text"; inp.maxLength=24; inp.value=o.n||""; inp.placeholder="选项 "+(i+1);
+      inp.oninput=function(){ voteState.opts[i].n=inp.value; voteSave(); };
+      const del=document.createElement("button"); del.className="vo-del"; del.innerHTML="&times;"; del.title="删除";
+      del.onclick=function(){ if(voteState.opts.length<=2){ voteToast("至少保留 2 个选项"); return; } voteState.opts.splice(i,1); voteSave(); voteRenderSetup(); };
+      row.appendChild(dot); row.appendChild(inp); row.appendChild(del); wrap.appendChild(row);
+    });
+  }
+  function voteRenderLive(){
+    voteEl("voteSetup").style.display="none"; voteEl("voteLive").style.display="";
+    voteEl("voteTitle").textContent = voteState.q || "🗳️ 快速投票";
+    const total = voteState.opts.reduce(function(a,o){return a+(o.v||0);},0);
+    voteEl("voteTotal").textContent = total>0 ? ("共 "+total+" 票 · 点选项卡片即可投票") : "还没有票 · 点下面的选项卡片投出第一票";
+    let max=0; voteState.opts.forEach(function(o){ if((o.v||0)>max) max=o.v||0; }); if(max<1) max=1;
+    const board=voteEl("voteBoard"); board.innerHTML="";
+    voteState.opts.forEach(function(o,i){
+      const v=o.v||0; const pct= total? Math.round(v/total*100):0;
+      const isLead = v>0 && v===max;
+      const item=document.createElement("div"); item.className="vb-item"+(isLead?" vb-lead":"");
+      const fill=document.createElement("div"); fill.className="vb-fill"; fill.style.background=voteColor(i); fill.style.width=(v/max*100)+"%";
+      const rowd=document.createElement("div"); rowd.className="vb-row";
+      rowd.innerHTML='<span class="vb-name"><span class="vb-dot" style="background:'+voteColor(i)+'"></span>'+(isLead?"👑 ":"")+'<span class="vb-txt">'+voteEsc(o.n||("选项"+(i+1)))+'</span></span><span style="white-space:nowrap"><span class="vb-num">'+v+'</span><span class="vb-pct">'+pct+'%</span></span>';
+      item.appendChild(fill); item.appendChild(rowd);
+      item.onclick=function(){ voteState.opts[i].v=(voteState.opts[i].v||0)+1; bumpUsage("vote"); voteSave(); voteRenderLive(); };
+      board.appendChild(item);
+    });
+    voteEl("voteWinnerBox").innerHTML="";
+  }
+  function voteRender(){
+    if(!voteState) voteState=voteLoadState();
+    votePresetsRender();
+    if(voteState.live) voteRenderLive(); else voteRenderSetup();
+  }
+  function voteStart(){
+    voteState.q = (voteEl("voteQ").value||"").trim();
+    const valid = voteState.opts.map(function(o){ return { n:(o.n||"").trim(), v:o.v||0 }; }).filter(function(o){ return o.n!==""; });
+    if(valid.length<2){ voteToast("至少填写 2 个选项"); return; }
+    voteState.opts=valid; voteState.live=true; voteSave(); voteRenderLive();
+  }
+  function voteResult(){
+    const total = voteState.opts.reduce(function(a,o){return a+(o.v||0);},0);
+    const box=voteEl("voteWinnerBox");
+    if(total===0){ box.innerHTML='<div class="vote-winner">还没有任何票，先投几票再宣布吧~</div>'; return; }
+    let max=0; voteState.opts.forEach(function(o){ if((o.v||0)>max) max=o.v||0; });
+    const winners=voteState.opts.filter(function(o){ return (o.v||0)===max; });
+    let html;
+    if(winners.length===1){
+      html='<div class="vote-winner">🏆 获胜：<span style="color:var(--accent-2)">'+voteEsc(winners[0].n)+'</span><br><span style="font-size:14px;font-weight:600;color:var(--muted)">得票 '+max+' 票 · 占比 '+Math.round(max/total*100)+'% · 就这么定了！</span></div>';
+      if(typeof confettiBurst==="function") confettiBurst(130);
+    }else{
+      html='<div class="vote-winner">⚖️ 平局啦！<span style="color:var(--accent-2)">'+winners.map(function(o){return voteEsc(o.n);}).join(" / ")+'</span><br><span style="font-size:14px;font-weight:600;color:var(--muted)">都是 '+max+' 票——要不…招个硬币？</span></div>';
+      if(typeof confettiBurst==="function") confettiBurst(60);
+    }
+    box.innerHTML=html;
+  }
+  function voteBind(){
+    const add=voteEl("voteAdd"); if(add) add.onclick=function(){ if(voteState.opts.length>=12){ voteToast("最多 12 个选项"); return; } voteState.opts.push({n:"",v:0}); voteSave(); voteRenderSetup(); };
+    const st=voteEl("voteStart"); if(st) st.onclick=voteStart;
+    const dice=voteEl("voteDice"); if(dice) dice.onclick=function(){ const i=Math.floor(Math.random()*voteState.opts.length); voteState.opts[i].v=(voteState.opts[i].v||0)+1; bumpUsage("vote"); voteSave(); voteRenderLive(); voteToast("🎲 随机投给了「"+(voteState.opts[i].n||("选项"+(i+1)))+"」"); };
+    const res=voteEl("voteResult"); if(res) res.onclick=voteResult;
+    const rc=voteEl("voteResetCount"); if(rc) rc.onclick=function(){ voteState.opts.forEach(function(o){o.v=0;}); voteSave(); voteRenderLive(); };
+    const ed=voteEl("voteEdit"); if(ed) ed.onclick=function(){ voteState.live=false; voteSave(); voteRenderSetup(); };
+  }
+  voteBind();
+  BADGES.push(
+    { emoji: "🗳️", name: "投票发起人", desc: "开过 1 次快速投票", test: function(u){ return (u.vote || 0) >= 1; } },
+    { emoji: "📊", name: "民意代言人", desc: "累计投出 30 票", test: function(u){ return (u.vote || 0) >= 30; } }
+  );
+  QUOTES.push(
+    "选择困难的时候，就交给多数人的手指头。",
+    "投票不能保证选对，但能保证没人背锅。",
+    "一人一票，争吵减半，饭局提前开场。",
+    "少数服从多数，但别忘了听听少数怎么说。",
+    "平局不可怕，可怕的是没人敢投。",
+    "好的投票题，选项少而精，人心自然易集中。",
+    "把选择摆上台面，比藏在心里猜来猜去强。"
+  );
   BADGES.push(
     { emoji: "🔐", name: "密码哨兵", desc: "用过 1 次密码强度检测", test: (u) => (u.pwdcheck || 0) >= 1 },
     { emoji: "🛡️", name: "安全洁癖", desc: "累计检测密码 20 次", test: (u) => (u.pwdcheck || 0) >= 20 }
