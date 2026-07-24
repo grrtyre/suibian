@@ -1517,6 +1517,7 @@
         <button data-tab="game24">🃏 24 点</button>
         <button data-tab="klotski">🧩 华容道</button>
         <button data-tab="qrcode">📱 二维码生成</button>
+        <button data-tab="lightsout">💡 熄灯谜题</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5800,6 +5801,53 @@
       <div class="sb-tip">📌 从零手写的 QR Code Model 2 编码器：GF(256) 伽罗华域 + Reed-Solomon 纠错 + 8 种掩码自动评分择优，支持版本 1-10（最长约 270 字节）。全部计算都在你的浏览器里完成，内容绝不上传。深色前景 + 浅色背景扫描率最高；「圆点」风格好看，但低对比时建议用「方块」。</div>
     </div>
   </section>
+      <section id="lightsout" class="panel">
+        <style>
+          #lightsout .lo-wrap{max-width:560px;margin:0 auto;text-align:center}
+          #lightsout .lo-desc{color:var(--muted,#8a8f98);font-size:14px;margin:6px 0 14px;line-height:1.6}
+          #lightsout .lo-toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
+          #lightsout .lo-size,#lightsout .lo-btn{border:1px solid rgba(140,150,170,.35);background:rgba(140,150,170,.10);color:inherit;border-radius:10px;padding:7px 13px;font-size:14px;cursor:pointer;transition:all .15s}
+          #lightsout .lo-size:hover,#lightsout .lo-btn:hover{background:rgba(140,150,170,.22)}
+          #lightsout .lo-size.active{background:linear-gradient(135deg,#ffb020,#ff7a45);color:#241500;border-color:transparent;font-weight:700;box-shadow:0 3px 12px rgba(255,140,40,.35)}
+          #lightsout .lo-board{display:grid;gap:10px;max-width:420px;margin:0 auto 16px;padding:16px;border-radius:18px;background:radial-gradient(circle at 50% 0%,rgba(60,66,90,.35),rgba(20,22,34,.55));box-shadow:inset 0 2px 14px rgba(0,0,0,.35)}
+          #lightsout .lo-cell{aspect-ratio:1/1;border:none;border-radius:12px;cursor:pointer;background:#2b2f42;box-shadow:inset 0 -3px 8px rgba(0,0,0,.45),inset 0 2px 4px rgba(255,255,255,.05);transition:transform .08s,box-shadow .25s,background .25s;position:relative}
+          #lightsout .lo-cell:active{transform:scale(.92)}
+          #lightsout .lo-cell.on{background:radial-gradient(circle at 50% 38%,#fff6c4,#ffd54a 45%,#ff9e2c 78%,#e5670c);box-shadow:0 0 18px 3px rgba(255,180,60,.75),0 0 34px 8px rgba(255,140,30,.35),inset 0 -3px 8px rgba(180,90,0,.5)}
+          #lightsout .lo-cell.hint{outline:3px dashed #57d0ff;outline-offset:-3px;animation:loPulse 1s infinite}
+          @keyframes loPulse{0%,100%{outline-color:#57d0ff}50%{outline-color:rgba(87,208,255,.25)}}
+          #lightsout .lo-board.lo-win .lo-cell{animation:loWin .6s ease}
+          @keyframes loWin{0%{transform:scale(1)}40%{transform:scale(.8);background:#2b2f42;box-shadow:none}100%{transform:scale(1)}}
+          #lightsout .lo-stats{display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:center;font-size:14px;color:var(--muted,#8a8f98)}
+          #lightsout .lo-stats b{color:inherit;font-size:16px;font-weight:800}
+          #lightsout .lo-goal{font-size:13px;color:var(--muted,#8a8f98);margin-top:10px;opacity:.85}
+        </style>
+        <div class="lo-wrap">
+          <h2>💡 熄灯谜题</h2>
+          <p class="lo-desc">经典 Lights Out：点亮的灯要全部熄灭。点一盏灯会同时翻转它和上下左右四盏。<br>内置 GF(2) 线性代数最优解求解器——提示与自动通关都算得出「理论最少步数」。</p>
+          <div class="lo-toolbar">
+            <button class="lo-size" data-n="3">3 × 3</button>
+            <button class="lo-size active" data-n="5">5 × 5</button>
+            <button class="lo-size" data-n="7">7 × 7</button>
+          </div>
+          <div class="lo-toolbar">
+            <button class="lo-btn" id="lo-new">🔄 换一局</button>
+            <button class="lo-btn" id="lo-hint">💡 提示一步</button>
+            <button class="lo-btn" id="lo-solve">🤖 自动通关</button>
+            <button class="lo-btn" id="lo-undo">↩ 撤销</button>
+            <button class="lo-btn" id="lo-reset">⟲ 重来本局</button>
+          </div>
+          <div class="lo-board" id="lo-board"></div>
+          <div class="lo-stats">
+            <span>步数 <b id="lo-moves">0</b></span>
+            <span>用时 <b id="lo-time">00:00</b></span>
+            <span>最少步 <b id="lo-optimal">0</b></span>
+            <span>本尺寸纪录 <b id="lo-best">—</b></span>
+            <span>通关 <b id="lo-wins">0</b></span>
+            <span>连胜 <b id="lo-streak">0</b></span>
+          </div>
+          <p class="lo-goal">💡 小贴士：以「最少步」通关可解锁「全部熄灭」徽章；用了提示或自动通关则不计入连胜与成就。</p>
+        </div>
+      </section>
 <script>
 (function () {
   "use strict";
@@ -6138,9 +6186,11 @@
     if (id === "game24") g24Render();
     if (id === "klotski") klRender();
     if (id === "qrcode") qrRender();
+    if (id === "lightsout") loRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
+    if (id !== "lightsout" && typeof loStop === "function") loStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
@@ -6270,6 +6320,7 @@
     game24: "24点 巅峰24点 game24 twenty four 扑克 纸牌 算术 心算 凑24 加减乘除 四则运算 数学 益智 智力 游戏 计算",
     klotski: "华容道 klotski 滑块 数字华容道 曹操 横刀立马 益智 解谜 puzzle 中式 三国 移动 拼图 益智游戏 烧脑 通关 sliding block",
     qrcode: "二维码 qrcode qr 生成 扫码 扫一扫 wifi 网址 名片 链接 码 纠错 reed solomon 二维 barcode 分享 海报 码上",
+    lightsout: "熄灯 关灯 lightsout lights out 灯 点灯 开关 益智 解谜 线性代数 gf2 puzzle 消灯 关灯游戏 灯泡 谜题",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6460,6 +6511,7 @@ splitbill:"tools",
     game24:"games",
     klotski:"games",
     qrcode:"tools",
+    lightsout:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -19453,6 +19505,265 @@ splitbill:"tools",
     window.qrBind = qrBind;
     window.__qrTest = { encode: qrEncode, payload: qrPayload, utf8: qUtf8, cap: qCap, rs: qRS, fmt: qFmtBits, verBits: qVerBits, penalty: qPenalty, escWifi: qrEscWifi, lum: qrLum };
   })();
+  /* ====LIGHTSOUT_MOD==== 熄灯谜题：GF(2) 线性代数最优解求解器 */
+  (function () {
+    var LO = {
+      N: 5, board: [], initial: [], moves: 0, hist: [],
+      optimal: 0, cheated: false, startTs: 0, timer: null, demo: false, hintCell: -1
+    };
+    var LO_KEY = "suibian_lightsout";
+    var SCR = { 3: 5, 5: 12, 7: 20 };            // 每个尺寸的默认打乱步数（可解）
+    function $lo(id) { return document.getElementById(id); }
+
+    /* ---------- 纯逻辑：GF(2) 求解 ---------- */
+    function pressVec(N, k) {
+      var v = new Array(N * N).fill(0);
+      var r = (k / N) | 0, c = k % N;
+      v[k] ^= 1;
+      if (r > 0) v[k - N] ^= 1;
+      if (r < N - 1) v[k + N] ^= 1;
+      if (c > 0) v[k - 1] ^= 1;
+      if (c < N - 1) v[k + 1] ^= 1;
+      return v;
+    }
+    function applyPress(bd, N, k) {
+      var r = (k / N) | 0, c = k % N;
+      bd[k] ^= 1;
+      if (r > 0) bd[k - N] ^= 1;
+      if (r < N - 1) bd[k + N] ^= 1;
+      if (c > 0) bd[k - 1] ^= 1;
+      if (c < N - 1) bd[k + 1] ^= 1;
+      return bd;
+    }
+    function popcount(a) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i] ? 1 : 0; return s; }
+    function isSolved(bd) { for (var i = 0; i < bd.length; i++) if (bd[i]) return false; return true; }
+
+    // 求 A x = b（A 对称，行 i 即 pressVec(i)）；返回 {x,free,rows,where,M} 或 null（无解）
+    function solveGF2(N, b) {
+      var M = N * N, rows = [], i, j;
+      for (i = 0; i < M; i++) { var row = pressVec(N, i); row.push(b[i] ? 1 : 0); rows.push(row); }
+      var where = new Array(M).fill(-1), r = 0, col;
+      for (col = 0; col < M && r < M; col++) {
+        var sel = -1;
+        for (i = r; i < M; i++) { if (rows[i][col]) { sel = i; break; } }
+        if (sel < 0) continue;
+        var t = rows[r]; rows[r] = rows[sel]; rows[sel] = t;
+        where[col] = r;
+        for (i = 0; i < M; i++) {
+          if (i !== r && rows[i][col]) { for (j = col; j <= M; j++) rows[i][j] ^= rows[r][j]; }
+        }
+        r++;
+      }
+      for (i = r; i < M; i++) { if (rows[i][M]) return null; }   // 不一致 → 无解
+      var x = new Array(M).fill(0);
+      for (col = 0; col < M; col++) { if (where[col] !== -1) x[col] = rows[where[col]][M]; }
+      var free = []; for (col = 0; col < M; col++) if (where[col] === -1) free.push(col);
+      return { x: x, free: free, rows: rows, where: where, M: M };
+    }
+    function nullBasis(sol) {
+      var basis = [], f, col, fi;
+      for (fi = 0; fi < sol.free.length; fi++) {
+        f = sol.free[fi];
+        var v = new Array(sol.M).fill(0); v[f] = 1;
+        for (col = 0; col < sol.M; col++) { if (sol.where[col] !== -1) v[col] = sol.rows[sol.where[col]][f]; }
+        basis.push(v);
+      }
+      return basis;
+    }
+    // 最少步数解：base 解 ⊕ 零空间线性组合 中取汉明权重最小者
+    function minSolution(N, b) {
+      var sol = solveGF2(N, b); if (!sol) return null;
+      var base = sol.x.slice(), basis = nullBasis(sol);
+      var best = base.slice(), bestW = popcount(base), k = basis.length;
+      if (k <= 16) {
+        for (var mask = 1; mask < (1 << k); mask++) {
+          var cand = base.slice();
+          for (var i = 0; i < k; i++) {
+            if (mask & (1 << i)) { var v = basis[i]; for (var jj = 0; jj < cand.length; jj++) cand[jj] ^= v[jj]; }
+          }
+          var w = popcount(cand);
+          if (w < bestW) { bestW = w; best = cand; }
+        }
+      }
+      return { sol: best, weight: bestW };
+    }
+    // 生成可解谜题：从全灭出发随机按 R 次，得到打乱局面（必可解）
+    function genPuzzle(N, R) {
+      var bd = new Array(N * N).fill(0), used = {}, cnt = 0, guard = 0;
+      while (cnt < R && guard < R * 30) {
+        guard++;
+        var k = (Math.random() * N * N) | 0;
+        applyPress(bd, N, k);
+        used[k] = (used[k] || 0) + 1; cnt++;
+      }
+      if (isSolved(bd)) { applyPress(bd, N, (Math.random() * N * N) | 0); } // 避免开局即通关
+      return bd;
+    }
+
+    /* ---------- 存档 ---------- */
+    function loLoad() {
+      try { var o = JSON.parse(localStorage.getItem(LO_KEY) || "{}"); if (!o.best) o.best = {}; return o; }
+      catch (e) { return { wins: 0, streak: 0, best: {} }; }
+    }
+    function loSave(o) { try { localStorage.setItem(LO_KEY, JSON.stringify(o)); } catch (e) { } }
+
+    /* ---------- 渲染 ---------- */
+    function fmtTime(ms) {
+      var s = Math.floor(ms / 1000), m = Math.floor(s / 60); s = s % 60;
+      return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+    }
+    function renderStats() {
+      var st = loLoad();
+      var bt = st.best[LO.N];
+      if ($lo("lo-moves")) $lo("lo-moves").textContent = LO.moves;
+      if ($lo("lo-optimal")) $lo("lo-optimal").textContent = LO.optimal;
+      if ($lo("lo-best")) $lo("lo-best").textContent = bt ? bt : "—";
+      if ($lo("lo-wins")) $lo("lo-wins").textContent = st.wins || 0;
+      if ($lo("lo-streak")) $lo("lo-streak").textContent = st.streak || 0;
+    }
+    function renderBoard() {
+      var wrap = $lo("lo-board"); if (!wrap) return;
+      wrap.style.gridTemplateColumns = "repeat(" + LO.N + ", 1fr)";
+      var html = "";
+      for (var k = 0; k < LO.N * LO.N; k++) {
+        var on = LO.board[k] ? " on" : "";
+        var hint = (k === LO.hintCell) ? " hint" : "";
+        html += '<button class="lo-cell' + on + hint + '" data-k="' + k + '" aria-label="\u706f ' + k + '"></button>';
+      }
+      wrap.innerHTML = html;
+      renderStats();
+    }
+    function tick() {
+      if (!$lo("lo-time")) return;
+      $lo("lo-time").textContent = fmtTime(Date.now() - LO.startTs);
+    }
+    function startTimer() { stopTimer(); LO.startTs = Date.now() - 0; LO.timer = setInterval(tick, 200); tick(); }
+    function stopTimer() { if (LO.timer) { clearInterval(LO.timer); LO.timer = null; } }
+
+    /* ---------- 游戏流程 ---------- */
+    function newGame() {
+      var R = SCR[LO.N] || 12;
+      LO.board = genPuzzle(LO.N, R);
+      LO.initial = LO.board.slice();
+      LO.moves = 0; LO.hist = []; LO.cheated = false; LO.demo = false; LO.hintCell = -1;
+      var ms = minSolution(LO.N, LO.board);
+      LO.optimal = ms ? ms.weight : 0;
+      renderBoard(); startTimer();
+    }
+    function pressCell(k) {
+      if (LO.demo) return;
+      LO.hist.push(LO.board.slice());
+      applyPress(LO.board, LO.N, k);
+      LO.moves++; LO.hintCell = -1;
+      renderBoard();
+      if (isSolved(LO.board)) win();
+    }
+    function undo() {
+      if (LO.demo || !LO.hist.length) return;
+      LO.board = LO.hist.pop(); LO.moves = Math.max(0, LO.moves - 1); LO.hintCell = -1;
+      renderBoard();
+    }
+    function resetScramble() {
+      if (LO.demo) return;
+      LO.board = LO.initial.slice(); LO.moves = 0; LO.hist = []; LO.cheated = false; LO.hintCell = -1;
+      renderBoard(); startTimer();
+    }
+    function hint() {
+      if (LO.demo) return;
+      var ms = minSolution(LO.N, LO.board);
+      if (!ms || ms.weight === 0) { if (typeof toast === "function") toast("\u5df2\u7ecf\u5168\u90e8\u7184\u706d\u5566\uff01\u2728"); return; }
+      for (var k = 0; k < ms.sol.length; k++) { if (ms.sol[k]) { LO.hintCell = k; break; } }
+      LO.cheated = true;        // 用过提示不计成就
+      renderBoard();
+      if (typeof toast === "function") toast("\u63d0\u793a\uff1a\u6309\u4eae\u5904\u7684\u90a3\u76cf\u706f \ud83d\udca1");
+    }
+    function autoSolve() {
+      if (LO.demo) return;
+      var ms = minSolution(LO.N, LO.board);
+      if (!ms || ms.weight === 0) { if (typeof toast === "function") toast("\u5df2\u7ecf\u901a\u5173\u5566\uff01"); return; }
+      var seq = []; for (var k = 0; k < ms.sol.length; k++) if (ms.sol[k]) seq.push(k);
+      LO.demo = true; LO.cheated = true; LO.hintCell = -1;
+      var i = 0;
+      (function step() {
+        if (i >= seq.length) { LO.demo = false; renderBoard(); if (isSolved(LO.board)) win(); return; }
+        applyPress(LO.board, LO.N, seq[i]); LO.moves++; i++;
+        renderBoard();
+        setTimeout(step, 300);
+      })();
+    }
+    function win() {
+      stopTimer();
+      var wrap = $lo("lo-board"); if (wrap) wrap.classList.add("lo-win");
+      setTimeout(function () { if (wrap) wrap.classList.remove("lo-win"); }, 900);
+      if (!LO.cheated) {
+        var st = loLoad();
+        st.wins = (st.wins || 0) + 1;
+        st.streak = (st.streak || 0) + 1;
+        var b = st.best[LO.N];
+        if (!b || LO.moves < b) st.best[LO.N] = LO.moves;
+        loSave(st);
+        if (typeof bumpUsage === "function") bumpUsage("lightsout");
+        var perfect = (LO.optimal > 0 && LO.moves === LO.optimal);
+        if (perfect && typeof bumpUsage === "function") bumpUsage("lightsoutperfect");
+        if (typeof confettiBurst === "function") confettiBurst(perfect ? 180 : 120);
+        if (typeof toast === "function") {
+          toast(perfect
+            ? "\u5b8c\u7f8e\u901a\u5173\uff01" + LO.moves + " \u6b65 = \u7406\u8bba\u6700\u5c11\u6b65 \ud83c\udf1f"
+            : "\u5168\u90e8\u7184\u706d\uff01\u5171 " + LO.moves + " \u6b65 \ud83c\udf11");
+        }
+      } else {
+        var s2 = loLoad(); s2.streak = 0; loSave(s2);
+        if (typeof toast === "function") toast("\u901a\u5173\u5566\uff5e\uff08\u7528\u4e86\u63d0\u793a/\u81ea\u52a8\uff0c\u4e0d\u8ba1\u5f92\uff09");
+      }
+      renderStats();
+    }
+
+    /* ---------- 事件绑定 ---------- */
+    function loBind() {
+      var board = $lo("lo-board");
+      if (board) board.addEventListener("click", function (e) {
+        var b = e.target.closest ? e.target.closest(".lo-cell") : null;
+        if (!b) return;
+        pressCell(parseInt(b.dataset.k, 10));
+      });
+      [["lo-new", newGame], ["lo-hint", hint], ["lo-solve", autoSolve], ["lo-undo", undo], ["lo-reset", resetScramble]]
+        .forEach(function (p) { var el = $lo(p[0]); if (el) el.addEventListener("click", p[1]); });
+      var sz = document.querySelectorAll("#lightsout .lo-size");
+      sz.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          LO.N = parseInt(btn.dataset.n, 10) || 5;
+          sz.forEach(function (x) { x.classList.toggle("active", x === btn); });
+          newGame();
+        });
+      });
+    }
+    function loRender() {
+      if (!LO.board.length) { newGame(); }
+      else { renderBoard(); startTimer(); }
+    }
+    function loStop() { stopTimer(); }
+
+    window.loRender = loRender;
+    window.loStop = loStop;
+    window.loBind = loBind;
+    window.__loTest = {
+      pressVec: pressVec, applyPress: applyPress, solveGF2: solveGF2,
+      minSolution: minSolution, genPuzzle: genPuzzle, isSolved: isSolved, popcount: popcount
+    };
+  })();
+  loBind();
+  BADGES.push(
+    { emoji: "\ud83d\udca1", name: "\u7075\u5149\u4e4d\u73b0", desc: "\u7b2c\u4e00\u6b21\u5728\u300c\u7184\u706f\u8c1c\u9898\u300d\u4e2d\u901a\u5173", test: function (u) { return (u.lightsout || 0) >= 1; } },
+    { emoji: "\ud83c\udf11", name: "\u5168\u90e8\u7184\u706d", desc: "\u4ee5\u7406\u8bba\u6700\u5c11\u6b65\u901a\u5173\u4e00\u5c40\u7184\u706f\u8c1c\u9898", test: function (u) { return (u.lightsoutperfect || 0) >= 1; } }
+  );
+  QUOTES.push(
+    "\u4eae\u7740\u7684\u706f\u4e0d\u4e00\u5b9a\u90fd\u8be5\u5173\uff0c\u4f46\u603b\u6709\u4e00\u79cd\u6309\u6cd5\u80fd\u8ba9\u4e16\u754c\u5b89\u9759\u4e0b\u6765\u3002",
+    "\u7184\u706f\u8c1c\u9898\u544a\u8bc9\u4f60\uff1a\u6bcf\u4e2a\u9009\u62e9\u90fd\u4f1a\u5f71\u54cd\u5468\u56f4\uff0c\u522b\u53ea\u76ef\u7740\u81ea\u5df1\u90a3\u4e00\u683c\u3002",
+    "\u540c\u4e00\u76cf\u706f\u6309\u4e24\u6b21\u7b49\u4e8e\u6ca1\u6309\u2014\u2014\u53cd\u590d\u7ea0\u7ed3\u4e0d\u5982\u5f80\u524d\u770b\u3002",
+    "\u7ebf\u6027\u4ee3\u6570\u80fd\u7b97\u51fa\u6700\u5c11\u6b65\uff0c\u4f46\u4eb2\u624b\u6309\u4eae\u90a3\u4e0b\u624d\u662f\u4e50\u8da3\u3002",
+    "\u5f53\u4e00\u5207\u90fd\u719c\u706d\uff0c\u4f60\u4f1a\u53d1\u73b0\u9ed1\u6697\u91cc\u4e5f\u6709\u79e9\u5e8f\u3002",
+    "\u89e3\u4e0d\u5f00\u65f6\u5148\u6309\u4e2a\u63d0\u793a\uff0c\u522b\u786c\u6491\u2014\u2014\u5077\u5077\u53d8\u5f3a\u4e5f\u662f\u53d8\u5f3a\u3002"
+  );
   qrBind();
   BADGES.push(
     { emoji: "📱", name: "码上见", desc: "第一次生成二维码", test: function (u) { return (u.qrcode || 0) >= 1; } },
