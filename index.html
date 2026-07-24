@@ -1519,6 +1519,7 @@
         <button data-tab="qrcode">📱 二维码生成</button>
         <button data-tab="lightsout">💡 熄灯谜题</button>
         <button data-tab="solitaire">🃏 纸牌接龙</button>
+        <button data-tab="loan">🏠 房贷计算器</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5920,6 +5921,142 @@
           <p class="sk-tip">🃏 小贴士：点「牌堆」翻牌，翻完再点可循环回收；双击任意牌尝试自动送入基础堆；「一键收牌」把当前所有能收的牌一次收完。</p>
         </div>
       </section>
+  <section class="panel" id="loan">
+    <style>
+      #loan .ln-wrap { max-width: 780px; margin: 0 auto; }
+      #loan .ln-card { background: var(--card, rgba(255,255,255,.06)); border: 1px solid var(--line, rgba(255,255,255,.12)); border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
+      #loan .ln-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+      #loan .ln-field { display: flex; flex-direction: column; gap: 5px; flex: 1 1 130px; min-width: 120px; }
+      #loan .ln-lab { font-size: .8em; opacity: .8; }
+      #loan input.ln-in, #loan select.ln-in {
+        background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18); color: var(--text, #fff);
+        border-radius: 10px; padding: 9px 10px; font-size: .95em; outline: none; min-width: 0; width: 100%;
+        box-sizing: border-box;
+      }
+      #loan input.ln-in:focus, #loan select.ln-in:focus { border-color: var(--accent, #f6c94a); }
+      #loan .ln-btn {
+        cursor: pointer; border: none; border-radius: 10px; padding: 10px 18px; font-size: .95em; font-weight: 700;
+        background: var(--accent, #f6c94a); color: #1a1a1a; transition: transform .1s, filter .15s;
+      }
+      #loan .ln-btn:hover { filter: brightness(1.06); }
+      #loan .ln-btn:active { transform: scale(.96); }
+      #loan .ln-btn.ghost { background: rgba(255,255,255,.08); color: var(--text, #fff); border: 1px solid rgba(255,255,255,.18); }
+      #loan .ln-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      @media (max-width: 620px) { #loan .ln-cols { grid-template-columns: 1fr; } }
+      #loan .ln-plan { border-radius: 12px; padding: 12px 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); }
+      #loan .ln-plan.hl { border-color: rgba(246,201,74,.55); background: rgba(246,201,74,.08); }
+      #loan .ln-plan h4 { margin: 0 0 8px; font-size: 1em; }
+      #loan .ln-kv { display: flex; justify-content: space-between; gap: 8px; font-size: .9em; padding: 3px 0; }
+      #loan .ln-kv .k { opacity: .75; }
+      #loan .ln-kv .v { font-weight: 700; font-variant-numeric: tabular-nums; }
+      #loan .ln-kv .v.money { color: var(--accent, #f6c94a); }
+      #loan .ln-kv .v.good { color: #6bd490; }
+      #loan .ln-kv .v.bad { color: #ff6b6b; }
+      #loan .ln-note { font-size: .8em; opacity: .75; margin-top: 8px; line-height: 1.6; }
+      #loan .ln-chart-box { margin-top: 10px; overflow-x: auto; }
+      #loan canvas { display: block; margin: 0 auto; max-width: 100%; border-radius: 10px; background: rgba(0,0,0,.18); }
+      #loan .ln-legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; font-size: .8em; margin-top: 8px; opacity: .9; }
+      #loan .ln-legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+      #loan .ln-pre-out { margin-top: 10px; display: none; }
+      #loan .ln-pre-out.show { display: block; animation: lnFade .3s ease; }
+      @keyframes lnFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+      #loan .ln-big { font-size: 1.35em; font-weight: 800; color: var(--accent, #f6c94a); }
+      #loan .ln-err { color: #ff6b6b; font-size: .85em; margin-top: 8px; display: none; }
+      #loan .ln-err.show { display: block; }
+    </style>
+    <div class="ln-wrap">
+      <h2>🏠 房贷计算器</h2>
+      <p class="ln-note">等额本息 vs 等额本金一屏对比，再帮你模拟「提前还款」到底能省多少利息。数据只存在你本地，随便算。</p>
+
+      <div class="ln-card">
+        <div class="ln-lab" style="margin-bottom:8px">① 贷款条件</div>
+        <div class="ln-row">
+          <div class="ln-field">
+            <span class="ln-lab">贷款金额（万元）</span>
+            <input class="ln-in" id="loanAmt" type="number" min="1" max="10000" step="1" value="100" />
+          </div>
+          <div class="ln-field">
+            <span class="ln-lab">贷款年限</span>
+            <select class="ln-in" id="loanYears">
+              <option value="5">5 年</option>
+              <option value="10">10 年</option>
+              <option value="15">15 年</option>
+              <option value="20">20 年</option>
+              <option value="25">25 年</option>
+              <option value="30" selected>30 年</option>
+            </select>
+          </div>
+          <div class="ln-field">
+            <span class="ln-lab">年利率（%）</span>
+            <input class="ln-in" id="loanRate" type="number" min="0" max="24" step="0.01" value="3.6" />
+          </div>
+          <button class="ln-btn" id="loanCalcBtn">🧮 立即计算</button>
+        </div>
+        <div class="ln-err" id="loanErr"></div>
+      </div>
+
+      <div class="ln-card">
+        <div class="ln-lab" style="margin-bottom:8px">② 两种还款方式对比</div>
+        <div class="ln-cols">
+          <div class="ln-plan hl">
+            <h4>等额本息 <span style="font-size:.72em;opacity:.7">每月固定</span></h4>
+            <div class="ln-kv"><span class="k">每月月供</span><span class="v money" id="loanAnnPay">—</span></div>
+            <div class="ln-kv"><span class="k">支付总利息</span><span class="v bad" id="loanAnnInt">—</span></div>
+            <div class="ln-kv"><span class="k">还款总额</span><span class="v" id="loanAnnTotal">—</span></div>
+          </div>
+          <div class="ln-plan">
+            <h4>等额本金 <span style="font-size:.72em;opacity:.7">逐月递减</span></h4>
+            <div class="ln-kv"><span class="k">首月月供</span><span class="v money" id="loanLinFirst">—</span></div>
+            <div class="ln-kv"><span class="k">每月递减</span><span class="v" id="loanLinDec">—</span></div>
+            <div class="ln-kv"><span class="k">末月月供</span><span class="v" id="loanLinLast">—</span></div>
+            <div class="ln-kv"><span class="k">支付总利息</span><span class="v bad" id="loanLinInt">—</span></div>
+            <div class="ln-kv"><span class="k">还款总额</span><span class="v" id="loanLinTotal">—</span></div>
+          </div>
+        </div>
+        <div class="ln-note" id="loanDiffNote">—</div>
+        <div class="ln-chart-box"><canvas id="loanChart" width="680" height="260"></canvas></div>
+        <div class="ln-legend">
+          <span><span class="dot" style="background:#f6c94a"></span>等额本息·剩余本金</span>
+          <span><span class="dot" style="background:#6b9fff"></span>等额本金·剩余本金</span>
+          <span><span class="dot" style="background:#6bd490"></span>提前还款后（模拟）</span>
+        </div>
+      </div>
+
+      <div class="ln-card">
+        <div class="ln-lab" style="margin-bottom:8px">③ 提前还款模拟（按等额本息）</div>
+        <div class="ln-row">
+          <div class="ln-field">
+            <span class="ln-lab">已还了几个月</span>
+            <input class="ln-in" id="loanPreM" type="number" min="1" step="1" value="24" />
+          </div>
+          <div class="ln-field">
+            <span class="ln-lab">提前还款（万元）</span>
+            <input class="ln-in" id="loanPreAmt" type="number" min="1" step="1" value="20" />
+          </div>
+          <div class="ln-field">
+            <span class="ln-lab">还完之后</span>
+            <select class="ln-in" id="loanPreMode">
+              <option value="short" selected>月供不变，缩短年限</option>
+              <option value="less">年限不变，减少月供</option>
+            </select>
+          </div>
+          <button class="ln-btn ghost" id="loanPreBtn">💰 模拟一下</button>
+        </div>
+        <div class="ln-pre-out" id="loanPreOut">
+          <div class="ln-plan hl">
+            <div class="ln-kv"><span class="k">共节省利息</span><span class="ln-big" id="loanPreSave">—</span></div>
+            <div class="ln-kv"><span class="k" id="loanPreKeyK">缩短还款</span><span class="v good" id="loanPreKeyV">—</span></div>
+            <div class="ln-kv"><span class="k">提前还款后剩余本金</span><span class="v" id="loanPreLeft">—</span></div>
+            <div class="ln-kv"><span class="k">原方案剩余总利息</span><span class="v" id="loanPreOldInt">—</span></div>
+            <div class="ln-kv"><span class="k">新方案剩余总利息</span><span class="v" id="loanPreNewInt">—</span></div>
+          </div>
+        </div>
+        <div class="ln-err" id="loanPreErr"></div>
+      </div>
+
+      <p class="ln-note">🏠 小贴士：一般来说「等额本金」总利息更少但前期压力大；提前还款选「缩短年限」通常比「减少月供」省得多。结果仅供参考，实际以银行为准。</p>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -6260,6 +6397,7 @@
     if (id === "qrcode") qrRender();
     if (id === "lightsout") loRender();
     if (id === "solitaire") skRender();
+    if (id === "loan") loanRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -6396,6 +6534,7 @@
     qrcode: "二维码 qrcode qr 生成 扫码 扫一扫 wifi 网址 名片 链接 码 纠错 reed solomon 二维 barcode 分享 海报 码上",
     lightsout: "熄灯 关灯 lightsout lights out 灯 点灯 开关 益智 解谜 线性代数 gf2 puzzle 消灯 关灯游戏 灯泡 谜题",
     solitaire: "纸牌接龙 接龙 solitaire klondike 克朗代克 扑克 纸牌 单人纸牌 收牌 基础堆 红黑交替 卡牌 桌游 相卡 监牙 puzzle cards",
+    loan: "房贷 贷款 房贷计算器 月供 利息 等额本息 等额本金 提前还款 利率 按揭 loan mortgage 计算 买房 还款 上岸 金融 钱",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6588,6 +6727,7 @@ splitbill:"tools",
     qrcode:"tools",
     lightsout:"games",
     solitaire:"games",
+    loan:"tools",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -20206,6 +20346,306 @@ splitbill:"tools",
       canToTableau: canToTableau, autoCollect: autoCollect, isWon: isWon, SK: SK, isRed: isRed
     };
   })();
+  /* ===== 🏠 房贷计算器 loan ===== */
+  (function () {
+    var LN_KEY = "suibian_loan";
+
+    function lnLoad() {
+      try { return JSON.parse(localStorage.getItem(LN_KEY)) || {}; } catch (e) { return {}; }
+    }
+    function lnSave(s) {
+      try { localStorage.setItem(LN_KEY, JSON.stringify(s)); } catch (e) {}
+    }
+    function lnFmt(v) {
+      if (!isFinite(v)) return "—";
+      var neg = v < 0; v = Math.abs(v);
+      var s;
+      if (v >= 10000) s = (v / 10000).toFixed(2) + " 万";
+      else s = v.toFixed(2) + " 元";
+      return (neg ? "-" : "") + s;
+    }
+    function lnFmtMonths(m) {
+      m = Math.round(m);
+      var y = Math.floor(m / 12), r = m % 12;
+      if (y > 0 && r > 0) return y + " 年 " + r + " 个月";
+      if (y > 0) return y + " 年";
+      return r + " 个月";
+    }
+
+    /* 等额本息：月供 */
+    function lnAnnuityPay(P, r, n) {
+      if (n <= 0) return 0;
+      if (r === 0) return P / n;
+      var f = Math.pow(1 + r, n);
+      return P * r * f / (f - 1);
+    }
+    /* 等额本息：逐月剩余本金序列（长度 n+1，首项 P，末项≈0）与总利息 */
+    function lnAnnuitySchedule(P, r, n) {
+      var pay = lnAnnuityPay(P, r, n);
+      var left = P, total = 0, series = [P];
+      for (var i = 0; i < n; i++) {
+        var interest = left * r;
+        var principal = pay - interest;
+        if (principal > left) principal = left;
+        left -= principal;
+        total += interest;
+        series.push(left > 0.005 ? left : 0);
+      }
+      return { pay: pay, totalInterest: total, series: series };
+    }
+    /* 等额本金：首月/末月/递减/总利息/剩余本金序列 */
+    function lnLinearSchedule(P, r, n) {
+      var base = P / n;
+      var left = P, total = 0, series = [P];
+      var first = 0, last = 0;
+      for (var i = 0; i < n; i++) {
+        var interest = left * r;
+        var pay = base + interest;
+        if (i === 0) first = pay;
+        if (i === n - 1) last = pay;
+        left -= base;
+        total += interest;
+        series.push(left > 0.005 ? left : 0);
+      }
+      return { first: first, last: last, dec: base * r, totalInterest: total, series: series };
+    }
+    /* 提前还款模拟（等额本息）：已还 m 个月后一次性还 prepay 元
+       mode="short" 月供不变缩短年限；mode="less" 年限不变减月供 */
+    function lnPrepay(P, r, n, m, prepay, mode) {
+      if (m < 1 || m >= n) return { err: "已还月数需在 1 ~ " + (n - 1) + " 之间" };
+      var pay = lnAnnuityPay(P, r, n);
+      var left = P, paidInterest = 0;
+      for (var i = 0; i < m; i++) {
+        var interest = left * r;
+        paidInterest += interest;
+        left -= (pay - interest);
+      }
+      if (prepay >= left) return { err: "提前还款额 ≥ 剩余本金 " + lnFmt(left) + "，直接结清即可" };
+      /* 原方案剩余利息 = 剩余期数还款总额 - 剩余本金 */
+      var oldRestInterest = pay * (n - m) - left;
+      var newLeft = left - prepay;
+      var out = { err: null, left: left, newLeft: newLeft, oldRestInterest: oldRestInterest, oldPay: pay };
+      if (mode === "short") {
+        /* 月供不变，反解剩余期数：n' = -ln(1 - P*r/pay) / ln(1+r) */
+        var newN;
+        if (r === 0) newN = Math.ceil(newLeft / pay);
+        else newN = Math.ceil(-Math.log(1 - newLeft * r / pay) / Math.log(1 + r) - 1e-9);
+        if (!isFinite(newN) || newN < 1) newN = 1;
+        /* 精确逐月模拟新利息（末期尾款不足整月按实际算） */
+        var l2 = newLeft, ni = 0, cnt = 0;
+        while (l2 > 0.005 && cnt < newN + 2) {
+          var it = l2 * r;
+          var pr = Math.min(pay - it, l2);
+          ni += it; l2 -= pr; cnt++;
+        }
+        out.mode = "short";
+        out.newN = cnt;
+        out.newPay = pay;
+        out.newRestInterest = ni;
+        out.shortenMonths = (n - m) - cnt;
+      } else {
+        var restN = n - m;
+        var newPay = lnAnnuityPay(newLeft, r, restN);
+        out.mode = "less";
+        out.newN = restN;
+        out.newPay = newPay;
+        out.newRestInterest = newPay * restN - newLeft;
+        out.payCut = pay - newPay;
+      }
+      out.saved = out.oldRestInterest - out.newRestInterest;
+      return out;
+    }
+
+    function lnReadInputs() {
+      var amtEl = document.getElementById("loanAmt");
+      if (!amtEl) return null;
+      var amt = parseFloat(amtEl.value);
+      var years = parseInt(document.getElementById("loanYears").value, 10);
+      var rate = parseFloat(document.getElementById("loanRate").value);
+      if (!isFinite(amt) || amt <= 0 || amt > 100000) return { err: "贷款金额请填 1 ~ 100000 万" };
+      if (!isFinite(rate) || rate < 0 || rate > 36) return { err: "年利率请填 0 ~ 36 之间" };
+      return { P: amt * 10000, n: years * 12, r: rate / 100 / 12, amt: amt, years: years, rate: rate };
+    }
+
+    var lnLastPreSeries = null;
+
+    function lnDrawChart(annSeries, linSeries, preSeries) {
+      var cv = document.getElementById("loanChart");
+      if (!cv || !cv.getContext) return;
+      var ctx = cv.getContext("2d");
+      var W = cv.width, H = cv.height;
+      var padL = 56, padR = 14, padT = 16, padB = 30;
+      ctx.clearRect(0, 0, W, H);
+      var maxV = Math.max(annSeries[0], 1);
+      var maxN = Math.max(annSeries.length, linSeries.length) - 1;
+      function X(i) { return padL + (W - padL - padR) * (i / maxN); }
+      function Y(v) { return padT + (H - padT - padB) * (1 - v / maxV); }
+      /* 网格 + 纵轴刻度（万元） */
+      ctx.strokeStyle = "rgba(255,255,255,.08)";
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      ctx.font = "11px sans-serif";
+      ctx.lineWidth = 1;
+      ctx.textAlign = "right";
+      for (var g = 0; g <= 4; g++) {
+        var v = maxV * g / 4, y = Y(v);
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+        ctx.fillText((v / 10000).toFixed(0) + "万", padL - 6, y + 4);
+      }
+      /* 横轴年份刻度 */
+      ctx.textAlign = "center";
+      var stepY = maxN >= 240 ? 60 : (maxN >= 120 ? 24 : 12);
+      for (var mm = 0; mm <= maxN; mm += stepY) {
+        ctx.fillText((mm / 12) + "年", X(mm), H - 10);
+      }
+      function drawLine(series, color, dash) {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.setLineDash(dash || []);
+        for (var i = 0; i < series.length; i++) {
+          var x = X(i), y = Y(series[i]);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      drawLine(linSeries, "#6b9fff");
+      drawLine(annSeries, "#f6c94a");
+      if (preSeries && preSeries.length > 1) drawLine(preSeries, "#6bd490", [6, 4]);
+    }
+
+    function lnCalc(silent) {
+      var inp = lnReadInputs();
+      var errEl = document.getElementById("loanErr");
+      if (!inp) return;
+      if (inp.err) {
+        if (errEl) { errEl.textContent = "⚠️ " + inp.err; errEl.classList.add("show"); }
+        return;
+      }
+      if (errEl) errEl.classList.remove("show");
+      var ann = lnAnnuitySchedule(inp.P, inp.r, inp.n);
+      var lin = lnLinearSchedule(inp.P, inp.r, inp.n);
+      function set(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+      set("loanAnnPay", lnFmt(ann.pay));
+      set("loanAnnInt", lnFmt(ann.totalInterest));
+      set("loanAnnTotal", lnFmt(inp.P + ann.totalInterest));
+      set("loanLinFirst", lnFmt(lin.first));
+      set("loanLinDec", lnFmt(lin.dec) + "/月");
+      set("loanLinLast", lnFmt(lin.last));
+      set("loanLinInt", lnFmt(lin.totalInterest));
+      set("loanLinTotal", lnFmt(inp.P + lin.totalInterest));
+      var diff = ann.totalInterest - lin.totalInterest;
+      set("loanDiffNote", "📊 同样条件下，「等额本金」比「等额本息」总利息少 " + lnFmt(diff) +
+        "；但等额本金首月月供高 " + lnFmt(lin.first - ann.pay) + "，适合前期还款能力强的人。");
+      lnDrawChart(ann.series, lin.series, lnLastPreSeries);
+      lnSave({ amt: inp.amt, years: inp.years, rate: inp.rate });
+      if (!silent) {
+        if (typeof bumpUsage === "function") bumpUsage("loan");
+        if (typeof toast === "function") toast("🏠 算好了！等额本息月供 " + lnFmt(ann.pay));
+      }
+      return { ann: ann, lin: lin, inp: inp };
+    }
+
+    function lnDoPrepay() {
+      var inp = lnReadInputs();
+      var errEl = document.getElementById("loanPreErr");
+      var out = document.getElementById("loanPreOut");
+      function fail(msg) {
+        if (errEl) { errEl.textContent = "⚠️ " + msg; errEl.classList.add("show"); }
+        if (out) out.classList.remove("show");
+      }
+      if (!inp) return;
+      if (inp.err) return fail(inp.err);
+      var m = parseInt(document.getElementById("loanPreM").value, 10);
+      var pre = parseFloat(document.getElementById("loanPreAmt").value);
+      var mode = document.getElementById("loanPreMode").value;
+      if (!isFinite(m) || m < 1) return fail("已还月数至少 1 个月");
+      if (!isFinite(pre) || pre <= 0) return fail("提前还款金额要大于 0");
+      var res = lnPrepay(inp.P, inp.r, inp.n, m, pre * 10000, mode);
+      if (res.err) return fail(res.err);
+      if (errEl) errEl.classList.remove("show");
+      function set(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+      set("loanPreSave", lnFmt(res.saved));
+      if (res.mode === "short") {
+        set("loanPreKeyK", "缩短还款时间");
+        set("loanPreKeyV", lnFmtMonths(res.shortenMonths) + "（月供仍 " + lnFmt(res.newPay) + "）");
+      } else {
+        set("loanPreKeyK", "月供减少");
+        set("loanPreKeyV", lnFmt(res.payCut) + "/月（新月供 " + lnFmt(res.newPay) + "）");
+      }
+      set("loanPreLeft", lnFmt(res.newLeft));
+      set("loanPreOldInt", lnFmt(res.oldRestInterest));
+      set("loanPreNewInt", lnFmt(res.newRestInterest));
+      if (out) out.classList.add("show");
+      /* 生成提前还款后剩余本金曲线：前 m 个月按原方案，之后按新方案 */
+      var pay0 = lnAnnuityPay(inp.P, inp.r, inp.n);
+      var series = [inp.P], left = inp.P;
+      for (var i = 0; i < m; i++) {
+        left -= (pay0 - left * inp.r);
+        series.push(Math.max(left, 0));
+      }
+      left -= pre * 10000;
+      series.push(Math.max(left, 0));
+      var payN = res.newPay;
+      var guard = 0;
+      while (left > 0.005 && guard < 1200) {
+        var it = left * inp.r;
+        left -= Math.min(payN - it, left);
+        series.push(Math.max(left, 0));
+        guard++;
+      }
+      lnLastPreSeries = series;
+      lnCalc(true);
+      if (typeof bumpUsage === "function") bumpUsage("loanprepay");
+      if (typeof confettiBurst === "function" && res.saved > 0) confettiBurst(40);
+      if (typeof toast === "function") toast("💰 这一笔能省 " + lnFmt(res.saved) + " 利息！");
+    }
+
+    function loanRender() {
+      var s = lnLoad();
+      var amtEl = document.getElementById("loanAmt");
+      if (!amtEl) return;
+      if (s.amt) amtEl.value = s.amt;
+      if (s.years) { var yEl = document.getElementById("loanYears"); if (yEl) yEl.value = String(s.years); }
+      if (s.rate !== undefined) { var rEl = document.getElementById("loanRate"); if (rEl) rEl.value = s.rate; }
+      lnCalc(true);
+    }
+
+    function loanBind() {
+      var btn = document.getElementById("loanCalcBtn");
+      if (!btn) return;
+      btn.addEventListener("click", function () { lnLastPreSeries = null; lnCalc(false); });
+      var pb = document.getElementById("loanPreBtn");
+      if (pb) pb.addEventListener("click", lnDoPrepay);
+      ["loanAmt", "loanRate"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener("keydown", function (e) { if (e.key === "Enter") { lnLastPreSeries = null; lnCalc(false); } });
+      });
+      var yEl = document.getElementById("loanYears");
+      if (yEl) yEl.addEventListener("change", function () { lnLastPreSeries = null; lnCalc(true); });
+    }
+
+    window.loanRender = loanRender;
+    window.loanBind = loanBind;
+    window.__loanTest = {
+      annuityPay: lnAnnuityPay, annuitySchedule: lnAnnuitySchedule,
+      linearSchedule: lnLinearSchedule, prepay: lnPrepay,
+      fmt: lnFmt, fmtMonths: lnFmtMonths, calc: lnCalc, doPrepay: lnDoPrepay
+    };
+  })();
+  loanBind();
+  BADGES.push(
+    { emoji: "\uD83C\uDFE0", name: "\u7CBE\u6253\u7EC6\u7B97", desc: "\u7B2C\u4E00\u6B21\u7528\u623F\u8D37\u8BA1\u7B97\u5668\u7B97\u8D26", test: function (u) { return (u.loan || 0) >= 1; } },
+    { emoji: "\uD83D\uDCB0", name: "\u63D0\u524D\u4E0A\u5CB8", desc: "\u505A\u8FC7 3 \u6B21\u63D0\u524D\u8FD8\u6B3E\u6A21\u62DF", test: function (u) { return (u.loanprepay || 0) >= 3; } }
+  );
+  QUOTES.push(
+    "\u623F\u8D37\u7684\u771F\u76F8\uFF1A\u524D\u5341\u5E74\u8FD8\u7684\u51E0\u4E4E\u90FD\u662F\u5229\u606F\uFF0C\u540E\u5341\u5E74\u624D\u662F\u672C\u91D1\u3002",
+    "\u7B49\u989D\u672C\u606F\u662F\u6E29\u6C34\u716E\u9752\u86D9\uFF0C\u7B49\u989D\u672C\u91D1\u662F\u5148\u82E6\u540E\u751C\u3002",
+    "\u63D0\u524D\u8FD8\u6B3E\u9009\u7F29\u77ED\u5E74\u9650\uFF0C\u7701\u4E0B\u7684\u5229\u606F\u53EF\u80FD\u591F\u4E70\u4E00\u8F86\u8F66\u3002",
+    "\u6708\u4F9B\u4E0D\u8D85\u8FC7\u6536\u5165\u4E09\u5206\u4E4B\u4E00\uFF0C\u751F\u6D3B\u624D\u6709\u55D8\u5934\u3002",
+    "\u5229\u7387\u6BCF\u964D 0.1\u4E2A\u70B9\uFF0C\u4E09\u5341\u5E74\u80FD\u7701\u51FA\u4E00\u90E8\u65B0\u624B\u673A\u94B1\u2014\u2014\u590D\u5229\u4ECE\u4E0D\u9A97\u4EBA\u3002",
+    "\u7B97\u6E05\u695A\u518D\u7B7E\u5B57\uFF0C\u662F\u5BF9\u672A\u6765\u4E09\u5341\u5E74\u7684\u57FA\u672C\u5C0A\u91CD\u3002"
+  );
   skBind();
   BADGES.push(
     { emoji: "\ud83c\udccf", name: "\u724c\u5c40\u544a\u6377", desc: "\u7b2c\u4e00\u6b21\u5728\u300c\u7eb8\u724c\u63a5\u9f99\u300d\u4e2d\u901a\u5173", test: function (u) { return (u.solitaire || 0) >= 1; } },
