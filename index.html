@@ -1521,6 +1521,7 @@
         <button data-tab="solitaire">🃏 纸牌接龙</button>
         <button data-tab="loan">🏠 房贷计算器</button>
         <button data-tab="schulte">🎯 舒尔特方格</button>
+        <button data-tab="drum">🥁 节拍鼓机</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6128,6 +6129,69 @@
       </div>
     </div>
   </section>
+  <section class="panel" id="drum">
+    <style>
+      #drum .dm-wrap { max-width: 840px; margin: 0 auto; }
+      #drum .dm-note { font-size: .82em; opacity: .75; line-height: 1.6; }
+      #drum .dm-card { background: var(--card, rgba(255,255,255,.06)); border: 1px solid var(--line, rgba(255,255,255,.12)); border-radius: 14px; padding: 14px 14px; margin-top: 12px; }
+      #drum .dm-transport { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+      #drum .dm-play { cursor: pointer; border: none; border-radius: 12px; padding: 11px 26px; font-size: 1.05em; font-weight: 800; background: var(--accent, #f6c94a); color: #1a1a1a; transition: transform .1s, filter .15s; min-width: 120px; }
+      #drum .dm-play:hover { filter: brightness(1.07); }
+      #drum .dm-play:active { transform: scale(.96); }
+      #drum .dm-play.on { background: #ff6b6b; color: #fff; }
+      #drum .dm-ctrl { display: flex; align-items: center; gap: 7px; font-size: .84em; font-weight: 600; }
+      #drum .dm-ctrl input[type=range] { width: 104px; accent-color: var(--accent, #f6c94a); cursor: pointer; }
+      #drum .dm-ctrl .val { font-variant-numeric: tabular-nums; font-weight: 800; min-width: 40px; }
+      #drum .dm-grid { margin-top: 16px; overflow-x: auto; padding-bottom: 6px; }
+      #drum .dm-cols, #drum .dm-row { display: grid; grid-template-columns: 78px repeat(16, 1fr); gap: 4px; min-width: 580px; }
+      #drum .dm-cols { margin-bottom: 6px; }
+      #drum .dm-row { align-items: center; margin-bottom: 4px; }
+      #drum .dm-colhead { text-align: center; font-size: .62em; opacity: .45; font-variant-numeric: tabular-nums; padding-top: 2px; }
+      #drum .dm-colhead.cur { opacity: 1; color: var(--accent, #f6c94a); font-weight: 800; }
+      #drum .dm-label { display: flex; align-items: center; gap: 5px; font-size: .82em; font-weight: 700; cursor: pointer; user-select: none; padding: 5px 4px; border-radius: 8px; white-space: nowrap; }
+      #drum .dm-label:hover { background: rgba(255,255,255,.07); }
+      #drum .dm-label .emj { font-size: 1.05em; }
+      #drum .dm-cell { aspect-ratio: 1; border-radius: 6px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1); cursor: pointer; transition: transform .06s, background .1s, box-shadow .06s; min-height: 22px; }
+      #drum .dm-cell.beat { background: rgba(255,255,255,.14); }
+      #drum .dm-cell:active { transform: scale(.88); }
+      #drum .dm-cell.on { border-color: transparent; }
+      #drum .dm-cell.on.r0 { background: #ff6b6b; }
+      #drum .dm-cell.on.r1 { background: #f6c94a; }
+      #drum .dm-cell.on.r2 { background: #4dd0e1; }
+      #drum .dm-cell.on.r3 { background: #7ee787; }
+      #drum .dm-cell.on.r4 { background: #b388ff; }
+      #drum .dm-cell.on.r5 { background: #ffa94d; }
+      #drum .dm-cell.playing { box-shadow: 0 0 0 2px var(--accent, #f6c94a) inset, 0 0 8px rgba(246,201,74,.4); }
+      #drum .dm-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+      #drum .dm-pbtn { cursor: pointer; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.07); color: var(--text, #fff); border-radius: 999px; padding: 7px 14px; font-size: .82em; font-weight: 700; transition: transform .1s, background .15s; }
+      #drum .dm-pbtn:hover { background: rgba(255,255,255,.13); }
+      #drum .dm-pbtn:active { transform: scale(.93); }
+      #drum .dm-pbtn.warn { border-color: rgba(255,107,107,.5); color: #ff8a8a; }
+    </style>
+    <div class="dm-wrap">
+      <h2>🥁 节拍鼓机</h2>
+      <p class="dm-note">16 步 step 音序器：点亮格子编排鼓点，按「播放」循环律动。所有鼓声都由浏览器实时合成，不加载任何音频文件。选个预设直接开整，点左侧鼓名可单独试听音色。</p>
+      <div class="dm-card">
+        <div class="dm-transport">
+          <button class="dm-play" id="dmPlay">▶ 播放</button>
+          <div class="dm-ctrl">🥁 速度<input type="range" id="dmBpm" min="60" max="200" value="110"><span class="val" id="dmBpmV">110</span></div>
+          <div class="dm-ctrl">🎵 摇摆<input type="range" id="dmSwing" min="0" max="60" value="0"><span class="val" id="dmSwingV">0%</span></div>
+          <div class="dm-ctrl">🔊 音量<input type="range" id="dmVol" min="0" max="100" value="80"><span class="val" id="dmVolV">80</span></div>
+        </div>
+        <div class="dm-grid" id="dmGrid"></div>
+        <div class="dm-presets">
+          <button class="dm-pbtn" data-preset="rock">🎸 摇滚</button>
+          <button class="dm-pbtn" data-preset="house">🏠 浩室</button>
+          <button class="dm-pbtn" data-preset="hiphop">🎤 嘻哈</button>
+          <button class="dm-pbtn" data-preset="disco">🪩 迪斯科</button>
+          <button class="dm-pbtn" data-preset="latin">💃 拉丁</button>
+          <button class="dm-pbtn" data-preset="random">🎲 随机</button>
+          <button class="dm-pbtn warn" data-preset="clear">🧹 清空</button>
+        </div>
+        <p class="dm-note" style="margin-top:12px">💾 鼓点、速度与音量会自动存进这台设备的浏览器。每小节 4 拍、共 16 步，每 4 格为一拍；「摇摆」让偶数格稍微延后，做出律动的 swing 感。首次播放需点一下页面以唤醒声音（浏览器规则）。</p>
+      </div>
+    </div>
+  </section>
 
 <script>
 (function () {
@@ -6471,12 +6535,14 @@
     if (id === "solitaire") skRender();
     if (id === "loan") loanRender();
     if (id === "schulte") schRender();
+    if (id === "drum") drumRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
     if (id !== "lightsout" && typeof loStop === "function") loStop();
     if (id !== "solitaire" && typeof skStop === "function") skStop();
     if (id !== "schulte" && typeof schStop === "function") schStop();
+    if (id !== "drum" && typeof drumStop === "function") drumStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
@@ -6610,6 +6676,7 @@
     solitaire: "纸牌接龙 接龙 solitaire klondike 克朗代克 扑克 纸牌 单人纸牌 收牌 基础堆 红黑交替 卡牌 桌游 相卡 监牙 puzzle cards",
     loan: "房贷 贷款 房贷计算器 月供 利息 等额本息 等额本金 提前还款 利率 按揭 loan mortgage 计算 买房 还款 上岸 金融 钱",
     schulte: "舒尔特方格 舒尔特 注意力 专注力 视幅 训练 眼力 找数字 点数字 顺序 反应 速度 飞行员 schulte grid 专注 集中 余光 脑力 赛砰",
+    drum: "鼓机 节拍鼓机 打鼓 鼓点 节奏 步进音序器 sequencer 打击乐 底鼓 军鼓 军镲 镲片 beat drum machine 808 编鼓 律动 loop 循环 打拍子 音乐 敲鼓 鼓组 groove 鼓机 电子鼓",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6804,6 +6871,7 @@ splitbill:"tools",
     solitaire:"games",
     loan:"tools",
     schulte:"games",
+    drum:"create",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -25521,6 +25589,274 @@ splitbill:"tools",
     "字从右边来，祝福往左边去，世界就这么流动。",
     "随便发一句，说不定就成了别人的开心。"
   );
+
+  /* ===== 🥁 节拍鼓机 drum (Beat Machine · 16-step step sequencer, Web Audio 实时合成) ===== */
+  (function () {
+    "use strict";
+    var $ = function (id) { return document.getElementById(id); };
+    function dmToast(m) { if (typeof toast === "function") toast(m); }
+
+    var DM_KEY = "suibian_drum";
+    var INSTR = [
+      { id: "kick",  emj: "🦵", name: "底鼓" },
+      { id: "snare", emj: "🥁", name: "军鼓" },
+      { id: "hat",   emj: "🎩", name: "闭镲" },
+      { id: "open",  emj: "💿", name: "开镲" },
+      { id: "clap",  emj: "👏", name: "拍手" },
+      { id: "tom",   emj: "🛢️", name: "桶鼓" }
+    ];
+    var STEPS = 16, ROWS = INSTR.length;
+
+    function emptyPat() { var a = [], r; for (r = 0; r < ROWS; r++) a.push(new Array(STEPS).fill(false)); return a; }
+    function strToRow(s) { var a = new Array(STEPS).fill(false), i; for (i = 0; i < STEPS && i < s.length; i++) a[i] = (s.charAt(i) !== "." && s.charAt(i) !== " "); return a; }
+
+    var PRESETS = {
+      rock:   ["x.......x.......", "....x.......x...", "x.x.x.x.x.x.x.x.", "................", "................", "................"],
+      house:  ["x...x...x...x...", "....x.......x...", "x.x.x.x.x.x.x.x.", "..x...x...x...x.", "................", "................"],
+      hiphop: ["x.....x...x.....", "....x.......x...", "x.x.x.x.x.x.x.x.", "................", "................", "..............x."],
+      disco:  ["x...x...x...x...", "....x.......x...", "x.x.x.x.x.x.x.x.", "..x...x...x...x.", "................", "................"],
+      latin:  ["x..x..x...x..x..", "................", "x.xxx.xxx.xxx.xx", "................", "..x.x...x.x.x...", "....x.......x..."]
+    };
+    var PRESET_LABEL = { rock: "摇滚", house: "浩室", hiphop: "嘻哈", disco: "迪斯科", latin: "拉丁", random: "随机", clear: "清空" };
+
+    var pattern = emptyPat();
+    var bpm = 110, swing = 0, vol = 0.8;
+    var isPlaying = false;
+
+    function loadState() {
+      try {
+        var raw = localStorage.getItem(DM_KEY); if (!raw) return;
+        var o = JSON.parse(raw);
+        if (o && Array.isArray(o.pat) && o.pat.length === ROWS) {
+          var ok = true, r;
+          for (r = 0; r < ROWS; r++) { if (!Array.isArray(o.pat[r]) || o.pat[r].length !== STEPS) { ok = false; break; } }
+          if (ok) pattern = o.pat.map(function (row) { return row.map(function (v) { return !!v; }); });
+        }
+        if (typeof o.bpm === "number" && o.bpm >= 60 && o.bpm <= 200) bpm = o.bpm | 0;
+        if (typeof o.swing === "number" && o.swing >= 0 && o.swing <= 60) swing = o.swing | 0;
+        if (typeof o.vol === "number" && o.vol >= 0 && o.vol <= 1) vol = o.vol;
+      } catch (e) {}
+    }
+    function saveState() {
+      try { localStorage.setItem(DM_KEY, JSON.stringify({ pat: pattern, bpm: bpm, swing: swing, vol: vol })); } catch (e) {}
+    }
+
+    /* ---------- Web Audio 合成 ---------- */
+    var actx = null, master = null, _noise = null;
+    function ensureAudio() {
+      if (actx) return actx;
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        actx = new AC();
+        master = actx.createGain(); master.gain.value = vol; master.connect(actx.destination);
+      } catch (e) { actx = null; }
+      return actx;
+    }
+    function getNoise() {
+      if (_noise) return _noise;
+      var len = Math.floor(actx.sampleRate * 1.0), buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0), i;
+      for (i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      _noise = buf; return buf;
+    }
+    function trigger(id, t) {
+      if (!actx) return;
+      var o, g, n, f, ng, cg, offs, k, tt;
+      if (id === "kick") {
+        o = actx.createOscillator(); g = actx.createGain();
+        o.type = "sine"; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.12);
+        g.gain.setValueAtTime(1.0, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
+        o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.45);
+      } else if (id === "snare") {
+        n = actx.createBufferSource(); n.buffer = getNoise();
+        f = actx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 1200;
+        ng = actx.createGain(); ng.gain.setValueAtTime(0.8, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+        n.connect(f); f.connect(ng); ng.connect(master); n.start(t); n.stop(t + 0.2);
+        o = actx.createOscillator(); g = actx.createGain();
+        o.type = "triangle"; o.frequency.setValueAtTime(180, t);
+        g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.13);
+      } else if (id === "hat") {
+        n = actx.createBufferSource(); n.buffer = getNoise();
+        f = actx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 8000;
+        g = actx.createGain(); g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        n.connect(f); f.connect(g); g.connect(master); n.start(t); n.stop(t + 0.06);
+      } else if (id === "open") {
+        n = actx.createBufferSource(); n.buffer = getNoise();
+        f = actx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 7000;
+        g = actx.createGain(); g.gain.setValueAtTime(0.45, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+        n.connect(f); f.connect(g); g.connect(master); n.start(t); n.stop(t + 0.34);
+      } else if (id === "clap") {
+        g = actx.createGain(); g.connect(master);
+        f = actx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 1500; f.Q.value = 1.2; f.connect(g);
+        offs = [0, 0.012, 0.024, 0.05];
+        for (k = 0; k < offs.length; k++) {
+          n = actx.createBufferSource(); n.buffer = getNoise(); cg = actx.createGain(); tt = t + offs[k];
+          cg.gain.setValueAtTime(0.0001, tt); cg.gain.exponentialRampToValueAtTime(0.6, tt + 0.002); cg.gain.exponentialRampToValueAtTime(0.001, tt + 0.09);
+          n.connect(cg); cg.connect(f); n.start(tt); n.stop(tt + 0.1);
+        }
+      } else if (id === "tom") {
+        o = actx.createOscillator(); g = actx.createGain();
+        o.type = "sine"; o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(80, t + 0.2);
+        g.gain.setValueAtTime(0.8, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.32);
+      }
+    }
+    function preview(id) {
+      var ctx = ensureAudio(); if (!ctx) return;
+      if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+      trigger(id, ctx.currentTime + 0.01);
+    }
+
+    /* ---------- 调度器（前瞻式，保证节奏稳） ---------- */
+    var currentStep = 0, nextNoteTime = 0, timer = null, lastDrawn = -1;
+    var LOOKAHEAD = 25, SCHEDULE_AHEAD = 0.1;
+    var uiQueue = [];
+    function secPerStep() { return (60 / bpm) / 4; }
+    function scheduler() {
+      if (!actx) return;
+      while (nextNoteTime < actx.currentTime + SCHEDULE_AHEAD) {
+        var st = currentStep, playT = nextNoteTime, r;
+        if (st % 2 === 1) playT += (swing / 100) * secPerStep() * 0.5;
+        for (r = 0; r < ROWS; r++) { if (pattern[r][st]) trigger(INSTR[r].id, playT); }
+        uiQueue.push({ step: st, time: playT });
+        nextNoteTime += secPerStep();
+        currentStep = (currentStep + 1) % STEPS;
+      }
+    }
+    function drawStep() {
+      if (!isPlaying) return;
+      var now = actx ? actx.currentTime : 0, s = lastDrawn;
+      while (uiQueue.length && uiQueue[0].time < now + 0.02) { s = uiQueue[0].step; uiQueue.shift(); }
+      if (s !== lastDrawn) { highlightCol(s); lastDrawn = s; }
+      (window.requestAnimationFrame || function (f) { setTimeout(f, 30); })(drawStep);
+    }
+    function highlightCol(s) {
+      var i, cells = document.querySelectorAll("#drum .dm-cell.playing");
+      for (i = 0; i < cells.length; i++) cells[i].classList.remove("playing");
+      var col = document.querySelectorAll('#drum .dm-cell[data-c="' + s + '"]');
+      for (i = 0; i < col.length; i++) col[i].classList.add("playing");
+      var heads = document.querySelectorAll("#drum .dm-colhead");
+      for (i = 0; i < heads.length; i++) heads[i].classList.toggle("cur", +heads[i].getAttribute("data-col") === s);
+    }
+    function clearPlayhead() {
+      var i, a = document.querySelectorAll("#drum .dm-cell.playing"); for (i = 0; i < a.length; i++) a[i].classList.remove("playing");
+      var b = document.querySelectorAll("#drum .dm-colhead.cur"); for (i = 0; i < b.length; i++) b[i].classList.remove("cur");
+    }
+    function play() {
+      var ctx = ensureAudio();
+      if (!ctx) { dmToast("你的浏览器不支持音频合成 😢"); return; }
+      if (ctx.state === "suspended" && ctx.resume) ctx.resume();
+      if (isPlaying) return;
+      isPlaying = true; currentStep = 0; lastDrawn = -1; uiQueue = []; nextNoteTime = ctx.currentTime + 0.06;
+      timer = setInterval(scheduler, LOOKAHEAD);
+      (window.requestAnimationFrame || function (f) { setTimeout(f, 30); })(drawStep);
+      var p = $("dmPlay"); if (p) { p.textContent = "⏸ 停止"; p.classList.add("on"); }
+      if (typeof bumpUsage === "function") bumpUsage("drumplay");
+    }
+    function stop() {
+      isPlaying = false;
+      if (timer) { clearInterval(timer); timer = null; }
+      uiQueue = []; lastDrawn = -1;
+      var p = $("dmPlay"); if (p) { p.textContent = "▶ 播放"; p.classList.remove("on"); }
+      clearPlayhead();
+    }
+
+    /* ---------- DOM ---------- */
+    var built = false;
+    function build() {
+      var grid = $("dmGrid"); if (!grid || built) return;
+      var html = '<div class="dm-cols"><div></div>', c, r;
+      for (c = 0; c < STEPS; c++) html += '<div class="dm-colhead" data-col="' + c + '">' + (c + 1) + '</div>';
+      html += '</div>';
+      for (r = 0; r < ROWS; r++) {
+        html += '<div class="dm-row"><div class="dm-label" data-inst="' + r + '"><span class="emj">' + INSTR[r].emj + '</span>' + INSTR[r].name + '</div>';
+        for (c = 0; c < STEPS; c++) html += '<div class="dm-cell r' + r + ((c % 4 === 0) ? ' beat' : '') + '" data-r="' + r + '" data-c="' + c + '"></div>';
+        html += '</div>';
+      }
+      grid.innerHTML = html; built = true;
+    }
+    function renderCells() {
+      var cells = document.querySelectorAll("#drum .dm-cell"), i, r, c;
+      for (i = 0; i < cells.length; i++) {
+        r = +cells[i].getAttribute("data-r"); c = +cells[i].getAttribute("data-c");
+        cells[i].classList.toggle("on", !!pattern[r][c]);
+      }
+    }
+    function syncControls() {
+      if ($("dmBpm")) { $("dmBpm").value = bpm; $("dmBpmV").textContent = bpm; }
+      if ($("dmSwing")) { $("dmSwing").value = swing; $("dmSwingV").textContent = swing + "%"; }
+      if ($("dmVol")) { $("dmVol").value = Math.round(vol * 100); $("dmVolV").textContent = Math.round(vol * 100); }
+    }
+    function applyPreset(name) {
+      if (name === "clear") pattern = emptyPat();
+      else if (name === "random") pattern = randPat();
+      else if (PRESETS[name]) pattern = PRESETS[name].map(strToRow);
+      else return;
+      renderCells(); saveState();
+      dmToast(name === "clear" ? "已清空鼓点 🧹" : ("已载入：" + (PRESET_LABEL[name] || name)));
+    }
+    function randPat() {
+      var dens = [0.35, 0.18, 0.55, 0.12, 0.12, 0.1], p = emptyPat(), r, c;
+      for (r = 0; r < ROWS; r++) for (c = 0; c < STEPS; c++) p[r][c] = Math.random() < dens[r];
+      p[0][0] = true; p[1][4] = true; p[1][12] = true;
+      return p;
+    }
+
+    var bound = false;
+    function drumBind() {
+      if (bound) return;
+      var grid = $("dmGrid"); if (!grid) return;
+      loadState(); build(); renderCells(); syncControls();
+      grid.addEventListener("click", function (e) {
+        var lab = e.target.closest ? e.target.closest(".dm-label") : null;
+        if (lab) { preview(INSTR[+lab.getAttribute("data-inst")].id); return; }
+        var cell = e.target.closest ? e.target.closest(".dm-cell") : null;
+        if (!cell) return;
+        var r = +cell.getAttribute("data-r"), c = +cell.getAttribute("data-c");
+        pattern[r][c] = !pattern[r][c];
+        cell.classList.toggle("on", pattern[r][c]);
+        if (pattern[r][c]) preview(INSTR[r].id);
+        saveState();
+      });
+      var pb = $("dmPlay"); if (pb) pb.addEventListener("click", function () { if (isPlaying) stop(); else play(); });
+      var eb = $("dmBpm"); if (eb) eb.addEventListener("input", function () { bpm = +this.value; $("dmBpmV").textContent = bpm; saveState(); });
+      var sb = $("dmSwing"); if (sb) sb.addEventListener("input", function () { swing = +this.value; $("dmSwingV").textContent = swing + "%"; saveState(); });
+      var vb = $("dmVol"); if (vb) vb.addEventListener("input", function () { vol = (+this.value) / 100; if (master) master.gain.value = vol; $("dmVolV").textContent = this.value; saveState(); });
+      var pr = document.querySelector("#drum .dm-presets");
+      if (pr) pr.addEventListener("click", function (e) {
+        var b = e.target.closest ? e.target.closest(".dm-pbtn") : null; if (!b) return;
+        applyPreset(b.getAttribute("data-preset"));
+      });
+      bound = true;
+    }
+    function drumRender() { drumBind(); build(); renderCells(); syncControls(); }
+
+    window.drumRender = drumRender;
+    window.drumStop = stop;
+    window.drumBind = drumBind;
+    window.__drumTest = {
+      strToRow: strToRow, emptyPat: emptyPat, randPat: randPat, presets: PRESETS,
+      rows: ROWS, steps: STEPS,
+      secPerStep: function (b) { var old = bpm; bpm = b; var v = secPerStep(); bpm = old; return v; },
+      setPattern: function (p) { pattern = p; }, getPattern: function () { return pattern; }
+    };
+
+    drumBind();
+
+    BADGES.push(
+      { emoji: "🥁", name: "鼓点入门", desc: "第一次播放你的鼓点", test: function (u) { return (u.drumplay || 0) >= 1; } },
+      { emoji: "🎶", name: "节奏大师", desc: "累计播放鼓点 10 次", test: function (u) { return (u.drumplay || 0) >= 10; } }
+    );
+    QUOTES.push(
+      "节奏是时间的骨架，你只是往上面挂了几声鼓点。",
+      "四拍子里藏着整个世界的心跳。",
+      "底鼓管方向，军镲管情绪，剩下的交给你的手。",
+      "一段好 loop，循环一百遍也不腻。",
+      "先打稳一拍，再谈花活。",
+      "摇摆一点点，整段律动就活了。"
+    );
+  })();
 
 </script>
 </body>
