@@ -1518,6 +1518,7 @@
         <button data-tab="klotski">🧩 华容道</button>
         <button data-tab="qrcode">📱 二维码生成</button>
         <button data-tab="lightsout">💡 熄灯谜题</button>
+        <button data-tab="solitaire">🃏 纸牌接龙</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5848,6 +5849,77 @@
           <p class="lo-goal">💡 小贴士：以「最少步」通关可解锁「全部熄灭」徽章；用了提示或自动通关则不计入连胜与成就。</p>
         </div>
       </section>
+      <section id="solitaire" class="panel">
+        <style>
+          #solitaire .sk-wrap{max-width:820px;margin:0 auto}
+          #solitaire .sk-desc{color:var(--muted,#8a8f98);font-size:14px;margin:6px 0 12px;line-height:1.6;text-align:center}
+          #solitaire .sk-toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
+          #solitaire .sk-btn,#solitaire .sk-drawmode{border:1px solid rgba(140,150,170,.35);background:rgba(140,150,170,.10);color:inherit;border-radius:10px;padding:7px 13px;font-size:14px;cursor:pointer;transition:all .15s}
+          #solitaire .sk-btn:hover,#solitaire .sk-drawmode:hover{background:rgba(140,150,170,.22)}
+          #solitaire .sk-drawmode.active{background:linear-gradient(135deg,#3fae6b,#2b8a52);color:#fff;border-color:transparent;font-weight:700;box-shadow:0 3px 12px rgba(50,160,90,.35)}
+          #solitaire .sk-board{background:radial-gradient(circle at 50% 0%,rgba(30,120,70,.38),rgba(12,60,38,.6));border-radius:16px;padding:14px;box-shadow:inset 0 2px 14px rgba(0,0,0,.35)}
+          #solitaire .sk-top{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:14px}
+          #solitaire .sk-pile{min-height:80px}
+          #solitaire .sk-tableau{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:start}
+          #solitaire .sk-col{min-height:96px;position:relative;border-radius:8px}
+          #solitaire .sk-card{width:100%;max-width:66px;aspect-ratio:5/7;margin:0 auto;border-radius:8px;background:#fdfdfb;color:#1a1a2a;border:1px solid rgba(0,0,0,.18);box-shadow:0 1px 3px rgba(0,0,0,.35);display:flex;flex-direction:column;justify-content:space-between;padding:4px 5px;font-weight:800;font-size:15px;line-height:1;cursor:pointer;user-select:none;box-sizing:border-box;transition:transform .06s}
+          #solitaire .sk-card:active{transform:scale(.97)}
+          #solitaire .sk-card.red{color:#d21f3c}
+          #solitaire .sk-card .sk-s{font-size:18px;text-align:right}
+          #solitaire .sk-card.back{background:repeating-linear-gradient(45deg,#2b4c8c,#2b4c8c 6px,#3a5fa8 6px,#3a5fa8 12px);border:1px solid #24427a}
+          #solitaire .sk-card.stack{margin-top:-46px}
+          #solitaire .sk-col .sk-card:first-child{margin-top:0}
+          #solitaire .sk-card.sel{outline:3px solid #ffd54a;outline-offset:-1px;box-shadow:0 0 12px rgba(255,200,60,.75);position:relative;z-index:5}
+          #solitaire .sk-slot{width:100%;max-width:66px;aspect-ratio:5/7;margin:0 auto;border-radius:8px;border:2px dashed rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45);font-size:22px;box-sizing:border-box}
+          #solitaire #sk-stock{cursor:pointer}
+          #solitaire .sk-recycle{cursor:pointer}
+          #solitaire .sk-empty{border-color:rgba(255,255,255,.16)}
+          #solitaire .sk-stats{display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:center;font-size:14px;color:var(--muted,#8a8f98);margin-top:14px}
+          #solitaire .sk-stats b{color:inherit;font-size:16px;font-weight:800}
+          #solitaire .sk-board.sk-won{animation:skWin .9s ease}
+          @keyframes skWin{0%,100%{box-shadow:inset 0 2px 14px rgba(0,0,0,.35)}50%{box-shadow:inset 0 0 34px rgba(255,215,80,.6),0 0 26px rgba(255,215,80,.45)}}
+          #solitaire .sk-tip{font-size:13px;color:var(--muted,#8a8f98);text-align:center;margin-top:10px;opacity:.85;line-height:1.6}
+        </style>
+        <div class="sk-wrap">
+          <h2>🃏 纸牌接龙</h2>
+          <p class="sk-desc">经典克朗代克 Solitaire：把每种花色的 A→K 依次收进右上四个基础堆即获胜。<br>牌桌上红黑交替、由大到小往下接，空列只放 K。点一张牌选中，再点落点移动；双击可自动收牌。</p>
+          <div class="sk-toolbar">
+            <button class="sk-drawmode active" data-draw="1">翻 1 张</button>
+            <button class="sk-drawmode" data-draw="3">翻 3 张（难）</button>
+            <button class="sk-btn" id="sk-new">🔄 新牌局</button>
+            <button class="sk-btn" id="sk-auto">✨ 一键收牌</button>
+            <button class="sk-btn" id="sk-undo">↩ 撤销</button>
+          </div>
+          <div class="sk-board" id="sk-board">
+            <div class="sk-top" id="sk-top">
+              <div class="sk-pile" id="sk-stock"></div>
+              <div class="sk-pile" id="sk-waste"></div>
+              <div class="sk-pile"></div>
+              <div class="sk-pile" id="sk-found-0"></div>
+              <div class="sk-pile" id="sk-found-1"></div>
+              <div class="sk-pile" id="sk-found-2"></div>
+              <div class="sk-pile" id="sk-found-3"></div>
+            </div>
+            <div class="sk-tableau" id="sk-tableau">
+              <div class="sk-col" id="sk-col-0"></div>
+              <div class="sk-col" id="sk-col-1"></div>
+              <div class="sk-col" id="sk-col-2"></div>
+              <div class="sk-col" id="sk-col-3"></div>
+              <div class="sk-col" id="sk-col-4"></div>
+              <div class="sk-col" id="sk-col-5"></div>
+              <div class="sk-col" id="sk-col-6"></div>
+            </div>
+          </div>
+          <div class="sk-stats">
+            <span>步数 <b id="sk-moves">0</b></span>
+            <span>用时 <b id="sk-time">00:00</b></span>
+            <span>通关 <b id="sk-wins">0</b></span>
+            <span>最少步 <b id="sk-bestmoves">—</b></span>
+            <span>最快 <b id="sk-besttime">—</b></span>
+          </div>
+          <p class="sk-tip">🃏 小贴士：点「牌堆」翻牌，翻完再点可循环回收；双击任意牌尝试自动送入基础堆；「一键收牌」把当前所有能收的牌一次收完。</p>
+        </div>
+      </section>
 <script>
 (function () {
   "use strict";
@@ -6187,10 +6259,12 @@
     if (id === "klotski") klRender();
     if (id === "qrcode") qrRender();
     if (id === "lightsout") loRender();
+    if (id === "solitaire") skRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
     if (id !== "lightsout" && typeof loStop === "function") loStop();
+    if (id !== "solitaire" && typeof skStop === "function") skStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
@@ -6321,6 +6395,7 @@
     klotski: "华容道 klotski 滑块 数字华容道 曹操 横刀立马 益智 解谜 puzzle 中式 三国 移动 拼图 益智游戏 烧脑 通关 sliding block",
     qrcode: "二维码 qrcode qr 生成 扫码 扫一扫 wifi 网址 名片 链接 码 纠错 reed solomon 二维 barcode 分享 海报 码上",
     lightsout: "熄灯 关灯 lightsout lights out 灯 点灯 开关 益智 解谜 线性代数 gf2 puzzle 消灯 关灯游戏 灯泡 谜题",
+    solitaire: "纸牌接龙 接龙 solitaire klondike 克朗代克 扑克 纸牌 单人纸牌 收牌 基础堆 红黑交替 卡牌 桌游 相卡 监牙 puzzle cards",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6512,6 +6587,7 @@ splitbill:"tools",
     klotski:"games",
     qrcode:"tools",
     lightsout:"games",
+    solitaire:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -19763,6 +19839,385 @@ splitbill:"tools",
     "\u7ebf\u6027\u4ee3\u6570\u80fd\u7b97\u51fa\u6700\u5c11\u6b65\uff0c\u4f46\u4eb2\u624b\u6309\u4eae\u90a3\u4e0b\u624d\u662f\u4e50\u8da3\u3002",
     "\u5f53\u4e00\u5207\u90fd\u719c\u706d\uff0c\u4f60\u4f1a\u53d1\u73b0\u9ed1\u6697\u91cc\u4e5f\u6709\u79e9\u5e8f\u3002",
     "\u89e3\u4e0d\u5f00\u65f6\u5148\u6309\u4e2a\u63d0\u793a\uff0c\u522b\u786c\u6491\u2014\u2014\u5077\u5077\u53d8\u5f3a\u4e5f\u662f\u53d8\u5f3a\u3002"
+  );
+  /* ===== 🃏 纸牌接龙 Klondike Solitaire（自研，零依赖） ===== */
+  (function () {
+    "use strict";
+    var $sk = function (id) { return document.getElementById(id); };
+    var SUITS = ["\u2660", "\u2665", "\u2666", "\u2663"]; // ♠♥♦♣
+    var RANKS = ["", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+    var SKKEY = "suibian_solitaire";
+    var SK = {
+      stock: [], waste: [], found: [[], [], [], []],
+      tab: [[], [], [], [], [], [], []],
+      moves: 0, draw: 1, started: false, won: false, usedUndo: false,
+      sel: null // {from:"waste"|"tab", col:n, idx:n}
+    };
+    var hist = [];
+    var timerId = null, t0 = 0, baseElapsed = 0;
+
+    function isRed(s) { return s === 1 || s === 2; }
+
+    /* ---------- 存档 ---------- */
+    function skLoad() { try { return JSON.parse(localStorage.getItem(SKKEY)) || {}; } catch (e) { return {}; } }
+    function skSave(o) { try { localStorage.setItem(SKKEY, JSON.stringify(o)); } catch (e) {} }
+
+    /* ---------- 计时 ---------- */
+    function fmt(ms) {
+      var s = Math.floor(ms / 1000), m = Math.floor(s / 60);
+      s = s % 60;
+      return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+    }
+    function tick() { var el = $sk("sk-time"); if (el) el.textContent = fmt(baseElapsed + (Date.now() - t0)); }
+    function startTimer() { if (timerId) return; t0 = Date.now(); timerId = setInterval(tick, 500); }
+    function stopTimer() { if (timerId) { baseElapsed += Date.now() - t0; clearInterval(timerId); timerId = null; } }
+    function resetTimer() { stopTimer(); baseElapsed = 0; var el = $sk("sk-time"); if (el) el.textContent = "00:00"; }
+
+    /* ---------- 洗牌 / 发牌 ---------- */
+    function makeDeck() {
+      var d = [];
+      for (var s = 0; s < 4; s++) for (var r = 1; r <= 13; r++) d.push({ s: s, r: r, up: false });
+      for (var i = d.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = d[i]; d[i] = d[j]; d[j] = t; }
+      return d;
+    }
+    function deal() {
+      var d = makeDeck();
+      SK.found = [[], [], [], []];
+      SK.tab = [[], [], [], [], [], [], []];
+      for (var c = 0; c < 7; c++) {
+        for (var k = 0; k <= c; k++) {
+          var card = d.pop();
+          card.up = (k === c);
+          SK.tab[c].push(card);
+        }
+      }
+      SK.stock = d; // 其余进牌堆（全部背面）
+      SK.stock.forEach(function (x) { x.up = false; });
+      SK.waste = [];
+      SK.moves = 0; SK.started = true; SK.won = false; SK.usedUndo = false; SK.sel = null;
+      hist = [];
+    }
+
+    /* ---------- 状态快照（撤销用） ---------- */
+    function snapshot() {
+      return JSON.stringify({ stock: SK.stock, waste: SK.waste, found: SK.found, tab: SK.tab, moves: SK.moves });
+    }
+    function pushHist() { hist.push(snapshot()); if (hist.length > 300) hist.shift(); }
+    function restore(str) {
+      var o = JSON.parse(str);
+      SK.stock = o.stock; SK.waste = o.waste; SK.found = o.found; SK.tab = o.tab; SK.moves = o.moves;
+    }
+
+    /* ---------- 规则判定 ---------- */
+    // 从 tableau 某列的 idx 开始能否作为一整条有效串被拿起（全部正面、颜色交替、点数递减）
+    function validRun(col, idx) {
+      var arr = SK.tab[col];
+      if (idx < 0 || idx >= arr.length) return false;
+      for (var i = idx; i < arr.length; i++) {
+        if (!arr[i].up) return false;
+        if (i > idx) {
+          var prev = arr[i - 1], cur = arr[i];
+          if (prev.r - 1 !== cur.r) return false;
+          if (isRed(prev.s) === isRed(cur.s)) return false;
+        }
+      }
+      return true;
+    }
+    function canToFoundation(card) {
+      var f = SK.found[card.s];
+      if (f.length === 0) return card.r === 1;
+      return f[f.length - 1].r + 1 === card.r;
+    }
+    function canToTableau(card, col) {
+      var arr = SK.tab[col];
+      if (arr.length === 0) return card.r === 13; // 空列只放 K
+      var top = arr[arr.length - 1];
+      if (!top.up) return false;
+      return (top.r - 1 === card.r) && (isRed(top.s) !== isRed(card.s));
+    }
+
+    /* ---------- 取被选中的牌组 ---------- */
+    function grabGroup() {
+      if (!SK.sel) return null;
+      if (SK.sel.from === "waste") {
+        if (!SK.waste.length) return null;
+        return [SK.waste[SK.waste.length - 1]];
+      }
+      var arr = SK.tab[SK.sel.col];
+      return arr.slice(SK.sel.idx);
+    }
+    function removeGroup() {
+      if (SK.sel.from === "waste") { SK.waste.pop(); }
+      else {
+        var arr = SK.tab[SK.sel.col];
+        arr.splice(SK.sel.idx);
+        // 翻开新暴露的底牌
+        if (arr.length && !arr[arr.length - 1].up) arr[arr.length - 1].up = true;
+      }
+    }
+
+    /* ---------- 抽牌 / 回收 ---------- */
+    function drawStock() {
+      pushHist();
+      SK.sel = null;
+      if (SK.stock.length === 0) {
+        // 回收：把 waste 翻回 stock
+        if (SK.waste.length === 0) { hist.pop(); return; }
+        while (SK.waste.length) { var c = SK.waste.pop(); c.up = false; SK.stock.push(c); }
+        SK.moves++;
+      } else {
+        var n = Math.min(SK.draw, SK.stock.length);
+        for (var i = 0; i < n; i++) { var card = SK.stock.pop(); card.up = true; SK.waste.push(card); }
+        SK.moves++;
+      }
+      startTimer();
+      render();
+    }
+
+    /* ---------- 执行移动 ---------- */
+    function doMove(destType, destCol) {
+      var group = grabGroup();
+      if (!group || !group.length) { SK.sel = null; return false; }
+      var head = group[0];
+      var ok = false;
+      if (destType === "found") {
+        if (group.length === 1 && canToFoundation(head)) {
+          pushHist();
+          removeGroup();
+          SK.found[head.s].push(head);
+          ok = true;
+        }
+      } else if (destType === "tab") {
+        if (canToTableau(head, destCol)) {
+          pushHist();
+          removeGroup();
+          for (var i = 0; i < group.length; i++) SK.tab[destCol].push(group[i]);
+          ok = true;
+        }
+      }
+      if (ok) { SK.moves++; startTimer(); }
+      SK.sel = null;
+      return ok;
+    }
+
+    /* ---------- 智能：把单张自动送去基础堆 ---------- */
+    function autoToFoundation(from, col, idx) {
+      var card;
+      if (from === "waste") { if (!SK.waste.length) return false; card = SK.waste[SK.waste.length - 1]; }
+      else { var arr = SK.tab[col]; if (idx !== arr.length - 1) return false; card = arr[arr.length - 1]; }
+      if (!canToFoundation(card)) return false;
+      SK.sel = { from: from, col: col, idx: idx };
+      return doMove("found");
+    }
+    // 一键收牌：反复把能收的都收进基础堆
+    function autoCollect() {
+      var any = false, moved = true;
+      while (moved) {
+        moved = false;
+        if (SK.waste.length && canToFoundation(SK.waste[SK.waste.length - 1])) {
+          SK.sel = { from: "waste" }; if (doMove("found")) { moved = true; any = true; }
+        }
+        for (var c = 0; c < 7; c++) {
+          var arr = SK.tab[c];
+          if (arr.length && arr[arr.length - 1].up && canToFoundation(arr[arr.length - 1])) {
+            SK.sel = { from: "tab", col: c, idx: arr.length - 1 };
+            if (doMove("found")) { moved = true; any = true; }
+          }
+        }
+      }
+      return any;
+    }
+
+    function isWon() {
+      return SK.found[0].length === 13 && SK.found[1].length === 13 && SK.found[2].length === 13 && SK.found[3].length === 13;
+    }
+
+    /* ---------- 胜利处理 ---------- */
+    function checkWin() {
+      if (SK.won || !isWon()) return;
+      SK.won = true;
+      stopTimer();
+      var st = skLoad();
+      st.wins = (st.wins || 0) + 1;
+      var totalMs = baseElapsed;
+      if (!st.bestMoves || SK.moves < st.bestMoves) st.bestMoves = SK.moves;
+      if (!st.bestTime || totalMs < st.bestTime) st.bestTime = totalMs;
+      if (SK.draw === 3) st.wins3 = (st.wins3 || 0) + 1;
+      skSave(st);
+      if (typeof bumpUsage === "function") { bumpUsage("solitaire"); if (SK.draw === 3) bumpUsage("solitaire3"); }
+      if (typeof confettiBurst === "function") confettiBurst(SK.draw === 3 ? 200 : 150);
+      if (typeof toast === "function") toast("\u901a\u5173\uff01\u5171 " + SK.moves + " \u6b65\uff0c\u7528\u65f6 " + fmt(totalMs) + " \ud83c\udccf");
+      render();
+    }
+
+    /* ---------- 渲染 ---------- */
+    function cardHtml(card, extraCls, dataAttrs) {
+      if (!card.up) return '<div class="sk-card back' + (extraCls || "") + '"' + (dataAttrs || "") + '></div>';
+      var red = isRed(card.s) ? " red" : "";
+      return '<div class="sk-card' + red + (extraCls || "") + '"' + (dataAttrs || "") + '>' +
+        '<span class="sk-r">' + RANKS[card.r] + '</span><span class="sk-s">' + SUITS[card.s] + '</span></div>';
+    }
+    function render() {
+      // 顶部：牌堆 / 弃牌
+      var stockEl = $sk("sk-stock");
+      if (stockEl) stockEl.innerHTML = SK.stock.length
+        ? '<div class="sk-card back"></div>'
+        : '<div class="sk-slot sk-recycle">\u21bb</div>';
+      var wasteEl = $sk("sk-waste");
+      if (wasteEl) {
+        if (SK.waste.length) {
+          var top = SK.waste[SK.waste.length - 1];
+          var selW = (SK.sel && SK.sel.from === "waste") ? " sel" : "";
+          wasteEl.innerHTML = cardHtml(top, selW, ' data-from="waste"');
+        } else wasteEl.innerHTML = '<div class="sk-slot"></div>';
+      }
+      // 基础堆
+      for (var s = 0; s < 4; s++) {
+        var fe = $sk("sk-found-" + s);
+        if (!fe) continue;
+        var f = SK.found[s];
+        fe.innerHTML = f.length ? cardHtml(f[f.length - 1], "", ' data-found="' + s + '"')
+          : '<div class="sk-slot sk-fslot">' + SUITS[s] + '</div>';
+      }
+      // 七列
+      for (var c = 0; c < 7; c++) {
+        var col = $sk("sk-col-" + c);
+        if (!col) continue;
+        var arr = SK.tab[c], html = "";
+        if (!arr.length) html = '<div class="sk-slot sk-empty"></div>';
+        for (var i = 0; i < arr.length; i++) {
+          var selCls = (SK.sel && SK.sel.from === "tab" && SK.sel.col === c && i >= SK.sel.idx) ? " sel" : "";
+          html += cardHtml(arr[i], " stack" + selCls, ' data-col="' + c + '" data-idx="' + i + '"');
+        }
+        col.innerHTML = html;
+      }
+      $sk("sk-moves").textContent = SK.moves;
+      renderStats();
+      var board = $sk("sk-board");
+      if (board) board.classList.toggle("sk-won", SK.won);
+    }
+    function renderStats() {
+      var st = skLoad();
+      var w = $sk("sk-wins"); if (w) w.textContent = st.wins || 0;
+      var bm = $sk("sk-bestmoves"); if (bm) bm.textContent = st.bestMoves || "\u2014";
+      var bt = $sk("sk-besttime"); if (bt) bt.textContent = st.bestTime ? fmt(st.bestTime) : "\u2014";
+    }
+
+    /* ---------- 交互 ---------- */
+    function clearSel() { SK.sel = null; render(); }
+    function onCardClick(from, col, idx, dbl) {
+      if (SK.won) return;
+      // 双击 / 已选中同源再点：尝试自动送基础堆
+      if (dbl) { if (autoToFoundation(from, col, idx)) { render(); checkWin(); } return; }
+      if (SK.sel) {
+        // 已有选择：若点击的是可落点则移动
+        if (from === "tab") {
+          if (SK.sel.from === "tab" && SK.sel.col === col) { clearSel(); return; }
+          if (doMove("tab", col)) { render(); checkWin(); return; }
+          // 落点非法 → 改选新牌
+        } else if (from === "waste") { clearSel(); return; }
+      }
+      // 选牌
+      if (from === "waste") {
+        if (SK.waste.length) { SK.sel = { from: "waste" }; render(); }
+      } else if (from === "tab") {
+        if (validRun(col, idx)) { SK.sel = { from: "tab", col: col, idx: idx }; render(); }
+        else if (typeof toast === "function") toast("\u8fd9\u51e0\u5f20\u4e0d\u80fd\u4e00\u8d77\u79fb\u52a8\u54e6");
+      }
+    }
+    function onFoundClick(s) {
+      if (SK.won) return;
+      if (SK.sel) { if (doMove("found", s)) { render(); checkWin(); return; } clearSel(); }
+    }
+    function onEmptyCol(col) {
+      if (SK.won) return;
+      if (SK.sel) { if (doMove("tab", col)) { render(); checkWin(); return; } clearSel(); }
+    }
+
+    function newGame() { resetTimer(); deal(); render(); }
+    function undo() {
+      if (!hist.length) { if (typeof toast === "function") toast("\u6ca1\u6709\u53ef\u64a4\u9500\u7684\u6b65\u9aa4\u4e86"); return; }
+      SK.usedUndo = true;
+      restore(hist.pop());
+      SK.sel = null;
+      render();
+    }
+
+    /* ---------- 绑定 ---------- */
+    function skBind() {
+      var root = $sk("solitaire");
+      if (!root) return;
+      var top = $sk("sk-top"), tabs = $sk("sk-tableau");
+      var stockEl = $sk("sk-stock");
+      if (stockEl) stockEl.addEventListener("click", function () { drawStock(); });
+      if (top) top.addEventListener("click", function (e) {
+        var w = e.target.closest && e.target.closest("#sk-waste");
+        if (w) { onCardClick("waste", 0, 0, false); return; }
+        var fc = e.target.closest && e.target.closest("[id^='sk-found-']");
+        if (fc) { onFoundClick(parseInt(fc.id.replace("sk-found-", ""), 10)); }
+      });
+      if (top) top.addEventListener("dblclick", function (e) {
+        var w = e.target.closest && e.target.closest("#sk-waste");
+        if (w) onCardClick("waste", 0, 0, true);
+      });
+      if (tabs) {
+        tabs.addEventListener("click", function (e) {
+          var card = e.target.closest && e.target.closest(".sk-card");
+          if (card && card.dataset.col !== undefined) {
+            onCardClick("tab", parseInt(card.dataset.col, 10), parseInt(card.dataset.idx, 10), false);
+            return;
+          }
+          var colEl = e.target.closest && e.target.closest(".sk-col");
+          if (colEl && colEl.id) onEmptyCol(parseInt(colEl.id.replace("sk-col-", ""), 10));
+        });
+        tabs.addEventListener("dblclick", function (e) {
+          var card = e.target.closest && e.target.closest(".sk-card");
+          if (card && card.dataset.col !== undefined)
+            onCardClick("tab", parseInt(card.dataset.col, 10), parseInt(card.dataset.idx, 10), true);
+        });
+      }
+      var nb = $sk("sk-new"); if (nb) nb.addEventListener("click", newGame);
+      var ub = $sk("sk-undo"); if (ub) ub.addEventListener("click", undo);
+      var ac = $sk("sk-auto"); if (ac) ac.addEventListener("click", function () {
+        if (autoCollect()) { render(); checkWin(); }
+        else if (typeof toast === "function") toast("\u6682\u65f6\u6ca1\u6709\u53ef\u81ea\u52a8\u6536\u7684\u724c");
+      });
+      var dm = document.querySelectorAll("#solitaire .sk-drawmode");
+      dm.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          SK.draw = parseInt(btn.dataset.draw, 10) || 1;
+          dm.forEach(function (x) { x.classList.toggle("active", x === btn); });
+          newGame();
+        });
+      });
+    }
+    function skRender() {
+      if (!SK.started) { deal(); }
+      render();
+      if (!SK.won) startTimer();
+    }
+    function skStop() { stopTimer(); }
+
+    window.skRender = skRender;
+    window.skStop = skStop;
+    window.skBind = skBind;
+    window.__skTest = {
+      makeDeck: makeDeck, deal: deal, validRun: validRun, canToFoundation: canToFoundation,
+      canToTableau: canToTableau, autoCollect: autoCollect, isWon: isWon, SK: SK, isRed: isRed
+    };
+  })();
+  skBind();
+  BADGES.push(
+    { emoji: "\ud83c\udccf", name: "\u724c\u5c40\u544a\u6377", desc: "\u7b2c\u4e00\u6b21\u5728\u300c\u7eb8\u724c\u63a5\u9f99\u300d\u4e2d\u901a\u5173", test: function (u) { return (u.solitaire || 0) >= 1; } },
+    { emoji: "\u2660\ufe0f", name: "\u786c\u6838\u6536\u5b98", desc: "\u5728\u300c\u62bd\u4e09\u5f20\u300d\u96be\u5ea6\u4e0b\u901a\u5173\u4e00\u5c40", test: function (u) { return (u.solitaire3 || 0) >= 1; } }
+  );
+  QUOTES.push(
+    "\u7eb8\u724c\u63a5\u9f99\u6559\u4f1a\u4f60\uff1a\u80fd\u6536\u7684\u5148\u6536\uff0c\u80fd\u7ffb\u7684\u5148\u7ffb\uff0c\u5225\u8ba9\u673a\u4f1a\u538b\u5728\u5e95\u4e0b\u3002",
+    "\u6bcf\u4e00\u5f20\u80cc\u9762\u724c\u80cc\u540e\uff0c\u90fd\u85cf\u7740\u4e00\u4e2a\u4f60\u8fd8\u6ca1\u770b\u5230\u7684\u53ef\u80fd\u3002",
+    "\u7ea2\u9ed1\u4ea4\u9519\u624d\u80fd\u5f80\u4e0b\u63a5\u2014\u2014\u751f\u6d3b\u4e5f\u9700\u8981\u4e00\u70b9\u521a\u597d\u7684\u4e0d\u540c\u3002",
+    "\u5b9e\u5728\u8d70\u4e0d\u4e0b\u53bb\u65f6\uff0c\u5c31\u6491\u5f00\u4e00\u5f20\u65b0\u724c\u2014\u2014\u724c\u5806\u91cc\u603b\u6709\u8f6c\u673a\u3002",
+    "\u53ea\u6709 K \u80fd\u5750\u8fdb\u7a7a\u5217\uff1a\u6709\u4e9b\u4f4d\u7f6e\uff0c\u5f97\u7b49\u5f97\u8d77\u7684\u4eba\u624d\u80fd\u53bb\u3002",
+    "\u4ece A \u5230 K\uff0c\u4e00\u5f20\u4e0d\u843d\uff0c\u8fd9\u5c31\u662f\u6536\u5b98\u7684\u6d6a\u6f2b\u3002"
   );
   qrBind();
   BADGES.push(
