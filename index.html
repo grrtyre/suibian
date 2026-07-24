@@ -1516,6 +1516,7 @@
         <button data-tab="metronome">🎼 节拍器</button>
         <button data-tab="game24">🃏 24 点</button>
         <button data-tab="klotski">🧩 华容道</button>
+        <button data-tab="qrcode">📱 二维码生成</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5735,6 +5736,70 @@
     </div>
   </section>
 
+  <section id="qrcode">
+    <style>
+    #qrcode .qr-wrap{max-width:760px;margin:0 auto}
+    #qrcode .qr-tpl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+    #qrcode .qr-tpl button{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;font-size:13px;transition:all .15s}
+    #qrcode .qr-tpl button:hover{color:var(--text);border-color:var(--accent-2)}
+    #qrcode .qr-tpl button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+    #qrcode .qr-form{margin:10px 0}
+    #qrcode .qr-form textarea{width:100%;min-height:72px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px;resize:vertical;box-sizing:border-box}
+    #qrcode .qr-form input,#qrcode .qr-form select{padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px}
+    #qrcode .qr-frow{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+    #qrcode .qr-frow input{flex:1;min-width:140px}
+    #qrcode .qr-opts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;align-items:center;margin:12px 0;color:var(--muted);font-size:13px}
+    #qrcode .qr-opts label{display:flex;align-items:center;gap:5px}
+    #qrcode .qr-opts select{padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text)}
+    #qrcode .qr-opts input[type=color]{width:34px;height:26px;padding:1px;border:1px solid var(--line);border-radius:6px;background:var(--card);cursor:pointer}
+    #qrcode .qr-stage{display:flex;justify-content:center;margin:14px 0}
+    #qrcode .qr-stage canvas{border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.18);max-width:100%;height:auto}
+    #qrcode .qr-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+    #qrcode .qr-actions button{padding:10px 22px;border-radius:12px;border:none;cursor:pointer;font-size:15px;font-weight:600}
+    #qrcode .qr-gen{background:var(--accent);color:#fff}
+    #qrcode .qr-gen:hover{filter:brightness(1.1)}
+    #qrcode .qr-sec{background:var(--card);color:var(--text);border:1px solid var(--line)!important}
+    #qrcode .qr-info{text-align:center;color:var(--muted);font-size:13px;min-height:18px}
+    </style>
+    <h2>📱 二维码生成</h2>
+    <p class="sub">纯手写 QR 引擎 · Reed-Solomon 纠错 · 零依赖不联网</p>
+    <div class="qr-wrap">
+      <div class="qr-tpl" id="qrTpl">
+        <button data-t="text" class="on">📝 文本</button>
+        <button data-t="url">🔗 网址</button>
+        <button data-t="wifi">📶 WiFi</button>
+        <button data-t="tel">📞 电话</button>
+        <button data-t="sms">💬 短信</button>
+        <button data-t="mail">✉️ 邮件</button>
+      </div>
+      <div class="qr-form">
+        <div data-f="text"><textarea id="qrText" placeholder="输入任意文字，支持中文和 emoji……">https://grrtyre.github.io/suibian/</textarea></div>
+        <div data-f="url" style="display:none"><div class="qr-frow"><input id="qrUrl" type="text" placeholder="https://example.com"></div></div>
+        <div data-f="wifi" style="display:none">
+          <div class="qr-frow"><input id="qrSsid" type="text" placeholder="WiFi 名称 (SSID)"><input id="qrPwd" type="text" placeholder="密码"></div>
+          <div class="qr-frow"><select id="qrEnc"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">无密码</option></select></div>
+        </div>
+        <div data-f="tel" style="display:none"><div class="qr-frow"><input id="qrTel" type="text" placeholder="电话号码"></div></div>
+        <div data-f="sms" style="display:none"><div class="qr-frow"><input id="qrSmsNo" type="text" placeholder="手机号"><input id="qrSmsMsg" type="text" placeholder="短信内容"></div></div>
+        <div data-f="mail" style="display:none"><div class="qr-frow"><input id="qrMailTo" type="text" placeholder="收件邮箱"><input id="qrMailSub" type="text" placeholder="邮件主题（可选）"></div></div>
+      </div>
+      <div class="qr-opts">
+        <label>纠错 <select id="qrEc"><option value="L">L 7%</option><option value="M" selected>M 15%</option><option value="Q">Q 25%</option><option value="H">H 30%</option></select></label>
+        <label>大小 <select id="qrScale"><option value="6">小</option><option value="9" selected>中</option><option value="13">大</option></select></label>
+        <label>风格 <select id="qrStyle"><option value="square">方块</option><option value="dot">圆点</option></select></label>
+        <label>前景 <input type="color" id="qrFg" value="#1a1a2e"></label>
+        <label>背景 <input type="color" id="qrBg" value="#ffffff"></label>
+      </div>
+      <div class="qr-actions">
+        <button id="qrGen" class="qr-gen">✨ 生成二维码</button>
+        <button id="qrDl" class="qr-sec">⬇️ 下载 PNG</button>
+        <button id="qrCopyTxt" class="qr-sec">📋 复制内容</button>
+      </div>
+      <div class="qr-stage"><canvas id="qrCanvas" width="0" height="0"></canvas></div>
+      <div class="qr-info" id="qrInfo"></div>
+      <div class="sb-tip">📌 从零手写的 QR Code Model 2 编码器：GF(256) 伽罗华域 + Reed-Solomon 纠错 + 8 种掩码自动评分择优，支持版本 1-10（最长约 270 字节）。全部计算都在你的浏览器里完成，内容绝不上传。深色前景 + 浅色背景扫描率最高；「圆点」风格好看，但低对比时建议用「方块」。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -6072,6 +6137,7 @@
     if (id === "metronome") metroRender();
     if (id === "game24") g24Render();
     if (id === "klotski") klRender();
+    if (id === "qrcode") qrRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -6203,6 +6269,7 @@
     metronome: "节拍器 metronome 节拍 bpm 测速 tap tempo 拍号 细分 重音 渐快 练习 音乐 鼓点 速度 allegro andante 钢琴 吉他 工具",
     game24: "24点 巅峰24点 game24 twenty four 扑克 纸牌 算术 心算 凑24 加减乘除 四则运算 数学 益智 智力 游戏 计算",
     klotski: "华容道 klotski 滑块 数字华容道 曹操 横刀立马 益智 解谜 puzzle 中式 三国 移动 拼图 益智游戏 烧脑 通关 sliding block",
+    qrcode: "二维码 qrcode qr 生成 扫码 扫一扫 wifi 网址 名片 链接 码 纠错 reed solomon 二维 barcode 分享 海报 码上",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6392,6 +6459,7 @@ splitbill:"tools",
     metronome:"tools",
     game24:"games",
     klotski:"games",
+    qrcode:"tools",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -18966,6 +19034,438 @@ splitbill:"tools",
     window.klBind = klBind;
     window.__klTest = { solve: solve, canMove: canMove, isWin: isWin, canonKey: canonKey, LAYOUTS: LAYOUTS, clonePieces: clonePieces, st: st, load: load, move: move, findById: findById, occGrid: occGrid };
   })();
+  /* ============ 📱 二维码生成（纯手写 QR Code Model 2 编码引擎） ============ */
+  (function () {
+    /* ---- GF(256) 伽罗华域 ---- */
+    var qEXP = new Array(512), qLOG = new Array(256);
+    (function () {
+      var x = 1, i, j;
+      for (i = 0; i < 255; i++) { qEXP[i] = x; qLOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11d; }
+      for (j = 255; j < 512; j++) qEXP[j] = qEXP[j - 255];
+    })();
+    function qMul(a, b) { if (a === 0 || b === 0) return 0; return qEXP[qLOG[a] + qLOG[b]]; }
+    function qGenPoly(n) {
+      var poly = [1], i, j, k;
+      for (i = 0; i < n; i++) {
+        var next = [];
+        for (k = 0; k <= poly.length; k++) next.push(0);
+        for (j = 0; j < poly.length; j++) { next[j] ^= poly[j]; next[j + 1] ^= qMul(poly[j], qEXP[i]); }
+        poly = next;
+      }
+      return poly;
+    }
+    function qRS(data, ecCount) {
+      var gen = qGenPoly(ecCount), buf = data.slice(), i, j;
+      for (i = 0; i < ecCount; i++) buf.push(0);
+      for (i = 0; i < data.length; i++) {
+        var f = buf[i];
+        if (f === 0) continue;
+        for (j = 1; j < gen.length; j++) buf[i + j] ^= qMul(gen[j], f);
+      }
+      return buf.slice(data.length);
+    }
+    /* ---- RS 分块表 v1-v10 × L/M/Q/H：[块数,总码字,数据码字] ---- */
+    var qRST = {
+      1: { L: [[1,26,19]], M: [[1,26,16]], Q: [[1,26,13]], H: [[1,26,9]] },
+      2: { L: [[1,44,34]], M: [[1,44,28]], Q: [[1,44,22]], H: [[1,44,16]] },
+      3: { L: [[1,70,55]], M: [[1,70,44]], Q: [[2,35,17]], H: [[2,35,13]] },
+      4: { L: [[1,100,80]], M: [[2,50,32]], Q: [[2,50,24]], H: [[4,25,9]] },
+      5: { L: [[1,134,108]], M: [[2,67,43]], Q: [[2,33,15],[2,34,16]], H: [[2,33,11],[2,34,12]] },
+      6: { L: [[2,86,68]], M: [[4,43,27]], Q: [[4,43,19]], H: [[4,43,15]] },
+      7: { L: [[2,98,78]], M: [[4,49,31]], Q: [[2,32,14],[4,33,15]], H: [[4,39,13],[1,40,14]] },
+      8: { L: [[2,121,97]], M: [[2,60,38],[2,61,39]], Q: [[4,40,18],[2,41,19]], H: [[4,40,14],[2,41,15]] },
+      9: { L: [[2,146,116]], M: [[3,58,36],[2,59,37]], Q: [[4,36,16],[4,37,17]], H: [[4,36,12],[4,37,13]] },
+      10: { L: [[2,86,68],[2,87,69]], M: [[4,69,43],[1,70,44]], Q: [[6,43,19],[2,44,20]], H: [[6,43,15],[2,44,16]] }
+    };
+    var qALIGN = { 1: [], 2: [6,18], 3: [6,22], 4: [6,26], 5: [6,30], 6: [6,34], 7: [6,22,38], 8: [6,24,42], 9: [6,26,46], 10: [6,28,50] };
+    var qECB = { L: 1, M: 0, Q: 3, H: 2 };
+    function qCap(ver, ec) {
+      var b = qRST[ver][ec], t = 0, i;
+      for (i = 0; i < b.length; i++) t += b[i][0] * b[i][2];
+      return t;
+    }
+    function qUtf8(str) {
+      var out = [], i, c;
+      for (i = 0; i < str.length; i++) {
+        c = str.codePointAt(i);
+        if (c > 0xffff) i++;
+        if (c < 0x80) out.push(c);
+        else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+        else if (c < 0x10000) out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+        else out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+      }
+      return out;
+    }
+    function qDataCw(bytes, ver, ec) {
+      var cap = qCap(ver, ec), bits = [], i, k;
+      function put(val, len) { for (var p = len - 1; p >= 0; p--) bits.push((val >> p) & 1); }
+      put(4, 4);
+      put(bytes.length, ver >= 10 ? 16 : 8);
+      for (i = 0; i < bytes.length; i++) put(bytes[i], 8);
+      if (bits.length > cap * 8) return null;
+      put(0, Math.min(4, cap * 8 - bits.length));
+      while (bits.length % 8 !== 0) bits.push(0);
+      var cw = [];
+      for (i = 0; i < bits.length; i += 8) {
+        var v = 0;
+        for (k = 0; k < 8; k++) v = (v << 1) | bits[i + k];
+        cw.push(v);
+      }
+      var pads = [0xec, 0x11], p2 = 0;
+      while (cw.length < cap) cw.push(pads[(p2++) % 2]);
+      return cw;
+    }
+    function qInterleave(dataCw, ver, ec) {
+      var spec = qRST[ver][ec], blocks = [], ecs = [], off = 0, maxD = 0, maxE = 0, s, n, i, b;
+      for (s = 0; s < spec.length; s++) {
+        for (n = 0; n < spec[s][0]; n++) {
+          var dc = spec[s][2], ecc = spec[s][1] - dc;
+          var d = dataCw.slice(off, off + dc);
+          off += dc;
+          blocks.push(d);
+          ecs.push(qRS(d, ecc));
+          if (dc > maxD) maxD = dc;
+          if (ecc > maxE) maxE = ecc;
+        }
+      }
+      var out = [];
+      for (i = 0; i < maxD; i++) for (b = 0; b < blocks.length; b++) if (i < blocks[b].length) out.push(blocks[b][i]);
+      for (i = 0; i < maxE; i++) for (b = 0; b < ecs.length; b++) if (i < ecs[b].length) out.push(ecs[b][i]);
+      return out;
+    }
+    function qBuild(ver) {
+      var size = ver * 4 + 17, m = [], rv = [], r, c;
+      for (r = 0; r < size; r++) {
+        m.push([]); rv.push([]);
+        for (c = 0; c < size; c++) { m[r].push(0); rv[r].push(false); }
+      }
+      function set(r2, c2, v) { m[r2][c2] = v ? 1 : 0; rv[r2][c2] = true; }
+      function finder(r0, c0) {
+        var dr, dc;
+        for (dr = -1; dr <= 7; dr++) for (dc = -1; dc <= 7; dc++) {
+          var rr = r0 + dr, cc = c0 + dc;
+          if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+          var on = (dr >= 0 && dr <= 6 && (dc === 0 || dc === 6)) || (dc >= 0 && dc <= 6 && (dr === 0 || dr === 6)) || (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4);
+          set(rr, cc, on);
+        }
+      }
+      finder(0, 0); finder(0, size - 7); finder(size - 7, 0);
+      var ap = qALIGN[ver], i, j, d1, d2;
+      for (i = 0; i < ap.length; i++) for (j = 0; j < ap.length; j++) {
+        if (rv[ap[i]][ap[j]]) continue;
+        for (d1 = -2; d1 <= 2; d1++) for (d2 = -2; d2 <= 2; d2++) set(ap[i] + d1, ap[j] + d2, Math.max(Math.abs(d1), Math.abs(d2)) !== 1);
+      }
+      var t;
+      for (t = 8; t < size - 8; t++) {
+        if (!rv[6][t]) set(6, t, t % 2 === 0);
+        if (!rv[t][6]) set(t, 6, t % 2 === 0);
+      }
+      var f, g;
+      for (f = 0; f < 9; f++) { rv[8][f] = true; rv[f][8] = true; }
+      for (g = 0; g < 8; g++) { rv[8][size - 1 - g] = true; rv[size - 1 - g][8] = true; }
+      m[size - 8][8] = 1; rv[size - 8][8] = true;
+      if (ver >= 7) {
+        var vr, vc;
+        for (vr = 0; vr < 6; vr++) for (vc = size - 11; vc < size - 8; vc++) { rv[vr][vc] = true; rv[vc][vr] = true; }
+      }
+      return { m: m, rv: rv, size: size };
+    }
+    function qPlace(mat, cw) {
+      var size = mat.size, m = mat.m, rv = mat.rv;
+      var bi = 0, total = cw.length * 8, col = size - 1, row = size - 1, up = true, c;
+      while (col > 0) {
+        if (col === 6) col--;
+        for (;;) {
+          for (c = 0; c < 2; c++) {
+            var cc = col - c;
+            if (!rv[row][cc]) {
+              var bit = 0;
+              if (bi < total) bit = (cw[bi >> 3] >> (7 - (bi & 7))) & 1;
+              m[row][cc] = bit;
+              bi++;
+            }
+          }
+          if (up) { if (row === 0) { up = false; break; } row--; }
+          else { if (row === size - 1) { up = true; break; } row++; }
+        }
+        col -= 2;
+      }
+    }
+    var qMASKS = [
+      function (r, c) { return (r + c) % 2 === 0; },
+      function (r, c) { return r % 2 === 0; },
+      function (r, c) { return c % 3 === 0; },
+      function (r, c) { return (r + c) % 3 === 0; },
+      function (r, c) { return (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0; },
+      function (r, c) { return ((r * c) % 2 + (r * c) % 3) === 0; },
+      function (r, c) { return (((r * c) % 2 + (r * c) % 3) % 2) === 0; },
+      function (r, c) { return (((r + c) % 2 + (r * c) % 3) % 2) === 0; }
+    ];
+    function qMask(mat, mk) {
+      var fn = qMASKS[mk], r, c;
+      for (r = 0; r < mat.size; r++) for (c = 0; c < mat.size; c++) if (!mat.rv[r][c] && fn(r, c)) mat.m[r][c] ^= 1;
+    }
+    function qPenalty(m, size) {
+      var score = 0, r, c, k, v;
+      for (r = 0; r < size; r++) {
+        var rc = 1, rr = 1;
+        for (c = 1; c < size; c++) {
+          if (m[r][c] === m[r][c - 1]) rc++; else { if (rc >= 5) score += 3 + rc - 5; rc = 1; }
+          if (m[c][r] === m[c - 1][r]) rr++; else { if (rr >= 5) score += 3 + rr - 5; rr = 1; }
+        }
+        if (rc >= 5) score += 3 + rc - 5;
+        if (rr >= 5) score += 3 + rr - 5;
+      }
+      for (r = 0; r < size - 1; r++) for (c = 0; c < size - 1; c++) {
+        v = m[r][c];
+        if (v === m[r][c + 1] && v === m[r + 1][c] && v === m[r + 1][c + 1]) score += 3;
+      }
+      var p1 = [1,0,1,1,1,0,1,0,0,0,0], p2 = [0,0,0,0,1,0,1,1,1,0,1];
+      for (r = 0; r < size; r++) for (c = 0; c <= size - 11; c++) {
+        var o1 = true, o2 = true, o3 = true, o4 = true;
+        for (k = 0; k < 11; k++) {
+          if (m[r][c + k] !== p1[k]) o1 = false;
+          if (m[r][c + k] !== p2[k]) o2 = false;
+          if (m[c + k][r] !== p1[k]) o3 = false;
+          if (m[c + k][r] !== p2[k]) o4 = false;
+        }
+        if (o1) score += 40; if (o2) score += 40; if (o3) score += 40; if (o4) score += 40;
+      }
+      var dark = 0;
+      for (r = 0; r < size; r++) for (c = 0; c < size; c++) dark += m[r][c];
+      score += Math.floor(Math.abs(dark * 100 / (size * size) - 50) / 5) * 10;
+      return score;
+    }
+    function qBch(data, poly, bits) {
+      var v = data << bits, top = 31 - Math.clz32(poly);
+      for (;;) {
+        if (v === 0) break;
+        var hv = 31 - Math.clz32(v);
+        if (hv < top) break;
+        v ^= poly << (hv - top);
+      }
+      return v;
+    }
+    function qFmtBits(ec, mk) { var d = (qECB[ec] << 3) | mk; return (((d << 10) | qBch(d, 0x537, 10)) ^ 0x5412); }
+    function qVerBits(ver) { return (ver << 12) | qBch(ver, 0x1f25, 12); }
+    function qWriteFmt(mat, ec, mk) {
+      var size = mat.size, m = mat.m, bits = qFmtBits(ec, mk), i;
+      for (i = 0; i < 15; i++) {
+        var bit = (bits >> i) & 1;
+        if (i < 6) m[i][8] = bit;
+        else if (i < 8) m[i + 1][8] = bit;
+        else m[size - 15 + i][8] = bit;
+        if (i < 8) m[8][size - 1 - i] = bit;
+        else if (i === 8) m[8][7] = bit;
+        else m[8][14 - i] = bit;
+      }
+      m[size - 8][8] = 1;
+    }
+    function qWriteVer(mat, ver) {
+      if (ver < 7) return;
+      var size = mat.size, m = mat.m, bits = qVerBits(ver), i;
+      for (i = 0; i < 18; i++) {
+        var bit = (bits >> i) & 1, r = Math.floor(i / 3), c = size - 11 + (i % 3);
+        m[r][c] = bit; m[c][r] = bit;
+      }
+    }
+    function qrEncode(text, ecLevel) {
+      var ec = qECB.hasOwnProperty(ecLevel) ? ecLevel : "M";
+      var bytes = qUtf8(String(text));
+      var ver = 0, cw = null, v;
+      for (v = 1; v <= 10; v++) {
+        if (bytes.length + 3 <= qCap(v, ec)) {
+          cw = qDataCw(bytes, v, ec);
+          if (cw) { ver = v; break; }
+        }
+      }
+      if (!cw) return null;
+      var all = qInterleave(cw, ver, ec);
+      var best = null, bestSc = Infinity, bestMk = 0, mk;
+      for (mk = 0; mk < 8; mk++) {
+        var mat = qBuild(ver);
+        qPlace(mat, all);
+        qMask(mat, mk);
+        qWriteFmt(mat, ec, mk);
+        qWriteVer(mat, ver);
+        var sc = qPenalty(mat.m, mat.size);
+        if (sc < bestSc) { bestSc = sc; best = mat; bestMk = mk; }
+      }
+      return { matrix: best.m, size: best.size, version: ver, ec: ec, mask: bestMk, bytes: bytes.length };
+    }
+    /* ---- 内容模板 ---- */
+    function qrEscWifi(s) { return String(s).replace(/([\\;,:"])/g, "\\$1"); }
+    function qrPayload(type, v) {
+      if (type === "url") {
+        var u = (v.url || "").trim();
+        if (!u) return "";
+        if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(u)) u = "https://" + u;
+        return u;
+      }
+      if (type === "wifi") {
+        if (!(v.ssid || "").trim()) return "";
+        var enc = v.enc === "nopass" ? "nopass" : (v.enc === "WEP" ? "WEP" : "WPA");
+        var s = "WIFI:T:" + enc + ";S:" + qrEscWifi(v.ssid) + ";";
+        if (enc !== "nopass") s += "P:" + qrEscWifi(v.pwd || "") + ";";
+        return s + ";";
+      }
+      if (type === "tel") return (v.tel || "").trim() ? "tel:" + (v.tel || "").trim() : "";
+      if (type === "sms") return (v.no || "").trim() ? "SMSTO:" + (v.no || "").trim() + ":" + (v.msg || "") : "";
+      if (type === "mail") {
+        var to = (v.to || "").trim();
+        if (!to) return "";
+        var sub = (v.sub || "").trim();
+        return "mailto:" + to + (sub ? "?subject=" + encodeURIComponent(sub) : "");
+      }
+      return v.text || "";
+    }
+    /* ---- UI ---- */
+    var qrType = "text", qrLast = null, qrTimer = null;
+    function qrReadPayload() {
+      var g = function (id) { var el = $(id); return el ? el.value : ""; };
+      return qrPayload(qrType, { text: g("qrText"), url: g("qrUrl"), ssid: g("qrSsid"), pwd: g("qrPwd"), enc: g("qrEnc"), tel: g("qrTel"), no: g("qrSmsNo"), msg: g("qrSmsMsg"), to: g("qrMailTo"), sub: g("qrMailSub") });
+    }
+    function qrLum(hex) {
+      var n = parseInt(hex.slice(1), 16);
+      return 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+    }
+    function qrInFinder(r, c, size) {
+      return (r < 8 && c < 8) || (r < 8 && c >= size - 8) || (r >= size - 8 && c < 8);
+    }
+    function qrDraw(res) {
+      var cv = $("qrCanvas");
+      if (!cv || !cv.getContext) return;
+      var scale = parseInt(($("qrScale") || {}).value, 10) || 9;
+      var style = (($("qrStyle") || {}).value) || "square";
+      var fg = (($("qrFg") || {}).value) || "#1a1a2e";
+      var bg = (($("qrBg") || {}).value) || "#ffffff";
+      var quiet = 4, size = res.size, dim = (size + quiet * 2) * scale;
+      cv.width = dim; cv.height = dim;
+      var ctx = cv.getContext("2d");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, dim, dim);
+      ctx.fillStyle = fg;
+      var r, c;
+      for (r = 0; r < size; r++) for (c = 0; c < size; c++) {
+        if (!res.matrix[r][c]) continue;
+        var x = (c + quiet) * scale, y = (r + quiet) * scale;
+        if (style === "dot" && !qrInFinder(r, c, size)) {
+          ctx.beginPath();
+          ctx.arc(x + scale / 2, y + scale / 2, scale * 0.42, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(x, y, scale, scale);
+        }
+      }
+      var info = $("qrInfo");
+      if (info) info.textContent = "版本 " + res.version + "（" + size + "×" + size + "）· 纠错 " + res.ec + " · 掩码 #" + res.mask + " · " + res.bytes + " 字节";
+    }
+    function qrGenerate(byUser) {
+      var payload = qrReadPayload();
+      var info = $("qrInfo");
+      if (!payload) {
+        if (byUser && typeof toast === "function") toast("先填点内容再生成哦");
+        return;
+      }
+      var ec = (($("qrEc") || {}).value) || "M";
+      var res = qrEncode(payload, ec);
+      if (!res) {
+        if (info) info.textContent = "内容太长啦（" + qUtf8(payload).length + " 字节），试试降低纠错等级或精简内容";
+        if (byUser && typeof toast === "function") toast("内容超出容量上限");
+        return;
+      }
+      var fg = (($("qrFg") || {}).value) || "#1a1a2e";
+      var bg = (($("qrBg") || {}).value) || "#ffffff";
+      if (qrLum(fg) > qrLum(bg) - 40 && typeof toast === "function" && byUser) toast("⚠️ 前景比背景浅，扫码可能失败，建议深色前景");
+      qrLast = { res: res, payload: payload };
+      qrDraw(res);
+      if (byUser) {
+        if (typeof bumpUsage === "function") bumpUsage("qrcode");
+        if (qrType === "wifi" && typeof bumpUsage === "function") bumpUsage("qrwifi");
+      }
+    }
+    function qrAutoGen() {
+      if (qrTimer) clearTimeout(qrTimer);
+      qrTimer = setTimeout(function () { qrGenerate(false); }, 350);
+    }
+    function qrRender() {
+      if (!qrLast) qrGenerate(false);
+    }
+    function qrBind() {
+      var tpl = $("qrTpl");
+      if (!tpl) return;
+      tpl.addEventListener("click", function (e) {
+        var btn = e.target.closest("button");
+        if (!btn) return;
+        qrType = btn.getAttribute("data-t");
+        var bs = tpl.querySelectorAll("button"), i;
+        for (i = 0; i < bs.length; i++) bs[i].classList.toggle("on", bs[i] === btn);
+        var forms = document.querySelectorAll("#qrcode .qr-form > div");
+        for (i = 0; i < forms.length; i++) forms[i].style.display = forms[i].getAttribute("data-f") === qrType ? "" : "none";
+        qrAutoGen();
+      });
+      var gen = $("qrGen");
+      if (gen) gen.addEventListener("click", function () { qrGenerate(true); });
+      var ids = ["qrText", "qrUrl", "qrSsid", "qrPwd", "qrTel", "qrSmsNo", "qrSmsMsg", "qrMailTo", "qrMailSub"], i;
+      for (i = 0; i < ids.length; i++) {
+        var el = $(ids[i]);
+        if (el) el.addEventListener("input", qrAutoGen);
+      }
+      var sels = ["qrEc", "qrScale", "qrStyle", "qrEnc"], j;
+      for (j = 0; j < sels.length; j++) {
+        var sl = $(sels[j]);
+        if (sl) sl.addEventListener("change", function () { qrGenerate(false); });
+      }
+      var fgi = $("qrFg"), bgi = $("qrBg");
+      if (fgi) fgi.addEventListener("input", function () { if (qrLast) qrDraw(qrLast.res); });
+      if (bgi) bgi.addEventListener("input", function () { if (qrLast) qrDraw(qrLast.res); });
+      var dl = $("qrDl");
+      if (dl) dl.addEventListener("click", function () {
+        if (!qrLast) { if (typeof toast === "function") toast("先生成一个二维码"); return; }
+        var cv = $("qrCanvas");
+        try {
+          var a = document.createElement("a");
+          a.href = cv.toDataURL("image/png");
+          a.download = "suibian-qrcode.png";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          if (typeof toast === "function") toast("已下载 PNG ✓");
+          if (typeof bumpUsage === "function") bumpUsage("qrdl");
+        } catch (e2) {
+          if (typeof toast === "function") toast("下载失败，可右键另存图片");
+        }
+      });
+      var cp = $("qrCopyTxt");
+      if (cp) cp.addEventListener("click", function () {
+        if (!qrLast) { if (typeof toast === "function") toast("先生成一个二维码"); return; }
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(qrLast.payload).then(function () { if (typeof toast === "function") toast("已复制编码内容 ✓"); });
+          else if (typeof toast === "function") toast("当前环境不支持自动复制");
+        } catch (e3) { if (typeof toast === "function") toast("复制失败"); }
+      });
+      var ta = $("qrText");
+      if (ta) ta.addEventListener("keydown", function (e4) {
+        if ((e4.ctrlKey || e4.metaKey) && e4.key === "Enter") { e4.preventDefault(); qrGenerate(true); }
+      });
+    }
+    window.qrRender = qrRender;
+    window.qrBind = qrBind;
+    window.__qrTest = { encode: qrEncode, payload: qrPayload, utf8: qUtf8, cap: qCap, rs: qRS, fmt: qFmtBits, verBits: qVerBits, penalty: qPenalty, escWifi: qrEscWifi, lum: qrLum };
+  })();
+  qrBind();
+  BADGES.push(
+    { emoji: "📱", name: "码上见", desc: "第一次生成二维码", test: function (u) { return (u.qrcode || 0) >= 1; } },
+    { emoji: "🛜", name: "万物皆可码", desc: "生成 WiFi 二维码 3 次", test: function (u) { return (u.qrwifi || 0) >= 3; } }
+  );
+  QUOTES.push(
+    "二维码的哲学：把复杂的世界，装进黑白分明的方格里。",
+    "扫一扫就能连上的，除了 WiFi，还有人与人的距离。",
+    "纠错等级 H：哪怕缺了 30%，我也能认出完整的你。",
+    "生活就像掩码评分，八个方案里总有一个最不难看。",
+    "有些信息不必说出口，做成二维码，懂的人自然会扫。",
+    "Reed 和 Solomon 在 1960 年不会想到，他们的数学今天帮你连上了咖啡店的 WiFi。"
+  );
   klBind();
   BADGES.push(
     { emoji: "🧩", name: "华容道入门", desc: "第一次解开华容道任意关卡", test: function (u) { return (u.klotski || 0) >= 1; } },
