@@ -1524,6 +1524,7 @@
         <button data-tab="drum">🥁 节拍鼓机</button>
         <button data-tab="sheet">📊 迷你表格</button>
         <button data-tab="salary">💼 工资个税</button>
+        <button data-tab="xiangqi">♟️ 中国象棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6384,6 +6385,51 @@
       </div>
     </div>
   </section>
+  <section class="panel" id="xiangqi">
+    <style>
+      #xiangqi .xq-wrap { max-width: 520px; margin: 0 auto; }
+      #xiangqi .xq-status { text-align: center; font-size: 1.05rem; font-weight: 700; margin: 6px 0 12px; min-height: 1.5em; letter-spacing: .5px; }
+      #xiangqi .xq-status.check { color: #e74c3c; animation: xqBlink .7s ease-in-out infinite; }
+      #xiangqi .xq-status.win { color: #f1c40f; }
+      @keyframes xqBlink { 50% { opacity: .35; } }
+      #xiangqi .xq-boardwrap { position: relative; margin: 0 auto; touch-action: manipulation; background: linear-gradient(160deg,#f3d9a4,#e6bd77); border-radius: 10px; box-shadow: 0 8px 26px rgba(0,0,0,.28); }
+      #xiangqi canvas.xq-cv { display: block; border-radius: 10px; }
+      #xiangqi .xq-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+      #xiangqi .xq-pc { position: absolute; width: 34px; height: 34px; margin-left: -17px; margin-top: -17px; border-radius: 50%; border: 2px solid #7a4a12; background: radial-gradient(circle at 35% 30%,#fff8ec,#f0d8ac); color: #111; font-size: 20px; font-weight: 800; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,.35); font-family: "KaiTi","STKaiti","SimSun",serif; transition: transform .08s; padding: 0; }
+      #xiangqi .xq-pc.r { color: #c0392b; border-color: #c0392b; }
+      #xiangqi .xq-pc.b { color: #1a1a1a; border-color: #333; }
+      #xiangqi .xq-pc.sel { transform: scale(1.12); box-shadow: 0 0 0 3px #f39c12, 0 2px 6px rgba(0,0,0,.4); z-index: 3; }
+      #xiangqi .xq-pc.cap { box-shadow: 0 0 0 3px #e74c3c, 0 2px 6px rgba(0,0,0,.4); }
+      #xiangqi .xq-pc.last { box-shadow: 0 0 0 3px #27ae60, 0 2px 6px rgba(0,0,0,.4); }
+      #xiangqi .xq-dot { position: absolute; width: 16px; height: 16px; margin-left: -8px; margin-top: -8px; border-radius: 50%; background: rgba(39,174,96,.55); border: 2px solid #27ae60; cursor: pointer; z-index: 2; padding: 0; }
+      #xiangqi .xq-ctrl { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; margin: 14px 0 6px; }
+      #xiangqi .xq-ctrl button, #xiangqi .xq-ctrl select { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border,#4443); background: var(--card,#fff2); color: inherit; cursor: pointer; font-size: .92rem; }
+      #xiangqi .xq-ctrl button:hover { filter: brightness(1.08); }
+      #xiangqi .xq-cap { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; min-height: 26px; margin: 8px 0; font-family: "KaiTi","STKaiti",serif; font-size: 18px; }
+      #xiangqi .xq-cap .r { color: #c0392b; } #xiangqi .xq-cap .b { color: #888; }
+      #xiangqi .xq-tip { text-align: center; opacity: .72; font-size: .85rem; margin-top: 8px; line-height: 1.6; }
+    </style>
+    <div class="xq-wrap">
+      <div class="xq-status" id="xqStatus">红方先行 · 点击己方棋子走子</div>
+      <div class="xq-cap" id="xqCapB"></div>
+      <div class="xq-boardwrap" id="xqBoardWrap">
+        <canvas class="xq-cv" id="xqCanvas" width="344" height="382"></canvas>
+        <div class="xq-layer" id="xqLayer"></div>
+      </div>
+      <div class="xq-cap" id="xqCapR"></div>
+      <div class="xq-ctrl">
+        <button id="xqNew">🔄 新局</button>
+        <button id="xqUndo">↩ 悔棋</button>
+        <button id="xqHint">💡 支招</button>
+        <select id="xqLevel" title="AI 难度">
+          <option value="1">🐣 入门</option>
+          <option value="2" selected>🎯 普通</option>
+          <option value="3">🔥 较难</option>
+        </select>
+      </div>
+      <div class="xq-tip">你执红棋（下方）先行，AI 执黑。走子规则：马蹩腿、象塞眼、炮隔子吃、不许送将、白脸将（双将同列）判负。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -6729,6 +6775,7 @@
     if (id === "drum") drumRender();
     if (id === "sheet") sheetRender();
     if (id === "salary") salRender();
+    if (id === "xiangqi") xqRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -6873,6 +6920,7 @@
     drum: "鼓机 节拍鼓机 打鼓 鼓点 节奏 步进音序器 sequencer 打击乐 底鼓 军鼓 军镲 镲片 beat drum machine 808 编鼓 律动 loop 循环 打拍子 音乐 敲鼓 鼓组 groove 鼓机 电子鼓",
     sheet: "表格 迷你表格 电子表格 单元格 公式 函数 SUM 计算 表格计算 数据 表格工具 在线表格 spreadsheet 制表 行列 sheet 算账 统计 求和 平均值",
     salary: "工资 个税 计算 到手 税后 税前 年终奖 五险一金 社保 公积金 专项附加 扣除 累计预扣 奖金 避坑 月薪 薪资 薪水 打工 salary tax 个人所得税 报税",
+    xiangqi: "中国象棋 象棋 棋类 对弈 将军 将死 车马炮 楚河汉界 残局 minimax AI 人机 下棋 帅 兵卒 chinese chess xiangqi 益智 策略",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7070,6 +7118,7 @@ splitbill:"tools",
     drum:"create",
     sheet:"prod",
     salary:"tools",
+    xiangqi:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -26925,6 +26974,240 @@ splitbill:"tools",
       "五险一金不是扣款，是未来的你在偷偷存钱。",
       "搞懂累计预扣法的那天，你就明白了为什么年初工资高年底工资低。",
       "算清楚每一分钱去了哪，是打工人最朴素的浪漫。"
+    );
+  })();
+  /* ===== 中国象棋 vs AI 模块 ===== */
+  (function () {
+    var COLS = 9, ROWS = 10, PAD = 20, CELL = 38;
+    function inB(r, c) { return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
+    function K(r, c) { return r * COLS + c; }
+    function initBoard() {
+      var b = new Array(90).fill(null);
+      function set(r, c, t, s) { b[K(r, c)] = { t: t, s: s }; }
+      var back = ['R', 'N', 'E', 'A', 'K', 'A', 'E', 'N', 'R'];
+      for (var c = 0; c < 9; c++) set(0, c, back[c], 'b');
+      set(2, 1, 'C', 'b'); set(2, 7, 'C', 'b');
+      for (c = 0; c < 9; c += 2) set(3, c, 'P', 'b');
+      for (c = 0; c < 9; c++) set(9, c, back[c], 'r');
+      set(7, 1, 'C', 'r'); set(7, 7, 'C', 'r');
+      for (c = 0; c < 9; c += 2) set(6, c, 'P', 'r');
+      return b;
+    }
+    function gp(b, r, c) { return inB(r, c) ? b[K(r, c)] : undefined; }
+    function inPalace(r, c, s) { if (c < 3 || c > 5) return false; return s === 'r' ? (r >= 7 && r <= 9) : (r >= 0 && r <= 2); }
+    function ownSide(r, s) { return s === 'r' ? r >= 5 : r <= 4; }
+    function pieceMoves(b, r, c) {
+      var p = gp(b, r, c); if (!p) return [];
+      var s = p.s, res = [];
+      function empty(rr, cc) { return inB(rr, cc) && !b[K(rr, cc)]; }
+      function eoe(rr, cc) { return inB(rr, cc) && (!b[K(rr, cc)] || b[K(rr, cc)].s !== s); }
+      function push(rr, cc) { if (eoe(rr, cc)) res.push({ r: rr, c: cc }); }
+      var i, rr, cc;
+      if (p.t === 'K') {
+        var kd = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        for (i = 0; i < 4; i++) { rr = r + kd[i][0]; cc = c + kd[i][1]; if (inPalace(rr, cc, s)) push(rr, cc); }
+        var dir = s === 'r' ? -1 : 1, tr = r + dir;
+        while (inB(tr, c)) { var q = b[K(tr, c)]; if (q) { if (q.t === 'K' && q.s !== s) res.push({ r: tr, c: c }); break; } tr += dir; }
+      } else if (p.t === 'A') {
+        var ad = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+        for (i = 0; i < 4; i++) { rr = r + ad[i][0]; cc = c + ad[i][1]; if (inPalace(rr, cc, s)) push(rr, cc); }
+      } else if (p.t === 'E') {
+        var ed = [[2, 2], [2, -2], [-2, 2], [-2, -2]];
+        for (i = 0; i < 4; i++) { rr = r + ed[i][0]; cc = c + ed[i][1]; var er = r + ed[i][0] / 2, ec = c + ed[i][1] / 2; if (inB(rr, cc) && ownSide(rr, s) && empty(er, ec)) push(rr, cc); }
+      } else if (p.t === 'N') {
+        var nd = [[-2, -1, -1, 0], [-2, 1, -1, 0], [2, -1, 1, 0], [2, 1, 1, 0], [-1, -2, 0, -1], [1, -2, 0, -1], [-1, 2, 0, 1], [1, 2, 0, 1]];
+        for (i = 0; i < nd.length; i++) { rr = r + nd[i][0]; cc = c + nd[i][1]; var lr = r + nd[i][2], lc = c + nd[i][3]; if (inB(rr, cc) && empty(lr, lc)) push(rr, cc); }
+      } else if (p.t === 'R') {
+        var rdd = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        for (i = 0; i < 4; i++) { rr = r + rdd[i][0]; cc = c + rdd[i][1]; while (inB(rr, cc)) { if (!b[K(rr, cc)]) res.push({ r: rr, c: cc }); else { if (b[K(rr, cc)].s !== s) res.push({ r: rr, c: cc }); break; } rr += rdd[i][0]; cc += rdd[i][1]; } }
+      } else if (p.t === 'C') {
+        var cd = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+        for (i = 0; i < 4; i++) { rr = r + cd[i][0]; cc = c + cd[i][1]; var jumped = false; while (inB(rr, cc)) { var occ = b[K(rr, cc)]; if (!jumped) { if (!occ) res.push({ r: rr, c: cc }); else jumped = true; } else { if (occ) { if (occ.s !== s) res.push({ r: rr, c: cc }); break; } } rr += cd[i][0]; cc += cd[i][1]; } }
+      } else if (p.t === 'P') {
+        var fwd = s === 'r' ? -1 : 1; push(r + fwd, c);
+        var crossed = s === 'r' ? r <= 4 : r >= 5; if (crossed) { push(r, c - 1); push(r, c + 1); }
+      }
+      return res;
+    }
+    function findKing(b, s) { for (var i = 0; i < b.length; i++) { var p = b[i]; if (p && p.t === 'K' && p.s === s) return { r: Math.floor(i / COLS), c: i % COLS }; } return null; }
+    function inCheck(b, s) {
+      var k = findKing(b, s); if (!k) return true; var opp = s === 'r' ? 'b' : 'r';
+      for (var i = 0; i < b.length; i++) { var p = b[i]; if (!p || p.s !== opp) continue; var mv = pieceMoves(b, Math.floor(i / COLS), i % COLS); for (var j = 0; j < mv.length; j++) if (mv[j].r === k.r && mv[j].c === k.c) return true; }
+      return false;
+    }
+    function applyMove(b, fr, fc, tr, tc) { var nb = b.slice(); nb[K(tr, tc)] = nb[K(fr, fc)]; nb[K(fr, fc)] = null; return nb; }
+    function legalMoves(b, s) {
+      var res = [];
+      for (var i = 0; i < b.length; i++) { var p = b[i]; if (!p || p.s !== s) continue; var fr = Math.floor(i / COLS), fc = i % COLS; var mv = pieceMoves(b, fr, fc); for (var j = 0; j < mv.length; j++) { var nb = applyMove(b, fr, fc, mv[j].r, mv[j].c); if (!inCheck(nb, s)) res.push({ fr: fr, fc: fc, tr: mv[j].r, tc: mv[j].c }); } }
+      return res;
+    }
+    var VAL = { K: 6000, R: 600, C: 300, N: 270, E: 120, A: 120, P: 70 };
+    function evalBoard(b, s) { var sum = 0; for (var i = 0; i < b.length; i++) { var p = b[i]; if (!p) continue; var v = VAL[p.t]; if (p.t === 'P') { var r = Math.floor(i / COLS); var cr = p.s === 'r' ? r <= 4 : r >= 5; if (cr) v += 40; } sum += (p.s === s ? v : -v); } return sum; }
+    function ab(b, s, d, alpha, beta) {
+      if (d === 0) return evalBoard(b, s);
+      var moves = legalMoves(b, s);
+      if (moves.length === 0) return inCheck(b, s) ? -100000 - d : -50000;
+      var opp = s === 'r' ? 'b' : 'r', best = -Infinity;
+      for (var i = 0; i < moves.length; i++) { var m = moves[i]; var nb = applyMove(b, m.fr, m.fc, m.tr, m.tc); var sc = -ab(nb, opp, d - 1, -beta, -alpha); if (sc > best) best = sc; if (best > alpha) alpha = best; if (alpha >= beta) break; }
+      return best;
+    }
+    function bestMove(b, s, depth) {
+      var moves = legalMoves(b, s); if (moves.length === 0) return null;
+      var opp = s === 'r' ? 'b' : 'r', best = -Infinity, cand = [];
+      for (var i = 0; i < moves.length; i++) { var m = moves[i]; var nb = applyMove(b, m.fr, m.fc, m.tr, m.tc); var sc = -ab(nb, opp, depth - 1, -Infinity, Infinity); var cap = b[K(m.tr, m.tc)]; if (cap) sc += 1; if (sc > best + 0.0001) { best = sc; cand = [m]; } else if (Math.abs(sc - best) <= 0.0001) cand.push(m); }
+      return cand[Math.floor(Math.random() * cand.length)] || cand[0];
+    }
+    var NAME = { r: { K: '帅', A: '仕', E: '相', N: '马', R: '车', C: '炮', P: '兵' }, b: { K: '将', A: '士', E: '象', N: '马', R: '车', C: '炮', P: '卒' } };
+
+    // ---- UI 状态 ----
+    var board = null, sel = null, targets = [], turn = 'r', over = false, thinking = false, lastMv = null, hist = [], capR = [], capB = [], bound = false;
+    function px(c) { return PAD + c * CELL; }
+    function py(r) { return PAD + r * CELL; }
+
+    function drawBoard() {
+      var cv = document.getElementById('xqCanvas'); if (!cv) return; var g = cv.getContext('2d');
+      g.clearRect(0, 0, cv.width, cv.height);
+      g.strokeStyle = '#5a3410'; g.lineWidth = 1.4; g.lineJoin = 'round';
+      // 横线 10 条
+      for (var r = 0; r < ROWS; r++) { g.beginPath(); g.moveTo(px(0), py(r)); g.lineTo(px(8), py(r)); g.stroke(); }
+      // 竖线: 边线通到底, 中间线在河界断开
+      for (var c = 0; c < COLS; c++) {
+        if (c === 0 || c === 8) { g.beginPath(); g.moveTo(px(c), py(0)); g.lineTo(px(c), py(9)); g.stroke(); }
+        else { g.beginPath(); g.moveTo(px(c), py(0)); g.lineTo(px(c), py(4)); g.stroke(); g.beginPath(); g.moveTo(px(c), py(5)); g.lineTo(px(c), py(9)); g.stroke(); }
+      }
+      // 九宫斜线
+      function diag(r1, c1, r2, c2) { g.beginPath(); g.moveTo(px(c1), py(r1)); g.lineTo(px(c2), py(r2)); g.stroke(); }
+      diag(0, 3, 2, 5); diag(0, 5, 2, 3); diag(7, 3, 9, 5); diag(7, 5, 9, 3);
+      // 楚河汉界
+      g.fillStyle = '#5a3410'; g.font = '16px KaiTi, STKaiti, serif'; g.textBaseline = 'middle';
+      g.save(); g.translate(px(1.6), py(4.5)); g.fillText('楚 河', 0, 0); g.restore();
+      g.save(); g.translate(px(5.2), py(4.5)); g.fillText('汉 界', 0, 0); g.restore();
+    }
+
+    function render() {
+      var layer = document.getElementById('xqLayer'); if (!layer) return; layer.innerHTML = '';
+      for (var i = 0; i < board.length; i++) {
+        var p = board[i]; if (!p) continue;
+        var r = Math.floor(i / COLS), c = i % COLS;
+        var el = document.createElement('button');
+        el.className = 'xq-pc ' + p.s;
+        el.textContent = NAME[p.s][p.t];
+        el.style.left = px(c) + 'px'; el.style.top = py(r) + 'px';
+        if (sel && sel.r === r && sel.c === c) el.className += ' sel';
+        if (lastMv && ((lastMv.tr === r && lastMv.tc === c))) el.className += ' last';
+        if (targets.some(function (t) { return t.r === r && t.c === c; })) el.className += ' cap';
+        (function (rr, cc) { el.onclick = function () { onPoint(rr, cc); }; })(r, c);
+        layer.appendChild(el);
+      }
+      // 空点落子标记
+      targets.forEach(function (t) {
+        if (board[K(t.r, t.c)]) return; // 敌子已用 cap 高亮
+        var d = document.createElement('button'); d.className = 'xq-dot';
+        d.style.left = px(t.c) + 'px'; d.style.top = py(t.r) + 'px';
+        d.onclick = function () { doMove(sel.r, sel.c, t.r, t.c); };
+        layer.appendChild(d);
+      });
+      renderCap();
+    }
+    function renderCap() {
+      var eB = document.getElementById('xqCapB'), eR = document.getElementById('xqCapR');
+      if (eB) eB.innerHTML = capB.map(function (t) { return '<span class="b">' + NAME.b[t] + '</span>'; }).join('');
+      if (eR) eR.innerHTML = capR.map(function (t) { return '<span class="r">' + NAME.r[t] + '</span>'; }).join('');
+    }
+    function setStatus(txt, cls) { var e = document.getElementById('xqStatus'); if (!e) return; e.textContent = txt; e.className = 'xq-status' + (cls ? ' ' + cls : ''); }
+
+    function onPoint(r, c) {
+      if (over || thinking || turn !== 'r') return;
+      var p = board[K(r, c)];
+      if (sel) {
+        var tg = targets.find(function (t) { return t.r === r && t.c === c; });
+        if (tg) { doMove(sel.r, sel.c, r, c); return; }
+      }
+      if (p && p.s === 'r') { sel = { r: r, c: c }; targets = pieceMoves(board, r, c).filter(function (m) { var nb = applyMove(board, r, c, m.r, m.c); return !inCheck(nb, 'r'); }); render(); }
+      else { sel = null; targets = []; render(); }
+    }
+
+    function doMove(fr, fc, tr, tc) {
+      var cap = board[K(tr, tc)];
+      hist.push({ board: board.slice(), capR: capR.slice(), capB: capB.slice(), lastMv: lastMv });
+      if (cap) { if (cap.s === 'b') capB.push(cap.t); else capR.push(cap.t); }
+      board = applyMove(board, fr, fc, tr, tc);
+      lastMv = { fr: fr, fc: fc, tr: tr, tc: tc }; sel = null; targets = [];
+      if (turn === 'r') { try { bumpUsage('xiangqi'); } catch (e) {} }
+      turn = turn === 'r' ? 'b' : 'r'; render();
+      if (checkEnd()) return;
+      if (turn === 'b') { thinking = true; setStatus('AI 思考中…', ''); setTimeout(aiMove, 60); }
+      else updateTurnStatus();
+    }
+
+    function aiMove() {
+      var depth = parseInt((document.getElementById('xqLevel') || {}).value || '2', 10);
+      var mv = bestMove(board, 'b', depth);
+      thinking = false;
+      if (!mv) { checkEnd(); return; }
+      var cap = board[K(mv.tr, mv.tc)];
+      hist.push({ board: board.slice(), capR: capR.slice(), capB: capB.slice(), lastMv: lastMv });
+      if (cap) { if (cap.s === 'b') capB.push(cap.t); else capR.push(cap.t); }
+      board = applyMove(board, mv.fr, mv.fc, mv.tr, mv.tc);
+      lastMv = mv; turn = 'r'; render();
+      if (checkEnd()) return; updateTurnStatus();
+    }
+
+    function updateTurnStatus() {
+      if (inCheck(board, turn)) setStatus((turn === 'r' ? '红方' : '黑方') + '被将军！', 'check');
+      else setStatus(turn === 'r' ? '轮到红方（你）' : 'AI（黑方）走子', '');
+    }
+
+    function checkEnd() {
+      var loser = null;
+      if (legalMoves(board, 'b').length === 0) loser = 'b';
+      else if (legalMoves(board, 'r').length === 0) loser = 'r';
+      if (!loser) return false;
+      over = true;
+      if (loser === 'b') { setStatus('🎉 红方胜！将死黑将！', 'win'); try { bumpUsage('xiangqiwin'); confettiBurst(90); toast('👑 红棋获胜！'); } catch (e) {} }
+      else { setStatus('😖 黑方胜，再接再厉！', 'win'); try { toast('AI 获胜，换局再战！'); } catch (e) {} }
+      return true;
+    }
+
+    function undo() {
+      if (thinking || over && hist.length === 0) { }
+      if (hist.length === 0) return;
+      // 悔一步(若刚被AI走过,连悔两步回到玩家)
+      var steps = (turn === 'r' && hist.length >= 2 && !over) ? 2 : 1;
+      if (over) steps = Math.min(hist.length, 1);
+      for (var i = 0; i < steps; i++) { var h = hist.pop(); if (!h) break; board = h.board; capR = h.capR; capB = h.capB; lastMv = h.lastMv; }
+      over = false; thinking = false; turn = 'r'; sel = null; targets = []; render(); updateTurnStatus();
+    }
+
+    function hint() {
+      if (over || thinking || turn !== 'r') return;
+      var mv = bestMove(board, 'r', 2); if (!mv) return;
+      sel = { r: mv.fr, c: mv.fc };
+      targets = pieceMoves(board, mv.fr, mv.fc).filter(function (m) { var nb = applyMove(board, mv.fr, mv.fc, m.r, m.c); return !inCheck(nb, 'r'); });
+      render();
+      try { toast('建议：' + NAME.r[board[K(mv.fr, mv.fc)].t] + ' 走到高亮点'); } catch (e) {}
+    }
+
+    function newGame() { board = initBoard(); sel = null; targets = []; turn = 'r'; over = false; thinking = false; lastMv = null; hist = []; capR = []; capB = []; drawBoard(); render(); setStatus('红方先行 · 点击己方棋子走子', ''); }
+
+    function xqRender() {
+      if (!board) newGame(); else { drawBoard(); render(); }
+      if (bound) return; bound = true;
+      var nb = document.getElementById('xqNew'); if (nb) nb.onclick = newGame;
+      var ub = document.getElementById('xqUndo'); if (ub) ub.onclick = undo;
+      var hb = document.getElementById('xqHint'); if (hb) hb.onclick = hint;
+    }
+    window.xqRender = xqRender;
+
+    BADGES.push(
+      { emoji: '♟️', name: '初执红棋', desc: '第一次在中国象棋里落子对弈', test: function (u) { return (u.xiangqi || 0) >= 1; } },
+      { emoji: '👑', name: '楚河霸主', desc: '在中国象棋中战胜 AI 一局', test: function (u) { return (u.xiangqiwin || 0) >= 1; } }
+    );
+    QUOTES.push(
+      '棋逢对手，将遇良才——落子之前，先想三步。',
+      '当局者迷，旁观者清；人生如棋，落子无悔。',
+      '一步走错，满盘皆输；沉住气，方能反败为胜。',
+      '楚河汉界，方寸之间藏着最痛快的博弈。'
     );
   })();
 </script>
