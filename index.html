@@ -1520,6 +1520,7 @@
         <button data-tab="lightsout">💡 熄灯谜题</button>
         <button data-tab="solitaire">🃏 纸牌接龙</button>
         <button data-tab="loan">🏠 房贷计算器</button>
+        <button data-tab="schulte">🎯 舒尔特方格</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6057,6 +6058,77 @@
       <p class="ln-note">🏠 小贴士：一般来说「等额本金」总利息更少但前期压力大；提前还款选「缩短年限」通常比「减少月供」省得多。结果仅供参考，实际以银行为准。</p>
     </div>
   </section>
+  <section class="panel" id="schulte">
+    <style>
+      #schulte .sch-wrap { max-width: 760px; margin: 0 auto; }
+      #schulte .sch-card { background: var(--card, rgba(255,255,255,.06)); border: 1px solid var(--line, rgba(255,255,255,.12)); border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
+      #schulte .sch-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+      #schulte .sch-pill { cursor: pointer; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.07); color: var(--text, #fff); border-radius: 999px; padding: 7px 15px; font-size: .9em; font-weight: 700; transition: transform .1s, background .15s; }
+      #schulte .sch-pill:active { transform: scale(.94); }
+      #schulte .sch-pill.on { background: var(--accent, #f6c94a); color: #1a1a1a; border-color: transparent; }
+      #schulte .sch-stats { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 12px; }
+      #schulte .sch-stat { flex: 1 1 100px; min-width: 96px; max-width: 160px; text-align: center; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 9px 6px; }
+      #schulte .sch-stat .k { font-size: .72em; opacity: .7; }
+      #schulte .sch-stat .v { font-size: 1.25em; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 2px; }
+      #schulte .sch-stat .v.next { color: var(--accent, #f6c94a); }
+      #schulte .sch-board { display: grid; gap: 6px; width: min(92vw, 430px); margin: 14px auto 0; user-select: none; touch-action: manipulation; }
+      #schulte .sch-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: 800; border-radius: 12px; background: rgba(255,255,255,.09); border: 2px solid rgba(255,255,255,.14); cursor: pointer; transition: transform .07s, background .15s, opacity .2s, border-color .15s; }
+      #schulte .sch-cell:active { transform: scale(.93); }
+      #schulte .sch-cell.done { opacity: .28; background: rgba(107,212,144,.25); border-color: rgba(107,212,144,.5); cursor: default; }
+      #schulte .sch-cell.bad { animation: schShake .26s ease; background: rgba(255,107,107,.35); border-color: #ff6b6b; }
+      @keyframes schShake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+      #schulte .sch-result { text-align: center; margin-top: 12px; font-size: 1.05em; font-weight: 700; display: none; animation: schFade .3s ease; }
+      #schulte .sch-result.show { display: block; }
+      @keyframes schFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+      #schulte .sch-btns { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+      #schulte .sch-btn { cursor: pointer; border: none; border-radius: 10px; padding: 10px 20px; font-size: .95em; font-weight: 700; background: var(--accent, #f6c94a); color: #1a1a1a; transition: transform .1s, filter .15s; }
+      #schulte .sch-btn:hover { filter: brightness(1.06); }
+      #schulte .sch-btn:active { transform: scale(.96); }
+      #schulte .sch-best { margin-top: 12px; font-size: .85em; }
+      #schulte .sch-best table { width: 100%; border-collapse: collapse; }
+      #schulte .sch-best td, #schulte .sch-best th { padding: 5px 8px; text-align: center; border-bottom: 1px dashed rgba(255,255,255,.12); }
+      #schulte .sch-best th { opacity: .7; font-weight: 600; }
+      #schulte .sch-best td.rec { color: var(--accent, #f6c94a); font-weight: 700; font-variant-numeric: tabular-nums; }
+      #schulte .sch-note { font-size: .8em; opacity: .75; margin-top: 10px; line-height: 1.6; text-align: center; }
+    </style>
+    <div class="sch-wrap">
+      <h2>🎯 舒尔特方格</h2>
+      <p class="sch-note">飞行员同款注意力训练法：按 1→N² 的顺序尽快点完全部格子。眼睛盯住中心、用余光找数字，练的就是专注力与视幅。</p>
+
+      <div class="sch-card">
+        <div class="sch-pills" id="schSizes">
+          <button class="sch-pill" data-size="3">3×3</button>
+          <button class="sch-pill" data-size="4">4×4</button>
+          <button class="sch-pill on" data-size="5">5×5 经典</button>
+          <button class="sch-pill" data-size="6">6×6</button>
+          <button class="sch-pill" data-size="7">7×7</button>
+        </div>
+        <div class="sch-pills" id="schModes" style="margin-top:10px">
+          <button class="sch-pill on" data-mode="nor">顺序 1→N²</button>
+          <button class="sch-pill" data-mode="rev">逆序 N²→1</button>
+          <button class="sch-pill" data-mode="color">五彩干扰</button>
+        </div>
+
+        <div class="sch-stats">
+          <div class="sch-stat"><div class="k">下一个</div><div class="v next" id="schNext">-</div></div>
+          <div class="sch-stat"><div class="k">用时</div><div class="v" id="schTime">0.0 秒</div></div>
+          <div class="sch-stat"><div class="k">失误</div><div class="v" id="schErrs">0</div></div>
+          <div class="sch-stat"><div class="k">总局数</div><div class="v" id="schPlays">0</div></div>
+        </div>
+
+        <div class="sch-board" id="schBoard"></div>
+        <div class="sch-result" id="schResult"></div>
+
+        <div class="sch-btns">
+          <button class="sch-btn" id="schNewBtn">🔄 新开一局</button>
+        </div>
+
+        <div class="sch-best" id="schBest"></div>
+        <div class="sch-note">计时从你点下第一格开始；点错会记一次失误但不打断。成绩只存本地浏览器。5×5 顺序模式 15 秒内零失误，有隐藏成就等你。</div>
+      </div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -6398,11 +6470,13 @@
     if (id === "lightsout") loRender();
     if (id === "solitaire") skRender();
     if (id === "loan") loanRender();
+    if (id === "schulte") schRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
     if (id !== "lightsout" && typeof loStop === "function") loStop();
     if (id !== "solitaire" && typeof skStop === "function") skStop();
+    if (id !== "schulte" && typeof schStop === "function") schStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
@@ -6535,6 +6609,7 @@
     lightsout: "熄灯 关灯 lightsout lights out 灯 点灯 开关 益智 解谜 线性代数 gf2 puzzle 消灯 关灯游戏 灯泡 谜题",
     solitaire: "纸牌接龙 接龙 solitaire klondike 克朗代克 扑克 纸牌 单人纸牌 收牌 基础堆 红黑交替 卡牌 桌游 相卡 监牙 puzzle cards",
     loan: "房贷 贷款 房贷计算器 月供 利息 等额本息 等额本金 提前还款 利率 按揭 loan mortgage 计算 买房 还款 上岸 金融 钱",
+    schulte: "舒尔特方格 舒尔特 注意力 专注力 视幅 训练 眼力 找数字 点数字 顺序 反应 速度 飞行员 schulte grid 专注 集中 余光 脑力 赛砰",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6728,6 +6803,7 @@ splitbill:"tools",
     lightsout:"games",
     solitaire:"games",
     loan:"tools",
+    schulte:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -20633,6 +20709,187 @@ splitbill:"tools",
       fmt: lnFmt, fmtMonths: lnFmtMonths, calc: lnCalc, doPrepay: lnDoPrepay
     };
   })();
+  (function () {
+    var SCH_KEY = "suibian_schulte";
+    var schSize = 5, schMode = "nor";
+    var schSeq = [], schIdx = 0, schErr = 0, schT0 = 0, schTimer = null;
+    var schRunning = false, schDone = false, schInited = false;
+    var SCH_HUES = [4, 32, 52, 130, 170, 200, 260, 300];
+
+    function schLoad() { try { return JSON.parse(localStorage.getItem(SCH_KEY)) || {}; } catch (e) { return {}; } }
+    function schSave(st) { try { localStorage.setItem(SCH_KEY, JSON.stringify(st)); } catch (e) {} }
+    function schShuffle(n) {
+      var a = [], i, j, t;
+      for (i = 1; i <= n; i++) a.push(i);
+      for (i = a.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
+      return a;
+    }
+    function schFmt(ms) { return (ms / 1000).toFixed(2) + " 秒"; }
+    function schKey() { return schSize + "-" + schMode; }
+    function schRate(size, ms) {
+      var per = ms / (size * size);
+      if (per <= 400) return "⚡ 天才级反应";
+      if (per <= 600) return "🔥 优秀，眼脑同频";
+      if (per <= 900) return "👍 良好，稳中有快";
+      if (per <= 1400) return "🙂 中等，还有余量";
+      return "🐢 慢慢来，多练几局";
+    }
+    function schStop() { if (schTimer) { clearInterval(schTimer); schTimer = null; } schRunning = false; }
+    function schTick() {
+      var el = document.getElementById("schTime");
+      if (el && schRunning) el.textContent = ((Date.now() - schT0) / 1000).toFixed(1) + " 秒";
+    }
+    function schUpdNext() {
+      var el = document.getElementById("schNext");
+      if (el) el.textContent = schDone ? "✓" : String(schSeq[schIdx]);
+    }
+    function schNew() {
+      schStop();
+      var n = schSize * schSize;
+      var cells = schShuffle(n);
+      schSeq = [];
+      for (var i = 1; i <= n; i++) schSeq.push(schMode === "rev" ? n + 1 - i : i);
+      schIdx = 0; schErr = 0; schDone = false;
+      var board = document.getElementById("schBoard");
+      if (!board) return;
+      board.style.gridTemplateColumns = "repeat(" + schSize + ", 1fr)";
+      board.innerHTML = "";
+      var fs = schSize <= 4 ? "1.5em" : (schSize === 5 ? "1.25em" : (schSize === 6 ? "1.05em" : ".9em"));
+      for (var c = 0; c < n; c++) {
+        var d = document.createElement("div");
+        d.className = "sch-cell";
+        d.setAttribute("data-v", String(cells[c]));
+        d.textContent = String(cells[c]);
+        d.style.fontSize = fs;
+        if (schMode === "color") d.style.color = "hsl(" + SCH_HUES[Math.floor(Math.random() * SCH_HUES.length)] + ",85%,68%)";
+        board.appendChild(d);
+      }
+      var tEl = document.getElementById("schTime"); if (tEl) tEl.textContent = "0.0 秒";
+      var eEl = document.getElementById("schErrs"); if (eEl) eEl.textContent = "0";
+      var rEl = document.getElementById("schResult"); if (rEl) { rEl.className = "sch-result"; rEl.textContent = ""; }
+      schUpdNext();
+    }
+    function schFinish() {
+      schDone = true;
+      var ms = Math.max(1, Date.now() - schT0);
+      schStop();
+      var tEl = document.getElementById("schTime"); if (tEl) tEl.textContent = schFmt(ms);
+      schUpdNext();
+      var st = schLoad();
+      st.plays = (st.plays || 0) + 1;
+      st.best = st.best || {};
+      var k = schKey();
+      var isRec = !st.best[k] || ms < st.best[k];
+      if (isRec) st.best[k] = ms;
+      schSave(st);
+      if (typeof bumpUsage === "function") {
+        bumpUsage("schulte");
+        if (schSize === 5 && schMode === "nor" && ms <= 15000 && schErr === 0) bumpUsage("schultefast");
+      }
+      var rEl = document.getElementById("schResult");
+      if (rEl) {
+        rEl.textContent = "🏁 " + schFmt(ms) + " · 失误 " + schErr + " 次 · " + schRate(schSize, ms) + (isRec ? " · 🎉 新纪录！" : "");
+        rEl.className = "sch-result show";
+      }
+      if (isRec) {
+        if (typeof confettiBurst === "function") confettiBurst(70);
+        if (typeof toast === "function") toast("🎉 " + schSize + "×" + schSize + " 新纪录：" + schFmt(ms));
+      }
+      schRenderBest();
+    }
+    function schCellClick(el) {
+      if (schDone || !el || el.classList.contains("done")) return;
+      if (!schRunning) {
+        schT0 = Date.now(); schRunning = true;
+        schTimer = setInterval(schTick, 100);
+      }
+      var v = parseInt(el.getAttribute("data-v"), 10);
+      if (v === schSeq[schIdx]) {
+        el.classList.add("done");
+        schIdx++;
+        if (schIdx >= schSeq.length) schFinish();
+        else schUpdNext();
+      } else {
+        schErr++;
+        var eEl = document.getElementById("schErrs"); if (eEl) eEl.textContent = String(schErr);
+        el.classList.add("bad");
+        (function (n) { setTimeout(function () { n.classList.remove("bad"); }, 280); })(el);
+      }
+    }
+    function schRenderBest() {
+      var st = schLoad();
+      var pEl = document.getElementById("schPlays"); if (pEl) pEl.textContent = String(st.plays || 0);
+      var box = document.getElementById("schBest");
+      if (!box) return;
+      var best = st.best || {};
+      var modeName = schMode === "rev" ? "逆序" : (schMode === "color" ? "五彩干扰" : "顺序");
+      var html = "<table><tr><th>" + modeName + "模式最佳</th>";
+      var sizes = [3, 4, 5, 6, 7], i;
+      for (i = 0; i < sizes.length; i++) html += "<th>" + sizes[i] + "×" + sizes[i] + "</th>";
+      html += "</tr><tr><td>用时</td>";
+      for (i = 0; i < sizes.length; i++) {
+        var b = best[sizes[i] + "-" + schMode];
+        html += "<td class=\"rec\">" + (typeof b === "number" ? schFmt(b) : "—") + "</td>";
+      }
+      html += "</tr></table>";
+      box.innerHTML = html;
+    }
+    function schRender() { if (schInited) schRenderBest(); }
+    function schBind() {
+      var board = document.getElementById("schBoard");
+      if (!board) return;
+      schInited = true;
+      board.addEventListener("click", function (ev) {
+        var el = ev.target;
+        while (el && el !== board && !el.classList.contains("sch-cell")) el = el.parentNode;
+        if (el && el !== board) schCellClick(el);
+      });
+      var sizes = document.getElementById("schSizes");
+      if (sizes) sizes.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-size]") : null;
+        if (!b) return;
+        schSize = parseInt(b.getAttribute("data-size"), 10);
+        var ps = sizes.querySelectorAll(".sch-pill"), i;
+        for (i = 0; i < ps.length; i++) ps[i].classList.toggle("on", ps[i] === b);
+        schNew(); schRenderBest();
+      });
+      var modes = document.getElementById("schModes");
+      if (modes) modes.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-mode]") : null;
+        if (!b) return;
+        schMode = b.getAttribute("data-mode");
+        var ps = modes.querySelectorAll(".sch-pill"), i;
+        for (i = 0; i < ps.length; i++) ps[i].classList.toggle("on", ps[i] === b);
+        schNew(); schRenderBest();
+      });
+      var nb = document.getElementById("schNewBtn");
+      if (nb) nb.addEventListener("click", function () { schNew(); });
+      schNew();
+      schRenderBest();
+    }
+    window.schRender = schRender;
+    window.schStop = schStop;
+    window.schBind = schBind;
+    window.__schTest = {
+      shuffle: schShuffle, fmt: schFmt, rate: schRate, load: schLoad,
+      newGame: schNew, click: schCellClick, finish: schFinish,
+      setSizeMode: function (s, m) { schSize = s; schMode = m; },
+      state: function () { return { idx: schIdx, err: schErr, done: schDone, seq: schSeq.slice(), size: schSize, mode: schMode, running: schRunning }; }
+    };
+  })();
+  schBind();
+  BADGES.push(
+    { emoji: "🎯", name: "定睛凝神", desc: "第一次完成舒尔特方格", test: function (u) { return (u.schulte || 0) >= 1; } },
+    { emoji: "👁️", name: "目光如炬", desc: "5×5 顺序模式 15 秒内零失误完成", test: function (u) { return (u.schultefast || 0) >= 1; } }
+  );
+  QUOTES.push(
+    "舒尔特方格的秘诀：眼睛盯住中心，让数字自己跳进余光里。",
+    "专注力就像肌肉，每天五分钟的方格训练就是它的健身房。",
+    "飞行员靠它练眼力，你靠它治好走神的毛病。",
+    "点错不可怕，可怕的是眼睛跟着心一起乱。",
+    "视幅越宽，世界越大——这话在舒尔特方格里是字面意思。",
+    "25 个数字点完的那一刻，你已经比刚才的自己专注了一点。"
+  );
   loanBind();
   BADGES.push(
     { emoji: "\uD83C\uDFE0", name: "\u7CBE\u6253\u7EC6\u7B97", desc: "\u7B2C\u4E00\u6B21\u7528\u623F\u8D37\u8BA1\u7B97\u5668\u7B97\u8D26", test: function (u) { return (u.loan || 0) >= 1; } },
