@@ -1523,6 +1523,7 @@
         <button data-tab="schulte">🎯 舒尔特方格</button>
         <button data-tab="drum">🥁 节拍鼓机</button>
         <button data-tab="sheet">📊 迷你表格</button>
+        <button data-tab="salary">💼 工资个税</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6232,6 +6233,157 @@
     </div>
   </section>
 
+  <section class="panel" id="salary">
+    <style>
+      #salary .sal-wrap { max-width: 800px; margin: 0 auto; }
+      #salary .sal-card { background: var(--card, rgba(255,255,255,.06)); border: 1px solid var(--line, rgba(255,255,255,.12)); border-radius: 14px; padding: 14px 16px; margin-top: 12px; }
+      #salary .sal-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+      #salary .sal-field { display: flex; flex-direction: column; gap: 5px; flex: 1 1 140px; min-width: 130px; }
+      #salary .sal-lab { font-size: .8em; opacity: .8; }
+      #salary input.sal-in, #salary select.sal-in {
+        background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18); color: var(--text, #fff);
+        border-radius: 10px; padding: 9px 10px; font-size: .95em; outline: none; min-width: 0; width: 100%;
+        box-sizing: border-box;
+      }
+      #salary input.sal-in:focus, #salary select.sal-in:focus { border-color: var(--accent, #f6c94a); }
+      #salary .sal-btn {
+        cursor: pointer; border: none; border-radius: 10px; padding: 10px 20px; font-size: .98em; font-weight: 700;
+        background: var(--accent, #f6c94a); color: #1a1a1a; transition: transform .1s, filter .15s;
+      }
+      #salary .sal-btn:hover { filter: brightness(1.06); }
+      #salary .sal-btn:active { transform: scale(.96); }
+      #salary .sal-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+      #salary .sal-chip {
+        cursor: pointer; user-select: none; border-radius: 999px; padding: 7px 13px; font-size: .85em;
+        background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.18); color: var(--text, #fff);
+        transition: background .15s, border-color .15s, transform .1s;
+      }
+      #salary .sal-chip:active { transform: scale(.95); }
+      #salary .sal-chip.on { background: rgba(246,201,74,.18); border-color: rgba(246,201,74,.65); color: var(--accent, #f6c94a); font-weight: 700; }
+      #salary .sal-dedsum { font-size: .85em; opacity: .85; margin-top: 8px; }
+      #salary .sal-dedsum b { color: var(--accent, #f6c94a); }
+      #salary .sal-err { color: #ff6b6b; font-size: .85em; margin-top: 8px; display: none; }
+      #salary .sal-err.show { display: block; }
+      #salary .sal-out { display: none; }
+      #salary .sal-out.show { display: block; animation: salFade .3s ease; }
+      @keyframes salFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+      #salary .sal-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+      #salary .sal-stat { border-radius: 12px; padding: 12px 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); text-align: center; }
+      #salary .sal-stat .k { font-size: .78em; opacity: .75; }
+      #salary .sal-stat .v { font-size: 1.15em; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+      #salary .sal-stat .v.money { color: var(--accent, #f6c94a); }
+      #salary .sal-stat .v.bad { color: #ff6b6b; }
+      #salary .sal-stat .v.ins { color: #5aa9e6; }
+      #salary .sal-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      @media (max-width: 620px) { #salary .sal-cols { grid-template-columns: 1fr; } }
+      #salary .sal-plan { border-radius: 12px; padding: 12px 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); }
+      #salary .sal-plan.hl { border-color: rgba(246,201,74,.55); background: rgba(246,201,74,.08); }
+      #salary .sal-plan h4 { margin: 0 0 8px; font-size: 1em; }
+      #salary .sal-kv { display: flex; justify-content: space-between; gap: 8px; font-size: .9em; padding: 3px 0; }
+      #salary .sal-kv .k { opacity: .75; }
+      #salary .sal-kv .v { font-weight: 700; font-variant-numeric: tabular-nums; }
+      #salary .sal-kv .v.money { color: var(--accent, #f6c94a); }
+      #salary .sal-kv .v.bad { color: #ff6b6b; }
+      #salary .sal-best { margin-top: 10px; font-size: .9em; font-weight: 700; color: #6bd490; }
+      #salary .sal-trap { margin-top: 10px; font-size: .88em; line-height: 1.7; color: #ffb454; background: rgba(255,180,84,.1); border: 1px solid rgba(255,180,84,.4); border-radius: 10px; padding: 10px 12px; display: none; }
+      #salary .sal-trap.show { display: block; }
+      #salary .sal-chart-box { margin-top: 10px; overflow-x: auto; }
+      #salary canvas { display: block; margin: 0 auto; max-width: 100%; border-radius: 10px; background: rgba(0,0,0,.18); }
+      #salary .sal-legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; font-size: .8em; margin-top: 8px; opacity: .85; }
+      #salary .sal-legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+      #salary .sal-tbl-box { margin-top: 10px; overflow-x: auto; }
+      #salary table.sal-tbl { width: 100%; border-collapse: collapse; font-size: .85em; font-variant-numeric: tabular-nums; }
+      #salary table.sal-tbl th, #salary table.sal-tbl td { padding: 6px 8px; text-align: right; border-bottom: 1px solid rgba(255,255,255,.08); }
+      #salary table.sal-tbl th { opacity: .75; font-weight: 600; }
+      #salary table.sal-tbl td:first-child, #salary table.sal-tbl th:first-child { text-align: left; }
+      #salary table.sal-tbl td.tax { color: #ff6b6b; }
+      #salary table.sal-tbl td.net { color: var(--accent, #f6c94a); font-weight: 700; }
+      #salary .sal-note { font-size: .8em; opacity: .75; margin-top: 8px; line-height: 1.6; }
+    </style>
+    <div class="sal-wrap">
+      <h2>💼 工资个税计算器</h2>
+      <p class="sal-note">按「累计预扣法」逐月精算个税，五险一金、专项附加扣除全都算上；年终奖「单独计税 vs 并入综合所得」自动对比，还帮你避开「多发少得」陷阱区间。数据只存本地，随便算。</p>
+
+      <div class="sal-card">
+        <div class="sal-lab" style="margin-bottom:8px">① 收入与缴费</div>
+        <div class="sal-row">
+          <div class="sal-field">
+            <span class="sal-lab">税前月薪（元）</span>
+            <input class="sal-in" id="salSalary" type="number" min="0" step="100" value="15000" />
+          </div>
+          <div class="sal-field">
+            <span class="sal-lab">社保公积金基数（默认同月薪）</span>
+            <input class="sal-in" id="salBase" type="number" min="0" step="100" placeholder="留空 = 月薪" />
+          </div>
+          <div class="sal-field">
+            <span class="sal-lab">公积金比例（个人）</span>
+            <select class="sal-in" id="salGjj">
+              <option value="0.05">5%</option>
+              <option value="0.06">6%</option>
+              <option value="0.07">7%</option>
+              <option value="0.08">8%</option>
+              <option value="0.10">10%</option>
+              <option value="0.12" selected>12%</option>
+            </select>
+          </div>
+          <div class="sal-field">
+            <span class="sal-lab">年终奖（元，可为 0）</span>
+            <input class="sal-in" id="salBonus" type="number" min="0" step="1000" value="30000" />
+          </div>
+        </div>
+      </div>
+
+      <div class="sal-card">
+        <div class="sal-lab" style="margin-bottom:2px">② 专项附加扣除（点选，按每月标准额）</div>
+        <div class="sal-chips">
+          <span class="sal-chip" data-v="2000">👶 子女教育 2000</span>
+          <span class="sal-chip" data-v="1000">🏠 房贷利息 1000</span>
+          <span class="sal-chip" data-v="1500">🔑 住房租金 1500</span>
+          <span class="sal-chip" data-v="3000">👴 赡养老人 3000</span>
+          <span class="sal-chip" data-v="400">📚 继续教育 400</span>
+          <span class="sal-chip" data-v="2000">🍼 婴幼儿照护 2000</span>
+        </div>
+        <div class="sal-row" style="margin-top:10px">
+          <div class="sal-field" style="max-width:220px">
+            <span class="sal-lab">其他扣除（元/月）</span>
+            <input class="sal-in" id="salExtra" type="number" min="0" step="100" value="0" />
+          </div>
+          <div class="sal-dedsum">每月扣除合计：<b id="salDedSum">0</b> 元</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px; text-align:center">
+        <button class="sal-btn" id="salCalc">💰 开始计算</button>
+        <div class="sal-err" id="salErr"></div>
+      </div>
+
+      <div class="sal-out" id="salOut">
+        <div class="sal-card">
+          <div class="sal-lab" style="margin-bottom:8px">③ 全年汇总</div>
+          <div class="sal-sum" id="salSum"></div>
+        </div>
+
+        <div class="sal-card" id="salBonusCard">
+          <div class="sal-lab" style="margin-bottom:8px">④ 年终奖怎么计税更划算</div>
+          <div class="sal-cols" id="salPlans"></div>
+          <div class="sal-best" id="salBest"></div>
+          <div class="sal-trap" id="salTrap"></div>
+        </div>
+
+        <div class="sal-card">
+          <div class="sal-lab" style="margin-bottom:8px">⑤ 每月到手构成</div>
+          <div class="sal-chart-box"><canvas id="salChart" width="680" height="240"></canvas></div>
+          <div class="sal-legend">
+            <span><span class="dot" style="background:#f6c94a"></span>到手</span>
+            <span><span class="dot" style="background:#5aa9e6"></span>五险一金（个人）</span>
+            <span><span class="dot" style="background:#ff6b6b"></span>个税</span>
+          </div>
+          <div class="sal-tbl-box" id="salTblBox"></div>
+          <div class="sal-note">说明：按现行 3%~45% 七级超额累进税率与累计预扣法测算（起征点 5000 元/月），社保按个人缴纳约 10.5%（养老 8% + 医疗 2% + 失业 0.5%）估算，各地基数上下限、比例略有差异，结果仅供参考。</div>
+        </div>
+      </div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -6576,6 +6728,7 @@
     if (id === "schulte") schRender();
     if (id === "drum") drumRender();
     if (id === "sheet") sheetRender();
+    if (id === "salary") salRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -6719,6 +6872,7 @@
     schulte: "舒尔特方格 舒尔特 注意力 专注力 视幅 训练 眼力 找数字 点数字 顺序 反应 速度 飞行员 schulte grid 专注 集中 余光 脑力 赛砰",
     drum: "鼓机 节拍鼓机 打鼓 鼓点 节奏 步进音序器 sequencer 打击乐 底鼓 军鼓 军镲 镲片 beat drum machine 808 编鼓 律动 loop 循环 打拍子 音乐 敲鼓 鼓组 groove 鼓机 电子鼓",
     sheet: "表格 迷你表格 电子表格 单元格 公式 函数 SUM 计算 表格计算 数据 表格工具 在线表格 spreadsheet 制表 行列 sheet 算账 统计 求和 平均值",
+    salary: "工资 个税 计算 到手 税后 税前 年终奖 五险一金 社保 公积金 专项附加 扣除 累计预扣 奖金 避坑 月薪 薪资 薪水 打工 salary tax 个人所得税 报税",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6915,6 +7069,7 @@ splitbill:"tools",
     schulte:"games",
     drum:"create",
     sheet:"prod",
+    salary:"tools",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -26458,6 +26613,320 @@ splitbill:"tools",
   })();
 
 
+
+  /* ================== 💼 工资个税计算器 ================== */
+  (function () {
+    var $s = function (id) { return document.getElementById(id); };
+
+    /* 年度综合所得七级超额累进（累计预扣率表）：[阈值, 税率, 速算扣除数] */
+    var SAL_ANN = [
+      [0, 0.03, 0], [36000, 0.10, 2520], [144000, 0.20, 16920],
+      [300000, 0.25, 31920], [420000, 0.30, 52920], [660000, 0.35, 85920], [960000, 0.45, 181920]
+    ];
+    /* 年终奖单独计税用的按月换算表 */
+    var SAL_MON = [
+      [0, 0.03, 0], [3000, 0.10, 210], [12000, 0.20, 1410],
+      [25000, 0.25, 2660], [35000, 0.30, 4410], [55000, 0.35, 7160], [80000, 0.45, 15160]
+    ];
+
+    function salR2(x) { return Math.round(x * 100) / 100; }
+
+    function salAnnTax(x) {
+      if (!(x > 0)) return 0;
+      var b = SAL_ANN[0];
+      for (var i = 0; i < SAL_ANN.length; i++) { if (x > SAL_ANN[i][0]) b = SAL_ANN[i]; }
+      return salR2(x * b[1] - b[2]);
+    }
+
+    function salBonusBrk(bonus) {
+      var m = bonus / 12, b = SAL_MON[0];
+      for (var i = 0; i < SAL_MON.length; i++) { if (m > SAL_MON[i][0]) b = SAL_MON[i]; }
+      return b;
+    }
+
+    function salBonusSepTax(bonus) {
+      if (!(bonus > 0)) return 0;
+      var b = salBonusBrk(bonus);
+      return salR2(bonus * b[1] - b[2]);
+    }
+
+    /* 年终奖「多发少得」陷阱区间：[阈值T, 临界点X]，T<奖金<X 时到手不如恰好发 T */
+    var SAL_TRAPS = (function () {
+      var ths = [36000, 144000, 300000, 420000, 660000, 960000], out = [];
+      for (var i = 0; i < ths.length; i++) {
+        var T = ths[i];
+        var lo = salBonusBrk(T), hi = salBonusBrk(T + 1);
+        var X = (T * (1 - lo[1]) + lo[2] - hi[2]) / (1 - hi[1]);
+        out.push([T, salR2(X)]);
+      }
+      return out;
+    })();
+
+    function salTrapOf(bonus) {
+      for (var i = 0; i < SAL_TRAPS.length; i++) {
+        if (bonus > SAL_TRAPS[i][0] && bonus < SAL_TRAPS[i][1]) return SAL_TRAPS[i];
+      }
+      return null;
+    }
+
+    /* 主计算：o = { salary, base, gjj, deduct, bonus } */
+    function salCalcYear(o) {
+      var salary = o.salary, base = o.base, gjj = o.gjj, deduct = o.deduct, bonus = o.bonus;
+      var insM = salR2(base * 0.105 + base * gjj);
+      var months = [], paid = 0;
+      for (var m = 1; m <= 12; m++) {
+        var cumTaxable = salary * m - 5000 * m - insM * m - deduct * m;
+        var cumTax = salAnnTax(cumTaxable);
+        var t = salR2(Math.max(0, cumTax - paid));
+        paid = salR2(paid + t);
+        months.push({ m: m, tax: t, net: salR2(salary - insM - t), ins: insM });
+      }
+      var salaryTax = paid;
+      var taxableNoBonus = Math.max(0, salary * 12 - 60000 - insM * 12 - deduct * 12);
+      var sep = salBonusSepTax(bonus);
+      var merged = bonus > 0 ? salR2(salAnnTax(taxableNoBonus + bonus) - salAnnTax(taxableNoBonus)) : 0;
+      var best = bonus > 0 ? (sep <= merged ? "sep" : "merge") : "none";
+      var bonusTax = bonus > 0 ? Math.min(sep, merged) : 0;
+      var grossYear = salR2(salary * 12 + bonus);
+      var insYear = salR2(insM * 12);
+      var netYear = salR2(grossYear - insYear - salaryTax - bonusTax);
+      return {
+        insM: insM, months: months, salaryTax: salaryTax,
+        sep: sep, merged: merged, best: best, bonusTax: bonusTax,
+        grossYear: grossYear, insYear: insYear, netYear: netYear,
+        netMonthAvg: salR2(netYear / 12), trap: bonus > 0 ? salTrapOf(bonus) : null
+      };
+    }
+
+    function salFmt(x) {
+      var neg = x < 0; x = Math.abs(x);
+      var s = x.toFixed(2).split(".");
+      s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return (neg ? "-" : "") + s[0] + "." + s[1];
+    }
+
+    var SAL_LSK = "suibian_salary";
+    function salLoad() { try { return JSON.parse(localStorage.getItem(SAL_LSK) || "null"); } catch (e) { return null; } }
+    function salSave(o) { try { localStorage.setItem(SAL_LSK, JSON.stringify(o)); } catch (e) {} }
+
+    function salChips() { return document.querySelectorAll("#salary .sal-chip"); }
+
+    function salDedSum() {
+      var s = 0, chips = salChips();
+      for (var i = 0; i < chips.length; i++) {
+        if ((" " + chips[i].className + " ").indexOf(" on ") >= 0) s += parseFloat(chips[i].getAttribute("data-v")) || 0;
+      }
+      var exEl = $s("salExtra");
+      var ex = exEl ? parseFloat(exEl.value) : 0;
+      if (!(ex > 0)) ex = 0;
+      return s + ex;
+    }
+
+    function salUpdDed() {
+      var el = $s("salDedSum");
+      if (el) el.textContent = salFmt(salDedSum());
+    }
+
+    function salChipState() {
+      var chips = salChips(), a = [];
+      for (var i = 0; i < chips.length; i++) a.push((" " + chips[i].className + " ").indexOf(" on ") >= 0 ? 1 : 0);
+      return a;
+    }
+
+    function salDrawChart(r, salary) {
+      var cv = $s("salChart");
+      if (!cv || !cv.getContext) return;
+      var ctx = cv.getContext("2d");
+      if (!ctx) return;
+      var W = cv.width, H = cv.height;
+      ctx.clearRect(0, 0, W, H);
+      var padL = 62, padR = 12, padT = 14, padB = 26;
+      var iw = W - padL - padR, ih = H - padT - padB;
+      var maxV = salary > 0 ? salary : 1;
+      /* 网格 */
+      ctx.strokeStyle = "rgba(255,255,255,.1)";
+      ctx.fillStyle = "rgba(255,255,255,.6)";
+      ctx.font = "11px sans-serif";
+      ctx.textAlign = "right";
+      ctx.lineWidth = 1;
+      for (var g = 0; g <= 4; g++) {
+        var gy = padT + ih - ih * g / 4;
+        ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W - padR, gy); ctx.stroke();
+        ctx.fillText(salFmt(salR2(maxV * g / 4)), padL - 6, gy + 4);
+      }
+      var bw = iw / 12 * 0.62, gap = iw / 12;
+      ctx.textAlign = "center";
+      for (var i = 0; i < 12; i++) {
+        var mo = r.months[i];
+        var x = padL + gap * i + (gap - bw) / 2;
+        var hNet = ih * mo.net / maxV, hIns = ih * mo.ins / maxV, hTax = ih * mo.tax / maxV;
+        var y = padT + ih;
+        ctx.fillStyle = "#f6c94a"; ctx.fillRect(x, y - hNet, bw, hNet); y -= hNet;
+        ctx.fillStyle = "#5aa9e6"; ctx.fillRect(x, y - hIns, bw, hIns); y -= hIns;
+        ctx.fillStyle = "#ff6b6b"; ctx.fillRect(x, y - hTax, bw, hTax);
+        ctx.fillStyle = "rgba(255,255,255,.65)";
+        ctx.fillText((i + 1) + "月", padL + gap * i + gap / 2, padT + ih + 16);
+      }
+    }
+
+    function salEsc(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function salRenderOut(r, inp) {
+      var out = $s("salOut");
+      out.className = "sal-out show";
+      /* 汇总 */
+      var sum = $s("salSum");
+      var bonusModeTxt = r.best === "none" ? "无年终奖" : (r.best === "sep" ? "单独计税更优" : "并入综合所得更优");
+      sum.innerHTML =
+        '<div class="sal-stat"><div class="k">全年到手</div><div class="v money">' + salFmt(r.netYear) + '</div></div>' +
+        '<div class="sal-stat"><div class="k">月均到手</div><div class="v money">' + salFmt(r.netMonthAvg) + '</div></div>' +
+        '<div class="sal-stat"><div class="k">全年个税（含年终奖）</div><div class="v bad">' + salFmt(salR2(r.salaryTax + r.bonusTax)) + '</div></div>' +
+        '<div class="sal-stat"><div class="k">五险一金（个人全年）</div><div class="v ins">' + salFmt(r.insYear) + '</div></div>' +
+        '<div class="sal-stat"><div class="k">年终奖方案</div><div class="v">' + bonusModeTxt + '</div></div>';
+      /* 年终奖对比 */
+      var card = $s("salBonusCard"), plans = $s("salPlans"), bestEl = $s("salBest"), trapEl = $s("salTrap");
+      if (r.best === "none") {
+        card.style.display = "none";
+      } else {
+        card.style.display = "";
+        var sepHl = r.best === "sep" ? " hl" : "", merHl = r.best === "merge" ? " hl" : "";
+        plans.innerHTML =
+          '<div class="sal-plan' + sepHl + '"><h4>🎁 单独计税' + (r.best === "sep" ? "（推荐）" : "") + '</h4>' +
+          '<div class="sal-kv"><span class="k">应缴个税</span><span class="v bad">' + salFmt(r.sep) + ' 元</span></div>' +
+          '<div class="sal-kv"><span class="k">年终奖到手</span><span class="v money">' + salFmt(salR2(inp.bonus - r.sep)) + ' 元</span></div></div>' +
+          '<div class="sal-plan' + merHl + '"><h4>🧾 并入综合所得' + (r.best === "merge" ? "（推荐）" : "") + '</h4>' +
+          '<div class="sal-kv"><span class="k">多缴个税</span><span class="v bad">' + salFmt(r.merged) + ' 元</span></div>' +
+          '<div class="sal-kv"><span class="k">年终奖到手</span><span class="v money">' + salFmt(salR2(inp.bonus - r.merged)) + ' 元</span></div></div>';
+        var saveAmt = salR2(Math.abs(r.sep - r.merged));
+        bestEl.textContent = saveAmt > 0.005
+          ? "✅ 推荐「" + (r.best === "sep" ? "单独计税" : "并入综合所得") + "」，可少缴 " + salFmt(saveAmt) + " 元"
+          : "两种方式税负相同，随便选。";
+        if (r.trap) {
+          var T = r.trap[0], X = r.trap[1];
+          var lost = salR2((T - salBonusSepTax(T)) - (inp.bonus - salBonusSepTax(inp.bonus)));
+          trapEl.className = "sal-trap show";
+          trapEl.innerHTML = "⚠️ <b>年终奖踩进「多发少得」陷阱区间</b>（" + salFmt(T) + " ~ " + salFmt(X) + " 元）：" +
+            "单独计税时，发 " + salFmt(inp.bonus) + " 元反而比恰好发 " + salFmt(T) + " 元<b>少到手 " + salFmt(Math.max(0, lost)) + " 元</b>。" +
+            "如果能和公司商量，把超出部分并进工资或压到 " + salFmt(T) + " 元更划算。";
+        } else {
+          trapEl.className = "sal-trap";
+          trapEl.innerHTML = "";
+        }
+      }
+      /* 图表 + 明细表 */
+      salDrawChart(r, inp.salary);
+      var rows = "";
+      for (var i = 0; i < 12; i++) {
+        var mo = r.months[i];
+        rows += "<tr><td>" + mo.m + " 月</td><td>" + salFmt(inp.salary) + "</td><td>" + salFmt(mo.ins) +
+          '</td><td class="tax">' + salFmt(mo.tax) + '</td><td class="net">' + salFmt(mo.net) + "</td></tr>";
+      }
+      $s("salTblBox").innerHTML =
+        '<table class="sal-tbl"><thead><tr><th>月份</th><th>税前</th><th>五险一金</th><th>个税（累计预扣）</th><th>到手</th></tr></thead><tbody>' +
+        rows + "</tbody></table>";
+    }
+
+    function salDoCalc() {
+      var err = $s("salErr");
+      err.className = "sal-err";
+      err.textContent = "";
+      var salary = parseFloat($s("salSalary").value);
+      if (!(salary > 0) || salary > 10000000) {
+        err.textContent = "请输入正确的税前月薪（大于 0）";
+        err.className = "sal-err show";
+        return null;
+      }
+      var base = parseFloat($s("salBase").value);
+      if (!(base > 0)) base = salary;
+      var gjj = parseFloat($s("salGjj").value);
+      if (!(gjj >= 0)) gjj = 0.12;
+      var bonus = parseFloat($s("salBonus").value);
+      if (!(bonus > 0)) bonus = 0;
+      var deduct = salDedSum();
+      var inp = { salary: salary, base: base, gjj: gjj, deduct: deduct, bonus: bonus };
+      var r = salCalcYear(inp);
+      salRenderOut(r, inp);
+      salSave({ salary: salary, base: $s("salBase").value, gjj: gjj, bonus: bonus, extra: $s("salExtra").value, chips: salChipState() });
+      if (typeof bumpUsage === "function") {
+        bumpUsage("salary");
+        if (bonus > 0) bumpUsage("salarybonus");
+      }
+      if (typeof toast === "function") toast("算好了：全年到手 " + salFmt(r.netYear) + " 元");
+      if (r.best !== "none" && Math.abs(r.sep - r.merged) > 0.005 && typeof confettiBurst === "function") confettiBurst();
+      return r;
+    }
+
+    function salRestore() {
+      var st = salLoad();
+      if (!st) return;
+      try {
+        if (st.salary != null) $s("salSalary").value = st.salary;
+        if (st.base != null) $s("salBase").value = st.base;
+        if (st.gjj != null) $s("salGjj").value = String(st.gjj);
+        if (st.bonus != null) $s("salBonus").value = st.bonus;
+        if (st.extra != null) $s("salExtra").value = st.extra;
+        if (st.chips && st.chips.length) {
+          var chips = salChips();
+          for (var i = 0; i < chips.length && i < st.chips.length; i++) {
+            chips[i].className = st.chips[i] ? "sal-chip on" : "sal-chip";
+          }
+        }
+      } catch (e) {}
+    }
+
+    function salBind() {
+      var root = $s("salary");
+      if (!root || root.getAttribute("data-salbound")) return;
+      root.setAttribute("data-salbound", "1");
+      var chips = salChips();
+      for (var i = 0; i < chips.length; i++) {
+        (function (c) {
+          c.addEventListener("click", function () {
+            c.className = (" " + c.className + " ").indexOf(" on ") >= 0 ? "sal-chip" : "sal-chip on";
+            salUpdDed();
+          });
+        })(chips[i]);
+      }
+      var ids = ["salSalary", "salBase", "salBonus", "salExtra"];
+      for (var j = 0; j < ids.length; j++) {
+        var el = $s(ids[j]);
+        if (!el) continue;
+        el.addEventListener("keydown", function (e) { if (e.key === "Enter") salDoCalc(); });
+      }
+      var exEl = $s("salExtra");
+      if (exEl) exEl.addEventListener("input", salUpdDed);
+      $s("salCalc").addEventListener("click", salDoCalc);
+      salRestore();
+      salUpdDed();
+    }
+
+    function salRender() { salBind(); }
+
+    window.salRender = salRender;
+    window.salBind = salBind;
+    window.__salTest = {
+      annTax: salAnnTax, bonusSepTax: salBonusSepTax, calcYear: salCalcYear,
+      traps: SAL_TRAPS, trapOf: salTrapOf, fmt: salFmt,
+      dedSum: salDedSum, doCalc: salDoCalc, bind: salBind
+    };
+
+    salBind();
+
+    BADGES.push(
+      { emoji: "💼", name: "搬砖明白人", desc: "第一次算清自己的工资个税", test: function (u) { return (u.salary || 0) >= 1; } },
+      { emoji: "🧧", name: "奖金规划师", desc: "对比过 3 次年终奖计税方案", test: function (u) { return (u.salarybonus || 0) >= 3; } }
+    );
+    QUOTES.push(
+      "工资条上最小的那个数字，往往是你最想看懂的。",
+      "税前是老板给的体面，税后才是你过日子的底气。",
+      "年终奖多发一块钱，可能少到手两千块——数学有时候就是这么魔幻。",
+      "五险一金不是扣款，是未来的你在偷偷存钱。",
+      "搞懂累计预扣法的那天，你就明白了为什么年初工资高年底工资低。",
+      "算清楚每一分钱去了哪，是打工人最朴素的浪漫。"
+    );
+  })();
 </script>
 </body>
 </html>
