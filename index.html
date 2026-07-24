@@ -1515,6 +1515,7 @@
         <button data-tab="splitbill">🧾 AA 分摊</button>
         <button data-tab="metronome">🎼 节拍器</button>
         <button data-tab="game24">🃏 24 点</button>
+        <button data-tab="klotski">🧩 华容道</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -5679,6 +5680,61 @@
     </div>
   </section>
 
+  <section id="klotski">
+    <style>
+      #klotski .kl-wrap{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;justify-content:center}
+      #klotski .kl-board{position:relative;background:linear-gradient(135deg,#3a2c22,#241a13);border:4px solid #6b4a2f;border-radius:14px;box-shadow:inset 0 0 26px rgba(0,0,0,.55);touch-action:none;flex:0 0 auto}
+      #klotski .kl-exit{position:absolute;height:6px;background:linear-gradient(90deg,transparent,#f5c451,transparent);border-radius:3px;pointer-events:none}
+      #klotski .kl-tile{position:absolute;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;-webkit-user-select:none;user-select:none;color:#fff;font-weight:700;box-sizing:border-box;transition:left .13s ease,top .13s ease,box-shadow .13s;box-shadow:0 3px 0 rgba(0,0,0,.4),inset 0 1px 3px rgba(255,255,255,.28)}
+      #klotski .kl-tile .kl-nm{font-size:22px;line-height:1.05}
+      #klotski .kl-tile .kl-sub{font-size:10px;opacity:.85;margin-top:2px;letter-spacing:1px}
+      #klotski .kl-tile.sel{outline:3px solid #ffe58a;box-shadow:0 0 18px #ffcf40,0 3px 0 rgba(0,0,0,.4)}
+      #klotski .kl-tile.cao{background:linear-gradient(135deg,#e05353,#a11f1f)}
+      #klotski .kl-tile.cao .kl-nm{font-size:30px}
+      #klotski .kl-tile.v{background:linear-gradient(135deg,#4a90d9,#255a8f)}
+      #klotski .kl-tile.h{background:linear-gradient(135deg,#e0932f,#b56d15)}
+      #klotski .kl-tile.s{background:linear-gradient(135deg,#5aab6b,#357a45)}
+      #klotski .kl-side{min-width:230px;max-width:300px;flex:1 1 230px}
+      #klotski .kl-stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 10px}
+      #klotski .kl-stat div{background:var(--card,#1c1c22);border:1px solid var(--bd,#333);border-radius:9px;padding:8px;text-align:center}
+      #klotski .kl-stat span{font-size:12px;opacity:.7}
+      #klotski .kl-stat b{display:block;font-size:22px;margin-top:2px}
+      #klotski .kl-dpad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:6px;justify-content:center;margin:12px 0}
+      #klotski .kl-dpad button{font-size:20px;border-radius:9px;padding:0}
+      #klotski .kl-dpad .sp{visibility:hidden}
+      #klotski .kl-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;align-items:center}
+      #klotski select.kl-lay{padding:6px 8px;border-radius:8px}
+      #klotski .kl-msg{min-height:24px;font-weight:700;color:#f5c451;text-align:center;margin-top:6px}
+    </style>
+    <h2>🧩 华容道</h2>
+    <p class="sub">经典中式滑块解谜：想尽办法把红色「曹操」挪到棋盘底部中央的缺口。先点选棋子，再用方向盘 / 方向键 / 拖拽移动，一次一格 —— 只有两个空位，全靠腾挪给曹操让路。</p>
+    <div class="kl-row">
+      <label>关卡：<select id="klLay" class="kl-lay"></select></label>
+      <button id="klReset" class="btn">🔄 重开本关</button>
+      <button id="klUndo" class="btn">↩️ 撤销</button>
+      <button id="klHint" class="btn">💡 提示一步</button>
+      <button id="klSolve" class="btn">🤖 自动通关</button>
+    </div>
+    <div class="kl-wrap">
+      <div class="kl-board" id="klBoard"></div>
+      <div class="kl-side">
+        <div class="kl-stat">
+          <div><span>步数</span><b id="klMoves">0</b></div>
+          <div><span>用时</span><b id="klTime">0.0s</b></div>
+          <div><span>本关最少步</span><b id="klBest">-</b></div>
+          <div><span>通关次数</span><b id="klWins">0</b></div>
+        </div>
+        <div class="kl-dpad">
+          <span class="sp"></span><button data-d="U">▲</button><span class="sp"></span>
+          <button data-d="L">◀</button><span class="sp"></span><button data-d="R">▶</button>
+          <span class="sp"></span><button data-d="D">▼</button><span class="sp"></span>
+        </div>
+        <div id="klMsg" class="kl-msg"></div>
+        <div class="sb-tip">📌 目标：让「曹操」抵达底部中央缺口即通关。经典「横刀立马」是公认最难的开局，能亲手解出来的都是狠人。卡住了就点「💡 提示一步」或「🤖 自动通关」看解法。</div>
+      </div>
+    </div>
+  </section>
+
 <script>
 (function () {
   "use strict";
@@ -6015,8 +6071,10 @@
     if (id === "splitbill") sbillRender();
     if (id === "metronome") metroRender();
     if (id === "game24") g24Render();
+    if (id === "klotski") klRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
+    if (id !== "klotski" && typeof klStop === "function") klStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
     if (id !== "dino" && typeof dinoStop === "function") dinoStop();
@@ -6144,6 +6202,7 @@
     splitbill: "AA 分摊神器 splitbill aa AA制 分摊 平账 算账 结算 拼单 聚餐 旅行 合租 分账 转账 还钱 均摊 谁给谁 工具",
     metronome: "节拍器 metronome 节拍 bpm 测速 tap tempo 拍号 细分 重音 渐快 练习 音乐 鼓点 速度 allegro andante 钢琴 吉他 工具",
     game24: "24点 巅峰24点 game24 twenty four 扑克 纸牌 算术 心算 凑24 加减乘除 四则运算 数学 益智 智力 游戏 计算",
+    klotski: "华容道 klotski 滑块 数字华容道 曹操 横刀立马 益智 解谜 puzzle 中式 三国 移动 拼图 益智游戏 烧脑 通关 sliding block",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -6332,6 +6391,7 @@ stock:"games",
 splitbill:"tools",
     metronome:"tools",
     game24:"games",
+    klotski:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -18588,6 +18648,337 @@ splitbill:"tools",
     window.g24Render = g24Render; window.g24Stop = g24Stop; window.g24Bind = g24Bind;
     window.__g24Test = { solve: g24Solve, evalExpr: g24Eval, stripOuter: stripOuter, st: st, save: save, deal: deal, check: check, cardTap: cardTap, opTap: opTap, reveal: reveal, skip: skip, loadSave: loadSave };
   })();
+  (function () {
+    var COLS = 4, ROWS = 5, U = 72, PAD = 3;
+    var TYPECH = { cao: "C", v: "V", h: "H", s: "S" };
+    var DIRS = { U: [-1, 0], D: [1, 0], L: [0, -1], R: [0, 1] };
+    var LAYOUTS = [
+      { key: "hengdao", name: "横刀立马（经典·最难）", pieces: [
+        { id: "cao", type: "cao", nm: "曹操", r: 0, c: 1, w: 2, h: 2 },
+        { id: "zhang", type: "v", nm: "张飞", r: 0, c: 0, w: 1, h: 2 },
+        { id: "zhao", type: "v", nm: "赵云", r: 0, c: 3, w: 1, h: 2 },
+        { id: "ma", type: "v", nm: "马超", r: 2, c: 0, w: 1, h: 2 },
+        { id: "huang", type: "v", nm: "黄忠", r: 2, c: 3, w: 1, h: 2 },
+        { id: "guan", type: "h", nm: "关羽", r: 2, c: 1, w: 2, h: 1 },
+        { id: "s1", type: "s", nm: "兵", r: 3, c: 1, w: 1, h: 1 },
+        { id: "s2", type: "s", nm: "兵", r: 3, c: 2, w: 1, h: 1 },
+        { id: "s3", type: "s", nm: "卒", r: 4, c: 0, w: 1, h: 1 },
+        { id: "s4", type: "s", nm: "卒", r: 4, c: 3, w: 1, h: 1 }
+      ] },
+      { key: "qitou", name: "齐头并进（中等）", pieces: [
+        { id: "cao", type: "cao", nm: "曹操", r: 0, c: 1, w: 2, h: 2 },
+        { id: "sa", type: "s", nm: "兵", r: 0, c: 0, w: 1, h: 1 },
+        { id: "sb", type: "s", nm: "兵", r: 0, c: 3, w: 1, h: 1 },
+        { id: "zhang", type: "v", nm: "张飞", r: 1, c: 0, w: 1, h: 2 },
+        { id: "zhao", type: "v", nm: "赵云", r: 1, c: 3, w: 1, h: 2 },
+        { id: "guan", type: "h", nm: "关羽", r: 3, c: 1, w: 2, h: 1 },
+        { id: "ma", type: "v", nm: "马超", r: 3, c: 0, w: 1, h: 2 },
+        { id: "huang", type: "v", nm: "黄忠", r: 3, c: 3, w: 1, h: 2 },
+        { id: "sc", type: "s", nm: "卒", r: 4, c: 1, w: 1, h: 1 },
+        { id: "sd", type: "s", nm: "卒", r: 4, c: 2, w: 1, h: 1 }
+      ] },
+      { key: "xiaoshi", name: "小试身手（入门）", pieces: [
+        { id: "cao", type: "cao", nm: "曹操", r: 0, c: 1, w: 2, h: 2 },
+        { id: "zhang", type: "v", nm: "张飞", r: 0, c: 0, w: 1, h: 2 },
+        { id: "zhao", type: "v", nm: "赵云", r: 0, c: 3, w: 1, h: 2 },
+        { id: "sa", type: "s", nm: "兵", r: 2, c: 0, w: 1, h: 1 },
+        { id: "sb", type: "s", nm: "兵", r: 2, c: 1, w: 1, h: 1 },
+        { id: "sc", type: "s", nm: "兵", r: 2, c: 2, w: 1, h: 1 },
+        { id: "sd", type: "s", nm: "兵", r: 2, c: 3, w: 1, h: 1 },
+        { id: "ma", type: "v", nm: "马超", r: 3, c: 0, w: 1, h: 2 },
+        { id: "huang", type: "v", nm: "黄忠", r: 3, c: 3, w: 1, h: 2 }
+      ] }
+    ];
+
+    var st = { li: 0, pieces: [], sel: null, moves: 0, startTs: 0, timer: null, done: false, demo: false, hist: [] };
+
+    function el(id) { return document.getElementById(id); }
+    function toastMsg(m) { if (typeof toast === "function") toast(m); }
+    function clonePieces(arr) {
+      return arr.map(function (p) { return { id: p.id, type: p.type, nm: p.nm, r: p.r, c: p.c, w: p.w, h: p.h }; });
+    }
+    function occGrid(pieces) {
+      var g = [], r, c;
+      for (r = 0; r < ROWS; r++) { g.push([]); for (c = 0; c < COLS; c++) g[r].push(-1); }
+      for (var i = 0; i < pieces.length; i++) {
+        var p = pieces[i];
+        for (r = p.r; r < p.r + p.h; r++) for (c = p.c; c < p.c + p.w; c++) g[r][c] = i;
+      }
+      return g;
+    }
+    function canMove(pieces, i, dr, dc) {
+      var p = pieces[i], g = occGrid(pieces), r, c;
+      for (r = p.r; r < p.r + p.h; r++) for (c = p.c; c < p.c + p.w; c++) {
+        var nr = r + dr, nc = c + dc;
+        if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) return false;
+        var occ = g[nr][nc];
+        if (occ !== -1 && occ !== i) return false;
+      }
+      return true;
+    }
+    function isWin(pieces) {
+      for (var i = 0; i < pieces.length; i++) {
+        if (pieces[i].type === "cao") return pieces[i].r === 3 && pieces[i].c === 1;
+      }
+      return false;
+    }
+    function canonKey(pieces) {
+      var g = [], r, c;
+      for (r = 0; r < ROWS; r++) { for (c = 0; c < COLS; c++) g.push("."); }
+      for (var i = 0; i < pieces.length; i++) {
+        var p = pieces[i], ch = TYPECH[p.type] || "?";
+        for (r = p.r; r < p.r + p.h; r++) for (c = p.c; c < p.c + p.w; c++) g[r * COLS + c] = ch;
+      }
+      return g.join("");
+    }
+    // BFS 求解器：返回单格移动序列 [{id,dr,dc}] 或 null
+    function solve(startPieces) {
+      var start = clonePieces(startPieces);
+      if (isWin(start)) return [];
+      var startKey = canonKey(start);
+      var visited = {}; visited[startKey] = true;
+      var queue = [{ pieces: start, key: startKey }];
+      var parent = {}; // key -> {pk, move}
+      var order = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+      var cap = 400000, seen = 0;
+      while (queue.length && seen < cap) {
+        var cur = queue.shift(); seen++;
+        for (var i = 0; i < cur.pieces.length; i++) {
+          for (var d = 0; d < 4; d++) {
+            var dr = order[d][0], dc = order[d][1];
+            if (!canMove(cur.pieces, i, dr, dc)) continue;
+            var np = clonePieces(cur.pieces);
+            np[i].r += dr; np[i].c += dc;
+            var nk = canonKey(np);
+            if (visited[nk]) continue;
+            visited[nk] = true;
+            parent[nk] = { pk: cur.key, move: { id: cur.pieces[i].id, dr: dr, dc: dc } };
+            if (isWin(np)) {
+              var path = [], k = nk;
+              while (k !== startKey) { path.unshift(parent[k].move); k = parent[k].pk; }
+              return path;
+            }
+            queue.push({ pieces: np, key: nk });
+          }
+        }
+      }
+      return null;
+    }
+
+    function layout() { return LAYOUTS[st.li]; }
+    function findById(id) { for (var i = 0; i < st.pieces.length; i++) if (st.pieces[i].id === id) return i; return -1; }
+
+    function load(key) {
+      var st_store = read();
+      var idx = 0;
+      for (var i = 0; i < LAYOUTS.length; i++) if (LAYOUTS[i].key === key) idx = i;
+      st.li = idx;
+      st.pieces = clonePieces(LAYOUTS[idx].pieces);
+      st.sel = null; st.moves = 0; st.done = false; st.demo = false; st.hist = [];
+      stopTimer(); st.startTs = 0;
+      render();
+      msg("");
+    }
+
+    function read() {
+      try { return JSON.parse(localStorage.getItem("suibian_klotski") || "{}"); } catch (e) { return {}; }
+    }
+    function write(o) { try { localStorage.setItem("suibian_klotski", JSON.stringify(o)); } catch (e) {} }
+
+    function tick() {
+      if (!st.startTs) return;
+      var s = (Date.now() - st.startTs) / 1000;
+      var t = el("klTime"); if (t) t.textContent = s.toFixed(1) + "s";
+    }
+    function startTimer() { if (st.timer) return; st.startTs = Date.now(); st.timer = setInterval(tick, 100); }
+    function stopTimer() { if (st.timer) { clearInterval(st.timer); st.timer = null; } }
+
+    function msg(m) { var e = el("klMsg"); if (e) e.textContent = m || ""; }
+
+    function move(idx, dr, dc, silent) {
+      if (st.done) return false;
+      if (idx < 0 || !canMove(st.pieces, idx, dr, dc)) { if (!silent) toastMsg("这个方向动不了 🚧"); return false; }
+      st.hist.push(clonePieces(st.pieces));
+      if (st.hist.length > 500) st.hist.shift();
+      st.pieces[idx].r += dr; st.pieces[idx].c += dc;
+      st.moves++;
+      if (!st.startTs) startTimer();
+      render();
+      if (isWin(st.pieces)) win();
+      return true;
+    }
+
+    function win() {
+      st.done = true; stopTimer();
+      if (st.demo) { msg("🤖 自动通关演示完成！这就是解法～"); return; }
+      var store = read();
+      store.wins = (store.wins || 0) + 1;
+      store.best = store.best || {};
+      var key = layout().key, prev = store.best[key];
+      var better = (prev == null || st.moves < prev);
+      if (better) store.best[key] = st.moves;
+      write(store);
+      if (typeof bumpUsage === "function") {
+        bumpUsage("klotski");
+        if (key === "hengdao") bumpUsage("klotskihard");
+      }
+      if (typeof confettiBurst === "function") confettiBurst(140);
+      var extra = better ? "（刷新本关最少步纪录！）" : "";
+      msg("🎉 曹操成功突围！用了 " + st.moves + " 步 " + extra);
+      toastMsg("🎉 通关「" + layout().name.replace(/（.*/, "") + "」！");
+      render();
+    }
+
+    function doDir(dch) {
+      var d = DIRS[dch]; if (!d) return;
+      if (st.sel == null) { toastMsg("先点一个棋子再移动 👆"); return; }
+      move(findById(st.sel), d[0], d[1]);
+    }
+
+    function hint() {
+      if (st.done) { toastMsg("已经通关啦～"); return; }
+      msg("🧠 计算解法中…");
+      setTimeout(function () {
+        var path = solve(st.pieces);
+        if (!path) { msg("😵 这个局面似乎无解"); return; }
+        if (!path.length) { msg("已经是终点啦！"); return; }
+        var m = path[0];
+        st.sel = m.id;
+        move(findById(m.id), m.dr, m.dc);
+        var lp = findById(m.id);
+        msg("💡 提示：移动「" + (lp >= 0 ? st.pieces[lp].nm : "棋子") + "」，剩约 " + path.length + " 步可解");
+      }, 20);
+    }
+
+    function autoSolve() {
+      if (st.done) { toastMsg("已经通关啦～"); return; }
+      msg("🤖 计算最优解…");
+      setTimeout(function () {
+        var path = solve(st.pieces);
+        if (!path || !path.length) { msg("😵 无解或已是终点"); return; }
+        st.demo = true; st.sel = null;
+        var i = 0;
+        var iv = setInterval(function () {
+          if (i >= path.length) { clearInterval(iv); return; }
+          var m = path[i++];
+          var idx = findById(m.id);
+          if (idx >= 0 && canMove(st.pieces, idx, m.dr, m.dc)) {
+            st.pieces[idx].r += m.dr; st.pieces[idx].c += m.dc;
+            st.moves++; render();
+            if (isWin(st.pieces)) { clearInterval(iv); win(); }
+          } else { clearInterval(iv); }
+        }, 240);
+        msg("🤖 自动演示中（共 " + path.length + " 步）…");
+      }, 20);
+    }
+
+    function undo() {
+      if (st.done || !st.hist.length) { toastMsg("没有可撤销的步骤"); return; }
+      st.pieces = st.hist.pop();
+      st.moves = Math.max(0, st.moves - 1);
+      render();
+    }
+
+    function render() {
+      var b = el("klBoard"); if (!b) return;
+      b.style.width = (COLS * U) + "px";
+      b.style.height = (ROWS * U) + "px";
+      b.innerHTML = "";
+      var exit = document.createElement("div");
+      exit.className = "kl-exit";
+      exit.style.left = (U + PAD) + "px";
+      exit.style.width = (2 * U - 2 * PAD) + "px";
+      exit.style.bottom = "1px";
+      b.appendChild(exit);
+      for (var i = 0; i < st.pieces.length; i++) {
+        (function (p) {
+          var t = document.createElement("div");
+          t.className = "kl-tile " + p.type + (st.sel === p.id ? " sel" : "");
+          t.style.left = (p.c * U + PAD) + "px";
+          t.style.top = (p.r * U + PAD) + "px";
+          t.style.width = (p.w * U - 2 * PAD) + "px";
+          t.style.height = (p.h * U - 2 * PAD) + "px";
+          t.innerHTML = '<span class="kl-nm">' + p.nm + "</span>" + (p.type === "cao" ? '<span class="kl-sub">CAO CAO</span>' : "");
+          t.addEventListener("click", function (e) { e.stopPropagation(); if (st.done) return; st.sel = p.id; render(); });
+          // 拖拽移动
+          var sx = 0, sy = 0, dragging = false;
+          t.addEventListener("pointerdown", function (e) { dragging = true; sx = e.clientX; sy = e.clientY; st.sel = p.id; render(); });
+          t.addEventListener("pointerup", function (e) {
+            if (!dragging) return; dragging = false;
+            var dx = e.clientX - sx, dy = e.clientY - sy, TH = 18;
+            if (Math.abs(dx) < TH && Math.abs(dy) < TH) return;
+            var idx = findById(p.id);
+            if (Math.abs(dx) > Math.abs(dy)) move(idx, 0, dx > 0 ? 1 : -1); else move(idx, dy > 0 ? 1 : -1, 0);
+          });
+          b.appendChild(t);
+        })(st.pieces[i]);
+      }
+      var mv = el("klMoves"); if (mv) mv.textContent = st.moves;
+      var wn = el("klWins"); if (wn) wn.textContent = (read().wins || 0);
+      var bs = el("klBest"); if (bs) { var be = (read().best || {})[layout().key]; bs.textContent = be != null ? be : "-"; }
+      if (!st.startTs) { var tt = el("klTime"); if (tt) tt.textContent = "0.0s"; }
+    }
+
+    function fillLayoutSelect() {
+      var s = el("klLay"); if (!s) return;
+      s.innerHTML = "";
+      for (var i = 0; i < LAYOUTS.length; i++) {
+        var o = document.createElement("option");
+        o.value = LAYOUTS[i].key; o.textContent = LAYOUTS[i].name;
+        s.appendChild(o);
+      }
+      s.value = layout().key;
+    }
+
+    function klRender() {
+      if (!el("klBoard")) return;
+      if (!st.pieces.length) { fillLayoutSelect(); load(LAYOUTS[0].key); }
+      else { fillLayoutSelect(); render(); }
+    }
+    function klStop() { stopTimer(); }
+
+    var bound = false;
+    function klBind() {
+      if (bound) return; if (!el("klBoard")) return; bound = true;
+      fillLayoutSelect();
+      var s = el("klLay"); if (s) s.addEventListener("change", function () { load(s.value); });
+      var r = el("klReset"); if (r) r.addEventListener("click", function () { load(layout().key); });
+      var u = el("klUndo"); if (u) u.addEventListener("click", undo);
+      var h = el("klHint"); if (h) h.addEventListener("click", hint);
+      var so = el("klSolve"); if (so) so.addEventListener("click", autoSolve);
+      var pads = document.querySelectorAll("#klotski .kl-dpad button");
+      for (var i = 0; i < pads.length; i++) {
+        (function (btn) { btn.addEventListener("click", function () { doDir(btn.getAttribute("data-d")); }); })(pads[i]);
+      }
+      var bd = el("klBoard"); if (bd) bd.addEventListener("click", function () { st.sel = null; render(); });
+      document.addEventListener("keydown", function (e) {
+        var sec = el("klotski"); if (!sec || sec.classList.contains("hidden") || sec.style.display === "none") return;
+        var tag = (e.target && e.target.tagName) || "";
+        if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+        var map = { ArrowUp: "U", ArrowDown: "D", ArrowLeft: "L", ArrowRight: "R" };
+        if (map[e.key]) { e.preventDefault(); doDir(map[e.key]); }
+      });
+      load(LAYOUTS[0].key);
+    }
+
+    window.klRender = klRender;
+    window.klStop = klStop;
+    window.klBind = klBind;
+    window.__klTest = { solve: solve, canMove: canMove, isWin: isWin, canonKey: canonKey, LAYOUTS: LAYOUTS, clonePieces: clonePieces, st: st, load: load, move: move, findById: findById, occGrid: occGrid };
+  })();
+  klBind();
+  BADGES.push(
+    { emoji: "🧩", name: "华容道入门", desc: "第一次解开华容道任意关卡", test: function (u) { return (u.klotski || 0) >= 1; } },
+    { emoji: "🏇", name: "横刀立马", desc: "通关最难的「横刀立马」布局", test: function (u) { return (u.klotskihard || 0) >= 1; } }
+  );
+  QUOTES.push(
+    "华容道的智慧：想让曹操走，先得给他让路。",
+    "人生和华容道一样，很多时候要先退一步，才能腾出前进的空间。",
+    "别硬推曹操，先挪开挡路的兵。",
+    "只有两个空位，也能盘活整个棋局——格局不在大小，在会不会用。",
+    "解不开就点提示，认输不丢人，卡死才丢人。",
+    "关羽拦得住曹操，拦不住一个会玩华容道的你。"
+  );
   g24Bind();
   BADGES.push(
     { emoji: "\ud83c\udccf", name: "24\u70b9\u65b0\u624b", desc: "\u7b2c\u4e00\u6b21\u89e3\u51fa 24 \u70b9", test: function (u) { return (u.game24 || 0) >= 1; } },
