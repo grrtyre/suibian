@@ -1534,6 +1534,7 @@
         <button data-tab="bubble">🫧 泡泡龙</button>
         <button data-tab="backgammon">🎲 双陆棋</button>
         <button data-tab="hockey">🏒 空气曲棍球</button>
+        <button data-tab="djump">🦘 涂鸦跳跃</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6911,6 +6912,45 @@
       <div class="hk-tip">🖱️ 用鼠标 / 手指拖动下半场的粉色球拍击球。快速挥拍能给冰球更大的力量；冰球会在四壁反弹，打进上方蓝色球门即得分。上半场由 AI 防守，三档难度任你挑，先进指定球数者获胜。</div>
     </div>
   </section>
+  <section class="panel" id="djump">
+    <h2>🦘 涂鸦跳跃</h2>
+    <p class="sub">踩着平台一路往上跳，别掉下去——看你能跳多高！</p>
+    <style>
+      #djump .dj-wrap { max-width:380px; margin:0 auto; }
+      #djump .dj-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #djump .dj-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #djump .dj-top button:hover { background:rgba(255,255,255,.12); }
+      #djump .dj-canvas-wrap { position:relative; width:100%; max-width:320px; margin:0 auto; }
+      #djump canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#121826; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #djump .dj-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(6,12,20,.82); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #djump .dj-msg.show { display:flex; }
+      #djump .dj-msg .t { font-size:1.5rem; font-weight:800; }
+      #djump .dj-msg .s { font-size:.95rem; opacity:.85; }
+      #djump .dj-msg button { padding:9px 24px; border-radius:10px; border:0; background:#f1c40f; color:#222; font-weight:700; cursor:pointer; }
+      #djump .dj-pad { display:flex; gap:14px; justify-content:center; margin-top:12px; }
+      #djump .dj-pad button { width:96px; height:52px; font-size:1.4rem; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; cursor:pointer; user-select:none; touch-action:none; }
+      #djump .dj-pad button:active { background:rgba(255,255,255,.16); }
+      #djump .dj-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="dj-wrap">
+      <div class="dj-top">
+        <button id="djNew">🔄 新的一跳</button>
+      </div>
+      <div class="dj-canvas-wrap">
+        <canvas id="djCanvas"></canvas>
+        <div class="dj-msg" id="djMsg">
+          <div class="t" id="djMsgT"></div>
+          <div class="s" id="djMsgS"></div>
+          <button id="djAgain">开始跳跃</button>
+        </div>
+      </div>
+      <div class="dj-pad">
+        <button id="djLeft" aria-label="左">◀</button>
+        <button id="djRight" aria-label="右">▶</button>
+      </div>
+      <div class="dj-tip">⌨️ 电脑上用 ← → 或 A / D 左右移动；📱 手机上用下方 ◀ ▶ 按钮，或直接在画面上左右拖动。角色会自动弹跳：踩绿色普通台、蓝色移动台、黄色弹簧（跳得更高）；踩到棕色台会碎，别停留。冲上顶部即无尽刷新高度，掉出屏幕就结束。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7266,6 +7306,7 @@
     if (id === "bubble") bubbleRender();
     if (id === "backgammon") bgRender();
     if (id === "hockey") hockeyRender();
+    if (id === "djump") djumpRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7282,6 +7323,7 @@
     if (id !== "bubble" && typeof bubbleStop === "function") bubbleStop();
     if (id !== "backgammon" && typeof bgStop === "function") bgStop();
     if (id !== "hockey" && typeof hockeyStop === "function") hockeyStop();
+    if (id !== "djump" && typeof djumpStop === "function") djumpStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7429,6 +7471,7 @@
     bubble: "泡泡龙 泡泡射手 bubble shooter 射泡泡 打泡泡 消除 三消 puzzle bobble 祖玛 街机 益智 瞄准 连锁 消泡泡 彩色泡泡 休闲 解压",
     backgammon: "西洋双陆棋 双陆棋 双陆 backgammon 十五子棋 骰子棋 掷骰 人机 对弈 对战 AI 棋类 桌游 board game 策略 出栈 打点 中栏 bar 棋盘 经典 tables",
     hockey: "空气曲棍球 曲棍球 冰球 air hockey 冰上曲棍 球拍 球门 进球 物理 反弹 人机 对战 对弈 AI 街机 休闲 反应 手眼协调 竞技 game",
+    djump: "涂鸦跳跃 涂鸦 跳跃 弹跳 doodle jump 平台跳跃 无尽 街机 休闲 上跳 弹簧 移动平台 反应 手眼协调 高度 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7636,6 +7679,7 @@ splitbill:"tools",
     bubble:"games",
     backgammon:"games",
     hockey:"games",
+    djump:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -31446,6 +31490,368 @@ splitbill:"tools",
         "借着侧墙斜打，往往能绕过对方球拍，直插死角。",
         "进攻再猛也要留一只手回防；空门失球，比没进球更亏。",
         "冰球不会累，但对手会——耐心磨到它露出破绽。"
+      );
+    })();
+    /* ===== 🦘 涂鸦跳跃 Doodle Jump（无尽弹跳） ===== */
+    (function () {
+      var D = typeof document !== "undefined" ? document : null;
+      var DJ_W = 320, DJ_H = 480;      // 逻辑尺寸（竖版）
+      var DJ_PW = 36, DJ_PH = 40;      // 玩家碰撞盒
+      var DJ_PLW = 58, DJ_PLH = 13;    // 平台尺寸
+      var DJ_G = 0.34;                 // 重力
+      var DJ_JUMP = -8.9;              // 普通弹跳初速
+      var DJ_SPRING = -16.5;           // 弹簧超级弹跳
+      var DJ_MOVE = 4.7;               // 键盘水平速度
+      var DJ_SCROLL = 200;             // 相机滚动线（越过即卷屏）
+      var DJ_VYMAX = 19;               // 下落限速（防穿透）
+
+      var djCanvas = null, djCtx = null, djDpr = 1;
+      var djP = null;                  // 玩家 {cx,y,vx,vy,dir}
+      var djPlats = [];                // 平台数组
+      var djScore = 0, djBest = 0, djTopY = 0;
+      var djOver = false, djStarted = false, djActive = false;
+      var djKeyL = false, djKeyR = false, djPtrX = null;
+      var djRAF = 0, djRunning = false, djWired = false;
+      var DJ_KEY = "suibian_djump";
+
+      function djRnd(a, b) { return a + Math.random() * (b - a); }
+      function djClamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+      // 水平环绕：中心越过左右边界即从另一侧回来
+      function djWrapX(cx) {
+        if (cx < -DJ_PW / 2) return DJ_W + DJ_PW / 2 - 1;
+        if (cx > DJ_W + DJ_PW / 2) return -DJ_PW / 2 + 1;
+        return cx;
+      }
+      // 落台判定：仅下落时、脚底本帧跨过台面顶、且水平重叠
+      function djLand(p, pl, prevFeet) {
+        if (p.vy <= 0 || pl.broken) return false;
+        var L = p.cx - DJ_PW / 2, R = p.cx + DJ_PW / 2;
+        if (R < pl.x || L > pl.x + pl.w) return false;
+        var feet = p.y + DJ_PH;
+        return prevFeet <= pl.y + pl.h && feet >= pl.y;
+      }
+
+      function djReadBest() {
+        try { djBest = parseInt(localStorage.getItem(DJ_KEY) || "0", 10) || 0; } catch (e) { djBest = 0; }
+      }
+      function djSaveBest() {
+        try { localStorage.setItem(DJ_KEY, String(djBest)); } catch (e) {}
+      }
+
+      // 生成一块平台（随难度提高移动/易碎比例，附带弹簧）
+      function djAddPlatform(y) {
+        var w = DJ_PLW;
+        var x = djRnd(6, DJ_W - w - 6);
+        var r = Math.random();
+        var diff = Math.min(djScore / 2400, 1);   // 0..1 随高度递增
+        var pFragile = 0.05 + diff * 0.20;
+        var pMove = 0.10 + diff * 0.26;
+        var type = 0, vx = 0, spring = false;
+        if (r < pFragile) type = 2;                       // 易碎（踩一次即碎）
+        else if (r < pFragile + pMove) {                  // 移动
+          type = 1; vx = (Math.random() < 0.5 ? -1 : 1) * djRnd(0.8, 1.9 + diff);
+        } else type = 0;                                   // 普通
+        if (type === 0 && Math.random() < 0.12) spring = true;
+        var pl = { x: x, y: y, w: w, h: DJ_PLH, type: type, vx: vx, spring: spring, broken: false };
+        djPlats.push(pl);
+        if (y < djTopY) djTopY = y;
+        return pl;
+      }
+
+      // 纯逻辑初始化（不触碰 DOM，可供无头测试）
+      function djReset() {
+        djScore = 0; djOver = false; djStarted = true;
+        djP = { cx: DJ_W / 2, y: DJ_H - 130, vx: 0, vy: DJ_JUMP, dir: 1 };
+        djPlats = [];
+        djTopY = DJ_H;
+        // 玩家脚下一块保底平台
+        djPlats.push({ x: DJ_W / 2 - DJ_PLW / 2, y: DJ_H - 84, w: DJ_PLW, h: DJ_PLH, type: 0, vx: 0, spring: false, broken: false });
+        djTopY = DJ_H - 84;
+        var y = DJ_H - 84;
+        while (y > -20) { y -= djRnd(52, 90); djAddPlatform(y); }
+      }
+
+      // 单帧物理推进（不绘制）；返回快照，供无头 sim 驱动
+      function djPhysics() {
+        if (djOver || !djP) return { over: djOver };
+        var p = djP;
+        // 水平：指针优先，否则键盘
+        if (djPtrX != null) {
+          var d = djPtrX - p.cx;
+          p.cx += d * 0.5;
+          if (d < -0.5) p.dir = -1; else if (d > 0.5) p.dir = 1;
+        } else {
+          var vx = 0;
+          if (djKeyL) vx -= DJ_MOVE;
+          if (djKeyR) vx += DJ_MOVE;
+          p.vx = vx; p.cx += vx;
+          if (vx < 0) p.dir = -1; else if (vx > 0) p.dir = 1;
+        }
+        p.cx = djWrapX(p.cx);
+        // 垂直
+        var prevFeet = p.y + DJ_PH;
+        p.vy += DJ_G;
+        if (p.vy > DJ_VYMAX) p.vy = DJ_VYMAX;
+        p.y += p.vy;
+        // 落台
+        if (p.vy > 0) {
+          for (var i = 0; i < djPlats.length; i++) {
+            var pl = djPlats[i];
+            if (djLand(p, pl, prevFeet)) {
+              p.y = pl.y - DJ_PH;
+              p.vy = pl.spring ? DJ_SPRING : DJ_JUMP;
+              if (pl.type === 2) pl.broken = true;         // 易碎踩碎
+              try { if (typeof settings !== "undefined" && settings.sound && typeof tone === "function") tone(pl.spring ? 880 : 520, 0.05, "square", 0.09); } catch (e) {}
+              break;
+            }
+          }
+        }
+        // 移动平台 & 碎块下坠
+        for (var j = 0; j < djPlats.length; j++) {
+          var q = djPlats[j];
+          if (q.type === 1 && !q.broken) {
+            q.x += q.vx;
+            if (q.x < 4) { q.x = 4; q.vx *= -1; }
+            if (q.x + q.w > DJ_W - 4) { q.x = DJ_W - 4 - q.w; q.vx *= -1; }
+          }
+          if (q.broken) q.y += 7;                          // 碎块坠落动画
+        }
+        // 相机卷屏（跟随上升）
+        if (p.y < DJ_SCROLL) {
+          var dy = DJ_SCROLL - p.y;
+          p.y = DJ_SCROLL;
+          djScore += dy;
+          for (var k = 0; k < djPlats.length; k++) djPlats[k].y += dy;
+          djTopY += dy;
+          while (djTopY > -10) { var ny = djTopY - djRnd(52, 90); djAddPlatform(ny); }
+          djPlats = djPlats.filter(function (pl) { return pl.y < DJ_H + 60; });
+        }
+        // 坠落判负
+        if (p.y > DJ_H + DJ_PH) { djOver = true; }
+        return { over: djOver, y: p.y, cx: p.cx, score: Math.floor(djScore), plats: djPlats.length };
+      }
+
+      /* ---------- 绘制 ---------- */
+      function djSetupCanvas() {
+        djDpr = (typeof window !== "undefined" && window.devicePixelRatio) ? Math.min(window.devicePixelRatio, 2) : 1;
+        djCanvas.width = DJ_W * djDpr;
+        djCanvas.height = DJ_H * djDpr;
+        djCtx = djCanvas.getContext("2d");
+        djCtx.setTransform(djDpr, 0, 0, djDpr, 0, 0);
+      }
+      function djRoundRect(c, x, y, w, h, r) {
+        c.beginPath();
+        c.moveTo(x + r, y);
+        c.arcTo(x + w, y, x + w, y + h, r);
+        c.arcTo(x + w, y + h, x, y + h, r);
+        c.arcTo(x, y + h, x, y, r);
+        c.arcTo(x, y, x + w, y, r);
+        c.closePath();
+      }
+      function djDrawPlatform(c, pl) {
+        var col = pl.type === 2 ? "#c07a3a" : (pl.type === 1 ? "#3d9bff" : "#48c479");
+        if (pl.broken) { c.globalAlpha = 0.5; }
+        c.fillStyle = col;
+        djRoundRect(c, pl.x, pl.y, pl.w, pl.h, 6); c.fill();
+        c.fillStyle = "rgba(255,255,255,.28)";
+        djRoundRect(c, pl.x + 3, pl.y + 2, pl.w - 6, 3, 2); c.fill();
+        if (pl.spring && !pl.broken) {
+          c.fillStyle = "#ffcf3f";
+          c.fillRect(pl.x + pl.w / 2 - 6, pl.y - 8, 12, 8);
+          c.strokeStyle = "#b8860b"; c.lineWidth = 1.4;
+          c.beginPath(); c.moveTo(pl.x + pl.w / 2 - 5, pl.y - 2);
+          c.lineTo(pl.x + pl.w / 2 + 5, pl.y - 6);
+          c.moveTo(pl.x + pl.w / 2 - 5, pl.y - 6);
+          c.lineTo(pl.x + pl.w / 2 + 5, pl.y - 2); c.stroke();
+        }
+        c.globalAlpha = 1;
+      }
+      function djDrawPlayer(c, p) {
+        var cx = p.cx, y = p.y, dir = p.dir;
+        var bx = cx - DJ_PW / 2, bw = DJ_PW;
+        // 身体
+        c.fillStyle = "#7ed957";
+        djRoundRect(c, bx + 3, y + 8, bw - 6, DJ_PH - 12, 12); c.fill();
+        // 头顶两只小触角
+        c.fillStyle = "#5bb33b";
+        c.fillRect(cx - 8, y + 3, 3, 7);
+        c.fillRect(cx + 5, y + 3, 3, 7);
+        // 眼睛（朝向）
+        var ex = dir >= 0 ? cx + 2 : cx - 8;
+        c.fillStyle = "#fff";
+        c.beginPath(); c.arc(ex, y + 17, 6, 0, Math.PI * 2); c.fill();
+        c.fillStyle = "#1a1a1a";
+        c.beginPath(); c.arc(ex + (dir >= 0 ? 2 : -2), y + 17, 2.6, 0, Math.PI * 2); c.fill();
+        // 小鼻子/嘴
+        c.fillStyle = "#e88a2a";
+        c.beginPath();
+        c.moveTo(dir >= 0 ? cx + 12 : cx - 12, y + 24);
+        c.lineTo(dir >= 0 ? cx + 20 : cx - 20, y + 26);
+        c.lineTo(dir >= 0 ? cx + 12 : cx - 12, y + 28);
+        c.closePath(); c.fill();
+        // 小脚
+        c.fillStyle = "#5bb33b";
+        c.fillRect(cx - 10, y + DJ_PH - 5, 7, 5);
+        c.fillRect(cx + 3, y + DJ_PH - 5, 7, 5);
+      }
+      function djDraw() {
+        if (!djCtx) return;
+        var c = djCtx;
+        // 背景渐变
+        var g = c.createLinearGradient(0, 0, 0, DJ_H);
+        g.addColorStop(0, "#20263f"); g.addColorStop(1, "#121826");
+        c.fillStyle = g; c.fillRect(0, 0, DJ_W, DJ_H);
+        // 网格点缀
+        c.fillStyle = "rgba(255,255,255,.03)";
+        for (var gy = (djScore % 40); gy < DJ_H; gy += 40) c.fillRect(0, gy, DJ_W, 1);
+        // 平台
+        for (var i = 0; i < djPlats.length; i++) djDrawPlatform(c, djPlats[i]);
+        // 玩家
+        if (djP) djDrawPlayer(c, djP);
+        // 分数 HUD
+        c.fillStyle = "#fff"; c.font = "bold 22px system-ui,sans-serif"; c.textAlign = "left";
+        c.fillText(String(Math.floor(djScore)), 12, 30);
+        c.fillStyle = "rgba(255,255,255,.55)"; c.font = "12px system-ui,sans-serif";
+        c.fillText("最高 " + djBest, 12, 48);
+      }
+
+      function djLoop() {
+        if (!djRunning) return;
+        djPhysics();
+        djDraw();
+        if (djOver) { djEnd(); return; }
+        djRAF = requestAnimationFrame(djLoop);
+      }
+
+      function djStart() {
+        if (!djCanvas) return;
+        djReadBest();
+        djReset();
+        try { bumpUsage("djump"); } catch (e) {}
+        var msg = $("djMsg"); if (msg) msg.classList.remove("show");
+        djKeyL = djKeyR = false; djPtrX = null;
+        djRunning = true; djActive = true;
+        if (djRAF) cancelAnimationFrame(djRAF);
+        djRAF = requestAnimationFrame(djLoop);
+      }
+
+      function djEnd() {
+        djRunning = false;
+        if (djRAF) { cancelAnimationFrame(djRAF); djRAF = 0; }
+        var sc = Math.floor(djScore);
+        var isBest = sc > djBest;
+        if (isBest) { djBest = sc; djSaveBest(); }
+        if (sc >= 1000) { try { bumpUsage("djumphi"); } catch (e) {} }
+        try { if (typeof renderAchv === "function") renderAchv(); } catch (e) {}
+        var msg = $("djMsg"), t = $("djMsgT"), s = $("djMsgS");
+        if (t) t.textContent = isBest ? "🎉 新纪录！" : "🪂 摔下来啦";
+        if (s) s.textContent = "本次高度 " + sc + (isBest ? "（历史最佳）" : "　最高 " + djBest);
+        if (msg) msg.classList.add("show");
+        if (isBest && sc > 0) {
+          try { if (typeof confettiBurst === "function") confettiBurst(120); } catch (e) {}
+          try { if (typeof settings !== "undefined" && settings.sound && typeof playDing === "function") playDing(); } catch (e) {}
+        } else {
+          try { if (typeof settings !== "undefined" && settings.sound && typeof tone === "function") tone(160, 0.3, "sawtooth", 0.12); } catch (e) {}
+        }
+      }
+
+      function djStop() {
+        djRunning = false; djActive = false;
+        if (djRAF) { cancelAnimationFrame(djRAF); djRAF = 0; }
+        djKeyL = djKeyR = false; djPtrX = null;
+      }
+
+      function djWire() {
+        if (djWired || !D) return; djWired = true;
+        // 键盘
+        D.addEventListener("keydown", function (e) {
+          if (!djActive) return;
+          var k = e.key;
+          if (k === "ArrowLeft" || k === "a" || k === "A") { djKeyL = true; djPtrX = null; e.preventDefault(); }
+          else if (k === "ArrowRight" || k === "d" || k === "D") { djKeyR = true; djPtrX = null; e.preventDefault(); }
+          else if ((k === " " || k === "Enter") && djOver) { djStart(); e.preventDefault(); }
+        });
+        D.addEventListener("keyup", function (e) {
+          if (!djActive) return;
+          var k = e.key;
+          if (k === "ArrowLeft" || k === "a" || k === "A") djKeyL = false;
+          else if (k === "ArrowRight" || k === "d" || k === "D") djKeyR = false;
+        });
+        // 指针（拖动 / 触摸画布控制水平）
+        if (djCanvas) {
+          var setPtr = function (e) {
+            var rect = djCanvas.getBoundingClientRect();
+            var clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+            djPtrX = djClamp((clientX - rect.left) / rect.width * DJ_W, 0, DJ_W);
+          };
+          djCanvas.addEventListener("pointerdown", function (e) { setPtr(e); e.preventDefault(); });
+          djCanvas.addEventListener("pointermove", function (e) { if (e.buttons || (e.pointerType === "touch")) setPtr(e); });
+          djCanvas.addEventListener("pointerup", function () { djPtrX = null; });
+          djCanvas.addEventListener("pointerleave", function () { djPtrX = null; });
+        }
+        // 屏幕左右按钮
+        var bl = $("djLeft"), br = $("djRight");
+        if (bl) {
+          bl.addEventListener("pointerdown", function (e) { djKeyL = true; djPtrX = null; e.preventDefault(); });
+          bl.addEventListener("pointerup", function () { djKeyL = false; });
+          bl.addEventListener("pointerleave", function () { djKeyL = false; });
+        }
+        if (br) {
+          br.addEventListener("pointerdown", function (e) { djKeyR = true; djPtrX = null; e.preventDefault(); });
+          br.addEventListener("pointerup", function () { djKeyR = false; });
+          br.addEventListener("pointerleave", function () { djKeyR = false; });
+        }
+        var nb = $("djNew"); if (nb) nb.addEventListener("click", function () { try { if (typeof playClick === "function") playClick(); } catch (e) {} djStart(); });
+        var ag = $("djAgain"); if (ag) ag.addEventListener("click", function () { try { if (typeof playClick === "function") playClick(); } catch (e) {} djStart(); });
+      }
+
+      function djRender() {
+        if (!D) return;
+        djCanvas = $("djCanvas"); if (!djCanvas) return;
+        djSetupCanvas();
+        djWire();
+        djActive = true;
+        djReadBest();
+        if (!djStarted) {
+          // 首次进入：显示一个静态起始画面
+          djReset(); djRunning = false; djStarted = false;
+          djDraw();
+          var msg = $("djMsg"), t = $("djMsgT"), s = $("djMsgS");
+          if (t) t.textContent = "🦘 涂鸦跳跃";
+          if (s) s.textContent = "踩着平台一路往上跳，别掉下去！最高 " + djBest;
+          if (msg) msg.classList.add("show");
+        } else if (!djRunning && !djOver) {
+          djDraw();
+        } else if (djOver) {
+          djDraw();
+        }
+      }
+
+      // 暴露给顶层 activate（挂在 window 上，主脚本通过同名函数调用）
+      window.djumpRender = djRender;
+      window.djumpStop = djStop;
+
+      // 仅供无头 sim 驱动（浏览器不会主动调用）
+      window.__djTest = {
+        reset: djReset, physics: djPhysics, land: djLand, wrapX: djWrapX, clamp: djClamp,
+        addPlatform: djAddPlatform,
+        setKeys: function (l, r) { djKeyL = !!l; djKeyR = !!r; djPtrX = null; },
+        setPtr: function (x) { djPtrX = (x == null ? null : x); },
+        get: function () { return { y: djP ? djP.y : 0, cx: djP ? djP.cx : 0, vy: djP ? djP.vy : 0, score: Math.floor(djScore), over: djOver, plats: djPlats.length }; },
+        state: function () { return { p: djP, plats: djPlats }; },
+        W: DJ_W, H: DJ_H, PW: DJ_PW, PH: DJ_PH, G: DJ_G, JUMP: DJ_JUMP, SPRING: DJ_SPRING, SCROLL: DJ_SCROLL
+      };
+
+      BADGES.push(
+        { emoji: "🦘", name: "跳跳新手", desc: "玩过一局涂鸦跳跃", test: function (u) { return (u.djump || 0) >= 1; } },
+        { emoji: "🚀", name: "云端跳者", desc: "涂鸦跳跃单局高度突破 1000", test: function (u) { return (u.djumphi || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "涂鸦跳跃的哲学：你不能停下，停下就会掉下去——一直往上跳就对了。",
+        "别盯着脚下的深渊，眼睛要看着上面那块还没踩到的平台。",
+        "移动的平台像机会，来回晃悠，看准了再落脚。",
+        "踩碎的那块板别指望第二次，人生很多台阶只借你一步。",
+        "遇到弹簧就别客气，好运来的时候要跳得比平时更高。"
       );
     })();
 </script>
