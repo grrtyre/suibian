@@ -1536,6 +1536,7 @@
         <button data-tab="hockey">🏒 空气曲棍球</button>
         <button data-tab="djump">🦘 涂鸦跳跃</button>
         <button data-tab="zuma">🐸 祖玛弹珠</button>
+        <button data-tab="invaders">👾 太空侵略者</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6985,6 +6986,46 @@
       <div class="zm-tip">🖱️ 移动鼠标 / 手指瞄准，点按发射彩珠；三颗同色相连即消除，接缝同色还会连锁加倍。右键 / C 键 / 「换一颗」可交换当前珠与下一颗。珠链会沿螺旋轨道滚向中心骷髅洞，抢在它到达前清空全部弹珠即过关——关卡越高，珠越多、滚越快、颜色越花。</div>
     </div>
   </section>
+  <section class="panel" id="invaders">
+    <h2>👾 太空侵略者</h2>
+    <p class="sub">左右腾挪、抬手开火——别让外星舰队落地！</p>
+    <style>
+      #invaders .inv-wrap { max-width:420px; margin:0 auto; }
+      #invaders .inv-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #invaders .inv-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #invaders .inv-top button:hover { background:rgba(255,255,255,.12); }
+      #invaders .inv-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #invaders canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#05070f; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #invaders .inv-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(6,10,18,.84); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #invaders .inv-msg.show { display:flex; }
+      #invaders .inv-msg .t { font-size:1.5rem; font-weight:800; }
+      #invaders .inv-msg .s { font-size:.95rem; opacity:.85; }
+      #invaders .inv-msg button { padding:9px 24px; border-radius:10px; border:0; background:#80d8ff; color:#123; font-weight:700; cursor:pointer; }
+      #invaders .inv-pad { display:flex; gap:10px; justify-content:center; margin-top:10px; }
+      #invaders .inv-pad button { flex:1; max-width:110px; padding:12px 0; font-size:1.15rem; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; cursor:pointer; touch-action:none; user-select:none; -webkit-user-select:none; }
+      #invaders .inv-pad button:active { background:rgba(255,255,255,.18); }
+      #invaders .inv-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="inv-wrap">
+      <div class="inv-top">
+        <button id="invNew">🔄 新的一局</button>
+      </div>
+      <div class="inv-canvas-wrap">
+        <canvas id="invCanvas"></canvas>
+        <div class="inv-msg" id="invMsg">
+          <div class="t" id="invMsgT"></div>
+          <div class="s" id="invMsgS"></div>
+          <button id="invAgain">开始游戏</button>
+        </div>
+      </div>
+      <div class="inv-pad">
+        <button id="invLeft">◀</button>
+        <button id="invFire">🔥</button>
+        <button id="invRight">▶</button>
+      </div>
+      <div class="inv-tip">⌨️ ← → / A D 移动，空格 / K 开火；📱 底部按钮或直接在画布上拖动战机、点按射击。三种像素外星人分值 10/20/30，顶部红色飞碟 50~150 分；四座绿色掩体可挡弹但会被打碎，敌方越打越少下压越快——全歼一波得奖励分并回一条命，波次无尽、难度递增，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7342,6 +7383,7 @@
     if (id === "hockey") hockeyRender();
     if (id === "djump") djumpRender();
     if (id === "zuma") zumaRender();
+    if (id === "invaders") invadersRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7360,6 +7402,7 @@
     if (id !== "hockey" && typeof hockeyStop === "function") hockeyStop();
     if (id !== "djump" && typeof djumpStop === "function") djumpStop();
     if (id !== "zuma" && typeof zumaStop === "function") zumaStop();
+    if (id !== "invaders" && typeof invadersStop === "function") invadersStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7509,6 +7552,7 @@
     hockey: "空气曲棍球 曲棍球 冰球 air hockey 冰上曲棍 球拍 球门 进球 物理 反弹 人机 对战 对弈 AI 街机 休闲 反应 手眼协调 竞技 game",
     djump: "涂鸦跳跃 涂鸦 跳跃 弹跳 doodle jump 平台跳跃 无尽 街机 休闲 上跳 弹簧 移动平台 反应 手眼协调 高度 game",
     zuma: "祖玛 祖玛弹珠 zuma 弹珠 三消 消除 轨道 螺旋 青蛙 射击 泡泡 连锁 街机 休闲 瞄准 手眼协调 game",
+    invaders: "太空侵略者 invaders space invaders 小蜜蜂 射击 外星人 飞船 战机 像素 街机 打飞机 掩体 飞碟 经典 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7718,6 +7762,7 @@ splitbill:"tools",
     hockey:"games",
     djump:"games",
     zuma:"games",
+    invaders:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -32254,6 +32299,453 @@ splitbill:"tools",
         "珠链越滚越近不可怕，可怕的是你握着弹珠迟迟不敢发射。",
         "连锁反应从来不是运气，是你之前每一颗都放对了位置。",
         "颜色不对就换一颗再打，人生也一样，没必要用错的答案硬凑。"
+      );
+    })();
+    (function () {
+      "use strict";
+      var D = document;
+      var IV_KEY = "suibian_invaders";
+      var IV_W = 360, IV_H = 480;
+      var IV_ROWS = 5, IV_COLS = 8, IV_SX = 34, IV_SY = 26, IV_AW = 24, IV_AH = 16;
+      var IV_PY = IV_H - 34, IV_PW = 26, IV_PH = 12;
+      var ivCv = null, ivCtx = null, ivRAF = 0, ivRunning = false, ivStarted = false, ivWired = false;
+      var ivScore = 0, ivBest = 0, ivLives = 3, ivLevel = 1, ivOver = false, ivWaveClear = false, ivTick = 0;
+      var ivPX = IV_W / 2, ivKeyL = false, ivKeyR = false, ivBtnL = false, ivBtnR = false, ivDrag = false;
+      var ivPB = [], ivAB = [], ivAliens = [], ivGX = 40, ivGY = 60, ivDir = 1, ivAnim = 0;
+      var ivShields = [], ivUfo = null, ivUfoTimer = 500, ivInvinc = 0, ivFreeze = 0, ivFloats = [];
+      var ivStars = [];
+      (function () {
+        var s = 7;
+        for (var i = 0; i < 42; i++) {
+          s = (s * 16807) % 2147483647; var x = s % IV_W;
+          s = (s * 16807) % 2147483647; var y = s % (IV_H - 140);
+          s = (s * 16807) % 2147483647;
+          ivStars.push({ x: x, y: y + 14, r: 0.6 + (s % 10) / 12 });
+        }
+      })();
+
+      var IV_SPR = [
+        [ /* squid */
+          ["...##...", "..####..", ".######.", "##.##.##", "########", ".#.##.#.", "#......#", ".#....#."],
+          ["...##...", "..####..", ".######.", "##.##.##", "########", "..#..#..", ".#.##.#.", "#.#..#.#"]
+        ],
+        [ /* crab */
+          ["..#.....#..", "...#...#...", "..#######..", ".##.###.##.", "###########", "#.#######.#", "#.#.....#.#", "...##.##..."],
+          ["..#.....#..", "#..#...#..#", "#.#######.#", "###.###.###", ".#########.", "..#######..", "..#.....#..", ".#.......#."]
+        ],
+        [ /* octopus */
+          ["....####....", ".##########.", "############", "###..##..###", "############", "...##..##...", "..##.##.##..", "##........##"],
+          ["....####....", ".##########.", "############", "###..##..###", "############", "..###..###..", ".##..##..##.", "..##....##.."]
+        ]
+      ];
+      var IV_PAL = ["#ce93d8", "#4dd0e1", "#aed581"];
+
+      function ivAlienPos(a) { return { x: ivGX + a.c * IV_SX, y: ivGY + a.r * IV_SY }; }
+      function ivAliveList() {
+        var out = [];
+        for (var i = 0; i < ivAliens.length; i++) if (ivAliens[i].alive) out.push(ivAliens[i]);
+        return out;
+      }
+
+      function ivMakeShields() {
+        ivShields = [];
+        var shape = [".######.", "########", "########", "###..###", "##....##"];
+        var xs = [62, 180, 298];
+        for (var i = 0; i < 3; i++) {
+          var cells = [];
+          for (var r = 0; r < 5; r++) {
+            var row = [];
+            for (var c = 0; c < 8; c++) row.push(shape[r].charAt(c) === "#" ? 2 : 0);
+            cells.push(row);
+          }
+          ivShields.push({ x0: xs[i] - 24, y0: IV_H - 118, cells: cells });
+        }
+      }
+
+      function ivHitShield(x, y) {
+        for (var i = 0; i < ivShields.length; i++) {
+          var s = ivShields[i];
+          var c = Math.floor((x - s.x0) / 6), r = Math.floor((y - s.y0) / 6);
+          if (c < 0 || c >= 8 || r < 0 || r >= 5) continue;
+          if (s.cells[r][c] > 0) { s.cells[r][c]--; return true; }
+        }
+        return false;
+      }
+
+      function ivSpawnWave(lv) {
+        ivAliens = [];
+        for (var r = 0; r < IV_ROWS; r++)
+          for (var c = 0; c < IV_COLS; c++)
+            ivAliens.push({ c: c, r: r, alive: true, type: r === 0 ? 0 : (r < 3 ? 1 : 2), pts: r === 0 ? 30 : (r < 3 ? 20 : 10) });
+        ivGX = (IV_W - ((IV_COLS - 1) * IV_SX + IV_AW)) / 2;
+        ivGY = 54 + Math.min(lv - 1, 5) * 8;
+        ivDir = 1; ivAnim = 0; ivPB = []; ivAB = []; ivFloats = [];
+        ivUfo = null; ivUfoTimer = 420 + Math.floor(Math.random() * 360);
+        ivWaveClear = false; ivFreeze = 30; ivInvinc = 60; ivPX = IV_W / 2;
+        ivMakeShields();
+      }
+
+      function ivMsgShow(t, s, btn) {
+        var m = D.getElementById("invMsg");
+        if (!m) return;
+        var et = D.getElementById("invMsgT"), es = D.getElementById("invMsgS"), b = D.getElementById("invAgain");
+        if (et) et.textContent = t;
+        if (es) es.textContent = s;
+        if (b) b.textContent = btn || "开始游戏";
+        m.classList.add("show");
+      }
+      function ivMsgHide() {
+        var m = D.getElementById("invMsg");
+        if (m) m.classList.remove("show");
+      }
+
+      function ivSaveBest() {
+        if (ivScore > ivBest) {
+          ivBest = ivScore;
+          try { localStorage.setItem(IV_KEY, String(ivBest)); } catch (e) {}
+        }
+      }
+
+      function ivNewGame() {
+        ivScore = 0; ivLives = 3; ivLevel = 1; ivOver = false; ivStarted = true; ivTick = 0;
+        ivSpawnWave(1);
+        try { bumpUsage("invaders"); } catch (e) {}
+        ivMsgHide();
+      }
+      function ivNextWave() {
+        ivLevel++;
+        ivSpawnWave(ivLevel);
+        ivMsgHide();
+      }
+
+      function ivGameOver(msg) {
+        ivOver = true;
+        ivSaveBest();
+        ivMsgShow("\ud83d\udca5 游戏结束", msg + " 得分 " + ivScore + "（最高 " + ivBest + "）", "再来一局");
+      }
+
+      function ivClearWave() {
+        ivWaveClear = true;
+        var bonus = 100 + ivLevel * 50;
+        ivScore += bonus;
+        if (ivLives < 4) ivLives++;
+        ivSaveBest();
+        try { bumpUsage("invwin"); } catch (e) {}
+        try { confettiBurst(120); } catch (e) {}
+        try { if (settings.sound) playDing(); } catch (e) {}
+        ivMsgShow("\ud83d\udee1\ufe0f 第 " + ivLevel + " 波击退！", "奖励 " + bonus + " 分、生命 +1，下一波更快更低……", "迎战下一波");
+      }
+
+      function ivFire() {
+        if (!ivStarted || ivOver || ivWaveClear || ivFreeze > 0) return;
+        if (ivPB.length >= 2) return;
+        ivPB.push({ x: ivPX, y: IV_PY - 14 });
+      }
+
+      function ivStep() {
+        if (!ivStarted || ivOver || ivWaveClear) return;
+        ivTick++;
+        if (ivFreeze > 0) { ivFreeze--; return; }
+        if (ivInvinc > 0) ivInvinc--;
+        var dx = 0;
+        if (ivKeyL || ivBtnL) dx -= 3.6;
+        if (ivKeyR || ivBtnR) dx += 3.6;
+        if (dx) ivPX = Math.max(16, Math.min(IV_W - 16, ivPX + dx));
+
+        var alive = ivAliveList();
+        var n = alive.length;
+        if (!n) { ivClearWave(); return; }
+        var total = IV_ROWS * IV_COLS;
+        var spd = 0.32 + (1 - n / total) * 1.5 + (ivLevel - 1) * 0.1;
+        var minX = 1e9, maxX = -1e9, maxY = -1e9;
+        for (var i = 0; i < n; i++) {
+          var p = ivAlienPos(alive[i]);
+          if (p.x < minX) minX = p.x;
+          if (p.x + IV_AW > maxX) maxX = p.x + IV_AW;
+          if (p.y + IV_AH > maxY) maxY = p.y + IV_AH;
+        }
+        ivGX += ivDir * spd;
+        if ((ivDir > 0 && maxX + spd >= IV_W - 6) || (ivDir < 0 && minX - spd <= 6)) {
+          ivDir = -ivDir;
+          ivGY += 12;
+        }
+        if ((ivTick % 28) === 0) ivAnim = 1 - ivAnim;
+        if (maxY >= IV_PY - 14) { ivGameOver("外星舰队登陆了地球……"); return; }
+        for (i = 0; i < ivShields.length; i++) {
+          if (maxY >= ivShields[i].y0) {
+            for (var rr = 0; rr < 5; rr++) for (var cc = 0; cc < 8; cc++) ivShields[i].cells[rr][cc] = 0;
+          }
+        }
+
+        var cap = 3 + ivLevel;
+        if (ivAB.length < cap && Math.random() < Math.min(0.05, 0.014 + ivLevel * 0.004 + (1 - n / total) * 0.02)) {
+          var shooter = alive[Math.floor(Math.random() * n)];
+          for (var j = 0; j < n; j++)
+            if (alive[j].c === shooter.c && alive[j].r > shooter.r) shooter = alive[j];
+          var sp = ivAlienPos(shooter);
+          ivAB.push({ x: sp.x + IV_AW / 2, y: sp.y + IV_AH, vy: 2.4 + ivLevel * 0.22 });
+        }
+
+        if (ivUfo) {
+          ivUfo.x += ivUfo.vx;
+          if (ivUfo.x < -40 || ivUfo.x > IV_W + 40) { ivUfo = null; ivUfoTimer = 480 + Math.floor(Math.random() * 480); }
+        } else if (--ivUfoTimer <= 0) {
+          var ud = Math.random() < 0.5 ? 1 : -1;
+          ivUfo = { x: ud > 0 ? -32 : IV_W + 32, vx: ud * 1.6, y: 30, pts: (1 + Math.floor(Math.random() * 3)) * 50 };
+        }
+
+        for (i = ivPB.length - 1; i >= 0; i--) {
+          var b = ivPB[i];
+          b.y -= 7.2;
+          if (b.y < 12) { ivPB.splice(i, 1); continue; }
+          if (ivUfo && b.x > ivUfo.x - 16 && b.x < ivUfo.x + 16 && b.y > ivUfo.y - 8 && b.y < ivUfo.y + 8) {
+            ivScore += ivUfo.pts;
+            ivFloats.push({ x: ivUfo.x, y: ivUfo.y, t: 60, s: "+" + ivUfo.pts });
+            ivUfo = null; ivUfoTimer = 480 + Math.floor(Math.random() * 480);
+            ivPB.splice(i, 1); continue;
+          }
+          var hitA = false;
+          for (j = 0; j < ivAliens.length; j++) {
+            var a = ivAliens[j];
+            if (!a.alive) continue;
+            var q = ivAlienPos(a);
+            if (b.x > q.x && b.x < q.x + IV_AW && b.y > q.y && b.y < q.y + IV_AH) {
+              a.alive = false; ivScore += a.pts; hitA = true; break;
+            }
+          }
+          if (hitA) { ivPB.splice(i, 1); continue; }
+          if (ivHitShield(b.x, b.y)) { ivPB.splice(i, 1); continue; }
+        }
+
+        for (i = ivAB.length - 1; i >= 0; i--) {
+          var ab = ivAB[i];
+          ab.y += ab.vy;
+          if (ab.y > IV_H - 10) { ivAB.splice(i, 1); continue; }
+          if (ivHitShield(ab.x, ab.y)) { ivAB.splice(i, 1); continue; }
+          if (ivInvinc === 0 && ab.x > ivPX - IV_PW / 2 && ab.x < ivPX + IV_PW / 2 && ab.y > IV_PY - IV_PH && ab.y < IV_PY + 4) {
+            ivAB.splice(i, 1);
+            ivLives--; ivFreeze = 40; ivInvinc = 100;
+            if (ivLives <= 0) { ivGameOver("战机被击毁……"); return; }
+            continue;
+          }
+          var canceled = false;
+          for (j = ivPB.length - 1; j >= 0; j--) {
+            if (Math.abs(ivPB[j].x - ab.x) < 5 && Math.abs(ivPB[j].y - ab.y) < 8) { ivPB.splice(j, 1); canceled = true; break; }
+          }
+          if (canceled) { ivAB.splice(i, 1); continue; }
+        }
+
+        for (i = ivFloats.length - 1; i >= 0; i--) {
+          ivFloats[i].t--; ivFloats[i].y -= 0.4;
+          if (ivFloats[i].t <= 0) ivFloats.splice(i, 1);
+        }
+
+        if (!ivAliveList().length) ivClearWave();
+      }
+
+      function ivDrawSprite(ctx, pat, x, y, w, h, col) {
+        var pw = w / pat[0].length, ph = h / pat.length;
+        ctx.fillStyle = col;
+        for (var r = 0; r < pat.length; r++)
+          for (var c = 0; c < pat[r].length; c++)
+            if (pat[r].charAt(c) === "#") ctx.fillRect(x + c * pw, y + r * ph, pw + 0.4, ph + 0.4);
+      }
+
+      function ivDrawShip(ctx, x, y, col) {
+        ctx.fillStyle = col;
+        ctx.fillRect(x - 13, y - 4, 26, 8);
+        ctx.fillRect(x - 9, y - 8, 18, 4);
+        ctx.fillRect(x - 2, y - 12, 4, 6);
+      }
+
+      function ivDraw() {
+        if (!ivCtx) return;
+        var ctx = ivCtx;
+        ctx.setTransform(2, 0, 0, 2, 0, 0);
+        ctx.clearRect(0, 0, IV_W, IV_H);
+        ctx.fillStyle = "#05070f";
+        ctx.fillRect(0, 0, IV_W, IV_H);
+        ctx.fillStyle = "rgba(255,255,255,.45)";
+        for (var i = 0; i < ivStars.length; i++) ctx.fillRect(ivStars[i].x, ivStars[i].y, ivStars[i].r, ivStars[i].r);
+        ctx.fillStyle = "#2e7d32";
+        ctx.fillRect(0, IV_H - 10, IV_W, 2);
+
+        for (i = 0; i < ivShields.length; i++) {
+          var s = ivShields[i];
+          for (var r = 0; r < 5; r++)
+            for (var c = 0; c < 8; c++) {
+              var hp = s.cells[r][c];
+              if (!hp) continue;
+              ctx.fillStyle = hp === 2 ? "#66bb6a" : "#33691e";
+              ctx.fillRect(s.x0 + c * 6, s.y0 + r * 6, 5.4, 5.4);
+            }
+        }
+
+        for (i = 0; i < ivAliens.length; i++) {
+          var a = ivAliens[i];
+          if (!a.alive) continue;
+          var p = ivAlienPos(a);
+          ivDrawSprite(ctx, IV_SPR[a.type][ivAnim], p.x, p.y, IV_AW, IV_AH, IV_PAL[a.type]);
+        }
+
+        if (ivUfo) {
+          ctx.fillStyle = "#ef5350";
+          ctx.fillRect(ivUfo.x - 14, ivUfo.y - 3, 28, 6);
+          ctx.fillRect(ivUfo.x - 8, ivUfo.y - 7, 16, 4);
+          ctx.fillStyle = "#ffcdd2";
+          ctx.fillRect(ivUfo.x - 3, ivUfo.y - 6, 6, 3);
+        }
+
+        if (!ivOver && (ivInvinc === 0 || (ivTick % 10) < 5)) ivDrawShip(ctx, ivPX, IV_PY, "#80d8ff");
+
+        ctx.fillStyle = "#ffee58";
+        for (i = 0; i < ivPB.length; i++) ctx.fillRect(ivPB[i].x - 1.5, ivPB[i].y - 8, 3, 8);
+        ctx.fillStyle = "#ff7043";
+        for (i = 0; i < ivAB.length; i++) ctx.fillRect(ivAB[i].x - 1.5, ivAB[i].y, 3, 8);
+
+        ctx.fillStyle = "#ffe082";
+        ctx.font = "700 12px system-ui, sans-serif";
+        for (i = 0; i < ivFloats.length; i++) {
+          ctx.globalAlpha = Math.min(1, ivFloats[i].t / 30);
+          ctx.fillText(ivFloats[i].s, ivFloats[i].x - 10, ivFloats[i].y);
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.fillStyle = "rgba(255,255,255,.9)";
+        ctx.font = "600 13px system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText("得分 " + ivScore, 10, 20);
+        ctx.textAlign = "center";
+        ctx.fillText("第 " + ivLevel + " 波", IV_W / 2, 20);
+        ctx.textAlign = "right";
+        ctx.fillText("最高 " + Math.max(ivBest, ivScore), IV_W - 10, 20);
+        ctx.textAlign = "left";
+        for (i = 0; i < ivLives; i++) ivDrawShip(ctx, 18 + i * 24, IV_H - 18, "rgba(128,216,255,.75)");
+      }
+
+      function ivLoop() {
+        if (!ivRunning) return;
+        ivStep();
+        ivDraw();
+        ivRAF = requestAnimationFrame(ivLoop);
+      }
+
+      function ivWire() {
+        if (ivWired) return;
+        ivWired = true;
+        ivCv = D.getElementById("invCanvas");
+        if (ivCv) {
+          ivCv.width = IV_W * 2;
+          ivCv.height = IV_H * 2;
+          ivCtx = ivCv.getContext("2d");
+          var toX = function (e) {
+            var r = ivCv.getBoundingClientRect();
+            return (e.clientX - r.left) * (IV_W / (r.width || IV_W));
+          };
+          ivCv.addEventListener("pointerdown", function (e) {
+            e.preventDefault();
+            ivDrag = true;
+            ivPX = Math.max(16, Math.min(IV_W - 16, toX(e)));
+            ivFire();
+            try { ivCv.setPointerCapture(e.pointerId); } catch (err) {}
+          });
+          ivCv.addEventListener("pointermove", function (e) {
+            if (!ivDrag) return;
+            ivPX = Math.max(16, Math.min(IV_W - 16, toX(e)));
+          });
+          ivCv.addEventListener("pointerup", function () { ivDrag = false; });
+          ivCv.addEventListener("pointercancel", function () { ivDrag = false; });
+        }
+        var mk = function (id, set) {
+          var el = D.getElementById(id);
+          if (!el) return;
+          el.addEventListener("pointerdown", function (e) { e.preventDefault(); set(true); });
+          el.addEventListener("pointerup", function () { set(false); });
+          el.addEventListener("pointerleave", function () { set(false); });
+          el.addEventListener("pointercancel", function () { set(false); });
+        };
+        mk("invLeft", function (v) { ivBtnL = v; });
+        mk("invRight", function (v) { ivBtnR = v; });
+        var bf = D.getElementById("invFire");
+        if (bf) bf.addEventListener("pointerdown", function (e) { e.preventDefault(); ivFire(); });
+        var bn = D.getElementById("invNew");
+        if (bn) bn.addEventListener("click", ivNewGame);
+        var ba = D.getElementById("invAgain");
+        if (ba) ba.addEventListener("click", function () {
+          if (ivWaveClear && !ivOver) ivNextWave(); else ivNewGame();
+        });
+        D.addEventListener("keydown", function (e) {
+          if (!ivRunning) return;
+          var tg = e.target;
+          if (tg && (tg.tagName === "INPUT" || tg.tagName === "TEXTAREA" || tg.isContentEditable)) return;
+          var k = e.key;
+          if (k === "ArrowLeft" || k === "a" || k === "A") { ivKeyL = true; e.preventDefault(); }
+          else if (k === "ArrowRight" || k === "d" || k === "D") { ivKeyR = true; e.preventDefault(); }
+          else if (k === " " || k === "k" || k === "K") { ivFire(); e.preventDefault(); }
+        });
+        D.addEventListener("keyup", function (e) {
+          var k = e.key;
+          if (k === "ArrowLeft" || k === "a" || k === "A") ivKeyL = false;
+          else if (k === "ArrowRight" || k === "d" || k === "D") ivKeyR = false;
+        });
+      }
+
+      window.invadersRender = function () {
+        ivWire();
+        try { ivBest = parseInt(localStorage.getItem(IV_KEY) || "0", 10) || 0; } catch (e) { ivBest = 0; }
+        if (!ivStarted) ivMsgShow("\ud83d\udc7e 太空侵略者", "\u2190 \u2192 / A D 移动，空格或点按开火——守住地球！", "开始游戏");
+        if (!ivRunning) { ivRunning = true; ivRAF = requestAnimationFrame(ivLoop); }
+      };
+      window.invadersStop = function () {
+        ivRunning = false;
+        if (ivRAF) {
+          try { cancelAnimationFrame(ivRAF); } catch (e) {}
+          ivRAF = 0;
+        }
+      };
+
+      // ---- 测试钩子（不影响运行）----
+      window.__invTest = {
+        state: function () {
+          return {
+            score: ivScore, best: ivBest, lives: ivLives, level: ivLevel,
+            over: ivOver, waveClear: ivWaveClear, started: ivStarted, tick: ivTick,
+            gx: ivGX, gy: ivGY, dir: ivDir, px: ivPX,
+            alive: ivAliveList().length, pb: ivPB.length, ab: ivAB.length,
+            ufo: !!ivUfo, freeze: ivFreeze, invinc: ivInvinc
+          };
+        },
+        newGame: ivNewGame, nextWave: ivNextWave, step: ivStep, fire: ivFire,
+        spawnWave: ivSpawnWave, hitShield: ivHitShield, pos: ivAlienPos,
+        aliens: function () { return ivAliens; },
+        pbArr: function () { return ivPB; },
+        abArr: function () { return ivAB; },
+        shields: function () { return ivShields; },
+        setPX: function (x) { ivPX = x; },
+        setGY: function (y) { ivGY = y; },
+        setLives: function (v) { ivLives = v; },
+        setFreeze: function (v) { ivFreeze = v; },
+        setInvinc: function (v) { ivInvinc = v; },
+        killAllBut: function (k) {
+          var left = 0;
+          for (var i = ivAliens.length - 1; i >= 0; i--) {
+            if (!ivAliens[i].alive) continue;
+            if (left < k) { left++; continue; }
+            ivAliens[i].alive = false;
+          }
+        }
+      };
+
+      BADGES.push(
+        { emoji: "\ud83d\udc7e", name: "太空新兵", desc: "玩过一局太空侵略者", test: function (u) { return (u.invaders || 0) >= 1; } },
+        { emoji: "\ud83d\udee1\ufe0f", name: "地球守卫", desc: "太空侵略者击退一整波舰队", test: function (u) { return (u.invwin || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "太空侵略者的启示：压力总是一排一排慢慢逼近，你能做的是站稳、瞄准、一次打掉一个。",
+        "掩体早晚会被打穿，但它替你挡下的每一发，都给了你多开一枪的机会。",
+        "敌人越少剩下的跑得越快——越到收尾，越不能松手。",
+        "别追着飞碟满屏跑，守住自己的节奏，奖励自然会从头顶路过。",
+        "丢一条命不算完，阵地还在，就还有下一发子弹。"
       );
     })();
 </script>
