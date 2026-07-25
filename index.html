@@ -1532,6 +1532,7 @@
         <button data-tab="dab">▦ 点格棋</button>
         <button data-tab="checkers">⛃ 跳棋</button>
         <button data-tab="bubble">🫧 泡泡龙</button>
+        <button data-tab="backgammon">🎲 双陆棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6785,6 +6786,78 @@
       <div class="bub-tip">移动鼠标 / 手指瞄准，点击或轻触发射泡泡。让 3 个及以上同色泡泡相连即可消除；被击落后与顶部断开的泡泡会成串坠落，得额外分。清空整屏即进入下一关；泡泡触到红线则游戏结束。可借左右墙壁反弹瞄准刁钻角度。</div>
     </div>
   </section>
+  <section class="panel" id="backgammon">
+    <h2>🎲 西洋双陆棋（人机对弈）</h2>
+    <style>
+      #backgammon .bg-wrap { max-width:640px; margin:0 auto; }
+      #backgammon .bg-top-ctrl { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #backgammon .bg-top-ctrl select, #backgammon .bg-top-ctrl button { padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #backgammon .bg-top-ctrl button:hover { background:rgba(255,255,255,.12); }
+      #backgammon .bg-info { text-align:center; font-size:.9rem; opacity:.9; margin:2px 0 10px; min-height:1.2em; font-variant-numeric:tabular-nums; }
+      #backgammon .bg-board { position:relative; background:linear-gradient(135deg,#3a2a1a,#241708); border:6px solid #5a3d22; border-radius:14px; padding:10px 8px; box-shadow:0 12px 34px rgba(0,0,0,.5); }
+      #backgammon .bg-row { display:flex; gap:2px; height:150px; }
+      #backgammon .bg-top { align-items:flex-start; }
+      #backgammon .bg-bot { align-items:flex-end; }
+      #backgammon .bg-point { position:relative; flex:1; height:100%; display:flex; cursor:pointer; }
+      #backgammon .bg-point .bg-tri { position:absolute; left:50%; transform:translateX(-50%); width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; }
+      #backgammon .bg-point.top .bg-tri { top:0; border-top:130px solid #c9a26a; }
+      #backgammon .bg-point.top.even .bg-tri { border-top-color:#8a5a34; }
+      #backgammon .bg-point.bot .bg-tri { bottom:0; border-bottom:130px solid #c9a26a; }
+      #backgammon .bg-point.bot.even .bg-tri { border-bottom-color:#8a5a34; }
+      #backgammon .bg-point .bg-stack { position:relative; z-index:2; width:100%; display:flex; flex-direction:column; align-items:center; gap:1px; padding-top:3px; }
+      #backgammon .bg-point.bot .bg-stack { flex-direction:column-reverse; padding-top:0; padding-bottom:3px; justify-content:flex-start; align-self:flex-end; }
+      #backgammon .bg-chk { width:24px; height:24px; border-radius:50%; box-sizing:border-box; }
+      #backgammon .bg-chk.w { background:radial-gradient(circle at 35% 30%,#ffffff,#c7ccd6); border:1px solid #9198a6; }
+      #backgammon .bg-chk.b { background:radial-gradient(circle at 35% 30%,#4a4f5a,#14171d); border:1px solid #000; }
+      #backgammon .bg-more { font-size:.66rem; color:#fff; background:rgba(0,0,0,.6); border-radius:6px; padding:0 4px; z-index:3; }
+      #backgammon .bg-point.sel .bg-tri { filter:brightness(1.5) drop-shadow(0 0 4px #f1c40f); }
+      #backgammon .bg-point.target::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:16px; height:16px; border-radius:50%; background:rgba(46,204,113,.85); box-shadow:0 0 10px #2ecc71; z-index:4; }
+      #backgammon .bg-point .bg-hz { position:absolute; bottom:2px; left:50%; transform:translateX(-50%); font-size:.58rem; opacity:.35; z-index:1; }
+      #backgammon .bg-point.top .bg-hz { top:2px; bottom:auto; }
+      #backgammon .bg-barzone { display:flex; align-items:center; justify-content:center; gap:14px; padding:6px 0; margin:2px 0; background:rgba(0,0,0,.28); border-radius:6px; font-size:.82rem; }
+      #backgammon .bg-barlab { opacity:.55; letter-spacing:1px; }
+      #backgammon .bg-barcell { padding:3px 10px; border-radius:6px; background:rgba(255,255,255,.06); cursor:pointer; }
+      #backgammon .bg-barcell[data-bar="W"]:hover { background:rgba(241,196,15,.25); }
+      #backgammon .bg-off { display:flex; justify-content:space-between; margin-top:10px; font-size:.85rem; font-variant-numeric:tabular-nums; }
+      #backgammon .bg-off-w { color:#e8ecf3; } #backgammon .bg-off-b { color:#aab; }
+      #backgammon .bg-dice { display:flex; gap:10px; justify-content:center; align-items:center; margin-top:12px; min-height:44px; }
+      #backgammon .bg-die { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:9px; background:#f5f3ee; color:#222; font-weight:800; font-size:1.3rem; box-shadow:0 3px 8px rgba(0,0,0,.4); }
+      #backgammon .bg-die.used { opacity:.32; }
+      #backgammon .bg-roll { padding:10px 26px; border-radius:10px; border:0; background:#f1c40f; color:#222; font-weight:800; font-size:1.02rem; cursor:pointer; }
+      #backgammon .bg-roll:hover { filter:brightness(1.06); }
+      #backgammon .bg-board { position:relative; }
+      #backgammon .bg-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(8,6,2,.8); border-radius:10px; color:#fff; text-align:center; padding:20px; z-index:20; }
+      #backgammon .bg-msg.show { display:flex; }
+      #backgammon .bg-msg .t { font-size:1.4rem; font-weight:800; }
+      #backgammon .bg-msg .s { font-size:.95rem; opacity:.85; }
+      #backgammon .bg-msg button { padding:9px 24px; border-radius:10px; border:0; background:#f1c40f; color:#222; font-weight:700; cursor:pointer; }
+      #backgammon .bg-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+      @media (max-width:520px){ #backgammon .bg-chk{width:18px;height:18px;} #backgammon .bg-row{height:120px;} #backgammon .bg-point.top .bg-tri{border-top-width:104px;} #backgammon .bg-point.bot .bg-tri{border-bottom-width:104px;} #backgammon .bg-point .bg-tri{border-left-width:10px;border-right-width:10px;} }
+    </style>
+    <div class="bg-wrap">
+      <div class="bg-top-ctrl">
+        <label>难度
+          <select id="bgLevel">
+            <option value="1">入门（随机）</option>
+            <option value="2" selected>普通</option>
+            <option value="3">较难</option>
+          </select>
+        </label>
+        <button id="bgNew">🔄 新对局</button>
+        <button id="bgUndoBtn">↩ 悔本回合</button>
+        <button id="bgBearBtn">🏁 出栈</button>
+        <button id="bgResignBtn">🏳 认输</button>
+      </div>
+      <div class="bg-info" id="bgInfo"></div>
+      <div class="bg-board">
+        <div id="bgBoard"></div>
+        <div class="bg-off" id="bgOff"></div>
+        <div class="bg-msg" id="bgMsg"><div class="t"></div><div class="s"></div><button id="bgAgain">再来一局</button></div>
+      </div>
+      <div class="bg-dice" id="bgDice"></div>
+      <div class="bg-tip">你执白 ●（右下角为你的家），目标是让全部 15 枚棋子绕行归家并全部「出栈」，先出完者胜。点「掷骰」→ 点自己的棋子（高亮绿点为可落点）→ 点绿点走子；两颗骰子各走一步、点数相同（豹子）可走四步。落到对方仅 1 子的点可将其「打」回中栏（BAR），对方须先从中栏进场才能继续。全部棋子回到自家内区后即可逐一出栈。可「悔本回合」重走、也可切换 AI 难度。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7138,6 +7211,7 @@
     if (id === "dab") dabRender();
     if (id === "checkers") ckRender();
     if (id === "bubble") bubbleRender();
+    if (id === "backgammon") bgRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7152,6 +7226,7 @@
     if (id !== "dab" && typeof dabStop === "function") dabStop();
     if (id !== "checkers" && typeof ckStop === "function") ckStop();
     if (id !== "bubble" && typeof bubbleStop === "function") bubbleStop();
+    if (id !== "backgammon" && typeof bgStop === "function") bgStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7297,6 +7372,7 @@
     dab: "点格棋 dots and boxes 点格 方格 连线 画线 围地 占格 人机 对弈 对战 AI 益智 策略 烧脑 棋类 双十字 送分 长链 棋盘",
     checkers: "跳棋 英式跳棋 西洋跳棋 checkers draughts 国际跳棋 吃子 连跳 加冕 王棋 人机 对弈 对战 AI 棋类 策略 益智 棋盘 红黑",
     bubble: "泡泡龙 泡泡射手 bubble shooter 射泡泡 打泡泡 消除 三消 puzzle bobble 祖玛 街机 益智 瞄准 连锁 消泡泡 彩色泡泡 休闲 解压",
+    backgammon: "西洋双陆棋 双陆棋 双陆 backgammon 十五子棋 骰子棋 掷骰 人机 对弈 对战 AI 棋类 桌游 board game 策略 出栈 打点 中栏 bar 棋盘 经典 tables",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7502,6 +7578,7 @@ splitbill:"tools",
     dab:"games",
     checkers:"games",
     bubble:"games",
+    backgammon:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -30506,6 +30583,560 @@ splitbill:"tools",
       "清空整屏那一刻的痛快，值得前面每一次隐忍瞄准。"
     );
   })();
+    /* ===== 🎲 西洋双陆棋 Backgammon（人机对弈） ===== */
+    (function () {
+      // 棋盘：24 个点，索引 0..23。正数=白（玩家/human），负数=黑（AI）。
+      // 车道(lane)抽象：白 lane=i，黑 lane=23-i；两方在 lane 空间中都是「lane 大→小」朝 0 号方向走，越过 0 出栈；bar 视作 lane 24。
+      // 白家 = lane 0..5（索引 0..5）；黑家 = lane 0..5（索引 23..18）。
+      var BG_W = 1, BG_B = -1;
+      var bgB = null;         // Array(24)
+      var bgBarW = 0, bgBarB = 0, bgOffW = 0, bgOffB = 0;
+      var bgTurn = "W";       // 'W' 玩家 / 'B' AI
+      var bgDice = [];        // 当前骰子面值序列（doubles 展开为 4 个）
+      var bgUsed = [];        // 已用骰子（布尔并列 bgDice）
+      var bgLevel = 2;        // 1 入门 2 普通 3 较难
+      var bgSel = -2;         // 选中的源 lane（-2 无；24 表示 bar）
+      var bgTargets = [];     // 当前选中源的合法落点 [{to, die, hit}]
+      var bgOver = false;
+      var bgStartSnap = null; // 回合开始快照（悔棋用）
+      var bgMsgLock = false;
+      var bgAItimer = null;
+
+      function bgCloneState(s) {
+        return { b: s.b.slice(), barW: s.barW, barB: s.barB, offW: s.offW, offB: s.offB };
+      }
+      function bgCurState() {
+        return { b: bgB.slice(), barW: bgBarW, barB: bgBarB, offW: bgOffW, offB: bgOffB };
+      }
+      function bgLaneToIdx(P, lane) { return P === "W" ? lane : 23 - lane; }
+      function bgOwnAt(s, P, lane) {
+        var v = s.b[bgLaneToIdx(P, lane)];
+        return P === "W" ? (v > 0 ? v : 0) : (v < 0 ? -v : 0);
+      }
+      function bgOppAt(s, P, lane) {
+        var v = s.b[bgLaneToIdx(P, lane)];
+        return P === "W" ? (v < 0 ? -v : 0) : (v > 0 ? v : 0);
+      }
+      function bgBarOf(s, P) { return P === "W" ? s.barW : s.barB; }
+      function bgOffOf(s, P) { return P === "W" ? s.offW : s.offB; }
+      function bgAllHome(s, P) {
+        if (bgBarOf(s, P) > 0) return false;
+        for (var lane = 6; lane <= 23; lane++) if (bgOwnAt(s, P, lane) > 0) return false;
+        return true;
+      }
+      function bgHighestOwn(s, P) {
+        for (var lane = 5; lane >= 0; lane--) if (bgOwnAt(s, P, lane) > 0) return lane;
+        return -1;
+      }
+
+      // 生成使用单个骰子 d 的所有合法半步（基于状态 s、行棋方 P）
+      function bgGenSingle(s, P, d) {
+        var out = [];
+        var bar = bgBarOf(s, P);
+        if (bar > 0) {
+          var t = 24 - d; // 进入对方内区 lane 18..23
+          if (t >= 0 && t <= 23 && bgOppAt(s, P, t) <= 1) out.push({ from: 24, to: t, die: d, hit: bgOppAt(s, P, t) === 1 });
+          return out;
+        }
+        for (var L = 0; L <= 23; L++) {
+          if (bgOwnAt(s, P, L) <= 0) continue;
+          var T = L - d;
+          if (T >= 0) {
+            if (bgOppAt(s, P, T) <= 1) out.push({ from: L, to: T, die: d, hit: bgOppAt(s, P, T) === 1 });
+          } else {
+            // 出栈 bear off：需全部到家
+            if (!bgAllHome(s, P)) continue;
+            if (L === d - 1) out.push({ from: L, to: -1, die: d, hit: false });          // 精确出栈
+            else if (L < d - 1 && L === bgHighestOwn(s, P)) out.push({ from: L, to: -1, die: d, hit: false }); // 超出出栈（最高位）
+          }
+        }
+        return out;
+      }
+
+      // 在状态 s 上就地应用一个半步
+      function bgApply(s, P, mv) {
+        var sign = P === "W" ? 1 : -1;
+        if (mv.from === 24) { if (P === "W") s.barW--; else s.barB--; }
+        else { s.b[bgLaneToIdx(P, mv.from)] -= sign; }
+        if (mv.to === -1) { if (P === "W") s.offW++; else s.offB++; return; }
+        var ti = bgLaneToIdx(P, mv.to);
+        if (bgOppAt(s, P, mv.to) === 1) { // 打对方 blot
+          if (P === "W") s.barB++; else s.barW++;
+          s.b[ti] = sign;
+        } else {
+          s.b[ti] += sign;
+        }
+      }
+
+      // 计算从状态 s 出发，用 dice（面值数组）最多能走几个骰子
+      function bgMaxUse(s, P, dice) {
+        if (dice.length === 0) return 0;
+        var best = 0, seen = {};
+        for (var k = 0; k < dice.length; k++) {
+          var d = dice[k];
+          if (seen[d]) continue; seen[d] = 1;
+          var mvs = bgGenSingle(s, P, d);
+          for (var m = 0; m < mvs.length; m++) {
+            var ns = bgCloneState(s); bgApply(ns, P, mvs[m]);
+            var rem = dice.slice(); rem.splice(k, 1);
+            var got = 1 + bgMaxUse(ns, P, rem);
+            if (got > best) best = got;
+            if (best === dice.length) return best;
+          }
+        }
+        return best;
+      }
+
+      // 生成完整回合的所有「终局状态」序列（去重），遵守「尽量多用骰、只能用一颗时须用大点」规则
+      function bgGenTurn(s, P, dice) {
+        var results = [], maxLen = 0;
+        function rec(st, rem, path) {
+          var moved = false, seen = {};
+          for (var k = 0; k < rem.length; k++) {
+            var d = rem[k];
+            if (seen[d]) continue; seen[d] = 1;
+            var mvs = bgGenSingle(st, P, d);
+            for (var m = 0; m < mvs.length; m++) {
+              moved = true;
+              var ns = bgCloneState(st); bgApply(ns, P, mvs[m]);
+              var nrem = rem.slice(); nrem.splice(k, 1);
+              rec(ns, nrem, path.concat([{ die: d, dieVal: d }]));
+            }
+          }
+          if (!moved) {
+            if (path.length > maxLen) maxLen = path.length;
+            results.push({ state: st, len: path.length, firstDie: path.length ? path[0].dieVal : 0 });
+          }
+        }
+        rec(bgCloneState(s), dice.slice(), []);
+        // 过滤：只保留用满 maxLen 的
+        var filtered = results.filter(function (r) { return r.len === maxLen; });
+        // 只能用一颗且非 doubles 时，若能用大点则必须用大点
+        if (maxLen === 1 && dice.length >= 2 && dice[0] !== dice[1]) {
+          var big = Math.max(dice[0], dice[1]);
+          if (filtered.some(function (r) { return r.firstDie === big; })) {
+            filtered = filtered.filter(function (r) { return r.firstDie === big; });
+          }
+        }
+        // 去重（按局面签名）
+        var uniq = {}, list = [];
+        for (var i = 0; i < filtered.length; i++) {
+          var st = filtered[i].state;
+          var sig = st.b.join(",") + "|" + st.barW + "|" + st.barB + "|" + st.offW + "|" + st.offB;
+          if (!uniq[sig]) { uniq[sig] = 1; list.push(filtered[i]); }
+        }
+        return { list: list, maxLen: maxLen };
+      }
+
+      // pip 计数（P 的剩余步数总和；越小越好）
+      function bgPip(s, P) {
+        var pip = bgBarOf(s, P) * 25;
+        for (var L = 0; L <= 23; L++) pip += bgOwnAt(s, P, L) * (L + 1);
+        return pip;
+      }
+      // P 的暴露 blot 数（可被对方直接命中的单子），粗略估计
+      function bgBlots(s, P) {
+        var n = 0;
+        for (var L = 0; L <= 23; L++) if (bgOwnAt(s, P, L) === 1) n++;
+        return n;
+      }
+      // P 在自家内区做成的「点」（≥2 子）数量
+      function bgHomePoints(s, P) {
+        var n = 0;
+        for (var L = 0; L <= 5; L++) if (bgOwnAt(s, P, L) >= 2) n++;
+        return n;
+      }
+
+      // 局面评估（站在 forP 视角，越大越好）
+      function bgEval(s, forP) {
+        var opp = forP === "W" ? "B" : "W";
+        var myPip = bgPip(s, forP), opPip = bgPip(s, opp);
+        var score = (opPip - myPip) * 1.0;
+        score += (bgOffOf(s, forP) - bgOffOf(s, opp)) * 18;
+        score -= bgBlots(s, forP) * 9;
+        score += bgHomePoints(s, forP) * 6;
+        score += bgBarOf(s, opp) * 14;      // 把对方打上 bar 很赚
+        score -= bgBarOf(s, forP) * 16;
+        return score;
+      }
+
+      // AI 选择整回合走法，返回目标 state；level 决定强弱
+      function bgAIChoose(s, P, dice, level) {
+        var g = bgGenTurn(s, P, dice);
+        if (g.list.length === 0) return null;
+        if (level <= 1) return g.list[(Math.random() * g.list.length) | 0].state; // 入门：随机
+        var best = null, bestScore = -1e9;
+        for (var i = 0; i < g.list.length; i++) {
+          var st = g.list[i].state;
+          var sc = bgEval(st, P);
+          if (level >= 3) sc += (Math.random() - 0.5) * 0.3; // 较难：几乎纯评估，微扰破平
+          else sc += (Math.random() - 0.5) * 3;              // 普通：带波动
+          if (sc > bestScore) { bestScore = sc; best = st; }
+        }
+        return best;
+      }
+
+      // ===== 以上为纯逻辑，可无头测试 =====
+      window.__bgTest = {
+        genSingle: bgGenSingle, apply: bgApply, maxUse: bgMaxUse, genTurn: bgGenTurn,
+        pip: bgPip, evalFn: bgEval, aiChoose: bgAIChoose, allHome: bgAllHome,
+        newState: function () {
+          var b = new Array(24); for (var i = 0; i < 24; i++) b[i] = 0;
+          b[23] = 2; b[12] = 5; b[7] = 3; b[5] = 5;   // 白
+          b[0] = -2; b[11] = -5; b[16] = -3; b[18] = -5; // 黑
+          return { b: b, barW: 0, barB: 0, offW: 0, offB: 0 };
+        }
+      };
+
+      // ===== UI 部分（仅在浏览器中运行） =====
+      var D = typeof document !== "undefined" ? document : null;
+
+      function bgSetStart() {
+        bgB = new Array(24); for (var i = 0; i < 24; i++) bgB[i] = 0;
+        bgB[23] = 2; bgB[12] = 5; bgB[7] = 3; bgB[5] = 5;
+        bgB[0] = -2; bgB[11] = -5; bgB[16] = -3; bgB[18] = -5;
+        bgBarW = 0; bgBarB = 0; bgOffW = 0; bgOffB = 0;
+        bgOver = false; bgSel = -2; bgTargets = [];
+      }
+
+      function bgSnap() { return { b: bgB.slice(), barW: bgBarW, barB: bgBarB, offW: bgOffW, offB: bgOffB, dice: bgDice.slice(), used: bgUsed.slice(), turn: bgTurn }; }
+      function bgRestore(sn) {
+        bgB = sn.b.slice(); bgBarW = sn.barW; bgBarB = sn.barB; bgOffW = sn.offW; bgOffB = sn.offB;
+        bgDice = sn.dice.slice(); bgUsed = sn.used.slice(); bgTurn = sn.turn; bgSel = -2; bgTargets = [];
+      }
+
+      function bgRemainDice() {
+        var r = []; for (var i = 0; i < bgDice.length; i++) if (!bgUsed[i]) r.push(bgDice[i]); return r;
+      }
+
+      function bgRoll() {
+        if (bgOver) return;
+        var a = 1 + (Math.random() * 6 | 0), b = 1 + (Math.random() * 6 | 0);
+        bgDice = a === b ? [a, a, a, a] : [a, b];
+        bgUsed = bgDice.map(function () { return false; });
+        bgStartSnap = bgSnap();
+        bgSel = -2; bgTargets = [];
+        // 若无任何合法走法，直接跳过
+        var g = bgGenTurn(bgCurState(), bgTurn, bgRemainDice());
+        if (g.maxLen === 0) {
+          bgFlash(bgTurn === "W" ? "你没有可走的棋，跳过本回合" : "AI 无棋可走，跳过");
+          bgUsed = bgDice.map(function () { return true; });
+          bgRender2();
+          setTimeout(bgEndTurn, 850);
+          return;
+        }
+        bgRender2();
+        if (bgTurn === "B") bgAItimer = setTimeout(bgAIPlay, 620);
+      }
+
+      // 玩家点击某个 lane 源
+      function bgPickSource(lane) {
+        if (bgOver || bgTurn !== "W" || bgMsgLock) return;
+        var rem = bgRemainDice();
+        if (rem.length === 0) return;
+        var s = bgCurState();
+        // 有子在 bar 必须先进
+        if (bgBarW > 0 && lane !== 24) { bgFlash("有棋子在中栏，请先从中栏进场"); return; }
+        var src = lane;
+        var moves = [];
+        var maxTotal = bgGenTurn(s, "W", rem).maxLen;
+        var made = bgDice.filter(function (_, i) { return bgUsed[i]; }).length - (bgStartSnap ? bgStartSnap.used.filter(Boolean).length : 0);
+        // 汇总该源在各剩余骰子下的落点，并保证不破坏「尽量多用」
+        var seenDie = {};
+        for (var i = 0; i < bgDice.length; i++) {
+          if (bgUsed[i]) continue;
+          var d = bgDice[i];
+          var mvs = bgGenSingle(s, "W", d);
+          for (var m = 0; m < mvs.length; m++) {
+            if (mvs[m].from !== src) continue;
+            // 走这一步后，剩余骰子仍能达到 (maxTotal - 已走 - 1)
+            var ns = bgCloneState(s); bgApply(ns, "W", mvs[m]);
+            var remAfter = rem.slice(); remAfter.splice(remAfter.indexOf(d), 1);
+            var need = maxTotal - 1;
+            if (bgMaxUse(ns, "W", remAfter) >= need) {
+              moves.push({ to: mvs[m].to, die: d, hit: mvs[m].hit });
+            }
+          }
+        }
+        if (moves.length === 0) { bgSel = -2; bgTargets = []; bgFlash("这颗棋子没有合法走法"); bgRender2(); return; }
+        bgSel = src; bgTargets = moves; bgRender2();
+      }
+
+      function bgDoMove(to, die) {
+        var s = bgCurState();
+        var mv = { from: bgSel, to: to, die: die, hit: false };
+        // 找到对应 die 索引
+        var di = -1;
+        for (var i = 0; i < bgDice.length; i++) { if (!bgUsed[i] && bgDice[i] === die) { di = i; break; } }
+        if (di < 0) return;
+        mv.hit = bgOppAt(s, "W", to === -1 ? 99 : to) === 1 && to !== -1;
+        bgApplyLive("W", mv);
+        bgUsed[di] = true;
+        bgSel = -2; bgTargets = [];
+        if (bgCheckWin()) return;
+        var rem = bgRemainDice();
+        if (rem.length === 0 || bgGenTurn(bgCurState(), "W", rem).maxLen === 0) {
+          bgRender2();
+          setTimeout(bgEndTurn, 500);
+        } else {
+          bgRender2();
+        }
+      }
+
+      function bgApplyLive(P, mv) {
+        var sign = P === "W" ? 1 : -1;
+        if (mv.from === 24) { if (P === "W") bgBarW--; else bgBarB--; }
+        else { bgB[bgLaneToIdx(P, mv.from)] -= sign; }
+        if (mv.to === -1) { if (P === "W") bgOffW++; else bgOffB++; return; }
+        var ti = bgLaneToIdx(P, mv.to);
+        var oppCnt = P === "W" ? (bgB[ti] < 0 ? -bgB[ti] : 0) : (bgB[ti] > 0 ? bgB[ti] : 0);
+        if (oppCnt === 1) { if (P === "W") bgBarB++; else bgBarW++; bgB[ti] = sign; }
+        else bgB[ti] += sign;
+      }
+
+      function bgEndTurn() {
+        if (bgOver) return;
+        bgTurn = bgTurn === "W" ? "B" : "W";
+        bgDice = []; bgUsed = []; bgSel = -2; bgTargets = [];
+        bgRender2();
+        if (bgTurn === "B") bgAItimer = setTimeout(bgRoll, 560);
+      }
+
+      function bgAIPlay() {
+        if (bgOver || bgTurn !== "B") return;
+        var rem = bgRemainDice();
+        var target = bgAIChoose(bgCurState(), "B", rem, bgLevel);
+        if (target) {
+          bgB = target.b.slice(); bgBarW = target.barW; bgBarB = target.barB; bgOffW = target.offW; bgOffB = target.offB;
+        }
+        bgUsed = bgDice.map(function () { return true; });
+        bgRender2();
+        if (bgCheckWin()) return;
+        setTimeout(bgEndTurn, 700);
+      }
+
+      function bgCheckWin() {
+        if (bgOffW >= 15) { bgWin("W"); return true; }
+        if (bgOffB >= 15) { bgWin("B"); return true; }
+        return false;
+      }
+
+      function bgWin(P) {
+        bgOver = true;
+        if (bgAItimer) clearTimeout(bgAItimer);
+        var gammon = (P === "W" ? bgOffB : bgOffW) === 0;
+        if (P === "W") {
+          try {
+            if (typeof bumpUsage === "function") { bumpUsage("bg"); bumpUsage("bgwin"); }
+          } catch (e) { }
+          try { if (typeof burstConfetti === "function") burstConfetti(); } catch (e) { }
+          try { if (typeof playDing === "function") playDing(); } catch (e) { }
+        } else {
+          try { if (typeof bumpUsage === "function") bumpUsage("bg"); } catch (e) { }
+        }
+        bgShowMsg(P === "W" ? (gammon ? "🎉 Gammon 大胜！" : "🎉 你赢了！") : (gammon ? "AI Gammon 完胜…" : "AI 赢了"),
+          P === "W" ? "全部 15 枚棋子成功归巢出栈" : "再接再厉，下一局翻盘");
+        bgRender2();
+      }
+
+      // ===== 渲染 =====
+      var bgWrap, bgBoardEl, bgDiceEl, bgInfoEl, bgMsgEl;
+
+      function bgFlash(txt) {
+        if (!bgInfoEl) return;
+        bgInfoEl.textContent = txt;
+        bgInfoEl.style.color = "#f1c40f";
+        setTimeout(function () { if (bgInfoEl) { bgInfoEl.style.color = ""; bgUpdInfo(); } }, 1400);
+      }
+
+      function bgUpdInfo() {
+        if (!bgInfoEl) return;
+        if (bgOver) { bgInfoEl.textContent = "对局结束"; return; }
+        var s = bgCurState();
+        var txt = bgTurn === "W" ? "轮到你（白 ●）" : "AI 思考中（黑 ●）";
+        if (bgDice.length) {
+          var rem = bgRemainDice();
+          txt += "　骰子：" + bgDice.map(function (d, i) { return bgUsed[i] ? "·" : d; }).join(" ");
+        } else {
+          txt += "　点「掷骰」开始";
+        }
+        txt += "　白pip " + bgPip(s, "W") + " / 黑pip " + bgPip(s, "B");
+        bgInfoEl.textContent = txt;
+      }
+
+      function bgShowMsg(t, sub) {
+        if (!bgMsgEl) return;
+        bgMsgEl.querySelector(".t").textContent = t;
+        bgMsgEl.querySelector(".s").textContent = sub || "";
+        bgMsgEl.classList.add("show");
+      }
+      function bgHideMsg() { if (bgMsgEl) bgMsgEl.classList.remove("show"); }
+
+      // 生成一个点(point)的 HTML；lane→显示位置由布局映射
+      function bgCheckerHTML(color, count) {
+        var h = "";
+        var show = Math.min(count, 5);
+        for (var i = 0; i < show; i++) h += '<div class="bg-chk ' + color + '"></div>';
+        if (count > 5) h += '<div class="bg-more">' + count + '</div>';
+        return h;
+      }
+
+      // 布局：上半 lane（白视角）13..24 在顶排，1..12 在底排；用索引直接摆放更直观。
+      // 我们按「白 lane」渲染：底部右→左 lane 0..11（白家在右下），顶部 lane 12..23。
+      function bgRender2() {
+        if (!bgBoardEl) return;
+        // 24 个三角点，分四象限
+        // 顶排从左到右：lane 12..23  （对应索引 12..23，即白的外区/黑家延伸）
+        // 底排从左到右：lane 11..0
+        var html = "";
+        // 顶排
+        html += '<div class="bg-row bg-top">';
+        for (var L = 12; L <= 23; L++) html += bgPointHTML(L, true);
+        html += '</div>';
+        // 中栏 bar 提示
+        html += '<div class="bg-barzone"><span class="bg-barlab">中栏 BAR</span>' +
+          '<span class="bg-barcell" data-bar="W">白 ●×' + bgBarW + '</span>' +
+          '<span class="bg-barcell" data-bar="B">黑 ●×' + bgBarB + '</span></div>';
+        // 底排
+        html += '<div class="bg-row bg-bot">';
+        for (var L2 = 11; L2 >= 0; L2--) html += bgPointHTML(L2, false);
+        html += '</div>';
+        bgBoardEl.innerHTML = html;
+        // 出栈区
+        var offEl = D.getElementById("bgOff");
+        if (offEl) offEl.innerHTML = '<div class="bg-off-w">白出栈 ' + bgOffW + '/15</div><div class="bg-off-b">黑出栈 ' + bgOffB + '/15</div>';
+        // 绑定点击
+        var pts = bgBoardEl.querySelectorAll(".bg-point");
+        for (var i = 0; i < pts.length; i++) {
+          (function (el) {
+            el.onclick = function () {
+              var lane = parseInt(el.getAttribute("data-lane"), 10);
+              bgOnPointClick(lane);
+            };
+          })(pts[i]);
+        }
+        var barW = bgBoardEl.querySelector('[data-bar="W"]');
+        if (barW) barW.onclick = function () { if (bgBarW > 0) bgPickSource(24); };
+        bgUpdInfo();
+        // 骰子渲染
+        if (bgDiceEl) {
+          if (!bgDice.length) bgDiceEl.innerHTML = '<button class="bg-roll" id="bgRollBtn">🎲 掷骰</button>';
+          else {
+            var dh = "";
+            for (var k = 0; k < bgDice.length; k++) dh += '<span class="bg-die' + (bgUsed[k] ? " used" : "") + '">' + bgDice[k] + '</span>';
+            bgDiceEl.innerHTML = dh;
+          }
+          var rb = D.getElementById("bgRollBtn");
+          if (rb) rb.onclick = function () { if (bgTurn === "W" && !bgOver) bgRoll(); };
+        }
+      }
+
+      function bgPointHTML(lane, isTop) {
+        var idx = lane; // 白 lane=索引
+        var v = bgB[idx];
+        var color = v > 0 ? "w" : (v < 0 ? "b" : "");
+        var count = Math.abs(v);
+        var cls = "bg-point " + (isTop ? "top" : "bot") + ((lane % 2 === 0) ? " even" : " odd");
+        if (bgSel === lane) cls += " sel";
+        var isTarget = bgTargets.some(function (t) { return t.to === lane; });
+        if (isTarget) cls += " target";
+        var inner = count ? bgCheckerHTML(color, count) : "";
+        var badge = (lane <= 5) ? '<span class="bg-hz">家</span>' : "";
+        return '<div class="' + cls + '" data-lane="' + lane + '"><div class="bg-tri"></div><div class="bg-stack">' + inner + '</div>' + badge + '</div>';
+      }
+
+      function bgOnPointClick(lane) {
+        if (bgOver || bgTurn !== "W") return;
+        // 若已选源且点到目标 → 走子
+        if (bgSel !== -2) {
+          var tgt = bgTargets.filter(function (t) { return t.to === lane; });
+          if (tgt.length) {
+            // 若多个骰子都能到（少见），选较小的以保留灵活
+            tgt.sort(function (a, b) { return a.die - b.die; });
+            bgDoMove(tgt[0].to, tgt[0].die);
+            return;
+          }
+        }
+        // 出栈落点用专门按钮，这里处理普通选源
+        bgPickSource(lane);
+      }
+
+      function bgBearOffClick() {
+        if (bgSel === -2) return;
+        var tgt = bgTargets.filter(function (t) { return t.to === -1; });
+        if (tgt.length) { tgt.sort(function (a, b) { return a.die - b.die; }); bgDoMove(-1, tgt[0].die); }
+      }
+
+      function bgUndo() {
+        if (bgTurn !== "W" || !bgStartSnap || bgOver) return;
+        bgRestore(bgStartSnap);
+        bgRender2();
+      }
+      function bgResign() {
+        if (bgOver) return;
+        bgWin("B");
+      }
+      function bgNewGame() {
+        if (bgAItimer) clearTimeout(bgAItimer);
+        bgHideMsg();
+        bgSetStart();
+        bgDice = []; bgUsed = [];
+        bgTurn = "W";
+        bgRender2();
+      }
+
+      window.bgRender = function () {
+        if (!D) return;
+        bgWrap = D.getElementById("bgWrap");
+        bgBoardEl = D.getElementById("bgBoard");
+        bgDiceEl = D.getElementById("bgDice");
+        bgInfoEl = D.getElementById("bgInfo");
+        bgMsgEl = D.getElementById("bgMsg");
+        if (!bgB) { bgSetStart(); bgTurn = "W"; bgDice = []; bgUsed = []; }
+        var lv = D.getElementById("bgLevel");
+        if (lv) { lv.onchange = function () { bgLevel = parseInt(lv.value, 10) || 2; }; bgLevel = parseInt(lv.value, 10) || 2; }
+        var nb = D.getElementById("bgNew"); if (nb) nb.onclick = bgNewGame;
+        var ub = D.getElementById("bgUndoBtn"); if (ub) ub.onclick = bgUndo;
+        var rs = D.getElementById("bgResignBtn"); if (rs) rs.onclick = bgResign;
+        var bo = D.getElementById("bgBearBtn"); if (bo) bo.onclick = bgBearOffClick;
+        var ag = D.getElementById("bgAgain"); if (ag) ag.onclick = bgNewGame;
+        bgRender2();
+      };
+      window.bgStop = function () {
+        if (bgAItimer) { clearTimeout(bgAItimer); bgAItimer = null; }
+      };
+
+      // 仅供无头 sim 驱动（浏览器中不会主动调用，无副作用）
+      window.__bgUI = {
+        roll: function () { bgRoll(); },
+        state: function () { return { turn: bgTurn, over: bgOver, dice: bgDice.slice(), used: bgUsed.slice(), offW: bgOffW, offB: bgOffB, barW: bgBarW, barB: bgBarB }; },
+        playerAuto: function () {
+          if (bgTurn !== "W" || bgOver) return false;
+          var order = [24]; for (var i = 0; i <= 23; i++) order.push(i);
+          for (var k = 0; k < order.length; k++) {
+            bgPickSource(order[k]);
+            if (bgTargets.length) {
+              var t = bgTargets[0];
+              if (t.to === -1) bgBearOffClick(); else bgDoMove(t.to, t.die);
+              return true;
+            }
+          }
+          return false;
+        }
+      };
+
+      BADGES.push(
+        { emoji: "🎲", name: "双陆新手", desc: "玩过一局西洋双陆棋", test: function (u) { return (u.bg || 0) >= 1; } },
+        { emoji: "🏆", name: "双陆高手", desc: "在西洋双陆棋中战胜 AI", test: function (u) { return (u.bgwin || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "西洋双陆的哲学：运气发牌，技术打牌——骰子给你可能，落子由你决定。",
+        "别让棋子单着（blot），孤子最容易被人一杆打回中栏。",
+        "抢占关键点、连成封锁线，对手就算掷出好骰也无处可去。",
+        "领先时拼命跑、落后时耐心留后手打击——这才是双陆的攻守之道。",
+        "全部回家再从容出栈，急着冒进往往一子被打、满盘皆输。"
+      );
+    })();
 </script>
 </body>
 </html>
