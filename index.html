@@ -1529,6 +1529,7 @@
         <button data-tab="yahtzee">🎲 快艇骰子</button>
         <button data-tab="chess">♞ 国际象棋</button>
         <button data-tab="weiqi">⚫ 围棋</button>
+        <button data-tab="dab">▦ 点格棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6660,6 +6661,46 @@
       <div class="wq-tip">中国规则数子法，黑贴 7.5（结算时白方总数 + 7.5）。落子自动提走对方无气之子；禁自杀、禁全局同形（打劫需先找劫材）。双方连续虚着后进入数子阶段：点击死子整块标记 / 取消，再点「✅ 确认数子」结算。悔棋一次回退一整回合。</div>
     </div>
   </section>
+  <section class="panel" id="dab">
+    <h2>▦ 点格棋（人机对弈）</h2>
+    <style>
+      #dab .dab-wrap { max-width: 560px; margin: 0 auto; }
+      #dab .dab-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+      #dab .dab-top select { padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.25); background:rgba(0,0,0,.25); color:inherit; font-size:.95rem; }
+      #dab .dab-status { text-align:center; font-size:1.02rem; font-weight:700; margin:6px 0 8px; min-height:1.5em; letter-spacing:.3px; }
+      #dab .dab-status.dab-win { color:#f1c40f; }
+      #dab .dab-status.dab-lose { color:#e74c3c; }
+      #dab .dab-status.dab-warn { color:#e67e22; }
+      #dab .dab-board { width:min(92vw,460px); margin:0 auto; }
+      #dab .dab-svg { width:100%; height:auto; display:block; background:linear-gradient(135deg,#2c3e50,#1a2733); border:2px solid rgba(255,255,255,.12); border-radius:14px; box-shadow:0 8px 26px rgba(0,0,0,.4); touch-action:manipulation; }
+      #dab .dab-hit { cursor:default; transition:stroke .12s; }
+      #dab .dab-hit.on { cursor:pointer; }
+      #dab .dab-hit.on:hover { stroke:rgba(255,255,255,.6) !important; }
+      #dab .dab-last { filter:drop-shadow(0 0 4px rgba(255,255,255,.65)); }
+      #dab .dab-info { text-align:center; margin-top:10px; font-size:1rem; min-height:1.4em; }
+      #dab .dab-sc { font-weight:800; padding:2px 8px; border-radius:8px; }
+      #dab .dab-me { color:#e74c3c; }
+      #dab .dab-ai { color:#3498db; }
+      #dab .dab-vs { opacity:.6; margin:0 2px; }
+      #dab .dab-stats { text-align:center; margin-top:8px; opacity:.8; font-size:.92rem; }
+      #dab .dab-tip { margin-top:10px; font-size:.85rem; opacity:.62; text-align:center; line-height:1.6; }
+      @media (max-width:520px){ #dab .dab-top { gap:6px; } #dab .dab-top select { font-size:.88rem; padding:5px 8px; } }
+    </style>
+    <div class="dab-wrap">
+      <div class="dab-top">
+        <select id="dabSize" title="棋盘大小"><option value="3" selected>3 × 3</option><option value="4">4 × 4</option><option value="5">5 × 5</option></select>
+        <select id="dabLevel" title="AI 难度"><option value="1">入门</option><option value="2" selected>普通</option><option value="3">较难</option></select>
+        <select id="dabFirst" title="先手"><option value="me" selected>我先手</option><option value="ai">AI 先手</option></select>
+        <button id="dabNew">🆕 新对局</button>
+        <button id="dabUndo">↩️ 悔棋</button>
+      </div>
+      <div class="dab-status" id="dabStatus"></div>
+      <div class="dab-board" id="dabBoard"></div>
+      <div class="dab-info" id="dabInfo"></div>
+      <div class="dab-stats" id="dabStats"></div>
+      <div class="dab-tip">点击网格中的短线段画边，谁画下某个方格的第 4 条边，谁就占领该格并额外再走一步。全部方格占完后，格数多者胜。策略：尽量别画出“三条边”的格子（会送分给对方）；被迫送分时开最短的链，收官阶段还能用“双十字”弃两格换主动权。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7010,6 +7051,7 @@
     if (id === "yahtzee") ytRender();
     if (id === "chess") chsRender();
     if (id === "weiqi") wqRender();
+    if (id === "dab") dabRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7021,6 +7063,7 @@
     if (id !== "yahtzee" && typeof ytStop === "function") ytStop();
     if (id !== "chess" && typeof chsStop === "function") chsStop();
     if (id !== "weiqi" && typeof wqStop === "function") wqStop();
+    if (id !== "dab" && typeof dabStop === "function") dabStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7163,6 +7206,7 @@
     yahtzee: "快艇骰子 骰子 yahtzee 快艇 计分 掷骰 三掷 留骰 锁骰 葫芦 小顺 大顺 四条 三条 全同 上区奖励 人机 对战 桌游 dice 手气 运气 策略 骰盅 骰盘",
     chess: "国际象棋 chess 象棋 西洋棋 人机 对弈 对战 AI 棋盘 王车易位 吃过路兵 升变 将军 将死 马 车 象 后 王 兵 棋类 策略 烧脑",
     weiqi: "围棋 weiqi go 黑白 落子 提子 打劫 数子 贴目 人机 对弈 对战 AI 九路 十三路 围地 做眼 死活 布局 定式 棋盘 棋类 策略 烧脑 金角银边",
+    dab: "点格棋 dots and boxes 点格 方格 连线 画线 围地 占格 人机 对弈 对战 AI 益智 策略 烧脑 棋类 双十字 送分 长链 棋盘",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7365,6 +7409,7 @@ splitbill:"tools",
     yahtzee:"games",
     chess:"games",
     weiqi:"games",
+    dab:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -29202,6 +29247,393 @@ splitbill:"tools",
       "\u5f03\u5b50\u4e0d\u662f\u8ba4\u8f93\uff0c\u662f\u628a\u529b\u6c14\u7528\u5728\u66f4\u5927\u7684\u5730\u65b9\u3002",
       "\u4e24\u773c\u6210\u6d3b\uff1a\u7559\u597d\u4e24\u6761\u9000\u8def\uff0c\u8c01\u4e5f\u5403\u4e0d\u6389\u4f60\u3002",
       "\u843d\u5b50\u65e0\u6094\uff0c\u4e0d\u662f\u4e0d\u8ba9\u6094\uff0c\u662f\u63d0\u9192\u4f60\u60f3\u597d\u518d\u4f38\u624b\u3002"
+    );
+    /* ========================= 点格棋 Dots and Boxes（人机对弈） ========================= */
+    var dabR = 3, dabC = 3;
+    var dabH = null, dabV = null, dabOwner = null;
+    var dabTurn = 1, dabMy = 1;
+    var dabScore = { 1: 0, 2: 0 };
+    var dabOver = false, dabBusy = false, dabBound = false;
+    var dabLevel = 2;
+    var dabHist = [];
+    var dabLastEdge = null;
+    var dabTimer = null;
+
+    function dabEl(id) { return document.getElementById(id); }
+
+    function dabInit() {
+      dabH = []; for (var r = 0; r <= dabR; r++) { var a = []; for (var c = 0; c < dabC; c++) a.push(0); dabH.push(a); }
+      dabV = []; for (var r2 = 0; r2 < dabR; r2++) { var b = []; for (var c2 = 0; c2 <= dabC; c2++) b.push(0); dabV.push(b); }
+      dabOwner = []; for (var r3 = 0; r3 < dabR; r3++) { var e = []; for (var c3 = 0; c3 < dabC; c3++) e.push(0); dabOwner.push(e); }
+      dabScore = { 1: 0, 2: 0 };
+      dabTurn = 1; dabOver = false; dabBusy = false; dabHist = []; dabLastEdge = null;
+    }
+
+    function dabBoxSides(H, V, r, c) {
+      return (H[r][c] ? 1 : 0) + (H[r + 1][c] ? 1 : 0) + (V[r][c] ? 1 : 0) + (V[r][c + 1] ? 1 : 0);
+    }
+    function dabLegal(H, V) {
+      var mv = [];
+      for (var r = 0; r <= dabR; r++) for (var c = 0; c < dabC; c++) if (!H[r][c]) mv.push({ t: "h", r: r, c: c });
+      for (var r2 = 0; r2 < dabR; r2++) for (var c2 = 0; c2 <= dabC; c2++) if (!V[r2][c2]) mv.push({ t: "v", r: r2, c: c2 });
+      return mv;
+    }
+    function dabBoxesForEdge(m) {
+      var b = [];
+      if (m.t === "h") { if (m.r - 1 >= 0) b.push({ r: m.r - 1, c: m.c }); if (m.r < dabR) b.push({ r: m.r, c: m.c }); }
+      else { if (m.c - 1 >= 0) b.push({ r: m.r, c: m.c - 1 }); if (m.c < dabC) b.push({ r: m.r, c: m.c }); }
+      return b;
+    }
+    function dabCompletes(H, V, m) {
+      var boxes = dabBoxesForEdge(m), out = [];
+      for (var i = 0; i < boxes.length; i++) { var bx = boxes[i]; if (dabBoxSides(H, V, bx.r, bx.c) === 3) out.push(bx); }
+      return out;
+    }
+    function dabCreates3(H, V, m) {
+      var boxes = dabBoxesForEdge(m);
+      for (var i = 0; i < boxes.length; i++) { var bx = boxes[i]; if (dabBoxSides(H, V, bx.r, bx.c) === 2) return true; }
+      return false;
+    }
+    function dabCloneHV() {
+      return { H: dabH.map(function (r) { return r.slice(); }), V: dabV.map(function (r) { return r.slice(); }) };
+    }
+    function dabSetC(H, V, m, val) { if (m.t === "h") H[m.r][m.c] = val; else V[m.r][m.c] = val; }
+
+    /* 贪吃估算：从当前局面一路吃下去能拿多少格 */
+    function dabGreedyCount(H, V) {
+      var Hc = H.map(function (r) { return r.slice(); }), Vc = V.map(function (r) { return r.slice(); });
+      var got = 0, guard = 0;
+      while (guard++ < 500) {
+        var mv = dabLegal(Hc, Vc), found = null;
+        for (var i = 0; i < mv.length; i++) { if (dabCompletes(Hc, Vc, mv[i]).length > 0) { found = mv[i]; break; } }
+        if (!found) break;
+        var boxes = dabCompletes(Hc, Vc, found);
+        dabSetC(Hc, Vc, found, 1);
+        got += boxes.length;
+      }
+      return got;
+    }
+
+    /* 双十字：处于长链尾部（还剩两格）时，不吃而封住成 domino，逗对方先开下一链 */
+    function dabFindDoubleCross(H, V) {
+      for (var r = 0; r < dabR; r++) for (var c = 0; c < dabC; c++) {
+        if (dabBoxSides(H, V, r, c) !== 3) continue;
+        var e = null;
+        if (!H[r][c]) e = { t: "h", r: r, c: c };
+        else if (!H[r + 1][c]) e = { t: "h", r: r + 1, c: c };
+        else if (!V[r][c]) e = { t: "v", r: r, c: c };
+        else if (!V[r][c + 1]) e = { t: "v", r: r, c: c + 1 };
+        if (!e) continue;
+        var nb = dabBoxesForEdge(e), Q = null;
+        for (var i = 0; i < nb.length; i++) { if (!(nb[i].r === r && nb[i].c === c)) Q = nb[i]; }
+        if (!Q) continue;
+        if (dabBoxSides(H, V, Q.r, Q.c) !== 2) continue;
+        var open = [];
+        if (!H[Q.r][Q.c]) open.push({ t: "h", r: Q.r, c: Q.c });
+        if (!H[Q.r + 1][Q.c]) open.push({ t: "h", r: Q.r + 1, c: Q.c });
+        if (!V[Q.r][Q.c]) open.push({ t: "v", r: Q.r, c: Q.c });
+        if (!V[Q.r][Q.c + 1]) open.push({ t: "v", r: Q.r, c: Q.c + 1 });
+        var others = open.filter(function (o) { return !(o.t === e.t && o.r === e.r && o.c === e.c); });
+        if (others.length !== 1) continue;
+        var f = others[0];
+        if (dabCompletes(H, V, f).length === 0) return f;
+      }
+      return null;
+    }
+
+    /* 残局精确求解（negamax + 记忆化 + 额外回合规则）：当剩余边数较少时启用，
+       自动发现「双十字」等最优收官技巧。超出结点预算则返回 null 交回启发式。 */
+    function dabEndgameMove() {
+      var H = dabH.map(function (r) { return r.map(function (v) { return v ? 1 : 0; }); });
+      var V = dabV.map(function (r) { return r.map(function (v) { return v ? 1 : 0; }); });
+      var memo = {}, budget = 260000, nodes = { n: 0 };
+      function key() {
+        var a = [];
+        for (var r = 0; r < H.length; r++) a.push(H[r].join(""));
+        a.push("|");
+        for (var r2 = 0; r2 < V.length; r2++) a.push(V[r2].join(""));
+        return a.join("");
+      }
+      function neg() {
+        if (nodes.n > budget) return null;
+        var k0 = key();
+        if (memo[k0] !== undefined) return memo[k0];
+        var mv = dabLegal(H, V);
+        if (!mv.length) { memo[k0] = 0; return 0; }
+        nodes.n++;
+        var best = -999;
+        for (var i = 0; i < mv.length; i++) {
+          var m = mv[i], kk = dabCompletes(H, V, m).length;
+          dabSetC(H, V, m, 1);
+          var sub = neg();
+          dabSetC(H, V, m, 0);
+          if (sub === null) return null;
+          var val = kk > 0 ? kk + sub : -sub;
+          if (val > best) best = val;
+        }
+        memo[k0] = best;
+        return best;
+      }
+      var mv0 = dabLegal(H, V);
+      if (!mv0.length) return null;
+      var bestMove = null, bestVal = -999;
+      for (var i = 0; i < mv0.length; i++) {
+        var m = mv0[i], kk = dabCompletes(H, V, m).length;
+        dabSetC(H, V, m, 1);
+        var sub = neg();
+        dabSetC(H, V, m, 0);
+        if (sub === null) return null;
+        var val = kk > 0 ? kk + sub : -sub;
+        if (val > bestVal) { bestVal = val; bestMove = m; }
+      }
+      return bestMove;
+    }
+
+    function dabAiPick() {
+      var mv = dabLegal(dabH, dabV);
+      if (!mv.length) return null;
+      var caps = mv.filter(function (m) { return dabCompletes(dabH, dabV, m).length > 0; });
+      var safe = mv.filter(function (m) { return dabCompletes(dabH, dabV, m).length === 0 && !dabCreates3(dabH, dabV, m); });
+      var unclaimed = dabR * dabC - dabScore[1] - dabScore[2];
+
+      if (dabLevel === 1) {
+        if (caps.length) return caps[Math.floor(Math.random() * caps.length)];
+        if (safe.length && Math.random() < 0.55) return safe[Math.floor(Math.random() * safe.length)];
+        return mv[Math.floor(Math.random() * mv.length)];
+      }
+
+      /* 较难：残局用 negamax 精确收官（含双十字/留链控制），中盘退化为启发式 */
+      if (dabLevel >= 3 && mv.length <= 14) {
+        var em = dabEndgameMove();
+        if (em) return em;
+      }
+
+      if (caps.length) {
+        for (var i = 0; i < caps.length; i++) { if (dabCompletes(dabH, dabV, caps[i]).length === 2) return caps[i]; }
+        var best = caps[0], bestSafe = -1;
+        for (var j = 0; j < caps.length; j++) {
+          var m = caps[j], cl = dabCloneHV();
+          dabSetC(cl.H, cl.V, m, 2);
+          var adj = dabLegal(cl.H, cl.V), sc = 0;
+          for (var k = 0; k < adj.length; k++) { if (dabCompletes(cl.H, cl.V, adj[k]).length === 0 && !dabCreates3(cl.H, cl.V, adj[k])) sc++; }
+          if (sc > bestSafe) { bestSafe = sc; best = m; }
+        }
+        return best;
+      }
+
+      if (safe.length) return safe[Math.floor(Math.random() * safe.length)];
+
+      /* 无安全着法：被迫送格，选让对方贪吃得分最少的一手（开最短链） */
+      var bm = mv[0], bg = 1e9;
+      for (var q = 0; q < mv.length; q++) {
+        var cl2 = dabCloneHV(); dabSetC(cl2.H, cl2.V, mv[q], 2);
+        var give = dabGreedyCount(cl2.H, cl2.V);
+        if (give < bg) { bg = give; bm = mv[q]; }
+      }
+      return bm;
+    }
+
+    function dabApply(m, player) {
+      dabSetC(dabH, dabV, m, player);
+      dabLastEdge = { t: m.t, r: m.r, c: m.c };
+      var adj = dabBoxesForEdge(m), got = 0;
+      for (var i = 0; i < adj.length; i++) {
+        var bx = adj[i];
+        if (dabOwner[bx.r][bx.c] === 0 && dabBoxSides(dabH, dabV, bx.r, bx.c) === 4) {
+          dabOwner[bx.r][bx.c] = player; dabScore[player]++; got++;
+        }
+      }
+      return got > 0;
+    }
+
+    function dabSnap() {
+      return {
+        H: dabH.map(function (r) { return r.slice(); }), V: dabV.map(function (r) { return r.slice(); }),
+        O: dabOwner.map(function (r) { return r.slice(); }), s1: dabScore[1], s2: dabScore[2],
+        turn: dabTurn, last: dabLastEdge ? { t: dabLastEdge.t, r: dabLastEdge.r, c: dabLastEdge.c } : null
+      };
+    }
+    function dabPushHist() { dabHist.push(dabSnap()); if (dabHist.length > 300) dabHist.shift(); }
+
+    function dabPlayerMove(m) {
+      if (dabOver || dabBusy || dabTurn !== dabMy) return;
+      if ((m.t === "h" && dabH[m.r][m.c]) || (m.t === "v" && dabV[m.r][m.c])) return;
+      dabPushHist();
+      var again = dabApply(m, 1);
+      if (typeof playDing === "function" && again) playDing();
+      dabDraw();
+      if (dabCheckEnd()) return;
+      if (again) return;
+      dabTurn = 2; dabBusy = true; dabDraw();
+      dabTimer = setTimeout(dabAiStep, 520);
+    }
+
+    function dabAiStep() {
+      if (dabOver) { dabBusy = false; return; }
+      var m = dabAiPick();
+      if (!m) { dabBusy = false; return; }
+      var again = dabApply(m, 2);
+      dabDraw();
+      if (dabCheckEnd()) { dabBusy = false; return; }
+      if (again) { dabTimer = setTimeout(dabAiStep, 470); return; }
+      dabTurn = 1; dabBusy = false; dabDraw();
+    }
+
+    function dabCheckEnd() {
+      if (dabLegal(dabH, dabV).length > 0) return false;
+      dabOver = true; dabBusy = false;
+      var me = dabScore[1], ai = dabScore[2];
+      var st = dabEl("dabStatus");
+      if (st) {
+        st.classList.remove("dab-win", "dab-lose", "dab-warn");
+        if (me > ai) { st.textContent = "🎉 你赢了！ " + me + " : " + ai; st.classList.add("dab-win"); }
+        else if (me < ai) { st.textContent = "😾 AI 赢了 " + me + " : " + ai + "，再来一局！"; st.classList.add("dab-lose"); }
+        else { st.textContent = "🤝 平局 " + me + " : " + ai; st.classList.add("dab-warn"); }
+      }
+      if (typeof bumpUsage === "function") { bumpUsage("dab"); if (me > ai) bumpUsage("dabwin"); }
+      if (me > ai) { if (typeof confettiBurst === "function") confettiBurst(90); if (typeof playDing === "function") playDing(); }
+      dabSaveStats(me > ai ? "win" : (me < ai ? "lose" : "draw"));
+      dabDrawStats(); dabDraw();
+      return true;
+    }
+
+    function dabLoadStats() {
+      try { var s = JSON.parse(localStorage.getItem("suibian_dab") || "{}"); return { plays: s.plays || 0, wins: s.wins || 0, losses: s.losses || 0, draws: s.draws || 0 }; }
+      catch (e) { return { plays: 0, wins: 0, losses: 0, draws: 0 }; }
+    }
+    function dabSaveStats(res) {
+      var s = dabLoadStats(); s.plays++;
+      if (res === "win") s.wins++; else if (res === "lose") s.losses++; else s.draws++;
+      try { localStorage.setItem("suibian_dab", JSON.stringify(s)); } catch (e) {}
+    }
+    function dabDrawStats() {
+      var el = dabEl("dabStats"); if (!el) return; var s = dabLoadStats();
+      el.textContent = "战绩　对局 " + s.plays + "　胜 " + s.wins + "　负 " + s.losses + "　平 " + s.draws;
+    }
+
+    function dabDraw() {
+      var board = dabEl("dabBoard"); if (!board) return;
+      var gap = 100, pad = 30, dr = 7;
+      var W = pad * 2 + dabC * gap, HH = pad * 2 + dabR * gap;
+      var s = '<svg viewBox="0 0 ' + W + ' ' + HH + '" class="dab-svg" xmlns="http://www.w3.org/2000/svg">';
+      for (var r = 0; r < dabR; r++) for (var c = 0; c < dabC; c++) {
+        var o = dabOwner[r][c]; if (!o) continue;
+        var x = pad + c * gap, y = pad + r * gap;
+        var fill = o === 1 ? "rgba(231,76,60,.28)" : "rgba(52,152,219,.28)";
+        var strk = o === 1 ? "#e74c3c" : "#3498db";
+        var lb = o === 1 ? "我" : "AI";
+        s += '<rect x="' + (x + 7) + '" y="' + (y + 7) + '" width="' + (gap - 14) + '" height="' + (gap - 14) + '" rx="10" fill="' + fill + '"/>';
+        s += '<text x="' + (x + gap / 2) + '" y="' + (y + gap / 2) + '" text-anchor="middle" dominant-baseline="central" font-size="30" font-weight="800" fill="' + strk + '" opacity=".85">' + lb + '</text>';
+      }
+      for (var hr = 0; hr <= dabR; hr++) for (var hc = 0; hc < dabC; hc++) {
+        var hv = dabH[hr][hc]; if (!hv) continue;
+        var hx = pad + hc * gap, hy = pad + hr * gap, hcol = hv === 1 ? "#e74c3c" : "#3498db";
+        var hl = dabLastEdge && dabLastEdge.t === "h" && dabLastEdge.r === hr && dabLastEdge.c === hc;
+        s += '<line x1="' + hx + '" y1="' + hy + '" x2="' + (hx + gap) + '" y2="' + hy + '" stroke="' + hcol + '" stroke-width="' + (hl ? 9 : 6) + '" stroke-linecap="round"' + (hl ? ' class="dab-last"' : "") + '/>';
+      }
+      for (var vr = 0; vr < dabR; vr++) for (var vc = 0; vc <= dabC; vc++) {
+        var vv = dabV[vr][vc]; if (!vv) continue;
+        var vx = pad + vc * gap, vy = pad + vr * gap, vcol = vv === 1 ? "#e74c3c" : "#3498db";
+        var vl = dabLastEdge && dabLastEdge.t === "v" && dabLastEdge.r === vr && dabLastEdge.c === vc;
+        s += '<line x1="' + vx + '" y1="' + vy + '" x2="' + vx + '" y2="' + (vy + gap) + '" stroke="' + vcol + '" stroke-width="' + (vl ? 9 : 6) + '" stroke-linecap="round"' + (vl ? ' class="dab-last"' : "") + '/>';
+      }
+      var inter = !dabOver && dabTurn === dabMy && !dabBusy;
+      for (var ar = 0; ar <= dabR; ar++) for (var ac = 0; ac < dabC; ac++) {
+        if (dabH[ar][ac]) continue;
+        var ax = pad + ac * gap, ay = pad + ar * gap;
+        s += '<line x1="' + ax + '" y1="' + ay + '" x2="' + (ax + gap) + '" y2="' + ay + '" stroke="rgba(255,255,255,.10)" stroke-width="15" stroke-linecap="round" class="dab-hit' + (inter ? " on" : "") + '" data-t="h" data-r="' + ar + '" data-c="' + ac + '"/>';
+      }
+      for (var br = 0; br < dabR; br++) for (var bc = 0; bc <= dabC; bc++) {
+        if (dabV[br][bc]) continue;
+        var bx2 = pad + bc * gap, by2 = pad + br * gap;
+        s += '<line x1="' + bx2 + '" y1="' + by2 + '" x2="' + bx2 + '" y2="' + (by2 + gap) + '" stroke="rgba(255,255,255,.10)" stroke-width="15" stroke-linecap="round" class="dab-hit' + (inter ? " on" : "") + '" data-t="v" data-r="' + br + '" data-c="' + bc + '"/>';
+      }
+      for (var dr2 = 0; dr2 <= dabR; dr2++) for (var dc2 = 0; dc2 <= dabC; dc2++) {
+        s += '<circle cx="' + (pad + dc2 * gap) + '" cy="' + (pad + dr2 * gap) + '" r="' + dr + '" fill="#f0d9a8"/>';
+      }
+      s += "</svg>";
+      board.innerHTML = s;
+
+      var info = dabEl("dabInfo");
+      if (info) {
+        var sc = '<span class="dab-sc dab-me">我 ' + dabScore[1] + '</span><span class="dab-vs">vs</span><span class="dab-sc dab-ai">AI ' + dabScore[2] + '</span>';
+        if (dabOver) info.innerHTML = sc;
+        else info.innerHTML = sc + "　·　" + (dabTurn === 1 ? '<b style="color:#e74c3c">轮到你</b>' : '<b style="color:#3498db">AI 思考中…</b>');
+      }
+
+      if (!board._dabBound) {
+        board._dabBound = true;
+        board.addEventListener("click", function (ev) {
+          var t = ev.target;
+          if (!t || !t.classList || !t.classList.contains("dab-hit") || !t.classList.contains("on")) return;
+          dabPlayerMove({ t: t.getAttribute("data-t"), r: parseInt(t.getAttribute("data-r"), 10), c: parseInt(t.getAttribute("data-c"), 10) });
+        });
+      }
+    }
+
+    function dabUndo() {
+      if (dabBusy) { toast("AI 行棋中，稍等"); return; }
+      if (!dabHist.length) { toast("没有可悔的棋了"); return; }
+      var s = dabHist.pop();
+      dabH = s.H.map(function (r) { return r.slice(); });
+      dabV = s.V.map(function (r) { return r.slice(); });
+      dabOwner = s.O.map(function (r) { return r.slice(); });
+      dabScore = { 1: s.s1, 2: s.s2 };
+      dabTurn = s.turn; dabLastEdge = s.last; dabOver = false; dabBusy = false;
+      var st = dabEl("dabStatus"); if (st) { st.className = "dab-status"; st.textContent = "已悔棋·轮到你"; }
+      dabDraw();
+    }
+
+    function dabNewGame() {
+      dabStop();
+      var sz = dabEl("dabSize"); if (sz) { var v = parseInt(sz.value, 10) || 3; dabR = v; dabC = v; }
+      var lv = dabEl("dabLevel"); if (lv) dabLevel = parseInt(lv.value, 10) || 2;
+      var fs = dabEl("dabFirst"); var aiFirst = fs && fs.value === "ai";
+      dabInit();
+      var st = dabEl("dabStatus"); if (st) { st.className = "dab-status"; st.textContent = aiFirst ? "AI 先手，思考中…" : "你先手·点击线段落子，连成方格得分"; }
+      dabDrawStats();
+      if (aiFirst) { dabTurn = 2; dabBusy = true; dabDraw(); dabTimer = setTimeout(dabAiStep, 500); }
+      else { dabDraw(); }
+    }
+
+    function dabStop() { if (dabTimer) { clearTimeout(dabTimer); dabTimer = null; } dabBusy = false; }
+
+    function dabRender() {
+      if (!dabBound) {
+        dabBound = true;
+        var b1 = dabEl("dabNew"), b2 = dabEl("dabUndo"), s1 = dabEl("dabSize"), s3 = dabEl("dabFirst"), s2 = dabEl("dabLevel");
+        if (b1) b1.onclick = dabNewGame;
+        if (b2) b2.onclick = dabUndo;
+        if (s1) s1.onchange = dabNewGame;
+        if (s3) s3.onchange = dabNewGame;
+        if (s2) s2.onchange = function () { var l = dabEl("dabLevel"); if (l) dabLevel = parseInt(l.value, 10) || 2; };
+      }
+      if (!dabH) dabNewGame(); else dabDraw();
+    }
+
+    window.dabRender = dabRender;
+    window.dabStop = dabStop;
+    window.__dabTest = {
+      init: dabInit, legal: function () { return dabLegal(dabH, dabV); },
+      completes: dabCompletes, creates3: dabCreates3, sides: dabBoxSides,
+      apply: dabApply, ai: dabAiPick, greedy: dabGreedyCount, doublecross: dabFindDoubleCross,
+      newGame: dabNewGame, playerMove: dabPlayerMove, aiStep: dabAiStep, undo: dabUndo,
+      setDims: function (r, c) { dabR = r; dabC = c; }, setLevel: function (l) { dabLevel = l; },
+      H: function () { return dabH; }, V: function () { return dabV; }, owner: function () { return dabOwner; },
+      state: function () { return { R: dabR, C: dabC, s1: dabScore[1], s2: dabScore[2], turn: dabTurn, over: dabOver, hist: dabHist.length }; },
+      setEdge: function (m, val) { dabSetC(dabH, dabV, m, val); }
+    };
+
+    BADGES.push(
+      { emoji: "▦", name: "初落一笔", desc: "第一次玩点格棋", test: function (u) { return (u.dab || 0) >= 1; } },
+      { emoji: "🏁", name: "围地高手", desc: "在点格棋中赢下 AI 一局", test: function (u) { return (u.dabwin || 0) >= 1; } }
+    );
+    QUOTES.push(
+      "点格棋的智慧：别急着吃眼前那一格，忍住的人才拿得走整条链。",
+      "该弃的时候弃两格——用小损失换主动权，是高手的从容。",
+      "双十字：把两格拱手让人，只为逼对方先开口。",
+      "先连边，再收网；布局的耐心，决定收官的战果。",
+      "每一条线都在为将来铺路，落子前先想清楚三步。"
     );
   })();
 </script>
