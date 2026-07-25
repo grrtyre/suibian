@@ -1525,6 +1525,7 @@
         <button data-tab="sheet">📊 迷你表格</button>
         <button data-tab="salary">💼 工资个税</button>
         <button data-tab="xiangqi">♟️ 中国象棋</button>
+        <button data-tab="navy">🚢 海战棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6430,6 +6431,71 @@
       <div class="xq-tip">你执红棋（下方）先行，AI 执黑。走子规则：马蹩腿、象塞眼、炮隔子吃、不许送将、白脸将（双将同列）判负。</div>
     </div>
   </section>
+  <section class="panel" id="navy">
+    <style>
+      #navy .nv-wrap { max-width: 720px; margin: 0 auto; }
+      #navy .nv-status { text-align: center; font-size: 1.02rem; font-weight: 700; margin: 4px 0 10px; min-height: 1.5em; letter-spacing: .3px; }
+      #navy .nv-status.hit { color: #e67e22; }
+      #navy .nv-status.win { color: #f1c40f; }
+      #navy .nv-status.lose { color: #e74c3c; }
+      #navy .nv-boards { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+      #navy .nv-side { flex: 0 1 320px; min-width: 260px; }
+      #navy .nv-cap { text-align: center; font-weight: 700; margin-bottom: 6px; font-size: .92rem; opacity: .85; }
+      #navy .nv-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; aspect-ratio: 1/1; background: rgba(30,80,140,.25); padding: 4px; border-radius: 10px; }
+      #navy .nv-cell { position: relative; border: none; border-radius: 3px; background: linear-gradient(150deg, #1c5d99, #14477a); cursor: default; padding: 0; font-size: clamp(9px, 2.4vw, 15px); line-height: 1; display: flex; align-items: center; justify-content: center; color: #fff; transition: filter .12s, transform .12s; aspect-ratio: 1/1; }
+      #navy .nv-grid.foe .nv-cell.open { cursor: crosshair; }
+      #navy .nv-grid.foe .nv-cell.open:hover { filter: brightness(1.35); transform: scale(1.06); }
+      #navy .nv-cell.ship { background: linear-gradient(150deg, #5d6d7e, #34495e); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+      #navy .nv-cell.miss::after { content: ""; width: 26%; height: 26%; border-radius: 50%; background: rgba(255,255,255,.65); }
+      #navy .nv-cell.hit { background: linear-gradient(150deg, #d35400, #a04000); animation: nvBoom .3s ease-out; }
+      #navy .nv-cell.sunk { background: linear-gradient(150deg, #7b241c, #4a0f0a); }
+      #navy .nv-cell.sus { box-shadow: inset 0 0 0 2px #f1c40f; }
+      #navy .nv-cell.lastai { box-shadow: inset 0 0 0 2px #e74c3c; }
+      @keyframes nvBoom { 0% { transform: scale(.5); filter: brightness(2.2); } 100% { transform: scale(1); } }
+      #navy .nv-fleet { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 7px; min-height: 18px; }
+      #navy .nv-fs { display: flex; gap: 2px; align-items: center; }
+      #navy .nv-fs i { width: 9px; height: 9px; border-radius: 2px; background: #5d6d7e; display: inline-block; }
+      #navy .nv-fs.dead i { background: #7b241c; opacity: .55; }
+      #navy .nv-fs.dead { text-decoration: line-through; opacity: .6; }
+      #navy .nv-fs span { font-size: 10px; opacity: .75; margin-left: 3px; }
+      #navy .nv-ctrl { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+      #navy .nv-ctrl button { border: none; border-radius: 10px; padding: 9px 16px; font-size: .92rem; cursor: pointer; background: var(--card-2); color: inherit; border: 1px solid var(--line); transition: filter .15s; }
+      #navy .nv-ctrl button:hover { filter: brightness(1.1); }
+      #navy .nv-ctrl button.pri { background: linear-gradient(135deg, #2980b9, #1a5276); color: #fff; border-color: transparent; font-weight: 700; }
+      #navy .nv-ctrl button:disabled { opacity: .4; cursor: not-allowed; filter: none; }
+      #navy .nv-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+      #navy .nv-stat { background: var(--card-2); border: 1px solid var(--line); border-radius: 12px; padding: 7px 14px; min-width: 78px; text-align: center; }
+      #navy .nv-stat b { display: block; font-size: 19px; color: var(--accent-2); }
+      #navy .nv-stat span { font-size: 11px; color: var(--muted); }
+      #navy .nv-tip { text-align: center; opacity: .72; font-size: .85rem; margin-top: 10px; line-height: 1.6; }
+      @media (max-width: 640px) { #navy .nv-boards { gap: 12px; } #navy .nv-side { flex: 1 1 100%; max-width: 340px; margin: 0 auto; } }
+    </style>
+    <h2>🚢 海战棋 · 人机对战</h2>
+    <p class="sub">布下五艘战舰，与 AI 舰长互轰 —— 命中可连击，先把对方舰队全部送进海底者胜</p>
+    <div class="nv-wrap">
+      <div class="nv-status" id="nvStatus">🎲 随机布阵后点「⚔️ 开战」</div>
+      <div class="nv-boards">
+        <div class="nv-side">
+          <div class="nv-cap">🛡️ 我方舰队</div>
+          <div class="nv-grid" id="nvMine"></div>
+          <div class="nv-fleet" id="nvFleetMine"></div>
+        </div>
+        <div class="nv-side">
+          <div class="nv-cap">🎯 敌方海域</div>
+          <div class="nv-grid foe" id="nvFoe"></div>
+          <div class="nv-fleet" id="nvFleetFoe"></div>
+        </div>
+      </div>
+      <div class="nv-ctrl">
+        <button id="nvShuffle">🎲 重新布阵</button>
+        <button id="nvStart" class="pri">⚔️ 开战</button>
+        <button id="nvScan" disabled>🛰️ 侦察 (3)</button>
+        <button id="nvNew">🔄 新局</button>
+      </div>
+      <div class="nv-stats" id="nvStats"></div>
+      <div class="nv-tip">舰队：航母×5格 · 战列舰×4格 · 巡洋舰×3格 · 潜艇×3格 · 驱逐舰×2格，舰与舰互不相邻（含斜角）。命中敌舰可再打一炮；击沉时会自动排除周围海域。🛰️ 侦察每局限 3 次，会框出一个藏有敌舰的格子。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -6776,6 +6842,7 @@
     if (id === "sheet") sheetRender();
     if (id === "salary") salRender();
     if (id === "xiangqi") xqRender();
+    if (id === "navy") nvRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -6783,6 +6850,7 @@
     if (id !== "solitaire" && typeof skStop === "function") skStop();
     if (id !== "schulte" && typeof schStop === "function") schStop();
     if (id !== "drum" && typeof drumStop === "function") drumStop();
+    if (id !== "navy" && typeof nvStop === "function") nvStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -6921,6 +6989,7 @@
     sheet: "表格 迷你表格 电子表格 单元格 公式 函数 SUM 计算 表格计算 数据 表格工具 在线表格 spreadsheet 制表 行列 sheet 算账 统计 求和 平均值",
     salary: "工资 个税 计算 到手 税后 税前 年终奖 五险一金 社保 公积金 专项附加 扣除 累计预扣 奖金 避坑 月薪 薪资 薪水 打工 salary tax 个人所得税 报税",
     xiangqi: "中国象棋 象棋 棋类 对弈 将军 将死 车马炮 楚河汉界 残局 minimax AI 人机 下棋 帅 兵卒 chinese chess xiangqi 益智 策略",
+    navy: "海战棋 战舰 军舰 炮击 海战 battleship 舰队 航母 击沉 猜位置 对战 人机 策略 布阵 海军 navy 命中 联机 经典桌游",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7119,6 +7188,7 @@ splitbill:"tools",
     sheet:"prod",
     salary:"tools",
     xiangqi:"games",
+    navy:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -27208,6 +27278,367 @@ splitbill:"tools",
       '当局者迷，旁观者清；人生如棋，落子无悔。',
       '一步走错，满盘皆输；沉住气，方能反败为胜。',
       '楚河汉界，方寸之间藏着最痛快的博弈。'
+    );
+  })();
+  /* ===== 🚢 海战棋 navy (Battleship vs AI) ===== */
+  (function () {
+    var NV_N = 10;
+    var NV_FLEET = [
+      { len: 5, name: "航母" },
+      { len: 4, name: "战列舰" },
+      { len: 3, name: "巡洋舰" },
+      { len: 3, name: "潜艇" },
+      { len: 2, name: "驱逐舰" }
+    ];
+    var NV_LSK = "suibian_navy";
+
+    function nvIdx(r, c) { return r * NV_N + c; }
+    function nvIn(r, c) { return r >= 0 && r < NV_N && c >= 0 && c < NV_N; }
+
+    /* 随机布阵：舰与舰互不相邻（含斜角），失败则整盘重来 */
+    function nvPlaceFleet(rng) {
+      rng = rng || Math.random;
+      for (var attempt = 0; attempt < 200; attempt++) {
+        var cells = new Array(NV_N * NV_N);
+        for (var i = 0; i < cells.length; i++) cells[i] = -1;
+        var ships = [];
+        var ok = true;
+        for (var s = 0; s < NV_FLEET.length && ok; s++) {
+          var len = NV_FLEET[s].len, placed = false;
+          for (var t = 0; t < 400 && !placed; t++) {
+            var hor = rng() < 0.5;
+            var r0 = Math.floor(rng() * (hor ? NV_N : NV_N - len + 1));
+            var c0 = Math.floor(rng() * (hor ? NV_N - len + 1 : NV_N));
+            var fit = true, k, rr, cc;
+            for (k = 0; k < len && fit; k++) {
+              rr = hor ? r0 : r0 + k; cc = hor ? c0 + k : c0;
+              for (var dr = -1; dr <= 1 && fit; dr++) for (var dc = -1; dc <= 1 && fit; dc++) {
+                var nr = rr + dr, nc = cc + dc;
+                if (nvIn(nr, nc) && cells[nvIdx(nr, nc)] >= 0) fit = false;
+              }
+            }
+            if (!fit) continue;
+            var sc = [];
+            for (k = 0; k < len; k++) {
+              rr = hor ? r0 : r0 + k; cc = hor ? c0 + k : c0;
+              cells[nvIdx(rr, cc)] = s; sc.push(nvIdx(rr, cc));
+            }
+            ships.push({ len: len, name: NV_FLEET[s].name, cells: sc, hits: 0, sunk: false });
+            placed = true;
+          }
+          if (!placed) ok = false;
+        }
+        if (ok) return { cells: cells, ships: ships };
+      }
+      return null; /* 理论上不会发生 */
+    }
+
+    /* 开火：shots 0=未打 1=miss 2=hit 3=sunk；击沉时把整舰标 3 并把周围一圈标 miss */
+    function nvFire(board, shots, i) {
+      if (shots[i]) return null;
+      var sIdx = board.cells[i];
+      if (sIdx < 0) { shots[i] = 1; return "miss"; }
+      shots[i] = 2;
+      var ship = board.ships[sIdx];
+      ship.hits++;
+      if (ship.hits >= ship.len) {
+        ship.sunk = true;
+        for (var k = 0; k < ship.cells.length; k++) {
+          var ci = ship.cells[k];
+          shots[ci] = 3;
+          var r = Math.floor(ci / NV_N), c = ci % NV_N;
+          for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) {
+            var nr = r + dr, nc = c + dc;
+            if (nvIn(nr, nc) && !shots[nvIdx(nr, nc)]) shots[nvIdx(nr, nc)] = 1;
+          }
+        }
+        return "sunk";
+      }
+      return "hit";
+    }
+
+    function nvAllSunk(board) {
+      for (var i = 0; i < board.ships.length; i++) if (!board.ships[i].sunk) return false;
+      return true;
+    }
+
+    /* AI 选靶：target 模式（沿命中链）优先，否则奇偶棋盘式狩猎 */
+    function nvAiPick(shots, hits, rng) {
+      rng = rng || Math.random;
+      var cand = [], i, r, c;
+      if (hits.length >= 2) {
+        var r0 = Math.floor(hits[0] / NV_N), c0 = hits[0] % NV_N;
+        var r1 = Math.floor(hits[1] / NV_N);
+        var horiz = r0 === r1;
+        var lo = Infinity, hi = -Infinity;
+        for (i = 0; i < hits.length; i++) {
+          var v = horiz ? hits[i] % NV_N : Math.floor(hits[i] / NV_N);
+          if (v < lo) lo = v; if (v > hi) hi = v;
+        }
+        var fixed = horiz ? r0 : c0;
+        var ends = horiz
+          ? [[fixed, lo - 1], [fixed, hi + 1]]
+          : [[lo - 1, fixed], [hi + 1, fixed]];
+        for (i = 0; i < ends.length; i++) {
+          r = ends[i][0]; c = ends[i][1];
+          if (nvIn(r, c) && !shots[nvIdx(r, c)]) cand.push(nvIdx(r, c));
+        }
+      } else if (hits.length === 1) {
+        r = Math.floor(hits[0] / NV_N); c = hits[0] % NV_N;
+        var dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+        for (i = 0; i < dirs.length; i++) {
+          var nr = r + dirs[i][0], nc = c + dirs[i][1];
+          if (nvIn(nr, nc) && !shots[nvIdx(nr, nc)]) cand.push(nvIdx(nr, nc));
+        }
+      }
+      if (cand.length) return cand[Math.floor(rng() * cand.length)];
+      var par = [], any = [];
+      for (i = 0; i < NV_N * NV_N; i++) {
+        if (shots[i]) continue;
+        any.push(i);
+        r = Math.floor(i / NV_N); c = i % NV_N;
+        if ((r + c) % 2 === 0) par.push(i);
+      }
+      var pool = par.length ? par : any;
+      if (!pool.length) return -1;
+      return pool[Math.floor(rng() * pool.length)];
+    }
+
+    /* ---------- 状态 ---------- */
+    var nvP = null, nvE = null;       /* 双方棋盘 */
+    var nvPS = null, nvES = null;     /* nvPS=我打敌方的记录, nvES=敌打我的记录 */
+    var nvPhase = "setup";            /* setup / play / over */
+    var nvTurn = "p";
+    var nvHits = [];                  /* AI 命中链 */
+    var nvScans = 3, nvSus = {};      /* 侦察标记 */
+    var nvShotCnt = 0;                /* 我方开炮数 */
+    var nvLastAi = -1;
+    var nvTimer = null, nvBound = false;
+
+    function nvLoad() {
+      try { return JSON.parse(localStorage.getItem(NV_LSK)) || {}; } catch (e) { return {}; }
+    }
+    function nvSave(st) { try { localStorage.setItem(NV_LSK, JSON.stringify(st)); } catch (e) {} }
+
+    function nvNewGame() {
+      if (nvTimer) { clearTimeout(nvTimer); nvTimer = null; }
+      nvP = nvPlaceFleet(); nvE = nvPlaceFleet();
+      nvPS = new Array(NV_N * NV_N); nvES = new Array(NV_N * NV_N);
+      for (var i = 0; i < NV_N * NV_N; i++) { nvPS[i] = 0; nvES[i] = 0; }
+      nvPhase = "setup"; nvTurn = "p"; nvHits = [];
+      nvScans = 3; nvSus = {}; nvShotCnt = 0; nvLastAi = -1;
+      nvSetStatus("🎲 随机布阵后点「⚔️ 开战」", "");
+      nvDraw();
+    }
+
+    function nvSetStatus(txt, cls) {
+      var el = document.getElementById("nvStatus");
+      if (el) { el.textContent = txt; el.className = "nv-status" + (cls ? " " + cls : ""); }
+    }
+
+    function nvDraw() {
+      var mine = document.getElementById("nvMine"), foe = document.getElementById("nvFoe");
+      if (!mine || !foe || !nvP) return;
+      var i, cell, frag;
+      /* 我方棋盘：显示舰体 + 敌方炮火 */
+      frag = document.createDocumentFragment();
+      for (i = 0; i < NV_N * NV_N; i++) {
+        cell = document.createElement("div");
+        cell.className = "nv-cell";
+        if (nvP.cells[i] >= 0) cell.classList.add("ship");
+        if (nvES[i] === 1) cell.classList.add("miss");
+        else if (nvES[i] === 2) { cell.classList.add("hit"); cell.textContent = "💥"; }
+        else if (nvES[i] === 3) { cell.classList.add("sunk"); cell.textContent = "🔥"; }
+        if (i === nvLastAi) cell.classList.add("lastai");
+        frag.appendChild(cell);
+      }
+      mine.innerHTML = ""; mine.appendChild(frag);
+      /* 敌方海域：只显示我方炮火与侦察标记 */
+      frag = document.createDocumentFragment();
+      for (i = 0; i < NV_N * NV_N; i++) {
+        cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "nv-cell";
+        if (nvPS[i] === 1) cell.classList.add("miss");
+        else if (nvPS[i] === 2) { cell.classList.add("hit"); cell.textContent = "💥"; }
+        else if (nvPS[i] === 3) { cell.classList.add("sunk"); cell.textContent = "🔥"; }
+        else {
+          if (nvPhase === "play" && nvTurn === "p") cell.classList.add("open");
+          if (nvSus[i]) { cell.classList.add("sus"); cell.textContent = "❓"; }
+        }
+        (function (idx) { cell.onclick = function () { nvPlayerFire(idx); }; })(i);
+        frag.appendChild(cell);
+      }
+      foe.innerHTML = ""; foe.appendChild(frag);
+      nvDrawFleet("nvFleetMine", nvP);
+      nvDrawFleet("nvFleetFoe", nvE);
+      nvDrawStats();
+      var sc = document.getElementById("nvScan");
+      if (sc) { sc.textContent = "🛰️ 侦察 (" + nvScans + ")"; sc.disabled = !(nvPhase === "play" && nvTurn === "p" && nvScans > 0); }
+      var st = document.getElementById("nvStart"), sh = document.getElementById("nvShuffle");
+      if (st) st.disabled = nvPhase !== "setup";
+      if (sh) sh.disabled = nvPhase !== "setup";
+    }
+
+    function nvDrawFleet(id, board) {
+      var el = document.getElementById(id);
+      if (!el || !board) return;
+      el.innerHTML = "";
+      for (var s = 0; s < board.ships.length; s++) {
+        var ship = board.ships[s];
+        var d = document.createElement("div");
+        d.className = "nv-fs" + (ship.sunk ? " dead" : "");
+        for (var k = 0; k < ship.len; k++) d.appendChild(document.createElement("i"));
+        var sp = document.createElement("span");
+        sp.textContent = ship.name;
+        d.appendChild(sp);
+        el.appendChild(d);
+      }
+    }
+
+    function nvDrawStats() {
+      var el = document.getElementById("nvStats");
+      if (!el) return;
+      var st = nvLoad();
+      var best = (typeof st.best === "number") ? st.best + " 炮" : "—";
+      el.innerHTML =
+        '<div class="nv-stat"><b>' + (st.plays || 0) + '</b><span>总对局</span></div>' +
+        '<div class="nv-stat"><b>' + (st.wins || 0) + '</b><span>胜局</span></div>' +
+        '<div class="nv-stat"><b>' + (st.streak || 0) + '</b><span>连胜</span></div>' +
+        '<div class="nv-stat"><b>' + best + '</b><span>最少炮数取胜</span></div>';
+    }
+
+    function nvStart() {
+      if (nvPhase !== "setup") return;
+      nvPhase = "play"; nvTurn = "p";
+      var st = nvLoad();
+      st.plays = (st.plays || 0) + 1;
+      nvSave(st);
+      if (typeof bumpUsage === "function") bumpUsage("navy");
+      nvSetStatus("⚔️ 开战！点敌方海域开炮（命中可连击）", "");
+      nvDraw();
+    }
+
+    function nvPlayerFire(i) {
+      if (nvPhase !== "play" || nvTurn !== "p") return;
+      var res = nvFire(nvE, nvPS, i);
+      if (!res) return;
+      nvShotCnt++;
+      delete nvSus[i];
+      if (res === "sunk") {
+        var name = nvE.ships[nvE.cells[i]].name;
+        if (nvAllSunk(nvE)) return nvGameOver(true);
+        nvSetStatus("🔥 击沉敌方「" + name + "」！继续开炮！", "hit");
+      } else if (res === "hit") {
+        nvSetStatus("💥 命中！再来一炮！", "hit");
+      } else {
+        nvTurn = "e";
+        nvSetStatus("🌊 落空……敌方回击中", "");
+        nvTimer = setTimeout(nvAiTurn, 700);
+      }
+      nvDraw();
+    }
+
+    function nvAiTurn() {
+      nvTimer = null;
+      if (nvPhase !== "play" || nvTurn !== "e") return;
+      var i = nvAiPick(nvES, nvHits);
+      if (i < 0) { nvTurn = "p"; nvDraw(); return; }
+      var res = nvFire(nvP, nvES, i);
+      nvLastAi = i;
+      if (res === "hit") {
+        nvHits.push(i);
+        nvSetStatus("😱 我方舰艇被命中！敌方连击中……", "lose");
+        nvDraw();
+        nvTimer = setTimeout(nvAiTurn, 650);
+      } else if (res === "sunk") {
+        var sIdx = nvP.cells[i];
+        var dead = nvP.ships[sIdx];
+        var deadSet = {};
+        for (var k = 0; k < dead.cells.length; k++) deadSet[dead.cells[k]] = 1;
+        var rest = [];
+        for (k = 0; k < nvHits.length; k++) if (!deadSet[nvHits[k]]) rest.push(nvHits[k]);
+        nvHits = rest;
+        if (nvAllSunk(nvP)) return nvGameOver(false);
+        nvSetStatus("🛳️ 我方「" + dead.name + "」被击沉！敌方连击中……", "lose");
+        nvDraw();
+        nvTimer = setTimeout(nvAiTurn, 650);
+      } else {
+        nvTurn = "p";
+        nvSetStatus("🌊 敌方炮弹落空，轮到你了！", "");
+        nvDraw();
+      }
+    }
+
+    function nvGameOver(win) {
+      nvPhase = "over";
+      var st = nvLoad();
+      if (win) {
+        st.wins = (st.wins || 0) + 1;
+        st.streak = (st.streak || 0) + 1;
+        if (typeof st.best !== "number" || nvShotCnt < st.best) st.best = nvShotCnt;
+        nvSave(st);
+        if (typeof bumpUsage === "function") bumpUsage("navywin");
+        nvSetStatus("🏆 大获全胜！全歼敌方舰队，共开炮 " + nvShotCnt + " 次", "win");
+        if (typeof confettiBurst === "function") { try { confettiBurst(); } catch (e) {} }
+        if (typeof toast === "function") { try { toast("🚢 提督威武！敌方舰队全军覆没"); } catch (e) {} }
+      } else {
+        st.streak = 0;
+        nvSave(st);
+        nvSetStatus("💀 我方舰队全军覆没……点「🔄 新局」重整旗鼓", "lose");
+        if (typeof toast === "function") { try { toast("胜败乃兵家常事，再来一局！"); } catch (e) {} }
+      }
+      nvDraw();
+    }
+
+    function nvScanOnce() {
+      if (nvPhase !== "play" || nvTurn !== "p" || nvScans <= 0) return;
+      var pool = [];
+      for (var i = 0; i < NV_N * NV_N; i++) {
+        if (!nvPS[i] && !nvSus[i] && nvE.cells[i] >= 0) pool.push(i);
+      }
+      if (!pool.length) {
+        if (typeof toast === "function") { try { toast("侦察机报告：没有更多可疑目标了"); } catch (e) {} }
+        return;
+      }
+      var pick = pool[Math.floor(Math.random() * pool.length)];
+      nvSus[pick] = true;
+      nvScans--;
+      if (typeof toast === "function") { try { toast("🛰️ 侦察机发现可疑目标！已用黄框标出"); } catch (e) {} }
+      nvDraw();
+    }
+
+    function nvRender() {
+      if (!nvP) nvNewGame(); else nvDraw();
+      if (nvBound) return;
+      nvBound = true;
+      var b;
+      b = document.getElementById("nvShuffle"); if (b) b.onclick = function () { if (nvPhase === "setup") { nvP = nvPlaceFleet(); nvDraw(); } };
+      b = document.getElementById("nvStart"); if (b) b.onclick = nvStart;
+      b = document.getElementById("nvScan"); if (b) b.onclick = nvScanOnce;
+      b = document.getElementById("nvNew"); if (b) b.onclick = nvNewGame;
+    }
+    function nvStop() { if (nvTimer) { clearTimeout(nvTimer); nvTimer = null; } }
+    window.nvRender = nvRender;
+    window.nvStop = nvStop;
+    window.__nvTest = {
+      placeFleet: nvPlaceFleet, fire: nvFire, allSunk: nvAllSunk, aiPick: nvAiPick,
+      idx: nvIdx, N: NV_N, FLEET: NV_FLEET,
+      _state: function () { return { P: nvP, E: nvE, PS: nvPS, ES: nvES, phase: nvPhase, turn: nvTurn, hits: nvHits, scans: nvScans, shots: nvShotCnt }; },
+      _newGame: nvNewGame, _start: nvStart, _playerFire: nvPlayerFire, _aiTurn: nvAiTurn, _scan: nvScanOnce
+    };
+
+    BADGES.push(
+      { emoji: "🚢", name: "出海点兵", desc: "第一次在海战棋里指挥舰队开战", test: function (u) { return (u.navy || 0) >= 1; } },
+      { emoji: "⚓", name: "海战提督", desc: "在海战棋中战胜 AI 舰长 3 局", test: function (u) { return (u.navywin || 0) >= 3; } }
+    );
+    QUOTES.push(
+      "大海从不辜负敢于起锚的人——先开一炮再说。",
+      "命中是运气，连击是实力，布阵是智慧。",
+      "人生和海战棋一样：看不见的地方，才藏着关键目标。",
+      "落空了没关系，海面这么大，总有一炮会命中。",
+      "别怕暴露位置，怕的是从来不敢开火。",
+      "击沉过往的犹豫，你的舰队才能全速前进。"
     );
   })();
 </script>
