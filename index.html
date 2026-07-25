@@ -1533,6 +1533,7 @@
         <button data-tab="checkers">⛃ 跳棋</button>
         <button data-tab="bubble">🫧 泡泡龙</button>
         <button data-tab="backgammon">🎲 双陆棋</button>
+        <button data-tab="hockey">🏒 空气曲棍球</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6858,6 +6859,58 @@
       <div class="bg-tip">你执白 ●（右下角为你的家），目标是让全部 15 枚棋子绕行归家并全部「出栈」，先出完者胜。点「掷骰」→ 点自己的棋子（高亮绿点为可落点）→ 点绿点走子；两颗骰子各走一步、点数相同（豹子）可走四步。落到对方仅 1 子的点可将其「打」回中栏（BAR），对方须先从中栏进场才能继续。全部棋子回到自家内区后即可逐一出栈。可「悔本回合」重走、也可切换 AI 难度。</div>
     </div>
   </section>
+  <section class="panel" id="hockey">
+    <h2>🏒 空气曲棍球</h2>
+    <p class="sub">拖动你的球拍（下半场）把冰球打进对方球门，先进指定球数者获胜。</p>
+    <style>
+      #hockey .hk-wrap { max-width:420px; margin:0 auto; }
+      #hockey .hk-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #hockey .hk-top label { font-size:.85rem; opacity:.85; display:inline-flex; align-items:center; gap:4px; }
+      #hockey .hk-top select, #hockey .hk-top button { padding:6px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #hockey .hk-top button:hover { background:rgba(255,255,255,.12); }
+      #hockey .hk-score { text-align:center; font-size:1.5rem; font-weight:800; letter-spacing:3px; margin:2px 0 8px; font-variant-numeric:tabular-nums; }
+      #hockey .hk-score .ai { color:#5cc8ff; }
+      #hockey .hk-score .me { color:#ff6c9c; }
+      #hockey .hk-score .lab { font-size:.62rem; opacity:.55; letter-spacing:1px; display:block; font-weight:600; }
+      #hockey .hk-canvas-wrap { position:relative; width:100%; max-width:340px; margin:0 auto; }
+      #hockey canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#0d1622; box-shadow:0 12px 30px rgba(0,0,0,.5); cursor:pointer; }
+      #hockey .hk-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(6,12,20,.82); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #hockey .hk-msg.show { display:flex; }
+      #hockey .hk-msg .t { font-size:1.5rem; font-weight:800; }
+      #hockey .hk-msg .s { font-size:.95rem; opacity:.85; }
+      #hockey .hk-msg button { padding:9px 24px; border-radius:10px; border:0; background:#f1c40f; color:#222; font-weight:700; cursor:pointer; }
+      #hockey .hk-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="hk-wrap">
+      <div class="hk-top">
+        <label>难度
+          <select id="hkLevel">
+            <option value="1">轻松</option>
+            <option value="2" selected>普通</option>
+            <option value="3">高手</option>
+          </select>
+        </label>
+        <label>赛制
+          <select id="hkGoal">
+            <option value="5">5 球</option>
+            <option value="7" selected>7 球</option>
+            <option value="11">11 球</option>
+          </select>
+        </label>
+        <button id="hkNew">🔄 新对局</button>
+      </div>
+      <div class="hk-score"><span class="ai" id="hkScoreAI">0</span> : <span class="me" id="hkScoreMe">0</span><span class="lab">AI（上） · 你（下）</span></div>
+      <div class="hk-canvas-wrap">
+        <canvas id="hkCanvas"></canvas>
+        <div class="hk-msg" id="hkMsg">
+          <div class="t" id="hkMsgT"></div>
+          <div class="s" id="hkMsgS"></div>
+          <button id="hkAgain">再来一局</button>
+        </div>
+      </div>
+      <div class="hk-tip">🖱️ 用鼠标 / 手指拖动下半场的粉色球拍击球。快速挥拍能给冰球更大的力量；冰球会在四壁反弹，打进上方蓝色球门即得分。上半场由 AI 防守，三档难度任你挑，先进指定球数者获胜。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7212,6 +7265,7 @@
     if (id === "checkers") ckRender();
     if (id === "bubble") bubbleRender();
     if (id === "backgammon") bgRender();
+    if (id === "hockey") hockeyRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7227,6 +7281,7 @@
     if (id !== "checkers" && typeof ckStop === "function") ckStop();
     if (id !== "bubble" && typeof bubbleStop === "function") bubbleStop();
     if (id !== "backgammon" && typeof bgStop === "function") bgStop();
+    if (id !== "hockey" && typeof hockeyStop === "function") hockeyStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7373,6 +7428,7 @@
     checkers: "跳棋 英式跳棋 西洋跳棋 checkers draughts 国际跳棋 吃子 连跳 加冕 王棋 人机 对弈 对战 AI 棋类 策略 益智 棋盘 红黑",
     bubble: "泡泡龙 泡泡射手 bubble shooter 射泡泡 打泡泡 消除 三消 puzzle bobble 祖玛 街机 益智 瞄准 连锁 消泡泡 彩色泡泡 休闲 解压",
     backgammon: "西洋双陆棋 双陆棋 双陆 backgammon 十五子棋 骰子棋 掷骰 人机 对弈 对战 AI 棋类 桌游 board game 策略 出栈 打点 中栏 bar 棋盘 经典 tables",
+    hockey: "空气曲棍球 曲棍球 冰球 air hockey 冰上曲棍 球拍 球门 进球 物理 反弹 人机 对战 对弈 AI 街机 休闲 反应 手眼协调 竞技 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7579,6 +7635,7 @@ splitbill:"tools",
     checkers:"games",
     bubble:"games",
     backgammon:"games",
+    hockey:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -31135,6 +31192,260 @@ splitbill:"tools",
         "抢占关键点、连成封锁线，对手就算掷出好骰也无处可去。",
         "领先时拼命跑、落后时耐心留后手打击——这才是双陆的攻守之道。",
         "全部回家再从容出栈，急着冒进往往一子被打、满盘皆输。"
+      );
+    })();
+    /* ===== 🏒 空气曲棍球 Air Hockey（人机对弈） ===== */
+    (function () {
+      var D = typeof document !== "undefined" ? document : null;
+      var HK_W = 340, HK_H = 560;      // 逻辑尺寸（竖版球台）
+      var HK_PR = 24;                  // 球拍半径
+      var HK_KR = 13;                  // 冰球半径
+      var HK_GOAL = 128;               // 球门宽度
+      var HK_MAXV = 17;                // 冰球最大速度
+      var hkCanvas = null, hkCtx = null, hkDpr = 1;
+      var hkPuck = null;               // {x,y,vx,vy}
+      var hkMe = null, hkAI = null;    // 球拍 {x,y,px,py}（px/py=上一帧位置，用于算挥拍速度）
+      var hkScoreMe = 0, hkScoreAI = 0;
+      var hkLevel = 2, hkGoal = 7;
+      var hkOver = false, hkPaused = false, hkResetT = 0;
+      var hkRAF = 0, hkRunning = false;
+      var hkPtr = null;                // 指针目标 {x,y} 或 null
+
+      function hkClamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+      // 冰球撞球拍（纯函数，供无头测试）：就地修改 puck，返回是否发生碰撞
+      function hkCollide(puck, mx, my, mvx, mvy) {
+        var dx = puck.x - mx, dy = puck.y - my;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var minD = HK_KR + HK_PR;
+        if (dist >= minD || dist === 0) return false;
+        var nx = dx / dist, ny = dy / dist;
+        puck.x = mx + nx * minD;      // 把冰球推出球拍
+        puck.y = my + ny * minD;
+        var rvx = puck.vx - mvx, rvy = puck.vy - mvy;
+        var vn = rvx * nx + rvy * ny; // 法向相对速度
+        if (vn < 0) {                 // 仅在靠近时反弹（弹性 e=1）
+          puck.vx -= 2 * vn * nx;
+          puck.vy -= 2 * vn * ny;
+        }
+        puck.vx += mvx * 0.28;        // 叠加挥拍带来的推力
+        puck.vy += mvy * 0.28;
+        return true;
+      }
+
+      // 边界与球门（纯函数）：返回 "" | "aiGoal"(冰球进上门=玩家得分) | "meGoal"(进下门=AI得分)
+      function hkWalls(puck) {
+        var gx0 = (HK_W - HK_GOAL) / 2, gx1 = (HK_W + HK_GOAL) / 2;
+        if (puck.x < HK_KR) { puck.x = HK_KR; puck.vx = Math.abs(puck.vx) * 0.98; }
+        else if (puck.x > HK_W - HK_KR) { puck.x = HK_W - HK_KR; puck.vx = -Math.abs(puck.vx) * 0.98; }
+        if (puck.y < HK_KR) {
+          if (puck.x > gx0 && puck.x < gx1) return "aiGoal";
+          puck.y = HK_KR; puck.vy = Math.abs(puck.vy) * 0.98;
+        }
+        if (puck.y > HK_H - HK_KR) {
+          if (puck.x > gx0 && puck.x < gx1) return "meGoal";
+          puck.y = HK_H - HK_KR; puck.vy = -Math.abs(puck.vy) * 0.98;
+        }
+        return "";
+      }
+
+      function hkCapSpeed(puck) {
+        var sp = Math.sqrt(puck.vx * puck.vx + puck.vy * puck.vy);
+        if (sp > HK_MAXV) { puck.vx = puck.vx / sp * HK_MAXV; puck.vy = puck.vy / sp * HK_MAXV; }
+      }
+
+      function hkResetPuck(dir) {
+        // dir: +1 冰球飞向下方(我方) / -1 飞向上方(AI) / 0 随机
+        var d = dir || (Math.random() < 0.5 ? 1 : -1);
+        hkPuck = { x: HK_W / 2, y: HK_H / 2, vx: (Math.random() - 0.5) * 3, vy: d * 3.4 };
+      }
+
+      function hkResetPositions() {
+        hkMe = { x: HK_W / 2, y: HK_H - 70, px: HK_W / 2, py: HK_H - 70 };
+        hkAI = { x: HK_W / 2, y: 70, px: HK_W / 2, py: 70 };
+        hkPtr = null;
+      }
+
+      function hkUpdateScore() {
+        if (!D) return;
+        var a = D.getElementById("hkScoreAI"), b = D.getElementById("hkScoreMe");
+        if (a) a.textContent = hkScoreAI;
+        if (b) b.textContent = hkScoreMe;
+      }
+
+      function hkNewGame() {
+        hkScoreMe = 0; hkScoreAI = 0; hkOver = false; hkPaused = false; hkResetT = 0;
+        hkResetPositions();
+        hkResetPuck(0);
+        hkUpdateScore();
+        var m = D && D.getElementById("hkMsg"); if (m) m.classList.remove("show");
+        hkRunning = true;
+        if (!hkRAF) hkRAF = requestAnimationFrame(hkLoop);
+      }
+
+      function hkGoalScored(who) {
+        // who: "me" 玩家得分 / "ai" AI 得分
+        if (who === "me") hkScoreMe++; else hkScoreAI++;
+        hkUpdateScore();
+        if (typeof playDing === "function") { try { playDing(); } catch (e) {} }
+        if (hkScoreMe >= hkGoal || hkScoreAI >= hkGoal) { hkEnd(); return; }
+        hkPaused = true; hkResetT = 0;
+        hkResetPuck(who === "me" ? -1 : 1); // 发球给失球方
+        hkResetPositions();
+      }
+
+      function hkEnd() {
+        hkOver = true; hkRunning = false;
+        var win = hkScoreMe > hkScoreAI;
+        if (typeof bumpUsage === "function") { try { bumpUsage("hockey"); if (win) bumpUsage("hockeywin"); } catch (e) {} }
+        if (win && typeof confettiBurst === "function") { try { confettiBurst(120); } catch (e) {} }
+        if (typeof renderAchv === "function") { try { renderAchv(); } catch (e) {} }
+        if (!D) return;
+        var m = D.getElementById("hkMsg"), t = D.getElementById("hkMsgT"), s = D.getElementById("hkMsgS");
+        if (t) t.textContent = win ? "🎉 你赢了！" : "😤 AI 赢了";
+        if (s) s.textContent = "比分 " + hkScoreMe + " : " + hkScoreAI + (win ? "　手感火热！" : "　再战一局？");
+        if (m) m.classList.add("show");
+      }
+
+      function hkAIMove() {
+        var sp = hkLevel === 1 ? 3.2 : (hkLevel === 2 ? 4.8 : 6.6);
+        var tx, ty;
+        if (hkPuck.y < HK_H * 0.5) {
+          // 冰球在 AI 半场：拦截 / 进攻
+          tx = hkPuck.x;
+          if (hkLevel >= 2 && hkPuck.y < HK_H * 0.34 && hkPuck.y > HK_PR + HK_KR + 2) {
+            ty = hkPuck.y - (HK_PR + HK_KR) * 0.6; // 从上方压向冰球，把它顶下去
+          } else {
+            ty = hkPuck.y - HK_PR;
+          }
+        } else {
+          // 回防：轻微横向跟随冰球
+          tx = HK_W / 2 + (hkPuck.x - HK_W / 2) * 0.35;
+          ty = HK_PR + 26;
+        }
+        tx = hkClamp(tx, HK_PR, HK_W - HK_PR);
+        ty = hkClamp(ty, HK_PR, HK_H * 0.5 - HK_PR);
+        hkAI.px = hkAI.x; hkAI.py = hkAI.y;
+        var dx = tx - hkAI.x, dy = ty - hkAI.y;
+        var d = Math.sqrt(dx * dx + dy * dy);
+        if (d > sp) { hkAI.x += dx / d * sp; hkAI.y += dy / d * sp; }
+        else { hkAI.x = tx; hkAI.y = ty; }
+      }
+
+      function hkMeMove() {
+        hkMe.px = hkMe.x; hkMe.py = hkMe.y;
+        if (hkPtr) {
+          var tx = hkClamp(hkPtr.x, HK_PR, HK_W - HK_PR);
+          var ty = hkClamp(hkPtr.y, HK_H * 0.5 + HK_PR, HK_H - HK_PR); // 限制在下半场
+          hkMe.x += (tx - hkMe.x) * 0.5; // 平滑跟随，产生挥拍速度
+          hkMe.y += (ty - hkMe.y) * 0.5;
+        }
+      }
+
+      function hkStep() {
+        if (hkPaused) { hkResetT++; if (hkResetT > 40) hkPaused = false; return; }
+        hkMeMove();
+        hkAIMove();
+        hkPuck.x += hkPuck.vx;
+        hkPuck.y += hkPuck.vy;
+        hkPuck.vx *= 0.996; hkPuck.vy *= 0.996;   // 冰面摩擦
+        var g = hkWalls(hkPuck);
+        if (g === "aiGoal") { hkGoalScored("me"); return; }
+        if (g === "meGoal") { hkGoalScored("ai"); return; }
+        hkCollide(hkPuck, hkMe.x, hkMe.y, hkMe.x - hkMe.px, hkMe.y - hkMe.py);
+        hkCollide(hkPuck, hkAI.x, hkAI.y, hkAI.x - hkAI.px, hkAI.y - hkAI.py);
+        hkCapSpeed(hkPuck);
+      }
+
+      function hkDrawPad(p, col) {
+        var c = hkCtx;
+        c.beginPath(); c.arc(p.x, p.y, HK_PR, 0, Math.PI * 2); c.fillStyle = col; c.fill();
+        c.beginPath(); c.arc(p.x, p.y, HK_PR * 0.55, 0, Math.PI * 2); c.fillStyle = "rgba(0,0,0,.35)"; c.fill();
+        c.beginPath(); c.arc(p.x, p.y, HK_PR, 0, Math.PI * 2); c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 2; c.stroke();
+      }
+
+      function hkDraw() {
+        if (!hkCtx) return;
+        var c = hkCtx;
+        c.clearRect(0, 0, HK_W, HK_H);
+        c.fillStyle = "#0d1622"; c.fillRect(0, 0, HK_W, HK_H);
+        c.strokeStyle = "rgba(255,255,255,.16)"; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(0, HK_H / 2); c.lineTo(HK_W, HK_H / 2); c.stroke();
+        c.beginPath(); c.arc(HK_W / 2, HK_H / 2, 54, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.arc(HK_W / 2, HK_H / 2, 5, 0, Math.PI * 2); c.fillStyle = "rgba(255,255,255,.25)"; c.fill();
+        var gx0 = (HK_W - HK_GOAL) / 2, gx1 = (HK_W + HK_GOAL) / 2;
+        c.lineWidth = 6;
+        c.strokeStyle = "#5cc8ff"; c.beginPath(); c.moveTo(gx0, 3); c.lineTo(gx1, 3); c.stroke();
+        c.strokeStyle = "#ff6c9c"; c.beginPath(); c.moveTo(gx0, HK_H - 3); c.lineTo(gx1, HK_H - 3); c.stroke();
+        c.beginPath(); c.arc(hkPuck.x, hkPuck.y, HK_KR, 0, Math.PI * 2); c.fillStyle = "#ffd166"; c.fill();
+        c.strokeStyle = "rgba(0,0,0,.4)"; c.lineWidth = 2; c.stroke();
+        hkDrawPad(hkAI, "#5cc8ff");
+        hkDrawPad(hkMe, "#ff6c9c");
+      }
+
+      function hkLoop() {
+        hkRAF = 0;
+        if (!hkRunning) return;
+        if (!hkOver) { hkStep(); hkDraw(); }
+        hkRAF = requestAnimationFrame(hkLoop);
+      }
+
+      function hkPointer(e) {
+        if (!hkCanvas) return null;
+        var r = hkCanvas.getBoundingClientRect();
+        var cx = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        var cy = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+        return { x: (cx - r.left) / r.width * HK_W, y: (cy - r.top) / r.height * HK_H };
+      }
+
+      function hkInit() {
+        if (!D) return;
+        hkCanvas = D.getElementById("hkCanvas");
+        if (!hkCanvas) return;
+        hkDpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+        hkCanvas.width = Math.round(HK_W * hkDpr);
+        hkCanvas.height = Math.round(HK_H * hkDpr);
+        hkCtx = hkCanvas.getContext("2d");
+        hkCtx.setTransform(hkDpr, 0, 0, hkDpr, 0, 0);
+        hkCanvas.addEventListener("pointermove", function (e) { hkPtr = hkPointer(e); });
+        hkCanvas.addEventListener("pointerdown", function (e) { hkPtr = hkPointer(e); });
+        hkCanvas.addEventListener("pointerleave", function () { hkPtr = null; });
+        var lv = D.getElementById("hkLevel");
+        if (lv) { lv.onchange = function () { hkLevel = parseInt(lv.value, 10) || 2; }; hkLevel = parseInt(lv.value, 10) || 2; }
+        var gl = D.getElementById("hkGoal");
+        if (gl) { gl.onchange = function () { hkGoal = parseInt(gl.value, 10) || 7; hkNewGame(); }; hkGoal = parseInt(gl.value, 10) || 7; }
+        var nb = D.getElementById("hkNew"); if (nb) nb.onclick = function () { if (typeof playClick === "function") { try { playClick(); } catch (e) {} } hkNewGame(); };
+        var ag = D.getElementById("hkAgain"); if (ag) ag.onclick = hkNewGame;
+      }
+
+      window.hockeyRender = function () {
+        hkInit();
+        if (!hkCanvas) return;
+        if (!hkPuck) { hkResetPositions(); hkResetPuck(0); hkUpdateScore(); }
+        hkRunning = true;
+        if (!hkRAF) hkRAF = requestAnimationFrame(hkLoop);
+      };
+      window.hockeyStop = function () {
+        hkRunning = false;
+        if (hkRAF) { cancelAnimationFrame(hkRAF); hkRAF = 0; }
+      };
+
+      // 仅供无头 sim 驱动（浏览器中不会主动调用，无副作用）
+      window.__hkTest = {
+        collide: hkCollide, walls: hkWalls, cap: hkCapSpeed, clamp: hkClamp,
+        W: HK_W, H: HK_H, KR: HK_KR, PR: HK_PR, GOAL: HK_GOAL, MAXV: HK_MAXV
+      };
+
+      BADGES.push(
+        { emoji: "🏒", name: "冰球新手", desc: "玩过一局空气曲棍球", test: function (u) { return (u.hockey || 0) >= 1; } },
+        { emoji: "🥅", name: "冰球高手", desc: "在空气曲棍球中战胜 AI", test: function (u) { return (u.hockeywin || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "空气曲棍球的秘诀：别追着球跑，守住门、等它自己送上门。",
+        "快速挥拍比死命顶更有力——出手那一瞬间的速度，才是冰球真正的力量。",
+        "借着侧墙斜打，往往能绕过对方球拍，直插死角。",
+        "进攻再猛也要留一只手回防；空门失球，比没进球更亏。",
+        "冰球不会累，但对手会——耐心磨到它露出破绽。"
       );
     })();
 </script>
