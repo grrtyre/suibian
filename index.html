@@ -1537,6 +1537,7 @@
         <button data-tab="djump">🦘 涂鸦跳跃</button>
         <button data-tab="zuma">🐸 祖玛弹珠</button>
         <button data-tab="invaders">👾 太空侵略者</button>
+        <button data-tab="frogger">🚦 青蛙过河</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7026,6 +7027,51 @@
       <div class="inv-tip">⌨️ ← → / A D 移动，空格 / K 开火；📱 底部按钮或直接在画布上拖动战机、点按射击。三种像素外星人分值 10/20/30，顶部红色飞碟 50~150 分；四座绿色掩体可挡弹但会被打碎，敌方越打越少下压越快——全歼一波得奖励分并回一条命，波次无尽、难度递增，最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="frogger">
+    <h2>🚦 青蛙过河</h2>
+    <p class="sub">躲车流、踩木头、防潜水龟——把 5 只小蛙全都送回家！</p>
+    <style>
+      #frogger .fg-wrap { max-width:420px; margin:0 auto; }
+      #frogger .fg-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #frogger .fg-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #frogger .fg-top button:hover { background:rgba(255,255,255,.12); }
+      #frogger .fg-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #frogger canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#0b1220; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #frogger .fg-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(6,10,18,.84); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #frogger .fg-msg.show { display:flex; }
+      #frogger .fg-msg .t { font-size:1.5rem; font-weight:800; }
+      #frogger .fg-msg .s { font-size:.95rem; opacity:.85; }
+      #frogger .fg-msg button { padding:9px 24px; border-radius:10px; border:0; background:#7ade4a; color:#123; font-weight:700; cursor:pointer; }
+      #frogger .fg-pad { display:grid; grid-template-columns:repeat(3,64px); grid-template-rows:repeat(2,48px); gap:8px; justify-content:center; margin-top:10px; }
+      #frogger .fg-pad button { font-size:1.15rem; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; cursor:pointer; touch-action:none; user-select:none; -webkit-user-select:none; }
+      #frogger .fg-pad button:active { background:rgba(255,255,255,.18); }
+      #frogger .fg-pad .u { grid-column:2; grid-row:1; }
+      #frogger .fg-pad .l { grid-column:1; grid-row:2; }
+      #frogger .fg-pad .d { grid-column:2; grid-row:2; }
+      #frogger .fg-pad .r { grid-column:3; grid-row:2; }
+      #frogger .fg-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="fg-wrap">
+      <div class="fg-top">
+        <button id="fgNew">🔄 新的一局</button>
+      </div>
+      <div class="fg-canvas-wrap">
+        <canvas id="fgCanvas"></canvas>
+        <div class="fg-msg" id="fgMsg">
+          <div class="t" id="fgMsgT"></div>
+          <div class="s" id="fgMsgS"></div>
+          <button id="fgAgain">开始游戏</button>
+        </div>
+      </div>
+      <div class="fg-pad">
+        <button id="fgUp" class="u">▲</button>
+        <button id="fgLeft" class="l">◀</button>
+        <button id="fgDown" class="d">▼</button>
+        <button id="fgRight" class="r">▶</button>
+      </div>
+      <div class="fg-tip">⌨️ 方向键 / WASD 跳格；📱 方向按钮，或在画布上滑动（轻点 = 向上跳）。下半程躲开五车道的车流，上半程踩着木头和乌龟渡河——注意有的乌龟会闪烁预警后潜水！每前进一格 +10 分，送一只小蛙回家 +50 分并有剩余时间加成，槽位里偶尔出现 🪰 苍蝇可加 100 分；5 个家全部填满过关、奖分回命，关卡无尽、越来越快，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7384,6 +7430,7 @@
     if (id === "djump") djumpRender();
     if (id === "zuma") zumaRender();
     if (id === "invaders") invadersRender();
+    if (id === "frogger") froggerRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7403,6 +7450,7 @@
     if (id !== "djump" && typeof djumpStop === "function") djumpStop();
     if (id !== "zuma" && typeof zumaStop === "function") zumaStop();
     if (id !== "invaders" && typeof invadersStop === "function") invadersStop();
+    if (id !== "frogger" && typeof froggerStop === "function") froggerStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7553,6 +7601,7 @@
     djump: "涂鸦跳跃 涂鸦 跳跃 弹跳 doodle jump 平台跳跃 无尽 街机 休闲 上跳 弹簧 移动平台 反应 手眼协调 高度 game",
     zuma: "祖玛 祖玛弹珠 zuma 弹珠 三消 消除 轨道 螺旋 青蛙 射击 泡泡 连锁 街机 休闲 瞄准 手眼协调 game",
     invaders: "太空侵略者 invaders space invaders 小蜜蜂 射击 外星人 飞船 战机 像素 街机 打飞机 掩体 飞碟 经典 game",
+    frogger: "青蛙过河 frogger 过马路 过河 跳格 街机 经典 木头 乌龟 汽车 车流 小蛙 回家 像素 潜水 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7763,6 +7812,7 @@ splitbill:"tools",
     djump:"games",
     zuma:"games",
     invaders:"games",
+    frogger:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -32747,6 +32797,496 @@ splitbill:"tools",
         "别追着飞碟满屏跑，守住自己的节奏，奖励自然会从头顶路过。",
         "丢一条命不算完，阵地还在，就还有下一发子弹。"
       );
+    (function () {
+      var D = document;
+      var FG_KEY = "suibian_frogger";
+      var FG_W = 360, FG_H = 480, FG_CELL = 30, FG_COLS = 12;
+      var FG_HOME_ROW = 1, FG_START_ROW = 13;
+      var FG_HOMES_X = [36, 108, 180, 252, 324];
+
+      var fgCv = null, fgCtx = null, fgWired = false;
+      var fgRunning = false, fgRAF = 0;
+      var fgStarted = false, fgOver = false, fgClear = false;
+      var fgScore = 0, fgBest = 0, fgLives = 3, fgLevel = 1;
+      var fgTick = 0, fgTime = 0, fgTimeMax = 1500;
+      var fgFx = 180, fgFr = FG_START_ROW, fgMinRow = FG_START_ROW;
+      var fgHopT = 0, fgDeadT = 0, fgDeadX = 0, fgDeadR = 0, fgDeadWet = false;
+      var fgHomes = [false, false, false, false, false];
+      var fgFlySlot = -1;
+      var fgLanes = [];
+      var fgFloats = [];
+
+      function fgMod(x, p) { return ((x % p) + p) % p; }
+
+      function fgBuildLanes(lv) {
+        var s = 1 + (lv - 1) * 0.12;
+        var defs = [
+          { row: 2, type: "log", len: 4, v: 0.50 * s, n: 2, gap: 8 },
+          { row: 3, type: "turtle", len: 2, v: -0.55 * s, n: 4, gap: 4, dive: 3 },
+          { row: 4, type: "log", len: 3, v: 0.90 * s, n: 3, gap: 6 },
+          { row: 5, type: "log", len: 2, v: 0.40 * s, n: 3, gap: 5 },
+          { row: 6, type: "turtle", len: 3, v: -0.50 * s, n: 3, gap: 5, dive: 4 },
+          { row: 8, type: "truck", len: 2, v: -0.55 * s, n: 2, gap: 9 },
+          { row: 9, type: "fast", len: 1, v: 1.70 * s, n: 1, gap: 14 },
+          { row: 10, type: "car", len: 1, v: -0.75 * s, n: 3, gap: 5 },
+          { row: 11, type: "car2", len: 1, v: 0.55 * s, n: 3, gap: 5 },
+          { row: 12, type: "car3", len: 1, v: -1.00 * s, n: 2, gap: 8 }
+        ];
+        var lanes = [];
+        for (var i = 0; i < defs.length; i++) {
+          var d = defs[i];
+          var period = d.n * (d.len + d.gap) * FG_CELL;
+          var minP = FG_W + (d.len + 2) * FG_CELL;
+          while (period < minP) period += (d.len + d.gap) * FG_CELL;
+          lanes.push({
+            row: d.row, type: d.type, len: d.len, v: d.v, n: d.n,
+            dive: d.dive || 0, period: period,
+            step: (d.len + d.gap) * FG_CELL,
+            ph: Math.floor(Math.random() * period)
+          });
+        }
+        return lanes;
+      }
+
+      function fgItemX(lane, i) {
+        return fgMod(lane.ph + i * lane.step + lane.v * fgTick, lane.period) - lane.len * FG_CELL;
+      }
+      function fgSubmerged(lane, i) {
+        if (!lane.dive || (i % lane.dive) !== lane.dive - 1) return false;
+        var phase = fgMod(fgTick + i * 140 + lane.row * 97, 420);
+        return phase < 80;
+      }
+      function fgSinking(lane, i) {
+        if (!lane.dive || (i % lane.dive) !== lane.dive - 1) return false;
+        var phase = fgMod(fgTick + i * 140 + lane.row * 97, 420);
+        return phase >= 340;
+      }
+      function fgLaneAt(row) {
+        for (var i = 0; i < fgLanes.length; i++) if (fgLanes[i].row === row) return fgLanes[i];
+        return null;
+      }
+      function fgPlatformAt(row, x) {
+        var lane = fgLaneAt(row);
+        if (!lane || (lane.type !== "log" && lane.type !== "turtle")) return null;
+        for (var i = 0; i < lane.n; i++) {
+          if (fgSubmerged(lane, i)) continue;
+          var xi = fgItemX(lane, i);
+          if (x >= xi + 2 && x <= xi + lane.len * FG_CELL - 2) return lane;
+        }
+        return null;
+      }
+      function fgCarHit(row, x) {
+        var lane = fgLaneAt(row);
+        if (!lane || lane.type === "log" || lane.type === "turtle") return false;
+        for (var i = 0; i < lane.n; i++) {
+          var xi = fgItemX(lane, i);
+          if (x + 10 >= xi + 3 && x - 10 <= xi + lane.len * FG_CELL - 3) return true;
+        }
+        return false;
+      }
+
+      function fgMsgShow(t, s, btn) {
+        var m = D.getElementById("fgMsg");
+        if (!m) return;
+        var et = D.getElementById("fgMsgT"), es = D.getElementById("fgMsgS"), b = D.getElementById("fgAgain");
+        if (et) et.textContent = t;
+        if (es) es.textContent = s;
+        if (b) b.textContent = btn || "开始游戏";
+        m.classList.add("show");
+      }
+      function fgMsgHide() {
+        var m = D.getElementById("fgMsg");
+        if (m) m.classList.remove("show");
+      }
+      function fgSaveBest() {
+        if (fgScore > fgBest) {
+          fgBest = fgScore;
+          try { localStorage.setItem(FG_KEY, String(fgBest)); } catch (e) {}
+        }
+      }
+      function fgFloat(x, y, txt) {
+        fgFloats.push({ x: x, y: y, txt: txt, t: 50 });
+        if (fgFloats.length > 8) fgFloats.shift();
+      }
+
+      function fgResetFrog() {
+        fgFx = 180; fgFr = FG_START_ROW; fgMinRow = FG_START_ROW;
+        fgTime = fgTimeMax; fgHopT = 0;
+      }
+      function fgStartLevel(lv) {
+        fgLevel = lv;
+        fgLanes = fgBuildLanes(lv);
+        fgHomes = [false, false, false, false, false];
+        fgFlySlot = Math.floor(Math.random() * 5);
+        fgTimeMax = Math.max(900, 1560 - lv * 60);
+        fgClear = false;
+        fgResetFrog();
+      }
+      function fgNewGame() {
+        fgScore = 0; fgLives = 3; fgOver = false; fgStarted = true;
+        fgTick = 0; fgDeadT = 0; fgFloats = [];
+        fgStartLevel(1);
+        try { bumpUsage("frogger"); } catch (e) {}
+        fgMsgHide();
+      }
+      function fgGameOver(msg) {
+        fgOver = true;
+        fgSaveBest();
+        fgMsgShow("\ud83d\udc80 游戏结束", msg + " 得分 " + fgScore + "（最高 " + fgBest + "）", "再来一局");
+      }
+      function fgDie(wet) {
+        if (fgDeadT > 0 || fgOver || fgClear) return;
+        fgDeadT = 55; fgDeadX = fgFx; fgDeadR = fgFr; fgDeadWet = !!wet;
+        try { if (settings.sound) playDing(); } catch (e) {}
+      }
+      function fgAfterDeath() {
+        fgLives--;
+        if (fgLives < 0) { fgGameOver(fgDeadWet ? "小蛙沉入了河底……" : "小蛙倒在了马路上……"); return; }
+        fgResetFrog();
+      }
+      function fgLevelClear() {
+        fgClear = true;
+        var bonus = 200 + fgLevel * 100;
+        fgScore += bonus;
+        if (fgLives < 4) fgLives++;
+        fgSaveBest();
+        try { bumpUsage("frogwin"); } catch (e) {}
+        try { confettiBurst(120); } catch (e) {}
+        try { if (settings.sound) playDing(); } catch (e) {}
+        fgMsgShow("\ud83c\udfe1 第 " + fgLevel + " 关全员到家！", "奖励 " + bonus + " 分、生命 +1，下一关车更快、龟更爱潜水……", "下一关");
+      }
+
+      function fgEnterHome() {
+        for (var i = 0; i < 5; i++) {
+          if (Math.abs(fgFx - FG_HOMES_X[i]) <= 18 && !fgHomes[i]) {
+            fgHomes[i] = true;
+            var gain = 50 + Math.floor(fgTime / 90) * 3;
+            var flyOn = (i === fgFlySlot) && (fgMod(fgTick, 600) < 300);
+            if (flyOn) { gain += 100; fgFloat(FG_HOMES_X[i], 56, "\ud83e\udeb0 +100"); }
+            fgScore += gain;
+            fgFloat(FG_HOMES_X[i], 40, "+" + gain);
+            fgSaveBest();
+            var done = true;
+            for (var k = 0; k < 5; k++) if (!fgHomes[k]) done = false;
+            if (done) { fgLevelClear(); } else {
+              fgFlySlot = -1;
+              var empt = [];
+              for (var m = 0; m < 5; m++) if (!fgHomes[m]) empt.push(m);
+              if (empt.length) fgFlySlot = empt[Math.floor(Math.random() * empt.length)];
+              fgResetFrog();
+            }
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function fgHop(dx, dy) {
+        if (!fgStarted || fgOver || fgClear || fgDeadT > 0) return;
+        if (dy < 0 && fgFr <= FG_HOME_ROW) return;
+        if (dy > 0 && fgFr >= FG_START_ROW) return;
+        var nx = fgFx + dx * FG_CELL;
+        if (nx < 15 || nx > FG_W - 15) return;
+        fgFx = nx;
+        fgFr += dy;
+        fgHopT = 8;
+        if (fgFr < fgMinRow) { fgMinRow = fgFr; fgScore += 10; }
+        if (fgFr === FG_HOME_ROW) {
+          if (!fgEnterHome()) fgDie(true);
+          return;
+        }
+        if (fgFr >= 8 && fgFr <= 12 && fgCarHit(fgFr, fgFx)) { fgDie(false); return; }
+        if (fgFr >= 2 && fgFr <= 6 && !fgPlatformAt(fgFr, fgFx)) { fgDie(true); }
+      }
+
+      function fgStep() {
+        fgTick++;
+        if (fgHopT > 0) fgHopT--;
+        for (var f = fgFloats.length - 1; f >= 0; f--) {
+          fgFloats[f].t--; fgFloats[f].y -= 0.5;
+          if (fgFloats[f].t <= 0) fgFloats.splice(f, 1);
+        }
+        if (!fgStarted || fgOver || fgClear) return;
+        if (fgDeadT > 0) {
+          fgDeadT--;
+          if (fgDeadT === 0) fgAfterDeath();
+          return;
+        }
+        fgTime--;
+        if (fgTime <= 0) { fgDie(false); return; }
+        if (fgFr >= 2 && fgFr <= 6) {
+          var lane = fgPlatformAt(fgFr, fgFx);
+          if (!lane) { fgDie(true); return; }
+          fgFx += lane.v;
+          if (fgFx < 8 || fgFx > FG_W - 8) { fgDie(true); return; }
+        } else if (fgFr >= 8 && fgFr <= 12) {
+          if (fgCarHit(fgFr, fgFx)) { fgDie(false); return; }
+        }
+      }
+
+      /* ---------- 绘制 ---------- */
+      function fgRoundRect(c, x, y, w, h, r) {
+        c.beginPath();
+        c.moveTo(x + r, y);
+        c.arcTo(x + w, y, x + w, y + h, r);
+        c.arcTo(x + w, y + h, x, y + h, r);
+        c.arcTo(x, y + h, x, y, r);
+        c.arcTo(x, y, x + w, y, r);
+        c.closePath();
+      }
+      function fgDrawFrogAt(c, x, y, sc, col) {
+        c.save();
+        c.translate(x, y);
+        c.scale(sc, sc);
+        c.fillStyle = col || "#7ade4a";
+        c.beginPath(); c.ellipse(0, 2, 10, 8, 0, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.ellipse(-8, 8, 4, 3, 0.6, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.ellipse(8, 8, 4, 3, -0.6, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.ellipse(-7, -6, 3.5, 3.5, 0, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.ellipse(7, -6, 3.5, 3.5, 0, 0, Math.PI * 2); c.fill();
+        c.fillStyle = "#0d1a08";
+        c.beginPath(); c.arc(-7, -6.5, 1.6, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(7, -6.5, 1.6, 0, Math.PI * 2); c.fill();
+        c.restore();
+      }
+      function fgRowY(r) { return r * FG_CELL; }
+
+      function fgDraw() {
+        var c = fgCtx;
+        if (!c) return;
+        c.clearRect(0, 0, FG_W, FG_H);
+        /* 背景带 */
+        c.fillStyle = "#0b1220"; c.fillRect(0, 0, FG_W, FG_CELL);            /* HUD */
+        c.fillStyle = "#123420"; c.fillRect(0, fgRowY(1), FG_W, FG_CELL);    /* 家 */
+        c.fillStyle = "#0a2a4a"; c.fillRect(0, fgRowY(2), FG_W, FG_CELL * 5);/* 河 */
+        c.fillStyle = "#1c4527"; c.fillRect(0, fgRowY(7), FG_W, FG_CELL);    /* 中线草地 */
+        c.fillStyle = "#22262e"; c.fillRect(0, fgRowY(8), FG_W, FG_CELL * 5);/* 马路 */
+        c.fillStyle = "#1c4527"; c.fillRect(0, fgRowY(13), FG_W, FG_CELL);   /* 起点 */
+        c.fillStyle = "#0b1220"; c.fillRect(0, fgRowY(14), FG_W, FG_CELL * 2);/* 底部 HUD */
+
+        /* 河面波纹 */
+        c.fillStyle = "rgba(255,255,255,.05)";
+        for (var wv = 0; wv < 10; wv++) {
+          var wx = fgMod(wv * 53 + fgTick * 0.3, FG_W + 40) - 20;
+          c.fillRect(wx, fgRowY(2) + 8 + (wv % 5) * 28, 22, 2);
+        }
+        /* 马路虚线 */
+        c.fillStyle = "rgba(255,255,255,.16)";
+        for (var rr = 9; rr <= 12; rr++)
+          for (var dd = 0; dd < 6; dd++) c.fillRect(dd * 64 + 8, fgRowY(rr) - 1, 26, 2);
+
+        /* 家槽位 */
+        for (var h = 0; h < 5; h++) {
+          var hx = FG_HOMES_X[h];
+          c.fillStyle = "#0a2013";
+          fgRoundRect(c, hx - 20, fgRowY(1) + 3, 40, FG_CELL - 6, 8); c.fill();
+          if (fgHomes[h]) {
+            fgDrawFrogAt(c, hx, fgRowY(1) + FG_CELL / 2, 0.9, "#a5e88a");
+          } else if (h === fgFlySlot && fgMod(fgTick, 600) < 300 && fgStarted && !fgOver) {
+            c.font = "14px serif"; c.textAlign = "center"; c.textBaseline = "middle";
+            c.fillText("\ud83e\udeb0", hx, fgRowY(1) + FG_CELL / 2);
+          }
+        }
+
+        /* 平台与车辆 */
+        for (var li = 0; li < fgLanes.length; li++) {
+          var lane = fgLanes[li];
+          var y = fgRowY(lane.row);
+          for (var i = 0; i < lane.n; i++) {
+            var x = fgItemX(lane, i);
+            var wpx = lane.len * FG_CELL;
+            if (x > FG_W || x + wpx < 0) continue;
+            if (lane.type === "log") {
+              c.fillStyle = "#8a5a2b";
+              fgRoundRect(c, x + 2, y + 6, wpx - 4, FG_CELL - 12, 9); c.fill();
+              c.fillStyle = "rgba(60,35,12,.55)";
+              for (var g = 1; g < lane.len; g++) c.fillRect(x + g * FG_CELL - 1, y + 8, 2, FG_CELL - 16);
+            } else if (lane.type === "turtle") {
+              var sub = fgSubmerged(lane, i), sink = fgSinking(lane, i);
+              for (var t2 = 0; t2 < lane.len; t2++) {
+                var tx = x + t2 * FG_CELL + FG_CELL / 2;
+                if (sub) {
+                  c.strokeStyle = "rgba(255,255,255,.25)"; c.lineWidth = 1.5;
+                  c.beginPath(); c.arc(tx, y + FG_CELL / 2, 8, 0, Math.PI * 2); c.stroke();
+                } else {
+                  c.globalAlpha = sink && (fgTick % 20 < 10) ? 0.45 : 1;
+                  c.fillStyle = "#4c7a3d";
+                  c.beginPath(); c.arc(tx, y + FG_CELL / 2, 11, 0, Math.PI * 2); c.fill();
+                  c.fillStyle = "#2f5426";
+                  c.beginPath(); c.arc(tx, y + FG_CELL / 2, 7, 0, Math.PI * 2); c.fill();
+                  c.globalAlpha = 1;
+                }
+              }
+            } else {
+              var cols = { truck: "#c9c9d4", fast: "#ffd24a", car: "#ff6b6b", car2: "#5ad0ff", car3: "#c58bff" };
+              c.fillStyle = cols[lane.type] || "#ff6b6b";
+              fgRoundRect(c, x + 3, y + 5, wpx - 6, FG_CELL - 10, 7); c.fill();
+              c.fillStyle = "rgba(10,14,22,.7)";
+              if (lane.v > 0) c.fillRect(x + wpx - 13, y + 9, 7, FG_CELL - 18);
+              else c.fillRect(x + 6, y + 9, 7, FG_CELL - 18);
+            }
+          }
+        }
+
+        /* 青蛙 / 死亡动画 */
+        if (fgStarted && !fgOver) {
+          if (fgDeadT > 0) {
+            c.font = "22px serif"; c.textAlign = "center"; c.textBaseline = "middle";
+            c.globalAlpha = Math.min(1, fgDeadT / 30);
+            c.fillText(fgDeadWet ? "\ud83d\udca6" : "\ud83d\udc80", fgDeadX, fgRowY(fgDeadR) + FG_CELL / 2);
+            c.globalAlpha = 1;
+          } else {
+            var sc2 = 1 + (fgHopT > 0 ? fgHopT / 8 * 0.35 : 0);
+            fgDrawFrogAt(c, fgFx, fgRowY(fgFr) + FG_CELL / 2, sc2, "#7ade4a");
+          }
+        }
+
+        /* 浮动得分 */
+        c.font = "bold 13px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+        for (var ff = 0; ff < fgFloats.length; ff++) {
+          c.globalAlpha = Math.min(1, fgFloats[ff].t / 25);
+          c.fillStyle = "#ffe27a";
+          c.fillText(fgFloats[ff].txt, fgFloats[ff].x, fgFloats[ff].y);
+        }
+        c.globalAlpha = 1;
+
+        /* 顶部 HUD */
+        c.fillStyle = "#dfe8ff"; c.font = "bold 13px sans-serif";
+        c.textAlign = "left"; c.textBaseline = "middle";
+        c.fillText("得分 " + fgScore, 10, FG_CELL / 2);
+        c.textAlign = "center";
+        c.fillText("第 " + fgLevel + " 关", FG_W / 2, FG_CELL / 2);
+        c.textAlign = "right";
+        c.fillText("最高 " + fgBest, FG_W - 10, FG_CELL / 2);
+
+        /* 底部：时间条 + 生命 */
+        var ratio = Math.max(0, fgTime / fgTimeMax);
+        c.fillStyle = "rgba(255,255,255,.12)";
+        fgRoundRect(c, 12, fgRowY(14) + 10, FG_W - 24, 10, 5); c.fill();
+        c.fillStyle = ratio > 0.35 ? "#6fdd7f" : "#ff7a6b";
+        if (ratio > 0.005) { fgRoundRect(c, 12, fgRowY(14) + 10, (FG_W - 24) * ratio, 10, 5); c.fill(); }
+        for (var lv2 = 0; lv2 < Math.max(0, fgLives); lv2++)
+          fgDrawFrogAt(c, 24 + lv2 * 26, fgRowY(15) + 12, 0.72, "#7ade4a");
+        c.fillStyle = "rgba(223,232,255,.55)"; c.font = "11px sans-serif";
+        c.textAlign = "right";
+        c.fillText("\u23f1 时间耗尽小蛙会累倒", FG_W - 12, fgRowY(15) + 12);
+      }
+
+      function fgLoop() {
+        if (!fgRunning) return;
+        fgStep();
+        fgDraw();
+        fgRAF = requestAnimationFrame(fgLoop);
+      }
+
+      /* ---------- 输入 ---------- */
+      function fgActive() {
+        var sec = D.getElementById("frogger");
+        return sec && sec.classList.contains("active");
+      }
+      function fgWire() {
+        if (fgWired) return;
+        fgWired = true;
+        fgCv = D.getElementById("fgCanvas");
+        if (!fgCv) return;
+        var dpr = Math.min(2, (typeof window !== "undefined" && window.devicePixelRatio) || 1);
+        fgCv.width = FG_W * dpr; fgCv.height = FG_H * dpr;
+        fgCtx = fgCv.getContext("2d");
+        fgCtx.scale(dpr, dpr);
+
+        var bNew = D.getElementById("fgNew"), bAgain = D.getElementById("fgAgain");
+        if (bNew) bNew.addEventListener("click", function () { fgNewGame(); });
+        if (bAgain) bAgain.addEventListener("click", function () {
+          if (fgClear) { fgStartLevel(fgLevel + 1); fgMsgHide(); }
+          else fgNewGame();
+        });
+        var dirs = { fgUp: [0, -1], fgDown: [0, 1], fgLeft: [-1, 0], fgRight: [1, 0] };
+        Object.keys(dirs).forEach(function (id) {
+          var b = D.getElementById(id);
+          if (b) b.addEventListener("pointerdown", function (ev) {
+            ev.preventDefault();
+            fgHop(dirs[id][0], dirs[id][1]);
+          });
+        });
+
+        var pd = null;
+        fgCv.addEventListener("pointerdown", function (ev) {
+          ev.preventDefault();
+          pd = { x: ev.clientX, y: ev.clientY };
+          try { fgCv.setPointerCapture(ev.pointerId); } catch (e) {}
+        });
+        fgCv.addEventListener("pointerup", function (ev) {
+          if (!pd) return;
+          var dx = ev.clientX - pd.x, dy = ev.clientY - pd.y;
+          pd = null;
+          if (Math.abs(dx) < 14 && Math.abs(dy) < 14) { fgHop(0, -1); return; }
+          if (Math.abs(dx) > Math.abs(dy)) fgHop(dx > 0 ? 1 : -1, 0);
+          else fgHop(0, dy > 0 ? 1 : -1);
+        });
+
+        D.addEventListener("keydown", function (e) {
+          if (!fgActive()) return;
+          var tag = (e.target && e.target.tagName) || "";
+          if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+          var k = e.key;
+          if (k === "ArrowUp" || k === "w" || k === "W") { e.preventDefault(); fgHop(0, -1); }
+          else if (k === "ArrowDown" || k === "s" || k === "S") { e.preventDefault(); fgHop(0, 1); }
+          else if (k === "ArrowLeft" || k === "a" || k === "A") { e.preventDefault(); fgHop(-1, 0); }
+          else if (k === "ArrowRight" || k === "d" || k === "D") { e.preventDefault(); fgHop(1, 0); }
+        });
+      }
+
+      window.froggerRender = function () {
+        fgWire();
+        try { fgBest = parseInt(localStorage.getItem(FG_KEY) || "0", 10) || 0; } catch (e) { fgBest = 0; }
+        if (!fgStarted) fgMsgShow("\ud83d\udea6 青蛙过河", "躲开车流、踩着木头与乌龟，把 5 只小蛙全部送回家！", "开始游戏");
+        if (!fgRunning) { fgRunning = true; fgRAF = requestAnimationFrame(fgLoop); }
+      };
+      window.froggerStop = function () {
+        fgRunning = false;
+        if (fgRAF) {
+          try { cancelAnimationFrame(fgRAF); } catch (e) {}
+          fgRAF = 0;
+        }
+      };
+
+      // ---- 测试钩子（不影响运行）----
+      window.__fgTest = {
+        state: function () {
+          return {
+            started: fgStarted, over: fgOver, clear: fgClear,
+            score: fgScore, lives: fgLives, level: fgLevel,
+            fx: fgFx, fr: fgFr, deadT: fgDeadT, time: fgTime,
+            homes: fgHomes.slice(), lanes: fgLanes.length, tick: fgTick
+          };
+        },
+        newGame: fgNewGame,
+        hop: fgHop,
+        step: fgStep,
+        laneAt: fgLaneAt,
+        itemX: fgItemX,
+        submerged: fgSubmerged,
+        platformAt: fgPlatformAt,
+        carHit: fgCarHit,
+        enterHomes: function () { return FG_HOMES_X.slice(); },
+        setFrog: function (x, r) { fgFx = x; fgFr = r; },
+        setTime: function (t) { fgTime = t; },
+        startLevel: fgStartLevel,
+        draw: fgDraw
+      };
+
+      BADGES.push(
+        { emoji: "\ud83d\udea6", name: "过马路小蛙", desc: "玩过一局青蛙过河", test: function (u) { return (u.frogger || 0) >= 1; } },
+        { emoji: "\ud83c\udfe1", name: "五蛙归巢", desc: "青蛙过河集齐一整关的 5 个家", test: function (u) { return (u.frogwin || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "青蛙过河的启示：路再宽，也是一步一步跳过去的。",
+        "别盯着整条马路发怵，只看清眼前这一辆车的空当。",
+        "河里没有立足之地时，木头和乌龟就是你的贵人——但乌龟也会潜水，贵人也有自己的节奏。",
+        "站在原地不动也会被时间追上，向前跳，哪怕只有一格。",
+        "五只小蛙都到家才算圆满：先照顾好每一次出发，再谈终点。"
+      );
+    })();
     })();
 </script>
 </body>
