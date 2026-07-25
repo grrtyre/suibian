@@ -1528,6 +1528,7 @@
         <button data-tab="navy">🚢 海战棋</button>
         <button data-tab="yahtzee">🎲 快艇骰子</button>
         <button data-tab="chess">♞ 国际象棋</button>
+        <button data-tab="weiqi">⚫ 围棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6609,6 +6610,56 @@
       <div class="chs-tip">你执白（下方）先行，点击己方棋子查看合法落点（绿点可走、红圈可吃）。完整规则支持：王车易位、吃过路兵、兵升变（自动升后）、将军 / 将死 / 逼和 / 子力不足和棋判定。悔棋一次回退一整回合，💡支招由 AI 给你出主意。</div>
     </div>
   </section>
+  <section class="panel" id="weiqi">
+    <h2>⚫ 围棋（人机对弈）</h2>
+    <style>
+      #weiqi .wq-wrap { max-width: 560px; margin: 0 auto; }
+      #weiqi .wq-top { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+      #weiqi .wq-top select { padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.25); color: inherit; font-size: .95rem; }
+      #weiqi .wq-status { text-align: center; font-size: 1.02rem; font-weight: 700; margin: 6px 0 8px; min-height: 1.5em; letter-spacing: .3px; }
+      #weiqi .wq-status.wq-win { color: #f1c40f; }
+      #weiqi .wq-status.wq-lose { color: #e74c3c; }
+      #weiqi .wq-status.wq-warn { color: #e67e22; }
+      #weiqi .wq-board { display: grid; width: min(92vw, 460px); aspect-ratio: 1; margin: 0 auto; padding: 10px; box-sizing: border-box; background: linear-gradient(135deg, #d9ab63, #c8974e); border: 3px solid #6b4a2b; border-radius: 10px; box-shadow: 0 8px 26px rgba(0,0,0,.45); }
+      #weiqi .wq-c { position: relative; cursor: pointer; }
+      #weiqi .wq-c::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -0.5px; background: #7a5526; }
+      #weiqi .wq-c::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; margin-left: -0.5px; background: #7a5526; }
+      #weiqi .wq-c.el::before { left: 50%; }
+      #weiqi .wq-c.er::before { right: 50%; }
+      #weiqi .wq-c.et::after { top: 50%; }
+      #weiqi .wq-c.eb::after { bottom: 50%; }
+      #weiqi .wq-c.star { background-image: radial-gradient(circle 3px at 50% 50%, #4a3110 97%, transparent 100%); }
+      #weiqi .wq-s { position: absolute; inset: 8%; border-radius: 50%; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,.5); }
+      #weiqi .wq-b { background: radial-gradient(circle at 35% 30%, #5a5a5a, #050505 70%); }
+      #weiqi .wq-w { background: radial-gradient(circle at 35% 30%, #ffffff, #c4c4c4 75%); }
+      #weiqi .wq-s.wq-lastm::after { content: ""; position: absolute; left: 50%; top: 50%; width: 34%; height: 34%; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #e74c3c; box-sizing: border-box; }
+      #weiqi .wq-s.wq-dead { opacity: .45; }
+      #weiqi .wq-s.wq-dead::before { content: "\2715"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #e74c3c; font-weight: 900; font-size: .8em; }
+      #weiqi .wq-info, #weiqi .wq-stats { text-align: center; margin-top: 8px; opacity: .85; font-size: .95rem; }
+      #weiqi .wq-tip { margin-top: 10px; font-size: .85rem; opacity: .65; text-align: center; line-height: 1.6; }
+      @media (max-width: 520px) { #weiqi .wq-top { gap: 6px; } #weiqi .wq-top select { font-size: .88rem; padding: 5px 8px; } }
+    </style>
+    <div class="wq-wrap">
+      <div class="wq-top">
+        <select id="wqSize" title="棋盘路数"><option value="9" selected>9 路</option><option value="13">13 路</option></select>
+        <select id="wqLevel" title="AI 难度"><option value="1">入门</option><option value="2" selected>普通</option><option value="3">较难</option></select>
+        <select id="wqColor" title="执子颜色"><option value="B" selected>我执黑</option><option value="W">我执白</option></select>
+        <button id="wqNew">🆕 新对局</button>
+        <button id="wqUndo">↩️ 悔棋</button>
+        <button id="wqPass">🈳 虚着</button>
+        <button id="wqResign">🏳️ 认输</button>
+      </div>
+      <div class="wq-status" id="wqStatus"></div>
+      <div class="wq-board" id="wqBoard"></div>
+      <div id="wqCountBar" style="display:none; text-align:center; margin-top:10px;">
+        <button id="wqConfirm">✅ 确认数子</button>
+        <button id="wqResume">▶️ 继续对局</button>
+      </div>
+      <div class="wq-info" id="wqInfo"></div>
+      <div class="wq-stats" id="wqStats"></div>
+      <div class="wq-tip">中国规则数子法，黑贴 7.5（结算时白方总数 + 7.5）。落子自动提走对方无气之子；禁自杀、禁全局同形（打劫需先找劫材）。双方连续虚着后进入数子阶段：点击死子整块标记 / 取消，再点「✅ 确认数子」结算。悔棋一次回退一整回合。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -6958,6 +7009,7 @@
     if (id === "navy") nvRender();
     if (id === "yahtzee") ytRender();
     if (id === "chess") chsRender();
+    if (id === "weiqi") wqRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -6968,6 +7020,7 @@
     if (id !== "navy" && typeof nvStop === "function") nvStop();
     if (id !== "yahtzee" && typeof ytStop === "function") ytStop();
     if (id !== "chess" && typeof chsStop === "function") chsStop();
+    if (id !== "weiqi" && typeof wqStop === "function") wqStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7109,6 +7162,7 @@
     navy: "海战棋 战舰 军舰 炮击 海战 battleship 舰队 航母 击沉 猜位置 对战 人机 策略 布阵 海军 navy 命中 联机 经典桌游",
     yahtzee: "快艇骰子 骰子 yahtzee 快艇 计分 掷骰 三掷 留骰 锁骰 葫芦 小顺 大顺 四条 三条 全同 上区奖励 人机 对战 桌游 dice 手气 运气 策略 骰盅 骰盘",
     chess: "国际象棋 chess 象棋 西洋棋 人机 对弈 对战 AI 棋盘 王车易位 吃过路兵 升变 将军 将死 马 车 象 后 王 兵 棋类 策略 烧脑",
+    weiqi: "围棋 weiqi go 黑白 落子 提子 打劫 数子 贴目 人机 对弈 对战 AI 九路 十三路 围地 做眼 死活 布局 定式 棋盘 棋类 策略 烧脑 金角银边",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7310,6 +7364,7 @@ splitbill:"tools",
     navy:"games",
     yahtzee:"games",
     chess:"games",
+    weiqi:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -28694,6 +28749,459 @@ splitbill:"tools",
       "王车易位的智慧：关键时刻，先保住最重要的东西。",
       "开局背谱，中局拼算，残局见人品。",
       "被将军不可怕，可怕的是看不见将军。"
+    );
+  })();
+  (function () {
+    var WQ_LS = "suibian_weiqi";
+    var WQ_KOMI = 7.5;
+    var wqN = 9;
+    var wqBd = null;
+    var wqTurn = 1;
+    var wqMy = 1;
+    var wqPasses = 0;
+    var wqLast = -1;
+    var wqPhase = "idle";
+    var wqDead = {};
+    var wqCapByB = 0;
+    var wqCapByW = 0;
+    var wqPosArr = [];
+    var wqPosSet = {};
+    var wqHist = [];
+    var wqTimer = null;
+    var wqBound = false;
+    var wqMoveCount = 0;
+    var wqCounted = false;
+
+    function wqEl(id) { return document.getElementById(id); }
+    function wqLoad() { try { return JSON.parse(localStorage.getItem(WQ_LS) || "{}") || {}; } catch (e) { return {}; } }
+    function wqSaveLS(s) { try { localStorage.setItem(WQ_LS, JSON.stringify(s)); } catch (e) {} }
+
+    function wqNbs(i, n) {
+      var r = [], x = i % n, y = (i - x) / n;
+      if (x > 0) r.push(i - 1);
+      if (x < n - 1) r.push(i + 1);
+      if (y > 0) r.push(i - n);
+      if (y < n - 1) r.push(i + n);
+      return r;
+    }
+    function wqGroup(bd, n, i) {
+      var color = bd[i], seen = {}, stack = [i], stones = [], libs = {}, libN = 0;
+      seen[i] = 1;
+      while (stack.length) {
+        var p = stack.pop();
+        stones.push(p);
+        var nb = wqNbs(p, n);
+        for (var k = 0; k < nb.length; k++) {
+          var q = nb[k];
+          if (bd[q] === 0) { if (!libs[q]) { libs[q] = 1; libN++; } }
+          else if (bd[q] === color && !seen[q]) { seen[q] = 1; stack.push(q); }
+        }
+      }
+      return { stones: stones, libs: libN, libPts: libs, color: color };
+    }
+    function wqTry(bd, n, i, color) {
+      if (i < 0 || i >= n * n || bd[i] !== 0) return null;
+      var b2 = bd.slice(), opp = 3 - color, captured = 0;
+      b2[i] = color;
+      var nb = wqNbs(i, n);
+      for (var k = 0; k < nb.length; k++) {
+        var q = nb[k];
+        if (b2[q] === opp) {
+          var g = wqGroup(b2, n, q);
+          if (g.libs === 0) {
+            for (var s = 0; s < g.stones.length; s++) b2[g.stones[s]] = 0;
+            captured += g.stones.length;
+          }
+        }
+      }
+      if (wqGroup(b2, n, i).libs === 0) return null;
+      return { bd: b2, captured: captured, pos: b2.join("") };
+    }
+    function wqLegalAll(bd, n, color, posSet) {
+      var r = [];
+      for (var i = 0; i < n * n; i++) {
+        var t = wqTry(bd, n, i, color);
+        if (t && !posSet[t.pos]) r.push(i);
+      }
+      return r;
+    }
+    function wqIsEye(bd, n, i, color) {
+      if (bd[i] !== 0) return false;
+      var x = i % n, y = (i - x) / n;
+      var nb = wqNbs(i, n);
+      for (var k = 0; k < nb.length; k++) if (bd[nb[k]] !== color) return false;
+      var bad = 0, off = 0, ds = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+      for (var d = 0; d < 4; d++) {
+        var dx = x + ds[d][0], dy = y + ds[d][1];
+        if (dx < 0 || dy < 0 || dx >= n || dy >= n) { off++; continue; }
+        if (bd[dy * n + dx] === 3 - color) bad++;
+      }
+      return off > 0 ? bad === 0 : bad <= 1;
+    }
+    function wqScore(bd, n, dead) {
+      var b2 = bd.slice(), i;
+      for (i = 0; i < n * n; i++) if (dead && dead[i]) b2[i] = 0;
+      var seen = {}, bArea = 0, wArea = 0;
+      for (i = 0; i < n * n; i++) {
+        if (b2[i] === 1) bArea++;
+        else if (b2[i] === 2) wArea++;
+        else if (!seen[i]) {
+          var stack = [i], cells = [], touch = {};
+          seen[i] = 1;
+          while (stack.length) {
+            var p = stack.pop();
+            cells.push(p);
+            var nb = wqNbs(p, n);
+            for (var k = 0; k < nb.length; k++) {
+              var q = nb[k];
+              if (b2[q] === 0) { if (!seen[q]) { seen[q] = 1; stack.push(q); } }
+              else touch[b2[q]] = 1;
+            }
+          }
+          if (touch[1] && !touch[2]) bArea += cells.length;
+          else if (touch[2] && !touch[1]) wArea += cells.length;
+        }
+      }
+      return { b: bArea, w: wArea + WQ_KOMI };
+    }
+    function wqAiPick(bd, n, color, posSet, level) {
+      var opp = 3 - color, moves = [], i, k, s, stonesTotal = 0;
+      for (i = 0; i < n * n; i++) if (bd[i]) stonesTotal++;
+      var atariOwn = [], atariSeen = {};
+      for (i = 0; i < n * n; i++) {
+        if (bd[i] === color && !atariSeen[i]) {
+          var g0 = wqGroup(bd, n, i);
+          for (s = 0; s < g0.stones.length; s++) atariSeen[g0.stones[s]] = 1;
+          if (g0.libs === 1) atariOwn.push(g0);
+        }
+      }
+      for (i = 0; i < n * n; i++) {
+        if (bd[i] !== 0) continue;
+        if (wqIsEye(bd, n, i, color)) continue;
+        var t = wqTry(bd, n, i, color);
+        if (!t || posSet[t.pos]) continue;
+        var sc = t.captured * 12;
+        var myG = wqGroup(t.bd, n, i);
+        if (myG.libs <= 1) sc -= (t.captured > 0 ? 8 : 40);
+        else sc += Math.min(myG.libs, 6) * 0.8;
+        for (var a = 0; a < atariOwn.length; a++) {
+          var p0 = atariOwn[a].stones[0];
+          if (t.bd[p0] === color && wqGroup(t.bd, n, p0).libs >= 2) sc += 9 + atariOwn[a].stones.length * 3;
+        }
+        var nb = wqNbs(i, n), doneG = {};
+        for (k = 0; k < nb.length; k++) {
+          var q = nb[k];
+          if (t.bd[q] === opp && !doneG[q]) {
+            var og = wqGroup(t.bd, n, q);
+            for (s = 0; s < og.stones.length; s++) doneG[og.stones[s]] = 1;
+            if (og.libs === 1 && myG.libs >= 2) sc += 5 + og.stones.length * 2;
+            else if (og.libs === 2) sc += 1.5;
+          }
+        }
+        var x = i % n, y = (i - x) / n;
+        var line = Math.min(x, y, n - 1 - x, n - 1 - y);
+        if (stonesTotal < n) {
+          if (line === 2 || line === 3) sc += 4;
+          else if (line === 1) sc += 1;
+          else if (line === 0) sc -= 4;
+        } else if (line === 0) sc -= 1;
+        if (stonesTotal > 0) {
+          var md = 99;
+          for (var j = 0; j < n * n; j++) {
+            if (bd[j]) {
+              var jx = j % n, jy = (j - jx) / n;
+              var dd = Math.abs(jx - x) + Math.abs(jy - y);
+              if (dd < md) md = dd;
+            }
+          }
+          if (md <= 4) sc += (5 - md) * 1.1;
+        } else if (line >= 2) sc += 3;
+        sc += Math.random() * (level === 1 ? 14 : level === 2 ? 3 : 1.2);
+        moves.push({ i: i, sc: sc, t: t });
+      }
+      if (!moves.length) return { pass: true };
+      moves.sort(function (a, b) { return b.sc - a.sc; });
+      if (level >= 3) {
+        var top = moves.slice(0, 8);
+        for (k = 0; k < top.length; k++) {
+          var worst = 0;
+          for (i = 0; i < n * n; i++) {
+            if (top[k].t.bd[i] !== 0) continue;
+            var rt = wqTry(top[k].t.bd, n, i, opp);
+            if (rt && rt.captured > worst && !posSet[rt.pos]) worst = rt.captured;
+          }
+          top[k].sc -= worst * 9;
+        }
+        top.sort(function (a, b) { return b.sc - a.sc; });
+        moves = top;
+      }
+      var best = moves[0];
+      if (best.sc < 1.2 && stonesTotal > n * n * 0.5) return { pass: true };
+      return best;
+    }
+    function wqStars(n) {
+      var m = {}, pts;
+      if (n === 9) pts = [[2, 2], [2, 6], [6, 2], [6, 6], [4, 4]];
+      else pts = [[3, 3], [3, 9], [9, 3], [9, 9], [6, 6]];
+      for (var k = 0; k < pts.length; k++) m[pts[k][1] * n + pts[k][0]] = 1;
+      return m;
+    }
+
+    function wqSnapshot() {
+      wqHist.push({ bd: wqBd.slice(), turn: wqTurn, passes: wqPasses, last: wqLast, posLen: wqPosArr.length, capB: wqCapByB, capW: wqCapByW, moves: wqMoveCount, phase: wqPhase });
+    }
+    function wqApplyMove(i, color) {
+      var t = wqTry(wqBd, wqN, i, color);
+      if (!t) return "illegal";
+      if (wqPosSet[t.pos]) return "ko";
+      wqSnapshot();
+      wqBd = t.bd;
+      if (color === 1) wqCapByB += t.captured; else wqCapByW += t.captured;
+      wqPosArr.push(t.pos);
+      wqPosSet[t.pos] = 1;
+      wqLast = i;
+      wqPasses = 0;
+      wqTurn = 3 - color;
+      wqMoveCount++;
+      return "ok";
+    }
+    function wqDoPass(color) {
+      wqSnapshot();
+      wqLast = -1;
+      wqPasses++;
+      wqTurn = 3 - color;
+      wqMoveCount++;
+      if (wqPasses >= 2) {
+        wqPhase = "count";
+        wqDead = {};
+      }
+    }
+    function wqRollback() {
+      var s = wqHist.pop();
+      if (!s) return false;
+      wqBd = s.bd;
+      wqTurn = s.turn;
+      wqPasses = s.passes;
+      wqLast = s.last;
+      wqCapByB = s.capB;
+      wqCapByW = s.capW;
+      wqMoveCount = s.moves;
+      wqPhase = s.phase;
+      while (wqPosArr.length > s.posLen) delete wqPosSet[wqPosArr.pop()];
+      return true;
+    }
+    function wqStop() { if (wqTimer) { clearTimeout(wqTimer); wqTimer = null; } }
+
+    function wqNewGame() {
+      wqStop();
+      var szEl = wqEl("wqSize"), lvEl = wqEl("wqColor");
+      wqN = szEl ? (parseInt(szEl.value, 10) || 9) : 9;
+      wqMy = (lvEl && lvEl.value === "W") ? 2 : 1;
+      wqBd = [];
+      for (var i = 0; i < wqN * wqN; i++) wqBd.push(0);
+      wqTurn = 1;
+      wqPasses = 0;
+      wqLast = -1;
+      wqPhase = "play";
+      wqDead = {};
+      wqCapByB = 0;
+      wqCapByW = 0;
+      wqPosArr = [];
+      wqPosSet = {};
+      wqPosSet[wqBd.join("")] = 1;
+      wqHist = [];
+      wqMoveCount = 0;
+      wqCounted = false;
+      if (typeof bumpUsage === "function") bumpUsage("weiqi");
+      wqDraw();
+      wqMaybeAi();
+    }
+    function wqFinish(msg, myWin) {
+      wqPhase = "over";
+      wqCounted = true;
+      var st = wqLoad();
+      st.plays = (st.plays || 0) + 1;
+      if (myWin) {
+        st.wins = (st.wins || 0) + 1;
+        if (typeof bumpUsage === "function") bumpUsage("weiqiwin");
+        if (typeof confettiBurst === "function") { try { confettiBurst(120); } catch (e) {} }
+      }
+      wqSaveLS(st);
+      wqDraw(msg, myWin ? "win" : "lose");
+    }
+    function wqConfirmCount() {
+      if (wqPhase !== "count") return;
+      var sc = wqScore(wqBd, wqN, wqDead);
+      var myS = wqMy === 1 ? sc.b : sc.w;
+      var opS = wqMy === 1 ? sc.w : sc.b;
+      var diff = Math.abs(sc.b - sc.w);
+      var msg = "\ud83c\udfc1 \u7ec8\u5c40\uff1a\u9ed1 " + sc.b + " : \u767d " + sc.w + "\uff08\u542b\u8d34 " + WQ_KOMI + "\uff09\u2014\u2014" + (myS > opS ? "\u4f60\u8d62 " + diff + " \u5b50\uff01" : "AI \u8d62 " + diff + " \u5b50\uff0c\u518d\u6765\u4e00\u5c40\uff01");
+      wqFinish(msg, myS > opS);
+    }
+    function wqResume() {
+      if (wqPhase !== "count") return;
+      wqPhase = "play";
+      wqPasses = 0;
+      wqDead = {};
+      wqDraw();
+      wqMaybeAi();
+    }
+    function wqResign() {
+      if (wqPhase !== "play" && wqPhase !== "count") return;
+      wqStop();
+      wqFinish("\ud83c\udff3\ufe0f \u4f60\u8ba4\u8f93\u4e86\uff0cAI \u83b7\u80dc\u2014\u2014\u80dc\u8d1f\u4e43\u5175\u5bb6\u5e38\u4e8b\uff0c\u91cd\u65b0\u5f00\u5c40\uff01", false);
+    }
+    function wqUndoClick() {
+      if (wqPhase === "over" || !wqHist.length) return;
+      wqStop();
+      wqRollback();
+      while (wqHist.length && wqTurn !== wqMy) wqRollback();
+      if (wqTurn !== wqMy && !wqHist.length) { /* AI opens: back to start */ }
+      wqPhase = "play";
+      wqDraw();
+      wqMaybeAi();
+    }
+    function wqPassClick() {
+      if (wqPhase !== "play" || wqTurn !== wqMy) return;
+      wqDoPass(wqMy);
+      wqDraw();
+      wqMaybeAi();
+    }
+    function wqCellClick(i) {
+      if (wqPhase === "count") {
+        if (wqBd[i]) {
+          var g = wqGroup(wqBd, wqN, i);
+          var on = !wqDead[g.stones[0]];
+          for (var s = 0; s < g.stones.length; s++) {
+            if (on) wqDead[g.stones[s]] = 1;
+            else delete wqDead[g.stones[s]];
+          }
+          wqDraw();
+        }
+        return;
+      }
+      if (wqPhase !== "play" || wqTurn !== wqMy) return;
+      var r = wqApplyMove(i, wqMy);
+      if (r === "ok") { wqDraw(); wqMaybeAi(); }
+      else if (r === "ko") wqDraw("\u26d4 \u7981\u5168\u5c40\u540c\u5f62\uff08\u6253\u52ab\u8bf7\u5148\u627e\u52ab\u6750\uff09", "warn");
+      else wqDraw("\u26d4 \u6b64\u5904\u4e0d\u80fd\u843d\u5b50\uff08\u5df2\u5360 / \u81ea\u6740\uff09", "warn");
+    }
+    function wqMaybeAi() {
+      if (wqPhase !== "play" || wqTurn === wqMy) return;
+      wqTimer = setTimeout(function () {
+        wqTimer = null;
+        if (wqPhase !== "play" || wqTurn === wqMy) return;
+        var lvEl = wqEl("wqLevel");
+        var lvl = lvEl ? (parseInt(lvEl.value, 10) || 2) : 2;
+        var mv = wqAiPick(wqBd, wqN, wqTurn, wqPosSet, lvl);
+        if (mv.pass) wqDoPass(wqTurn);
+        else wqApplyMove(mv.i, wqTurn);
+        wqDraw();
+        wqMaybeAi();
+      }, 420);
+    }
+
+    function wqDraw(msg, tone) {
+      var bdEl = wqEl("wqBoard");
+      if (!bdEl) return;
+      bdEl.style.gridTemplateColumns = "repeat(" + wqN + ", 1fr)";
+      bdEl.innerHTML = "";
+      var stars = wqStars(wqN);
+      for (var i = 0; i < wqN * wqN; i++) {
+        var c = document.createElement("div");
+        var cls = "wq-c";
+        var x = i % wqN, y = (i - x) / wqN;
+        if (y === 0) cls += " et";
+        if (y === wqN - 1) cls += " eb";
+        if (x === 0) cls += " el";
+        if (x === wqN - 1) cls += " er";
+        if (stars[i]) cls += " star";
+        c.className = cls;
+        if (wqBd[i]) {
+          var st = document.createElement("div");
+          st.className = "wq-s " + (wqBd[i] === 1 ? "wq-b" : "wq-w") + (i === wqLast ? " wq-lastm" : "") + (wqPhase === "count" && wqDead[i] ? " wq-dead" : "");
+          c.appendChild(st);
+        }
+        (function (idx) { c.onclick = function () { wqCellClick(idx); }; })(i);
+        bdEl.appendChild(c);
+      }
+      var stEl = wqEl("wqStatus");
+      if (stEl) {
+        var text, cl = "wq-status";
+        if (msg) {
+          text = msg;
+          if (tone === "win") cl += " wq-win";
+          else if (tone === "lose") cl += " wq-lose";
+          else if (tone === "warn") cl += " wq-warn";
+        } else if (wqPhase === "count") {
+          text = "\ud83e\uddee \u6570\u5b50\u9636\u6bb5\uff1a\u70b9\u51fb\u68cb\u5b50\u6807\u8bb0\u6b7b\u5b50\uff0c\u786e\u8ba4\u540e\u7ed3\u7b97";
+        } else if (wqPhase === "over") {
+          text = "\u5bf9\u5c40\u5df2\u7ed3\u675f\uff0c\u70b9\u300c\ud83c\udd95 \u65b0\u5bf9\u5c40\u300d\u518d\u6765";
+        } else if (wqTurn === wqMy) {
+          text = "\u8f6e\u5230\u4f60\u843d\u5b50" + (wqMy === 1 ? "\uff08\u6267\u9ed1 \u26ab\uff09" : "\uff08\u6267\u767d \u26aa\uff09") + (wqPasses === 1 ? " \u2014\u2014 \u5bf9\u65b9\u521a\u865a\u7740\uff0c\u518d\u865a\u4e00\u624b\u5c31\u6570\u5b50" : "");
+        } else {
+          text = "\ud83e\udd16 AI \u601d\u8003\u4e2d\u2026";
+        }
+        stEl.className = cl;
+        stEl.textContent = text;
+      }
+      var barEl = wqEl("wqCountBar");
+      if (barEl) barEl.style.display = wqPhase === "count" ? "" : "none";
+      var infEl = wqEl("wqInfo");
+      if (infEl) {
+        if (wqPhase === "count") {
+          var sc = wqScore(wqBd, wqN, wqDead);
+          infEl.textContent = "\u5f53\u524d\u6570\u5b50\u9884\u89c8 \u2014 \u9ed1 " + sc.b + " : \u767d " + sc.w + "\uff08\u542b\u8d34 " + WQ_KOMI + "\uff09";
+        } else {
+          infEl.textContent = "\u63d0\u5b50\uff1a\u9ed1 " + wqCapByB + " \u00b7 \u767d " + wqCapByW + "\uff5c\u7b2c " + (wqMoveCount + 1) + " \u624b";
+        }
+      }
+      var ssEl = wqEl("wqStats");
+      if (ssEl) {
+        var s0 = wqLoad();
+        var p = s0.plays || 0, w = s0.wins || 0;
+        ssEl.textContent = "\u603b\u5bf9\u5c40 " + p + " \u00b7 \u80dc " + w + (p ? " \u00b7 \u80dc\u7387 " + Math.round((w / p) * 100) + "%" : "");
+      }
+    }
+    function wqRender() {
+      if (!wqBound) {
+        wqBound = true;
+        var b1 = wqEl("wqNew"), b2 = wqEl("wqUndo"), b3 = wqEl("wqPass"), b4 = wqEl("wqResign"), b5 = wqEl("wqConfirm"), b6 = wqEl("wqResume");
+        var s1 = wqEl("wqSize"), s2 = wqEl("wqColor");
+        if (b1) b1.onclick = wqNewGame;
+        if (b2) b2.onclick = wqUndoClick;
+        if (b3) b3.onclick = wqPassClick;
+        if (b4) b4.onclick = wqResign;
+        if (b5) b5.onclick = wqConfirmCount;
+        if (b6) b6.onclick = wqResume;
+        if (s1) s1.onchange = wqNewGame;
+        if (s2) s2.onchange = wqNewGame;
+      }
+      if (wqPhase === "idle" || !wqBd) wqNewGame();
+      else wqDraw();
+    }
+    window.wqRender = wqRender;
+    window.wqStop = wqStop;
+    window.__wqTest = {
+      nbs: wqNbs, group: wqGroup, tryPlay: wqTry, legal: wqLegalAll, eye: wqIsEye,
+      ai: wqAiPick, score: wqScore, stars: wqStars,
+      apply: wqApplyMove, doPass: wqDoPass, rollback: wqRollback,
+      _state: function () { return { n: wqN, bd: wqBd, turn: wqTurn, my: wqMy, passes: wqPasses, phase: wqPhase, hist: wqHist.length, capB: wqCapByB, capW: wqCapByW, dead: wqDead, moves: wqMoveCount }; },
+      _setPhase: function (p) { wqPhase = p; },
+      _newGame: wqNewGame, _click: wqCellClick, _undo: wqUndoClick, _pass: wqPassClick,
+      _confirm: wqConfirmCount, _resume: wqResume, _resign: wqResign, _draw: wqDraw
+    };
+
+    BADGES.push(
+      { emoji: "\u26ab", name: "\u843d\u5b50\u65e0\u6094", desc: "\u7b2c\u4e00\u6b21\u5728\u56f4\u68cb\u76d8\u4e0a\u5f00\u5c40", test: function (u) { return (u.weiqi || 0) >= 1; } },
+      { emoji: "\ud83c\udfee", name: "\u68cb\u9053\u521d\u6bb5", desc: "\u8d62\u4e0b\u4e00\u5c40\u56f4\u68cb\uff08\u542b AI \u4e2d\u76d8\u543e\u8ba4\u8f93\u2026\u5e76\u6ca1\u6709\uff0c\u5f97\u771f\u8d62\uff09", test: function (u) { return (u.weiqiwin || 0) >= 1; } }
+    );
+    QUOTES.push(
+      "\u56f4\u68cb\u7684\u9053\u7406\uff1a\u91d1\u89d2\u94f6\u8fb9\u8349\u809a\u76ae\uff0c\u5148\u628a\u81ea\u5df1\u7684\u89d2\u843d\u7ecf\u8425\u597d\u3002",
+      "\u6253\u52ab\u8981\u5148\u627e\u52ab\u6750\u2014\u2014\u751f\u6d3b\u91cc\u60f3\u53cd\u60b3\uff0c\u4e5f\u5f97\u5148\u6709\u7b79\u7801\u3002",
+      "\u5f03\u5b50\u4e0d\u662f\u8ba4\u8f93\uff0c\u662f\u628a\u529b\u6c14\u7528\u5728\u66f4\u5927\u7684\u5730\u65b9\u3002",
+      "\u4e24\u773c\u6210\u6d3b\uff1a\u7559\u597d\u4e24\u6761\u9000\u8def\uff0c\u8c01\u4e5f\u5403\u4e0d\u6389\u4f60\u3002",
+      "\u843d\u5b50\u65e0\u6094\uff0c\u4e0d\u662f\u4e0d\u8ba9\u6094\uff0c\u662f\u63d0\u9192\u4f60\u60f3\u597d\u518d\u4f38\u624b\u3002"
     );
   })();
 </script>
