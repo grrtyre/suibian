@@ -1535,6 +1535,7 @@
         <button data-tab="backgammon">🎲 双陆棋</button>
         <button data-tab="hockey">🏒 空气曲棍球</button>
         <button data-tab="djump">🦘 涂鸦跳跃</button>
+        <button data-tab="zuma">🐸 祖玛弹珠</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6951,6 +6952,39 @@
       <div class="dj-tip">⌨️ 电脑上用 ← → 或 A / D 左右移动；📱 手机上用下方 ◀ ▶ 按钮，或直接在画面上左右拖动。角色会自动弹跳：踩绿色普通台、蓝色移动台、黄色弹簧（跳得更高）；踩到棕色台会碎，别停留。冲上顶部即无尽刷新高度，掉出屏幕就结束。</div>
     </div>
   </section>
+  <section class="panel" id="zuma">
+    <h2>🐸 祖玛弹珠</h2>
+    <p class="sub">瞄准发射、三颗同色即消——别让珠链滚进骷髅洞！</p>
+    <style>
+      #zuma .zm-wrap { max-width:420px; margin:0 auto; }
+      #zuma .zm-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #zuma .zm-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #zuma .zm-top button:hover { background:rgba(255,255,255,.12); }
+      #zuma .zm-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #zuma canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#0f1626; box-shadow:0 12px 30px rgba(0,0,0,.5); cursor:crosshair; }
+      #zuma .zm-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(6,12,20,.82); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #zuma .zm-msg.show { display:flex; }
+      #zuma .zm-msg .t { font-size:1.5rem; font-weight:800; }
+      #zuma .zm-msg .s { font-size:.95rem; opacity:.85; }
+      #zuma .zm-msg button { padding:9px 24px; border-radius:10px; border:0; background:#f1c40f; color:#222; font-weight:700; cursor:pointer; }
+      #zuma .zm-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="zm-wrap">
+      <div class="zm-top">
+        <button id="zmNew">🔄 新的一局</button>
+        <button id="zmSwap">🔁 换一颗 (C)</button>
+      </div>
+      <div class="zm-canvas-wrap">
+        <canvas id="zmCanvas"></canvas>
+        <div class="zm-msg" id="zmMsg">
+          <div class="t" id="zmMsgT"></div>
+          <div class="s" id="zmMsgS"></div>
+          <button id="zmAgain">开始游戏</button>
+        </div>
+      </div>
+      <div class="zm-tip">🖱️ 移动鼠标 / 手指瞄准，点按发射彩珠；三颗同色相连即消除，接缝同色还会连锁加倍。右键 / C 键 / 「换一颗」可交换当前珠与下一颗。珠链会沿螺旋轨道滚向中心骷髅洞，抢在它到达前清空全部弹珠即过关——关卡越高，珠越多、滚越快、颜色越花。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7307,6 +7341,7 @@
     if (id === "backgammon") bgRender();
     if (id === "hockey") hockeyRender();
     if (id === "djump") djumpRender();
+    if (id === "zuma") zumaRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7324,6 +7359,7 @@
     if (id !== "backgammon" && typeof bgStop === "function") bgStop();
     if (id !== "hockey" && typeof hockeyStop === "function") hockeyStop();
     if (id !== "djump" && typeof djumpStop === "function") djumpStop();
+    if (id !== "zuma" && typeof zumaStop === "function") zumaStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7472,6 +7508,7 @@
     backgammon: "西洋双陆棋 双陆棋 双陆 backgammon 十五子棋 骰子棋 掷骰 人机 对弈 对战 AI 棋类 桌游 board game 策略 出栈 打点 中栏 bar 棋盘 经典 tables",
     hockey: "空气曲棍球 曲棍球 冰球 air hockey 冰上曲棍 球拍 球门 进球 物理 反弹 人机 对战 对弈 AI 街机 休闲 反应 手眼协调 竞技 game",
     djump: "涂鸦跳跃 涂鸦 跳跃 弹跳 doodle jump 平台跳跃 无尽 街机 休闲 上跳 弹簧 移动平台 反应 手眼协调 高度 game",
+    zuma: "祖玛 祖玛弹珠 zuma 弹珠 三消 消除 轨道 螺旋 青蛙 射击 泡泡 连锁 街机 休闲 瞄准 手眼协调 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7680,6 +7717,7 @@ splitbill:"tools",
     backgammon:"games",
     hockey:"games",
     djump:"games",
+    zuma:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -31852,6 +31890,370 @@ splitbill:"tools",
         "移动的平台像机会，来回晃悠，看准了再落脚。",
         "踩碎的那块板别指望第二次，人生很多台阶只借你一步。",
         "遇到弹簧就别客气，好运来的时候要跳得比平时更高。"
+      );
+    })();
+    /* ===== 🐸 祖玛弹珠 Zuma（轨道三消射击） ===== */
+    (function () {
+      var D = typeof document !== "undefined" ? document : null;
+      var ZM_W = 360, ZM_H = 480;
+      var ZM_R = 13;                    // 弹珠半径
+      var ZM_GI = 13;                   // 珠间距（路径索引单位，1 索引约 2px，13 索引约等于直径 26px）
+      var ZM_COLORS = ["#e74c3c", "#f1c40f", "#2ecc71", "#3498db", "#9b59b6", "#e67e22"];
+      var ZM_CX = 180, ZM_CY = 256;     // 青蛙炮台 / 螺旋中心
+      var ZM_KEY = "suibian_zuma";
+
+      // ---- 路径：外缘顺时针螺旋 2.6 圈收进中心骷髅洞，采样点距约 2px ----
+      var ZM_PTS = [];
+      (function () {
+        var th0 = -Math.PI / 2, turns = 2.6, thEnd = th0 + turns * Math.PI * 2;
+        var r0 = 192, r1 = 58, prev = null;
+        for (var th = th0; th <= thEnd; th += 0.004) {
+          var t = (th - th0) / (thEnd - th0);
+          var r = r0 + (r1 - r0) * t;
+          var x = ZM_CX + Math.cos(th) * r * 0.94;
+          var y = ZM_CY + Math.sin(th) * r * 0.82;
+          if (!prev || (x - prev.x) * (x - prev.x) + (y - prev.y) * (y - prev.y) >= 4) {
+            ZM_PTS.push({ x: x, y: y }); prev = { x: x, y: y };
+          }
+        }
+      })();
+      var ZM_LEN = ZM_PTS.length;
+
+      function zmPt(d) {
+        var i = Math.round(d);
+        if (i < 0) i = 0; if (i > ZM_LEN - 1) i = ZM_LEN - 1;
+        return ZM_PTS[i];
+      }
+      function zmTan(d) { // 指向洞口方向的单位切线
+        var a = zmPt(d - 2), b = zmPt(d + 2);
+        var dx = b.x - a.x, dy = b.y - a.y, L = Math.sqrt(dx * dx + dy * dy) || 1;
+        return { x: dx / L, y: dy / L };
+      }
+
+      // ---- 状态（刚性珠链模型：颜色数组 + 队首路径位置，位置 = frontD - k*GI）----
+      var zmCols = [], zmFrontD = 0, zmRemain = 0, zmFed = 0;
+      var zmLevel = 1, zmScore = 0, zmBest = 0;
+      var zmOver = false, zmWon = false, zmStarted = false;
+      var zmCur = 0, zmNext = 0, zmProj = null, zmAim = -Math.PI / 2;
+      var zmFloats = [], zmFrame = 0;
+
+      function zmColorsN() { return zmLevel < 3 ? 4 : (zmLevel < 5 ? 5 : 6); }
+      function zmRandColor() {
+        var n = zmColorsN(), c = Math.floor(Math.random() * n);
+        var m = zmCols.length;   // 进链时避免直接送三连
+        if (m >= 2 && zmCols[m - 1] === c && zmCols[m - 2] === c) c = (c + 1 + Math.floor(Math.random() * (n - 1))) % n;
+        return c;
+      }
+      function zmPickShot() {  // 发射珠优先取场上已有的颜色，避免死弹
+        if (zmCols.length) return zmCols[Math.floor(Math.random() * zmCols.length)];
+        return Math.floor(Math.random() * zmColorsN());
+      }
+
+      function zmFeed() {
+        while (zmRemain > 0 && zmFrontD - zmCols.length * ZM_GI >= 0) {
+          zmCols.push(zmRandColor()); zmRemain--; zmFed++;
+        }
+      }
+      function zmStep() {
+        var sp = 0.16 + zmLevel * 0.02;
+        if (zmFed < 16 && zmRemain > 0) sp = 1.5;         // 开局快速铺链
+        zmFrontD += sp;
+        zmFeed();
+        if (zmCols.length && zmFrontD >= ZM_LEN - 2) { zmGameOver(); return; }
+        if (!zmCols.length && zmRemain <= 0 && zmStarted && !zmOver && !zmProj) zmLevelClear();
+      }
+
+      // 消除解算：围绕 i 扩展同色段，>=3 即消；消后接缝同色继续连锁（倍率递增）
+      function zmResolve(i) {
+        var combo = 0, cleared = 0;
+        while (true) {
+          var c = zmCols[i], a = i, b = i;
+          while (a > 0 && zmCols[a - 1] === c) a--;
+          while (b < zmCols.length - 1 && zmCols[b + 1] === c) b++;
+          var n = b - a + 1;
+          if (n < 3) break;
+          combo++; cleared += n;
+          var gain = n * 10 * combo;
+          zmScore += gain;
+          var fp = zmPt(zmFrontD - a * ZM_GI);
+          zmFloats.push({ x: fp.x, y: fp.y, t: 46, s: "+" + gain + (combo > 1 ? " x" + combo : "") });
+          zmCols.splice(a, n);
+          if (a === 0) { zmFrontD -= n * ZM_GI; break; }
+          if (a < zmCols.length && zmCols[a - 1] === zmCols[a]) { i = a; continue; }
+          break;
+        }
+        if (cleared > 0) { try { playDing(); } catch (e) {} }
+        return cleared;
+      }
+
+      // 命中珠 k 后按切向投影决定插前 / 插后，然后解算消除
+      function zmInsert(k, px, py, c) {
+        var dk = zmFrontD - k * ZM_GI;
+        var P = zmPt(dk), T = zmTan(dk);
+        var s = (px - P.x) * T.x + (py - P.y) * T.y;
+        var idx = s > 0 ? k : k + 1;
+        zmCols.splice(idx, 0, c);
+        if (idx === 0) zmFrontD += ZM_GI;
+        return zmResolve(idx);
+      }
+
+      function zmProjStep() {
+        if (!zmProj) return;
+        for (var s = 0; s < 3; s++) {   // 细分步进防穿透
+          zmProj.x += zmProj.vx / 3; zmProj.y += zmProj.vy / 3;
+          if (zmProj.x < -20 || zmProj.x > ZM_W + 20 || zmProj.y < -20 || zmProj.y > ZM_H + 20) { zmProj = null; return; }
+          var hit = -1, hd = 1e9, lim = (ZM_R * 2 - 3) * (ZM_R * 2 - 3);
+          for (var k = 0; k < zmCols.length; k++) {
+            var d = zmFrontD - k * ZM_GI;
+            if (d < 0) break;
+            var p = zmPt(d);
+            var dx = zmProj.x - p.x, dy = zmProj.y - p.y, q = dx * dx + dy * dy;
+            if (q < lim && q < hd) { hd = q; hit = k; }
+          }
+          if (hit >= 0) {
+            zmInsert(hit, zmProj.x, zmProj.y, zmProj.c);
+            zmProj = null;
+            return;
+          }
+        }
+      }
+
+      function zmShoot(ang) {
+        if (zmOver || !zmStarted || zmProj) return;
+        zmAim = ang;
+        zmProj = { x: ZM_CX + Math.cos(ang) * 30, y: ZM_CY + Math.sin(ang) * 30, vx: Math.cos(ang) * 12, vy: Math.sin(ang) * 12, c: zmCur };
+        zmCur = zmNext; zmNext = zmPickShot();
+      }
+      function zmSwapBall() { var t = zmCur; zmCur = zmNext; zmNext = t; }
+
+      function zmSaveBest() {
+        if (zmScore > zmBest) { zmBest = zmScore; try { localStorage.setItem(ZM_KEY, String(zmBest)); } catch (e) {} }
+      }
+      function zmGameOver() {
+        if (zmOver) return;
+        zmOver = true; zmWon = false;
+        zmSaveBest();
+        zmMsgShow("\ud83d\udc80 珠链入洞", "止步第 " + zmLevel + " 关 · 得分 " + zmScore + " · 最高 " + zmBest, "再来一局");
+      }
+      function zmLevelClear() {
+        zmOver = true; zmWon = true;
+        zmScore += zmLevel * 100;
+        zmSaveBest();
+        try { bumpUsage("zumawin"); } catch (e) {}
+        try { confettiBurst(120); } catch (e) {}
+        try { playDing(); } catch (e) {}
+        zmMsgShow("\ud83c\udf89 第 " + zmLevel + " 关通过！", "通关奖励 +" + (zmLevel * 100) + " · 总分 " + zmScore + " · 下一关更快更花", "下一关");
+      }
+      function zmStartLevel(lv) {
+        zmLevel = lv;
+        zmCols = []; zmFrontD = 0; zmFed = 0; zmProj = null; zmFloats = [];
+        zmRemain = 34 + lv * 6;
+        zmOver = false; zmWon = false; zmStarted = true;
+        zmCur = Math.floor(Math.random() * zmColorsN());
+        zmNext = Math.floor(Math.random() * zmColorsN());
+        zmMsgHide();
+      }
+      function zmNewGame() {
+        zmScore = 0;
+        try { bumpUsage("zuma"); } catch (e) {}
+        zmStartLevel(1);
+      }
+
+      // ---- 渲染 ----
+      var zmCanvas = null, zmCtx = null, zmDpr = 1, zmTrack = null;
+      var zmRAF = 0, zmRunning = false, zmWired = false;
+
+      function zmMakeTrack() {
+        if (!D) return;
+        zmTrack = D.createElement("canvas");
+        zmTrack.width = ZM_W * zmDpr; zmTrack.height = ZM_H * zmDpr;
+        var g = zmTrack.getContext("2d");
+        g.scale(zmDpr, zmDpr);
+        g.lineJoin = "round"; g.lineCap = "round";
+        g.beginPath();
+        for (var i = 0; i < ZM_LEN; i += 2) {
+          var p = ZM_PTS[i];
+          if (i === 0) g.moveTo(p.x, p.y); else g.lineTo(p.x, p.y);
+        }
+        g.strokeStyle = "rgba(255,255,255,.07)"; g.lineWidth = ZM_R * 2 + 4; g.stroke();
+        g.setLineDash([1, 10]);
+        g.strokeStyle = "rgba(255,255,255,.16)"; g.lineWidth = 2; g.stroke();
+      }
+
+      function zmBallDraw(ctx, x, y, c, r) {
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = ZM_COLORS[c] || "#95a5a6"; ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,.35)"; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.beginPath(); ctx.arc(x - r * 0.32, y - r * 0.36, r * 0.32, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,.45)"; ctx.fill();
+      }
+
+      function zmDraw() {
+        if (!zmCtx) return;
+        var ctx = zmCtx;
+        zmFrame++;
+        ctx.clearRect(0, 0, ZM_W, ZM_H);
+        ctx.fillStyle = "#0f1626"; ctx.fillRect(0, 0, ZM_W, ZM_H);
+        if (zmTrack) ctx.drawImage(zmTrack, 0, 0, ZM_W, ZM_H);
+        // 骷髅洞（临近险情红圈脉冲）
+        var hp = ZM_PTS[ZM_LEN - 1];
+        var danger = zmStarted && !zmOver && zmFrontD > ZM_LEN * 0.78;
+        ctx.beginPath(); ctx.arc(hp.x, hp.y, 17, 0, Math.PI * 2);
+        ctx.fillStyle = "#05070d"; ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = danger ? "rgba(231,76,60," + (0.55 + 0.45 * Math.sin(zmFrame * 0.25)).toFixed(2) + ")" : "rgba(255,255,255,.22)";
+        ctx.stroke();
+        ctx.font = "16px serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText("\ud83d\udc80", hp.x, hp.y + 1);
+        // 珠链
+        for (var k = zmCols.length - 1; k >= 0; k--) {
+          var d = zmFrontD - k * ZM_GI;
+          if (d < 0) continue;
+          var p = zmPt(d);
+          zmBallDraw(ctx, p.x, p.y, zmCols[k], ZM_R);
+        }
+        // 飞行中的弹珠
+        if (zmProj) zmBallDraw(ctx, zmProj.x, zmProj.y, zmProj.c, ZM_R - 1);
+        // 瞄准虚线
+        if (zmStarted && !zmOver) {
+          ctx.save();
+          ctx.setLineDash([4, 6]);
+          ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(ZM_CX + Math.cos(zmAim) * 34, ZM_CY + Math.sin(zmAim) * 34);
+          ctx.lineTo(ZM_CX + Math.cos(zmAim) * 80, ZM_CY + Math.sin(zmAim) * 80);
+          ctx.stroke();
+          ctx.restore();
+        }
+        // 青蛙炮台（朝瞄准方向）
+        ctx.save();
+        ctx.translate(ZM_CX, ZM_CY);
+        ctx.rotate(zmAim + Math.PI / 2);
+        ctx.beginPath(); ctx.ellipse(0, 2, 17, 20, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "#1f9d55"; ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,.35)"; ctx.lineWidth = 2; ctx.stroke();
+        ctx.beginPath(); ctx.arc(-8, -14, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#2ecc71"; ctx.fill();
+        ctx.beginPath(); ctx.arc(8, -14, 5.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-8, -15, 2.4, 0, Math.PI * 2);
+        ctx.fillStyle = "#0b1220"; ctx.fill();
+        ctx.beginPath(); ctx.arc(8, -15, 2.4, 0, Math.PI * 2); ctx.fill();
+        zmBallDraw(ctx, 0, -27, zmCur, 11);   // 嘴边当前弹
+        ctx.restore();
+        // HUD
+        ctx.font = "12px system-ui, sans-serif"; ctx.textAlign = "left"; ctx.textBaseline = "top";
+        ctx.fillStyle = "rgba(255,255,255,.85)";
+        ctx.fillText("关卡 " + zmLevel + " · 分数 " + zmScore + " · 最高 " + zmBest, 10, 8);
+        ctx.fillText("剩余 " + (zmRemain + zmCols.length), 10, 24);
+        ctx.textAlign = "right";
+        ctx.fillText("下一颗", ZM_W - 12, 8);
+        zmBallDraw(ctx, ZM_W - 26, 36, zmNext, 8);
+        // 浮动得分
+        for (var i = zmFloats.length - 1; i >= 0; i--) {
+          var f = zmFloats[i]; f.t--; f.y -= 0.5;
+          if (f.t <= 0) { zmFloats.splice(i, 1); continue; }
+          ctx.globalAlpha = Math.min(1, f.t / 20);
+          ctx.fillStyle = "#f1c40f"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.font = "bold 13px system-ui, sans-serif";
+          ctx.fillText(f.s, f.x, f.y);
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      function zmLoop() {
+        if (!zmRunning) return;
+        if (zmStarted && !zmOver) { zmStep(); zmProjStep(); }
+        zmDraw();
+        zmRAF = requestAnimationFrame(zmLoop);
+      }
+
+      function zmMsgShow(t, s, btn) {
+        if (!D) return;
+        var m = D.getElementById("zmMsg"); if (!m) return;
+        var et = D.getElementById("zmMsgT"), es = D.getElementById("zmMsgS"), eb = D.getElementById("zmAgain");
+        if (et) et.textContent = t;
+        if (es) es.textContent = s;
+        if (eb) eb.textContent = btn || "再来一局";
+        m.classList.add("show");
+      }
+      function zmMsgHide() {
+        if (!D) return;
+        var m = D.getElementById("zmMsg"); if (m) m.classList.remove("show");
+      }
+
+      function zmWire() {
+        if (zmWired || !D) return;
+        var cv = D.getElementById("zmCanvas");
+        if (!cv) return;
+        zmWired = true;
+        zmCanvas = cv;
+        zmDpr = Math.min((typeof window !== "undefined" && window.devicePixelRatio) || 1, 2);
+        zmCanvas.width = ZM_W * zmDpr; zmCanvas.height = ZM_H * zmDpr;
+        zmCtx = zmCanvas.getContext("2d");
+        zmCtx.scale(zmDpr, zmDpr);
+        zmMakeTrack();
+        function evAng(e) {
+          var r = zmCanvas.getBoundingClientRect();
+          var x = (e.clientX - r.left) * ZM_W / (r.width || ZM_W);
+          var y = (e.clientY - r.top) * ZM_H / (r.height || ZM_H);
+          return Math.atan2(y - ZM_CY, x - ZM_CX);
+        }
+        zmCanvas.addEventListener("pointermove", function (e) { zmAim = evAng(e); });
+        zmCanvas.addEventListener("pointerdown", function (e) {
+          if (e.preventDefault) e.preventDefault();
+          if (e.button === 2) { zmSwapBall(); return; }
+          zmShoot(evAng(e));
+        });
+        zmCanvas.addEventListener("contextmenu", function (e) { if (e.preventDefault) e.preventDefault(); });
+        D.addEventListener("keydown", function (e) {
+          var sec = D.getElementById("zuma");
+          if (!sec || !sec.classList.contains("active")) return;
+          if (e.key === "c" || e.key === "C" || e.key === "x" || e.key === "X") {
+            zmSwapBall();
+            if (e.preventDefault) e.preventDefault();
+          }
+        });
+        var bNew = D.getElementById("zmNew"), bSwap = D.getElementById("zmSwap"), bAgain = D.getElementById("zmAgain");
+        if (bNew) bNew.addEventListener("click", zmNewGame);
+        if (bSwap) bSwap.addEventListener("click", zmSwapBall);
+        if (bAgain) bAgain.addEventListener("click", function () {
+          if (zmWon) zmStartLevel(zmLevel + 1); else zmNewGame();
+        });
+      }
+
+      window.zumaRender = function () {
+        zmWire();
+        try { zmBest = parseInt(localStorage.getItem(ZM_KEY) || "0", 10) || 0; } catch (e) { zmBest = 0; }
+        if (!zmStarted) zmMsgShow("\ud83d\udc38 祖玛弹珠", "瞄准发射，三颗同色即消——别让珠链滚进骷髅洞", "开始游戏");
+        if (!zmRunning) { zmRunning = true; zmRAF = requestAnimationFrame(zmLoop); }
+      };
+      window.zumaStop = function () {
+        zmRunning = false;
+        if (zmRAF) { try { cancelAnimationFrame(zmRAF); } catch (e) {} zmRAF = 0; }
+      };
+
+      // ---- 测试钩子（不影响运行）----
+      window.__zmTest = {
+        pts: ZM_PTS, len: ZM_LEN, pt: zmPt, tan: zmTan,
+        state: function () { return { cols: zmCols.slice(), frontD: zmFrontD, remain: zmRemain, score: zmScore, level: zmLevel, over: zmOver, won: zmWon, proj: zmProj, cur: zmCur, next: zmNext }; },
+        set: function (cols, frontD) { zmCols = cols.slice(); zmFrontD = frontD; },
+        setRemain: function (n) { zmRemain = n; },
+        setCur: function (c) { zmCur = c; },
+        forceStart: function (lv) { zmStartLevel(lv); },
+        step: zmStep, feed: zmFeed, resolve: zmResolve, insert: zmInsert, projStep: zmProjStep,
+        shoot: zmShoot, swap: zmSwapBall, newGame: zmNewGame, pickShot: zmPickShot
+      };
+
+      BADGES.push(
+        { emoji: "\ud83d\udc38", name: "青蛙吐珠", desc: "玩过一局祖玛弹珠", test: function (u) { return (u.zuma || 0) >= 1; } },
+        { emoji: "\ud83c\udf00", name: "祖玛清盘手", desc: "祖玛弹珠通过任意一关", test: function (u) { return (u.zumawin || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "祖玛的道理：问题会顺着轨道一路滚过来，你只能瞄准、出手、消掉它。",
+        "三颗同色才会消——攒力量的时候别急，凑齐了再一次打出去。",
+        "珠链越滚越近不可怕，可怕的是你握着弹珠迟迟不敢发射。",
+        "连锁反应从来不是运气，是你之前每一颗都放对了位置。",
+        "颜色不对就换一颗再打，人生也一样，没必要用错的答案硬凑。"
       );
     })();
 </script>
