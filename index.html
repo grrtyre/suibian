@@ -1531,6 +1531,7 @@
         <button data-tab="weiqi">⚫ 围棋</button>
         <button data-tab="dab">▦ 点格棋</button>
         <button data-tab="checkers">⛃ 跳棋</button>
+        <button data-tab="bubble">🫧 泡泡龙</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6745,6 +6746,45 @@
       <div class="ck-tip">经典英式跳棋（Checkers / Draughts）：双方各 12 枚，只走深色格。普通兵斜前走一步；隔着敌子跳到空格即吃子，<b>有吃必吃</b>，一口气能连跳就必须跳到底。冲到对方底线加冕成王（👑），王可以前后任意斜走与跳吃。把对方吃光或困死即获胜；连续 80 步无吃子且无兵推进判和。点棋子看提示，绿点是落点，金框是必选之子。</div>
     </div>
   </section>
+  <section class="panel" id="bubble">
+    <h2>🫧 泡泡龙</h2>
+    <style>
+      #bubble .bub-wrap { max-width:420px; margin:0 auto; text-align:center; }
+      #bubble .bub-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+      #bubble .bub-top select { padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.25); background:rgba(0,0,0,.25); color:inherit; font-size:.92rem; }
+      #bubble .bub-stat { display:flex; gap:16px; justify-content:center; margin:4px 0 10px; font-variant-numeric:tabular-nums; }
+      #bubble .bub-stat b { display:block; font-size:1.18rem; color:#f1c40f; line-height:1.2; }
+      #bubble .bub-stat span { font-size:.72rem; opacity:.7; }
+      #bubble .bub-canvas-wrap { position:relative; width:min(92vw,340px); margin:0 auto; }
+      #bubble canvas { width:100%; height:auto; display:block; border-radius:14px; background:radial-gradient(circle at 50% -10%,#22314f,#0c1424 70%); box-shadow:0 10px 30px rgba(0,0,0,.45); cursor:crosshair; touch-action:none; }
+      #bubble .bub-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(4,10,22,.74); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #bubble .bub-msg.show { display:flex; }
+      #bubble .bub-msg .t { font-size:1.32rem; font-weight:800; }
+      #bubble .bub-msg .s { font-size:.92rem; opacity:.85; line-height:1.6; }
+      #bubble .bub-msg button { padding:9px 24px; border-radius:10px; border:0; background:#f1c40f; color:#222; font-weight:700; cursor:pointer; font-size:1rem; }
+      #bubble .bub-tip { margin-top:12px; font-size:.84rem; opacity:.62; line-height:1.6; text-align:center; }
+    </style>
+    <div class="bub-wrap">
+      <div class="bub-top">
+        <select id="bubColors" title="颜色数">
+          <option value="4">4 色 · 轻松</option>
+          <option value="5" selected>5 色 · 标准</option>
+          <option value="6">6 色 · 挑战</option>
+        </select>
+        <button id="bubNew">🆕 新游戏</button>
+      </div>
+      <div class="bub-stat">
+        <div><b id="bubScore">0</b><span>得分</span></div>
+        <div><b id="bubBest">0</b><span>最高</span></div>
+        <div><b id="bubLevel">1</b><span>关卡</span></div>
+      </div>
+      <div class="bub-canvas-wrap">
+        <canvas id="bubCanvas"></canvas>
+        <div class="bub-msg" id="bubMsg"><div class="t" id="bubMsgT"></div><div class="s" id="bubMsgS"></div><button id="bubAgain">再来一局</button></div>
+      </div>
+      <div class="bub-tip">移动鼠标 / 手指瞄准，点击或轻触发射泡泡。让 3 个及以上同色泡泡相连即可消除；被击落后与顶部断开的泡泡会成串坠落，得额外分。清空整屏即进入下一关；泡泡触到红线则游戏结束。可借左右墙壁反弹瞄准刁钻角度。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7097,6 +7137,7 @@
     if (id === "weiqi") wqRender();
     if (id === "dab") dabRender();
     if (id === "checkers") ckRender();
+    if (id === "bubble") bubbleRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7110,6 +7151,7 @@
     if (id !== "weiqi" && typeof wqStop === "function") wqStop();
     if (id !== "dab" && typeof dabStop === "function") dabStop();
     if (id !== "checkers" && typeof ckStop === "function") ckStop();
+    if (id !== "bubble" && typeof bubbleStop === "function") bubbleStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7254,6 +7296,7 @@
     weiqi: "围棋 weiqi go 黑白 落子 提子 打劫 数子 贴目 人机 对弈 对战 AI 九路 十三路 围地 做眼 死活 布局 定式 棋盘 棋类 策略 烧脑 金角银边",
     dab: "点格棋 dots and boxes 点格 方格 连线 画线 围地 占格 人机 对弈 对战 AI 益智 策略 烧脑 棋类 双十字 送分 长链 棋盘",
     checkers: "跳棋 英式跳棋 西洋跳棋 checkers draughts 国际跳棋 吃子 连跳 加冕 王棋 人机 对弈 对战 AI 棋类 策略 益智 棋盘 红黑",
+    bubble: "泡泡龙 泡泡射手 bubble shooter 射泡泡 打泡泡 消除 三消 puzzle bobble 祖玛 街机 益智 瞄准 连锁 消泡泡 彩色泡泡 休闲 解压",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7458,6 +7501,7 @@ splitbill:"tools",
     weiqi:"games",
     dab:"games",
     checkers:"games",
+    bubble:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -30098,6 +30142,368 @@ splitbill:"tools",
       "别急着冲底线，后排守稳了，王才加冕得安心。",
       "送你吃一子，换你露出破绽——弃子从来不是认怂。",
       "王棋能进能退；进退自如，是棋盘上最好的状态。"
+    );
+    /* ===== 🫧 泡泡龙 Bubble Shooter ===== */
+    var BUB_R = 20, BUB_COLS = 8, BUB_W = BUB_R * 2 * BUB_COLS, BUB_ROWH = BUB_R * 1.7320508,
+        BUB_H = 480, BUB_Y0 = BUB_R + 6, BUB_SPEED = 9, BUB_DEADY = BUB_H - 74;
+    var BUB_PALETTE = ["#ff5b6a", "#4aa8ff", "#2ecc71", "#ffd23f", "#b06bff", "#26d7c4"];
+    var bubGrid = [], bubNCol = 5, bubLevel = 1,
+        bubCur = 0, bubNext = 0, bubScore = 0, bubBest = 0,
+        bubMoving = null, bubParts = [], bubOver = false, bubPaused = false,
+        bubRAF = 0, bubRunning = false, bubInited = false,
+        bubCanvas = null, bubCtx = null, bubDpr = 1,
+        bubPointer = { x: BUB_W / 2, y: 60 }, bubShooter = { x: BUB_W / 2, y: BUB_H - 32 };
+    try { bubBest = parseInt(localStorage.getItem("suibian_bubble") || "0", 10) || 0; } catch (eB) {}
+
+    function bubColsIn(r) { return (r % 2 === 1) ? BUB_COLS - 1 : BUB_COLS; }
+    function bubCellX(r, c) { return BUB_R + c * BUB_R * 2 + ((r % 2 === 1) ? BUB_R : 0); }
+    function bubCellY(r) { return BUB_Y0 + r * BUB_ROWH; }
+    function bubInb(r, c) { return r >= 0 && r < bubGrid.length && c >= 0 && c < bubColsIn(r); }
+    function bubEnsureRow(r) {
+      while (bubGrid.length <= r) {
+        var idx = bubGrid.length, row = [];
+        for (var c = 0; c < bubColsIn(idx); c++) row.push(null);
+        bubGrid.push(row);
+      }
+    }
+    function bubNeighbors(r, c) {
+      var odd = (r % 2 === 1), out = [];
+      var cand = odd
+        ? [[r, c - 1], [r, c + 1], [r - 1, c], [r - 1, c + 1], [r + 1, c], [r + 1, c + 1]]
+        : [[r, c - 1], [r, c + 1], [r - 1, c - 1], [r - 1, c], [r + 1, c - 1], [r + 1, c]];
+      for (var i = 0; i < cand.length; i++) if (bubInb(cand[i][0], cand[i][1])) out.push(cand[i]);
+      return out;
+    }
+    function bubCluster(r, c, sameColor) {
+      if (!bubInb(r, c) || bubGrid[r][c] == null) return [];
+      var color = bubGrid[r][c], seen = {}, stack = [[r, c]], res = [];
+      seen[r + "," + c] = 1;
+      while (stack.length) {
+        var cur = stack.pop(); res.push(cur);
+        var nb = bubNeighbors(cur[0], cur[1]);
+        for (var i = 0; i < nb.length; i++) {
+          var nr = nb[i][0], nc = nb[i][1], key = nr + "," + nc;
+          if (seen[key]) continue;
+          var v = bubGrid[nr][nc];
+          if (v == null) continue;
+          if (sameColor && v !== color) continue;
+          seen[key] = 1; stack.push([nr, nc]);
+        }
+      }
+      return res;
+    }
+    function bubFloating() {
+      var anchored = {}, stack = [];
+      if (bubGrid[0]) for (var c0 = 0; c0 < bubColsIn(0); c0++) {
+        if (bubGrid[0][c0] != null) { anchored["0," + c0] = 1; stack.push([0, c0]); }
+      }
+      while (stack.length) {
+        var cur = stack.pop(), nb = bubNeighbors(cur[0], cur[1]);
+        for (var i = 0; i < nb.length; i++) {
+          var nr = nb[i][0], nc = nb[i][1], key = nr + "," + nc;
+          if (anchored[key] || bubGrid[nr][nc] == null) continue;
+          anchored[key] = 1; stack.push([nr, nc]);
+        }
+      }
+      var loose = [];
+      for (var r = 0; r < bubGrid.length; r++) for (var cc = 0; cc < bubColsIn(r); cc++) {
+        if (bubGrid[r][cc] != null && !anchored[r + "," + cc]) loose.push([r, cc]);
+      }
+      return loose;
+    }
+    function bubCountLeft() {
+      var n = 0;
+      for (var r = 0; r < bubGrid.length; r++) for (var c = 0; c < bubColsIn(r); c++) if (bubGrid[r][c] != null) n++;
+      return n;
+    }
+    function bubColorsOnBoard() {
+      var s = {};
+      for (var r = 0; r < bubGrid.length; r++) for (var c = 0; c < bubColsIn(r); c++) { var v = bubGrid[r][c]; if (v != null) s[v] = 1; }
+      return Object.keys(s).map(Number);
+    }
+    function bubPickShotColor() {
+      var on = bubColorsOnBoard();
+      if (on.length === 0) return Math.floor(Math.random() * bubNCol);
+      return on[Math.floor(Math.random() * on.length)];
+    }
+    function bubNewLevel(lv) {
+      bubLevel = lv;
+      var initRows = Math.min(4 + lv, 8);
+      bubGrid = [];
+      for (var r = 0; r < initRows; r++) {
+        var row = [];
+        for (var c = 0; c < bubColsIn(r); c++) row.push(Math.floor(Math.random() * bubNCol));
+        bubGrid.push(row);
+      }
+      bubOver = false; bubPaused = false; bubMoving = null; bubParts = [];
+      bubCur = bubPickShotColor(); bubNext = bubPickShotColor();
+      bubHideMsg(); bubUpdateHud();
+    }
+    function bubNewGame() {
+      var sel = (typeof $ === "function") ? $("bubColors") : null;
+      bubNCol = sel ? (parseInt(sel.value, 10) || 5) : bubNCol;
+      if (bubNCol < 3) bubNCol = 3; if (bubNCol > BUB_PALETTE.length) bubNCol = BUB_PALETTE.length;
+      bubScore = 0; bubOver = false;
+      bubNewLevel(1);
+    }
+    function bubSaveBest() {
+      if (bubScore > bubBest) { bubBest = bubScore; try { localStorage.setItem("suibian_bubble", String(bubBest)); } catch (e) {} }
+    }
+    function bubUpdateHud() {
+      bubSaveBest();
+      if (typeof $ !== "function") return;
+      var a = $("bubScore"), b = $("bubBest"), c = $("bubLevel");
+      if (a) a.textContent = String(bubScore);
+      if (b) b.textContent = String(bubBest);
+      if (c) c.textContent = String(bubLevel);
+    }
+    function bubShowMsg(t, s) {
+      if (typeof $ !== "function") return;
+      var m = $("bubMsg"), mt = $("bubMsgT"), ms = $("bubMsgS");
+      if (mt) mt.textContent = t; if (ms) ms.textContent = s;
+      if (m) m.classList.add("show");
+    }
+    function bubHideMsg() {
+      if (typeof $ !== "function") return;
+      var m = $("bubMsg"); if (m) m.classList.remove("show");
+    }
+    function bubSnap(x, y) {
+      var rc = Math.round((y - BUB_Y0) / BUB_ROWH);
+      if (rc < 0) rc = 0;
+      var best = null, bestD = 1e9, r, c, dr;
+      for (dr = -1; dr <= 1; dr++) {
+        r = rc + dr; if (r < 0) continue;
+        bubEnsureRow(r);
+        for (c = 0; c < bubColsIn(r); c++) {
+          if (bubGrid[r][c] != null) continue;
+          var ok = (r === 0);
+          if (!ok) {
+            var nb = bubNeighbors(r, c);
+            for (var i = 0; i < nb.length; i++) if (bubGrid[nb[i][0]][nb[i][1]] != null) { ok = true; break; }
+          }
+          if (!ok) continue;
+          var dx = x - bubCellX(r, c), dy = y - bubCellY(r), d = dx * dx + dy * dy;
+          if (d < bestD) { bestD = d; best = [r, c]; }
+        }
+      }
+      if (best) return best;
+      for (dr = 0; dr <= 2; dr++) {
+        r = rc + dr; bubEnsureRow(r);
+        for (c = 0; c < bubColsIn(r); c++) {
+          if (bubGrid[r][c] != null) continue;
+          var dx2 = x - bubCellX(r, c), dy2 = y - bubCellY(r), d2 = dx2 * dx2 + dy2 * dy2;
+          if (d2 < bestD) { bestD = d2; best = [r, c]; }
+        }
+      }
+      return best;
+    }
+    function bubHitsAny(x, y) {
+      var lim = (BUB_R * 1.85) * (BUB_R * 1.85);
+      for (var r = 0; r < bubGrid.length; r++) for (var c = 0; c < bubColsIn(r); c++) {
+        if (bubGrid[r][c] == null) continue;
+        var dx = x - bubCellX(r, c), dy = y - bubCellY(r);
+        if (dx * dx + dy * dy < lim) return true;
+      }
+      return false;
+    }
+    function bubSpawnPop(r, c, color) {
+      bubParts.push({ type: "pop", x: bubCellX(r, c), y: bubCellY(r), color: color, t: 0, life: 11 });
+    }
+    function bubSpawnFall(r, c, color) {
+      bubParts.push({ type: "fall", x: bubCellX(r, c), y: bubCellY(r), color: color, vy: 1 + Math.random() * 1.5, vx: (Math.random() - 0.5) * 2 });
+    }
+    function bubPlace(mv) {
+      var cell = bubSnap(mv.x, mv.y);
+      if (!cell) { return; }
+      bubEnsureRow(cell[0]);
+      bubGrid[cell[0]][cell[1]] = mv.color;
+      if (bubCellY(cell[0]) + BUB_R >= BUB_DEADY) { bubUpdateHud(); bubLose(); return; }
+      var clu = bubCluster(cell[0], cell[1], true), popped = 0;
+      if (clu.length >= 3) {
+        for (var i = 0; i < clu.length; i++) {
+          var rr = clu[i][0], cc = clu[i][1];
+          bubSpawnPop(rr, cc, bubGrid[rr][cc]); bubGrid[rr][cc] = null; popped++;
+        }
+        var loose = bubFloating();
+        for (var j = 0; j < loose.length; j++) {
+          var lr = loose[j][0], lc = loose[j][1];
+          bubSpawnFall(lr, lc, bubGrid[lr][lc]); bubGrid[lr][lc] = null;
+        }
+        bubScore += clu.length * 10 + loose.length * 20;
+        if (typeof playDing === "function") playDing();
+      }
+      bubUpdateHud();
+      if (bubCountLeft() === 0) { bubWinLevel(); return; }
+      bubCur = bubNext; bubNext = bubPickShotColor();
+    }
+    function bubWinLevel() {
+      bubScore += 100; bubPaused = true; bubUpdateHud();
+      if (typeof bumpUsage === "function") { bumpUsage("bubble"); bumpUsage("bubbleclear"); }
+      if (typeof playDing === "function") playDing();
+      if (typeof toast === "function") toast("🎉 第 " + bubLevel + " 关达成 +100");
+      var nx = bubLevel + 1;
+      setTimeout(function () { if (!bubOver) bubNewLevel(nx); }, 950);
+    }
+    function bubLose() {
+      bubOver = true; bubPaused = true; bubMoving = null; bubSaveBest();
+      if (typeof bumpUsage === "function") bumpUsage("bubble");
+      bubShowMsg("💥 游戏结束", "得分 " + bubScore + " · 到达第 " + bubLevel + " 关");
+    }
+    function bubAimDir() {
+      var dx = bubPointer.x - bubShooter.x, dy = bubPointer.y - bubShooter.y;
+      if (dy > -6) dy = -6;
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      return { x: dx / len, y: dy / len };
+    }
+    function bubFire() {
+      if (bubMoving || bubOver || bubPaused) return;
+      var d = bubAimDir();
+      bubMoving = { x: bubShooter.x, y: bubShooter.y, vx: d.x, vy: d.y, color: bubCur };
+      if (typeof playClick === "function") playClick();
+    }
+    function bubStep() {
+      if (bubMoving) {
+        var steps = 4, step = BUB_SPEED / steps;
+        for (var k = 0; k < steps; k++) {
+          bubMoving.x += bubMoving.vx * step;
+          bubMoving.y += bubMoving.vy * step;
+          if (bubMoving.x < BUB_R) { bubMoving.x = BUB_R; bubMoving.vx *= -1; }
+          if (bubMoving.x > BUB_W - BUB_R) { bubMoving.x = BUB_W - BUB_R; bubMoving.vx *= -1; }
+          if (bubMoving.y <= BUB_Y0 || bubHitsAny(bubMoving.x, bubMoving.y)) {
+            var mv = bubMoving; bubMoving = null; bubPlace(mv); break;
+          }
+        }
+      }
+      for (var i = bubParts.length - 1; i >= 0; i--) {
+        var p = bubParts[i];
+        if (p.type === "pop") { p.t++; if (p.t > p.life) bubParts.splice(i, 1); }
+        else { p.vy += 0.55; p.y += p.vy; p.x += p.vx; if (p.y > BUB_H + BUB_R * 2) bubParts.splice(i, 1); }
+      }
+    }
+    function bubBall(ctx, x, y, color, r) {
+      var g = ctx.createRadialGradient(x - r * 0.32, y - r * 0.34, r * 0.15, x, y, r);
+      g.addColorStop(0, "rgba(255,255,255,.9)");
+      g.addColorStop(0.22, color);
+      g.addColorStop(1, color);
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+      ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.32, r * 0.26, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.fill();
+    }
+    function bubDraw() {
+      var ctx = bubCtx; if (!ctx) return;
+      ctx.clearRect(0, 0, BUB_W, BUB_H);
+      // death line
+      ctx.save();
+      ctx.strokeStyle = "rgba(231,76,60,.7)"; ctx.lineWidth = 2; ctx.setLineDash([7, 6]);
+      ctx.beginPath(); ctx.moveTo(0, BUB_DEADY); ctx.lineTo(BUB_W, BUB_DEADY); ctx.stroke();
+      ctx.restore();
+      // grid bubbles
+      for (var r = 0; r < bubGrid.length; r++) for (var c = 0; c < bubColsIn(r); c++) {
+        var v = bubGrid[r][c]; if (v == null) continue;
+        bubBall(ctx, bubCellX(r, c), bubCellY(r), BUB_PALETTE[v % BUB_PALETTE.length], BUB_R - 1);
+      }
+      // particles
+      for (var i = 0; i < bubParts.length; i++) {
+        var p = bubParts[i];
+        if (p.type === "pop") {
+          var pr = (BUB_R - 1) * (1 + p.t / p.life * 0.6), a = 1 - p.t / p.life;
+          ctx.globalAlpha = Math.max(0, a);
+          ctx.beginPath(); ctx.arc(p.x, p.y, pr, 0, Math.PI * 2);
+          ctx.fillStyle = p.color; ctx.fill(); ctx.globalAlpha = 1;
+        } else {
+          bubBall(ctx, p.x, p.y, p.color, BUB_R - 1);
+        }
+      }
+      // aim guide
+      if (!bubMoving && !bubOver && !bubPaused) {
+        var d = bubAimDir(), gx = bubShooter.x, gy = bubShooter.y, gvx = d.x, gvy = d.y, pts = [[gx, gy]], bounce = 0;
+        for (var s = 0; s < 240; s++) {
+          gx += gvx * 4; gy += gvy * 4;
+          if (gx < BUB_R) { gx = BUB_R; gvx *= -1; bounce++; }
+          if (gx > BUB_W - BUB_R) { gx = BUB_W - BUB_R; gvx *= -1; bounce++; }
+          if (gy <= BUB_Y0 || bubHitsAny(gx, gy)) { pts.push([gx, gy]); break; }
+          if (s % 5 === 0) pts.push([gx, gy]);
+          if (bounce > 2) { pts.push([gx, gy]); break; }
+        }
+        ctx.save();
+        ctx.strokeStyle = "rgba(255,255,255,.42)"; ctx.lineWidth = 2; ctx.setLineDash([2, 7]); ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+        for (var q = 1; q < pts.length; q++) ctx.lineTo(pts[q][0], pts[q][1]);
+        ctx.stroke(); ctx.restore();
+      }
+      // moving bubble
+      if (bubMoving) bubBall(ctx, bubMoving.x, bubMoving.y, BUB_PALETTE[bubMoving.color % BUB_PALETTE.length], BUB_R - 1);
+      // shooter + next
+      if (!bubOver) bubBall(ctx, bubShooter.x, bubShooter.y, BUB_PALETTE[bubCur % BUB_PALETTE.length], BUB_R - 1);
+      bubBall(ctx, BUB_W - BUB_R - 4, BUB_H - BUB_R - 2, BUB_PALETTE[bubNext % BUB_PALETTE.length], BUB_R * 0.66);
+      ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("下一个", BUB_W - BUB_R - 4, BUB_H - BUB_R * 2 - 6);
+    }
+    function bubOnMove(e) {
+      if (!bubCanvas) return;
+      var rect = bubCanvas.getBoundingClientRect();
+      var cx = (e.touches ? e.touches[0].clientX : e.clientX);
+      var cy = (e.touches ? e.touches[0].clientY : e.clientY);
+      bubPointer.x = (cx - rect.left) * (BUB_W / rect.width);
+      bubPointer.y = (cy - rect.top) * (BUB_H / rect.height);
+    }
+    function bubOnDown(e) {
+      bubOnMove(e);
+      if (e.preventDefault) e.preventDefault();
+      bubFire();
+    }
+    function bubLoop() {
+      if (!bubRunning) { bubRAF = 0; return; }
+      bubStep(); bubDraw();
+      bubRAF = requestAnimationFrame(bubLoop);
+    }
+    function bubInit() {
+      if (bubInited) return;
+      bubInited = true;
+      bubCanvas = (typeof $ === "function") ? $("bubCanvas") : null;
+      if (!bubCanvas) return;
+      bubDpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+      bubCanvas.width = Math.round(BUB_W * bubDpr);
+      bubCanvas.height = Math.round(BUB_H * bubDpr);
+      bubCtx = bubCanvas.getContext("2d");
+      bubCtx.setTransform(bubDpr, 0, 0, bubDpr, 0, 0);
+      bubCanvas.addEventListener("pointermove", bubOnMove);
+      bubCanvas.addEventListener("pointerdown", bubOnDown);
+      var bn = $("bubNew"); if (bn) bn.addEventListener("click", function () { if (typeof playClick === "function") playClick(); bubNewGame(); });
+      var ag = $("bubAgain"); if (ag) ag.addEventListener("click", function () { if (typeof playClick === "function") playClick(); bubNewGame(); });
+      var cs = $("bubColors"); if (cs) cs.addEventListener("change", function () { bubNewGame(); });
+    }
+    function bubRender() {
+      bubInit();
+      if (!bubCanvas) return;
+      if (bubGrid.length === 0 && !bubOver) bubNewGame();
+      bubRunning = true;
+      if (!bubRAF) bubRAF = requestAnimationFrame(bubLoop);
+    }
+    function bubStop() {
+      bubRunning = false;
+      if (bubRAF) { cancelAnimationFrame(bubRAF); bubRAF = 0; }
+    }
+    window.bubbleRender = bubRender;
+    window.bubbleStop = bubStop;
+    window.__bubbleTest = {
+      neighbors: bubNeighbors, cluster: bubCluster, floating: bubFloating,
+      colsIn: bubColsIn, countLeft: bubCountLeft, snap: bubSnap,
+      setGrid: function (g) { bubGrid = g; },
+      getGrid: function () { return bubGrid; },
+      R: BUB_R, COLS: BUB_COLS, W: BUB_W, H: BUB_H
+    };
+
+    BADGES.push(
+      { emoji: "🫧", name: "泡泡新手", desc: "玩过一局泡泡龙", test: function (u) { return (u.bubble || 0) >= 1; } },
+      { emoji: "🎯", name: "泡泡射手", desc: "在泡泡龙中通关 5 关", test: function (u) { return (u.bubbleclear || 0) >= 5; } }
+    );
+    QUOTES.push(
+      "泡泡龙的智慧：瞄准之前，先看清哪一簇最容易连成一片。",
+      "三个同色才消得掉——独木不成林，凑一凑总有出路。",
+      "打掉支点，一整串泡泡自己就落下来了。",
+      "墙是用来借力的，斜着打进去，往往比正面强攻更准。",
+      "清空整屏那一刻的痛快，值得前面每一次隐忍瞄准。"
     );
   })();
 </script>
