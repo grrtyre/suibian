@@ -1530,6 +1530,7 @@
         <button data-tab="chess">♞ 国际象棋</button>
         <button data-tab="weiqi">⚫ 围棋</button>
         <button data-tab="dab">▦ 点格棋</button>
+        <button data-tab="checkers">⛃ 跳棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6701,6 +6702,49 @@
       <div class="dab-tip">点击网格中的短线段画边，谁画下某个方格的第 4 条边，谁就占领该格并额外再走一步。全部方格占完后，格数多者胜。策略：尽量别画出“三条边”的格子（会送分给对方）；被迫送分时开最短的链，收官阶段还能用“双十字”弃两格换主动权。</div>
     </div>
   </section>
+  <section class="panel" id="checkers">
+    <h2>⛃ 跳棋（人机对弈）</h2>
+    <style>
+      #checkers .ck-wrap { max-width: 560px; margin: 0 auto; }
+      #checkers .ck-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+      #checkers .ck-top select { padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.25); background:rgba(0,0,0,.25); color:inherit; font-size:.95rem; }
+      #checkers .ck-status { text-align:center; font-size:1.02rem; font-weight:700; margin:6px 0 8px; min-height:1.5em; letter-spacing:.3px; }
+      #checkers .ck-status.ck-win { color:#f1c40f; }
+      #checkers .ck-status.ck-lose { color:#e74c3c; }
+      #checkers .ck-status.ck-warn { color:#e67e22; }
+      #checkers .ck-board { display:grid; grid-template-columns:repeat(8,1fr); width:min(92vw,440px); aspect-ratio:1; margin:0 auto; border:3px solid #5d4037; border-radius:10px; overflow:hidden; box-shadow:0 8px 26px rgba(0,0,0,.4); user-select:none; }
+      #checkers .ck-cell { position:relative; display:flex; align-items:center; justify-content:center; }
+      #checkers .ck-cell.lt { background:#ecd9b0; }
+      #checkers .ck-cell.dk { background:#7a5230; cursor:default; }
+      #checkers .ck-cell.dk.can { cursor:pointer; box-shadow:inset 0 0 0 2px rgba(241,196,15,.55); }
+      #checkers .ck-cell.dk.sel { box-shadow:inset 0 0 0 3px #f1c40f; background:#8a6238; }
+      #checkers .ck-cell.dk.dst { cursor:pointer; }
+      #checkers .ck-cell.dk.dst::before { content:""; position:absolute; width:26%; height:26%; border-radius:50%; background:rgba(46,204,113,.85); box-shadow:0 0 8px rgba(46,204,113,.8); }
+      #checkers .ck-cell.dk.last { background:#6d6030; }
+      #checkers .ck-pc { width:76%; height:76%; border-radius:50%; position:relative; box-shadow:0 3px 6px rgba(0,0,0,.45), inset 0 -4px 6px rgba(0,0,0,.3), inset 0 3px 5px rgba(255,255,255,.25); }
+      #checkers .ck-pc.me { background:radial-gradient(circle at 34% 30%, #ff7b6b, #c0392b 62%, #8e2418); }
+      #checkers .ck-pc.ai { background:radial-gradient(circle at 34% 30%, #6b7a86, #2c3e50 62%, #17222c); }
+      #checkers .ck-pc.king::after { content:"👑"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:clamp(12px,3.4vw,20px); filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+      #checkers .ck-info { text-align:center; margin-top:10px; font-size:1rem; min-height:1.4em; }
+      #checkers .ck-stats { text-align:center; margin-top:8px; opacity:.8; font-size:.92rem; }
+      #checkers .ck-tip { margin-top:10px; font-size:.85rem; opacity:.62; text-align:center; line-height:1.6; }
+      @media (max-width:520px){ #checkers .ck-top { gap:6px; } #checkers .ck-top select { font-size:.88rem; padding:5px 8px; } }
+    </style>
+    <div class="ck-wrap">
+      <div class="ck-top">
+        <select id="ckLevel" title="AI 难度"><option value="1">入门</option><option value="2" selected>普通</option><option value="3">较难</option></select>
+        <select id="ckFirst" title="先手"><option value="me" selected>我先手（红）</option><option value="ai">AI 先手（黑）</option></select>
+        <button id="ckNew">🆕 新对局</button>
+        <button id="ckUndo">↩️ 悔棋</button>
+        <button id="ckResign">🏳️ 认输</button>
+      </div>
+      <div class="ck-status" id="ckStatus"></div>
+      <div class="ck-board" id="ckBoard"></div>
+      <div class="ck-info" id="ckInfo"></div>
+      <div class="ck-stats" id="ckStats"></div>
+      <div class="ck-tip">经典英式跳棋（Checkers / Draughts）：双方各 12 枚，只走深色格。普通兵斜前走一步；隔着敌子跳到空格即吃子，<b>有吃必吃</b>，一口气能连跳就必须跳到底。冲到对方底线加冕成王（👑），王可以前后任意斜走与跳吃。把对方吃光或困死即获胜；连续 80 步无吃子且无兵推进判和。点棋子看提示，绿点是落点，金框是必选之子。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7052,6 +7096,7 @@
     if (id === "chess") chsRender();
     if (id === "weiqi") wqRender();
     if (id === "dab") dabRender();
+    if (id === "checkers") ckRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7064,6 +7109,7 @@
     if (id !== "chess" && typeof chsStop === "function") chsStop();
     if (id !== "weiqi" && typeof wqStop === "function") wqStop();
     if (id !== "dab" && typeof dabStop === "function") dabStop();
+    if (id !== "checkers" && typeof ckStop === "function") ckStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7207,6 +7253,7 @@
     chess: "国际象棋 chess 象棋 西洋棋 人机 对弈 对战 AI 棋盘 王车易位 吃过路兵 升变 将军 将死 马 车 象 后 王 兵 棋类 策略 烧脑",
     weiqi: "围棋 weiqi go 黑白 落子 提子 打劫 数子 贴目 人机 对弈 对战 AI 九路 十三路 围地 做眼 死活 布局 定式 棋盘 棋类 策略 烧脑 金角银边",
     dab: "点格棋 dots and boxes 点格 方格 连线 画线 围地 占格 人机 对弈 对战 AI 益智 策略 烧脑 棋类 双十字 送分 长链 棋盘",
+    checkers: "跳棋 英式跳棋 西洋跳棋 checkers draughts 国际跳棋 吃子 连跳 加冕 王棋 人机 对弈 对战 AI 棋类 策略 益智 棋盘 红黑",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7410,6 +7457,7 @@ splitbill:"tools",
     chess:"games",
     weiqi:"games",
     dab:"games",
+    checkers:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -29634,6 +29682,422 @@ splitbill:"tools",
       "双十字：把两格拱手让人，只为逼对方先开口。",
       "先连边，再收网；布局的耐心，决定收官的战果。",
       "每一条线都在为将来铺路，落子前先想清楚三步。"
+    );
+  })();
+  (function () {
+    var CK_ST_KEY = "suibian_checkers";
+    var ckBd = null, ckTurn = 1, ckOver = false, ckLevel = 2, ckSel = null;
+    var ckCands = [], ckChain = false, ckLastPath = [], ckHist = [], ckDrawClock = 0;
+    var ckTimer = null, ckBusy = false, ckInited = false, ckMoveSaved = false, ckInfoTimer = null;
+
+    function ckNewBoard() {
+      var bd = [];
+      for (var r = 0; r < 8; r++) {
+        var row = [];
+        for (var c = 0; c < 8; c++) {
+          var v = 0;
+          if ((r + c) % 2 === 1) {
+            if (r < 3) v = -1;
+            else if (r > 4) v = 1;
+          }
+          row.push(v);
+        }
+        bd.push(row);
+      }
+      return bd;
+    }
+    function ckClone(bd) { return bd.map(function (row) { return row.slice(); }); }
+    function ckDirs(p) {
+      if (p === 2 || p === -2) return [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+      return p > 0 ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]];
+    }
+    function ckCapsFrom(bd, r0, c0, p0) {
+      var res = [];
+      function dfs(rr, cc, piece, path, caps) {
+        var found = false;
+        var dirs = ckDirs(piece);
+        for (var i = 0; i < dirs.length; i++) {
+          var mr = rr + dirs[i][0], mc = cc + dirs[i][1];
+          var lr = rr + 2 * dirs[i][0], lc = cc + 2 * dirs[i][1];
+          if (lr < 0 || lr > 7 || lc < 0 || lc > 7) continue;
+          var mid = bd[mr][mc];
+          if (mid === 0 || mid * piece > 0) continue;
+          if (bd[lr][lc] !== 0) continue;
+          found = true;
+          var sFrom = bd[rr][cc];
+          bd[rr][cc] = 0; bd[mr][mc] = 0;
+          var np = piece, crowned = false;
+          if (piece === 1 && lr === 0) { np = 2; crowned = true; }
+          if (piece === -1 && lr === 7) { np = -2; crowned = true; }
+          bd[lr][lc] = np;
+          path.push([lr, lc]); caps.push([mr, mc]);
+          if (crowned) res.push({ path: path.slice(), caps: caps.slice() });
+          else dfs(lr, lc, np, path, caps);
+          path.pop(); caps.pop();
+          bd[lr][lc] = 0; bd[mr][mc] = mid; bd[rr][cc] = sFrom;
+        }
+        if (!found && path.length > 1) res.push({ path: path.slice(), caps: caps.slice() });
+      }
+      dfs(r0, c0, p0, [[r0, c0]], []);
+      return res;
+    }
+    function ckMoves(bd, side) {
+      var caps = [], quiets = [], r, c, p, i;
+      for (r = 0; r < 8; r++) for (c = 0; c < 8; c++) {
+        p = bd[r][c];
+        if (p === 0 || p * side < 0) continue;
+        var seqs = ckCapsFrom(bd, r, c, p);
+        for (i = 0; i < seqs.length; i++) caps.push(seqs[i]);
+      }
+      if (caps.length) return caps;
+      for (r = 0; r < 8; r++) for (c = 0; c < 8; c++) {
+        p = bd[r][c];
+        if (p === 0 || p * side < 0) continue;
+        var dirs = ckDirs(p);
+        for (i = 0; i < dirs.length; i++) {
+          var nr = r + dirs[i][0], nc = c + dirs[i][1];
+          if (nr < 0 || nr > 7 || nc < 0 || nc > 7 || bd[nr][nc] !== 0) continue;
+          quiets.push({ path: [[r, c], [nr, nc]], caps: [] });
+        }
+      }
+      return quiets;
+    }
+    function ckApply(bd, mv) {
+      var fr = mv.path[0], to = mv.path[mv.path.length - 1];
+      var p = bd[fr[0]][fr[1]];
+      bd[fr[0]][fr[1]] = 0;
+      for (var i = 0; i < mv.caps.length; i++) bd[mv.caps[i][0]][mv.caps[i][1]] = 0;
+      if (p === 1 && to[0] === 0) p = 2;
+      if (p === -1 && to[0] === 7) p = -2;
+      bd[to[0]][to[1]] = p;
+      return p;
+    }
+    function ckEval(bd) {
+      var s = 0;
+      for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) {
+        var p = bd[r][c];
+        if (!p) continue;
+        var ctr = (c >= 2 && c <= 5 && r >= 2 && r <= 5) ? 3 : 0;
+        if (p === 1) s += 100 + (7 - r) * 2 + (r === 7 ? 4 : 0) + ctr;
+        else if (p === 2) s += 170 + ctr;
+        else if (p === -1) s -= 100 + r * 2 + (r === 0 ? 4 : 0) + ctr;
+        else s -= 170 + ctr;
+      }
+      return s;
+    }
+    function ckSearch(bd, side, depth, alpha, beta) {
+      var moves = ckMoves(bd, side);
+      if (!moves.length) return -90000 - depth * 10;
+      if (depth <= 0 && (!moves[0].caps.length || depth <= -8)) return side * ckEval(bd);
+      if (moves.length > 1 && moves[0].caps.length) {
+        moves.sort(function (a, b) { return b.caps.length - a.caps.length; });
+      }
+      var best = -1e9;
+      for (var i = 0; i < moves.length; i++) {
+        var nb = ckClone(bd);
+        ckApply(nb, moves[i]);
+        var v = -ckSearch(nb, -side, depth - 1, -beta, -alpha);
+        if (v > best) best = v;
+        if (best > alpha) alpha = best;
+        if (alpha >= beta) break;
+      }
+      return best;
+    }
+    function ckCountPieces(bd) {
+      var n = 0;
+      for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) if (bd[r][c]) n++;
+      return n;
+    }
+    function ckAiPick() {
+      var moves = ckMoves(ckBd, -1);
+      if (!moves.length) return null;
+      if (ckLevel === 1) return moves[Math.floor(Math.random() * moves.length)];
+      for (var i = moves.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = moves[i]; moves[i] = moves[j]; moves[j] = t;
+      }
+      var depth = ckLevel === 2 ? 2 : (ckCountPieces(ckBd) <= 8 ? 8 : 6);
+      var best = null, bv = -1e9;
+      for (var k = 0; k < moves.length; k++) {
+        var nb = ckClone(ckBd);
+        ckApply(nb, moves[k]);
+        var v = -ckSearch(nb, 1, depth - 1, -1e9, 1e9);
+        if (ckLevel === 2) v += Math.random() * 6;
+        if (v > bv) { bv = v; best = moves[k]; }
+      }
+      return best;
+    }
+
+    function ckGetStats() {
+      try { return JSON.parse(localStorage.getItem(CK_ST_KEY)) || { plays: 0, wins: 0, losses: 0, draws: 0 }; }
+      catch (e) { return { plays: 0, wins: 0, losses: 0, draws: 0 }; }
+    }
+    function ckSaveStats(st) { try { localStorage.setItem(CK_ST_KEY, JSON.stringify(st)); } catch (e) {} }
+    function ckShowStats() {
+      var el = document.getElementById("ckStats");
+      if (!el) return;
+      var st = ckGetStats();
+      el.textContent = "战绩：共 " + st.plays + " 局 · 胜 " + st.wins + " · 负 " + st.losses + " · 和 " + st.draws;
+    }
+    function ckSetStatus(txt, cls) {
+      var el = document.getElementById("ckStatus");
+      if (!el) return;
+      el.textContent = txt;
+      el.className = "ck-status" + (cls ? " " + cls : "");
+    }
+    function ckUpdInfo() {
+      var el = document.getElementById("ckInfo");
+      if (!el || !ckBd) return;
+      var m = 0, mk = 0, a = 0, ak = 0;
+      for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) {
+        var p = ckBd[r][c];
+        if (p === 1) m++;
+        else if (p === 2) { m++; mk++; }
+        else if (p === -1) a++;
+        else if (p === -2) { a++; ak++; }
+      }
+      el.innerHTML = '<span style="color:#e74c3c;font-weight:700;">红（我）' + m + (mk ? " · 王" + mk : "") +
+        '</span><span style="opacity:.55;margin:0 10px;">VS</span>' +
+        '<span style="color:#95a5a6;font-weight:700;">黑（AI）' + a + (ak ? " · 王" + ak : "") + "</span>";
+    }
+    function ckInfoMsg(t) {
+      var el = document.getElementById("ckInfo");
+      if (!el) return;
+      el.textContent = t;
+      if (ckInfoTimer) clearTimeout(ckInfoTimer);
+      ckInfoTimer = setTimeout(function () { ckInfoTimer = null; ckUpdInfo(); }, 2200);
+    }
+    function ckDrawBoard() {
+      var bel = document.getElementById("ckBoard");
+      if (!bel || !ckBd) return;
+      var dst = {}, can = {}, lastSet = {}, i;
+      if (ckTurn === 1 && !ckOver) {
+        for (i = 0; i < ckCands.length; i++) {
+          var m = ckCands[i];
+          can[m.path[0][0] * 8 + m.path[0][1]] = 1;
+          if (ckSel && m.path[0][0] === ckSel[0] && m.path[0][1] === ckSel[1]) dst[m.path[1][0] * 8 + m.path[1][1]] = 1;
+        }
+      }
+      for (i = 0; i < ckLastPath.length; i++) lastSet[ckLastPath[i][0] * 8 + ckLastPath[i][1]] = 1;
+      var html = "";
+      for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) {
+        var dark = (r + c) % 2 === 1;
+        var key = r * 8 + c;
+        var cls = "ck-cell " + (dark ? "dk" : "lt");
+        if (dark && lastSet[key]) cls += " last";
+        if (dark && can[key]) cls += " can";
+        if (dark && dst[key]) cls += " dst";
+        if (ckSel && ckSel[0] === r && ckSel[1] === c) cls += " sel";
+        var p = ckBd[r][c], pc = "";
+        if (p) pc = '<span class="ck-pc ' + (p > 0 ? "me" : "ai") + (Math.abs(p) === 2 ? " king" : "") + '"></span>';
+        html += '<div class="' + cls + '" data-r="' + r + '" data-c="' + c + '">' + pc + "</div>";
+      }
+      bel.innerHTML = html;
+      ckUpdInfo();
+    }
+
+    function ckPushHist() {
+      ckHist.push(JSON.stringify({ bd: ckBd, clock: ckDrawClock, last: ckLastPath }));
+      if (ckHist.length > 200) ckHist.shift();
+    }
+    function ckBumpClock(pieceBefore, mv) {
+      if (mv.caps.length || Math.abs(pieceBefore) === 1) ckDrawClock = 0;
+      else ckDrawClock++;
+    }
+    function ckMyTurnStart() {
+      ckTurn = 1; ckChain = false; ckSel = null; ckMoveSaved = false;
+      ckCands = ckMoves(ckBd, 1);
+      if (!ckCands.length) { ckFinish(-1); return; }
+      if (ckDrawClock >= 80) { ckFinish(0); return; }
+      if (ckCands[0].caps.length) ckSetStatus("轮到你走 —— 有吃子机会，必须吃！", "ck-warn");
+      else ckSetStatus("轮到你走（红方）", "");
+      ckDrawBoard();
+    }
+    function ckAiTurn() {
+      ckTurn = -1; ckSel = null; ckChain = false; ckCands = [];
+      var aiMoves = ckMoves(ckBd, -1);
+      if (!aiMoves.length) { ckFinish(1); return; }
+      if (ckDrawClock >= 80) { ckFinish(0); return; }
+      ckSetStatus("AI 思考中…", "");
+      ckDrawBoard();
+      ckBusy = true;
+      ckTimer = setTimeout(function () {
+        ckTimer = null;
+        if (ckOver || !ckBd) { ckBusy = false; return; }
+        var mv = ckAiPick();
+        ckBusy = false;
+        if (!mv) { ckFinish(1); return; }
+        var p0 = ckBd[mv.path[0][0]][mv.path[0][1]];
+        ckApply(ckBd, mv);
+        ckBumpClock(p0, mv);
+        ckLastPath = mv.path.slice();
+        ckMyTurnStart();
+      }, 380);
+    }
+    function ckFinish(result, msg) {
+      ckOver = true; ckSel = null; ckCands = []; ckChain = false;
+      var st = ckGetStats();
+      if (result === 1) {
+        st.wins++;
+        ckSetStatus(msg || "🎉 你赢了！AI 被吃光或无路可走", "ck-win");
+        if (typeof bumpUsage === "function") bumpUsage("checkerswin");
+        if (typeof confettiBurst === "function") try { confettiBurst(80); } catch (e) {}
+        if (typeof playDing === "function") try { playDing(); } catch (e) {}
+      } else if (result === -1) {
+        st.losses++;
+        ckSetStatus(msg || "😵 你输了：被吃光或无路可走", "ck-lose");
+      } else {
+        st.draws++;
+        ckSetStatus(msg || "🤝 和棋：连续 80 步无吃子且无兵推进", "");
+      }
+      ckSaveStats(st);
+      ckShowStats();
+      ckDrawBoard();
+    }
+    function ckCellClick(r, c) {
+      if (ckOver || ckTurn !== 1 || ckBusy || !ckBd) return;
+      if (r < 0 || r > 7 || c < 0 || c > 7) return;
+      var p = ckBd[r][c];
+      if (!ckChain && p > 0) {
+        var has = false;
+        for (var i = 0; i < ckCands.length; i++) {
+          if (ckCands[i].path[0][0] === r && ckCands[i].path[0][1] === c) { has = true; break; }
+        }
+        if (has) { ckSel = [r, c]; ckDrawBoard(); return; }
+        ckInfoMsg(ckCands.length && ckCands[0].caps.length ? "有吃子机会时必须吃子，这枚棋子暂时不能走" : "这枚棋子当前无路可走");
+        return;
+      }
+      if (!ckSel) return;
+      var matched = [];
+      for (var j = 0; j < ckCands.length; j++) {
+        var m = ckCands[j];
+        if (m.path[0][0] === ckSel[0] && m.path[0][1] === ckSel[1] && m.path[1][0] === r && m.path[1][1] === c) matched.push(m);
+      }
+      if (!matched.length) {
+        if (!ckChain) { ckSel = null; ckDrawBoard(); }
+        return;
+      }
+      if (!ckMoveSaved) { ckPushHist(); ckMoveSaved = true; }
+      var piece = ckBd[ckSel[0]][ckSel[1]];
+      if (matched[0].caps.length) {
+        var cont = [];
+        for (var k = 0; k < matched.length; k++) if (matched[k].path.length > 2) cont.push(matched[k]);
+        ckBd[ckSel[0]][ckSel[1]] = 0;
+        ckBd[matched[0].caps[0][0]][matched[0].caps[0][1]] = 0;
+        if (piece === 1 && r === 0) piece = 2;
+        ckBd[r][c] = piece;
+        ckLastPath = ckChain ? ckLastPath.concat([[r, c]]) : [[ckSel[0], ckSel[1]], [r, c]];
+        ckDrawClock = 0;
+        if (cont.length) {
+          ckChain = true;
+          ckSel = [r, c];
+          ckCands = cont.map(function (mm) { return { path: mm.path.slice(1), caps: mm.caps.slice(1) }; });
+          ckSetStatus("连跳中 —— 必须继续吃子！", "ck-warn");
+          ckDrawBoard();
+          return;
+        }
+      } else {
+        ckBd[ckSel[0]][ckSel[1]] = 0;
+        var np = piece;
+        if (np === 1 && r === 0) np = 2;
+        ckBd[r][c] = np;
+        ckLastPath = [[ckSel[0], ckSel[1]], [r, c]];
+        ckBumpClock(piece, { caps: [] });
+      }
+      ckChain = false; ckSel = null;
+      ckDrawBoard();
+      ckAiTurn();
+    }
+    function ckUndo() {
+      if (!ckHist.length || !ckBd) return;
+      if (ckTimer) { clearTimeout(ckTimer); ckTimer = null; }
+      ckBusy = false;
+      var s;
+      try { s = JSON.parse(ckHist.pop()); } catch (e) { return; }
+      ckBd = s.bd; ckDrawClock = s.clock || 0; ckLastPath = s.last || [];
+      ckOver = false; ckChain = false; ckSel = null; ckMoveSaved = false;
+      ckMyTurnStart();
+    }
+    function ckResign() {
+      if (ckOver || !ckBd) return;
+      if (ckTimer) { clearTimeout(ckTimer); ckTimer = null; }
+      ckBusy = false;
+      ckFinish(-1, "🏳️ 你认输了，下把再战！");
+    }
+    function ckNewGame() {
+      ckStop();
+      ckBd = ckNewBoard(); ckTurn = 1; ckOver = false; ckSel = null; ckChain = false;
+      ckCands = []; ckLastPath = []; ckHist = []; ckDrawClock = 0; ckMoveSaved = false;
+      var lv = document.getElementById("ckLevel");
+      ckLevel = lv ? (parseInt(lv.value, 10) || 2) : 2;
+      var fe = document.getElementById("ckFirst");
+      var first = fe ? fe.value : "me";
+      var st = ckGetStats(); st.plays++; ckSaveStats(st);
+      if (typeof bumpUsage === "function") bumpUsage("checkers");
+      ckShowStats();
+      if (first === "ai") ckAiTurn();
+      else ckMyTurnStart();
+    }
+    function ckInit() {
+      if (ckInited) return;
+      ckInited = true;
+      var bel = document.getElementById("ckBoard");
+      if (bel && bel.addEventListener) bel.addEventListener("click", function (e) {
+        var t = e.target;
+        while (t && t !== bel && !(t.dataset && t.dataset.r !== undefined)) t = t.parentNode;
+        if (!t || t === bel || !t.dataset) return;
+        ckCellClick(parseInt(t.dataset.r, 10), parseInt(t.dataset.c, 10));
+      });
+      var bn = document.getElementById("ckNew");
+      if (bn && bn.addEventListener) bn.addEventListener("click", ckNewGame);
+      var bu = document.getElementById("ckUndo");
+      if (bu && bu.addEventListener) bu.addEventListener("click", ckUndo);
+      var br = document.getElementById("ckResign");
+      if (br && br.addEventListener) br.addEventListener("click", ckResign);
+      var lv = document.getElementById("ckLevel");
+      if (lv && lv.addEventListener) lv.addEventListener("change", function () { ckLevel = parseInt(lv.value, 10) || 2; });
+    }
+    function ckStop() {
+      if (ckTimer) { clearTimeout(ckTimer); ckTimer = null; }
+      if (ckInfoTimer) { clearTimeout(ckInfoTimer); ckInfoTimer = null; }
+      ckBusy = false;
+    }
+    function ckRender() {
+      ckInit();
+      if (!ckBd) ckNewGame();
+      else { ckShowStats(); ckDrawBoard(); }
+    }
+
+    window.ckRender = ckRender;
+    window.ckStop = ckStop;
+    window.__ckTest = {
+      newBoard: ckNewBoard, clone: ckClone, moves: ckMoves, capsFrom: ckCapsFrom,
+      apply: ckApply, evalBd: ckEval, search: ckSearch, aiPick: ckAiPick,
+      count: ckCountPieces, dirs: ckDirs, bumpClock: ckBumpClock,
+      newGame: ckNewGame, cellClick: ckCellClick, undo: ckUndo, resign: ckResign,
+      aiTurn: ckAiTurn, myTurn: ckMyTurnStart, finish: ckFinish,
+      setLevel: function (l) { ckLevel = l; },
+      setClock: function (v) { ckDrawClock = v; },
+      setBoard: function (b, turn) {
+        ckBd = b; ckTurn = turn || 1; ckOver = false; ckChain = false; ckSel = null;
+        ckHist = []; ckMoveSaved = false; ckLastPath = [];
+        if (ckTurn === 1) ckCands = ckMoves(ckBd, 1);
+      },
+      state: function () {
+        return { bd: ckBd, turn: ckTurn, over: ckOver, chain: ckChain, sel: ckSel, cands: ckCands, hist: ckHist.length, clock: ckDrawClock, level: ckLevel };
+      }
+    };
+
+    BADGES.push(
+      { emoji: "⛃", name: "跳棋新丁", desc: "第一次玩跳棋", test: function (u) { return (u.checkers || 0) >= 1; } },
+      { emoji: "🫅", name: "加冕之王", desc: "在跳棋中战胜 AI", test: function (u) { return (u.checkerswin || 0) >= 1; } }
+    );
+    QUOTES.push(
+      "跳棋的第一课：能吃必吃——人生有些便宜，是躲不掉的。",
+      "连跳的快感，来自之前每一步隐忍的铺垫。",
+      "别急着冲底线，后排守稳了，王才加冕得安心。",
+      "送你吃一子，换你露出破绽——弃子从来不是认怂。",
+      "王棋能进能退；进退自如，是棋盘上最好的状态。"
     );
   })();
 </script>
