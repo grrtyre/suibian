@@ -1527,6 +1527,7 @@
         <button data-tab="xiangqi">♟️ 中国象棋</button>
         <button data-tab="navy">🚢 海战棋</button>
         <button data-tab="yahtzee">🎲 快艇骰子</button>
+        <button data-tab="chess">♞ 国际象棋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6555,6 +6556,59 @@
       <div class="yt-tip">上区（一点~六点）合计 ≥63 加 35 分奖励；三条 / 四条计五颗骰子总和，葫芦 25 分、小顺 30 分、大顺 40 分、快艇（五颗同点）50 分、机会计总和。每回合掷完至少一次后，点表格里你这列的绿色格子计分（0 分格也可以弃置）。</div>
     </div>
   </section>
+  <section class="panel" id="chess">
+    <h2>♞ 国际象棋（人机对弈）</h2>
+    <style>
+      #chess .chs-wrap { max-width: 560px; margin: 0 auto; }
+      #chess .chs-top { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+      #chess .chs-top select { padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.25); color: inherit; font-size: .95rem; }
+      #chess .chs-status { text-align: center; font-size: 1.02rem; font-weight: 700; margin: 6px 0 8px; min-height: 1.5em; letter-spacing: .3px; }
+      #chess .chs-status.chs-win { color: #f1c40f; }
+      #chess .chs-status.chs-lose { color: #e74c3c; }
+      #chess .chs-status.chs-check { color: #e67e22; animation: chsPulse 1s infinite; }
+      @keyframes chsPulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+      #chess .chs-board { display: grid; grid-template-columns: repeat(8, 1fr); width: min(92vw, 480px); aspect-ratio: 1; margin: 0 auto; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 26px rgba(0,0,0,.45); border: 3px solid #6b4a2b; }
+      #chess .chs-sq { position: relative; border: 0; padding: 0; margin: 0; font-size: clamp(22px, 7.4vw, 40px); line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: background .12s; font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", serif; }
+      #chess .chs-sq.chs-lt { background: #f0d9b5; }
+      #chess .chs-sq.chs-dk { background: #b58863; }
+      #chess .chs-sq.chs-last { box-shadow: inset 0 0 0 200px rgba(155, 199, 0, .33); }
+      #chess .chs-sq.chs-sel { box-shadow: inset 0 0 0 3px #f1c40f, inset 0 0 0 200px rgba(241,196,15,.22); }
+      #chess .chs-sq.chs-hint { box-shadow: inset 0 0 0 3px #3498db, inset 0 0 0 200px rgba(52,152,219,.25); }
+      #chess .chs-sq.chs-chk { box-shadow: inset 0 0 0 200px rgba(231, 76, 60, .5); animation: chsPulse .8s infinite; }
+      #chess .chs-sq.chs-tgt::after { content: ""; position: absolute; width: 26%; height: 26%; border-radius: 50%; background: rgba(30, 90, 30, .45); }
+      #chess .chs-sq.chs-cpt::after { content: ""; position: absolute; inset: 6%; border-radius: 50%; border: 4px solid rgba(180, 40, 30, .55); }
+      #chess .chs-w { color: #fdfdfd; text-shadow: 0 0 3px #000, 0 1px 2px rgba(0,0,0,.8); }
+      #chess .chs-b { color: #17202a; text-shadow: 0 0 2px rgba(255,255,255,.4); }
+      #chess .chs-coord { position: absolute; font-size: 10px; font-weight: 700; opacity: .65; pointer-events: none; font-family: system-ui, sans-serif; }
+      #chess .chs-coord.chs-cf { right: 3px; bottom: 2px; }
+      #chess .chs-coord.chs-cr { left: 3px; top: 2px; }
+      #chess .chs-lt .chs-coord { color: #8a5a2b; }
+      #chess .chs-dk .chs-coord { color: #f4e3c7; }
+      #chess .chs-cap { min-height: 1.6em; text-align: center; font-size: 1.25rem; margin: 5px auto; width: min(92vw, 480px); letter-spacing: 2px; }
+      #chess .chs-stats { text-align: center; opacity: .85; font-size: .92rem; margin-top: 8px; }
+      #chess .chs-tip { opacity: .7; font-size: .86rem; text-align: center; margin-top: 10px; line-height: 1.6; }
+    </style>
+    <div class="chs-wrap">
+      <div class="chs-top">
+        <label>难度
+          <select id="chsDiff">
+            <option value="1">入门</option>
+            <option value="2" selected>普通</option>
+            <option value="3">较难</option>
+          </select>
+        </label>
+        <button id="chsNew">🔄 新对局</button>
+        <button id="chsUndo">↩️ 悔棋</button>
+        <button id="chsHintBtn">💡 支招</button>
+      </div>
+      <div class="chs-status" id="chsStatus">你执白先行，点击棋子开始对局</div>
+      <div class="chs-cap" id="chsCapB"></div>
+      <div class="chs-board" id="chsBoard"></div>
+      <div class="chs-cap" id="chsCapW"></div>
+      <div class="chs-stats" id="chsStats"></div>
+      <div class="chs-tip">你执白（下方）先行，点击己方棋子查看合法落点（绿点可走、红圈可吃）。完整规则支持：王车易位、吃过路兵、兵升变（自动升后）、将军 / 将死 / 逼和 / 子力不足和棋判定。悔棋一次回退一整回合，💡支招由 AI 给你出主意。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -6903,6 +6957,7 @@
     if (id === "xiangqi") xqRender();
     if (id === "navy") nvRender();
     if (id === "yahtzee") ytRender();
+    if (id === "chess") chsRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -6912,6 +6967,7 @@
     if (id !== "drum" && typeof drumStop === "function") drumStop();
     if (id !== "navy" && typeof nvStop === "function") nvStop();
     if (id !== "yahtzee" && typeof ytStop === "function") ytStop();
+    if (id !== "chess" && typeof chsStop === "function") chsStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7052,6 +7108,7 @@
     xiangqi: "中国象棋 象棋 棋类 对弈 将军 将死 车马炮 楚河汉界 残局 minimax AI 人机 下棋 帅 兵卒 chinese chess xiangqi 益智 策略",
     navy: "海战棋 战舰 军舰 炮击 海战 battleship 舰队 航母 击沉 猜位置 对战 人机 策略 布阵 海军 navy 命中 联机 经典桌游",
     yahtzee: "快艇骰子 骰子 yahtzee 快艇 计分 掷骰 三掷 留骰 锁骰 葫芦 小顺 大顺 四条 三条 全同 上区奖励 人机 对战 桌游 dice 手气 运气 策略 骰盅 骰盘",
+    chess: "国际象棋 chess 象棋 西洋棋 人机 对弈 对战 AI 棋盘 王车易位 吃过路兵 升变 将军 将死 马 车 象 后 王 兵 棋类 策略 烧脑",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7252,6 +7309,7 @@ splitbill:"tools",
     xiangqi:"games",
     navy:"games",
     yahtzee:"games",
+    chess:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -28129,6 +28187,513 @@ splitbill:"tools",
       "敢把 0 分填进快艇格的人，早就想好了下一步。",
       "上区攒的是耐心，下区赌的是勇气。",
       "五颗骰子同点叫快艇，五次坚持同心叫成功。"
+    );
+  })();
+  (function () {
+    var CHS_LS = "suibian_chess";
+    var CHS_GLYPH = { K: "\u2654", Q: "\u2655", R: "\u2656", B: "\u2657", N: "\u2658", P: "\u2659", k: "\u265A", q: "\u265B", r: "\u265C", b: "\u265D", n: "\u265E", p: "\u265F" };
+    var CHS_VAL = { P: 100, N: 320, B: 330, R: 500, Q: 900, K: 20000 };
+    var CHS_PST_P = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      50, 50, 50, 50, 50, 50, 50, 50,
+      10, 10, 20, 30, 30, 20, 10, 10,
+      5, 5, 10, 25, 25, 10, 5, 5,
+      0, 0, 0, 20, 20, 0, 0, 0,
+      5, -5, -10, 0, 0, -10, -5, 5,
+      5, 10, 10, -20, -20, 10, 10, 5,
+      0, 0, 0, 0, 0, 0, 0, 0];
+    var CHS_PST_N = [
+      -50, -40, -30, -30, -30, -30, -40, -50,
+      -40, -20, 0, 0, 0, 0, -20, -40,
+      -30, 0, 10, 15, 15, 10, 0, -30,
+      -30, 5, 15, 20, 20, 15, 5, -30,
+      -30, 0, 15, 20, 20, 15, 0, -30,
+      -30, 5, 10, 15, 15, 10, 5, -30,
+      -40, -20, 0, 5, 5, 0, -20, -40,
+      -50, -40, -30, -30, -30, -30, -40, -50];
+    var CHS_PST_B = [
+      -20, -10, -10, -10, -10, -10, -10, -20,
+      -10, 0, 0, 0, 0, 0, 0, -10,
+      -10, 0, 5, 10, 10, 5, 0, -10,
+      -10, 5, 5, 10, 10, 5, 5, -10,
+      -10, 0, 10, 10, 10, 10, 0, -10,
+      -10, 10, 10, 10, 10, 10, 10, -10,
+      -10, 5, 0, 0, 0, 0, 5, -10,
+      -20, -10, -10, -10, -10, -10, -10, -20];
+    var CHS_PST_R = [
+      0, 0, 0, 0, 0, 0, 0, 0,
+      5, 10, 10, 10, 10, 10, 10, 5,
+      -5, 0, 0, 0, 0, 0, 0, -5,
+      -5, 0, 0, 0, 0, 0, 0, -5,
+      -5, 0, 0, 0, 0, 0, 0, -5,
+      -5, 0, 0, 0, 0, 0, 0, -5,
+      -5, 0, 0, 0, 0, 0, 0, -5,
+      0, 0, 0, 5, 5, 0, 0, 0];
+    var CHS_PST_K = [
+      -30, -40, -40, -50, -50, -40, -40, -30,
+      -30, -40, -40, -50, -50, -40, -40, -30,
+      -30, -40, -40, -50, -50, -40, -40, -30,
+      -30, -40, -40, -50, -50, -40, -40, -30,
+      -20, -30, -30, -40, -40, -30, -30, -20,
+      -10, -20, -20, -20, -20, -20, -20, -10,
+      20, 20, 0, 0, 0, 0, 20, 20,
+      20, 30, 10, 0, 0, 10, 30, 20];
+    var CHS_PST = { P: CHS_PST_P, N: CHS_PST_N, B: CHS_PST_B, R: CHS_PST_R, Q: null, K: CHS_PST_K };
+    var CHS_KN = [-17, -15, -10, -6, 6, 10, 15, 17];
+    var CHS_KG = [-9, -8, -7, -1, 1, 7, 8, 9];
+
+    function chsIsW(p) { return p >= "A" && p <= "Z"; }
+    function chsInit() {
+      var b = "rnbqkbnr" + "pppppppp" + "        " + "        " + "        " + "        " + "PPPPPPPP" + "RNBQKBNR";
+      var arr = [], i;
+      for (i = 0; i < 64; i++) arr.push(b.charAt(i) === " " ? "" : b.charAt(i));
+      return { b: arr, w: true, cr: { K: true, Q: true, k: true, q: true }, ep: -1 };
+    }
+    function chsAttacked(b, i, byW) {
+      var r = i >> 3, c = i & 7, j, k, p, dr, dc, rr, cc;
+      if (byW) {
+        if (r < 7) {
+          if (c > 0 && b[i + 7] === "P") return true;
+          if (c < 7 && b[i + 9] === "P") return true;
+        }
+      } else {
+        if (r > 0) {
+          if (c > 0 && b[i - 9] === "p") return true;
+          if (c < 7 && b[i - 7] === "p") return true;
+        }
+      }
+      for (j = 0; j < 8; j++) {
+        k = i + CHS_KN[j]; rr = k >> 3; cc = k & 7;
+        if (k >= 0 && k < 64 && Math.abs(rr - r) + Math.abs(cc - c) === 3 && Math.abs(rr - r) <= 2 && Math.abs(cc - c) <= 2) {
+          p = b[k];
+          if (p === (byW ? "N" : "n")) return true;
+        }
+      }
+      for (j = 0; j < 8; j++) {
+        k = i + CHS_KG[j]; rr = k >> 3; cc = k & 7;
+        if (k >= 0 && k < 64 && Math.abs(rr - r) <= 1 && Math.abs(cc - c) <= 1) {
+          p = b[k];
+          if (p === (byW ? "K" : "k")) return true;
+        }
+      }
+      var DIRS = [[-1, 0, "RQ"], [1, 0, "RQ"], [0, -1, "RQ"], [0, 1, "RQ"], [-1, -1, "BQ"], [-1, 1, "BQ"], [1, -1, "BQ"], [1, 1, "BQ"]];
+      for (j = 0; j < 8; j++) {
+        dr = DIRS[j][0]; dc = DIRS[j][1];
+        rr = r + dr; cc = c + dc;
+        while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) {
+          p = b[rr * 8 + cc];
+          if (p) {
+            if (chsIsW(p) === byW && DIRS[j][2].indexOf(p.toUpperCase()) >= 0) return true;
+            break;
+          }
+          rr += dr; cc += dc;
+        }
+      }
+      return false;
+    }
+    function chsKingSq(b, w) {
+      var t = w ? "K" : "k", i;
+      for (i = 0; i < 64; i++) if (b[i] === t) return i;
+      return -1;
+    }
+    function chsInCheck(st, w) {
+      var ki = chsKingSq(st.b, w);
+      return ki >= 0 && chsAttacked(st.b, ki, !w);
+    }
+    function chsPseudo(st, forW) {
+      var b = st.b, out = [], i, r, c, p, up, j, k, rr, cc, dr, dc, one, two, cap;
+      function push(f, t, promo, flag) { out.push({ f: f, t: t, promo: promo || "", flag: flag || "" }); }
+      function pawnTo(f, t, flag) {
+        var tr = t >> 3;
+        if (tr === 0 || tr === 7) push(f, t, forW ? "Q" : "q", flag);
+        else push(f, t, "", flag);
+      }
+      for (i = 0; i < 64; i++) {
+        p = b[i];
+        if (!p || chsIsW(p) !== forW) continue;
+        r = i >> 3; c = i & 7;
+        var u = p.toUpperCase();
+        if (u === "P") {
+          up = forW ? -8 : 8;
+          one = i + up;
+          if (one >= 0 && one < 64 && !b[one]) {
+            pawnTo(i, one, "");
+            two = i + up * 2;
+            if (((forW && r === 6) || (!forW && r === 1)) && !b[two]) push(i, two, "", "dp");
+          }
+          for (j = -1; j <= 1; j += 2) {
+            cc = c + j;
+            if (cc < 0 || cc > 7) continue;
+            k = one + j;
+            cap = b[k];
+            if (cap && chsIsW(cap) !== forW) pawnTo(i, k, "");
+            else if (k === st.ep && !cap) push(i, k, "", "ep");
+          }
+        } else if (u === "N") {
+          for (j = 0; j < 8; j++) {
+            k = i + CHS_KN[j]; rr = k >> 3; cc = k & 7;
+            if (k < 0 || k > 63 || Math.abs(rr - r) + Math.abs(cc - c) !== 3 || Math.abs(rr - r) > 2 || Math.abs(cc - c) > 2) continue;
+            if (!b[k] || chsIsW(b[k]) !== forW) push(i, k);
+          }
+        } else if (u === "K") {
+          for (j = 0; j < 8; j++) {
+            k = i + CHS_KG[j]; rr = k >> 3; cc = k & 7;
+            if (k < 0 || k > 63 || Math.abs(rr - r) > 1 || Math.abs(cc - c) > 1) continue;
+            if (!b[k] || chsIsW(b[k]) !== forW) push(i, k);
+          }
+          var home = forW ? 60 : 4;
+          if (i === home && !chsAttacked(b, home, !forW)) {
+            if ((forW ? st.cr.K : st.cr.k) && !b[home + 1] && !b[home + 2] && b[home + 3] === (forW ? "R" : "r") &&
+              !chsAttacked(b, home + 1, !forW) && !chsAttacked(b, home + 2, !forW)) push(i, home + 2, "", "ck");
+            if ((forW ? st.cr.Q : st.cr.q) && !b[home - 1] && !b[home - 2] && !b[home - 3] && b[home - 4] === (forW ? "R" : "r") &&
+              !chsAttacked(b, home - 1, !forW) && !chsAttacked(b, home - 2, !forW)) push(i, home - 2, "", "cq");
+          }
+        } else {
+          var dirs = u === "R" ? [[-1, 0], [1, 0], [0, -1], [0, 1]] :
+            u === "B" ? [[-1, -1], [-1, 1], [1, -1], [1, 1]] :
+              [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]];
+          for (j = 0; j < dirs.length; j++) {
+            dr = dirs[j][0]; dc = dirs[j][1];
+            rr = r + dr; cc = c + dc;
+            while (rr >= 0 && rr < 8 && cc >= 0 && cc < 8) {
+              k = rr * 8 + cc;
+              if (!b[k]) push(i, k);
+              else { if (chsIsW(b[k]) !== forW) push(i, k); break; }
+              rr += dr; cc += dc;
+            }
+          }
+        }
+      }
+      return out;
+    }
+    function chsDo(st, m) {
+      var b = st.b, p = b[m.f];
+      var u = { cap: b[m.t], ep: st.ep, cr: { K: st.cr.K, Q: st.cr.Q, k: st.cr.k, q: st.cr.q }, epSq: -1, epP: "" };
+      b[m.t] = m.promo || p;
+      b[m.f] = "";
+      if (m.flag === "ep") {
+        u.epSq = m.t + (chsIsW(p) ? 8 : -8);
+        u.epP = b[u.epSq];
+        b[u.epSq] = "";
+      } else if (m.flag === "ck") {
+        b[m.t - 1] = b[m.t + 1]; b[m.t + 1] = "";
+      } else if (m.flag === "cq") {
+        b[m.t + 1] = b[m.t - 2]; b[m.t - 2] = "";
+      }
+      st.ep = m.flag === "dp" ? ((m.f + m.t) >> 1) : -1;
+      if (p === "K") { st.cr.K = false; st.cr.Q = false; }
+      else if (p === "k") { st.cr.k = false; st.cr.q = false; }
+      if (m.f === 63 || m.t === 63) st.cr.K = false;
+      if (m.f === 56 || m.t === 56) st.cr.Q = false;
+      if (m.f === 7 || m.t === 7) st.cr.k = false;
+      if (m.f === 0 || m.t === 0) st.cr.q = false;
+      st.w = !st.w;
+      return u;
+    }
+    function chsUndo(st, m, u) {
+      var b = st.b;
+      var p = b[m.t];
+      b[m.f] = m.promo ? (chsIsW(p) ? "P" : "p") : p;
+      b[m.t] = u.cap;
+      if (m.flag === "ep") b[u.epSq] = u.epP;
+      else if (m.flag === "ck") { b[m.t + 1] = b[m.t - 1]; b[m.t - 1] = ""; }
+      else if (m.flag === "cq") { b[m.t - 2] = b[m.t + 1]; b[m.t + 1] = ""; }
+      st.ep = u.ep;
+      st.cr = u.cr;
+      st.w = !st.w;
+    }
+    function chsLegalAll(st) {
+      var ms = chsPseudo(st, st.w), out = [], i, u, side = st.w;
+      for (i = 0; i < ms.length; i++) {
+        u = chsDo(st, ms[i]);
+        if (!chsInCheck(st, side)) out.push(ms[i]);
+        chsUndo(st, ms[i], u);
+      }
+      return out;
+    }
+    function chsEval(st) {
+      var b = st.b, s = 0, i, p, u, v;
+      for (i = 0; i < 64; i++) {
+        p = b[i];
+        if (!p) continue;
+        u = p.toUpperCase();
+        v = CHS_VAL[u] + (CHS_PST[u] ? (chsIsW(p) ? CHS_PST[u][i] : CHS_PST[u][i ^ 56]) : 0);
+        s += chsIsW(p) ? v : -v;
+      }
+      return s;
+    }
+    function chsOrder(st, ms) {
+      var b = st.b, i, m, sc;
+      for (i = 0; i < ms.length; i++) {
+        m = ms[i]; sc = 0;
+        if (b[m.t]) sc = 10 * CHS_VAL[b[m.t].toUpperCase()] - CHS_VAL[b[m.f].toUpperCase()];
+        if (m.promo) sc += 900;
+        if (m.flag === "ep") sc += 900;
+        m._s = sc;
+      }
+      ms.sort(function (a, x) { return x._s - a._s; });
+      return ms;
+    }
+    function chsQuiesce(st, alpha, beta, depth) {
+      var color = st.w ? 1 : -1;
+      var stand = color * chsEval(st);
+      if (stand >= beta) return beta;
+      if (stand > alpha) alpha = stand;
+      if (depth <= 0) return alpha;
+      var ms = chsPseudo(st, st.w), i, u, sc, side = st.w;
+      chsOrder(st, ms);
+      for (i = 0; i < ms.length; i++) {
+        if (!st.b[ms[i].t] && ms[i].flag !== "ep" && !ms[i].promo) continue;
+        u = chsDo(st, ms[i]);
+        if (chsInCheck(st, side)) { chsUndo(st, ms[i], u); continue; }
+        sc = -chsQuiesce(st, -beta, -alpha, depth - 1);
+        chsUndo(st, ms[i], u);
+        if (sc >= beta) return beta;
+        if (sc > alpha) alpha = sc;
+      }
+      return alpha;
+    }
+    function chsSearch(st, depth, alpha, beta, ply) {
+      if (depth === 0) return chsQuiesce(st, alpha, beta, 4);
+      var ms = chsLegalAll(st), i, u, sc;
+      if (!ms.length) return chsInCheck(st, st.w) ? (-100000 + ply) : 0;
+      chsOrder(st, ms);
+      for (i = 0; i < ms.length; i++) {
+        u = chsDo(st, ms[i]);
+        sc = -chsSearch(st, depth - 1, -beta, -alpha, ply + 1);
+        chsUndo(st, ms[i], u);
+        if (sc >= beta) return beta;
+        if (sc > alpha) alpha = sc;
+      }
+      return alpha;
+    }
+    function chsBest(st, depth) {
+      var ms = chsLegalAll(st), best = null, bestSc = -Infinity, i, u, sc;
+      if (!ms.length) return null;
+      chsOrder(st, ms);
+      for (i = 0; i < ms.length; i++) {
+        u = chsDo(st, ms[i]);
+        sc = -chsSearch(st, depth - 1, -Infinity, Infinity, 1);
+        chsUndo(st, ms[i], u);
+        sc += Math.random() * 4;
+        if (sc > bestSc) { bestSc = sc; best = ms[i]; }
+      }
+      return best;
+    }
+    function chsInsufficient(b) {
+      var minors = 0, i, p, u;
+      for (i = 0; i < 64; i++) {
+        p = b[i];
+        if (!p) continue;
+        u = p.toUpperCase();
+        if (u === "K") continue;
+        if (u === "N" || u === "B") { minors++; if (minors > 1) return false; }
+        else return false;
+      }
+      return true;
+    }
+
+    var chsSt = null, chsHist = [], chsSel = -1, chsMoves = [], chsOver = false,
+      chsTimer = null, chsHint = null, chsLast = [-1, -1], chsCapW = [], chsCapB = [],
+      chsStarted = false, chsBound = false;
+
+    function chsLoad() {
+      try { return JSON.parse(localStorage.getItem(CHS_LS)) || { plays: 0, wins: 0, draws: 0 }; }
+      catch (e) { return { plays: 0, wins: 0, draws: 0 }; }
+    }
+    function chsSave(d) { try { localStorage.setItem(CHS_LS, JSON.stringify(d)); } catch (e) { } }
+    function chsEl(id) { return document.getElementById(id); }
+
+    function chsNewGame() {
+      if (chsTimer) { clearTimeout(chsTimer); chsTimer = null; }
+      chsSt = chsInit();
+      chsHist = []; chsSel = -1; chsMoves = []; chsOver = false; chsHint = null;
+      chsLast = [-1, -1]; chsCapW = []; chsCapB = []; chsStarted = false;
+      chsSetStatus("你执白先行，点击棋子开始对局", "");
+      chsDraw();
+    }
+    function chsSetStatus(txt, cls) {
+      var el = chsEl("chsStatus");
+      if (!el) return;
+      el.textContent = txt;
+      el.className = "chs-status" + (cls ? " " + cls : "");
+    }
+    function chsDraw() {
+      var bd = chsEl("chsBoard");
+      if (!bd || !chsSt) return;
+      bd.innerHTML = "";
+      var tgt = {}, i, m;
+      for (i = 0; i < chsMoves.length; i++) tgt[chsMoves[i].t] = chsMoves[i];
+      var ckSq = -1;
+      if (chsSt.w && chsInCheck(chsSt, true)) ckSq = chsKingSq(chsSt.b, true);
+      if (!chsSt.w && chsInCheck(chsSt, false)) ckSq = chsKingSq(chsSt.b, false);
+      for (i = 0; i < 64; i++) {
+        var r = i >> 3, c = i & 7, p = chsSt.b[i];
+        var btn = document.createElement("button");
+        var cls = "chs-sq " + (((r + c) % 2 === 0) ? "chs-lt" : "chs-dk");
+        if (p) cls += chsIsW(p) ? " chs-w" : " chs-b";
+        if (i === chsLast[0] || i === chsLast[1]) cls += " chs-last";
+        if (i === chsSel) cls += " chs-sel";
+        if (chsHint && (i === chsHint.f || i === chsHint.t)) cls += " chs-hint";
+        if (i === ckSq) cls += " chs-chk";
+        if (tgt[i]) cls += (p || tgt[i].flag === "ep") ? " chs-cpt" : " chs-tgt";
+        btn.className = cls;
+        btn.dataset.i = i;
+        if (p) btn.textContent = CHS_GLYPH[p];
+        if (r === 7) {
+          var cf = document.createElement("span");
+          cf.className = "chs-coord chs-cf";
+          cf.textContent = "abcdefgh".charAt(c);
+          btn.appendChild(cf);
+        }
+        if (c === 0) {
+          var cr = document.createElement("span");
+          cr.className = "chs-coord chs-cr";
+          cr.textContent = String(8 - r);
+          btn.appendChild(cr);
+        }
+        btn.onclick = chsClickSq;
+        bd.appendChild(btn);
+      }
+      var cw = chsEl("chsCapW"), cb = chsEl("chsCapB");
+      if (cw) cw.textContent = chsCapB.map(function (x) { return CHS_GLYPH[x]; }).join(" ");
+      if (cb) cb.textContent = chsCapW.map(function (x) { return CHS_GLYPH[x]; }).join(" ");
+      var d = chsLoad(), stEl = chsEl("chsStats");
+      if (stEl) stEl.textContent = "对局 " + d.plays + " · 胜 " + d.wins + " · 和 " + d.draws;
+    }
+    function chsClickSq(ev) {
+      if (chsOver || !chsSt || !chsSt.w) return;
+      var i = parseInt(ev.currentTarget.dataset.i, 10), j, m = null;
+      for (j = 0; j < chsMoves.length; j++) if (chsMoves[j].t === i) { m = chsMoves[j]; break; }
+      if (chsSel >= 0 && m) { chsPlay(m); return; }
+      var p = chsSt.b[i];
+      if (p && chsIsW(p)) {
+        chsSel = i;
+        chsHint = null;
+        var all = chsLegalAll(chsSt);
+        chsMoves = all.filter(function (x) { return x.f === i; });
+      } else {
+        chsSel = -1; chsMoves = [];
+      }
+      chsDraw();
+    }
+    function chsSnapshot() {
+      chsHist.push(JSON.stringify({ b: chsSt.b, w: chsSt.w, cr: chsSt.cr, ep: chsSt.ep, last: chsLast, cw: chsCapW, cb: chsCapB }));
+    }
+    function chsApply(m) {
+      var cap = chsSt.b[m.t];
+      var u = chsDo(chsSt, m);
+      if (u.cap) (chsIsW(u.cap) ? chsCapW : chsCapB).push(u.cap);
+      if (u.epP) (chsIsW(u.epP) ? chsCapW : chsCapB).push(u.epP);
+      chsLast = [m.f, m.t];
+      return cap;
+    }
+    function chsPlay(m) {
+      chsSnapshot();
+      if (!chsStarted) {
+        chsStarted = true;
+        var d0 = chsLoad(); d0.plays++; chsSave(d0);
+        if (typeof bumpUsage === "function") bumpUsage("chess");
+      }
+      chsApply(m);
+      chsSel = -1; chsMoves = []; chsHint = null;
+      if (typeof playClick === "function") playClick();
+      if (chsCheckEnd()) { chsDraw(); return; }
+      chsSetStatus("AI 思考中…", "");
+      chsDraw();
+      chsTimer = setTimeout(chsAiMove, 260);
+    }
+    function chsAiMove() {
+      chsTimer = null;
+      if (chsOver || !chsSt || chsSt.w) return;
+      var depth = parseInt((chsEl("chsDiff") || { value: "2" }).value, 10) || 2;
+      var m = chsBest(chsSt, depth);
+      if (!m) { chsCheckEnd(); chsDraw(); return; }
+      chsApply(m);
+      if (!chsCheckEnd()) {
+        chsSetStatus(chsInCheck(chsSt, true) ? "将军！小心你的王" : "轮到你走棋", chsInCheck(chsSt, true) ? "chs-check" : "");
+      }
+      chsDraw();
+    }
+    function chsCheckEnd() {
+      var ms = chsLegalAll(chsSt);
+      var d;
+      if (!ms.length) {
+        chsOver = true;
+        d = chsLoad();
+        if (chsInCheck(chsSt, chsSt.w)) {
+          if (!chsSt.w) {
+            d.wins++;
+            chsSetStatus("将死！你赢了 🎉", "chs-win");
+            if (typeof bumpUsage === "function") bumpUsage("chesswin");
+            if (typeof confettiBurst === "function") confettiBurst();
+          } else {
+            chsSetStatus("你被将死了，再来一局雪耻！", "chs-lose");
+          }
+        } else {
+          d.draws++;
+          chsSetStatus("逼和（无子可动），平局", "");
+        }
+        chsSave(d);
+        return true;
+      }
+      if (chsInsufficient(chsSt.b)) {
+        chsOver = true;
+        d = chsLoad(); d.draws++; chsSave(d);
+        chsSetStatus("子力不足，判和", "");
+        return true;
+      }
+      return false;
+    }
+    function chsUndoClick() {
+      if (!chsHist.length || !chsSt) return;
+      if (chsTimer) { clearTimeout(chsTimer); chsTimer = null; }
+      var s = JSON.parse(chsHist.pop());
+      chsSt.b = s.b; chsSt.w = s.w; chsSt.cr = s.cr; chsSt.ep = s.ep;
+      chsLast = s.last; chsCapW = s.cw; chsCapB = s.cb;
+      chsOver = false; chsSel = -1; chsMoves = []; chsHint = null;
+      chsSetStatus("已悔棋，轮到你走", "");
+      chsDraw();
+      if (typeof toast === "function") toast("悔棋成功，机会再来一次");
+    }
+    function chsHintClick() {
+      if (chsOver || !chsSt || !chsSt.w) return;
+      var m = chsBest(chsSt, 2);
+      if (!m) return;
+      chsHint = m; chsSel = -1; chsMoves = [];
+      chsDraw();
+      if (typeof toast === "function") toast("AI 建议已用蓝框标出");
+    }
+    function chsRender() {
+      if (!chsSt) chsNewGame(); else chsDraw();
+      if (chsBound) return;
+      chsBound = true;
+      var b;
+      b = chsEl("chsNew"); if (b) b.onclick = chsNewGame;
+      b = chsEl("chsUndo"); if (b) b.onclick = chsUndoClick;
+      b = chsEl("chsHintBtn"); if (b) b.onclick = chsHintClick;
+    }
+    function chsStop() { if (chsTimer) { clearTimeout(chsTimer); chsTimer = null; } }
+    window.chsRender = chsRender;
+    window.chsStop = chsStop;
+    window.__chsTest = {
+      init: chsInit, pseudo: chsPseudo, legal: chsLegalAll, doMove: chsDo, undoMove: chsUndo,
+      attacked: chsAttacked, inCheck: chsInCheck, evalFn: chsEval, best: chsBest,
+      insufficient: chsInsufficient, kingSq: chsKingSq,
+      _state: function () { return { st: chsSt, over: chsOver, hist: chsHist.length, capW: chsCapW, capB: chsCapB, started: chsStarted }; },
+      _newGame: chsNewGame, _play: chsPlay, _ai: chsAiMove, _undo: chsUndoClick, _hint: chsHintClick, _end: chsCheckEnd
+    };
+
+    BADGES.push(
+      { emoji: "\u265E", name: "初执白子", desc: "第一次坐上国际象棋的棋盘", test: function (u) { return (u.chess || 0) >= 1; } },
+      { emoji: "\uD83C\uDFC6", name: "棋盘统帅", desc: "将死国际象棋 AI，赢下一整局", test: function (u) { return (u.chesswin || 0) >= 1; } }
+    );
+    QUOTES.push(
+      "国际象棋里没有运气，每一步都是你自己的选择。",
+      "兵到底线能升后——普通人坚持到最后也能翻盘。",
+      "王车易位的智慧：关键时刻，先保住最重要的东西。",
+      "开局背谱，中局拼算，残局见人品。",
+      "被将军不可怕，可怕的是看不见将军。"
     );
   })();
 </script>
