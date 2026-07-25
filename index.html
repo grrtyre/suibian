@@ -1526,6 +1526,7 @@
         <button data-tab="salary">💼 工资个税</button>
         <button data-tab="xiangqi">♟️ 中国象棋</button>
         <button data-tab="navy">🚢 海战棋</button>
+        <button data-tab="yahtzee">🎲 快艇骰子</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -6496,6 +6497,64 @@
       <div class="nv-tip">舰队：航母×5格 · 战列舰×4格 · 巡洋舰×3格 · 潜艇×3格 · 驱逐舰×2格，舰与舰互不相邻（含斜角）。命中敌舰可再打一炮；击沉时会自动排除周围海域。🛰️ 侦察每局限 3 次，会框出一个藏有敌舰的格子。</div>
     </div>
   </section>
+  <section class="panel" id="yahtzee">
+    <style>
+      #yahtzee .yt-wrap { max-width: 760px; margin: 0 auto; }
+      #yahtzee .yt-status { text-align: center; font-size: 1.02rem; font-weight: 700; margin: 4px 0 10px; min-height: 1.5em; letter-spacing: .3px; }
+      #yahtzee .yt-status.win { color: #f1c40f; }
+      #yahtzee .yt-status.lose { color: #e74c3c; }
+      #yahtzee .yt-dice { display: flex; gap: 12px; justify-content: center; margin: 12px 0 6px; flex-wrap: wrap; }
+      #yahtzee .yt-die { width: 56px; height: 56px; border-radius: 13px; background: #fdfefe; border: 2px solid #aeb6bf; position: relative; cursor: pointer; box-shadow: 0 3px 9px rgba(0,0,0,.28); transition: transform .13s, box-shadow .13s, border-color .13s; padding: 0; }
+      #yahtzee .yt-die:disabled { cursor: default; opacity: .6; }
+      #yahtzee .yt-die.held { border-color: #f1c40f; box-shadow: 0 0 0 3px rgba(241,196,15,.35), 0 3px 9px rgba(0,0,0,.28); transform: translateY(-7px); }
+      #yahtzee .yt-die.rolling { animation: ytShake .38s ease; }
+      @keyframes ytShake { 0% { transform: rotate(0); } 25% { transform: rotate(-14deg) scale(1.08); } 55% { transform: rotate(11deg); } 80% { transform: rotate(-6deg); } 100% { transform: rotate(0); } }
+      #yahtzee .yt-die i { position: absolute; width: 11px; height: 11px; border-radius: 50%; background: #2c3e50; }
+      #yahtzee .yt-die i.r { background: #c0392b; }
+      #yahtzee .yt-die .tl { top: 8px; left: 8px; }
+      #yahtzee .yt-die .tr { top: 8px; right: 8px; }
+      #yahtzee .yt-die .ml { top: 22.5px; left: 8px; }
+      #yahtzee .yt-die .mr { top: 22.5px; right: 8px; }
+      #yahtzee .yt-die .bl { bottom: 8px; left: 8px; }
+      #yahtzee .yt-die .br { bottom: 8px; right: 8px; }
+      #yahtzee .yt-die .c { top: 22.5px; left: 22.5px; }
+      #yahtzee .yt-hold-tip { text-align: center; font-size: .8rem; color: var(--muted); min-height: 1.2em; margin-bottom: 4px; }
+      #yahtzee .yt-ctrl { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+      #yahtzee .yt-ctrl button { border: none; border-radius: 10px; padding: 9px 16px; font-size: .92rem; cursor: pointer; background: var(--card-2); color: inherit; border: 1px solid var(--line); transition: filter .15s; }
+      #yahtzee .yt-ctrl button:hover { filter: brightness(1.1); }
+      #yahtzee .yt-ctrl button.pri { background: linear-gradient(135deg, #8e44ad, #6c3483); color: #fff; border-color: transparent; font-weight: 700; }
+      #yahtzee .yt-ctrl button:disabled { opacity: .4; cursor: not-allowed; filter: none; }
+      #yahtzee .yt-tbl { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: .92rem; }
+      #yahtzee .yt-tbl th, #yahtzee .yt-tbl td { border: 1px solid var(--line); padding: 6px 9px; text-align: center; }
+      #yahtzee .yt-tbl th { background: var(--card-2); }
+      #yahtzee .yt-tbl td.cat { text-align: left; white-space: nowrap; }
+      #yahtzee .yt-tbl td.pick { cursor: pointer; color: #27ae60; font-weight: 700; background: rgba(39,174,96,.08); transition: background .12s; }
+      #yahtzee .yt-tbl td.pick:hover { background: rgba(39,174,96,.25); }
+      #yahtzee .yt-tbl td.got { font-weight: 700; }
+      #yahtzee .yt-tbl td.zero { color: #e74c3c; }
+      #yahtzee .yt-tbl tr.sum td { font-weight: 700; background: var(--card-2); }
+      #yahtzee .yt-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+      #yahtzee .yt-stat { background: var(--card-2); border: 1px solid var(--line); border-radius: 12px; padding: 7px 14px; min-width: 78px; text-align: center; }
+      #yahtzee .yt-stat b { display: block; font-size: 19px; color: var(--accent-2); }
+      #yahtzee .yt-stat span { font-size: 11px; color: var(--muted); }
+      #yahtzee .yt-tip { text-align: center; opacity: .72; font-size: .85rem; margin-top: 10px; line-height: 1.6; }
+      @media (max-width: 640px) { #yahtzee .yt-die { width: 48px; height: 48px; } #yahtzee .yt-die .ml, #yahtzee .yt-die .mr { top: 18.5px; } #yahtzee .yt-die .c { top: 18.5px; left: 18.5px; } #yahtzee .yt-tbl { font-size: .82rem; } #yahtzee .yt-tbl th, #yahtzee .yt-tbl td { padding: 5px 5px; } }
+    </style>
+    <h2>🎲 快艇骰子 · 人机对战</h2>
+    <p class="sub">经典 Yahtzee 计分骰：每回合最多掷三次，点骰子锁定，13 个计分格填满定胜负 —— 和 AI 船长比比谁的手气加脑子更硬</p>
+    <div class="yt-wrap">
+      <div class="yt-status" id="ytStatus">点「🎲 掷骰子」开始你的回合</div>
+      <div class="yt-dice" id="ytDice"></div>
+      <div class="yt-hold-tip" id="ytHoldTip"></div>
+      <div class="yt-ctrl">
+        <button id="ytRoll" class="pri">🎲 掷骰子 (3)</button>
+        <button id="ytNew">🔄 新对局</button>
+      </div>
+      <div id="ytTable"></div>
+      <div class="yt-stats" id="ytStats"></div>
+      <div class="yt-tip">上区（一点~六点）合计 ≥63 加 35 分奖励；三条 / 四条计五颗骰子总和，葫芦 25 分、小顺 30 分、大顺 40 分、快艇（五颗同点）50 分、机会计总和。每回合掷完至少一次后，点表格里你这列的绿色格子计分（0 分格也可以弃置）。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -6843,6 +6902,7 @@
     if (id === "salary") salRender();
     if (id === "xiangqi") xqRender();
     if (id === "navy") nvRender();
+    if (id === "yahtzee") ytRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -6851,6 +6911,7 @@
     if (id !== "schulte" && typeof schStop === "function") schStop();
     if (id !== "drum" && typeof drumStop === "function") drumStop();
     if (id !== "navy" && typeof nvStop === "function") nvStop();
+    if (id !== "yahtzee" && typeof ytStop === "function") ytStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -6990,6 +7051,7 @@
     salary: "工资 个税 计算 到手 税后 税前 年终奖 五险一金 社保 公积金 专项附加 扣除 累计预扣 奖金 避坑 月薪 薪资 薪水 打工 salary tax 个人所得税 报税",
     xiangqi: "中国象棋 象棋 棋类 对弈 将军 将死 车马炮 楚河汉界 残局 minimax AI 人机 下棋 帅 兵卒 chinese chess xiangqi 益智 策略",
     navy: "海战棋 战舰 军舰 炮击 海战 battleship 舰队 航母 击沉 猜位置 对战 人机 策略 布阵 海军 navy 命中 联机 经典桌游",
+    yahtzee: "快艇骰子 骰子 yahtzee 快艇 计分 掷骰 三掷 留骰 锁骰 葫芦 小顺 大顺 四条 三条 全同 上区奖励 人机 对战 桌游 dice 手气 运气 策略 骰盅 骰盘",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7189,6 +7251,7 @@ splitbill:"tools",
     salary:"tools",
     xiangqi:"games",
     navy:"games",
+    yahtzee:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -27639,6 +27702,433 @@ splitbill:"tools",
       "落空了没关系，海面这么大，总有一炮会命中。",
       "别怕暴露位置，怕的是从来不敢开火。",
       "击沉过往的犹豫，你的舰队才能全速前进。"
+    );
+  })();
+  /* ===== 🎲 快艇骰子 yahtzee (Yahtzee vs AI) ===== */
+  (function () {
+    var YT_LSK = "suibian_yahtzee";
+    var YT_CATS = [
+      { id: "ones", name: "⚀ 一点", sec: "u", n: 1 },
+      { id: "twos", name: "⚁ 二点", sec: "u", n: 2 },
+      { id: "threes", name: "⚂ 三点", sec: "u", n: 3 },
+      { id: "fours", name: "⚃ 四点", sec: "u", n: 4 },
+      { id: "fives", name: "⚄ 五点", sec: "u", n: 5 },
+      { id: "sixes", name: "⚅ 六点", sec: "u", n: 6 },
+      { id: "trip", name: "🎯 三条", sec: "l" },
+      { id: "quad", name: "💥 四条", sec: "l" },
+      { id: "full", name: "🏠 葫芦 (25)", sec: "l" },
+      { id: "sstr", name: "🪜 小顺 (30)", sec: "l" },
+      { id: "lstr", name: "🌈 大顺 (40)", sec: "l" },
+      { id: "yz", name: "🚤 快艇 (50)", sec: "l" },
+      { id: "chance", name: "🍀 机会", sec: "l" }
+    ];
+    var YT_PIPS = {
+      1: ["c"],
+      2: ["tl", "br"],
+      3: ["tl", "c", "br"],
+      4: ["tl", "tr", "bl", "br"],
+      5: ["tl", "tr", "c", "bl", "br"],
+      6: ["tl", "tr", "ml", "mr", "bl", "br"]
+    };
+
+    var ytSc = null;         /* { me:{cat:score}, ai:{cat:score} } */
+    var ytDice = [1, 1, 1, 1, 1];
+    var ytHold = [false, false, false, false, false];
+    var ytRolls = 0;         /* 本回合已掷次数 0..3 */
+    var ytPhase = "idle";    /* idle | me | ai | over */
+    var ytRound = 1;         /* 1..13 */
+    var ytTimer = null;
+    var ytBound = false;
+    var ytBumped = false;
+
+    /* ---------- 纯逻辑 ---------- */
+    function ytCounts(d) {
+      var c = [0, 0, 0, 0, 0, 0, 0], i;
+      for (i = 0; i < d.length; i++) c[d[i]]++;
+      return c;
+    }
+    function ytSum(d) {
+      var s = 0, i;
+      for (i = 0; i < d.length; i++) s += d[i];
+      return s;
+    }
+    function ytMaxCount(c) {
+      var m = 0, v;
+      for (v = 1; v <= 6; v++) if (c[v] > m) m = c[v];
+      return m;
+    }
+    function ytHasRun(c, len) {
+      var run = 0, v;
+      for (v = 1; v <= 6; v++) {
+        if (c[v] > 0) { run++; if (run >= len) return true; }
+        else run = 0;
+      }
+      return false;
+    }
+    function ytScore(cat, d) {
+      var c = ytCounts(d), sum = ytSum(d), v;
+      switch (cat) {
+        case "ones": return c[1] * 1;
+        case "twos": return c[2] * 2;
+        case "threes": return c[3] * 3;
+        case "fours": return c[4] * 4;
+        case "fives": return c[5] * 5;
+        case "sixes": return c[6] * 6;
+        case "trip": return ytMaxCount(c) >= 3 ? sum : 0;
+        case "quad": return ytMaxCount(c) >= 4 ? sum : 0;
+        case "full":
+          var has3 = 0, has2 = 0;
+          for (v = 1; v <= 6; v++) { if (c[v] === 3) has3 = v; if (c[v] === 2) has2 = v; }
+          return (has3 && has2) ? 25 : 0;
+        case "sstr": return ytHasRun(c, 4) ? 30 : 0;
+        case "lstr": return ytHasRun(c, 5) ? 40 : 0;
+        case "yz": return ytMaxCount(c) === 5 ? 50 : 0;
+        case "chance": return sum;
+      }
+      return 0;
+    }
+    function ytTotals(sc) {
+      var upper = 0, lower = 0, i, cat, s;
+      for (i = 0; i < YT_CATS.length; i++) {
+        cat = YT_CATS[i];
+        s = sc[cat.id];
+        if (typeof s !== "number") continue;
+        if (cat.sec === "u") upper += s; else lower += s;
+      }
+      var bonus = upper >= 63 ? 35 : 0;
+      return { upper: upper, bonus: bonus, lower: lower, total: upper + bonus + lower };
+    }
+    function ytDone(sc) {
+      var i;
+      for (i = 0; i < YT_CATS.length; i++) if (typeof sc[YT_CATS[i].id] !== "number") return false;
+      return true;
+    }
+
+    /* ---------- AI 策略 ---------- */
+    /* 留骰：返回 5 个布尔（true=锁定） */
+    function ytKeepMask(d, sc) {
+      var c = ytCounts(d), i, v;
+      var keep = [false, false, false, false, false];
+      var mx = ytMaxCount(c);
+      /* 已成快艇 / 大顺：全锁 */
+      if (mx === 5) return [true, true, true, true, true];
+      if (ytHasRun(c, 5) && typeof sc.lstr !== "number") return [true, true, true, true, true];
+      /* 葫芦到手且葫芦未用：全锁 */
+      if (typeof sc.full !== "number") {
+        var h3 = 0, h2 = 0;
+        for (v = 1; v <= 6; v++) { if (c[v] === 3) h3 = v; if (c[v] === 2) h2 = v; }
+        if (h3 && h2) return [true, true, true, true, true];
+      }
+      /* 顺子路线：已有 4 连且顺子格未用 → 只锁最长连子内的骰（每值一颗） */
+      var wantStr = (typeof sc.sstr !== "number") || (typeof sc.lstr !== "number");
+      if (wantStr && ytHasRun(c, 4)) {
+        var run = 0, start = 1, bestLen = 0, bestStart = 1;
+        for (v = 1; v <= 6; v++) {
+          if (c[v] > 0) {
+            if (run === 0) start = v;
+            run++;
+            if (run > bestLen) { bestLen = run; bestStart = start; }
+          } else run = 0;
+        }
+        var used = {};
+        for (i = 0; i < 5; i++) {
+          if (d[i] >= bestStart && d[i] < bestStart + bestLen && !used[d[i]]) {
+            used[d[i]] = true; keep[i] = true;
+          }
+        }
+        return keep;
+      }
+      /* 同点路线：锁数量最多的点数（并列取大） */
+      var bestV = 0, bestC = 0;
+      for (v = 6; v >= 1; v--) if (c[v] > bestC) { bestC = c[v]; bestV = v; }
+      if (bestC >= 2) {
+        for (i = 0; i < 5; i++) if (d[i] === bestV) keep[i] = true;
+        return keep;
+      }
+      /* 散牌：留 5、6 点搏上区/机会 */
+      for (i = 0; i < 5; i++) if (d[i] >= 5) keep[i] = true;
+      return keep;
+    }
+    /* 选格：加权挑最优，全 0 时按牺牲顺序弃格 */
+    function ytBestCat(d, sc) {
+      var best = null, bestAdj = -1, i, cat, raw, adj;
+      for (i = 0; i < YT_CATS.length; i++) {
+        cat = YT_CATS[i];
+        if (typeof sc[cat.id] === "number") continue;
+        raw = ytScore(cat.id, d);
+        adj = raw;
+        if (cat.sec === "u" && raw >= cat.n * 3) adj += 4;     /* 上区奖励节奏 */
+        if (cat.id === "yz" && raw > 0) adj += 20;
+        if (cat.id === "lstr" && raw > 0) adj += 8;
+        if (cat.id === "sstr" && raw > 0) adj += 4;
+        if (cat.id === "full" && raw > 0) adj += 5;
+        if (cat.id === "chance") adj -= 4;                     /* 机会留着兜底 */
+        if (adj > bestAdj) { bestAdj = adj; best = cat.id; }
+      }
+      if (best !== null && ytScore(best, d) > 0) return best;
+      /* 全是 0 分：按代价最小的顺序弃 */
+      var sac = ["ones", "twos", "yz", "quad", "lstr", "sstr", "full", "trip", "threes", "fours", "fives", "sixes", "chance"];
+      for (i = 0; i < sac.length; i++) if (typeof sc[sac[i]] !== "number") return sac[i];
+      return best;
+    }
+
+    /* ---------- 存档 ---------- */
+    function ytLoadStats() {
+      try {
+        var o = JSON.parse(localStorage.getItem(YT_LSK) || "{}");
+        return { plays: o.plays || 0, wins: o.wins || 0, streak: o.streak || 0, best: o.best || 0 };
+      } catch (e) { return { plays: 0, wins: 0, streak: 0, best: 0 }; }
+    }
+    function ytSaveStats(st) {
+      try { localStorage.setItem(YT_LSK, JSON.stringify(st)); } catch (e) { /* ignore */ }
+    }
+
+    /* ---------- 渲染 ---------- */
+    function ytEl(id) { return document.getElementById(id); }
+    function ytSetStatus(msg, cls) {
+      var el = ytEl("ytStatus");
+      if (!el) return;
+      el.textContent = msg;
+      el.className = "yt-status" + (cls ? " " + cls : "");
+    }
+    function ytDrawDice(shake) {
+      var box = ytEl("ytDice");
+      if (!box) return;
+      box.innerHTML = "";
+      var i, j, b, pips, dot;
+      for (i = 0; i < 5; i++) {
+        b = document.createElement("button");
+        b.type = "button";
+        b.className = "yt-die" + (ytHold[i] ? " held" : "") + (shake && !ytHold[i] ? " rolling" : "");
+        b.setAttribute("data-i", String(i));
+        b.setAttribute("aria-label", "骰子" + (i + 1) + "：" + ytDice[i] + " 点" + (ytHold[i] ? "（已锁定）" : ""));
+        if (ytRolls === 0 || ytPhase !== "me") b.disabled = true;
+        pips = YT_PIPS[ytDice[i]] || [];
+        for (j = 0; j < pips.length; j++) {
+          dot = document.createElement("i");
+          dot.className = pips[j] + (ytDice[i] === 1 ? " r" : "");
+          b.appendChild(dot);
+        }
+        (function (idx) {
+          b.onclick = function () {
+            if (ytPhase !== "me" || ytRolls === 0 || ytRolls >= 3) {
+              if (ytPhase === "me" && ytRolls >= 3) { return; }
+              return;
+            }
+            ytHold[idx] = !ytHold[idx];
+            if (typeof playClick === "function") playClick();
+            ytDraw();
+          };
+        })(i);
+        box.appendChild(b);
+      }
+      var tip = ytEl("ytHoldTip");
+      if (tip) {
+        if (ytPhase === "me" && ytRolls > 0 && ytRolls < 3) tip.textContent = "点骰子可锁定 / 解锁，再掷只换未锁的骰";
+        else if (ytPhase === "me" && ytRolls >= 3) tip.textContent = "三次掷完，在表格里选一个绿色格子计分";
+        else tip.textContent = "";
+      }
+    }
+    function ytDrawTable() {
+      var box = ytEl("ytTable");
+      if (!box || !ytSc) return;
+      var canPick = ytPhase === "me" && ytRolls > 0;
+      var h = '<table class="yt-tbl"><tr><th style="text-align:left">计分格</th><th>😎 你</th><th>🤖 AI</th></tr>';
+      var i, cat, mine, ais, prev;
+      var lastU = "sixes";
+      for (i = 0; i < YT_CATS.length; i++) {
+        cat = YT_CATS[i];
+        mine = ytSc.me[cat.id];
+        ais = ytSc.ai[cat.id];
+        h += "<tr><td class=\"cat\">" + cat.name + "</td>";
+        if (typeof mine === "number") {
+          h += "<td class=\"got" + (mine === 0 ? " zero" : "") + "\">" + mine + "</td>";
+        } else if (canPick) {
+          prev = ytScore(cat.id, ytDice);
+          h += "<td class=\"pick\" data-cat=\"" + cat.id + "\">+" + prev + "</td>";
+        } else {
+          h += "<td>·</td>";
+        }
+        h += "<td>" + (typeof ais === "number" ? "<b" + (ais === 0 ? " class=\"zero\"" : "") + ">" + ais + "</b>" : "·") + "</td></tr>";
+        if (cat.id === lastU) {
+          var tm = ytTotals(ytSc.me), ta = ytTotals(ytSc.ai);
+          h += '<tr class="sum"><td class="cat">上区小计 (≥63 奖 35)</td><td>' + tm.upper + "</td><td>" + ta.upper + "</td></tr>";
+          h += '<tr class="sum"><td class="cat">🎁 上区奖励</td><td>' + tm.bonus + "</td><td>" + ta.bonus + "</td></tr>";
+        }
+      }
+      var tm2 = ytTotals(ytSc.me), ta2 = ytTotals(ytSc.ai);
+      h += '<tr class="sum"><td class="cat">🏆 总分</td><td>' + tm2.total + "</td><td>" + ta2.total + "</td></tr></table>";
+      box.innerHTML = h;
+      if (canPick) {
+        var cells = box.querySelectorAll("td.pick"), k;
+        for (k = 0; k < cells.length; k++) {
+          cells[k].onclick = (function (cid) {
+            return function () { ytPick(cid); };
+          })(cells[k].getAttribute("data-cat"));
+        }
+      }
+    }
+    function ytDrawStats() {
+      var box = ytEl("ytStats");
+      if (!box) return;
+      var st = ytLoadStats();
+      box.innerHTML =
+        '<div class="yt-stat"><b>' + st.plays + '</b><span>总对局</span></div>' +
+        '<div class="yt-stat"><b>' + st.wins + '</b><span>胜局</span></div>' +
+        '<div class="yt-stat"><b>' + st.streak + '</b><span>连胜</span></div>' +
+        '<div class="yt-stat"><b>' + (st.best || "—") + '</b><span>最高分</span></div>';
+    }
+    function ytDrawCtrl() {
+      var rb = ytEl("ytRoll");
+      if (rb) {
+        rb.textContent = "🎲 掷骰子 (" + (3 - ytRolls) + ")";
+        rb.disabled = !(ytPhase === "me" && ytRolls < 3) && ytPhase !== "idle";
+        if (ytPhase === "idle") { rb.disabled = false; rb.textContent = "🎲 掷骰子 (3)"; }
+      }
+    }
+    function ytDraw(shake) {
+      ytDrawDice(shake);
+      ytDrawTable();
+      ytDrawCtrl();
+      ytDrawStats();
+    }
+
+    /* ---------- 流程 ---------- */
+    function ytNewGame() {
+      if (ytTimer) { clearTimeout(ytTimer); ytTimer = null; }
+      ytSc = { me: {}, ai: {} };
+      ytDice = [1, 2, 3, 4, 5];
+      ytHold = [false, false, false, false, false];
+      ytRolls = 0;
+      ytRound = 1;
+      ytPhase = "idle";
+      ytBumped = false;
+      ytSetStatus("第 1/13 回合 · 点「🎲 掷骰子」开始你的回合");
+      ytDraw();
+    }
+    function ytRollDice() {
+      if (ytPhase === "idle") {
+        ytPhase = "me";
+        if (!ytBumped) {
+          ytBumped = true;
+          var st = ytLoadStats();
+          st.plays++;
+          ytSaveStats(st);
+          if (typeof bumpUsage === "function") bumpUsage("yahtzee");
+        }
+      }
+      if (ytPhase !== "me" || ytRolls >= 3) return;
+      var i;
+      for (i = 0; i < 5; i++) if (!ytHold[i]) ytDice[i] = 1 + Math.floor(Math.random() * 6);
+      ytRolls++;
+      if (typeof playClick === "function") playClick();
+      ytSetStatus("第 " + ytRound + "/13 回合 · 你已掷 " + ytRolls + "/3 次" + (ytRolls >= 3 ? "，请选格计分" : ""));
+      ytDraw(true);
+    }
+    function ytPick(cid) {
+      if (ytPhase !== "me" || ytRolls === 0 || !ytSc || typeof ytSc.me[cid] === "number") return;
+      var s = ytScore(cid, ytDice);
+      ytSc.me[cid] = s;
+      if (typeof playClick === "function") playClick();
+      ytSetStatus("你在「" + ytCatName(cid) + "」记下 " + s + " 分，轮到 🤖 AI……");
+      ytPhase = "ai";
+      ytHold = [false, false, false, false, false];
+      ytRolls = 0;
+      ytDraw();
+      ytTimer = setTimeout(ytAiStep, 620);
+    }
+    function ytCatName(cid) {
+      var i;
+      for (i = 0; i < YT_CATS.length; i++) if (YT_CATS[i].id === cid) return YT_CATS[i].name;
+      return cid;
+    }
+    function ytAiStep() {
+      ytTimer = null;
+      if (ytPhase !== "ai" || !ytSc) return;
+      var i;
+      if (ytRolls < 3) {
+        for (i = 0; i < 5; i++) if (!ytHold[i]) ytDice[i] = 1 + Math.floor(Math.random() * 6);
+        ytRolls++;
+        ytSetStatus("🤖 AI 第 " + ytRolls + "/3 次掷骰……");
+        ytDraw(true);
+        if (ytRolls < 3) {
+          var mask = ytKeepMask(ytDice, ytSc.ai), all = true;
+          for (i = 0; i < 5; i++) { ytHold[i] = mask[i]; if (!mask[i]) all = false; }
+          ytDraw();
+          ytTimer = setTimeout(all ? ytAiScore : ytAiStep, 640);
+        } else {
+          ytTimer = setTimeout(ytAiScore, 640);
+        }
+        return;
+      }
+      ytAiScore();
+    }
+    function ytAiScore() {
+      ytTimer = null;
+      if (ytPhase !== "ai" || !ytSc) return;
+      var cid = ytBestCat(ytDice, ytSc.ai);
+      var s = ytScore(cid, ytDice);
+      ytSc.ai[cid] = s;
+      ytHold = [false, false, false, false, false];
+      ytRolls = 0;
+      if (ytDone(ytSc.me) && ytDone(ytSc.ai)) { ytFinish(); return; }
+      ytRound++;
+      ytPhase = "me";
+      ytSetStatus("🤖 AI 在「" + ytCatName(cid) + "」记下 " + s + " 分 · 第 " + ytRound + "/13 回合，轮到你掷骰");
+      ytDraw();
+    }
+    function ytFinish() {
+      ytPhase = "over";
+      var tm = ytTotals(ytSc.me), ta = ytTotals(ytSc.ai);
+      var st = ytLoadStats();
+      if (tm.total > st.best) st.best = tm.total;
+      if (tm.total > ta.total) {
+        st.wins++;
+        st.streak++;
+        ytSaveStats(st);
+        ytSetStatus("🏆 你 " + tm.total + " : " + ta.total + " AI —— 你赢了！", "win");
+        if (typeof bumpUsage === "function") bumpUsage("yahtzeewin");
+        if (typeof confettiBurst === "function") confettiBurst(120);
+      } else if (tm.total < ta.total) {
+        st.streak = 0;
+        ytSaveStats(st);
+        ytSetStatus("💀 你 " + tm.total + " : " + ta.total + " AI —— AI 险胜，再来一局？", "lose");
+      } else {
+        ytSaveStats(st);
+        ytSetStatus("🤝 你 " + tm.total + " : " + ta.total + " AI —— 平局，天意！");
+      }
+      ytDraw();
+    }
+
+    function ytRender() {
+      if (!ytSc) ytNewGame(); else ytDraw();
+      if (ytBound) return;
+      ytBound = true;
+      var b;
+      b = ytEl("ytRoll"); if (b) b.onclick = ytRollDice;
+      b = ytEl("ytNew"); if (b) b.onclick = ytNewGame;
+    }
+    function ytStop() { if (ytTimer) { clearTimeout(ytTimer); ytTimer = null; } }
+    window.ytRender = ytRender;
+    window.ytStop = ytStop;
+    window.__ytTest = {
+      score: ytScore, counts: ytCounts, totals: ytTotals, keepMask: ytKeepMask,
+      bestCat: ytBestCat, done: ytDone, hasRun: ytHasRun, CATS: YT_CATS,
+      _state: function () { return { sc: ytSc, dice: ytDice, hold: ytHold, rolls: ytRolls, phase: ytPhase, round: ytRound }; },
+      _setDice: function (d) { var i; for (i = 0; i < 5; i++) ytDice[i] = d[i]; },
+      _newGame: ytNewGame, _roll: ytRollDice, _pick: ytPick, _aiStep: ytAiStep, _finish: ytFinish
+    };
+
+    BADGES.push(
+      { emoji: "🎲", name: "快艇起航", desc: "第一次坐上快艇骰子的牌桌", test: function (u) { return (u.yahtzee || 0) >= 1; } },
+      { emoji: "🚤", name: "骰坛提督", desc: "在快艇骰子中战胜 AI 船长 3 局", test: function (u) { return (u.yahtzeewin || 0) >= 3; } }
+    );
+    QUOTES.push(
+      "运气发牌，策略出牌——快艇骰子如此，生活也如此。",
+      "第三掷之前，一切皆有可能。",
+      "敢把 0 分填进快艇格的人，早就想好了下一步。",
+      "上区攒的是耐心，下区赌的是勇气。",
+      "五颗骰子同点叫快艇，五次坚持同心叫成功。"
     );
   })();
 </script>
