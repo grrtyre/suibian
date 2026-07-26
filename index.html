@@ -1539,6 +1539,7 @@
         <button data-tab="invaders">👾 太空侵略者</button>
         <button data-tab="frogger">🚦 青蛙过河</button>
         <button data-tab="lander">🚀 登月着陆器</button>
+        <button data-tab="arkanoid">🧱 打砖块DX</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7114,6 +7115,38 @@
       <div class="ll-tip">⌨️ ← → / A D 左右调整姿态，↑ / W / 空格 点火推进；📱 按住屏幕上的 ◀ 🔥 ▶ 操作。重力会把飞船不断往下拉，你要靠引擎抵消它并对准闪光的黄色着陆台——下降速度 ↓ 和横移速度 ↔ 都变绿、机身接近竖直时才能安全着陆；台面越窄倍率越高（x2/x3/x5），剩余燃料越多加分越高。撞地或落太猛会坠毁，共 3 条命，成功着陆进入更难的下一关，最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="arkanoid">
+    <h2>🧱 打砖块DX</h2>
+    <p class="sub">经典 Breakout 复刻：接球、拆墙、吃道具，把整面砖墙拆个精光！</p>
+    <style>
+      #arkanoid .ak-wrap { max-width:420px; margin:0 auto; }
+      #arkanoid .ak-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #arkanoid .ak-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #arkanoid .ak-top button:hover { background:rgba(255,255,255,.12); }
+      #arkanoid .ak-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #arkanoid canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#0b1220; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #arkanoid .ak-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(6,10,18,.84); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #arkanoid .ak-msg.show { display:flex; }
+      #arkanoid .ak-msg .t { font-size:1.5rem; font-weight:800; }
+      #arkanoid .ak-msg .s { font-size:.95rem; opacity:.85; line-height:1.6; }
+      #arkanoid .ak-msg button { padding:9px 24px; border-radius:10px; border:0; background:#ffa94d; color:#241303; font-weight:700; cursor:pointer; }
+      #arkanoid .ak-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="ak-wrap">
+      <div class="ak-top">
+        <button id="akNew">🔄 新的一局</button>
+      </div>
+      <div class="ak-canvas-wrap">
+        <canvas id="akCanvas"></canvas>
+        <div class="ak-msg" id="akMsg">
+          <div class="t" id="akMsgT"></div>
+          <div class="s" id="akMsgS"></div>
+          <button id="akAgain">开始游戏</button>
+        </div>
+      </div>
+      <div class="ak-tip">🖱️ 鼠标 / 手指在画面上左右滑动移动挡板，点击画面或按 空格 / ↑ 发球；⌨️ 也可用 ← → / A D 移动。彩砖一下碎，银砖两下、金砖三下；掉落的胶囊用挡板接住：E 加宽挡板、S 小球缓速、M 分裂多球（最多 6 颗）、❤ 补一条命（上限 5）。清空整面墙进入更快更硬的下一关，漏接全部小球扣一条命，共 3 条命，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7474,6 +7507,7 @@
     if (id === "invaders") invadersRender();
     if (id === "frogger") froggerRender();
     if (id === "lander") landerRender();
+    if (id === "arkanoid") arkanoidRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7495,6 +7529,7 @@
     if (id !== "invaders" && typeof invadersStop === "function") invadersStop();
     if (id !== "frogger" && typeof froggerStop === "function") froggerStop();
     if (id !== "lander" && typeof landerStop === "function") landerStop();
+    if (id !== "arkanoid" && typeof arkanoidStop === "function") arkanoidStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7647,6 +7682,7 @@
     invaders: "太空侵略者 invaders space invaders 小蜜蜂 射击 外星人 飞船 战机 像素 街机 打飞机 掩体 飞碟 经典 game",
     frogger: "青蛙过河 frogger 过马路 过河 跳格 街机 经典 木头 乌龟 汽车 车流 小蛙 回家 像素 潜水 game",
     lander: "登月着陆器 lander lunar 登月 著陆 飞船 火箭 物理 重力 燃料 推进 宇航 街机 经典 降落 飞驶 game",
+    arkanoid: "打砖块DX arkanoid dx 豪华 砖块 弹球 挡板 反弹 道具 多球 加宽 缓速 街机 经典 拆墙 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7859,6 +7895,7 @@ splitbill:"tools",
     invaders:"games",
     frogger:"games",
     lander:"games",
+    arkanoid:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -33796,6 +33833,497 @@ splitbill:"tools",
         "看准那块闪光的平地，宽的稳、窄的值钱，先活下来再谈高分。",
         "姿态比速度更重要：飞船只要不歪，慢慢总能落稳。",
         "燃料是有限的，冲动是昂贵的——省着点用，你会飞得更远。"
+      );
+    })();
+    (function () {
+      "use strict";
+      const $ = (id) => document.getElementById(id);
+      const BO_KEY = "suibian_arkanoid";
+      const W = 360, H = 480;
+      const COLS = 9, BW = 36, BH = 15, BGAP = 2, BTOP = 64;
+      const BOX = 10;                              // 砖区左边距: 9*38-2=340, (360-340)/2=10
+      const PAD_Y = H - 30, PAD_H = 10, PAD_W0 = 64, PAD_W1 = 96;
+      const BALL_R = 5;
+      const PU_W = 26, PU_H = 14, PU_VY = 1.7;
+      const MAX_BALLS = 6, MAX_LIVES = 5;
+
+      let cv = null, ctx = null, dpr = 2;
+      let raf = 0, running = false, wired = false;
+      let started = false, over = false, paused = false;
+      let score = 0, best = 0, level = 1, lives = 3, combo = 0;
+      let bricks = [], balls = [], powers = [], particles = [];
+      let padX = W / 2, padW = PAD_W0, padVX = 0;
+      let expandT = 0, slowT = 0, tick = 0, shakeT = 0;
+      const keys = { left: false, right: false };
+
+      // ---- 可注入随机数（测试可复现）----
+      let _seed = 0, _useSeed = false;
+      function rnd() {
+        if (_useSeed) {
+          _seed = (_seed * 1103515245 + 12345) & 0x7fffffff;
+          return _seed / 0x7fffffff;
+        }
+        return Math.random();
+      }
+
+      function baseSpeed() { return Math.min(6, 3.3 + (level - 1) * 0.3); }
+      function curSpeed() { return baseSpeed() * (slowT > 0 ? 0.7 : 1); }
+
+      function readBest() {
+        try {
+          const d = JSON.parse(localStorage.getItem(BO_KEY) || "{}");
+          best = d.best | 0;
+        } catch (e) { best = 0; }
+      }
+      function saveBest() {
+        if (score > best) {
+          best = score;
+          try { localStorage.setItem(BO_KEY, JSON.stringify({ best: best })); } catch (e) {}
+        }
+      }
+
+      // ---- 关卡砖阵：5 种确定性图案轮换，硬度随关卡上升 ----
+      function brickHp(r, c, lv) {
+        const t = (r * 7 + c * 3 + lv) % 10;
+        if (lv >= 3 && t >= 8) return 3;
+        if (lv >= 2 && t >= 6) return 2;
+        return 1;
+      }
+      function buildBricks(lv) {
+        const rows = Math.min(8, 4 + Math.floor((lv - 1) / 2));
+        const pat = (lv - 1) % 5;
+        const arr = [];
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < COLS; c++) {
+            let on = true;
+            if (pat === 1) on = (r + c) % 2 === 0;                       // 棋盘
+            else if (pat === 2) on = Math.abs(c - 4) <= r;               // 金字塔
+            else if (pat === 3) on = c % 2 === 0 || r % 3 === 0;         // 栅栏
+            else if (pat === 4) on = Math.abs(c - 4) + Math.abs(r - Math.floor(rows / 2)) <= 4; // 菱形
+            if (!on) continue;
+            const hp = brickHp(r, c, lv);
+            arr.push({ r: r, c: c, x: BOX + c * (BW + BGAP), y: BTOP + r * (BH + BGAP), hp: hp, hpMax: hp });
+          }
+        }
+        if (!arr.length) arr.push({ r: 0, c: 4, x: BOX + 4 * (BW + BGAP), y: BTOP, hp: 1, hpMax: 1 });
+        return arr;
+      }
+
+      function newBall(stuck) {
+        return { x: padX, y: PAD_Y - BALL_R - 1, vx: 0, vy: 0, stuck: !!stuck };
+      }
+      function launch(b) {
+        if (!b.stuck) return;
+        b.stuck = false;
+        const a = (rnd() * 0.6 - 0.3) - Math.PI / 2;   // 大致朝上 ±17°
+        const s = curSpeed();
+        b.vx = Math.cos(a) * s; b.vy = Math.sin(a) * s;
+      }
+      function launchAll() { let did = false; balls.forEach((b) => { if (b.stuck) { launch(b); did = true; } }); return did; }
+
+      function startLevel(lv) {
+        level = lv;
+        bricks = buildBricks(lv);
+        powers = []; particles = [];
+        padW = PAD_W0; expandT = 0; slowT = 0; combo = 0;
+        padX = W / 2;
+        balls = [newBall(true)];
+      }
+      function newGame() {
+        score = 0; lives = 3; over = false; started = true; paused = false; tick = 0;
+        startLevel(1);
+        hideMsg();
+      }
+
+      function burst(x, y, col, n) {
+        for (let i = 0; i < (n || 8); i++) {
+          particles.push({ x: x, y: y, vx: (rnd() - 0.5) * 4, vy: (rnd() - 0.5) * 4 - 1, life: 22 + rnd() * 10, col: col });
+        }
+        if (particles.length > 220) particles.splice(0, particles.length - 220);
+      }
+
+      // ---- 道具 ----
+      const PU_TYPES = [
+        { k: "E", w: 30 }, { k: "S", w: 25 }, { k: "M", w: 30 }, { k: "L", w: 15 }
+      ];
+      function maybeDrop(x, y) {
+        if (rnd() >= 0.16) return;
+        let t = rnd() * 100, k = "E";
+        for (let i = 0; i < PU_TYPES.length; i++) { t -= PU_TYPES[i].w; if (t <= 0) { k = PU_TYPES[i].k; break; } }
+        powers.push({ x: x, y: y, k: k });
+      }
+      function applyPower(k) {
+        if (k === "E") { padW = PAD_W1; expandT = 720; }
+        else if (k === "S") { slowT = 480; }
+        else if (k === "L") { if (lives < MAX_LIVES) lives++; }
+        else if (k === "M") {
+          const cur = balls.filter((b) => !b.stuck);
+          const room = MAX_BALLS - balls.length;
+          for (let i = 0; i < Math.min(room, cur.length); i++) {
+            const b = cur[i];
+            const s = Math.max(1.5, Math.hypot(b.vx, b.vy));
+            const a = Math.atan2(b.vy, b.vx) + 0.5;
+            balls.push({ x: b.x, y: b.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, stuck: false });
+          }
+          if (balls.length === 1 && balls[0].stuck) {
+            // 只有粘板球时：直接补一颗已发射的球
+            const nb = newBall(false); const s2 = curSpeed();
+            nb.vy = -s2; nb.vx = s2 * 0.3; balls.push(nb);
+          }
+        }
+        score += 5;
+      }
+
+      function brickAt(px, py) {
+        for (let i = 0; i < bricks.length; i++) {
+          const b = bricks[i];
+          if (px >= b.x && px <= b.x + BW && py >= b.y && py <= b.y + BH) return i;
+        }
+        return -1;
+      }
+
+      function hitBrick(i, ball) {
+        const b = bricks[i];
+        b.hp--;
+        combo++;
+        score += 10;
+        const cx = b.x + BW / 2, cy = b.y + BH / 2;
+        // 反弹轴：比较穿透深度
+        const dx = (ball.x - cx) / (BW / 2 + BALL_R), dy = (ball.y - cy) / (BH / 2 + BALL_R);
+        if (Math.abs(dx) > Math.abs(dy)) ball.vx = Math.abs(ball.vx) * (dx > 0 ? 1 : -1);
+        else ball.vy = Math.abs(ball.vy) * (dy > 0 ? 1 : -1);
+        if (b.hp <= 0) {
+          score += 10 * b.hpMax;
+          burst(cx, cy, b.hpMax >= 3 ? "#ffd45e" : b.hpMax === 2 ? "#c8d3e6" : "#7ade4a", 10);
+          maybeDrop(cx, cy);
+          bricks.splice(i, 1);
+          shakeT = 4;
+        } else {
+          burst(ball.x, ball.y, "#8ea6c8", 4);
+        }
+      }
+
+      function levelCleared() {
+        score += 100 + level * 50;
+        try { bumpUsage("arkanoidwin"); } catch (e) {}
+        saveBest();
+        startLevel(level + 1);
+        showMsg("\ud83c\udf89 第 " + (level - 1) + " 关拆完!", "奖励 +" + (100 + (level - 1) * 50) + " 分，下一关砖更硬、球更快。", "继续 第 " + level + " 关");
+        paused = true;
+      }
+
+      function loseBall() {
+        combo = 0;
+        if (balls.length > 0) return;
+        lives--;
+        shakeT = 8;
+        if (lives <= 0) {
+          over = true; started = false;
+          saveBest();
+          showMsg("\ud83d\udca5 游戏结束", "得分 " + score + " · 最高 " + best + "，砖墙笑而不语——再来一次？", "再来一局");
+        } else {
+          padW = PAD_W0; expandT = 0;
+          balls = [newBall(true)];
+        }
+      }
+
+      function physics() {
+        tick++;
+        if (expandT > 0 && --expandT === 0) padW = PAD_W0;
+        if (slowT > 0) slowT--;
+        if (shakeT > 0) shakeT--;
+
+        // 挡板
+        if (keys.left) padVX = -6.2;
+        else if (keys.right) padVX = 6.2;
+        else padVX *= 0.7;
+        padX += padVX;
+        padX = Math.max(padW / 2, Math.min(W - padW / 2, padX));
+
+        // 道具下落
+        for (let i = powers.length - 1; i >= 0; i--) {
+          const p = powers[i];
+          p.y += PU_VY;
+          if (p.y > H + 20) { powers.splice(i, 1); continue; }
+          if (p.y + PU_H / 2 >= PAD_Y && p.y - PU_H / 2 <= PAD_Y + PAD_H &&
+              p.x + PU_W / 2 >= padX - padW / 2 && p.x - PU_W / 2 <= padX + padW / 2) {
+            applyPower(p.k);
+            burst(p.x, PAD_Y, "#4ea1ff", 8);
+            powers.splice(i, 1);
+          }
+        }
+
+        // 球（两个子步防穿透）
+        for (let bi = balls.length - 1; bi >= 0; bi--) {
+          const b = balls[bi];
+          if (b.stuck) { b.x = padX; b.y = PAD_Y - BALL_R - 1; continue; }
+          const sp = Math.hypot(b.vx, b.vy);
+          const want = curSpeed();
+          if (sp > 0.01) { const f = (sp * 0.9 + want * 0.1) / sp; b.vx *= f; b.vy *= f; }
+          for (let sub = 0; sub < 2; sub++) {
+            b.x += b.vx / 2; b.y += b.vy / 2;
+            // 墙
+            if (b.x < BALL_R) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
+            else if (b.x > W - BALL_R) { b.x = W - BALL_R; b.vx = -Math.abs(b.vx); }
+            if (b.y < BALL_R + 28) { b.y = BALL_R + 28; b.vy = Math.abs(b.vy); }
+            // 挡板
+            if (b.vy > 0 && b.y + BALL_R >= PAD_Y && b.y - BALL_R <= PAD_Y + PAD_H &&
+                b.x >= padX - padW / 2 - BALL_R && b.x <= padX + padW / 2 + BALL_R) {
+              const t = Math.max(-1, Math.min(1, (b.x - padX) / (padW / 2)));
+              const a = t * 1.05 - Math.PI / 2;             // 最大 60°
+              const s = curSpeed();
+              b.vx = Math.cos(a) * s; b.vy = Math.sin(a) * s;
+              if (b.vy > -0.8) b.vy = -0.8;
+              b.y = PAD_Y - BALL_R - 0.5;
+              combo = 0;
+            }
+            // 砖
+            const hi = brickAt(b.x, b.y - BALL_R) >= 0 ? brickAt(b.x, b.y - BALL_R)
+                     : brickAt(b.x, b.y + BALL_R) >= 0 ? brickAt(b.x, b.y + BALL_R)
+                     : brickAt(b.x - BALL_R, b.y) >= 0 ? brickAt(b.x - BALL_R, b.y)
+                     : brickAt(b.x + BALL_R, b.y);
+            if (hi >= 0) {
+              hitBrick(hi, b);
+              if (!bricks.length) { levelCleared(); return; }
+              break;
+            }
+          }
+          // 掉底
+          if (b.y > H + BALL_R * 2) { balls.splice(bi, 1); if (!balls.length) loseBall(); }
+        }
+
+        // 粒子
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life--;
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+      }
+
+      // ---- 渲染 ----
+      function brickColor(b) {
+        if (b.hpMax >= 3) return b.hp === 3 ? "#ffd45e" : b.hp === 2 ? "#e0b34d" : "#b8903c";
+        if (b.hpMax === 2) return b.hp === 2 ? "#c8d3e6" : "#93a2bd";
+        const pal = ["#ff6b6b", "#ffa94d", "#7ade4a", "#4ea1ff", "#c084fc", "#f472b6", "#34d399", "#fbbf24"];
+        return pal[b.r % pal.length];
+      }
+      function draw() {
+        if (!ctx) return;
+        ctx.save();
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (shakeT > 0) ctx.translate((rnd() - 0.5) * 4, (rnd() - 0.5) * 3);
+        const g = ctx.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, "#0b1220"); g.addColorStop(1, "#101a30");
+        ctx.fillStyle = g; ctx.fillRect(-4, -4, W + 8, H + 8);
+
+        // HUD
+        ctx.fillStyle = "rgba(255,255,255,.72)";
+        ctx.font = "12px system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText("分 " + score, 10, 18);
+        ctx.textAlign = "center";
+        ctx.fillText("第 " + level + " 关", W / 2, 18);
+        ctx.textAlign = "right";
+        ctx.fillText("最高 " + best, W - 10, 18);
+        ctx.textAlign = "left";
+        let hearts = "";
+        for (let i = 0; i < lives; i++) hearts += "\u2764";
+        ctx.fillStyle = "#ff6b6b";
+        ctx.fillText(hearts, 10, 34);
+        if (slowT > 0) { ctx.fillStyle = "#7ade4a"; ctx.fillText("\ud83d\udc22缓速 " + Math.ceil(slowT / 60), 70, 34); }
+        if (expandT > 0) { ctx.fillStyle = "#4ea1ff"; ctx.fillText("\u2194\ufe0f加宽 " + Math.ceil(expandT / 60), 160, 34); }
+        ctx.strokeStyle = "rgba(255,255,255,.14)";
+        ctx.beginPath(); ctx.moveTo(0, 28); ctx.lineTo(W, 28); ctx.stroke();
+
+        // 砖
+        bricks.forEach((b) => {
+          ctx.fillStyle = brickColor(b);
+          ctx.fillRect(b.x, b.y, BW, BH);
+          ctx.fillStyle = "rgba(255,255,255,.22)";
+          ctx.fillRect(b.x, b.y, BW, 3);
+          ctx.fillStyle = "rgba(0,0,0,.25)";
+          ctx.fillRect(b.x, b.y + BH - 3, BW, 3);
+          if (b.hpMax >= 2 && b.hp >= 2) {
+            ctx.fillStyle = "rgba(255,255,255,.5)";
+            ctx.font = "9px system-ui, sans-serif"; ctx.textAlign = "center";
+            ctx.fillText(String(b.hp), b.x + BW / 2, b.y + BH - 4);
+            ctx.textAlign = "left";
+          }
+        });
+
+        // 道具
+        powers.forEach((p) => {
+          ctx.fillStyle = p.k === "L" ? "#ff6b6b" : p.k === "M" ? "#c084fc" : p.k === "S" ? "#7ade4a" : "#4ea1ff";
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(p.x - PU_W / 2, p.y - PU_H / 2, PU_W, PU_H, 4);
+          else ctx.rect(p.x - PU_W / 2, p.y - PU_H / 2, PU_W, PU_H);
+          ctx.fill();
+          ctx.fillStyle = "#0b1220"; ctx.font = "bold 10px system-ui, sans-serif"; ctx.textAlign = "center";
+          ctx.fillText(p.k === "L" ? "\u2764" : p.k, p.x, p.y + 3.5);
+          ctx.textAlign = "left";
+        });
+
+        // 挡板
+        const pg = ctx.createLinearGradient(padX - padW / 2, 0, padX + padW / 2, 0);
+        pg.addColorStop(0, "#4ea1ff"); pg.addColorStop(0.5, "#9cc8ff"); pg.addColorStop(1, "#4ea1ff");
+        ctx.fillStyle = pg;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(padX - padW / 2, PAD_Y, padW, PAD_H, 5);
+        else ctx.rect(padX - padW / 2, PAD_Y, padW, PAD_H);
+        ctx.fill();
+
+        // 球
+        balls.forEach((b) => {
+          ctx.fillStyle = "#fff";
+          ctx.beginPath(); ctx.arc(b.x, b.y, BALL_R, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,.35)";
+          ctx.beginPath(); ctx.arc(b.x - b.vx * 1.5, b.y - b.vy * 1.5, BALL_R * 0.65, 0, Math.PI * 2); ctx.fill();
+        });
+
+        // 粒子
+        particles.forEach((p) => {
+          ctx.globalAlpha = Math.max(0, p.life / 30);
+          ctx.fillStyle = p.col;
+          ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+        });
+        ctx.globalAlpha = 1;
+
+        if (started && !over && balls.some((b) => b.stuck)) {
+          ctx.fillStyle = "rgba(255,255,255,.6)";
+          ctx.font = "13px system-ui, sans-serif"; ctx.textAlign = "center";
+          ctx.fillText("\u70b9\u51fb / \u7a7a\u683c \u53d1\u7403", W / 2, H - 60);
+          ctx.textAlign = "left";
+        }
+        ctx.restore();
+      }
+
+      function loop() {
+        raf = 0;
+        if (!running) return;
+        if (started && !over && !paused) physics();
+        draw();
+        raf = requestAnimationFrame(loop);
+      }
+
+      // ---- 弹窗 ----
+      function showMsg(t, s, btn) {
+        const m = $("akMsg");
+        if (!m) return;
+        $("akMsgT").textContent = t;
+        $("akMsgS").textContent = s;
+        $("akAgain").textContent = btn || "开始游戏";
+        m.classList.add("show");
+      }
+      function hideMsg() { const m = $("akMsg"); if (m) m.classList.remove("show"); }
+
+      function press(act) {
+        if (act === "launch") {
+          if (over || !started) { newGame(); try { bumpUsage("arkanoid"); } catch (e) {} return; }
+          if (paused) { paused = false; hideMsg(); return; }
+          launchAll();
+        }
+      }
+
+      // ---- 事件 ----
+      function wire() {
+        if (wired) return;
+        wired = true;
+        cv = $("akCanvas");
+        if (!cv) return;
+        dpr = 2;
+        cv.width = W * dpr; cv.height = H * dpr;
+        ctx = cv.getContext("2d");
+
+        const toGameX = (e) => {
+          const r = cv.getBoundingClientRect();
+          return (e.clientX - r.left) / r.width * W;
+        };
+        cv.addEventListener("pointermove", (e) => {
+          if (!started || over || paused) return;
+          padX = Math.max(padW / 2, Math.min(W - padW / 2, toGameX(e)));
+        });
+        cv.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          if (started && !over && !paused) padX = Math.max(padW / 2, Math.min(W - padW / 2, toGameX(e)));
+          press("launch");
+        });
+        $("akAgain").addEventListener("click", () => {
+          if (paused) { paused = false; hideMsg(); return; }
+          newGame();
+          try { bumpUsage("arkanoid"); } catch (e) {}
+        });
+        $("akNew").addEventListener("click", () => {
+          newGame();
+          try { bumpUsage("arkanoid"); } catch (e) {}
+        });
+
+        document.addEventListener("keydown", (e) => {
+          const panel = $("arkanoid");
+          if (!panel || !panel.classList.contains("active")) return;
+          const k = e.key;
+          if (k === "ArrowLeft" || k === "a" || k === "A") { e.preventDefault(); keys.left = true; }
+          else if (k === "ArrowRight" || k === "d" || k === "D") { e.preventDefault(); keys.right = true; }
+          else if (k === " " || k === "ArrowUp") { e.preventDefault(); press("launch"); }
+          else if (k === "Enter") { if (over || !started) { e.preventDefault(); newGame(); try { bumpUsage("arkanoid"); } catch (e2) {} } }
+        });
+        document.addEventListener("keyup", (e) => {
+          const k = e.key;
+          if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = false;
+          else if (k === "ArrowRight" || k === "d" || k === "D") keys.right = false;
+        });
+      }
+
+      window.arkanoidRender = function () {
+        wire();
+        readBest();
+        if (!started) showMsg("\ud83e\uddf1 打砖块DX", "移动挡板接住小球，把整面砖墙拆个精光——银砖两下、金砖三下，掉落的道具记得接住。", "开始游戏");
+        if (!running) { running = true; raf = requestAnimationFrame(loop); }
+      };
+      window.arkanoidStop = function () {
+        running = false;
+        keys.left = keys.right = false;
+        if (raf) { try { cancelAnimationFrame(raf); } catch (e) {} raf = 0; }
+      };
+
+      // ---- 测试钩子 ----
+      window.__akTest = {
+        state: function () {
+          return {
+            started: started, over: over, paused: paused, score: score, best: best,
+            level: level, lives: lives, bricks: bricks.length, balls: balls.length,
+            powers: powers.length, padX: padX, padW: padW, expandT: expandT, slowT: slowT, tick: tick
+          };
+        },
+        seed: function (s) { _seed = s | 0; _useSeed = true; },
+        newGame: newGame,
+        startLevel: startLevel,
+        physics: physics,
+        draw: draw,
+        press: press,
+        launchAll: launchAll,
+        applyPower: applyPower,
+        buildBricks: buildBricks,
+        hitBrick: hitBrick,
+        brickAt: brickAt,
+        balls: function () { return balls.map((b) => ({ x: b.x, y: b.y, vx: b.vx, vy: b.vy, stuck: b.stuck })); },
+        bricksArr: function () { return bricks.map((b) => ({ x: b.x, y: b.y, hp: b.hp, hpMax: b.hpMax })); },
+        setBall: function (i, o) { if (balls[i]) Object.assign(balls[i], o); },
+        setPad: function (x) { padX = x; },
+        keepOneBrick: function () { bricks = bricks.slice(0, 1); },
+        dropPower: function (k, x, y) { powers.push({ x: x, y: y, k: k }); },
+        setLives: function (n) { lives = n; }
+      };
+
+      BADGES.push(
+        { emoji: "\ud83e\uddf1", name: "拆迁进行时", desc: "玩过一局打砖块DX", test: function (u) { return (u.arkanoid || 0) >= 1; } },
+        { emoji: "\ud83c\udfd7\ufe0f", name: "清空一面墙", desc: "打砖块DX通过一关", test: function (u) { return (u.arkanoidwin || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "打砖块的哲学：墙看起来密不透风，其实每一块都只差几下就碎了。",
+        "别追着球满场跑，站在它将要落下的地方等它——预判比反应快得多。",
+        "金砖要敲三下才碎，难啃的事也一样：多来几遍，别第一下就放弃。",
+        "接住道具是锦上添花，接住球才是保住底线——先稳住，再贪心。",
+        "一颗球拆不动的墙，就变成六颗球一起上：思路打开，火力自然就足了。"
       );
     })();
     })();
