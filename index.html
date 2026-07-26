@@ -1542,6 +1542,7 @@
         <button data-tab="arkanoid">🧱 打砖块DX</button>
         <button data-tab="asteroids">☄️ 小行星</button>
         <button data-tab="missile">🚀 导弹指挥官</button>
+        <button data-tab="centipede">🐛 蜈蚣</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7227,6 +7228,38 @@
       <div class="ms-tip">🖱️ 移动鼠标 / 触摸即为准星，点击画面在该处引爆拦截弹（自动选最近且有弹的发射井）；⌨️ 方向键 / WASD 移动准星，空格 / J 从最近的井开火，1 / 2 / 3 指定左 / 中 / 右发射井，Enter 重开。红色弹道命中地面会摧毁城市或发射井，第 2 波起导弹会分裂；拦截爆炸有连锁效果，一发引爆一串。每波结束按剩余弹药与幸存城市 ×倍率奖分，每 8000 分补建一座城市，六城全灭即防线失守。最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="centipede">
+    <h2>🐛 蜈蚣</h2>
+    <p class="sub">1981 街机经典复刻：蘑菇丛里蜿蜒而下的百足虫，打断一节就分裂成两条——手要快，心要稳！</p>
+    <style>
+      #centipede .cen-wrap { max-width:420px; margin:0 auto; }
+      #centipede .cen-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #centipede .cen-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #centipede .cen-top button:hover { background:rgba(255,255,255,.12); }
+      #centipede .cen-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #centipede canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#04070d; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #centipede .cen-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(4,7,13,.85); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #centipede .cen-msg.show { display:flex; }
+      #centipede .cen-msg .t { font-size:1.5rem; font-weight:800; }
+      #centipede .cen-msg .s { font-size:.95rem; opacity:.85; line-height:1.6; }
+      #centipede .cen-msg button { padding:9px 24px; border-radius:10px; border:0; background:#86efac; color:#052e16; font-weight:700; cursor:pointer; }
+      #centipede .cen-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="cen-wrap">
+      <div class="cen-top">
+        <button id="cenNew">🔄 新的一局</button>
+      </div>
+      <div class="cen-canvas-wrap">
+        <canvas id="cenCanvas"></canvas>
+        <div class="cen-msg" id="cenMsg">
+          <div class="t" id="cenMsgT"></div>
+          <div class="s" id="cenMsgS"></div>
+          <button id="cenAgain">开始除虫</button>
+        </div>
+      </div>
+      <div class="cen-tip">🖱️ 在画面上拖动即可移动炮台（自动连射）；⌨️ 方向键 / WASD 移动，空格 / J 射击（按住连发），Enter 重开。打中蜈蚣身体 +10、头 +100，被打断的那节变成蘑菇、后半截立刻掉头成新蜈蚣；蘑菇挡路会让蜈蚣提前下折。🕷️ 蜘蛛在底部乱蹦（+300）还会吃蘑菇，🪰 跳蚤垂直俯冲边落边种蘑菇（+200，要打两枪），🦂 蝎子横穿毒化蘑菇（+1000）——蜈蚣碰到毒蘑菇会径直俯冲！清完整条蜈蚣进入下一波，阵亡后蘑菇会自动修复。3 条命，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7590,6 +7623,7 @@
     if (id === "arkanoid") arkanoidRender();
     if (id === "asteroids") asteroidsRender();
     if (id === "missile") missileRender();
+    if (id === "centipede") centipedeRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7614,6 +7648,7 @@
     if (id !== "arkanoid" && typeof arkanoidStop === "function") arkanoidStop();
     if (id !== "asteroids" && typeof asteroidsStop === "function") asteroidsStop();
     if (id !== "missile" && typeof missileStop === "function") missileStop();
+    if (id !== "centipede" && typeof centipedeStop === "function") centipedeStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7769,6 +7804,7 @@
     arkanoid: "打砖块DX arkanoid dx 豪华 砖块 弹球 挡板 反弹 道具 多球 加宽 缓速 街机 经典 拆墙 game",
     asteroids: "小行星 asteroids 太空 射击 飞船 陨石 巨石 飞碟 惯性 漂移 街机 经典 宇宙 环形 game",
     missile: "导弹指挥官 missile command 拦截 城市 防御 发射井 弹道 爆炸 连锁 街机 经典 太空 game",
+    centipede: "蜈蚣 centipede 蘑菇 射击 分裂 蜘蛛 跳蚤 蝎子 街机 经典 百足虫 除虫 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7984,6 +8020,7 @@ splitbill:"tools",
     arkanoid:"games",
     asteroids:"games",
     missile:"games",
+    centipede:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -35438,6 +35475,589 @@ splitbill:"tools",
         "一次漂亮的拦截能引爆连锁反应——把劲用在关键节点上，一发顶十发。",
         "城市丢了一座别恋战，守住剩下的五座才是指挥官的格局。",
         "满分防御不靠手速，靠的是在导弹起飞前就想好每口井的用法。"
+      );
+    })();
+    (function () {
+      "use strict";
+      const $ = (id) => document.getElementById(id);
+      const W = 360, H = 480;
+      const CELL = 18, COLS = 20, OY = 36;
+      const ROWS = 24;                       // 网格行 0..23，像素 y = OY + r*CELL
+      const ZONE_TOP = 18;                   // 玩家活动区顶行（含）
+      const CHAIN_LEN = 10;
+      let canvas = null, ctx = null, raf = 0, active = false, bound = false;
+      let g = null;
+      let best = 0;
+      try { best = parseInt(localStorage.getItem("suibian_centipede") || "0", 10) || 0; } catch (e) {}
+      let seed = (Date.now() % 2147483646) + 1;
+      function rnd() { seed = (seed * 48271) % 2147483647; return (seed - 1) / 2147483646; }
+      function ri(n) { return Math.floor(rnd() * n); }
+      function stepFrames(lv) { return Math.max(4, 9 - lv); }   // 蜈蚣每走一格所需帧数
+      function cellY(r) { return OY + r * CELL; }
+      function pxToRow(y) { return Math.floor((y - OY) / CELL); }
+
+      function mkMush(g) {
+        g.mush = {};
+        let n = 28 + ri(6);
+        let guard = 0;
+        while (n > 0 && guard < 500) {
+          guard++;
+          const c = ri(COLS), r = 1 + ri(ZONE_TOP - 2);
+          const k = c + "," + r;
+          if (g.mush[k]) continue;
+          g.mush[k] = { hp: 4, poison: false };
+          n--;
+        }
+      }
+
+      function mkChain(g, len, headCol, dir) {
+        const cells = [];
+        for (let i = 0; i < len; i++) {
+          let c = headCol - dir * i;
+          cells.push({ x: c, y: 0 });
+        }
+        g.chains.push({ cells: cells, dir: dir, vdir: 1, diving: false, t: 0 });
+      }
+
+      function startWave(g) {
+        g.chains = [];
+        mkChain(g, CHAIN_LEN, ri(COLS), rnd() < 0.5 ? 1 : -1);
+        const heads = Math.min(4, g.lv - 1);
+        for (let i = 0; i < heads; i++) mkChain(g, 1, ri(COLS), rnd() < 0.5 ? 1 : -1);
+        g.spider = null; g.flea = null; g.scorp = null;
+        g.spiderT = 420 + ri(240);
+        g.fleaT = 300 + ri(300);
+        g.scorpT = g.lv >= 2 ? 500 + ri(400) : -1;
+        g.bullet = null;
+      }
+
+      function newGame() {
+        g = {
+          score: 0, lv: 1, lives: 3, over: false, won: false,
+          px: W / 2, py: H - 40,
+          bullet: null, chains: [], mush: {},
+          spider: null, flea: null, scorp: null,
+          spiderT: 0, fleaT: 0, scorpT: 0,
+          inv: 90, shake: 0, cool: 0, fireHold: false,
+          popups: [], frame: 0
+        };
+        mkMush(g);
+        startWave(g);
+        try { bumpUsage("centipede"); } catch (e) {}
+      }
+
+      function saveBest() {
+        if (g && g.score > best) best = g.score;
+        try { localStorage.setItem("suibian_centipede", String(best)); } catch (e) {}
+      }
+
+      function addPop(x, y, txt) {
+        g.popups.push({ x: x, y: y, txt: txt, t: 40 });
+        if (g.popups.length > 8) g.popups.shift();
+      }
+
+      function mushAt(g, c, r) { return g.mush[c + "," + r] || null; }
+
+      function hitMush(g, c, r) {
+        const k = c + "," + r, m = g.mush[k];
+        if (!m) return false;
+        m.hp--;
+        g.score += 1;
+        if (m.hp <= 0) delete g.mush[k];
+        return true;
+      }
+
+      function chainStep(g, ch) {
+        const head = ch.cells[0];
+        let nx = head.x, ny = head.y;
+        if (ch.diving) {
+          ny = head.y + 1;
+          if (ny >= ROWS - 1) { ny = ROWS - 1; ch.diving = false; ch.vdir = -1; }
+        } else {
+          nx = head.x + ch.dir;
+          const blocked = nx < 0 || nx >= COLS || mushAt(g, nx, head.y);
+          const pois = nx >= 0 && nx < COLS && mushAt(g, nx, head.y) && mushAt(g, nx, head.y).poison;
+          if (pois && head.y < ZONE_TOP) {
+            ch.diving = true;
+            nx = head.x; ny = head.y + 1;
+          } else if (blocked) {
+            nx = head.x;
+            ny = head.y + ch.vdir;
+            if (ny >= ROWS) { ny = ROWS - 1; ch.vdir = -1; ny = head.y - 1; }
+            if (ny < (head.y >= ZONE_TOP ? ZONE_TOP : 0)) { ch.vdir = 1; ny = head.y + 1; }
+            ch.dir = -ch.dir;
+          }
+        }
+        ch.cells.unshift({ x: nx, y: ny });
+        ch.cells.pop();
+      }
+
+      function splitChain(g, ci, si) {
+        const ch = g.chains[ci];
+        const cell = ch.cells[si];
+        g.score += si === 0 ? 100 : 10;
+        addPop(cell.x * CELL + 9, cellY(cell.y), si === 0 ? "+100" : "+10");
+        const k = cell.x + "," + cell.y;
+        if (cell.y < ROWS - 1) g.mush[k] = { hp: 4, poison: false };
+        const front = ch.cells.slice(0, si);
+        const back = ch.cells.slice(si + 1);
+        g.chains.splice(ci, 1);
+        if (front.length) g.chains.push({ cells: front, dir: ch.dir, vdir: ch.vdir, diving: ch.diving, t: ch.t });
+        if (back.length) g.chains.push({ cells: back, dir: -ch.dir, vdir: 1, diving: false, t: 0 });
+      }
+
+      function healMush(g) {
+        for (const k in g.mush) { g.mush[k].hp = 4; g.mush[k].poison = false; }
+      }
+
+      function die(g) {
+        g.lives--;
+        g.shake = 14;
+        g.bullet = null; g.spider = null; g.flea = null; g.scorp = null;
+        if (g.lives <= 0) {
+          g.over = true; g.won = false;
+          saveBest();
+          showMsg("💀 除虫失败", "得分 " + g.score + " · 第 " + g.lv + " 波 · 最佳 " + best, "再来一局");
+          return;
+        }
+        healMush(g);
+        startWave(g);
+        g.px = W / 2; g.py = H - 40;
+        g.inv = 120;
+      }
+
+      function fire(g) {
+        if (g.bullet || g.cool > 0 || g.over) return;
+        g.bullet = { x: g.px, y: g.py - 10 };
+        g.cool = 6;
+      }
+
+      function playerCell() { return { c: Math.floor(g.px / CELL), r: pxToRow(g.py) }; }
+
+      function update() {
+        if (!g || g.over) return;
+        g.frame++;
+        if (g.cool > 0) g.cool--;
+        if (g.inv > 0) g.inv--;
+        if (g.shake > 0) g.shake--;
+        if (g.fireHold) fire(g);
+
+        // 子弹
+        if (g.bullet) {
+          const b = g.bullet;
+          b.y -= 12;
+          if (b.y < OY - 10) { g.bullet = null; }
+          else {
+            const bc = Math.floor(b.x / CELL), br = pxToRow(b.y);
+            let used = false;
+            // 蝎子 / 蜘蛛 / 跳蚤（像素判定）
+            if (g.scorp && Math.abs(b.x - g.scorp.x) < 14 && Math.abs(b.y - g.scorp.y) < 10) {
+              g.score += 1000; addPop(g.scorp.x, g.scorp.y, "+1000"); g.scorp = null; used = true;
+              try { bumpUsage("centipedescorp"); } catch (e) {}
+            } else if (g.spider && Math.abs(b.x - g.spider.x) < 13 && Math.abs(b.y - g.spider.y) < 12) {
+              g.score += 300; addPop(g.spider.x, g.spider.y, "+300"); g.spider = null; used = true;
+              try { bumpUsage("centipedespider"); } catch (e) {}
+            } else if (g.flea && Math.abs(b.x - g.flea.x) < 11 && Math.abs(b.y - g.flea.y) < 12) {
+              g.flea.hp--;
+              if (g.flea.hp <= 0) { g.score += 200; addPop(g.flea.x, g.flea.y, "+200"); g.flea = null; }
+              else { g.flea.vy = 6; }
+              used = true;
+            }
+            // 蜈蚣（格子判定）
+            if (!used) {
+              outer:
+              for (let ci = 0; ci < g.chains.length; ci++) {
+                const ch = g.chains[ci];
+                for (let si = 0; si < ch.cells.length; si++) {
+                  if (ch.cells[si].x === bc && ch.cells[si].y === br) {
+                    splitChain(g, ci, si);
+                    used = true;
+                    break outer;
+                  }
+                }
+              }
+            }
+            // 蘑菇
+            if (!used && br >= 0 && br < ROWS && hitMush(g, bc, br)) used = true;
+            if (used) g.bullet = null;
+          }
+        }
+
+        // 蜈蚣走格
+        for (let ci = g.chains.length - 1; ci >= 0; ci--) {
+          const ch = g.chains[ci];
+          if (!ch) continue;
+          ch.t++;
+          if (ch.t >= stepFrames(g.lv)) { ch.t = 0; chainStep(g, ch); }
+        }
+
+        // 蜘蛛
+        if (g.spider) {
+          const s = g.spider;
+          s.x += s.vx; s.y += s.vy;
+          if (s.y < cellY(ZONE_TOP - 3)) { s.y = cellY(ZONE_TOP - 3); s.vy = Math.abs(s.vy); }
+          if (s.y > H - 14) { s.y = H - 14; s.vy = -Math.abs(s.vy); }
+          if (s.x < -20 || s.x > W + 20) g.spider = null;
+          else {
+            if (g.frame % 30 === 0 && rnd() < 0.5) s.vy = (rnd() < 0.5 ? -1 : 1) * (0.8 + rnd() * 0.9);
+            const sc = Math.floor(s.x / CELL), sr = pxToRow(s.y);
+            const k = sc + "," + sr;
+            if (g.mush[k] && rnd() < 0.3) delete g.mush[k];
+          }
+        } else if (g.spiderT > 0) {
+          g.spiderT--;
+          if (g.spiderT === 0) {
+            const fromLeft = rnd() < 0.5;
+            g.spider = { x: fromLeft ? -12 : W + 12, y: H - 60, vx: (fromLeft ? 1 : -1) * (1.1 + g.lv * 0.1), vy: -1 };
+            g.spiderT = -1;
+          }
+        } else if (!g.spider) {
+          g.spiderT = 420 + ri(300);
+        }
+
+        // 跳蚤：底部蘑菇太少时空降补种
+        if (g.flea) {
+          const f = g.flea;
+          f.y += f.vy;
+          const fc = Math.floor(f.x / CELL), fr = pxToRow(f.y);
+          if (fr !== f.lastR && fr > 1 && fr < ROWS - 2) {
+            f.lastR = fr;
+            if (rnd() < 0.22 && !mushAt(g, fc, fr)) g.mush[fc + "," + fr] = { hp: 4, poison: false };
+          }
+          if (f.y > H + 12) g.flea = null;
+        } else if (g.fleaT > 0) {
+          g.fleaT--;
+          if (g.fleaT === 0) {
+            let low = 0;
+            for (const k in g.mush) { if (parseInt(k.split(",")[1], 10) >= ZONE_TOP - 6) low++; }
+            if (low < 6) {
+              g.flea = { x: (ri(COLS) + 0.5) * CELL, y: OY - 8, vy: 3, hp: 2, lastR: -1 };
+              g.fleaT = -1;
+            } else g.fleaT = 240 + ri(240);
+          }
+        } else if (!g.flea) {
+          g.fleaT = 240 + ri(240);
+        }
+
+        // 蝎子：横穿毒化蘑菇
+        if (g.scorp) {
+          const sc = g.scorp;
+          sc.x += sc.vx;
+          const c = Math.floor(sc.x / CELL), r = pxToRow(sc.y);
+          const m = mushAt(g, c, r);
+          if (m) m.poison = true;
+          if (sc.x < -24 || sc.x > W + 24) g.scorp = null;
+        } else if (g.scorpT > 0) {
+          g.scorpT--;
+          if (g.scorpT === 0) {
+            const fromLeft = rnd() < 0.5;
+            const r = 2 + ri(ZONE_TOP - 6);
+            g.scorp = { x: fromLeft ? -18 : W + 18, y: cellY(r) + 9, vx: (fromLeft ? 1 : -1) * (1.4 + g.lv * 0.1) };
+            g.scorpT = -1;
+          }
+        } else if (g.lv >= 2 && !g.scorp) {
+          g.scorpT = 500 + ri(400);
+        }
+
+        // 玩家碰撞
+        if (g.inv <= 0) {
+          const pc = playerCell();
+          let dead = false;
+          for (const ch of g.chains) {
+            for (const cel of ch.cells) {
+              if (cel.x === pc.c && cel.y === pc.r) { dead = true; break; }
+            }
+            if (dead) break;
+          }
+          if (!dead && g.spider && Math.abs(g.spider.x - g.px) < 13 && Math.abs(g.spider.y - g.py) < 13) dead = true;
+          if (!dead && g.flea && Math.abs(g.flea.x - g.px) < 11 && Math.abs(g.flea.y - g.py) < 12) dead = true;
+          if (dead) { die(g); return; }
+        }
+
+        // 弹出分数
+        for (let i = g.popups.length - 1; i >= 0; i--) {
+          g.popups[i].t--;
+          if (g.popups[i].t <= 0) g.popups.splice(i, 1);
+        }
+
+        // 清波
+        if (g.chains.length === 0) {
+          const bonus = 100 + 50 * g.lv;
+          g.score += bonus;
+          addPop(W / 2, H / 2, "过波 +" + bonus);
+          try { bumpUsage("centipedewin"); } catch (e) {}
+          g.lv++;
+          healMush(g);
+          startWave(g);
+          g.inv = Math.max(g.inv, 60);
+          try { if (typeof burstConfetti === "function") burstConfetti(); } catch (e) {}
+        }
+      }
+
+      function draw() {
+        if (!ctx || !g) return;
+        ctx.save();
+        if (g.shake > 0) ctx.translate((rnd() - 0.5) * g.shake, (rnd() - 0.5) * g.shake);
+        // 背景
+        ctx.fillStyle = "#04070d";
+        ctx.fillRect(-10, -10, W + 20, H + 20);
+        // 星点
+        for (let i = 0; i < 26; i++) {
+          const sx = (i * 137 + 31) % W, sy = (i * 211 + 67) % H;
+          ctx.globalAlpha = 0.12 + 0.1 * Math.abs(Math.sin((g.frame + i * 37) * 0.02));
+          ctx.fillStyle = "#93c5fd";
+          ctx.fillRect(sx, sy, 2, 2);
+        }
+        ctx.globalAlpha = 1;
+        // 玩家区分界线
+        ctx.strokeStyle = "rgba(134,239,172,.12)";
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath(); ctx.moveTo(0, cellY(ZONE_TOP)); ctx.lineTo(W, cellY(ZONE_TOP)); ctx.stroke();
+        ctx.setLineDash([]);
+        // 蘑菇
+        for (const k in g.mush) {
+          const p = k.split(",");
+          const c = +p[0], r = +p[1], m = g.mush[k];
+          const x = c * CELL + 9, y = cellY(r) + 9;
+          const hue = m.poison ? "#c084fc" : "#4ade80";
+          const cap = m.poison ? "#a855f7" : "#22c55e";
+          ctx.fillStyle = "#a16207";
+          ctx.fillRect(x - 2, y, 4, 7);
+          ctx.beginPath();
+          ctx.fillStyle = cap;
+          const rr = 4 + m.hp * 1.2;
+          ctx.arc(x, y, rr, Math.PI, 0);
+          ctx.fill();
+          ctx.fillStyle = hue;
+          ctx.beginPath(); ctx.arc(x - rr * 0.4, y - rr * 0.45, 1.6, 0, Math.PI * 2); ctx.fill();
+        }
+        // 蜈蚣
+        for (const ch of g.chains) {
+          for (let i = ch.cells.length - 1; i >= 0; i--) {
+            const cel = ch.cells[i];
+            const x = cel.x * CELL + 9, y = cellY(cel.y) + 9;
+            const isHead = i === 0;
+            ctx.beginPath();
+            ctx.fillStyle = isHead ? "#f87171" : (i % 2 ? "#4ade80" : "#86efac");
+            ctx.arc(x, y, isHead ? 8 : 7, 0, Math.PI * 2);
+            ctx.fill();
+            if (isHead) {
+              ctx.fillStyle = "#04070d";
+              ctx.beginPath(); ctx.arc(x - 3, y - 2, 1.6, 0, Math.PI * 2); ctx.arc(x + 3, y - 2, 1.6, 0, Math.PI * 2); ctx.fill();
+            } else if (i % 3 === 0) {
+              ctx.strokeStyle = "rgba(4,7,13,.5)";
+              ctx.beginPath(); ctx.moveTo(x - 5, y + 5); ctx.lineTo(x - 7, y + 8); ctx.moveTo(x + 5, y + 5); ctx.lineTo(x + 7, y + 8); ctx.stroke();
+            }
+          }
+        }
+        // 蝎子
+        if (g.scorp) {
+          const s = g.scorp;
+          ctx.fillStyle = "#fbbf24";
+          ctx.beginPath(); ctx.ellipse(s.x, s.y, 11, 6, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = "#fbbf24"; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(s.x - s.vx * 6, s.y - 2); ctx.quadraticCurveTo(s.x - s.vx * 10, s.y - 12, s.x - s.vx * 5, s.y - 13); ctx.stroke();
+          ctx.lineWidth = 1;
+        }
+        // 蜘蛛
+        if (g.spider) {
+          const s = g.spider;
+          ctx.fillStyle = "#e879f9";
+          ctx.beginPath(); ctx.arc(s.x, s.y, 8, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = "#e879f9";
+          for (let i = -2; i <= 2; i++) {
+            if (i === 0) continue;
+            ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x + i * 6, s.y + 9 - Math.abs(i)); ctx.stroke();
+          }
+        }
+        // 跳蚤
+        if (g.flea) {
+          const f = g.flea;
+          ctx.fillStyle = "#38bdf8";
+          ctx.beginPath(); ctx.ellipse(f.x, f.y, 6, 8, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(56,189,248,.4)";
+          ctx.fillRect(f.x - 2, f.y - 16, 4, 8);
+        }
+        // 子弹
+        if (g.bullet) {
+          ctx.fillStyle = "#fef08a";
+          ctx.fillRect(g.bullet.x - 1.5, g.bullet.y - 7, 3, 12);
+        }
+        // 玩家
+        if (!(g.inv > 0 && (g.frame >> 2) % 2 === 0)) {
+          ctx.fillStyle = "#86efac";
+          ctx.beginPath();
+          ctx.moveTo(g.px, g.py - 11);
+          ctx.lineTo(g.px - 9, g.py + 9);
+          ctx.lineTo(g.px + 9, g.py + 9);
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#052e16";
+          ctx.fillRect(g.px - 2, g.py - 4, 4, 8);
+        }
+        // 弹出分数
+        ctx.font = "bold 12px monospace";
+        ctx.textAlign = "center";
+        for (const p of g.popups) {
+          ctx.globalAlpha = Math.min(1, p.t / 20);
+          ctx.fillStyle = "#fef08a";
+          ctx.fillText(p.txt, p.x, p.y - (40 - p.t) * 0.5);
+        }
+        ctx.globalAlpha = 1;
+        // HUD
+        ctx.fillStyle = "rgba(255,255,255,.85)";
+        ctx.font = "bold 13px monospace";
+        ctx.textAlign = "left";
+        ctx.fillText("分 " + g.score, 10, 22);
+        ctx.textAlign = "center";
+        ctx.fillText("波 " + g.lv, W / 2 - 40, 22);
+        ctx.fillText("命 " + "▲".repeat(Math.max(0, g.lives)), W / 2 + 40, 22);
+        ctx.textAlign = "right";
+        ctx.fillText("最佳 " + Math.max(best, g.score), W - 10, 22);
+        ctx.restore();
+      }
+
+      function loop() {
+        if (!active) return;
+        update();
+        draw();
+        raf = requestAnimationFrame(loop);
+      }
+
+      function showMsg(t, s, btn) {
+        const m = $("cenMsg");
+        if (!m) return;
+        $("cenMsgT").textContent = t;
+        $("cenMsgS").textContent = s;
+        $("cenAgain").textContent = btn || "开始除虫";
+        m.classList.add("show");
+      }
+      function hideMsg() { const m = $("cenMsg"); if (m) m.classList.remove("show"); }
+
+      function movePlayer(x, y) {
+        if (!g || g.over) return;
+        g.px = Math.max(10, Math.min(W - 10, x));
+        g.py = Math.max(cellY(ZONE_TOP) + 8, Math.min(H - 14, y));
+      }
+
+      const keys = {};
+      function keyDown(e) {
+        if (!active) return;
+        const k = e.key;
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "j", "J", "a", "A", "d", "D", "w", "W", "s", "S"].indexOf(k) >= 0) e.preventDefault();
+        if (k === "Enter") {
+          if (g && g.over) { hideMsg(); newGame(); }
+          return;
+        }
+        keys[k] = true;
+        if (g && (k === " " || k === "j" || k === "J")) { g.fireHold = true; fire(g); }
+      }
+      function keyUp(e) {
+        keys[e.key] = false;
+        if (g && (e.key === " " || e.key === "j" || e.key === "J")) g.fireHold = false;
+      }
+      function keyMove() {
+        if (!active || !g || g.over) return;
+        const sp = 3.4;
+        let dx = 0, dy = 0;
+        if (keys.ArrowLeft || keys.a || keys.A) dx -= sp;
+        if (keys.ArrowRight || keys.d || keys.D) dx += sp;
+        if (keys.ArrowUp || keys.w || keys.W) dy -= sp;
+        if (keys.ArrowDown || keys.s || keys.S) dy += sp;
+        if (dx || dy) movePlayer(g.px + dx, g.py + dy);
+      }
+
+      function canvasPos(ev) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: (ev.clientX - rect.left) / rect.width * W,
+          y: (ev.clientY - rect.top) / rect.height * H
+        };
+      }
+
+      function bind() {
+        if (bound) return;
+        bound = true;
+        let dragging = false;
+        canvas.addEventListener("pointerdown", function (ev) {
+          ev.preventDefault();
+          if (!g || g.over) return;
+          dragging = true;
+          g.fireHold = true;
+          const p = canvasPos(ev);
+          movePlayer(p.x, p.y - 24);
+          try { canvas.setPointerCapture(ev.pointerId); } catch (e) {}
+        });
+        canvas.addEventListener("pointermove", function (ev) {
+          if (!dragging || !g || g.over) return;
+          const p = canvasPos(ev);
+          movePlayer(p.x, p.y - 24);
+        });
+        const up = function () { dragging = false; if (g) g.fireHold = false; };
+        canvas.addEventListener("pointerup", up);
+        canvas.addEventListener("pointercancel", up);
+        $("cenNew").addEventListener("click", function () { hideMsg(); newGame(); });
+        $("cenAgain").addEventListener("click", function () { hideMsg(); newGame(); });
+        document.addEventListener("keydown", keyDown);
+        document.addEventListener("keyup", keyUp);
+        setInterval(keyMove, 16);
+      }
+
+      window.centipedeRender = function () {
+        canvas = $("cenCanvas");
+        if (!canvas) return;
+        if (!ctx) {
+          canvas.width = W * 2; canvas.height = H * 2;
+          ctx = canvas.getContext("2d");
+          ctx.scale(2, 2);
+        }
+        bind();
+        active = true;
+        if (!g) {
+          showMsg("🐛 蜈蚣", "百足虫正沿着蘑菇丛蜿蜒而下！拖动 / 方向键移动炮台自动连射，打断一节它就分裂成两条。小心蜘蛛、跳蚤和毒化蘑菇的蝎子！", "开始除虫");
+          newGame();
+          g.over = true;
+        }
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(loop);
+      };
+
+      window.centipedeStop = function () {
+        active = false;
+        for (const k in keys) keys[k] = false;
+        if (g) g.fireHold = false;
+        cancelAnimationFrame(raf);
+      };
+
+      window.__cenTest = {
+        getG: function () { return g; },
+        newGame: newGame,
+        startWave: function () { startWave(g); },
+        update: update,
+        fire: function () { fire(g); },
+        chainStep: chainStep,
+        splitChain: splitChain,
+        hitMush: hitMush,
+        mushAt: function (c, r) { return mushAt(g, c, r); },
+        healMush: function () { healMush(g); },
+        die: function () { die(g); },
+        movePlayer: movePlayer,
+        saveBest: saveBest,
+        getBest: function () { return best; },
+        setSeed: function (s) { seed = s; },
+        stepFrames: stepFrames,
+        CELL: CELL, COLS: COLS, ROWS: ROWS, ZONE_TOP: ZONE_TOP, OY: OY, W: W, H: H
+      };
+
+      BADGES.push(
+        { emoji: "\ud83d\udc1b", name: "百足斩", desc: "玩过一局蜈蚣", test: function (u) { return (u.centipede || 0) >= 1; } },
+        { emoji: "\ud83d\udd77\ufe0f", name: "蜘蛛猎手", desc: "在蜈蚣里击落一只蹦跳的蜘蛛", test: function (u) { return (u.centipedespider || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "蜈蚣的哲学：一百条腿也要一步一步走，再长的任务也是一格一格挪完的。",
+        "打断它一节，它就变成两条——问题拆小了未必更好对付，下手前先想清楚。",
+        "挡路的蘑菇别急着全清光，有些障碍其实在替你改变对手的路线。",
+        "毒蘑菇一碰就直线俯冲——情绪上头的时候，谁都会走最冲动的那条路。",
+        "蜘蛛乱蹦、跳蚤空降、蝎子放毒，主线之外的干扰永远不缺；盯住你的蜈蚣。"
       );
     })();
 </script>
