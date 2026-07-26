@@ -1544,6 +1544,7 @@
         <button data-tab="missile">🚀 导弹指挥官</button>
         <button data-tab="centipede">🐛 蜈蚣</button>
         <button data-tab="pinball">🎰 弹珠台</button>
+        <button data-tab="bomber">💣 炸弹人</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7293,6 +7294,39 @@
       <div class="pb-tip">🕹️ 按住画面右下角（或 空格 / ↓）蓄力，松开发射钢珠；⌨️ 方向键 ← → 或 A / D、🖱️ 点击屏幕左右半边分别控制两侧挡板；⏎ 回车重开。撞蓝色缓冲柱 +100、红色弹弓 +50、黄色落靶 +250，清空一整排落靶额外 +2000 并提升倍率（最高 ×6）。3 颗球，最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="bomber">
+    <h2>💣 炸弹人</h2>
+    <p class="sub">经典炸弹人：在迷宫里放炸弹开路，炸开砖块收集 🔥💣👟 道具，把所有敌人清出场地就能过关——小心别把自己也搭进去！</p>
+    <style>
+      #bomber .bm-wrap { max-width:420px; margin:0 auto; }
+      #bomber .bm-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #bomber .bm-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #bomber .bm-top button:hover { background:rgba(255,255,255,.12); }
+      #bomber .bm-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #bomber canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#0a0f1c; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #bomber .bm-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(10,15,28,.88); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #bomber .bm-msg.show { display:flex; }
+      #bomber .bm-msg .t { font-size:1.5rem; font-weight:800; }
+      #bomber .bm-msg .s { font-size:.95rem; opacity:.85; line-height:1.6; white-space:pre-line; }
+      #bomber .bm-msg button { padding:9px 24px; border-radius:10px; border:0; background:#fb923c; color:#241103; font-weight:700; cursor:pointer; }
+      #bomber .bm-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="bm-wrap">
+      <div class="bm-top">
+        <button id="bmNew">🔄 新的一局</button>
+        <button id="bmBombBtn">💣 放炸弹</button>
+      </div>
+      <div class="bm-canvas-wrap">
+        <canvas id="bmCanvas"></canvas>
+        <div class="bm-msg" id="bmMsg">
+          <div class="t" id="bmMsgT"></div>
+          <div class="s" id="bmMsgS"></div>
+          <button id="bmAgain">开始游戏</button>
+        </div>
+      </div>
+      <div class="bm-tip">⌨️ 方向键 / WASD 移动，空格 / J 放炸弹，⏎ 回车重开；📱 手机上按住画面往任意方向拖动即可移动，轻点一下（或点💣按钮）放炸弹。炸开砖块 +10，里面可能藏着 🔥 火力+1 / 💣 炸弹+1 / 👟 速度+1；炸掉敌人 +200，一次爆炸带走两个敌人解锁「连环引爆」徽章。清光敌人过关，敌人一关比一关多、还会出现追着你跑的 👻。3 条命，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7658,6 +7692,7 @@
     if (id === "missile") missileRender();
     if (id === "centipede") centipedeRender();
     if (id === "pinball") pinballRender();
+    if (id === "bomber") bomberRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7684,6 +7719,7 @@
     if (id !== "missile" && typeof missileStop === "function") missileStop();
     if (id !== "centipede" && typeof centipedeStop === "function") centipedeStop();
     if (id !== "pinball" && typeof pinballStop === "function") pinballStop();
+    if (id !== "bomber" && typeof bomberStop === "function") bomberStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7841,6 +7877,7 @@
     missile: "导弹指挥官 missile command 拦截 城市 防御 发射井 弹道 爆炸 连锁 街机 经典 太空 game",
     centipede: "蜈蚣 centipede 蘑菇 射击 分裂 蜘蛛 跳蚤 蝎子 街机 经典 百足虫 除虫 game",
     pinball: "弹珠台 弹珠 弹球 pinball 钢珠 挡板 缓冲柱 弹弓 落靶 物理 街机 经典 flipper 高分 game",
+    bomber: "炸弹人 bomberman bomber 炸弹 爆破 迷宫 砖块 道具 火力 连环 幽灵 街机 经典 放炸弹 拆迁 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8058,6 +8095,7 @@ splitbill:"tools",
     missile:"games",
     centipede:"games",
     pinball:"games",
+    bomber:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -36600,6 +36638,525 @@ splitbill:"tools",
       "球总会掉下来，关键是你在它掉下来之前撞到了多少分。",
       "落靶要一整排清完才有大奖：把小目标一个个敲掉，倍率自然涨上来。",
       "别怕球乱弹，弹珠台的乐趣正来自那点失控——放手让它跳。"
+    );
+  }
+})();
+(function () {
+  "use strict";
+  /* ======================= 💣 炸弹人 Bomberman ======================= */
+  var COLS = 13, ROWS = 11, CELL = 26;
+  var W = 360, H = 344, OX = 11, OY = 46;
+  var HR = 10;
+  var BOMB_T = 150, EXPL_T = 26;
+  var DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+  var canvas = null, ctx = null, raf = 0, active = false;
+  var g = null, best = 0, bound = false;
+  var keys = {};
+  var ptr = { on: false, id: -1, sx: 0, sy: 0, x: 0, y: 0, t: 0, moved: false };
+
+  function $id(x) { return document.getElementById(x); }
+  function cx(c) { return OX + c * CELL + CELL / 2; }
+  function cy(r) { return OY + r * CELL + CELL / 2; }
+  function colOf(x) { return Math.floor((x - OX) / CELL); }
+  function rowOf(y) { return Math.floor((y - OY) / CELL); }
+
+  function genMap() {
+    var map = [], items = [], r, c;
+    for (r = 0; r < ROWS; r++) {
+      map.push([]); items.push([]);
+      for (c = 0; c < COLS; c++) {
+        var solid = (r === 0 || c === 0 || r === ROWS - 1 || c === COLS - 1 || (r % 2 === 0 && c % 2 === 0));
+        map[r].push(solid ? 1 : (Math.random() < 0.6 ? 2 : 0));
+        items[r].push(0);
+      }
+    }
+    var zones = [[1, 1], [1, 2], [2, 1], [ROWS - 2, COLS - 2], [ROWS - 2, COLS - 3], [ROWS - 3, COLS - 2], [1, COLS - 2], [1, COLS - 3], [2, COLS - 2], [ROWS - 2, 1], [ROWS - 2, 2], [ROWS - 3, 1]];
+    for (var i = 0; i < zones.length; i++) {
+      if (map[zones[i][0]][zones[i][1]] === 2) map[zones[i][0]][zones[i][1]] = 0;
+    }
+    for (r = 1; r < ROWS - 1; r++) for (c = 1; c < COLS - 1; c++) {
+      if (map[r][c] === 2) {
+        var rr = Math.random();
+        items[r][c] = rr < 0.12 ? 1 : (rr < 0.24 ? 2 : (rr < 0.32 ? 3 : 0));
+      }
+    }
+    return { map: map, items: items };
+  }
+
+  function spawnEnemies(lv, map) {
+    var list = [];
+    var spots = [[COLS - 2, ROWS - 2], [COLS - 2, 1], [1, ROWS - 2], [COLS - 4, ROWS - 2], [COLS - 2, ROWS - 4], [3, ROWS - 2]];
+    var n = Math.min(3 + (lv - 1), 6);
+    var chasers = Math.min(lv - 1, n);
+    for (var i = 0; i < n; i++) {
+      var s = spots[i % spots.length];
+      if (map[s[1]][s[0]] === 2) map[s[1]][s[0]] = 0;
+      var chase = i < chasers;
+      list.push({
+        c: s[0], r: s[1], x: cx(s[0]), y: cy(s[1]),
+        dir: -1, chase: chase,
+        sp: (chase ? 1.05 : 0.85) + 0.05 * Math.min(lv, 6),
+        emo: chase ? "👻" : "👾"
+      });
+    }
+    return list;
+  }
+
+  function newLevel() {
+    var gen = genMap();
+    g.map = gen.map; g.items = gen.items;
+    g.bombs = []; g.expl = []; g.ground = []; g.floats = [];
+    g.enemies = spawnEnemies(g.lv, g.map);
+    g.p.x = cx(1); g.p.y = cy(1); g.p.inv = 120; g.p.dx = 0; g.p.dy = 0;
+    g.banner = 0;
+  }
+
+  function newGame() {
+    g = {
+      score: 0, lives: 3, lv: 1, over: false, banner: 0, frame: 0,
+      p: { x: 0, y: 0, sp: 1.5, power: 2, bombMax: 1, inv: 0, dx: 0, dy: 0 },
+      map: null, items: null, bombs: [], expl: [], ground: [], enemies: [], floats: []
+    };
+    newLevel();
+    hideMsg();
+  }
+
+  function bombAt(c, r) {
+    for (var i = 0; i < g.bombs.length; i++) if (g.bombs[i].c === c && g.bombs[i].r === r) return g.bombs[i];
+    return null;
+  }
+  function canEnter(c, r, ent) {
+    if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return false;
+    if (g.map[r][c] !== 0) return false;
+    var b = bombAt(c, r);
+    if (b && b.passers.indexOf(ent) < 0) return false;
+    return true;
+  }
+
+  function moveAxisX(p, dx, sp) {
+    var pc = colOf(p.x), pr = rowOf(p.y);
+    var rc = cy(pr);
+    if (Math.abs(p.y - rc) > 0.5) { p.y += Math.max(-sp, Math.min(sp, rc - p.y)); return; }
+    p.y = rc;
+    var nx = p.x + dx * sp;
+    var nc = colOf(nx + dx * HR);
+    if (nc === pc || canEnter(nc, pr, p)) p.x = nx;
+    else p.x = dx > 0 ? (OX + (pc + 1) * CELL - HR) : (OX + pc * CELL + HR);
+  }
+  function moveAxisY(p, dy, sp) {
+    var pc = colOf(p.x), pr = rowOf(p.y);
+    var cc = cx(pc);
+    if (Math.abs(p.x - cc) > 0.5) { p.x += Math.max(-sp, Math.min(sp, cc - p.x)); return; }
+    p.x = cc;
+    var ny = p.y + dy * sp;
+    var nr = rowOf(ny + dy * HR);
+    if (nr === pr || canEnter(pc, nr, p)) p.y = ny;
+    else p.y = dy > 0 ? (OY + (pr + 1) * CELL - HR) : (OY + pr * CELL + HR);
+  }
+
+  function updatePlayer() {
+    var p = g.p;
+    var dx = 0, dy = 0;
+    if (keys.ArrowLeft || keys.a) dx = -1;
+    else if (keys.ArrowRight || keys.d) dx = 1;
+    else if (keys.ArrowUp || keys.w) dy = -1;
+    else if (keys.ArrowDown || keys.s) dy = 1;
+    if (ptr.on && ptr.moved) {
+      var vx = ptr.x - ptr.sx, vy = ptr.y - ptr.sy;
+      if (Math.abs(vx) > 12 || Math.abs(vy) > 12) {
+        if (Math.abs(vx) > Math.abs(vy)) { dx = vx > 0 ? 1 : -1; dy = 0; }
+        else { dy = vy > 0 ? 1 : -1; dx = 0; }
+      }
+    }
+    p.dx = dx; p.dy = dy;
+    if (dx) moveAxisX(p, dx, p.sp);
+    else if (dy) moveAxisY(p, dy, p.sp);
+    if (p.inv > 0) p.inv--;
+    var pc = colOf(p.x), pr = rowOf(p.y);
+    for (var i = g.ground.length - 1; i >= 0; i--) {
+      var it = g.ground[i];
+      if (it.c === pc && it.r === pr) {
+        g.ground.splice(i, 1);
+        g.score += 50;
+        if (it.t === 1 && p.power < 8) p.power++;
+        else if (it.t === 2 && p.bombMax < 6) p.bombMax++;
+        else if (it.t === 3 && p.sp < 2.6) p.sp = Math.round((p.sp + 0.2) * 10) / 10;
+        addFloat(cx(it.c), cy(it.r), it.t === 1 ? "🔥 火力+1" : (it.t === 2 ? "💣 炸弹+1" : "👟 速度+1"));
+      }
+    }
+  }
+
+  function placeBomb() {
+    if (!g || g.over || g.banner > 0) return;
+    var c = colOf(g.p.x), r = rowOf(g.p.y);
+    if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return;
+    if (g.map[r][c] !== 0 || bombAt(c, r)) return;
+    if (g.bombs.length >= g.p.bombMax) return;
+    g.bombs.push({ c: c, r: r, t: BOMB_T, power: g.p.power, passers: [g.p] });
+  }
+
+  function addExpl(c, r) { g.expl.push({ c: c, r: r, ttl: EXPL_T }); }
+
+  function detonate(b) {
+    var idx = g.bombs.indexOf(b);
+    if (idx < 0) return;
+    g.bombs.splice(idx, 1);
+    addExpl(b.c, b.r);
+    for (var d = 0; d < 4; d++) {
+      for (var i = 1; i <= b.power; i++) {
+        var c = b.c + DIRS[d][0] * i, r = b.r + DIRS[d][1] * i;
+        if (c < 0 || r < 0 || c >= COLS || r >= ROWS) break;
+        if (g.map[r][c] === 1) break;
+        if (g.map[r][c] === 2) {
+          g.map[r][c] = 0; g.score += 10;
+          if (g.items[r][c]) { g.ground.push({ c: c, r: r, t: g.items[r][c] }); g.items[r][c] = 0; }
+          addExpl(c, r);
+          break;
+        }
+        var ob = bombAt(c, r);
+        addExpl(c, r);
+        if (ob) { detonate(ob); break; }
+      }
+    }
+  }
+
+  function inExpl(c, r) {
+    for (var i = 0; i < g.expl.length; i++) if (g.expl[i].c === c && g.expl[i].r === r) return true;
+    return false;
+  }
+  function stepExpl() {
+    for (var i = g.expl.length - 1; i >= 0; i--) if (--g.expl[i].ttl <= 0) g.expl.splice(i, 1);
+  }
+  function addFloat(x, y, txt) { g.floats.push({ x: x, y: y, t: 46, txt: txt }); }
+  function stepFloats() {
+    for (var i = g.floats.length - 1; i >= 0; i--) { var f = g.floats[i]; f.y -= 0.6; if (--f.t <= 0) g.floats.splice(i, 1); }
+  }
+
+  function pickDir(en) {
+    var cc = colOf(en.x), rr = rowOf(en.y);
+    var back = en.dir >= 0 ? (en.dir ^ 1) : -1;
+    var options = [];
+    for (var d = 0; d < 4; d++) {
+      var nc = cc + DIRS[d][0], nr = rr + DIRS[d][1];
+      if (nc < 0 || nr < 0 || nc >= COLS || nr >= ROWS) continue;
+      if (g.map[nr][nc] !== 0) continue;
+      if (bombAt(nc, nr)) continue;
+      if (inExpl(nc, nr)) continue;
+      options.push(d);
+    }
+    if (!options.length) { en.dir = -1; en.c = cc; en.r = rr; return; }
+    var pool = [];
+    for (var k = 0; k < options.length; k++) if (options[k] !== back) pool.push(options[k]);
+    if (!pool.length) pool = options;
+    var d2;
+    if (en.chase && Math.random() < 0.75) {
+      var bestD = pool[0], bestDist = 1e9;
+      for (var m = 0; m < pool.length; m++) {
+        var nc2 = cc + DIRS[pool[m]][0], nr2 = rr + DIRS[pool[m]][1];
+        var man = Math.abs(cx(nc2) - g.p.x) + Math.abs(cy(nr2) - g.p.y);
+        if (man < bestDist) { bestDist = man; bestD = pool[m]; }
+      }
+      d2 = bestD;
+    } else if (en.dir < 0 || pool.indexOf(en.dir) < 0 || Math.random() < 0.25) {
+      d2 = pool[Math.floor(Math.random() * pool.length)];
+    } else d2 = en.dir;
+    en.dir = d2;
+    en.c = cc + DIRS[d2][0]; en.r = rr + DIRS[d2][1];
+  }
+  function stepEnemies() {
+    for (var i = 0; i < g.enemies.length; i++) {
+      var en = g.enemies[i];
+      var tx = cx(en.c), ty = cy(en.r);
+      var dx = tx - en.x, dy = ty - en.y;
+      if (Math.abs(dx) + Math.abs(dy) <= en.sp) { en.x = tx; en.y = ty; pickDir(en); }
+      else {
+        en.x += Math.max(-en.sp, Math.min(en.sp, dx));
+        en.y += Math.max(-en.sp, Math.min(en.sp, dy));
+      }
+    }
+  }
+
+  function killPlayer() {
+    g.lives--;
+    if (g.lives < 0) { gameOver(); return; }
+    g.bombs = []; g.expl = [];
+    g.p.x = cx(1); g.p.y = cy(1); g.p.inv = 150; g.p.dx = 0; g.p.dy = 0;
+    addFloat(cx(1), cy(1) - 10, "💫 还剩 " + (g.lives + 1) + " 条命");
+  }
+  function gameOver() {
+    g.over = true;
+    saveBest();
+    try { bumpUsage("bomber"); } catch (e) {}
+    showMsg("💥 游戏结束", "得分 " + g.score + "\n最高分 " + best + "\n打到了第 " + g.lv + " 关", "再来一局");
+  }
+
+  function update() {
+    if (!g || g.over) return;
+    g.frame++;
+    if (g.banner > 0) {
+      g.banner--;
+      stepExpl(); stepFloats();
+      if (g.banner === 0) { g.lv++; newLevel(); }
+      return;
+    }
+    updatePlayer();
+    for (var i = g.bombs.length - 1; i >= 0; i--) {
+      var b = g.bombs[i];
+      b.t--;
+      for (var k = b.passers.length - 1; k >= 0; k--) {
+        var pe = b.passers[k];
+        if (colOf(pe.x) !== b.c || rowOf(pe.y) !== b.r) b.passers.splice(k, 1);
+      }
+      if (b.t <= 0) detonate(b);
+    }
+    stepEnemies();
+    var kills = 0;
+    for (var j = g.enemies.length - 1; j >= 0; j--) {
+      var en = g.enemies[j];
+      if (inExpl(colOf(en.x), rowOf(en.y))) {
+        g.enemies.splice(j, 1);
+        kills++;
+        g.score += 200;
+        addFloat(en.x, en.y, "+200");
+      }
+    }
+    if (kills >= 2) {
+      try { bumpUsage("bomberchain"); } catch (e2) {}
+      addFloat(g.p.x, g.p.y - 20, "🧨 连环引爆 x" + kills + "!");
+      try { if (typeof confettiBurst === "function") confettiBurst(40); } catch (e3) {}
+    }
+    var p = g.p;
+    if (p.inv <= 0 && !g.over) {
+      var hit = inExpl(colOf(p.x), rowOf(p.y));
+      if (!hit) for (var m = 0; m < g.enemies.length; m++) {
+        var ddx = g.enemies[m].x - p.x, ddy = g.enemies[m].y - p.y;
+        if (ddx * ddx + ddy * ddy < 256) { hit = true; break; }
+      }
+      if (hit) killPlayer();
+    }
+    if (!g.over && g.banner === 0 && g.enemies.length === 0) {
+      var bonus = 300 + 200 * g.lv;
+      g.score += bonus;
+      addFloat(W / 2, OY + 90, "🎉 过关 +" + bonus);
+      g.banner = 110;
+      try { if (typeof confettiBurst === "function") confettiBurst(60); } catch (e4) {}
+    }
+    stepExpl(); stepFloats();
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    ctx.clearRect(0, 0, W, H);
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#111a2e"); bg.addColorStop(1, "#0a0f1c");
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.font = "12px sans-serif"; ctx.fillStyle = "#e2e8f0";
+    ctx.fillText("得分 " + g.score, 12, 14);
+    ctx.fillText("最高 " + Math.max(best, g.score), 100, 14);
+    ctx.fillText("第 " + g.lv + " 关", 190, 14);
+    var hearts = "";
+    for (var h = 0; h < Math.max(0, g.lives); h++) hearts += "❤️";
+    ctx.fillText(hearts || "💔", 250, 14);
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText("🔥×" + g.p.power + "   💣×" + g.p.bombMax + "   👟 " + g.p.sp.toFixed(1), 12, 33);
+    var r, c, x, y;
+    for (r = 0; r < ROWS; r++) for (c = 0; c < COLS; c++) {
+      x = OX + c * CELL; y = OY + r * CELL;
+      if (g.map[r][c] === 1) {
+        ctx.fillStyle = "#3b4a61"; ctx.fillRect(x, y, CELL, CELL);
+        ctx.fillStyle = "#54678a"; ctx.fillRect(x + 2, y + 2, CELL - 4, CELL - 9);
+      } else if (g.map[r][c] === 2) {
+        ctx.fillStyle = "#8a5a2b"; ctx.fillRect(x + 1, y + 1, CELL - 2, CELL - 2);
+        ctx.fillStyle = "#a8713a";
+        ctx.fillRect(x + 2, y + 3, CELL - 4, 7);
+        ctx.fillRect(x + 2, y + 14, CELL - 4, 7);
+      } else {
+        ctx.fillStyle = ((r + c) % 2 === 0) ? "#1c3a27" : "#193423";
+        ctx.fillRect(x, y, CELL, CELL);
+      }
+    }
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    var i2;
+    ctx.font = "15px sans-serif";
+    for (i2 = 0; i2 < g.ground.length; i2++) {
+      var it = g.ground[i2];
+      ctx.fillText(it.t === 1 ? "🔥" : (it.t === 2 ? "💣" : "👟"), cx(it.c), cy(it.r));
+    }
+    for (i2 = 0; i2 < g.expl.length; i2++) {
+      var ex = g.expl[i2];
+      var a = ex.ttl / EXPL_T;
+      x = OX + ex.c * CELL; y = OY + ex.r * CELL;
+      ctx.fillStyle = "rgba(251,146,60," + (0.85 * a).toFixed(3) + ")";
+      ctx.fillRect(x + 1, y + 1, CELL - 2, CELL - 2);
+      ctx.fillStyle = "rgba(254,240,138," + (0.9 * a).toFixed(3) + ")";
+      ctx.fillRect(x + 6, y + 6, CELL - 12, CELL - 12);
+    }
+    for (i2 = 0; i2 < g.bombs.length; i2++) {
+      var b = g.bombs[i2];
+      var pulse = 17 + 3 * Math.sin(g.frame * (b.t < 45 ? 0.5 : 0.18));
+      ctx.font = Math.round(pulse) + "px sans-serif";
+      ctx.fillText("💣", cx(b.c), cy(b.r));
+    }
+    ctx.font = "19px sans-serif";
+    for (i2 = 0; i2 < g.enemies.length; i2++) {
+      var en = g.enemies[i2];
+      ctx.fillText(en.emo, en.x, en.y);
+    }
+    if (!(g.p.inv > 0 && (g.frame % 8) < 4)) {
+      ctx.font = "20px sans-serif";
+      ctx.fillText("🤖", g.p.x, g.p.y - 1);
+    }
+    ctx.font = "12px sans-serif"; ctx.fillStyle = "#fef9c3";
+    for (i2 = 0; i2 < g.floats.length; i2++) {
+      var f = g.floats[i2];
+      ctx.fillText(f.txt, f.x, f.y);
+    }
+    if (g.banner > 0) {
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      ctx.fillRect(0, H / 2 - 34, W, 68);
+      ctx.fillStyle = "#fbbf24"; ctx.font = "bold 22px sans-serif";
+      ctx.fillText("🎉 第 " + g.lv + " 关通过！", W / 2, H / 2 - 8);
+      ctx.fillStyle = "#e2e8f0"; ctx.font = "13px sans-serif";
+      ctx.fillText("敌人会更多更快，准备好！", W / 2, H / 2 + 18);
+    }
+  }
+
+  function loop() {
+    if (!active) return;
+    update();
+    draw();
+    raf = requestAnimationFrame(loop);
+  }
+
+  function showMsg(t, s2, btn) {
+    var m = $id("bmMsg"); if (!m) return;
+    var a = $id("bmMsgT"), b = $id("bmMsgS"), c = $id("bmAgain");
+    if (a) a.textContent = t;
+    if (b) b.textContent = s2;
+    if (c) c.textContent = btn || "开始游戏";
+    m.classList.add("show");
+  }
+  function hideMsg() { var m = $id("bmMsg"); if (m) m.classList.remove("show"); }
+
+  function loadBest() { try { best = parseInt(localStorage.getItem("suibian_bomber") || "0", 10) || 0; } catch (e) { best = 0; } }
+  function saveBest() {
+    if (g && g.score > best) best = g.score;
+    try { localStorage.setItem("suibian_bomber", String(best)); } catch (e) {}
+  }
+
+  var KEYMAP = { ArrowLeft: "ArrowLeft", ArrowRight: "ArrowRight", ArrowUp: "ArrowUp", ArrowDown: "ArrowDown", a: "a", d: "d", w: "w", s: "s", A: "a", D: "d", W: "w", S: "s" };
+  function onKeyDown(e) {
+    if (!active || !g) return;
+    var k = e.key;
+    if (KEYMAP[k]) { keys[KEYMAP[k]] = true; if (e.preventDefault) e.preventDefault(); return; }
+    if (k === " " || k === "j" || k === "J") { placeBomb(); if (e.preventDefault) e.preventDefault(); }
+    else if (k === "Enter") { newGame(); if (e.preventDefault) e.preventDefault(); }
+  }
+  function onKeyUp(e) { var k = e.key; if (KEYMAP[k]) keys[KEYMAP[k]] = false; }
+
+  function ptPos(e) {
+    var rc = canvas.getBoundingClientRect();
+    var sx = rc.width > 0 ? W / rc.width : 1, sy = rc.height > 0 ? H / rc.height : 1;
+    return { x: (e.clientX - rc.left) * sx, y: (e.clientY - rc.top) * sy };
+  }
+  function onPD(e) {
+    if (!active) return;
+    var p = ptPos(e);
+    ptr.on = true; ptr.id = e.pointerId; ptr.sx = p.x; ptr.sy = p.y; ptr.x = p.x; ptr.y = p.y;
+    ptr.t = Date.now(); ptr.moved = false;
+    if (canvas.setPointerCapture) { try { canvas.setPointerCapture(e.pointerId); } catch (err) {} }
+    if (e.preventDefault) e.preventDefault();
+  }
+  function onPM(e) {
+    if (!ptr.on || e.pointerId !== ptr.id) return;
+    var p = ptPos(e);
+    ptr.x = p.x; ptr.y = p.y;
+    if (Math.abs(p.x - ptr.sx) > 10 || Math.abs(p.y - ptr.sy) > 10) ptr.moved = true;
+  }
+  function onPU(e) {
+    if (!ptr.on || e.pointerId !== ptr.id) return;
+    var wasTap = !ptr.moved && (Date.now() - ptr.t) < 280;
+    ptr.on = false; ptr.moved = false;
+    if (wasTap && active && g && !g.over) placeBomb();
+  }
+
+  function bind() {
+    if (bound) return;
+    bound = true;
+    var again = $id("bmAgain"), nw = $id("bmNew"), bb = $id("bmBombBtn");
+    if (again) again.addEventListener("click", function () { newGame(); });
+    if (nw) nw.addEventListener("click", function () { newGame(); });
+    if (bb) bb.addEventListener("click", function () { if (active && g && !g.over) placeBomb(); });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    canvas.addEventListener("pointerdown", onPD);
+    canvas.addEventListener("pointermove", onPM);
+    canvas.addEventListener("pointerup", onPU);
+    canvas.addEventListener("pointercancel", onPU);
+  }
+
+  window.bomberRender = function () {
+    canvas = $id("bmCanvas");
+    if (!canvas) return;
+    loadBest();
+    if (!ctx) {
+      canvas.width = W * 2; canvas.height = H * 2;
+      ctx = canvas.getContext("2d");
+      ctx.scale(2, 2);
+    }
+    bind();
+    active = true;
+    if (!g) {
+      newGame();
+      g.over = true;
+      showMsg("💣 炸弹人", "方向键 / WASD 移动，空格 / J 放炸弹；手机上按住画面拖动方向移动、轻点放炸弹。炸开砖块吃 🔥💣👟 道具，消灭所有敌人过关——小心别把自己炸进去！", "开始游戏");
+    }
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(loop);
+  };
+
+  window.bomberStop = function () {
+    active = false;
+    for (var k in keys) keys[k] = false;
+    ptr.on = false; ptr.moved = false;
+    cancelAnimationFrame(raf);
+  };
+
+  window.__bmTest = {
+    getG: function () { return g; },
+    newGame: newGame,
+    start: function () { newGame(); },
+    update: update,
+    step: function (n) { for (var i = 0; i < n; i++) update(); },
+    setKey: function (k, v) { keys[k] = v; },
+    placeBomb: placeBomb,
+    detonate: detonate,
+    bombAt: bombAt,
+    canEnter: canEnter,
+    killPlayer: killPlayer,
+    inExpl: inExpl,
+    getBest: function () { return best; },
+    loadBest: loadBest,
+    cx: cx, cy: cy, colOf: colOf, rowOf: rowOf,
+    ptr: ptr,
+    COLS: COLS, ROWS: ROWS, CELL: CELL, W: W, H: H, BOMB_T: BOMB_T
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "💣", name: "爆破新手", desc: "玩过一局炸弹人", test: function (u) { return (u.bomber || 0) >= 1; } },
+      { emoji: "🧨", name: "连环引爆", desc: "在炸弹人里一次爆炸同时消灭 2 个敌人", test: function (u) { return (u.bomberchain || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "炸弹放下去就没有后悔键——但你还有两秒钟跑位的时间，别浪费。",
+      "把自己逼进死角的，往往不是敌人，而是自己随手放下的那颗炸弹。",
+      "火力越大越要留后路，能炸穿一切的人更得知道往哪儿躲。",
+      "砖块炸开之前，谁也不知道里面藏的是道具还是空气——试试才知道。",
+      "追着你跑的幽灵并不可怕，可怕的是你乱了自己的节奏。"
     );
   }
 })();
