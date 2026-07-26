@@ -1543,6 +1543,7 @@
         <button data-tab="asteroids">☄️ 小行星</button>
         <button data-tab="missile">🚀 导弹指挥官</button>
         <button data-tab="centipede">🐛 蜈蚣</button>
+        <button data-tab="pinball">🎰 弹珠台</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7260,6 +7261,38 @@
       <div class="cen-tip">🖱️ 在画面上拖动即可移动炮台（自动连射）；⌨️ 方向键 / WASD 移动，空格 / J 射击（按住连发），Enter 重开。打中蜈蚣身体 +10、头 +100，被打断的那节变成蘑菇、后半截立刻掉头成新蜈蚣；蘑菇挡路会让蜈蚣提前下折。🕷️ 蜘蛛在底部乱蹦（+300）还会吃蘑菇，🪰 跳蚤垂直俯冲边落边种蘑菇（+200，要打两枪），🦂 蝎子横穿毒化蘑菇（+1000）——蜈蚣碰到毒蘑菇会径直俯冲！清完整条蜈蚣进入下一波，阵亡后蘑菇会自动修复。3 条命，最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="pinball">
+    <h2>🎰 弹珠台</h2>
+    <p class="sub">经典物理弹珠台：蓄力发射钢珠，用左右挡板把它顶回场上——撞缓冲柱、弹弓和落靶，越弹越高分！</p>
+    <style>
+      #pinball .pb-wrap { max-width:420px; margin:0 auto; }
+      #pinball .pb-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #pinball .pb-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #pinball .pb-top button:hover { background:rgba(255,255,255,.12); }
+      #pinball .pb-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #pinball canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#05070f; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #pinball .pb-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(5,7,15,.86); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #pinball .pb-msg.show { display:flex; }
+      #pinball .pb-msg .t { font-size:1.5rem; font-weight:800; }
+      #pinball .pb-msg .s { font-size:.95rem; opacity:.85; line-height:1.6; white-space:pre-line; }
+      #pinball .pb-msg button { padding:9px 24px; border-radius:10px; border:0; background:#38bdf8; color:#04121f; font-weight:700; cursor:pointer; }
+      #pinball .pb-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="pb-wrap">
+      <div class="pb-top">
+        <button id="pbNew">🔄 新的一局</button>
+      </div>
+      <div class="pb-canvas-wrap">
+        <canvas id="pbCanvas"></canvas>
+        <div class="pb-msg" id="pbMsg">
+          <div class="t" id="pbMsgT"></div>
+          <div class="s" id="pbMsgS"></div>
+          <button id="pbAgain">开始游戏</button>
+        </div>
+      </div>
+      <div class="pb-tip">🕹️ 按住画面右下角（或 空格 / ↓）蓄力，松开发射钢珠；⌨️ 方向键 ← → 或 A / D、🖱️ 点击屏幕左右半边分别控制两侧挡板；⏎ 回车重开。撞蓝色缓冲柱 +100、红色弹弓 +50、黄色落靶 +250，清空一整排落靶额外 +2000 并提升倍率（最高 ×6）。3 颗球，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7624,6 +7657,7 @@
     if (id === "asteroids") asteroidsRender();
     if (id === "missile") missileRender();
     if (id === "centipede") centipedeRender();
+    if (id === "pinball") pinballRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7649,6 +7683,7 @@
     if (id !== "asteroids" && typeof asteroidsStop === "function") asteroidsStop();
     if (id !== "missile" && typeof missileStop === "function") missileStop();
     if (id !== "centipede" && typeof centipedeStop === "function") centipedeStop();
+    if (id !== "pinball" && typeof pinballStop === "function") pinballStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7805,6 +7840,7 @@
     asteroids: "小行星 asteroids 太空 射击 飞船 陨石 巨石 飞碟 惯性 漂移 街机 经典 宇宙 环形 game",
     missile: "导弹指挥官 missile command 拦截 城市 防御 发射井 弹道 爆炸 连锁 街机 经典 太空 game",
     centipede: "蜈蚣 centipede 蘑菇 射击 分裂 蜘蛛 跳蚤 蝎子 街机 经典 百足虫 除虫 game",
+    pinball: "弹珠台 弹珠 弹球 pinball 钢珠 挡板 缓冲柱 弹弓 落靶 物理 街机 经典 flipper 高分 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8021,6 +8057,7 @@ splitbill:"tools",
     asteroids:"games",
     missile:"games",
     centipede:"games",
+    pinball:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -36060,6 +36097,512 @@ splitbill:"tools",
         "蜘蛛乱蹦、跳蚤空降、蝎子放毒，主线之外的干扰永远不缺；盯住你的蜈蚣。"
       );
     })();
+(function () {
+  "use strict";
+  /* ======================= 🎰 弹珠台 Pinball ======================= */
+  var W = 360, H = 480, R = 7;
+  var GRAV = 0.16, MAXV = 13, WREST = 0.72;
+
+  // 静态墙壁段：{a:[x,y], b:[x,y], rest}
+  var WALLS = [
+    // 顶部连续拱形（无内凹死角，下降段把发射球拨向左侧场地）
+    [16, 66, 70, 26, WREST],
+    [70, 26, 250, 22, WREST],
+    [250, 22, 318, 40, WREST],
+    [318, 40, 352, 72, WREST],
+    // 右侧发射通道
+    [352, 72, 352, 442, WREST],
+    [334, 442, 352, 442, WREST],
+    [332, 116, 332, 442, WREST],
+    // 右墙 + 右漏斗（导向右挡板；顶端下移让下落球顺利入场）
+    [330, 96, 330, 300, WREST],
+    [330, 300, 244, 438, WREST],
+    // 左墙 + 左漏斗（导向左挡板）
+    [16, 66, 16, 300, WREST],
+    [16, 300, 116, 438, WREST]
+  ];
+
+  // 圆形碰撞体：普通缓冲柱 + 弹弓
+  var BUMPERS = [
+    { x: 110, y: 150, r: 18, score: 100, kick: 3.6, rest: 0.55, big: true },
+    { x: 206, y: 130, r: 18, score: 100, kick: 3.6, rest: 0.55, big: true },
+    { x: 160, y: 214, r: 16, score: 100, kick: 3.6, rest: 0.55, big: true },
+    { x: 256, y: 152, r: 16, score: 100, kick: 3.6, rest: 0.55, big: true },
+    { x: 104, y: 404, r: 9, score: 50, kick: 4.4, rest: 0.5, big: false },
+    { x: 256, y: 404, r: 9, score: 50, kick: 4.4, rest: 0.5, big: false }
+  ];
+
+  // 落靶（一排三个，全清得奖励+倍率）
+  function makeTargets() {
+    return [
+      { x: 128, y: 88, w: 26, alive: true },
+      { x: 162, y: 88, w: 26, alive: true },
+      { x: 196, y: 88, w: 26, alive: true }
+    ];
+  }
+
+  var canvas = null, ctx = null, active = false, raf = 0, best = 0;
+  var g = null;
+
+  function makeFlipper(px, py, rest, up, dir) {
+    // dir: +1 左挡板(尖端朝右) / -1 右挡板(尖端朝左)
+    return { px: px, py: py, len: 58, rest: rest, up: up, ang: rest, angVel: 0, dir: dir };
+  }
+
+  function newGame() {
+    g = {
+      ball: { x: 341, y: 430, vx: 0, vy: 0 },
+      state: "serve",       // serve | play
+      power: 0,
+      plungeHold: false,
+      balls: 3,
+      score: 0,
+      mult: 1,
+      best: best,
+      targets: makeTargets(),
+      fl: makeFlipper(116, 438, 0.42, -0.42, 1),
+      fr: makeFlipper(244, 438, Math.PI - 0.42, Math.PI + 0.42, -1),
+      flHold: false,
+      frHold: false,
+      stuck: 0,
+      over: false,
+      win: false,
+      flash: [],            // 碰撞体高亮 {i, t}
+      msg: ""
+    };
+    bumpedThisGame = false;
+  }
+
+  var bumpedThisGame = false;
+
+  function addScore(n) {
+    g.score += n * g.mult;
+    if (g.score > g.best) g.best = g.score;
+  }
+
+  function flashBumper(i) {
+    g.flash.push({ i: i, t: 10 });
+  }
+
+  /* ---------- 物理碰撞 ---------- */
+  function collideSeg(b, ax, ay, bx, by, rest) {
+    var dx = bx - ax, dy = by - ay;
+    var len2 = dx * dx + dy * dy;
+    var t = len2 > 0 ? ((b.x - ax) * dx + (b.y - ay) * dy) / len2 : 0;
+    if (t < 0) t = 0; else if (t > 1) t = 1;
+    var cx = ax + t * dx, cy = ay + t * dy;
+    var nx = b.x - cx, ny = b.y - cy;
+    var d = Math.sqrt(nx * nx + ny * ny);
+    if (d >= R) return false;
+    if (d > 1e-6) { nx /= d; ny /= d; }
+    else { var nl = Math.sqrt(len2) || 1; nx = -dy / nl; ny = dx / nl; d = 0; }
+    b.x += nx * (R - d); b.y += ny * (R - d);
+    var vn = b.vx * nx + b.vy * ny;
+    if (vn < 0) { b.vx -= (1 + rest) * vn * nx; b.vy -= (1 + rest) * vn * ny; }
+    return true;
+  }
+
+  function collideCircle(b, c) {
+    var dx = b.x - c.x, dy = b.y - c.y;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    var min = R + c.r;
+    if (d >= min) return false;
+    var nx, ny;
+    if (d > 1e-6) { nx = dx / d; ny = dy / d; } else { nx = 0; ny = -1; }
+    b.x = c.x + nx * min; b.y = c.y + ny * min;
+    var vn = b.vx * nx + b.vy * ny;
+    if (vn < 0) { b.vx -= (1 + c.rest) * vn * nx; b.vy -= (1 + c.rest) * vn * ny; }
+    b.vx += nx * c.kick; b.vy += ny * c.kick;
+    return true;
+  }
+
+  function collideFlipper(b, f) {
+    var ax = f.px, ay = f.py;
+    var bx = f.px + Math.cos(f.ang) * f.len, by = f.py + Math.sin(f.ang) * f.len;
+    var dx = bx - ax, dy = by - ay, len2 = dx * dx + dy * dy;
+    var t = len2 > 0 ? ((b.x - ax) * dx + (b.y - ay) * dy) / len2 : 0;
+    if (t < 0) t = 0; else if (t > 1) t = 1;
+    var cx = ax + t * dx, cy = ay + t * dy;
+    var nx = b.x - cx, ny = b.y - cy, d = Math.sqrt(nx * nx + ny * ny);
+    var rad = R + 3.5;
+    if (d >= rad) return false;
+    if (d > 1e-6) { nx /= d; ny /= d; }
+    else { var nl = Math.sqrt(len2) || 1; nx = -dy / nl; ny = dx / nl; d = 0; }
+    b.x += nx * (rad - d); b.y += ny * (rad - d);
+    // 接触点因挡板旋转产生的表面速度
+    var rpx = cx - ax, rpy = cy - ay;
+    var svx = -f.angVel * rpy, svy = f.angVel * rpx;
+    var rest = 0.5;
+    var vn = (b.vx - svx) * nx + (b.vy - svy) * ny;
+    if (vn < 0) { b.vx -= (1 + rest) * vn * nx; b.vy -= (1 + rest) * vn * ny; }
+    return true;
+  }
+
+  function clampV(b) {
+    if (!isFinite(b.vx)) b.vx = 0;
+    if (!isFinite(b.vy)) b.vy = 0;
+    if (!isFinite(b.x)) b.x = 180;
+    if (!isFinite(b.y)) b.y = 200;
+    var s = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+    if (s > MAXV) { b.vx = b.vx / s * MAXV; b.vy = b.vy / s * MAXV; }
+  }
+
+  function updateFlipper(f, hold) {
+    var target = hold ? f.up : f.rest;
+    var prev = f.ang;
+    var sp = 0.45;
+    if (f.ang < target) f.ang = Math.min(target, f.ang + sp);
+    else if (f.ang > target) f.ang = Math.max(target, f.ang - sp);
+    f.angVel = f.ang - prev;
+  }
+
+  function launch() {
+    if (!g || g.state !== "serve") return;
+    var p = g.power;
+    g.plungeHold = false;
+    g.state = "play";
+    g.ball.vx = 0;
+    g.ball.vy = -(11.6 + p * 1.2);
+    g.power = 0;
+    try { if (typeof playDing === "function" && settings && settings.sound) playDing(); } catch (e) {}
+  }
+
+  function loseBall() {
+    g.balls--;
+    g.stuck = 0;
+    if (g.balls <= 0) {
+      g.over = true;
+      g.win = false;
+      try { bumpUsage("pinball"); } catch (e) {}
+      var nb = false;
+      if (g.score >= best) { best = g.score; nb = true; saveBest(); }
+      else saveBest();
+      showMsg("💥 GAME OVER", "本局得分 " + g.score + (nb ? "（新纪录！🏆）" : "") + "　最高 " + best + "\n再来一局，冲更高分！", "再来一局");
+      if (nb && g.score > 0) { try { if (typeof confettiBurst === "function") confettiBurst(70); } catch (e) {} }
+    } else {
+      g.state = "serve";
+      g.power = 0;
+      g.ball.vx = 0; g.ball.vy = 0;
+      g.ball.x = 341; g.ball.y = 430;
+      try { toast("球掉了！还剩 " + g.balls + " 颗"); } catch (e) {}
+    }
+  }
+
+  function hitTargets(b) {
+    var allDead = true, any = false;
+    for (var i = 0; i < g.targets.length; i++) {
+      var tg = g.targets[i];
+      if (!tg.alive) continue;
+      if (collideSeg(b, tg.x, tg.y, tg.x + tg.w, tg.y, 0.6)) {
+        tg.alive = false;
+        addScore(250);
+        flashBumper(-2 - i);
+        any = true;
+        try { if (typeof playDing === "function" && settings && settings.sound) playDing(); } catch (e) {}
+      }
+    }
+    for (var j = 0; j < g.targets.length; j++) if (g.targets[j].alive) allDead = false;
+    if (allDead) {
+      // 全清：奖励 + 升倍率 + 复位
+      addScore(2000);
+      g.mult = Math.min(6, g.mult + 1);
+      for (var k = 0; k < g.targets.length; k++) g.targets[k].alive = true;
+      try { bumpUsage("pinballclear"); } catch (e) {}
+      try { if (typeof confettiBurst === "function") confettiBurst(45); } catch (e) {}
+      try { toast("落靶全清！倍率 ×" + g.mult); } catch (e) {}
+    }
+    return any;
+  }
+
+  function physicsStep(b, dtScale) {
+    b.vy += GRAV * dtScale;
+    b.x += b.vx * dtScale;
+    b.y += b.vy * dtScale;
+    var i;
+    for (i = 0; i < WALLS.length; i++) {
+      var w = WALLS[i];
+      collideSeg(b, w[0], w[1], w[2], w[3], w[4]);
+    }
+    for (i = 0; i < BUMPERS.length; i++) {
+      if (collideCircle(b, BUMPERS[i])) { addScore(BUMPERS[i].score); flashBumper(i); }
+    }
+    hitTargets(b);
+    collideFlipper(b, g.fl);
+    collideFlipper(b, g.fr);
+    clampV(b);
+    // 边界兜底
+    if (b.x < R + 1) { b.x = R + 1; if (b.vx < 0) b.vx = -b.vx * 0.5; }
+    if (b.x > W - R - 1) { b.x = W - R - 1; if (b.vx > 0) b.vx = -b.vx * 0.5; }
+    if (b.y < R) { b.y = R; if (b.vy < 0) b.vy = -b.vy * 0.5; }
+  }
+
+  function update() {
+    if (!g || g.over) return;
+    updateFlipper(g.fl, g.flHold);
+    updateFlipper(g.fr, g.frHold);
+    var b = g.ball;
+    // flash 衰减
+    for (var i = g.flash.length - 1; i >= 0; i--) { if (--g.flash[i].t <= 0) g.flash.splice(i, 1); }
+    if (g.state === "serve") {
+      if (g.plungeHold) g.power = Math.min(1, g.power + 0.02);
+      b.x = 341; b.y = 430 + g.power * 8; b.vx = 0; b.vy = 0;
+      return;
+    }
+    // 两次子步提高稳定性
+    physicsStep(b, 0.5);
+    physicsStep(b, 0.5);
+    // 落球
+    if (b.y > 476) { loseBall(); return; }
+    // 卡死兜底
+    var sp = Math.abs(b.vx) + Math.abs(b.vy);
+    if (sp < 0.3 && b.y > 320) { g.stuck++; if (g.stuck > 900) { loseBall(); return; } }
+    else g.stuck = 0;
+  }
+
+  /* ---------- 存档 ---------- */
+  function saveBest() {
+    try { localStorage.setItem("suibian_pinball", String(best)); } catch (e) {}
+  }
+  function loadBest() {
+    try { best = parseInt(localStorage.getItem("suibian_pinball") || "0", 10) || 0; } catch (e) { best = 0; }
+  }
+
+  /* ---------- 绘制 ---------- */
+  function flipperTip(f) {
+    return [f.px + Math.cos(f.ang) * f.len, f.py + Math.sin(f.ang) * f.len];
+  }
+
+  function render() {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, W, H);
+    // 背景渐变
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#0b1024");
+    bg.addColorStop(0.55, "#0a0f1f");
+    bg.addColorStop(1, "#05070f");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+    if (!g) return;
+    var i;
+    // 落靶
+    for (i = 0; i < g.targets.length; i++) {
+      var tg = g.targets[i];
+      ctx.fillStyle = tg.alive ? "#fbbf24" : "rgba(120,120,140,.25)";
+      if (tg.alive) { ctx.shadowColor = "#fbbf24"; ctx.shadowBlur = 8; }
+      ctx.fillRect(tg.x, tg.y - 4, tg.w, 8);
+      ctx.shadowBlur = 0;
+    }
+    // 墙
+    ctx.strokeStyle = "rgba(120,160,255,.55)";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    for (i = 0; i < WALLS.length; i++) {
+      var w = WALLS[i];
+      ctx.beginPath(); ctx.moveTo(w[0], w[1]); ctx.lineTo(w[2], w[3]); ctx.stroke();
+    }
+    // 缓冲柱 / 弹弓
+    for (i = 0; i < BUMPERS.length; i++) {
+      var c = BUMPERS[i];
+      var lit = false;
+      for (var f2 = 0; f2 < g.flash.length; f2++) if (g.flash[f2].i === i) lit = true;
+      var grad = ctx.createRadialGradient(c.x - c.r * 0.3, c.y - c.r * 0.3, 1, c.x, c.y, c.r);
+      if (c.big) { grad.addColorStop(0, lit ? "#fff" : "#7dd3fc"); grad.addColorStop(1, lit ? "#38bdf8" : "#1e40af"); }
+      else { grad.addColorStop(0, lit ? "#fff" : "#fca5a5"); grad.addColorStop(1, lit ? "#f43f5e" : "#7f1d1d"); }
+      ctx.fillStyle = grad;
+      if (lit) { ctx.shadowColor = c.big ? "#38bdf8" : "#f43f5e"; ctx.shadowBlur = 16; }
+      ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.stroke();
+    }
+    // 挡板
+    drawFlipper(g.fl);
+    drawFlipper(g.fr);
+    // 球
+    var b = g.ball;
+    var bgd = ctx.createRadialGradient(b.x - 2, b.y - 2, 1, b.x, b.y, R);
+    bgd.addColorStop(0, "#fff"); bgd.addColorStop(1, "#94a3b8");
+    ctx.fillStyle = bgd;
+    ctx.shadowColor = "rgba(255,255,255,.6)"; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(b.x, b.y, R, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    // 发射蓄力条
+    if (g.state === "serve") {
+      ctx.fillStyle = "rgba(255,255,255,.15)";
+      ctx.fillRect(336, 300, 12, 130);
+      ctx.fillStyle = "#facc15";
+      ctx.fillRect(336, 430 - g.power * 130, 12, g.power * 130);
+    }
+    // HUD
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "bold 15px system-ui,sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("分 " + g.score, 12, 18);
+    ctx.textAlign = "right";
+    ctx.fillText("最高 " + best, W - 12, 18);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#fbbf24";
+    ctx.font = "bold 13px system-ui,sans-serif";
+    ctx.fillText("×" + g.mult, W / 2, 18);
+    // 剩余球
+    ctx.textAlign = "left";
+    for (i = 0; i < g.balls; i++) {
+      ctx.fillStyle = "#e2e8f0";
+      ctx.beginPath(); ctx.arc(16 + i * 12, 34, 4, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  function drawFlipper(f) {
+    var tip = flipperTip(f);
+    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 11;
+    ctx.lineCap = "round";
+    ctx.shadowColor = "rgba(56,189,248,.6)"; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.moveTo(f.px, f.py); ctx.lineTo(tip[0], tip[1]); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#0ea5e9";
+    ctx.beginPath(); ctx.arc(f.px, f.py, 6, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function loop() {
+    if (!active) return;
+    update();
+    render();
+    raf = requestAnimationFrame(loop);
+  }
+
+  /* ---------- UI 消息 ---------- */
+  function showMsg(t, s, btn) {
+    var m = $("pbMsg"); if (!m) return;
+    $("pbMsgT").textContent = t;
+    $("pbMsgS").textContent = s;
+    $("pbAgain").textContent = btn || "开始游戏";
+    m.classList.add("show");
+  }
+  function hideMsg() { var m = $("pbMsg"); if (m) m.classList.remove("show"); }
+
+  function startPlay() {
+    hideMsg();
+    newGame();
+    g.over = false;
+  }
+
+  /* ---------- 输入 ---------- */
+  var pointers = {};
+  var bound = false;
+  function bind() {
+    if (bound) return; bound = true;
+    canvas.addEventListener("pointerdown", onDown);
+    canvas.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("keyup", onKeyUp);
+    var nb = $("pbNew"); if (nb) nb.addEventListener("click", startPlay);
+    var ag = $("pbAgain"); if (ag) ag.addEventListener("click", startPlay);
+  }
+
+  function canvasX(e) {
+    var r = canvas.getBoundingClientRect();
+    return (e.clientX - r.left) / r.width * W;
+  }
+
+  function onDown(e) {
+    if (!active || !g || g.over) return;
+    e.preventDefault();
+    var x = canvasX(e);
+    if (g.state === "serve" && x > 300) { g.plungeHold = true; pointers[e.pointerId] = "plunge"; return; }
+    if (x < W / 2) { g.flHold = true; pointers[e.pointerId] = "L"; }
+    else { g.frHold = true; pointers[e.pointerId] = "R"; }
+  }
+  function onMove(e) { /* 保留触点 */ }
+  function onUp(e) {
+    var side = pointers[e.pointerId];
+    delete pointers[e.pointerId];
+    if (!g) return;
+    if (side === "plunge") { launch(); }
+    else if (side === "L") { g.flHold = false; }
+    else if (side === "R") { g.frHold = false; }
+  }
+  function onKey(e) {
+    if (!active || !g) return;
+    var k = e.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") { g.flHold = true; e.preventDefault(); }
+    else if (k === "ArrowRight" || k === "d" || k === "D") { g.frHold = true; e.preventDefault(); }
+    else if (k === " " || k === "ArrowDown" || k === "s" || k === "S") {
+      if (g.state === "serve" && !g.over) { g.plungeHold = true; e.preventDefault(); }
+    } else if (k === "Enter") { if (g.over) startPlay(); }
+  }
+  function onKeyUp(e) {
+    if (!g) return;
+    var k = e.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") g.flHold = false;
+    else if (k === "ArrowRight" || k === "d" || k === "D") g.frHold = false;
+    else if (k === " " || k === "ArrowDown" || k === "s" || k === "S") {
+      if (g.state === "serve" && g.plungeHold) launch();
+    }
+  }
+
+  window.pinballRender = function () {
+    canvas = $("pbCanvas");
+    if (!canvas) return;
+    loadBest();
+    if (!ctx) {
+      canvas.width = W * 2; canvas.height = H * 2;
+      ctx = canvas.getContext("2d");
+      ctx.scale(2, 2);
+    }
+    bind();
+    active = true;
+    if (!g) {
+      showMsg("🎰 弹珠台", "按住右下角（或空格）蓄力发射钢珠！左右方向键 / A·D、或点击屏幕左右半边控制两侧挡板，把球顶回场上撞缓冲柱、弹弓和落靶得分。3 颗球，撞飞你的最高分！", "开始游戏");
+      newGame();
+      g.over = true;
+    }
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(loop);
+  };
+
+  window.pinballStop = function () {
+    active = false;
+    if (g) { g.flHold = false; g.frHold = false; g.plungeHold = false; }
+    pointers = {};
+    cancelAnimationFrame(raf);
+  };
+
+  window.__pbTest = {
+    getG: function () { return g; },
+    newGame: newGame,
+    startPlay: function () { newGame(); g.over = false; },
+    launch: launch,
+    update: update,
+    step: function (n) { for (var i = 0; i < n; i++) update(); },
+    setHold: function (side, v) { if (side === "L") g.flHold = v; else g.frHold = v; },
+    plunge: function (v) { g.plungeHold = v; },
+    loseBall: loseBall,
+    hitTargets: function () { return hitTargets(g.ball); },
+    collideSeg: collideSeg,
+    getBest: function () { return best; },
+    setBall: function (x, y, vx, vy) { g.ball.x = x; g.ball.y = y; g.ball.vx = vx; g.ball.vy = vy; g.state = "play"; },
+    WALLS: WALLS, BUMPERS: BUMPERS,
+    W: W, H: H, R: R
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "\ud83c\udfb0", name: "上台开球", desc: "玩过一局弹珠台", test: function (u) { return (u.pinball || 0) >= 1; } },
+      { emoji: "\ud83c\udfaf", name: "落靶清台", desc: "在弹珠台清空一整排落靶", test: function (u) { return (u.pinballclear || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "钢珠一旦发射就收不回来——有些决定也是，所以出手前先看准角度。",
+      "挡板拍得早不如拍得准，节奏感比手速更值钱。",
+      "球总会掉下来，关键是你在它掉下来之前撞到了多少分。",
+      "落靶要一整排清完才有大奖：把小目标一个个敲掉，倍率自然涨上来。",
+      "别怕球乱弹，弹珠台的乐趣正来自那点失控——放手让它跳。"
+    );
+  }
+})();
 </script>
 </body>
 </html>
