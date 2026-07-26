@@ -1540,6 +1540,7 @@
         <button data-tab="frogger">🚦 青蛙过河</button>
         <button data-tab="lander">🚀 登月着陆器</button>
         <button data-tab="arkanoid">🧱 打砖块DX</button>
+        <button data-tab="asteroids">☄️ 小行星</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7147,6 +7148,52 @@
       <div class="ak-tip">🖱️ 鼠标 / 手指在画面上左右滑动移动挡板，点击画面或按 空格 / ↑ 发球；⌨️ 也可用 ← → / A D 移动。彩砖一下碎，银砖两下、金砖三下；掉落的胶囊用挡板接住：E 加宽挡板、S 小球缓速、M 分裂多球（最多 6 颗）、❤ 补一条命（上限 5）。清空整面墙进入更快更硬的下一关，漏接全部小球扣一条命，共 3 条命，最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="asteroids">
+    <h2>☄️ 小行星</h2>
+    <p class="sub">1979 街机神作复刻：惯性漂移、巨石分裂、飞碟偷袭——在环形宇宙里活下去！</p>
+    <style>
+      #asteroids .ast-wrap { max-width:420px; margin:0 auto; }
+      #asteroids .ast-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #asteroids .ast-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #asteroids .ast-top button:hover { background:rgba(255,255,255,.12); }
+      #asteroids .ast-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #asteroids canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#060a14; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #asteroids .ast-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(6,10,18,.84); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #asteroids .ast-msg.show { display:flex; }
+      #asteroids .ast-msg .t { font-size:1.5rem; font-weight:800; }
+      #asteroids .ast-msg .s { font-size:.95rem; opacity:.85; line-height:1.6; }
+      #asteroids .ast-msg button { padding:9px 24px; border-radius:10px; border:0; background:#a5f3fc; color:#04222b; font-weight:700; cursor:pointer; }
+      #asteroids .ast-pads { display:flex; justify-content:space-between; align-items:center; max-width:360px; margin:10px auto 0; gap:8px; }
+      #asteroids .ast-pads .grp { display:flex; gap:8px; }
+      #asteroids .ast-pads button { width:56px; height:48px; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.3); color:#fff; font-size:1.15rem; cursor:pointer; touch-action:none; user-select:none; }
+      #asteroids .ast-pads button:active { background:rgba(165,243,252,.25); }
+      #asteroids .ast-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="ast-wrap">
+      <div class="ast-top">
+        <button id="astNew">🔄 新的一局</button>
+      </div>
+      <div class="ast-canvas-wrap">
+        <canvas id="astCanvas"></canvas>
+        <div class="ast-msg" id="astMsg">
+          <div class="t" id="astMsgT"></div>
+          <div class="s" id="astMsgS"></div>
+          <button id="astAgain">开始游戏</button>
+        </div>
+      </div>
+      <div class="ast-pads">
+        <div class="grp">
+          <button id="astL">◀</button>
+          <button id="astR">▶</button>
+        </div>
+        <div class="grp">
+          <button id="astT">🔥</button>
+          <button id="astF">●</button>
+        </div>
+      </div>
+      <div class="ast-tip">⌨️ ← → / A D 旋转，↑ / W 点火推进，空格 / J 开炮，Enter 重开；📱 下方按钮同样按住生效，点画面也能开炮。大石打碎成中石、中石碎成小石（20/50/100 分），全部清空进入下一波并奖分；船有惯性、屏幕四边循环；不定期出现的飞碟会放冷枪，击落大飞碟 +200、小飞碟 +400。共 3 条船，重生自带短暂无敌，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7508,6 +7555,7 @@
     if (id === "frogger") froggerRender();
     if (id === "lander") landerRender();
     if (id === "arkanoid") arkanoidRender();
+    if (id === "asteroids") asteroidsRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7530,6 +7578,7 @@
     if (id !== "frogger" && typeof froggerStop === "function") froggerStop();
     if (id !== "lander" && typeof landerStop === "function") landerStop();
     if (id !== "arkanoid" && typeof arkanoidStop === "function") arkanoidStop();
+    if (id !== "asteroids" && typeof asteroidsStop === "function") asteroidsStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7683,6 +7732,7 @@
     frogger: "青蛙过河 frogger 过马路 过河 跳格 街机 经典 木头 乌龟 汽车 车流 小蛙 回家 像素 潜水 game",
     lander: "登月着陆器 lander lunar 登月 著陆 飞船 火箭 物理 重力 燃料 推进 宇航 街机 经典 降落 飞驶 game",
     arkanoid: "打砖块DX arkanoid dx 豪华 砖块 弹球 挡板 反弹 道具 多球 加宽 缓速 街机 经典 拆墙 game",
+    asteroids: "小行星 asteroids 太空 射击 飞船 陨石 巨石 飞碟 惯性 漂移 街机 经典 宇宙 环形 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -7896,6 +7946,7 @@ splitbill:"tools",
     frogger:"games",
     lander:"games",
     arkanoid:"games",
+    asteroids:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -34324,6 +34375,572 @@ splitbill:"tools",
         "金砖要敲三下才碎，难啃的事也一样：多来几遍，别第一下就放弃。",
         "接住道具是锦上添花，接住球才是保住底线——先稳住，再贪心。",
         "一颗球拆不动的墙，就变成六颗球一起上：思路打开，火力自然就足了。"
+      );
+    })();
+    (function () {
+      "use strict";
+      const $ = (id) => document.getElementById(id);
+      const AST_KEY = "suibian_asteroids";
+      const W = 360, H = 480;
+      const SHIP_R = 10;
+      const ROT = 0.075, THRUST = 0.09, FRICTION = 0.992, MAX_V = 5.5;
+      const BULLET_V = 6.5, BULLET_LIFE = 55, MAX_BULLETS = 4, FIRE_CD = 10;
+      const SIZES = [
+        { r: 32, score: 20, child: 1, speed: 0.7 },
+        { r: 19, score: 50, child: 2, speed: 1.15 },
+        { r: 10, score: 100, child: -1, speed: 1.7 }
+      ];
+      const INVULN_T = 150, RESPAWN_T = 60;
+      const UFO_SCORE = 200, UFO_CD_BASE = 1500;
+
+      let cv = null, ctx = null, dpr = 2;
+      let raf = 0, running = false, wired = false;
+      let started = false, over = false;
+      let score = 0, best = 0, level = 1, lives = 3;
+      let ship = null, rocks = [], bullets = [], particles = [], stars = [];
+      let ufo = null, ufoShots = [], ufoTimer = 0;
+      let fireCd = 0, respawnT = 0, tick = 0, shakeT = 0;
+      const keys = { left: false, right: false, thrust: false, fire: false };
+
+      // ---- 可注入随机数（测试可复现）----
+      let _seed = 0, _useSeed = false;
+      function rnd() {
+        if (_useSeed) {
+          _seed = (_seed * 1103515245 + 12345) & 0x7fffffff;
+          return _seed / 0x7fffffff;
+        }
+        return Math.random();
+      }
+
+      function wrapX(x) { return (x % W + W) % W; }
+      function wrapY(y) { return (y % H + H) % H; }
+      function torusDist(ax, ay, bx, by) {
+        let dx = Math.abs(ax - bx); if (dx > W / 2) dx = W - dx;
+        let dy = Math.abs(ay - by); if (dy > H / 2) dy = H - dy;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      function readBest() {
+        try { best = (JSON.parse(localStorage.getItem(AST_KEY) || "{}").best | 0) || 0; } catch (e) { best = 0; }
+      }
+      function saveBest() {
+        try { localStorage.setItem(AST_KEY, JSON.stringify({ best: best })); } catch (e) {}
+      }
+
+      function makeRock(sz, x, y) {
+        const s = SIZES[sz];
+        const n = 9 + Math.floor(rnd() * 4);
+        const pts = [];
+        for (let i = 0; i < n; i++) pts.push(0.62 + rnd() * 0.42);
+        const a = rnd() * Math.PI * 2;
+        const sp = s.speed * (0.7 + rnd() * 0.7) * (1 + (level - 1) * 0.08);
+        return {
+          x: x, y: y, sz: sz, r: s.r,
+          vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+          rot: rnd() * Math.PI * 2, vr: (rnd() - 0.5) * 0.03, pts: pts
+        };
+      }
+
+      function spawnWave() {
+        rocks = [];
+        const n = Math.min(8, 3 + Math.floor((level - 1) / 1));
+        let guard = 0;
+        while (rocks.length < n && guard < 400) {
+          guard++;
+          const x = rnd() * W, y = rnd() * H;
+          if (torusDist(x, y, ship.x, ship.y) < 110) continue;
+          rocks.push(makeRock(0, x, y));
+        }
+      }
+
+      function resetShip() {
+        ship = { x: W / 2, y: H / 2, vx: 0, vy: 0, a: -Math.PI / 2, invuln: INVULN_T, dead: false };
+      }
+
+      function newGame() {
+        score = 0; level = 1; lives = 3; over = false; started = true;
+        bullets = []; particles = []; ufo = null; ufoShots = [];
+        ufoTimer = UFO_CD_BASE; fireCd = 0; respawnT = 0; tick = 0; shakeT = 0;
+        resetShip();
+        spawnWave();
+        hideMsg();
+      }
+
+      function nextLevel() {
+        level++;
+        score += 100 + 50 * level;
+        bullets = []; ufoShots = [];
+        ship.invuln = Math.max(ship.invuln, 90);
+        spawnWave();
+        try { bumpUsage("asteroidswin"); } catch (e) {}
+        toast("☄️ 第 " + (level - 1) + " 波清空！+" + (100 + 50 * level) + " 分，下一波更凶");
+      }
+
+      function boom(x, y, n, col, sp) {
+        for (let i = 0; i < n; i++) {
+          const a = rnd() * Math.PI * 2, v = (0.6 + rnd() * 1.6) * (sp || 1);
+          particles.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 22 + rnd() * 24, col: col });
+        }
+      }
+
+      function splitRock(i, bx, by) {
+        const rk = rocks[i];
+        const s = SIZES[rk.sz];
+        score += s.score;
+        boom(rk.x, rk.y, rk.sz === 0 ? 16 : rk.sz === 1 ? 11 : 7, "#cbd5e1", 1);
+        rocks.splice(i, 1);
+        if (s.child >= 0) {
+          const nsz = rk.sz + 1;
+          for (let k = 0; k < 2; k++) {
+            const nr = makeRock(nsz, rk.x, rk.y);
+            const na = Math.atan2(rk.y - by, rk.x - bx) + (k === 0 ? 0.7 : -0.7) + (rnd() - 0.5) * 0.5;
+            const sp = SIZES[nsz].speed * (0.8 + rnd() * 0.6) * (1 + (level - 1) * 0.08);
+            nr.vx = Math.cos(na) * sp; nr.vy = Math.sin(na) * sp;
+            rocks.push(nr);
+          }
+        }
+        if (score > best) { best = score; saveBest(); }
+        if (rocks.length === 0) nextLevel();
+      }
+
+      function fire() {
+        if (over || !started || ship.dead) return;
+        if (fireCd > 0 || bullets.length >= MAX_BULLETS) return;
+        fireCd = FIRE_CD;
+        bullets.push({
+          x: ship.x + Math.cos(ship.a) * SHIP_R,
+          y: ship.y + Math.sin(ship.a) * SHIP_R,
+          vx: Math.cos(ship.a) * BULLET_V + ship.vx * 0.4,
+          vy: Math.sin(ship.a) * BULLET_V + ship.vy * 0.4,
+          life: BULLET_LIFE
+        });
+      }
+
+      function spawnUfo() {
+        const fromLeft = rnd() < 0.5;
+        const small = level >= 3 && rnd() < 0.45;
+        ufo = {
+          x: fromLeft ? -20 : W + 20,
+          y: 60 + rnd() * (H - 160),
+          vx: (fromLeft ? 1 : -1) * (small ? 1.7 : 1.1),
+          small: small, r: small ? 9 : 13, shot: 90 + Math.floor(rnd() * 60)
+        };
+      }
+
+      function killShip() {
+        if (ship.invuln > 0 || ship.dead) return;
+        boom(ship.x, ship.y, 26, "#fda4af", 1.4);
+        shakeT = 16;
+        lives--;
+        ship.dead = true;
+        respawnT = RESPAWN_T;
+        if (lives <= 0) {
+          over = true;
+          if (score > best) best = score;
+          saveBest();
+          showMsg("💥 飞船全灭", "得分 " + score + " · 撑到第 " + level + " 波 · 最高分 " + best, "再来一局");
+        }
+      }
+
+      function respawn() {
+        // 中心附近安全才重生，否则给短暂延迟
+        let safe = true;
+        for (let i = 0; i < rocks.length; i++) {
+          if (torusDist(W / 2, H / 2, rocks[i].x, rocks[i].y) < 70) { safe = false; break; }
+        }
+        if (safe || respawnT < -180) {
+          resetShip();
+        } else {
+          respawnT = 10; // 再等等
+        }
+      }
+
+      function physics() {
+        tick++;
+        if (fireCd > 0) fireCd--;
+        if (shakeT > 0) shakeT--;
+
+        // 飞船
+        if (!ship.dead) {
+          if (keys.left) ship.a -= ROT;
+          if (keys.right) ship.a += ROT;
+          if (keys.thrust) {
+            ship.vx += Math.cos(ship.a) * THRUST;
+            ship.vy += Math.sin(ship.a) * THRUST;
+            const v = Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy);
+            if (v > MAX_V) { ship.vx *= MAX_V / v; ship.vy *= MAX_V / v; }
+            if (tick % 2 === 0) {
+              particles.push({
+                x: ship.x - Math.cos(ship.a) * SHIP_R, y: ship.y - Math.sin(ship.a) * SHIP_R,
+                vx: -Math.cos(ship.a) * 2 + (rnd() - 0.5), vy: -Math.sin(ship.a) * 2 + (rnd() - 0.5),
+                life: 12 + rnd() * 8, col: "#fbbf24"
+              });
+            }
+          }
+          ship.vx *= FRICTION; ship.vy *= FRICTION;
+          ship.x = wrapX(ship.x + ship.vx);
+          ship.y = wrapY(ship.y + ship.vy);
+          if (ship.invuln > 0) ship.invuln--;
+          if (keys.fire) fire();
+        } else if (!over) {
+          respawnT--;
+          if (respawnT <= 0) respawn();
+        }
+
+        // 子弹
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          b.x = wrapX(b.x + b.vx); b.y = wrapY(b.y + b.vy);
+          if (--b.life <= 0) bullets.splice(i, 1);
+        }
+
+        // 岩石
+        for (let i = 0; i < rocks.length; i++) {
+          const r = rocks[i];
+          r.x = wrapX(r.x + r.vx); r.y = wrapY(r.y + r.vy);
+          r.rot += r.vr;
+        }
+
+        // 子弹 × 岩石
+        outer:
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          if (!b) continue; // nextLevel 可能已清空子弹数组
+          for (let j = rocks.length - 1; j >= 0; j--) {
+            const r = rocks[j];
+            if (torusDist(b.x, b.y, r.x, r.y) < r.r) {
+              bullets.splice(i, 1);
+              splitRock(j, b.x, b.y);
+              continue outer;
+            }
+          }
+          if (ufo && torusDist(b.x, b.y, ufo.x, ufo.y) < ufo.r + 3) {
+            bullets.splice(i, 1);
+            score += ufo.small ? UFO_SCORE * 2 : UFO_SCORE;
+            boom(ufo.x, ufo.y, 18, "#a5f3fc", 1.2);
+            toast(ufo.small ? "🛸 击落小飞碟 +" + UFO_SCORE * 2 : "🛸 击落飞碟 +" + UFO_SCORE);
+            try { bumpUsage("asteroidsufo"); } catch (e) {}
+            ufo = null;
+            ufoTimer = UFO_CD_BASE - Math.min(600, level * 90);
+            if (score > best) { best = score; saveBest(); }
+          }
+        }
+
+        // 飞碟
+        if (!ufo) {
+          if (started && !over && --ufoTimer <= 0) spawnUfo();
+        } else {
+          ufo.x += ufo.vx;
+          ufo.y += Math.sin(tick * 0.03) * 0.6;
+          if (ufo.x < -30 || ufo.x > W + 30) {
+            ufo = null;
+            ufoTimer = UFO_CD_BASE - Math.min(600, level * 90);
+          } else if (--ufo.shot <= 0) {
+            ufo.shot = ufo.small ? 70 : 110;
+            let a;
+            if (ufo.small && !ship.dead) a = Math.atan2(ship.y - ufo.y, ship.x - ufo.x) + (rnd() - 0.5) * 0.3;
+            else a = rnd() * Math.PI * 2;
+            ufoShots.push({ x: ufo.x, y: ufo.y, vx: Math.cos(a) * 2.6, vy: Math.sin(a) * 2.6, life: 130 });
+          }
+        }
+
+        // 飞碟子弹
+        for (let i = ufoShots.length - 1; i >= 0; i--) {
+          const s = ufoShots[i];
+          s.x = wrapX(s.x + s.vx); s.y = wrapY(s.y + s.vy);
+          if (--s.life <= 0) { ufoShots.splice(i, 1); continue; }
+          if (!ship.dead && torusDist(s.x, s.y, ship.x, ship.y) < SHIP_R && ship.invuln <= 0) {
+            ufoShots.splice(i, 1);
+            killShip();
+          }
+        }
+
+        // 飞船 × 岩石 / 飞碟
+        if (!ship.dead && ship.invuln <= 0) {
+          for (let j = 0; j < rocks.length; j++) {
+            const r = rocks[j];
+            if (torusDist(ship.x, ship.y, r.x, r.y) < r.r + SHIP_R * 0.7) { killShip(); break; }
+          }
+          if (!ship.dead && ufo && torusDist(ship.x, ship.y, ufo.x, ufo.y) < ufo.r + SHIP_R * 0.7) killShip();
+        }
+
+        // 粒子
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx; p.y += p.vy; p.vx *= 0.96; p.vy *= 0.96;
+          if (--p.life <= 0) particles.splice(i, 1);
+        }
+      }
+
+      function drawRock(r) {
+        ctx.save();
+        ctx.translate(r.x, r.y);
+        ctx.rotate(r.rot);
+        ctx.beginPath();
+        for (let i = 0; i < r.pts.length; i++) {
+          const a = (i / r.pts.length) * Math.PI * 2;
+          const rr = r.r * r.pts[i];
+          if (i === 0) ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+          else ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+        ctx.fillStyle = "rgba(148,163,184,.07)";
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawShipShape(x, y, a, ghost) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(a);
+        ctx.beginPath();
+        ctx.moveTo(SHIP_R + 2, 0);
+        ctx.lineTo(-SHIP_R * 0.8, SHIP_R * 0.72);
+        ctx.lineTo(-SHIP_R * 0.4, 0);
+        ctx.lineTo(-SHIP_R * 0.8, -SHIP_R * 0.72);
+        ctx.closePath();
+        ctx.strokeStyle = ghost ? "rgba(165,243,252,.5)" : "#a5f3fc";
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+        if (keys.thrust && !ghost) {
+          ctx.beginPath();
+          ctx.moveTo(-SHIP_R * 0.55, 0);
+          ctx.lineTo(-SHIP_R * (1.1 + (tick % 6) * 0.1), 0);
+          ctx.strokeStyle = "#fbbf24";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function draw() {
+        if (!ctx) return;
+        ctx.save();
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (shakeT > 0) ctx.translate((rnd() - 0.5) * 5, (rnd() - 0.5) * 5);
+        ctx.fillStyle = "#060a14";
+        ctx.fillRect(-6, -6, W + 12, H + 12);
+
+        // 星空
+        for (let i = 0; i < stars.length; i++) {
+          const s = stars[i];
+          const tw = 0.35 + 0.65 * Math.abs(Math.sin((tick + s.p) * 0.02));
+          ctx.globalAlpha = tw * s.a;
+          ctx.fillStyle = "#e2e8f0";
+          ctx.fillRect(s.x, s.y, s.s, s.s);
+        }
+        ctx.globalAlpha = 1;
+
+        // 粒子
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 24));
+          ctx.fillStyle = p.col;
+          ctx.fillRect(p.x - 1.2, p.y - 1.2, 2.4, 2.4);
+        }
+        ctx.globalAlpha = 1;
+
+        // 岩石
+        for (let i = 0; i < rocks.length; i++) drawRock(rocks[i]);
+
+        // 飞碟
+        if (ufo) {
+          ctx.save();
+          ctx.translate(ufo.x, ufo.y);
+          ctx.strokeStyle = ufo.small ? "#f0abfc" : "#a5f3fc";
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, ufo.r, ufo.r * 0.45, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.ellipse(0, -ufo.r * 0.35, ufo.r * 0.5, ufo.r * 0.35, 0, Math.PI, 0);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // 飞碟子弹
+        ctx.fillStyle = "#f0abfc";
+        for (let i = 0; i < ufoShots.length; i++) {
+          const s = ufoShots[i];
+          ctx.beginPath(); ctx.arc(s.x, s.y, 2.4, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // 玩家子弹
+        ctx.fillStyle = "#fef08a";
+        for (let i = 0; i < bullets.length; i++) {
+          const b = bullets[i];
+          ctx.beginPath(); ctx.arc(b.x, b.y, 2, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // 飞船
+        if (!ship.dead && started) {
+          if (!(ship.invuln > 0 && Math.floor(tick / 5) % 2 === 0)) drawShipShape(ship.x, ship.y, ship.a, false);
+        }
+
+        // HUD
+        ctx.fillStyle = "rgba(255,255,255,.92)";
+        ctx.font = "700 13px system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText("分 " + score, 10, 20);
+        ctx.fillText("波 " + level, 10, 38);
+        ctx.textAlign = "right";
+        ctx.fillText("最高 " + best, W - 10, 20);
+        let hearts = "";
+        for (let i = 0; i < Math.max(0, lives); i++) hearts += "▲";
+        ctx.fillStyle = "#a5f3fc";
+        ctx.fillText(hearts, W - 10, 38);
+        ctx.restore();
+      }
+
+      function loop() {
+        raf = 0;
+        if (!running) return;
+        if (started && !over) physics();
+        else tick++;
+        draw();
+        raf = requestAnimationFrame(loop);
+      }
+
+      function showMsg(t, s, btn) {
+        const m = $("astMsg");
+        $("astMsgT").textContent = t;
+        $("astMsgS").textContent = s;
+        $("astAgain").textContent = btn || "开始游戏";
+        m.classList.add("show");
+      }
+      function hideMsg() { $("astMsg").classList.remove("show"); }
+
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < 70; i++) {
+          stars.push({ x: rnd() * W, y: rnd() * H, s: rnd() < 0.2 ? 2 : 1, a: 0.3 + rnd() * 0.7, p: rnd() * 300 });
+        }
+      }
+
+      function setupCanvas() {
+        cv = $("astCanvas");
+        dpr = Math.min(2, window.devicePixelRatio || 1);
+        if (dpr < 2) dpr = 2;
+        cv.width = W * dpr; cv.height = H * dpr;
+        ctx = cv.getContext("2d");
+      }
+
+      function startNew() {
+        newGame();
+        try { bumpUsage("asteroids"); } catch (e) {}
+      }
+
+      function bindHold(id, on, off) {
+        const el = $(id);
+        if (!el) return;
+        const down = (e) => { e.preventDefault(); on(); };
+        const up = (e) => { e.preventDefault(); off(); };
+        el.addEventListener("pointerdown", down);
+        el.addEventListener("pointerup", up);
+        el.addEventListener("pointerleave", up);
+        el.addEventListener("pointercancel", up);
+      }
+
+      function wire() {
+        if (wired) return;
+        wired = true;
+        setupCanvas();
+        initStars();
+        resetShip();
+
+        $("astNew").addEventListener("click", () => { startNew(); });
+        $("astAgain").addEventListener("click", () => { startNew(); });
+        cv.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          if (over || !started) { startNew(); return; }
+          fire();
+        });
+
+        bindHold("astL", () => { keys.left = true; }, () => { keys.left = false; });
+        bindHold("astR", () => { keys.right = true; }, () => { keys.right = false; });
+        bindHold("astT", () => { keys.thrust = true; }, () => { keys.thrust = false; });
+        bindHold("astF", () => { keys.fire = true; fire(); }, () => { keys.fire = false; });
+
+        document.addEventListener("keydown", (e) => {
+          const panel = $("asteroids");
+          if (!panel || !panel.classList.contains("active")) return;
+          const k = e.key;
+          if (k === "ArrowLeft" || k === "a" || k === "A") { e.preventDefault(); keys.left = true; }
+          else if (k === "ArrowRight" || k === "d" || k === "D") { e.preventDefault(); keys.right = true; }
+          else if (k === "ArrowUp" || k === "w" || k === "W") { e.preventDefault(); keys.thrust = true; }
+          else if (k === " " || k === "j" || k === "J") {
+            e.preventDefault();
+            if (over || !started) { startNew(); return; }
+            keys.fire = true; fire();
+          }
+          else if (k === "Enter") { if (over || !started) { e.preventDefault(); startNew(); } }
+        });
+        document.addEventListener("keyup", (e) => {
+          const k = e.key;
+          if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = false;
+          else if (k === "ArrowRight" || k === "d" || k === "D") keys.right = false;
+          else if (k === "ArrowUp" || k === "w" || k === "W") keys.thrust = false;
+          else if (k === " " || k === "j" || k === "J") keys.fire = false;
+        });
+      }
+
+      window.asteroidsRender = function () {
+        wire();
+        readBest();
+        if (!started) showMsg("☄️ 小行星", "旋转、点火、开炮——把漫天巨石轰成碎片，小心神出鬼没的飞碟。", "开始游戏");
+        if (!running) { running = true; raf = requestAnimationFrame(loop); }
+      };
+      window.asteroidsStop = function () {
+        running = false;
+        keys.left = keys.right = keys.thrust = keys.fire = false;
+        if (raf) { try { cancelAnimationFrame(raf); } catch (e) {} raf = 0; }
+      };
+
+      // ---- 测试钩子 ----
+      window.__astTest = {
+        state: function () {
+          return {
+            started: started, over: over, score: score, best: best, level: level, lives: lives,
+            rocks: rocks.length, bullets: bullets.length, ufo: !!ufo, ufoShots: ufoShots.length,
+            shipX: ship ? ship.x : 0, shipY: ship ? ship.y : 0, shipA: ship ? ship.a : 0,
+            shipVX: ship ? ship.vx : 0, shipVY: ship ? ship.vy : 0,
+            invuln: ship ? ship.invuln : 0, dead: ship ? ship.dead : false, tick: tick
+          };
+        },
+        seed: function (s) { _seed = s | 0; _useSeed = true; },
+        newGame: newGame,
+        physics: physics,
+        draw: draw,
+        fire: fire,
+        keys: keys,
+        spawnUfo: spawnUfo,
+        killShip: killShip,
+        rocksArr: function () { return rocks.map((r) => ({ x: r.x, y: r.y, sz: r.sz, r: r.r, vx: r.vx, vy: r.vy })); },
+        bulletsArr: function () { return bullets.map((b) => ({ x: b.x, y: b.y, vx: b.vx, vy: b.vy, life: b.life })); },
+        setShip: function (o) { Object.assign(ship, o); },
+        setRock: function (i, o) { if (rocks[i]) Object.assign(rocks[i], o); },
+        keepOneRock: function () { rocks = rocks.slice(0, 1); },
+        clearRocks: function () { rocks = []; },
+        addBullet: function (b) { bullets.push(b); },
+        setLives: function (n) { lives = n; },
+        setUfoTimer: function (n) { ufoTimer = n; },
+        getUfo: function () { return ufo ? { x: ufo.x, y: ufo.y, small: ufo.small, r: ufo.r, shot: ufo.shot } : null; },
+        torusDist: torusDist
+      };
+
+      BADGES.push(
+        { emoji: "\u2604\ufe0f", name: "太空清道夫", desc: "玩过一局小行星", test: function (u) { return (u.asteroids || 0) >= 1; } },
+        { emoji: "\ud83d\udef8", name: "飞碟猎人", desc: "在小行星里击落一架飞碟", test: function (u) { return (u.asteroidsufo || 0) >= 1; } }
+      );
+      QUOTES.push(
+        "小行星的生存法则：船永远在漂移，方向盘握在自己手里就不算失控。",
+        "大石头看着吓人，其实碎成小块之后才最难缠——问题也一样，别只盯着表面的大。",
+        "太空里没有刹车，想停下来就得朝反方向点火——纠错永远比硬撑体面。",
+        "子弹一次只有四发，机会也是：瞄准了再打，比乱枪打鸟强。",
+        "飞碟来的时候别慌，它越小越阴险——盯紧它，先下手为强。"
       );
     })();
     })();
