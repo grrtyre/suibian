@@ -1546,6 +1546,7 @@
         <button data-tab="pinball">🎰 弹珠台</button>
         <button data-tab="bomber">💣 炸弹人</button>
         <button data-tab="towerdef">🗼 塔防</button>
+        <button data-tab="qbert">🟧 跳跳金字塔</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7375,6 +7376,47 @@
       <div class="td-tip">🖱️ 点击空地选格子 → 点下方按钮建塔；点已建的塔可升级（最高 Lv.3）或按 7 折出售。⌨️ 数字 1/2/3 快速建 箭/冰/炮 塔，U 升级、X 出售、空格提前开波（按剩余秒数发奖金）、⏎ 回车重开。🏹 箭塔射速快、❄️ 冰塔让敌人减速一半、💥 炮塔范围溅射；🏃 黄色跑得快、🛡️ 灰色特别硬、每 5 波一只 👑 紫色 Boss 漏掉扣 3 条命。守满 10 波解锁「十波守城」徽章，最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="qbert">
+    <h2>🟧 跳跳金字塔</h2>
+    <p class="sub">1982 街机名作 Q*bert 复刻：操纵橙色小家伙在等距金字塔上斜向蹦跳，把每块方块都跳成目标色。小心滚落的红球和会追人的紫蛇🐍——跳上悬浮飞盘可以引蛇跳崖，帅气反杀 +500！</p>
+    <style>
+      #qbert .qb-wrap { max-width:420px; margin:0 auto; }
+      #qbert .qb-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #qbert .qb-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #qbert .qb-top button:hover { background:rgba(255,255,255,.12); }
+      #qbert .qb-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #qbert canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:manipulation; background:#0b0b1c; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #qbert .qb-pad { display:flex; gap:10px; justify-content:center; margin-top:10px; }
+      #qbert .qb-pad button { width:52px; height:44px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:1.05rem; cursor:pointer; }
+      #qbert .qb-pad button:hover { background:rgba(255,255,255,.12); }
+      #qbert .qb-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(11,11,28,.9); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #qbert .qb-msg.show { display:flex; }
+      #qbert .qb-msg .t { font-size:1.5rem; font-weight:800; }
+      #qbert .qb-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #qbert .qb-msg button { padding:9px 24px; border-radius:10px; border:0; background:#fb923c; color:#341303; font-weight:700; cursor:pointer; }
+      #qbert .qb-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="qb-wrap">
+      <div class="qb-top">
+        <button id="qbNew">🔄 新的一局</button>
+      </div>
+      <div class="qb-canvas-wrap">
+        <canvas id="qbCanvas"></canvas>
+        <div class="qb-msg" id="qbMsg">
+          <div class="t" id="qbMsgT">🟧 跳跳金字塔</div>
+          <div class="s" id="qbMsgS">把金字塔上所有方块跳成目标色！</div>
+          <button id="qbMsgBtn">开始蹦跶</button>
+        </div>
+      </div>
+      <div class="qb-pad">
+        <button id="qbUL" title="左上">↖️</button>
+        <button id="qbUR" title="右上">↗️</button>
+        <button id="qbDL" title="左下">↙️</button>
+        <button id="qbDR" title="右下">↘️</button>
+      </div>
+      <div class="qb-tip">⌨️ 方向键 / WASD 斜向跳（← 左上、↑ 右上、↓ 左下、→ 右下），⏎ 回车重开；📱 手机上直接点小人四周的斜向位置或用下方按钮。每把方块跳一步色 +25，跳完整座金字塔过关；第 2 关要跳两步变色，第 3 关起跳错会变回去！红球🔴碰到就没命，紫蛇🐍会一路追杀——站在边缘跳上 🛸 飞盘可回到塔顶，追得太紧的蛇会跟着摔下悬崖（+500）。接住绿球🟢冻结全场敌人。3 条命，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7742,6 +7784,7 @@
     if (id === "pinball") pinballRender();
     if (id === "bomber") bomberRender();
     if (id === "towerdef") towerdefRender();
+    if (id === "qbert") qbertRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7770,6 +7813,7 @@
     if (id !== "pinball" && typeof pinballStop === "function") pinballStop();
     if (id !== "bomber" && typeof bomberStop === "function") bomberStop();
     if (id !== "towerdef" && typeof towerdefStop === "function") towerdefStop();
+    if (id !== "qbert" && typeof qbertStop === "function") qbertStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7929,6 +7973,7 @@
     pinball: "弹珠台 弹珠 弹球 pinball 钢珠 挡板 缓冲柱 弹弓 落靶 物理 街机 经典 flipper 高分 game",
     bomber: "炸弹人 bomberman bomber 炸弹 爆破 迷宫 砖块 道具 火力 连环 幽灵 街机 经典 放炸弹 拆迁 game",
     towerdef: "塔防 tower defense towerdef 箭塔 冰塔 炮塔 守城 波次 防御 策略 升级 boss 溅射 减速 建塔 game",
+    qbert: "跳跳金字塔 qbert 金字塔 方块 变色 斜跳 蹦跳 蛇 飞盘 街机 经典 等距 立方体 弹跳 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8148,6 +8193,7 @@ splitbill:"tools",
     pinball:"games",
     bomber:"games",
     towerdef:"games",
+    qbert:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -37759,6 +37805,628 @@ splitbill:"tools",
       "守城靠的不是最贵的塔，而是放对位置的塔。",
       "第一波总是风平浪静，真正的考验都排在后面慢慢来。",
       "升级一座老塔，常常好过在新空地上再插一杆新旗。"
+    );
+  }
+})();
+(function () {
+  // ===== 🟧 跳跳金字塔 Q*bert =====
+  var W = 360, H = 480, ROWS = 7, CW = 48, STEPY = 40, TOPY = 96, SIDE = 15, DH = 24, HOPF = 14;
+  var LEVELS = [
+    { steps: 1, revert: false, cols: ["#2563eb", "#facc15"] },
+    { steps: 2, revert: false, cols: ["#2563eb", "#22d3ee", "#facc15"] },
+    { steps: 1, revert: true, cols: ["#7c3aed", "#fb923c"] },
+    { steps: 2, revert: true, cols: ["#0ea5e9", "#a3e635", "#f472b6"] }
+  ];
+  var DIRS = { UL: [-1, -1], UR: [-1, 0], DL: [1, 0], DR: [1, 1] };
+  var canvas = null, ctx = null, inited = false, active = false, rafId = null;
+  var best = 0, g = null;
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function saveBest() { try { localStorage.setItem("suibian_qbert", String(best)); } catch (e) {} }
+  function loadBest() { try { best = parseInt(localStorage.getItem("suibian_qbert") || "0", 10) || 0; } catch (e) { best = 0; } }
+  function lvConf(lv) { return LEVELS[Math.min(lv - 1, LEVELS.length - 1)]; }
+  function cubeExists(r, c) { return r >= 0 && r < ROWS && c >= 0 && c <= r; }
+  function posOf(r, c) { return { x: W / 2 + (c - r / 2) * CW, y: TOPY + r * STEPY }; }
+
+  function makeDiscs(rnd) {
+    var lRow = 1 + Math.floor(rnd() * 3);
+    var rRow = 1 + Math.floor(rnd() * 3);
+    return [
+      { r: lRow, c: -1, used: false },
+      { r: rRow, c: rRow + 1, used: false }
+    ];
+  }
+  function findDisc(r, c) {
+    if (!g) return null;
+    for (var i = 0; i < g.discs.length; i++) {
+      var d = g.discs[i];
+      if (!d.used && d.r === r && d.c === c) return d;
+    }
+    return null;
+  }
+  function discPos(d) {
+    var p = posOf(d.r, d.c);
+    return { x: p.x, y: p.y + 6 };
+  }
+
+  function resetLevel() {
+    g.cubes = [];
+    for (var r = 0; r < ROWS; r++) {
+      var row = [];
+      for (var c = 0; c <= r; c++) row.push(0);
+      g.cubes.push(row);
+    }
+    g.discs = makeDiscs(g.rnd);
+    g.ents = [];
+    g.coily = null;
+    g.player = { r: 0, c: 0, hop: null, fly: null, fall: null };
+    g.invuln = 100;
+    g.freeze = 0;
+    g.ballT = 130;
+    g.coilyT = 240;
+    g.greenT = 520;
+    g.clearFx = 0;
+    g.dying = 0;
+  }
+  function newGame(seed) {
+    if (seed === undefined) seed = (Date.now() & 0xfffff);
+    g = {
+      seed: seed, rnd: mulberry32(seed), lv: 1, score: 0, lives: 3,
+      frames: 0, over: false, win: false, banner: "", bannerT: 0
+    };
+    resetLevel();
+    hideMsg();
+  }
+  function nextLevel() {
+    g.lv++;
+    g.banner = ""; g.bannerT = 0;
+    resetLevel();
+  }
+
+  function spawnInt() { return Math.max(90, 210 - g.lv * 14); }
+  function stepWait() { return Math.max(20, 42 - g.lv * 3); }
+
+  function spawnTick() {
+    if (g.clearFx > 0 || g.dying > 0) return;
+    var reds = 0, greens = 0, i;
+    for (i = 0; i < g.ents.length; i++) {
+      if (g.ents[i].kind === "red") reds++;
+      if (g.ents[i].kind === "green") greens++;
+    }
+    g.ballT--;
+    if (g.ballT <= 0) {
+      g.ballT = spawnInt();
+      if (reds < 2 + Math.min(2, g.lv - 1)) {
+        g.ents.push({ kind: "red", r: 1, c: Math.floor(g.rnd() * 2), hop: null, wait: stepWait() + 10 });
+      }
+    }
+    if (!g.coily) {
+      g.coilyT--;
+      if (g.coilyT <= 0) {
+        var cl = { kind: "coily", r: 1, c: Math.floor(g.rnd() * 2), hop: null, wait: stepWait() + 16, snake: false };
+        g.ents.push(cl);
+        g.coily = cl;
+      }
+    }
+    if (greens === 0) {
+      g.greenT--;
+      if (g.greenT <= 0) {
+        g.greenT = 560 + Math.floor(g.rnd() * 380);
+        g.ents.push({ kind: "green", r: 1, c: Math.floor(g.rnd() * 2), hop: null, wait: stepWait() + 12 });
+      }
+    }
+  }
+
+  function entStartHop(ent, tr, tc) {
+    ent.hop = { fr: 0, total: HOPF, fr0: posOf(ent.r, ent.c), tr: tr, tc: tc };
+  }
+  function chooseBallDir(ent) {
+    var dc = g.rnd() < 0.5 ? 0 : 1;
+    return [ent.r + 1, ent.c + dc];
+  }
+  function hopDist(r1, c1, r2, c2) { return Math.abs(r1 - r2) + Math.abs(c1 - c2); }
+  function chooseSnakeDir(ent) {
+    var tr = g.player.r, tc = g.player.c;
+    var bestD = 1e9, pick = null, k, nr, nc, d0;
+    for (k in DIRS) {
+      nr = ent.r + DIRS[k][0]; nc = ent.c + DIRS[k][1];
+      if (!cubeExists(nr, nc)) continue;
+      d0 = hopDist(nr, nc, tr, tc);
+      if (d0 < bestD) { bestD = d0; pick = [nr, nc]; }
+    }
+    return pick;
+  }
+
+  function entTick(ent) {
+    if (ent.dead) return;
+    if (ent.falling !== undefined) {
+      ent.falling--;
+      if (ent.falling <= 0) ent.dead = true;
+      return;
+    }
+    if (ent.hop) {
+      ent.hop.fr++;
+      if (ent.hop.fr >= ent.hop.total) {
+        var tr = ent.hop.tr, tc = ent.hop.tc;
+        ent.hop = null;
+        if (!cubeExists(tr, tc)) { ent.dead = true; if (ent.kind === "coily") g.coily = null; return; }
+        ent.r = tr; ent.c = tc;
+        if (ent.kind === "coily" && !ent.snake && ent.r === ROWS - 1) {
+          ent.snake = true; ent.wait = stepWait() + 24;
+          return;
+        }
+        ent.wait = stepWait() + (ent.kind === "coily" && ent.snake ? 6 : 4);
+      }
+      return;
+    }
+    if (g.freeze > 0 && ent.kind !== "green") return;
+    ent.wait--;
+    if (ent.wait > 0) return;
+    var t;
+    if (ent.kind === "coily" && ent.snake) {
+      t = chooseSnakeDir(ent);
+      if (t) entStartHop(ent, t[0], t[1]); else ent.wait = 20;
+    } else {
+      t = chooseBallDir(ent);
+      if (t[0] >= ROWS) {
+        if (ent.kind === "coily") { ent.snake = true; ent.wait = stepWait(); return; }
+        entStartHop(ent, t[0], t[1]);
+      } else {
+        entStartHop(ent, t[0], t[1]);
+      }
+    }
+  }
+
+  function advanceColor(r, c) {
+    var conf = lvConf(g.lv);
+    var st = g.cubes[r][c];
+    if (st < conf.steps) {
+      g.cubes[r][c] = st + 1;
+      g.score += 25;
+    } else if (conf.revert) {
+      g.cubes[r][c] = st - 1;
+    }
+    checkWin();
+  }
+  function checkWin() {
+    var conf = lvConf(g.lv), r, c;
+    for (r = 0; r < ROWS; r++) for (c = 0; c <= r; c++) {
+      if (g.cubes[r][c] !== conf.steps) return;
+    }
+    var discsLeft = 0;
+    for (r = 0; r < g.discs.length; r++) if (!g.discs[r].used) discsLeft++;
+    g.score += 1000 + 250 * (g.lv - 1) + 250 * discsLeft;
+    g.clearFx = 100;
+    g.banner = "✨ 第 " + g.lv + " 关通关！"; g.bannerT = 100;
+    try { bumpUsage("qbert"); } catch (e) {}
+    try { if (typeof confettiBurst === "function") confettiBurst(120); } catch (e2) {}
+  }
+
+  function lureCheck(fromR, fromC) {
+    var s = g.coily;
+    if (!s || !s.snake || s.dead || s.falling !== undefined) return;
+    if (hopDist(s.r, s.c, fromR, fromC) <= 3) {
+      s.falling = 44;
+      s.hop = null;
+      g.coily = null;
+      g.score += 500;
+      g.banner = "🐍 蛇追着你跳崖了 +500！"; g.bannerT = 90;
+      try { bumpUsage("qbertcoily"); } catch (e) {}
+    }
+  }
+
+  function tryMove(dir) {
+    if (!g || g.over || g.clearFx > 0 || g.dying > 0) return false;
+    var p = g.player;
+    if (p.hop || p.fly || p.fall) return false;
+    var d = DIRS[dir];
+    if (!d) return false;
+    var tr = p.r + d[0], tc = p.c + d[1];
+    var from = posOf(p.r, p.c);
+    if (cubeExists(tr, tc)) {
+      p.hop = { fr: 0, total: HOPF, fr0: from, tr: tr, tc: tc, mode: "cube", fromR: p.r, fromC: p.c };
+    } else {
+      var disc = findDisc(tr, tc);
+      if (disc) {
+        p.hop = { fr: 0, total: HOPF, fr0: from, tr: tr, tc: tc, mode: "disc", disc: disc, fromR: p.r, fromC: p.c };
+      } else {
+        p.hop = { fr: 0, total: HOPF, fr0: from, tr: tr, tc: tc, mode: "off", fromR: p.r, fromC: p.c };
+      }
+    }
+    return true;
+  }
+
+  function finishPlayerHop() {
+    var p = g.player, h = p.hop;
+    p.hop = null;
+    if (h.mode === "disc") {
+      h.disc.used = true;
+      var dp = discPos(h.disc);
+      p.fly = { fr: 0, total: 80, x0: dp.x, y0: dp.y, x1: posOf(0, 0).x, y1: posOf(0, 0).y };
+      p.r = h.tr; p.c = h.tc;
+      lureCheck(h.fromR, h.fromC);
+    } else if (h.mode === "off") {
+      var tp = posOf(h.tr, h.tc);
+      p.fall = { fr: 0, x: tp.x, y: tp.y - 10, vy: 1.5 };
+    } else {
+      p.r = h.tr; p.c = h.tc;
+      advanceColor(p.r, p.c);
+    }
+  }
+
+  function startDying(msg) {
+    g.dying = 55;
+    g.banner = msg || "💀 被逮住了！"; g.bannerT = 55;
+  }
+  function afterDeath() {
+    g.lives--;
+    if (g.lives <= 0) { gameOver(); return; }
+    var i;
+    for (i = g.ents.length - 1; i >= 0; i--) g.ents.splice(i, 1);
+    g.coily = null;
+    g.player = { r: 0, c: 0, hop: null, fly: null, fall: null };
+    g.invuln = 140;
+    g.ballT = 140; g.coilyT = 260;
+  }
+  function gameOver() {
+    g.over = true;
+    if (g.score > best) best = g.score;
+    saveBest();
+    try { bumpUsage("qbert"); } catch (e) {}
+    showMsg("💀 游戏结束", "得分 " + g.score + " · 最高 " + best + "\n关卡 " + g.lv + "\n红球和紫蛇今天赢了，再来一把雪耻？", "再来一局");
+  }
+
+  function collisions() {
+    var p = g.player;
+    if (g.over || g.dying > 0 || g.invuln > 0 || p.hop || p.fly || p.fall) return;
+    for (var i = g.ents.length - 1; i >= 0; i--) {
+      var ent = g.ents[i];
+      if (ent.dead || ent.falling !== undefined || ent.hop) continue;
+      if (ent.r !== p.r || ent.c !== p.c) continue;
+      if (ent.kind === "green") {
+        g.ents.splice(i, 1);
+        g.score += 100;
+        g.freeze = 240;
+        g.banner = "🟢 时间冻结！+100"; g.bannerT = 80;
+      } else {
+        if (g.freeze > 0) continue;
+        startDying(ent.kind === "coily" && ent.snake ? "🐍 被蛇咬了！" : "🔴 撞上红球！");
+        return;
+      }
+    }
+  }
+
+  function update() {
+    if (!g || g.over) return;
+    g.frames++;
+    if (g.bannerT > 0) { g.bannerT--; if (g.bannerT === 0) g.banner = ""; }
+    if (g.clearFx > 0) {
+      g.clearFx--;
+      if (g.clearFx === 0) nextLevel();
+      return;
+    }
+    if (g.dying > 0) {
+      g.dying--;
+      if (g.dying === 0) afterDeath();
+      return;
+    }
+    if (g.invuln > 0) g.invuln--;
+    if (g.freeze > 0) g.freeze--;
+    var p = g.player;
+    if (p.fly) {
+      p.fly.fr++;
+      if (p.fly.fr >= p.fly.total) {
+        p.fly = null;
+        p.r = 0; p.c = 0;
+        advanceColor(0, 0);
+      }
+    } else if (p.fall) {
+      p.fall.fr++;
+      p.fall.vy += 0.5;
+      p.fall.y += p.fall.vy;
+      if (p.fall.fr >= 46) {
+        p.fall = null;
+        startDying("🕳️ 跳出金字塔了！");
+      }
+    } else if (p.hop) {
+      p.hop.fr++;
+      if (p.hop.fr >= p.hop.total) finishPlayerHop();
+    }
+    spawnTick();
+    for (var i = g.ents.length - 1; i >= 0; i--) {
+      entTick(g.ents[i]);
+      if (g.ents[i].dead) {
+        if (g.coily === g.ents[i]) g.coily = null;
+        g.ents.splice(i, 1);
+      }
+    }
+    collisions();
+  }
+
+  // ===== 渲染 =====
+  function shade(hex, f) {
+    var n = parseInt(hex.slice(1), 16);
+    var r = Math.max(0, Math.min(255, Math.floor(((n >> 16) & 255) * f)));
+    var gg = Math.max(0, Math.min(255, Math.floor(((n >> 8) & 255) * f)));
+    var b = Math.max(0, Math.min(255, Math.floor((n & 255) * f)));
+    return "rgb(" + r + "," + gg + "," + b + ")";
+  }
+  function hopPos(h) {
+    var t = h.fr / h.total;
+    var to = posOf(h.tr, h.tc);
+    var x = h.fr0.x + (to.x - h.fr0.x) * t;
+    var y = h.fr0.y + (to.y - h.fr0.y) * t - Math.sin(Math.PI * t) * 30;
+    return { x: x, y: y };
+  }
+  function drawCube(r, c) {
+    var conf = lvConf(g.lv);
+    var p = posOf(r, c);
+    var st = g.cubes[r][c];
+    var col = conf.cols[st];
+    if (g.clearFx > 0 && (Math.floor(g.frames / 6) % 2 === 0)) col = conf.cols[(st + 1) % conf.cols.length];
+    var hw = CW / 2, hh = DH / 2;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y - hh); ctx.lineTo(p.x + hw, p.y); ctx.lineTo(p.x, p.y + hh); ctx.lineTo(p.x - hw, p.y);
+    ctx.closePath();
+    ctx.fillStyle = col; ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,.35)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(p.x - hw, p.y); ctx.lineTo(p.x, p.y + hh); ctx.lineTo(p.x, p.y + hh + SIDE); ctx.lineTo(p.x - hw, p.y + SIDE);
+    ctx.closePath();
+    ctx.fillStyle = shade("#8b5cf6", 0.42); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(p.x + hw, p.y); ctx.lineTo(p.x, p.y + hh); ctx.lineTo(p.x, p.y + hh + SIDE); ctx.lineTo(p.x + hw, p.y + SIDE);
+    ctx.closePath();
+    ctx.fillStyle = shade("#8b5cf6", 0.26); ctx.fill();
+  }
+  function drawBall(x, y, col, frozen) {
+    ctx.beginPath();
+    ctx.arc(x, y - 9, 8, 0, Math.PI * 2);
+    ctx.fillStyle = frozen ? "rgba(148,163,184,.75)" : col;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x - 2.5, y - 11.5, 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.fill();
+  }
+  function drawSnake(x, y, frozen) {
+    var col = frozen ? "rgba(148,163,184,.8)" : "#a855f7";
+    ctx.beginPath(); ctx.arc(x, y - 6, 7, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y - 17, 6, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.arc(x - 2.4, y - 18.5, 1.8, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 2.4, y - 18.5, 1.8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#1e1b4b";
+    ctx.beginPath(); ctx.arc(x - 2.4, y - 18.3, 0.9, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 2.4, y - 18.3, 0.9, 0, Math.PI * 2); ctx.fill();
+  }
+  function drawPlayer(x, y) {
+    if (g.invuln > 0 && Math.floor(g.frames / 5) % 2 === 0 && !g.over) return;
+    ctx.beginPath(); ctx.arc(x, y - 10, 9, 0, Math.PI * 2); ctx.fillStyle = "#fb923c"; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x - 5, y - 4, 3, 4.5, 0.5, 0, Math.PI * 2); ctx.fillStyle = "#f97316"; ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.arc(x - 3, y - 13, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 3.5, y - 13, 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#1e293b";
+    ctx.beginPath(); ctx.arc(x - 2.6, y - 12.6, 1.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 3.9, y - 12.6, 1.3, 0, Math.PI * 2); ctx.fill();
+  }
+  function render() {
+    if (!ctx || !g) return;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#0b0b1c"; ctx.fillRect(0, 0, W, H);
+    var i;
+    for (i = 0; i < 26; i++) {
+      var sx = (i * 73 + 31) % W, sy = (i * 131 + 17) % H;
+      ctx.fillStyle = "rgba(255,255,255," + (0.08 + (i % 3) * 0.05) + ")";
+      ctx.fillRect(sx, sy, 2, 2);
+    }
+    var r, c;
+    for (r = 0; r < ROWS; r++) for (c = 0; c <= r; c++) drawCube(r, c);
+    for (i = 0; i < g.discs.length; i++) {
+      var d = g.discs[i];
+      if (d.used) continue;
+      var dp = discPos(d);
+      var fl = Math.sin(g.frames * 0.09 + i * 2) * 3;
+      ctx.beginPath();
+      ctx.ellipse(dp.x, dp.y + fl, 16, 6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "#22d3ee"; ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(dp.x, dp.y + fl - 2.5, 16, 6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "#67e8f9"; ctx.fill();
+    }
+    for (i = 0; i < g.ents.length; i++) {
+      var ent = g.ents[i];
+      var ep;
+      if (ent.falling !== undefined) {
+        ep = posOf(ent.r, ent.c);
+        ep = { x: ep.x, y: ep.y + (44 - ent.falling) * (44 - ent.falling) * 0.18 };
+      } else if (ent.hop) {
+        ep = hopPos(ent.hop);
+      } else {
+        ep = posOf(ent.r, ent.c);
+      }
+      var frozen = g.freeze > 0 && ent.kind !== "green";
+      if (ent.kind === "coily" && ent.snake) drawSnake(ep.x, ep.y - 8, frozen);
+      else drawBall(ep.x, ep.y - 6, ent.kind === "red" ? "#ef4444" : ent.kind === "green" ? "#22c55e" : "#a855f7", frozen);
+    }
+    var p = g.player, pp;
+    if (p.fly) {
+      var t = p.fly.fr / p.fly.total;
+      var fx = p.fly.x0 + (p.fly.x1 - p.fly.x0) * t;
+      var fy = p.fly.y0 + (p.fly.y1 - p.fly.y0) * t - Math.sin(Math.PI * t) * 24;
+      ctx.beginPath(); ctx.ellipse(fx, fy + 4, 16, 6, 0, 0, Math.PI * 2); ctx.fillStyle = "#22d3ee"; ctx.fill();
+      drawPlayer(fx, fy - 2);
+    } else if (p.fall) {
+      drawPlayer(p.fall.x, p.fall.y);
+    } else if (p.hop) {
+      pp = hopPos(p.hop);
+      drawPlayer(pp.x, pp.y - 8);
+    } else {
+      pp = posOf(p.r, p.c);
+      drawPlayer(pp.x, pp.y - 8);
+    }
+    var conf = lvConf(g.lv);
+    ctx.fillStyle = "rgba(255,255,255,.92)";
+    ctx.font = "bold 15px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("得分 " + g.score, 12, 24);
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,.6)";
+    ctx.fillText("最高 " + best, 12, 42);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "rgba(255,255,255,.92)";
+    ctx.font = "bold 14px system-ui, sans-serif";
+    ctx.fillText("第 " + g.lv + " 关", W - 12, 24);
+    var hearts = "";
+    for (i = 0; i < g.lives; i++) hearts += "❤️";
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.fillText(hearts || "💔", W - 12, 42);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,.65)";
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.fillText("目标色 →", W / 2 - 16, 24);
+    ctx.fillStyle = conf.cols[conf.steps];
+    ctx.fillRect(W / 2 + 14, 13, 16, 13);
+    ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.strokeRect(W / 2 + 14, 13, 16, 13);
+    if (g.freeze > 0) {
+      ctx.fillStyle = "rgba(103,232,249,.8)";
+      ctx.font = "bold 13px system-ui, sans-serif";
+      ctx.fillText("🟢 冻结 " + Math.ceil(g.freeze / 60) + "s", W / 2, H - 46);
+    }
+    if (g.banner) {
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      ctx.fillRect(0, H / 2 - 26, W, 46);
+      ctx.fillStyle = "#fef08a";
+      ctx.font = "bold 18px system-ui, sans-serif";
+      ctx.fillText(g.banner, W / 2, H / 2 + 3);
+    }
+    ctx.fillStyle = "rgba(255,255,255,.35)";
+    ctx.font = "11px system-ui, sans-serif";
+    ctx.fillText("斜向蹦跳 · 变完所有方块过关", W / 2, H - 16);
+  }
+
+  // ===== DOM =====
+  function el(id) { return document.getElementById(id); }
+  function showMsg(t, s, b) {
+    var m = el("qbMsg");
+    if (!m) return;
+    el("qbMsgT").textContent = t;
+    el("qbMsgS").textContent = s;
+    el("qbMsgBtn").textContent = b || "开始蹦跶";
+    m.classList.add("show");
+  }
+  function hideMsg() {
+    var m = el("qbMsg");
+    if (m) m.classList.remove("show");
+  }
+
+  function pointerDir(ev) {
+    if (!canvas || !g) return null;
+    var rect = canvas.getBoundingClientRect();
+    var sx = (ev.clientX - rect.left) / (rect.width || 1) * W;
+    var sy = (ev.clientY - rect.top) / (rect.height || 1) * H;
+    var p = g.player;
+    var pp = p.hop ? hopPos(p.hop) : posOf(p.r, p.c);
+    var dx = sx - pp.x, dy = sy - (pp.y - 10);
+    if (dy < 0) return dx < 0 ? "UL" : "UR";
+    return dx < 0 ? "DL" : "DR";
+  }
+
+  function init() {
+    if (inited) return;
+    canvas = el("qbCanvas");
+    if (!canvas) return;
+    canvas.width = W * 2; canvas.height = H * 2;
+    ctx = canvas.getContext("2d");
+    if (ctx && ctx.scale) ctx.scale(2, 2);
+    loadBest();
+    newGame();
+    g.over = true;
+    showMsg("🟧 跳跳金字塔", "斜向蹦跳，把所有方块跳成目标色！\n躲开红球🔴和紫蛇🐍，飞盘🛸能引蛇跳崖。", "开始蹦跶");
+    canvas.addEventListener("pointerdown", function (ev) {
+      if (!active || !g) return;
+      if (g.over) return;
+      var dir = pointerDir(ev);
+      if (dir) tryMove(dir);
+      if (ev.preventDefault) ev.preventDefault();
+    });
+    var btnNew = el("qbNew");
+    if (btnNew) btnNew.addEventListener("click", function () { newGame(); });
+    var btnMsg = el("qbMsgBtn");
+    if (btnMsg) btnMsg.addEventListener("click", function () { newGame(); });
+    var pads = { qbUL: "UL", qbUR: "UR", qbDL: "DL", qbDR: "DR" };
+    Object.keys(pads).forEach(function (id) {
+      var b = el(id);
+      if (b) b.addEventListener("click", function () { if (active && g && !g.over) tryMove(pads[id]); });
+    });
+    document.addEventListener("keydown", function (ev) {
+      if (!active || !g) return;
+      var k = ev.key;
+      if (k === "Enter") { newGame(); if (ev.preventDefault) ev.preventDefault(); return; }
+      if (g.over) return;
+      var map = {
+        ArrowLeft: "UL", ArrowUp: "UR", ArrowDown: "DL", ArrowRight: "DR",
+        a: "UL", w: "UR", s: "DL", d: "DR", A: "UL", W: "UR", S: "DL", D: "DR",
+        q: "UL", e: "UR", z: "DL", c: "DR"
+      };
+      if (map[k]) {
+        tryMove(map[k]);
+        if (ev.preventDefault) ev.preventDefault();
+      }
+    });
+    inited = true;
+  }
+
+  function loop() {
+    if (!active) return;
+    update();
+    render();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  window.qbertRender = function () {
+    init();
+    if (!inited) return;
+    if (active) return;
+    active = true;
+    loop();
+  };
+  window.qbertStop = function () {
+    active = false;
+    if (rafId !== null) {
+      try { cancelAnimationFrame(rafId); } catch (e) {}
+      rafId = null;
+    }
+  };
+  window.__qbertHooks = {
+    newGame: newGame, update: update, render: render, tryMove: tryMove,
+    getG: function () { return g; }, getBest: function () { return best; },
+    setBest: function (v) { best = v; }, saveBest: saveBest, loadBest: loadBest,
+    cubeExists: cubeExists, posOf: posOf, lvConf: lvConf, findDisc: findDisc,
+    lureCheck: lureCheck, gameOver: gameOver, checkWin: checkWin,
+    ROWS: ROWS, W: W, H: H, HOPF: HOPF, LEVELS: LEVELS, DIRS: DIRS
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🟧", name: "金字塔蹦迪", desc: "在跳跳金字塔里完整玩过一局", test: function (u) { return (u.qbert || 0) >= 1; } },
+      { emoji: "🛸", name: "引蛇跳崖", desc: "用飞盘骗紫蛇摔下金字塔", test: function (u) { return (u.qbertcoily || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "人生就像跳金字塔：每一步都会留下颜色，走回头路也算数。",
+      "追你的蛇未必比你聪明，它只是比你执着——所以要学会用飞盘。",
+      "有些方块要跳两次才变色，有些事要做两遍才做对。",
+      "站在塔顶往下看，每个格子都是自己一步步跳出来的。",
+      "别怕跳错颜色，大不了再跳一次，金字塔不会催你。"
     );
   }
 })();
