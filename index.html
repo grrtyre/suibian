@@ -1557,6 +1557,7 @@
         <button data-tab="typefall">⌨️ 打字雨</button>
         <button data-tab="fishy">🐟 大鱼吃小鱼</button>
         <button data-tab="miner">⛏️ 黄金矿工</button>
+        <button data-tab="pool">🎱 黑八台球</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7838,6 +7839,35 @@
       <div class="mn-tip">⛏️ 钩子自动左右摇摆，<b>空格 / ↓ / ⏎ / 点按屏幕</b>甩钩抓取。金块越大越值钱、💎 钻石 +500、💰 神秘钱袋随机开奖，石头又重又不值钱（拉回极慢，小心浪费时间）。<b>60 秒</b>内挖够左上角 🎯 目标金额即可深入下一层矿洞（目标更高、石头更多，还有过关加成 +200），时间到没挖够就收工失败。同一种子矿层布局完全可复现，最高分本地存档（suibian_miner），过关一次解锁「矿业大亨」徽章。</div>
     </div>
   </section>
+  <section class="panel" id="pool">
+    <h2>🎱 黑八台球</h2>
+    <style>
+      #pool .p8-wrap { max-width:420px; margin:0 auto; }
+      #pool .p8-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #pool .p8-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #pool .p8-top button:hover { background:rgba(255,255,255,.12); }
+      #pool .p8-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #pool canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#3d2413; box-shadow:0 12px 30px rgba(0,0,0,.5); cursor:crosshair; }
+      #pool .p8-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(8,26,16,.93); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #pool .p8-msg.show { display:flex; }
+      #pool .p8-msg .t { font-size:1.5rem; font-weight:800; }
+      #pool .p8-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #pool .p8-msg button { padding:9px 24px; border-radius:10px; border:0; background:#34d399; color:#052e1b; font-weight:700; cursor:pointer; }
+      #pool .p8-best { text-align:center; margin-top:8px; font-size:.88rem; opacity:.85; }
+      #pool .p8-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="p8-wrap">
+      <div class="p8-top">
+        <button id="p8New">🔄 重新开球</button>
+      </div>
+      <div class="p8-canvas-wrap">
+        <canvas id="p8Canvas" width="720" height="1120"></canvas>
+        <div class="p8-msg" id="p8Msg"><div class="t" id="p8MsgT"></div><div class="s" id="p8MsgS"></div><button id="p8MsgBtn">开始</button></div>
+      </div>
+      <div class="p8-best" id="p8Best"></div>
+      <div class="p8-tip">🎱 <b>拖动瞄准、松手出杆</b>：拖得越远力度越大（底部力度条实时显示），松手前可随意调整方向；键盘党用 <b>← →</b> 微调角度、<b>↑ ↓</b> 调力度、<b>空格 / ⏎</b> 出杆、<b>R</b> 重新开球。规则就一条：先把 7 颗彩球全部送进袋，<b>最后</b>再收黑八即可清台获胜；黑八提前落袋直接判负，母球落袋 -50 分并摆回置球点。进球 +100、同一杆连落多球有连击加成，清台还有黑八奖励（用杆越少奖励越高）。真实碰撞物理 + 库边反弹 + 同种子摆球可复现（mulberry32），最高分本地存档（suibian_pool），清台一次解锁「黑八传奇」徽章。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8216,6 +8246,7 @@
     if (id === "typefall") typefallRender();
     if (id === "fishy") fishyRender();
     if (id === "miner") minerRender();
+    if (id === "pool") poolRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8255,6 +8286,7 @@
     if (id !== "typefall" && typeof typefallStop === "function") typefallStop();
     if (id !== "fishy" && typeof fishyStop === "function") fishyStop();
     if (id !== "miner" && typeof minerStop === "function") minerStop();
+    if (id !== "pool" && typeof poolStop === "function") poolStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8425,6 +8457,7 @@
     typefall: "打字雨 typefall ztype 打字游戏 键盘 打字 单词 雨 街机 连击 打字练习 typing game arcade",
     fishy: "大鱼吃小鱼 fishy feeding frenzy 吃鱼 海洋 鲨鱼 街机 成长 大鱼 小鱼 水母 arcade fish ocean",
     miner: "黄金矿工 miner gold 挖金子 淘金 钩子 矿洞 钻石 金块 街机 arcade gold miner 抖金",
+    pool: "黑八台球 pool 台球 桌球 八号球 8ball billiards 斯诺克 snooker 街机 打台球 黑8 清台",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8655,6 +8688,7 @@ splitbill:"tools",
     typefall:"games",
     fishy:"games",
     miner:"games",
+    pool:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -43514,6 +43548,580 @@ splitbill:"tools",
       "拉上来是石头也别灰心，至少你排除了一个错误答案。",
       "神秘钱袋告诉我们：人生总得给未知留一钩。",
       "挖到钻石的人，都曾在石头堆里空手荡过很多回。"
+    );
+  }
+})();
+/* ====== 🎱 黑八台球 pool ====== */
+(function () {
+  "use strict";
+  var W = 360, H = 560, DPR = 2;
+  var BR = 9, PR = 16, CAP = 14.5;
+  var L = 30, R = 330, T = 30, B = 530;
+  var FRIC = 0.986, REST = 0.9, HITE = 0.98, MAXV = 13;
+  var CUEX = 180, CUEY = 430;
+  var POCKETS = [
+    { x: 30, y: 30 }, { x: 330, y: 30 },
+    { x: 26, y: 280 }, { x: 334, y: 280 },
+    { x: 30, y: 530 }, { x: 330, y: 530 }
+  ];
+  var COLS = ["#fbbf24", "#3b82f6", "#ef4444", "#a855f7", "#f97316", "#10b981", "#8d4f2a"];
+  var canvas = null, ctx = null, raf = 0, st = null, bound = false;
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function loadBest() {
+    var b = 0;
+    try { b = parseInt(localStorage.getItem("suibian_pool") || "0", 10) || 0; } catch (e) { b = 0; }
+    return b > 0 ? b : 0;
+  }
+  function saveBest(v) {
+    try { localStorage.setItem("suibian_pool", String(v)); } catch (e) {}
+  }
+  function updateBestLine() {
+    var el = document.getElementById("p8Best");
+    if (el && st) el.textContent = "🏆 最高分 " + st.best + " · 本局第 " + st.shots + " 杆";
+  }
+  function rack() {
+    var rng = st.rng;
+    var order = [1, 2, 3, 4, 5, 6, 7];
+    for (var i = order.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+    }
+    var rows = [[0], [-1, 1], [-2, 0, 2], [-1, 1]];
+    var slots = [];
+    for (var ri = 0; ri < rows.length; ri++) {
+      for (var ci = 0; ci < rows[ri].length; ci++) {
+        slots.push({
+          x: 180 + rows[ri][ci] * (BR + 0.8),
+          y: 150 - ri * (BR * 2 * 0.9)
+        });
+      }
+    }
+    st.balls = [];
+    st.balls.push({ id: 0, x: CUEX, y: CUEY, vx: 0, vy: 0, inPocket: false });
+    var k = 0;
+    for (var s = 0; s < slots.length; s++) {
+      var jx = (rng() - 0.5) * 1.2, jy = (rng() - 0.5) * 1.2;
+      var id = (s === 4) ? 8 : order[k++];
+      st.balls.push({ id: id, x: slots[s].x + jx, y: slots[s].y + jy, vx: 0, vy: 0, inPocket: false });
+    }
+  }
+  function newGame(seed) {
+    var s = (seed === undefined || seed === null) ? ((Date.now() ^ (Math.random() * 1e9)) >>> 0) : (seed >>> 0);
+    st = {
+      seed: s, rng: mulberry32(s),
+      balls: [], parts: [],
+      score: 0, shots: 0, fouls: 0,
+      phase: "aim", ang: -Math.PI / 2, pow: 0.55,
+      drag: false, dragX: 0, dragY: 0,
+      potted: [], banner: 0, bannerTxt: "", shake: 0,
+      over: false, won: false, idle: false,
+      best: loadBest(), t: 0
+    };
+    rack();
+    updateBestLine();
+  }
+  function cueBall() {
+    if (!st) return null;
+    for (var i = 0; i < st.balls.length; i++) if (st.balls[i].id === 0) return st.balls[i];
+    return null;
+  }
+  function aliveCount() {
+    var n = 0;
+    for (var i = 0; i < st.balls.length; i++) {
+      var b = st.balls[i];
+      if (!b.inPocket && b.id > 0 && b.id !== 8) n++;
+    }
+    return n;
+  }
+  function respawnCue() {
+    var cue = cueBall();
+    if (!cue) return;
+    var x = CUEX, y = CUEY, tries = 0;
+    while (tries < 80) {
+      var ok = true;
+      for (var i = 0; i < st.balls.length; i++) {
+        var o = st.balls[i];
+        if (o.id === 0 || o.inPocket) continue;
+        var dx = o.x - x, dy = o.y - y;
+        if (dx * dx + dy * dy < (BR * 2 + 4) * (BR * 2 + 4)) { ok = false; break; }
+      }
+      if (ok) break;
+      y -= 12;
+      if (y < T + BR + 4) { y = B - BR - 4; x = L + BR + 6 + tries * 7; }
+      tries++;
+    }
+    cue.x = x; cue.y = y; cue.vx = 0; cue.vy = 0; cue.inPocket = false;
+  }
+  function autoAim() {
+    var cue = cueBall();
+    if (!cue || cue.inPocket) return;
+    var tgt = null, bd = 1e9, only8 = aliveCount() === 0;
+    for (var i = 0; i < st.balls.length; i++) {
+      var b = st.balls[i];
+      if (b.inPocket || b.id === 0) continue;
+      if (!only8 && b.id === 8) continue;
+      var dx = b.x - cue.x, dy = b.y - cue.y, d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; tgt = b; }
+    }
+    if (tgt) st.ang = Math.atan2(tgt.y - cue.y, tgt.x - cue.x);
+  }
+  function shoot() {
+    if (!st || st.over || st.idle || st.phase !== "aim") return;
+    var cue = cueBall();
+    if (!cue || cue.inPocket) return;
+    var v = MAXV * clamp(st.pow, 0.1, 1);
+    cue.vx = Math.cos(st.ang) * v;
+    cue.vy = Math.sin(st.ang) * v;
+    st.shots++;
+    st.potted = [];
+    st.phase = "moving";
+    updateBestLine();
+  }
+  function nearPocket(x, y) {
+    for (var i = 0; i < POCKETS.length; i++) {
+      var dx = x - POCKETS[i].x, dy = y - POCKETS[i].y;
+      if (dx * dx + dy * dy < (PR + 6) * (PR + 6)) return POCKETS[i];
+    }
+    return null;
+  }
+  function potBall(b, pk) {
+    b.inPocket = true;
+    b.vx = 0; b.vy = 0;
+    st.potted.push(b.id);
+    for (var i = 0; i < 10; i++) {
+      st.parts.push({
+        x: pk.x, y: pk.y,
+        vx: (st.rng() - 0.5) * 4, vy: (st.rng() - 0.5) * 4 - 1,
+        life: 22 + st.rng() * 10,
+        col: b.id === 0 ? "#f8fafc" : (b.id === 8 ? "#334155" : COLS[(b.id - 1) % 7])
+      });
+    }
+  }
+  function stepPhysics() {
+    var SUB = 3, i, j, b;
+    for (var sIt = 0; sIt < SUB; sIt++) {
+      for (i = 0; i < st.balls.length; i++) {
+        b = st.balls[i];
+        if (b.inPocket) continue;
+        b.x += b.vx / SUB;
+        b.y += b.vy / SUB;
+        var pk = nearPocket(b.x, b.y);
+        if (pk) {
+          var pdx = b.x - pk.x, pdy = b.y - pk.y;
+          if (pdx * pdx + pdy * pdy < CAP * CAP) { potBall(b, pk); continue; }
+        } else {
+          if (b.x < L + BR) { b.x = L + BR; if (b.vx < 0) b.vx = -b.vx * REST; }
+          if (b.x > R - BR) { b.x = R - BR; if (b.vx > 0) b.vx = -b.vx * REST; }
+          if (b.y < T + BR) { b.y = T + BR; if (b.vy < 0) b.vy = -b.vy * REST; }
+          if (b.y > B - BR) { b.y = B - BR; if (b.vy > 0) b.vy = -b.vy * REST; }
+        }
+      }
+      for (i = 0; i < st.balls.length; i++) {
+        var a = st.balls[i];
+        if (a.inPocket) continue;
+        for (j = i + 1; j < st.balls.length; j++) {
+          var c = st.balls[j];
+          if (c.inPocket) continue;
+          var dx = c.x - a.x, dy = c.y - a.y;
+          var d2 = dx * dx + dy * dy, min = BR * 2;
+          if (d2 > 0.0001 && d2 < min * min) {
+            var d = Math.sqrt(d2), nx = dx / d, ny = dy / d;
+            var ov = (min - d) / 2;
+            a.x -= nx * ov; a.y -= ny * ov;
+            c.x += nx * ov; c.y += ny * ov;
+            var p = (a.vx - c.vx) * nx + (a.vy - c.vy) * ny;
+            if (p > 0) {
+              a.vx -= p * nx * HITE; a.vy -= p * ny * HITE;
+              c.vx += p * nx * HITE; c.vy += p * ny * HITE;
+            }
+          }
+        }
+      }
+    }
+    var moving = false;
+    for (i = 0; i < st.balls.length; i++) {
+      b = st.balls[i];
+      if (b.inPocket) continue;
+      b.vx *= FRIC; b.vy *= FRIC;
+      if (b.vx * b.vx + b.vy * b.vy < 0.0036) { b.vx = 0; b.vy = 0; }
+      else moving = true;
+      b.x = clamp(b.x, L + BR - 14, R - BR + 14);
+      b.y = clamp(b.y, T + BR - 14, B - BR + 14);
+    }
+    return moving;
+  }
+  function settleShot() {
+    var gained = 0, colored = 0, k;
+    for (k = 0; k < st.potted.length; k++) {
+      var id = st.potted[k];
+      if (id > 0 && id !== 8) {
+        gained += 100 + colored * 50;
+        colored++;
+      }
+    }
+    if (gained > 0) {
+      st.score += gained;
+      st.banner = 62;
+      st.bannerTxt = (colored > 1 ? "🔥 连落 " + colored + " 球！" : "🎯 进球！") + " +" + gained;
+    }
+    var cue = cueBall();
+    var scratched = cue && cue.inPocket;
+    var eightIn = st.potted.indexOf(8) >= 0;
+    if (eightIn) {
+      if (aliveCount() === 0 && !scratched) {
+        var bonus = 500 + Math.max(0, 18 - st.shots) * 40;
+        st.score += bonus;
+        st.over = true; st.won = true;
+        st.phase = "over";
+        if (st.score > st.best) { st.best = st.score; saveBest(st.best); }
+        try { bumpUsage("pool"); } catch (e) {}
+        try { bumpUsage("poolwin"); } catch (e) {}
+        try { confettiBurst(); } catch (e) {}
+        showMsg("🏆 清台胜利！", "黑八稳稳落袋，全场清台！\n总分 " + st.score + "（含黑八奖励 +" + bonus + "）\n共用 " + st.shots + " 杆 · 失误 " + st.fouls + " 次\n🏅 最高分 " + st.best, "再来一局");
+        updateBestLine();
+        return;
+      }
+      st.over = true; st.won = false;
+      st.phase = "over";
+      if (st.score > st.best) { st.best = st.score; saveBest(st.best); }
+      try { bumpUsage("pool"); } catch (e) {}
+      showMsg("💀 黑八提前落袋", (scratched ? "黑八和母球一起掉了…… " : "台面上还有彩球，黑八却先进洞了……") + "\n本局作负，得分 " + st.score + "\n🏅 最高分 " + st.best, "重新开球");
+      updateBestLine();
+      return;
+    }
+    if (scratched) {
+      st.fouls++;
+      st.score = Math.max(0, st.score - 50);
+      st.banner = 62;
+      st.bannerTxt = "⚠️ 母球落袋 -50";
+      respawnCue();
+    }
+    st.phase = "aim";
+    autoAim();
+    updateBestLine();
+  }
+  function update() {
+    if (!st || st.idle || st.over) return;
+    st.t++;
+    if (st.banner > 0) st.banner--;
+    if (st.shake > 0) st.shake--;
+    for (var i = st.parts.length - 1; i >= 0; i--) {
+      var p = st.parts[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life--;
+      if (p.life <= 0) st.parts.splice(i, 1);
+    }
+    if (st.phase === "moving") {
+      var moving = stepPhysics();
+      if (!moving) settleShot();
+    }
+  }
+  function drawBall(b) {
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    var col = b.id === 0 ? "#f8fafc" : (b.id === 8 ? "#16181d" : COLS[(b.id - 1) % 7]);
+    ctx.beginPath();
+    ctx.arc(1.5, 2, BR, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0,0,0,.32)";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 0, BR, 0, Math.PI * 2);
+    ctx.fillStyle = col;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-3, -3.4, BR * 0.42, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,.42)";
+    ctx.fill();
+    if (b.id > 0) {
+      ctx.fillStyle = b.id === 8 ? "#f1f5f9" : "rgba(255,255,255,.92)";
+      ctx.font = "bold 8px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(b.id), 0, 0.5);
+    }
+    ctx.restore();
+  }
+  function render() {
+    if (!ctx || !st) return;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (st.shake > 0) ctx.translate((st.rng() - 0.5) * st.shake, (st.rng() - 0.5) * st.shake);
+    ctx.fillStyle = "#3d2413";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#54341c";
+    ctx.fillRect(10, 10, W - 20, H - 20);
+    var g = ctx.createLinearGradient(0, T, 0, B);
+    g.addColorStop(0, "#0e7a42");
+    g.addColorStop(0.5, "#0b6b3a");
+    g.addColorStop(1, "#095e33");
+    ctx.fillStyle = g;
+    ctx.fillRect(L - 8, T - 8, R - L + 16, B - T + 16);
+    ctx.strokeStyle = "rgba(255,255,255,.08)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(L, 390); ctx.lineTo(R, 390);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(180, 150, 2.4, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,.22)";
+    ctx.fill();
+    for (var pi = 0; pi < POCKETS.length; pi++) {
+      var pk = POCKETS[pi];
+      ctx.beginPath();
+      ctx.arc(pk.x, pk.y, PR, 0, Math.PI * 2);
+      ctx.fillStyle = "#33200f";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(pk.x, pk.y, PR - 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = "#07090c";
+      ctx.fill();
+    }
+    var cue = cueBall();
+    if (st.phase === "aim" && cue && !cue.inPocket && !st.over && !st.idle) {
+      var len = 60 + st.pow * 90;
+      var ex = cue.x + Math.cos(st.ang) * len;
+      var ey = cue.y + Math.sin(st.ang) * len;
+      ctx.save();
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = "rgba(255,255,255,.65)";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(cue.x + Math.cos(st.ang) * (BR + 2), cue.y + Math.sin(st.ang) * (BR + 2));
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.arc(ex, ey, 3.2, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255,.8)";
+      ctx.fill();
+      var sx = cue.x - Math.cos(st.ang) * (BR + 6);
+      var sy = cue.y - Math.sin(st.ang) * (BR + 6);
+      var tx = cue.x - Math.cos(st.ang) * (BR + 6 + 44 + st.pow * 26);
+      var ty = cue.y - Math.sin(st.ang) * (BR + 6 + 44 + st.pow * 26);
+      ctx.strokeStyle = "#d9a05b";
+      ctx.lineWidth = 3.4;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      ctx.restore();
+    }
+    for (var bi = 0; bi < st.balls.length; bi++) {
+      if (!st.balls[bi].inPocket) drawBall(st.balls[bi]);
+    }
+    for (var pi2 = 0; pi2 < st.parts.length; pi2++) {
+      var pt = st.parts[pi2];
+      ctx.globalAlpha = Math.max(0, Math.min(1, pt.life / 22));
+      ctx.fillStyle = pt.col;
+      ctx.fillRect(pt.x - 1.6, pt.y - 1.6, 3.2, 3.2);
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = "rgba(0,0,0,.4)";
+    ctx.fillRect(0, 0, W, 22);
+    ctx.fillStyle = "#e2f3ff";
+    ctx.font = "bold 12px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText("💰 " + st.score, 14, 12);
+    ctx.fillText("🎯 第 " + st.shots + " 杆", 108, 12);
+    ctx.fillText("剩 " + aliveCount() + " 彩球 + 黑八", 216, 12);
+    if (st.phase === "aim" && !st.idle && !st.over) {
+      ctx.fillStyle = "rgba(0,0,0,.45)";
+      ctx.fillRect(90, H - 22, 180, 12);
+      var pg = ctx.createLinearGradient(90, 0, 270, 0);
+      pg.addColorStop(0, "#34d399");
+      pg.addColorStop(0.6, "#fbbf24");
+      pg.addColorStop(1, "#ef4444");
+      ctx.fillStyle = pg;
+      ctx.fillRect(92, H - 20, 176 * clamp(st.pow, 0, 1), 8);
+      ctx.fillStyle = "#e2f3ff";
+      ctx.font = "10px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("力度", 180, H - 30);
+    }
+    if (st.banner > 0) {
+      ctx.globalAlpha = Math.min(1, st.banner / 26);
+      ctx.fillStyle = "#facc15";
+      ctx.font = "bold 19px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(st.bannerTxt, W / 2, 250);
+      ctx.globalAlpha = 1;
+      ctx.textAlign = "left";
+    }
+  }
+  function showMsg(t, s, btn) {
+    var box = document.getElementById("p8Msg");
+    var tt = document.getElementById("p8MsgT");
+    var ss = document.getElementById("p8MsgS");
+    var bb = document.getElementById("p8MsgBtn");
+    if (!box) return;
+    if (tt) tt.textContent = t;
+    if (ss) ss.textContent = s;
+    if (bb) bb.textContent = btn || "开始";
+    box.classList.add("show");
+  }
+  function hideMsg() {
+    var box = document.getElementById("p8Msg");
+    if (box) box.classList.remove("show");
+  }
+  function startPlay() {
+    if (!st || st.over) newGame();
+    st.idle = false;
+    hideMsg();
+  }
+  function isActive() {
+    var sec = document.getElementById("pool");
+    return !!(sec && sec.classList.contains("active"));
+  }
+  function canvasPos(e) {
+    if (!canvas || !canvas.getBoundingClientRect) return { x: W / 2, y: H / 2 };
+    var r = canvas.getBoundingClientRect();
+    var sx = r.width > 0 ? W / r.width : 1;
+    var sy = r.height > 0 ? H / r.height : 1;
+    return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy };
+  }
+  function onPointerDown(e) {
+    if (!isActive() || !st) return;
+    if (st.idle || st.over) { startPlay(); return; }
+    if (st.phase !== "aim") return;
+    var p = canvasPos(e);
+    st.drag = true;
+    st.dragX = p.x; st.dragY = p.y;
+    var cue = cueBall();
+    if (cue && !cue.inPocket) {
+      var dx = p.x - cue.x, dy = p.y - cue.y;
+      if (dx * dx + dy * dy > 36) st.ang = Math.atan2(dy, dx);
+    }
+  }
+  function onPointerMove(e) {
+    if (!isActive() || !st || !st.drag || st.phase !== "aim") return;
+    var p = canvasPos(e);
+    st.dragX = p.x; st.dragY = p.y;
+    var cue = cueBall();
+    if (cue && !cue.inPocket) {
+      var dx = p.x - cue.x, dy = p.y - cue.y;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d > 6) {
+        st.ang = Math.atan2(dy, dx);
+        st.pow = clamp((d - 14) / 230, 0.12, 1);
+      }
+    }
+  }
+  function onPointerUp() {
+    if (!st || !st.drag) return;
+    st.drag = false;
+    if (!isActive() || st.phase !== "aim" || st.idle || st.over) return;
+    var cue = cueBall();
+    if (!cue || cue.inPocket) return;
+    var dx = st.dragX - cue.x, dy = st.dragY - cue.y;
+    if (dx * dx + dy * dy >= 26 * 26) shoot();
+  }
+  function onKey(e) {
+    if (!isActive() || !st) return;
+    var tgt = e.target;
+    if (tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA")) return;
+    var k = e.key;
+    if (k === "Enter") {
+      if (e.preventDefault) e.preventDefault();
+      if (st.over || st.idle) { startPlay(); return; }
+      shoot();
+      return;
+    }
+    if (st.over || st.idle) {
+      if (k === " " || k === "Spacebar") { if (e.preventDefault) e.preventDefault(); startPlay(); }
+      return;
+    }
+    if (k === "ArrowLeft" || k === "a" || k === "A") {
+      if (e.preventDefault) e.preventDefault();
+      st.ang -= 0.045;
+    } else if (k === "ArrowRight" || k === "d" || k === "D") {
+      if (e.preventDefault) e.preventDefault();
+      st.ang += 0.045;
+    } else if (k === "ArrowUp" || k === "w" || k === "W") {
+      if (e.preventDefault) e.preventDefault();
+      st.pow = clamp(st.pow + 0.06, 0.12, 1);
+    } else if (k === "ArrowDown" || k === "s" || k === "S") {
+      if (e.preventDefault) e.preventDefault();
+      st.pow = clamp(st.pow - 0.06, 0.12, 1);
+    } else if (k === " " || k === "Spacebar") {
+      if (e.preventDefault) e.preventDefault();
+      shoot();
+    } else if (k === "r" || k === "R") {
+      if (e.preventDefault) e.preventDefault();
+      newGame();
+      st.idle = false;
+      hideMsg();
+    }
+  }
+  function bindOnce() {
+    if (bound) return;
+    bound = true;
+    document.addEventListener("keydown", onKey);
+    var btnNew = document.getElementById("p8New");
+    if (btnNew) btnNew.addEventListener("click", function () { newGame(); st.idle = false; hideMsg(); });
+    var btnMsg = document.getElementById("p8MsgBtn");
+    if (btnMsg) btnMsg.addEventListener("click", startPlay);
+    if (canvas) {
+      canvas.addEventListener("pointerdown", onPointerDown);
+      canvas.addEventListener("pointermove", onPointerMove);
+      canvas.addEventListener("pointerup", onPointerUp);
+      canvas.addEventListener("pointercancel", onPointerUp);
+    }
+  }
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    update();
+    render();
+  }
+  window.poolRender = function () {
+    if (!canvas) {
+      canvas = document.getElementById("p8Canvas");
+      if (!canvas) return;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      ctx = canvas.getContext("2d");
+    }
+    bindOnce();
+    if (!st) {
+      newGame();
+      st.idle = true;
+      showMsg("🎱 黑八台球", "拖动瞄准、松手出杆，先把 7 颗彩球全部打进，\n最后再收黑八即可清台获胜！\n黑八提前落袋直接判负，母球落袋 -50 分。\n键盘党：← → 微调角度，↑ ↓ 调力度，空格出杆。", "开球");
+    }
+    if (!raf) loop();
+  };
+  window.poolStop = function () {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+  window.__p8Hooks = {
+    mulberry32: mulberry32, newGame: newGame, rack: rack, shoot: shoot,
+    stepPhysics: stepPhysics, settleShot: settleShot, update: update, render: render,
+    startPlay: startPlay, onKey: onKey, onPointerDown: onPointerDown,
+    onPointerMove: onPointerMove, onPointerUp: onPointerUp,
+    respawnCue: respawnCue, autoAim: autoAim, cueBall: cueBall, aliveCount: aliveCount,
+    loadBest: loadBest, saveBest: saveBest, isActive: isActive,
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    getRaf: function () { return raf; },
+    consts: { W: W, H: H, BR: BR, PR: PR, CAP: CAP, L: L, R: R, T: T, B: B, MAXV: MAXV, POCKETS: POCKETS, CUEX: CUEX, CUEY: CUEY }
+  };
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🎱", name: "清台新秀", desc: "完整打完一局黑八台球", test: function (u) { return (u.pool || 0) >= 1; } },
+      { emoji: "🏅", name: "黑八传奇", desc: "在黑八台球中清台获胜", test: function (u) { return (u.poolwin || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "出杆之前先想三步，人生也一样。",
+      "力度太猛容易洗袋，做事太急容易翻车。",
+      "黑八要留到最后打，好牌要留到关键时刻出。",
+      "母球落袋不可怕，可怕的是下一杆还不长记性。",
+      "清台的秘诀不是每杆都进，而是每杆都给下一杆留好位置。"
     );
   }
 })();
