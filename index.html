@@ -1550,6 +1550,7 @@
         <button data-tab="digdug">⛏️ 挖地小子</button>
         <button data-tab="snakeio">🐍 蛇蛇大作战</button>
         <button data-tab="helix">🌀 螺旋塔跳跃</button>
+        <button data-tab="knight">♞ 骑士巡游</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7535,6 +7536,64 @@
       <div class="hx-tip">🖱️ 在画面上左右拖动旋转塔身；⌨️ ← → / A D 旋转，⏎ 回车重开；📱 手机可长按下方两个按钮旋转。小球只会垂直下落，把缺口转到小球正下方就能穿层；连穿 3 层化身🔥火球可砸穿任意平台（含红色危险层，同时解锁「破界火球」徽章）；普通状态踩到红色层损失 1 条命。落到金色底座即通关进入更险的下一层塔，最高分本地存档。</div>
     </div>
   </section>
+  <!-- 骑士巡游 -->
+  <section class="panel" id="knight">
+    <h2>♞ 骑士巡游</h2>
+    <style>
+      #knight .kt-wrap { max-width:440px; margin:0 auto; }
+      #knight .kt-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #knight .kt-top button, #knight .kt-size button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #knight .kt-top button:hover, #knight .kt-size button:hover { background:rgba(255,255,255,.12); }
+      #knight .kt-size { display:flex; gap:8px; justify-content:center; margin-bottom:10px; }
+      #knight .kt-size button.on { background:#facc15; color:#3b2f03; border-color:#facc15; font-weight:700; }
+      #knight .kt-board-wrap { position:relative; width:100%; max-width:400px; margin:0 auto; }
+      #knight .kt-board { display:grid; gap:0; width:100%; aspect-ratio:1/1; border-radius:12px; overflow:hidden; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #knight .kt-cell { position:relative; border:0; padding:0; font-size:clamp(.7rem,3vw,1.05rem); font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .12s; aspect-ratio:1/1; }
+      #knight .kt-light { background:#e8d5ae; color:#5b4a26; }
+      #knight .kt-dark { background:#a97e4f; color:#f5ead2; }
+      #knight .kt-cell.kt-done.kt-light { background:#c9e6c6; color:#2f5d33; }
+      #knight .kt-cell.kt-done.kt-dark { background:#7fae7c; color:#f0fff0; }
+      #knight .kt-cell.kt-legal::after { content:""; position:absolute; width:26%; height:26%; border-radius:50%; background:rgba(37,99,235,.55); box-shadow:0 0 8px rgba(37,99,235,.7); }
+      #knight .kt-cell.kt-hint { outline:3px solid #f97316; outline-offset:-3px; }
+      #knight .kt-cell.kt-hint::after { background:rgba(249,115,22,.75); box-shadow:0 0 10px rgba(249,115,22,.9); }
+      #knight .kt-cell.kt-head { background:#facc15 !important; color:#1f2937 !important; font-size:clamp(1.1rem,5vw,1.7rem); }
+      #knight .kt-cell.kt-start::before { content:""; position:absolute; inset:0; box-shadow:inset 0 0 0 2px rgba(220,38,38,.55); pointer-events:none; }
+      #knight .kt-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+      #knight .kt-info { text-align:center; margin-top:10px; font-size:.9rem; opacity:.9; }
+      #knight .kt-best { text-align:center; margin-top:4px; font-size:.8rem; opacity:.65; }
+      #knight .kt-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(20,24,40,.92); border-radius:12px; color:#fff; text-align:center; padding:20px; z-index:3; }
+      #knight .kt-msg.show { display:flex; }
+      #knight .kt-msg .t { font-size:1.4rem; font-weight:800; }
+      #knight .kt-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #knight .kt-msg button { padding:9px 24px; border-radius:10px; border:0; background:#facc15; color:#3b2f03; font-weight:700; cursor:pointer; }
+      #knight .kt-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="kt-wrap">
+      <div class="kt-size">
+        <button data-n="5">5×5 入门</button>
+        <button data-n="6" class="on">6×6 进阶</button>
+        <button data-n="8">8×8 大师</button>
+      </div>
+      <div class="kt-top">
+        <button id="ktNew">🔄 再来一局</button>
+        <button id="ktUndo">↩️ 悔一步</button>
+        <button id="ktHint">💡 提示</button>
+        <button id="ktDemo">🤖 AI 演示</button>
+      </div>
+      <div class="kt-board-wrap">
+        <div class="kt-board" id="ktBoard"></div>
+        <svg class="kt-svg" id="ktSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+        <div class="kt-msg" id="ktMsg">
+          <div class="t" id="ktMsgT">♞ 骑士巡游</div>
+          <div class="s" id="ktMsgS">让骑士踏遍棋盘的每一格，每格只走一次！</div>
+          <button id="ktMsgBtn">再来一局</button>
+        </div>
+      </div>
+      <div class="kt-info" id="ktInfo">点击任意格子放下骑士，开始巡游</div>
+      <div class="kt-best" id="ktBest"></div>
+      <div class="kt-tip">🖱️ 点任意格子放下骑士（红框标记起点），之后只能按「马走日」跳到蓝点提示的未访问格；走满全盘即获胜，无路可走则被困。💡 每局 3 次提示（橙色格 = Warnsdorff 法则推荐、出路最少的格子优先）；🤖 AI 演示会从当前局面自动走完（演示不计入成就与纪录）。⌨️ U 悔一步 / H 提示 / ⏎ 重开。小知识：5×5 棋盘只有从与四角同色的格子出发才有解。完成 8×8 巡游可解锁「八八纵横」徽章，各尺寸最快用时本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7906,6 +7965,7 @@
     if (id === "digdug") digdugRender();
     if (id === "snakeio") snakeioRender();
     if (id === "helix") helixRender();
+    if (id === "knight") knightRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7938,6 +7998,7 @@
     if (id !== "digdug" && typeof digdugStop === "function") digdugStop();
     if (id !== "snakeio" && typeof snakeioStop === "function") snakeioStop();
     if (id !== "helix" && typeof helixStop === "function") helixStop();
+    if (id !== "knight" && typeof knightStop === "function") knightStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8101,6 +8162,7 @@
     digdug: "挖地小子 digdug 挖土 地道 隉道 打气 气筒 岩石 落石 恶龙 喷火 街机 经典 挖掘 地底 game",
     snakeio: "蛇蛇大作战 snakeio slither 贪吃蛇 大作战 io 混战 对战 AI 加速 击杀 排行榜 蛇 game",
     helix: "螺旋塔跳跃 helix jump 螺旋 塔 下落 弹跳 火球 旋转 缺口 街机 反应 game",
+    knight: "骑士巡游 knight tour 骑士 马走日 棋盘 谜题 puzzle 提示 演示 益智 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8324,6 +8386,7 @@ splitbill:"tools",
     digdug:"games",
     snakeio:"games",
     helix:"games",
+    knight:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -40429,6 +40492,379 @@ splitbill:"tools",
       "每一层塔都有出口，只是角度问题。"
     );
   }
+(function () {
+  "use strict";
+  // ♞ 骑士巡游（Knight's Tour）模块
+  var DELTA = [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]];
+  var SIZES = [5, 6, 8];
+  var bound = false, timerId = null, demoId = null;
+  var rec = { b5: 0, b6: 0, b8: 0, wins: 0 };
+  var st = null;
+
+  function saveRec() { try { localStorage.setItem("suibian_knight", JSON.stringify(rec)); } catch (e) {} }
+  function loadRec() {
+    try {
+      var raw = localStorage.getItem("suibian_knight");
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && typeof o === "object") {
+          rec.b5 = parseInt(o.b5, 10) || 0;
+          rec.b6 = parseInt(o.b6, 10) || 0;
+          rec.b8 = parseInt(o.b8, 10) || 0;
+          rec.wins = parseInt(o.wins, 10) || 0;
+        }
+      }
+    } catch (e) {}
+  }
+
+  function newGame(n) {
+    if (SIZES.indexOf(n) < 0) n = 6;
+    st = {
+      N: n, path: [], over: false, win: false, demo: false,
+      hints: 3, hintCell: -1, startT: 0, endT: 0, nodes: 0
+    };
+  }
+
+  function inBoard(n, r, c) { return r >= 0 && r < n && c >= 0 && c < n; }
+  function legalMoves(path, n, pos) {
+    var out = [], r = Math.floor(pos / n), c = pos % n, i, nr, nc, idx;
+    for (i = 0; i < 8; i++) {
+      nr = r + DELTA[i][0]; nc = c + DELTA[i][1];
+      if (!inBoard(n, nr, nc)) continue;
+      idx = nr * n + nc;
+      if (path.indexOf(idx) < 0) out.push(idx);
+    }
+    return out;
+  }
+  function degree(path, n, pos) { return legalMoves(path, n, pos).length; }
+  // Warnsdorff：出路最少的格子优先
+  function warnsdorffPick(path, n, pos) {
+    var ms = legalMoves(path, n, pos);
+    if (!ms.length) return -1;
+    var best = -1, bd = 99, i, d;
+    for (i = 0; i < ms.length; i++) {
+      var p2 = path.concat([ms[i]]);
+      d = degree(p2, n, ms[i]);
+      if (d < bd || (d === bd && ms[i] < best)) { bd = d; best = ms[i]; }
+    }
+    return best;
+  }
+  // 带回溯的求解器（Warnsdorff 排序），返回完整路径或 null
+  function solveFrom(path, n, cap) {
+    if (!path.length) return null;
+    cap = cap || 250000;
+    var total = n * n, nodes = 0;
+    var cur = path.slice();
+    function dfs() {
+      if (cur.length === total) return true;
+      if (++nodes > cap) return false;
+      var pos = cur[cur.length - 1];
+      var ms = legalMoves(cur, n, pos);
+      ms.sort(function (a, b) {
+        var da = degree(cur.concat([a]), n, a), db = degree(cur.concat([b]), n, b);
+        return da - db || a - b;
+      });
+      for (var i = 0; i < ms.length; i++) {
+        cur.push(ms[i]);
+        if (dfs()) return true;
+        cur.pop();
+      }
+      return false;
+    }
+    var ok = dfs();
+    if (st) st.nodes = nodes;
+    return ok ? cur : null;
+  }
+
+  function elapsedSec() {
+    if (!st || !st.startT) return 0;
+    var end = st.endT || Date.now();
+    return Math.max(1, Math.round((end - st.startT) / 1000));
+  }
+
+  function win() {
+    st.over = true; st.win = true; st.endT = Date.now();
+    stopTimer();
+    if (!st.demo) {
+      var sec = elapsedSec(), key = "b" + st.N;
+      if (!rec[key] || sec < rec[key]) rec[key] = sec;
+      rec.wins += 1;
+      saveRec();
+      try { bumpUsage("knight"); } catch (e) {}
+      if (st.N === 8) { try { bumpUsage("knight8"); } catch (e) {} }
+      try { confettiBurst(90); } catch (e) {}
+      showMsg("🎉 巡游完成！", st.N + "×" + st.N + " 棋盘 " + st.path.length + " 步全部走完\n用时 " + sec + " 秒" + (rec[key] === sec ? "（本尺寸最快纪录！）" : "") + "\n累计完成 " + rec.wins + " 次巡游");
+    } else {
+      showMsg("🤖 演示完成", "骑士替你走完了剩下的路。\n换你亲手来一遍吧——亲手完成才算数哦。");
+    }
+  }
+  function fail() {
+    st.over = true; st.win = false; st.endT = Date.now();
+    stopTimer();
+    showMsg("💀 骑士被困住了", "走了 " + st.path.length + " / " + (st.N * st.N) + " 格，前方已无路可走。\n可以点「悔一步」退回去换条路，\n或者「再来一局」重整旗鼓。");
+  }
+
+  function clickCell(idx) {
+    if (!st || st.over || demoId !== null) return false;
+    if (!st.path.length) {
+      st.path.push(idx);
+      st.startT = Date.now();
+      startTimer();
+    } else {
+      var pos = st.path[st.path.length - 1];
+      if (legalMoves(st.path, st.N, pos).indexOf(idx) < 0) return false;
+      st.path.push(idx);
+    }
+    st.hintCell = -1;
+    if (st.path.length === st.N * st.N) { win(); render(); return true; }
+    if (!legalMoves(st.path, st.N, st.path[st.path.length - 1]).length) { fail(); render(); return true; }
+    render();
+    return true;
+  }
+
+  function undo() {
+    if (!st || !st.path.length || demoId !== null) return false;
+    if (st.over && st.win) return false;
+    st.over = false; st.win = false; st.endT = 0;
+    st.path.pop();
+    st.hintCell = -1;
+    hideMsg();
+    if (st.path.length && !timerId) startTimer();
+    if (!st.path.length) { stopTimer(); st.startT = 0; }
+    render();
+    return true;
+  }
+
+  function hint() {
+    if (!st || st.over || !st.path.length || st.hints <= 0 || demoId !== null) return -1;
+    var pick = warnsdorffPick(st.path, st.N, st.path[st.path.length - 1]);
+    if (pick < 0) return -1;
+    st.hints -= 1;
+    st.hintCell = pick;
+    render();
+    return pick;
+  }
+
+  function demo() {
+    if (!st || st.over || demoId !== null) return;
+    if (!st.path.length) {
+      st.path.push(0);
+      st.startT = Date.now();
+    }
+    var full = solveFrom(st.path, st.N, 250000);
+    if (!full) {
+      showMsg("🤔 当前局面无解", "从这个走法组合出发，骑士无法踏遍全盘。\n（5×5 棋盘只有与四角同色的起点才有解）\n试试「悔一步」或换个起点吧。");
+      st.over = true;
+      stopTimer();
+      render();
+      return;
+    }
+    st.demo = true;
+    var i = st.path.length;
+    stopTimer();
+    hideMsg();
+    render();
+    demoId = setInterval(function () {
+      if (!st || i >= full.length) {
+        if (demoId !== null) { clearInterval(demoId); demoId = null; }
+        return;
+      }
+      st.path.push(full[i]); i += 1;
+      if (st.path.length === st.N * st.N) {
+        clearInterval(demoId); demoId = null;
+        win();
+      }
+      render();
+    }, 120);
+  }
+
+  // ---------- DOM ----------
+  function $k(id) { return document.getElementById(id); }
+  function showMsg(t, s) {
+    var m = $k("ktMsg");
+    if (!m) return;
+    var te = $k("ktMsgT"), se = $k("ktMsgS");
+    if (te) te.textContent = t;
+    if (se) se.textContent = s;
+    m.classList.add("show");
+  }
+  function hideMsg() {
+    var m = $k("ktMsg");
+    if (m) m.classList.remove("show");
+  }
+  function fmtTime(sec) {
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function startTimer() {
+    if (timerId !== null) return;
+    timerId = setInterval(updateInfo, 500);
+  }
+  function stopTimer() {
+    if (timerId !== null) { clearInterval(timerId); timerId = null; }
+  }
+  function updateInfo() {
+    var el = $k("ktInfo");
+    if (!el || !st) return;
+    var total = st.N * st.N;
+    var t = st.startT ? fmtTime(elapsedSec()) : "00:00";
+    el.textContent = "已走 " + st.path.length + " / " + total + " 格 · 用时 " + t + " · 剩余提示 " + st.hints;
+    var be = $k("ktBest");
+    if (be) {
+      var key = "b" + st.N;
+      be.textContent = rec[key] ? ("本尺寸最快 " + fmtTime(rec[key]) + " · 累计完成 " + rec.wins + " 次") : ("尚未在 " + st.N + "×" + st.N + " 上完成过巡游");
+    }
+  }
+
+  function buildBoard() {
+    var bd = $k("ktBoard");
+    if (!bd || !st) return;
+    bd.innerHTML = "";
+    bd.style.gridTemplateColumns = "repeat(" + st.N + ", 1fr)";
+    var n = st.N, total = n * n, i;
+    for (i = 0; i < total; i++) {
+      var cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = "kt-cell " + ((Math.floor(i / n) + i % n) % 2 ? "kt-dark" : "kt-light");
+      cell.setAttribute("data-i", String(i));
+      (function (idx) {
+        cell.addEventListener("click", function () { clickCell(idx); });
+      })(i);
+      bd.appendChild(cell);
+    }
+  }
+
+  function render() {
+    var bd = $k("ktBoard");
+    if (!bd || !st) return;
+    var n = st.N, total = n * n;
+    var cells = bd.children;
+    if (cells.length !== total) buildBoard();
+    cells = bd.children;
+    var head = st.path.length ? st.path[st.path.length - 1] : -1;
+    var legal = {};
+    if (head >= 0 && !st.over) {
+      var ms = legalMoves(st.path, n, head);
+      for (var j = 0; j < ms.length; j++) legal[ms[j]] = true;
+    }
+    var order = {};
+    for (var k = 0; k < st.path.length; k++) order[st.path[k]] = k + 1;
+    for (var i = 0; i < total; i++) {
+      var c = cells[i];
+      if (!c) continue;
+      var cls = "kt-cell " + ((Math.floor(i / n) + i % n) % 2 ? "kt-dark" : "kt-light");
+      if (order[i]) cls += " kt-done";
+      if (i === head) cls += " kt-head";
+      if (legal[i]) cls += " kt-legal";
+      if (i === st.hintCell) cls += " kt-hint";
+      if (st.path.length && i === st.path[0]) cls += " kt-start";
+      c.className = cls;
+      c.textContent = i === head ? "♞" : (order[i] ? String(order[i]) : (!st.path.length ? "" : ""));
+    }
+    // SVG 路径轨迹
+    var svg = $k("ktSvg");
+    if (svg) {
+      var pts = [];
+      for (var p = 0; p < st.path.length; p++) {
+        var idx2 = st.path[p];
+        var cx = ((idx2 % n) + 0.5) / n * 100, cy = (Math.floor(idx2 / n) + 0.5) / n * 100;
+        pts.push(cx.toFixed(2) + "," + cy.toFixed(2));
+      }
+      var line = svg.firstChild;
+      if (line) line.setAttribute("points", pts.join(" "));
+    }
+    updateInfo();
+  }
+
+  function restart(n) {
+    if (demoId !== null) { clearInterval(demoId); demoId = null; }
+    stopTimer();
+    newGame(n || (st ? st.N : 6));
+    hideMsg();
+    var bs = document.querySelectorAll("#knight .kt-size button");
+    for (var i = 0; i < bs.length; i++) {
+      bs[i].classList[parseInt(bs[i].getAttribute("data-n"), 10) === st.N ? "add" : "remove"]("on");
+    }
+    buildBoard();
+    render();
+  }
+
+  function onKey(e) {
+    var sec = $k("knight");
+    if (!sec || !sec.classList.contains("active")) return;
+    if (e.key === "u" || e.key === "U") { undo(); e.preventDefault(); }
+    else if (e.key === "h" || e.key === "H") { hint(); e.preventDefault(); }
+    else if (e.key === "Enter") { restart(); e.preventDefault(); }
+  }
+
+  function bind() {
+    if (bound) return;
+    bound = true;
+    loadRec();
+    var svg = $k("ktSvg");
+    if (svg) {
+      var pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      pl.setAttribute("fill", "none");
+      pl.setAttribute("stroke", "rgba(250,204,21,.65)");
+      pl.setAttribute("stroke-width", "1.6");
+      pl.setAttribute("stroke-linecap", "round");
+      pl.setAttribute("stroke-linejoin", "round");
+      svg.appendChild(pl);
+    }
+    var bs = document.querySelectorAll("#knight .kt-size button");
+    for (var i = 0; i < bs.length; i++) {
+      (function (btn) {
+        btn.addEventListener("click", function () { restart(parseInt(btn.getAttribute("data-n"), 10)); });
+      })(bs[i]);
+    }
+    var bNew = $k("ktNew"), bUndo = $k("ktUndo"), bHint = $k("ktHint"), bDemo = $k("ktDemo"), bMsg = $k("ktMsgBtn");
+    if (bNew) bNew.addEventListener("click", function () { restart(); });
+    if (bUndo) bUndo.addEventListener("click", function () { undo(); });
+    if (bHint) bHint.addEventListener("click", function () { hint(); });
+    if (bDemo) bDemo.addEventListener("click", function () { demo(); });
+    if (bMsg) bMsg.addEventListener("click", function () {
+      if (st && st.over && !st.win && st.path.length) { undo(); } else { restart(); }
+    });
+    document.addEventListener("keydown", onKey);
+    restart(6);
+  }
+
+  window.knightRender = function () {
+    if (!$k("ktBoard")) return;
+    bind();
+    if (st && st.path.length && !st.over && !st.demo && demoId === null) startTimer();
+    render();
+  };
+  window.knightStop = function () {
+    stopTimer();
+    if (demoId !== null) { clearInterval(demoId); demoId = null; }
+  };
+  window.__knightHooks = {
+    newGame: newGame, restart: restart, clickCell: clickCell, undo: undo, hint: hint,
+    demo: demo, win: win, fail: fail,
+    legalMoves: legalMoves, degree: degree, warnsdorffPick: warnsdorffPick, solveFrom: solveFrom,
+    getSt: function () { return st; },
+    getRec: function () { return rec; },
+    saveRec: saveRec, loadRec: loadRec,
+    elapsedSec: elapsedSec
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "♞", name: "巡游骑士", desc: "亲手完成一次完整的骑士巡游", test: function (u) { return (u.knight || 0) >= 1; } },
+      { emoji: "🐎", name: "八八纵横", desc: "在 8×8 大棋盘上完成骑士巡游", test: function (u) { return (u.knight8 || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "马走日，路走心，一步一格不回头。",
+      "出路最少的格子先走，这是骑士的智慧。",
+      "被困住时，先回头看看来时的路。",
+      "每个格子只经过一次，像极了时间。",
+      "好的起点，是巡游成功的一半。"
+    );
+  }
+})();
 })();
 </script>
 </body>
