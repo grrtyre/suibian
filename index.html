@@ -1552,6 +1552,7 @@
         <button data-tab="helix">🌀 螺旋塔跳跃</button>
         <button data-tab="knight">♞ 骑士巡游</button>
         <button data-tab="peggle">🎯 弹珠打钉</button>
+        <button data-tab="watersort">🧪 倒水排序</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7630,6 +7631,62 @@
       <div class="pg-tip">🖱️ 移动鼠标瞄准（带弹道预览虚线），点击发射；⌨️ ← → 微调角度、空格/⏎ 发射。弹珠会在钉子间弹跳，碰过的钉子在弹珠落地后消失：🔵 蓝钉 10 分、🍊 橙钉 100 分、💚 绿钉立得 +1 球。清光全部橙钉即过关（最后一颗橙钉 +500 撒花），关卡越深钉阵越刁钻；底部🧺接珠篮左右巡逻，弹珠落篮免费返还 1 球。球用完且橙钉未清则一局结束，最高分本地存档（suibian_peggle）。清过一关可解锁「清橙大师」徽章。</div>
     </div>
   </section>
+  <!-- 倒水排序 -->
+  <section class="panel" id="watersort">
+    <h2>🧪 倒水排序</h2>
+    <style>
+      #watersort .wsx-wrap { max-width:620px; margin:0 auto; }
+      #watersort .wsx-hud { display:flex; justify-content:center; gap:18px; flex-wrap:wrap; margin-bottom:6px; font-size:.9rem; }
+      #watersort .wsx-hud b { color:#facc15; }
+      #watersort .wsx-stage { position:relative; }
+      #watersort .wsx-board { display:flex; flex-wrap:wrap; justify-content:center; gap:18px 14px; padding:16px 4px 6px; min-height:190px; }
+      #watersort .wsx-cell { display:flex; flex-direction:column; align-items:center; gap:5px; }
+      #watersort .wsx-key { font-size:.72rem; opacity:.45; }
+      #watersort .wsx-tube { width:42px; height:148px; box-sizing:border-box; border:2px solid rgba(255,255,255,.32); border-radius:8px 8px 21px 21px; display:flex; flex-direction:column-reverse; overflow:hidden; cursor:pointer; background:rgba(255,255,255,.05); transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+      #watersort .wsx-tube:hover { border-color:rgba(255,255,255,.6); }
+      #watersort .wsx-tube.sel { transform:translateY(-12px); border-color:#facc15; box-shadow:0 12px 24px rgba(250,204,21,.35); }
+      #watersort .wsx-tube.done { border-color:#22c55e; box-shadow:0 0 14px rgba(34,197,94,.4); }
+      #watersort .wsx-seg { flex:0 0 25%; box-shadow:inset 0 2px 3px rgba(255,255,255,.28), inset 0 -2px 3px rgba(0,0,0,.28); animation:wsxPop .22s ease; }
+      @keyframes wsxPop { from { transform:scaleY(.5); opacity:.4; } to { transform:scaleY(1); opacity:1; } }
+      #watersort .wsx-seg.k1 { background:#ef4444; } #watersort .wsx-seg.k2 { background:#f97316; }
+      #watersort .wsx-seg.k3 { background:#facc15; } #watersort .wsx-seg.k4 { background:#22c55e; }
+      #watersort .wsx-seg.k5 { background:#14b8a6; } #watersort .wsx-seg.k6 { background:#3b82f6; }
+      #watersort .wsx-seg.k7 { background:#8b5cf6; } #watersort .wsx-seg.k8 { background:#ec4899; }
+      #watersort .wsx-seg.k9 { background:#94a3b8; }
+      #watersort .wsx-msg { position:absolute; inset:0; display:none; flex-direction:column; gap:10px; align-items:center; justify-content:center; background:rgba(10,12,24,.85); border-radius:14px; text-align:center; padding:18px; z-index:3; }
+      #watersort .wsx-msg.show { display:flex; }
+      #watersort .wsx-msg .t { font-size:1.3rem; font-weight:800; }
+      #watersort .wsx-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #watersort .wsx-msg button { padding:9px 24px; border-radius:10px; border:0; background:#facc15; color:#3b2f03; font-weight:700; cursor:pointer; }
+      #watersort .wsx-btns { display:flex; justify-content:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
+      #watersort .wsx-btns button { padding:8px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:inherit; cursor:pointer; font-size:.9rem; }
+      #watersort .wsx-btns button:hover { background:rgba(255,255,255,.16); }
+      #watersort .wsx-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="wsx-wrap">
+      <div class="wsx-hud">
+        <span>🏆 关卡 <b id="wsxLv">1</b></span>
+        <span>🎨 颜色 <b id="wsxColors">4</b></span>
+        <span>👣 步数 <b id="wsxMoves">0</b></span>
+        <span>✅ 累计通关 <b id="wsxWins">0</b></span>
+      </div>
+      <div class="wsx-stage">
+        <div class="wsx-board" id="wsxBoard"></div>
+        <div class="wsx-msg" id="wsxMsg">
+          <div class="t" id="wsxMsgT">🎉 通关！</div>
+          <div class="s" id="wsxMsgS"></div>
+          <button id="wsxMsgBtn">下一关 ▶</button>
+        </div>
+      </div>
+      <div class="wsx-btns">
+        <button id="wsxUndo">↩ 悔一步 (U)</button>
+        <button id="wsxRestart">🔄 重开本关 (R)</button>
+        <button id="wsxShuffle">🎲 换一副 (N)</button>
+      </div>
+      <div class="wsx-best" id="wsxBest" style="text-align:center;margin-top:8px;font-size:.88rem;opacity:.85;"></div>
+      <div class="wsx-tip">🖱️ 点一根试管选中（会跳起来），再点另一根把顶部同色的水整段倒过去；只能倒进空管或顶色相同且有空位的管子。把每种颜色各自集满一整管即通关！关卡无限，颜色从 4 种一路涨到 9 种、越倒越乱——但每一关都由「反向倒水」生成，保证必定有解。⌨️ 数字键选管 / U 悔一步（不限次）/ R 重开本关 / N 换一副 / ⏎ 下一关。进度自动本地存档（suibian_watersort），通关 7 色局解锁「分层大师」徽章。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8003,6 +8060,7 @@
     if (id === "helix") helixRender();
     if (id === "knight") knightRender();
     if (id === "peggle") peggleRender();
+    if (id === "watersort") watersortRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8037,6 +8095,7 @@
     if (id !== "helix" && typeof helixStop === "function") helixStop();
     if (id !== "knight" && typeof knightStop === "function") knightStop();
     if (id !== "peggle" && typeof peggleStop === "function") peggleStop();
+    if (id !== "watersort" && typeof watersortStop === "function") watersortStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8202,6 +8261,7 @@
     helix: "螺旋塔跳跃 helix jump 螺旋 塔 下落 弹跳 火球 旋转 缺口 街机 反应 game",
     knight: "骑士巡游 knight tour 骑士 马走日 棋盘 谜题 puzzle 提示 演示 益智 game",
     peggle: "弹珠打钉 peggle 弹珠 打钉 弹弓 弹跳 物理 发射 橘钉 橙钉 接珠篮 街机 弹射 game",
+    watersort: "倒水排序 watersort water sort 试管 倒水 排序 颜色 分层 益智 解谜 puzzle 悖棋 换一副 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8427,6 +8487,7 @@ splitbill:"tools",
     helix:"games",
     knight:"games",
     peggle:"games",
+    watersort:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -41390,6 +41451,292 @@ splitbill:"tools",
       "最后一颗橙钉，值得多绕几个弯。",
       "接珠篮一直在动，机会也是。",
       "打偏了没关系，下一球还在手里。"
+    );
+  }
+})();
+(function () {
+  // 🧪 倒水排序（Water Sort Puzzle）模块
+  var CAP = 4, MAXC = 9;
+  var $w = function (id) { return document.getElementById(id); };
+  var bound = false;
+  var g = null;    // { lv, salt, best, wins, tubes, sel, moves, hist, won, msgMode }
+  var KEYS = "1234567890-";
+
+  function mulberry32(seed) {
+    var t0 = seed >>> 0;
+    return function () {
+      t0 = (t0 + 0x6D2B79F5) >>> 0;
+      var t = t0;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function colorsFor(lv) { return Math.min(3 + Math.ceil(lv / 2), MAXC); }
+  function topRun(t) {
+    if (!t.length) return { c: 0, run: 0 };
+    var c = t[t.length - 1], run = 1;
+    while (run < t.length && t[t.length - 1 - run] === c) run++;
+    return { c: c, run: run };
+  }
+  function isMono(t) {
+    if (!t.length) return false;
+    for (var i = 1; i < t.length; i++) if (t[i] !== t[0]) return false;
+    return true;
+  }
+  function isSolved(st) {
+    for (var i = 0; i < st.length; i++) {
+      var t = st[i];
+      if (t.length === 0) continue;
+      if (t.length !== CAP || !isMono(t)) return false;
+    }
+    return true;
+  }
+
+  /* ---------- 关卡生成：从已排好的终局反向倒水打乱，保证必定有解 ---------- */
+  function genLevel(lv, salt) {
+    var C = colorsFor(lv), st = [];
+    var rnd = mulberry32((lv * 7919 + salt * 104729 + 12345) >>> 0);
+    for (var attempt = 0; attempt < 25; attempt++) {
+      st = [];
+      var c, i;
+      for (c = 1; c <= C; c++) { var t = []; for (i = 0; i < CAP; i++) t.push(c); st.push(t); }
+      st.push([]); st.push([]);
+      var M = 40 + C * 30 + Math.min(lv * 6, 120), done = 0;
+      for (var it = 0; it < M * 5 && done < M; it++) {
+        var a = Math.floor(rnd() * st.length), A = st[a];
+        if (!A.length) continue;
+        var tr = topRun(A), ks = [], k;
+        for (k = 1; k < tr.run; k++) ks.push(k);          // 留住顶色，正向可整段倒回
+        if (tr.run === A.length) ks.push(tr.run);          // 整管同色才允许一次倒空
+        if (!ks.length) continue;
+        var k0 = ks[Math.floor(rnd() * ks.length)], bs = [];
+        for (var b = 0; b < st.length; b++) {
+          if (b === a) continue;
+          var B = st[b];
+          if (CAP - B.length < k0) continue;
+          if (B.length && B[B.length - 1] === tr.c) continue; // 目标顶色不同，逆向恰好整段
+          bs.push(b);
+        }
+        if (!bs.length) continue;
+        var b0 = bs[Math.floor(rnd() * bs.length)];
+        for (var m = 0; m < k0; m++) st[b0].push(st[a].pop());
+        done++;
+      }
+      if (!isSolved(st)) return st;
+    }
+    return st;
+  }
+
+  /* ---------- 规则 ---------- */
+  function canPour(st, a, b) {
+    if (a === b) return false;
+    var A = st[a], B = st[b];
+    if (!A || !B || !A.length || B.length >= CAP) return false;
+    if (!B.length) return true;
+    return B[B.length - 1] === A[A.length - 1];
+  }
+  function pour(st, a, b) {
+    var tr = topRun(st[a]);
+    var n = Math.min(tr.run, CAP - st[b].length);
+    for (var i = 0; i < n; i++) st[b].push(st[a].pop());
+    return n;
+  }
+  function isDeadlocked(st) {
+    if (isSolved(st)) return false;
+    for (var a = 0; a < st.length; a++) {
+      var A = st[a];
+      if (!A.length) continue;
+      var mono = isMono(A);
+      for (var b = 0; b < st.length; b++) {
+        if (a === b) continue;
+        var B = st[b];
+        if (B.length >= CAP) continue;
+        if (!B.length) { if (!mono) return false; continue; } // 同色管倒空管属无效步
+        if (B[B.length - 1] === A[A.length - 1]) return false;
+      }
+    }
+    return true;
+  }
+
+  /* ---------- 存档 ---------- */
+  function save() {
+    try { localStorage.setItem("suibian_watersort", JSON.stringify({ lv: g.lv, salt: g.salt, best: g.best, wins: g.wins })); } catch (e) {}
+  }
+  function load() {
+    var d = { lv: 1, salt: 0, best: 0, wins: 0 };
+    try {
+      var raw = JSON.parse(localStorage.getItem("suibian_watersort") || "{}");
+      if (raw && typeof raw === "object") {
+        d.lv = Math.max(1, parseInt(raw.lv, 10) || 1);
+        d.salt = Math.max(0, parseInt(raw.salt, 10) || 0);
+        d.best = Math.max(0, parseInt(raw.best, 10) || 0);
+        d.wins = Math.max(0, parseInt(raw.wins, 10) || 0);
+      }
+    } catch (e) {}
+    return d;
+  }
+
+  /* ---------- 渲染 ---------- */
+  function render() {
+    var board = $w("wsxBoard");
+    if (!board || !g || !g.tubes) return;
+    var html = "";
+    for (var i = 0; i < g.tubes.length; i++) {
+      var t = g.tubes[i];
+      var full = t.length === CAP && isMono(t);
+      html += '<div class="wsx-cell"><div class="wsx-tube' + (g.sel === i ? " sel" : "") + (full ? " done" : "") + '" data-i="' + i + '">';
+      for (var j = 0; j < t.length; j++) html += '<div class="wsx-seg k' + t[j] + '"></div>';
+      html += '</div><span class="wsx-key">' + (KEYS[i] || "") + "</span></div>";
+    }
+    board.innerHTML = html;
+    var el;
+    if ((el = $w("wsxLv"))) el.textContent = g.lv;
+    if ((el = $w("wsxColors"))) el.textContent = colorsFor(g.lv);
+    if ((el = $w("wsxMoves"))) el.textContent = g.moves;
+    if ((el = $w("wsxWins"))) el.textContent = g.wins;
+    if ((el = $w("wsxBest"))) el.textContent = g.best > 0 ? ("🏅 最高通关：第 " + g.best + " 关") : "还没有通关纪录，试管在等你分层～";
+  }
+  function showMsg(t, s, btn) {
+    var m = $w("wsxMsg"); if (!m) return;
+    var e;
+    if ((e = $w("wsxMsgT"))) e.textContent = t;
+    if ((e = $w("wsxMsgS"))) e.textContent = s;
+    if ((e = $w("wsxMsgBtn"))) e.textContent = btn;
+    m.classList.add("show");
+  }
+  function hideMsg() { var m = $w("wsxMsg"); if (m) m.classList.remove("show"); }
+
+  /* ---------- 流程 ---------- */
+  function deal(lv, salt) {
+    g.lv = lv; g.salt = salt;
+    g.tubes = genLevel(lv, salt);
+    g.sel = -1; g.moves = 0; g.hist = []; g.won = false; g.msgMode = "";
+    hideMsg(); save(); render();
+  }
+  function winLevel() {
+    g.won = true; g.wins++;
+    if (g.lv > g.best) g.best = g.lv;
+    var C = colorsFor(g.lv);
+    try { bumpUsage("watersort"); } catch (e) {}
+    if (C >= 7) { try { bumpUsage("watersort7"); } catch (e) {} }
+    try { confettiBurst(); } catch (e) {}
+    save();
+    g.msgMode = "win";
+    showMsg("🎉 第 " + g.lv + " 关通关！", "用 " + g.moves + " 步理清了 " + C + " 种颜色\n下一关颜色更多、倒得更乱", "下一关 ▶");
+    render();
+  }
+  function afterMove() {
+    if (isSolved(g.tubes)) { winLevel(); return; }
+    if (isDeadlocked(g.tubes)) {
+      g.msgMode = "dead";
+      try { toast("💀 无路可走了！悔一步试试"); } catch (e) {}
+      showMsg("💀 无路可走", "别慌，悔棋不限次数；\n也可以重开本关或换一副牌。", "↩ 悔一步");
+    }
+  }
+  function clickTube(i) {
+    if (!g || g.won || !g.tubes) return;
+    if (i < 0 || i >= g.tubes.length) return;
+    if (g.sel === -1) {
+      if (g.tubes[i].length) { g.sel = i; render(); }
+      return;
+    }
+    if (g.sel === i) { g.sel = -1; render(); return; }
+    if (canPour(g.tubes, g.sel, i)) {
+      var from = g.sel;
+      var n = pour(g.tubes, from, i);
+      g.hist.push({ from: from, to: i, n: n });
+      g.moves++; g.sel = -1;
+      render(); afterMove();
+    } else if (g.tubes[i].length) {
+      g.sel = i; render();          // 倒不过去就改选目标管
+    } else {
+      g.sel = -1; render();
+      try { toast("这两根试管倒不了～"); } catch (e) {}
+    }
+  }
+  function undo() {
+    if (!g || g.won) return;
+    var h = g.hist.pop();
+    if (!h) { try { toast("没有可悔的步了"); } catch (e) {} return; }
+    for (var i = 0; i < h.n; i++) g.tubes[h.from].push(g.tubes[h.to].pop());
+    g.moves = Math.max(0, g.moves - 1);
+    g.sel = -1; g.msgMode = ""; hideMsg(); render();
+  }
+  function restart() { if (g) deal(g.lv, g.salt); }
+  function shuffle() { if (g) deal(g.lv, g.salt + 1); }
+  function msgAction() {
+    if (!g) return;
+    if (g.msgMode === "win") { deal(g.lv + 1, g.salt); return; }
+    hideMsg(); undo();
+  }
+
+  /* ---------- 输入 ---------- */
+  function onKey(ev) {
+    var sec = document.getElementById("watersort");
+    if (!sec || !sec.classList.contains("active")) return;
+    var tag = (ev.target && ev.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if (!g) return;
+    var k = ev.key;
+    if (k === "Enter" && g.won) { msgAction(); ev.preventDefault(); return; }
+    if (k === "u" || k === "U") { undo(); ev.preventDefault(); return; }
+    if (k === "r" || k === "R") { restart(); ev.preventDefault(); return; }
+    if (k === "n" || k === "N") { shuffle(); ev.preventDefault(); return; }
+    if (k === "Escape") { if (g.sel !== -1) { g.sel = -1; render(); } return; }
+    var idx = KEYS.indexOf(k);
+    if (k && k.length === 1 && idx >= 0 && idx < g.tubes.length) { clickTube(idx); ev.preventDefault(); }
+  }
+
+  /* ---------- 生命周期 ---------- */
+  window.watersortRender = function () {
+    if (!bound) {
+      bound = true;
+      var board = $w("wsxBoard");
+      if (board) board.addEventListener("click", function (ev) {
+        var el = ev.target && ev.target.closest ? ev.target.closest(".wsx-tube") : null;
+        if (el && el.dataset && el.dataset.i !== undefined) clickTube(parseInt(el.dataset.i, 10));
+      });
+      var e;
+      if ((e = $w("wsxMsgBtn"))) e.addEventListener("click", msgAction);
+      if ((e = $w("wsxUndo"))) e.addEventListener("click", undo);
+      if ((e = $w("wsxRestart"))) e.addEventListener("click", restart);
+      if ((e = $w("wsxShuffle"))) e.addEventListener("click", shuffle);
+      document.addEventListener("keydown", onKey);
+    }
+    if (!g) {
+      var d = load();
+      g = { lv: d.lv, salt: d.salt, best: d.best, wins: d.wins, tubes: null, sel: -1, moves: 0, hist: [], won: false, msgMode: "" };
+      deal(g.lv, g.salt);
+    } else render();
+  };
+  window.watersortStop = function () {
+    if (g && g.sel !== -1) { g.sel = -1; render(); }
+  };
+
+  window.__wsxHooks = {
+    genLevel: genLevel, canPour: canPour, pour: pour, topRun: topRun, isMono: isMono,
+    isSolved: isSolved, isDeadlocked: isDeadlocked, colorsFor: colorsFor,
+    clickTube: clickTube, undo: undo, restart: restart, shuffle: shuffle,
+    msgAction: msgAction, afterMove: afterMove, onKey: onKey, deal: deal, render: render,
+    getG: function () { return g; },
+    setG: function (v) { g = v; },
+    save: save, load: load
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🧪", name: "试管调色师", desc: "在倒水排序里通关任意一关", test: function (u) { return (u.watersort || 0) >= 1; } },
+      { emoji: "🌈", name: "分层大师", desc: "通关一局 7 种及以上颜色的倒水排序", test: function (u) { return (u.watersort7 || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "把混乱倒来倒去，总有一管先清澈。",
+      "留一根空试管，就是给自己留余地。",
+      "颜色分层和生活一样，急不得。",
+      "倒错了没关系，悔棋是种美德。",
+      "看似无路可走时，先退一步再看。"
     );
   }
 })();
