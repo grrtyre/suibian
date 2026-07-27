@@ -1549,6 +1549,7 @@
         <button data-tab="qbert">🟧 跳跳金字塔</button>
         <button data-tab="digdug">⛏️ 挖地小子</button>
         <button data-tab="snakeio">🐍 蛇蛇大作战</button>
+        <button data-tab="helix">🌀 螺旋塔跳跃</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7495,6 +7496,45 @@
       <div class="sio-tip">🖱️ 鼠标移动控制方向，按住左键 / 空格加速（加速消耗长度）；⌨️ 也可用方向键 / WASD 转向，⏎ 回车重开；📱 手机拖动屏幕转向、按住下方按钮加速。撞到别的蛇的身体或世界红色边界就出局；别的蛇撞上你的身体则它出局，尸体化作橙色能量豆（双倍营养）。头对头相撞时更长的一方获胜。单局击杀 3 条 AI 解锁「围蛇猎手」徽章，最长长度本地存档。</div>
     </div>
   </section>
+  <!-- 螺旋塔跳跃 -->
+  <section class="panel" id="helix">
+    <h2>🌀 螺旋塔跳跃</h2>
+    <style>
+      #helix .hx-wrap { max-width:420px; margin:0 auto; }
+      #helix .hx-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #helix .hx-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #helix .hx-top button:hover { background:rgba(255,255,255,.12); }
+      #helix .hx-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #helix canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#101c3a; box-shadow:0 12px 30px rgba(0,0,0,.5); cursor:ew-resize; }
+      #helix .hx-pad { display:flex; gap:10px; justify-content:center; margin-top:10px; }
+      #helix .hx-pad button { padding:10px 34px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:1.1rem; cursor:pointer; user-select:none; }
+      #helix .hx-pad button:hover { background:rgba(255,255,255,.12); }
+      #helix .hx-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(16,28,58,.92); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #helix .hx-msg.show { display:flex; }
+      #helix .hx-msg .t { font-size:1.5rem; font-weight:800; }
+      #helix .hx-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #helix .hx-msg button { padding:9px 24px; border-radius:10px; border:0; background:#facc15; color:#3b2f03; font-weight:700; cursor:pointer; }
+      #helix .hx-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="hx-wrap">
+      <div class="hx-top">
+        <button id="hxNew">🔄 新的一局</button>
+      </div>
+      <div class="hx-canvas-wrap">
+        <canvas id="hxCanvas"></canvas>
+        <div class="hx-msg" id="hxMsg">
+          <div class="t" id="hxMsgT">🌀 螺旋塔跳跃</div>
+          <div class="s" id="hxMsgS">旋转螺旋塔，让小球一路坠落到底座！</div>
+          <button id="hxMsgBtn">开始下坠</button>
+        </div>
+      </div>
+      <div class="hx-pad">
+        <button id="hxLeft">⟲ 左旋</button>
+        <button id="hxRight">⟳ 右旋</button>
+      </div>
+      <div class="hx-tip">🖱️ 在画面上左右拖动旋转塔身；⌨️ ← → / A D 旋转，⏎ 回车重开；📱 手机可长按下方两个按钮旋转。小球只会垂直下落，把缺口转到小球正下方就能穿层；连穿 3 层化身🔥火球可砸穿任意平台（含红色危险层，同时解锁「破界火球」徽章）；普通状态踩到红色层损失 1 条命。落到金色底座即通关进入更险的下一层塔，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7865,6 +7905,7 @@
     if (id === "qbert") qbertRender();
     if (id === "digdug") digdugRender();
     if (id === "snakeio") snakeioRender();
+    if (id === "helix") helixRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7896,6 +7937,7 @@
     if (id !== "qbert" && typeof qbertStop === "function") qbertStop();
     if (id !== "digdug" && typeof digdugStop === "function") digdugStop();
     if (id !== "snakeio" && typeof snakeioStop === "function") snakeioStop();
+    if (id !== "helix" && typeof helixStop === "function") helixStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8058,6 +8100,7 @@
     qbert: "跳跳金字塔 qbert 金字塔 方块 变色 斜跳 蹦跳 蛇 飞盘 街机 经典 等距 立方体 弹跳 game",
     digdug: "挖地小子 digdug 挖土 地道 隉道 打气 气筒 岩石 落石 恶龙 喷火 街机 经典 挖掘 地底 game",
     snakeio: "蛇蛇大作战 snakeio slither 贪吃蛇 大作战 io 混战 对战 AI 加速 击杀 排行榜 蛇 game",
+    helix: "螺旋塔跳跃 helix jump 螺旋 塔 下落 弹跳 火球 旋转 缺口 街机 反应 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8280,6 +8323,7 @@ splitbill:"tools",
     qbert:"games",
     digdug:"games",
     snakeio:"games",
+    helix:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -39868,6 +39912,521 @@ splitbill:"tools",
       "排行榜第一名的蛇，也是从一颗豆子吃起的。",
       "被撞翻不可怕，你留下的能量会喂饱后来者。",
       "地图很大，别总在出生点打转。"
+    );
+  }
+})();
+
+(function () {
+  "use strict";
+  var $h = function (id) { return document.getElementById(id); };
+
+  var W = 360, H = 480;
+  var SEGN = 12, SEG_ARC = Math.PI * 2 / SEGN;
+  var RX = 118, RY = 30, TH = 14, GAPY = 90, BR = 9;
+  var GRAV = 0.32, JUMP = -7.6, MAXV = 11, FEVER_N = 3;
+  var FRONT_A = Math.PI / 2;
+
+  var canvas = null, ctx = null;
+  var inited = false, active = false, bound = false, rafId = null;
+  var best = 0, g = null, seedFn = null;
+  var keys = {};
+  var dragX = null;
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function rng() { return seedFn ? seedFn() : Math.random(); }
+
+  function saveBest() { try { localStorage.setItem("suibian_helix", String(best)); } catch (e) {} }
+  function loadBest() { try { best = parseInt(localStorage.getItem("suibian_helix") || "0", 10) || 0; } catch (e) { best = 0; } }
+
+  function norm2pi(a) {
+    a = a % (Math.PI * 2);
+    if (a < 0) a += Math.PI * 2;
+    return a;
+  }
+  function segAt(rot) {
+    return Math.floor(norm2pi(FRONT_A - rot) / SEG_ARC) % SEGN;
+  }
+
+  function genLevel(lv) {
+    var n = Math.min(36, 10 + lv * 2);
+    var rings = [];
+    for (var i = 0; i < n; i++) {
+      var segs = [];
+      for (var s = 0; s < SEGN; s++) segs.push(1);
+      var gapLen = 2 + (rng() < 0.35 ? 1 : 0);
+      var gStart = Math.floor(rng() * SEGN);
+      for (var k = 0; k < gapLen; k++) segs[(gStart + k) % SEGN] = 0;
+      var redN = 0;
+      if (i >= 2) {
+        redN = Math.min(4, (lv - 1) + (i >= n - 4 ? 1 : 0));
+      }
+      var placed = 0, tries = 0;
+      while (placed < redN && tries < 40) {
+        var r = Math.floor(rng() * SEGN);
+        if (segs[r] === 1) { segs[r] = 2; placed++; }
+        tries++;
+      }
+      var solidLeft = 0;
+      for (var c = 0; c < SEGN; c++) if (segs[c] === 1) solidLeft++;
+      if (solidLeft === 0) segs[(gStart + SEGN - 1) % SEGN] = 1;
+      rings.push({ y: 130 + i * GAPY, segs: segs, passed: false, broken: false });
+    }
+    return { rings: rings, baseY: 130 + n * GAPY };
+  }
+
+  function newGame(seed) {
+    if (typeof seed === "number") seedFn = mulberry32(seed);
+    var lvData = genLevel(1);
+    g = {
+      lv: 1, score: 0, lives: 3, t: 0,
+      rot: 0.35, ball: { y: lvData.rings[0].y - 150, vy: 0 },
+      rings: lvData.rings, baseY: lvData.baseY,
+      combo: 0, fever: false, state: "play",
+      dieT: 0, clearT: 0, over: false, endMsg: "",
+      shards: [], squash: 0
+    };
+    hideMsg();
+    return g;
+  }
+
+  function addScore(v) { g.score += v; }
+
+  function firstAliveRing() {
+    for (var i = 0; i < g.rings.length; i++) {
+      var r = g.rings[i];
+      if (!r.passed && !r.broken) return r;
+    }
+    return null;
+  }
+
+  function spawnShards(ringY) {
+    for (var i = 0; i < 10; i++) {
+      g.shards.push({
+        x: W / 2 + (rng() - 0.5) * 120, y: ringY,
+        vx: (rng() - 0.5) * 5, vy: -2 - rng() * 3, t: 30
+      });
+    }
+  }
+
+  function gameOver() {
+    g.state = "over";
+    g.over = true;
+    if (g.score > best) best = g.score;
+    saveBest();
+    try { bumpUsage("helix"); } catch (e) {}
+    g.endMsg = "最终得分 " + g.score + "（第 " + g.lv + " 层塔）\n历史最高 " + best;
+    showMsg("💀 摔在了危险层上", g.endMsg, "再来一局");
+  }
+
+  function die() {
+    g.lives--;
+    g.combo = 0;
+    g.fever = false;
+    if (g.lives <= 0) { gameOver(); return; }
+    g.state = "dying";
+    g.dieT = 45;
+  }
+
+  function respawn() {
+    var r = firstAliveRing();
+    var y = r ? r.y - 150 : g.baseY - 150;
+    g.ball.y = y;
+    g.ball.vy = 0;
+    g.state = "play";
+  }
+
+  function levelClear() {
+    addScore(200 + 100 * (g.lv - 1));
+    g.state = "clear";
+    g.clearT = 90;
+    try { if (typeof confettiBurst === "function") confettiBurst(); } catch (e) {}
+  }
+
+  function nextLevel() {
+    g.lv++;
+    var lvData = genLevel(g.lv);
+    g.rings = lvData.rings;
+    g.baseY = lvData.baseY;
+    g.ball.y = lvData.rings[0].y - 150;
+    g.ball.vy = 0;
+    g.combo = 0;
+    g.fever = false;
+    g.state = "play";
+  }
+
+  function update() {
+    if (!g || g.over) return;
+    g.t++;
+    for (var si = g.shards.length - 1; si >= 0; si--) {
+      var sh = g.shards[si];
+      sh.x += sh.vx; sh.y += sh.vy; sh.vy += 0.25; sh.t--;
+      if (sh.t <= 0) g.shards.splice(si, 1);
+    }
+    if (g.squash > 0) g.squash--;
+
+    if (g.state === "dying") {
+      g.dieT--;
+      if (g.dieT <= 0) respawn();
+      return;
+    }
+    if (g.state === "clear") {
+      g.clearT--;
+      if (g.clearT <= 0) nextLevel();
+      return;
+    }
+    if (g.state !== "play") return;
+
+    if (keys.left) g.rot += 0.07;
+    if (keys.right) g.rot -= 0.07;
+
+    var prevY = g.ball.y;
+    g.ball.vy += GRAV;
+    if (g.ball.vy > MAXV) g.ball.vy = MAXV;
+    g.ball.y += g.ball.vy;
+
+    if (g.ball.vy > 0) {
+      for (var i = 0; i < g.rings.length; i++) {
+        var ring = g.rings[i];
+        if (ring.passed || ring.broken) continue;
+        if (prevY + BR <= ring.y && g.ball.y + BR >= ring.y) {
+          var type = ring.segs[segAt(g.rot)];
+          if (type === 0) {
+            ring.passed = true;
+            g.combo++;
+            addScore(10 * Math.min(6, 1 + g.combo));
+            if (g.combo >= FEVER_N) g.fever = true;
+          } else if (g.fever) {
+            ring.broken = true;
+            spawnShards(ring.y);
+            addScore(30);
+            if (type === 2) {
+              try { bumpUsage("helixred"); } catch (e) {}
+            }
+            g.fever = false;
+            g.combo = 0;
+          } else if (type === 2) {
+            g.ball.y = ring.y - BR;
+            die();
+            return;
+          } else {
+            g.ball.y = ring.y - BR;
+            g.ball.vy = JUMP;
+            g.combo = 0;
+            g.fever = false;
+            g.squash = 8;
+            return;
+          }
+        }
+      }
+      if (g.ball.y + BR >= g.baseY) {
+        g.ball.y = g.baseY - BR;
+        levelClear();
+      }
+    }
+  }
+
+  /* ---------- 渲染 ---------- */
+  function ringHue(lv) { return (lv * 47 + 190) % 360; }
+
+  function drawSegWall(sy, a0, a1, fill, top) {
+    var STEPS = 6;
+    ctx.beginPath();
+    for (var i = 0; i <= STEPS; i++) {
+      var a = a0 + (a1 - a0) * i / STEPS;
+      var x = W / 2 + Math.cos(a) * RX;
+      var y = sy + Math.sin(a) * RY;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    for (var j = STEPS; j >= 0; j--) {
+      var a2 = a0 + (a1 - a0) * j / STEPS;
+      ctx.lineTo(W / 2 + Math.cos(a2) * RX, sy + (top ? -TH : TH) + Math.sin(a2) * RY);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+
+  function drawRing(ring, camY) {
+    var sy = ring.y - camY;
+    if (sy < -70 || sy > H + 90) return;
+    var hue = ringHue(g.lv);
+    var pass;
+    for (pass = 0; pass < 2; pass++) {
+      for (var s = 0; s < SEGN; s++) {
+        var t = ring.segs[s];
+        if (t === 0) continue;
+        var a0 = s * SEG_ARC + g.rot;
+        var a1 = a0 + SEG_ARC - 0.03;
+        var mid = Math.sin(a0 + SEG_ARC / 2);
+        var front = mid > 0;
+        if ((pass === 0 && front) || (pass === 1 && !front)) continue;
+        var col;
+        if (t === 2) col = front ? "#ef4444" : "#8f1f1f";
+        else col = front ? "hsl(" + hue + ",70%,58%)" : "hsl(" + hue + ",45%,30%)";
+        drawSegWall(sy, a0, a1, col, false);
+        ctx.beginPath();
+        var STEPS = 6;
+        for (var i = 0; i <= STEPS; i++) {
+          var a = a0 + (a1 - a0) * i / STEPS;
+          ctx[i === 0 ? "moveTo" : "lineTo"](W / 2 + Math.cos(a) * RX, sy + Math.sin(a) * RY);
+        }
+        ctx.strokeStyle = front ? (t === 2 ? "#fca5a5" : "hsl(" + hue + ",85%,75%)") : "rgba(0,0,0,.25)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+  }
+
+  function render() {
+    if (!ctx || !g) return;
+    var camY = g.ball.y - 175;
+    if (camY < 0) camY = 0;
+
+    var grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#101c3a");
+    grd.addColorStop(1, "#1b1035");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+
+    /* 中央柱 */
+    var poleGrd = ctx.createLinearGradient(W / 2 - 17, 0, W / 2 + 17, 0);
+    poleGrd.addColorStop(0, "#2b3a63");
+    poleGrd.addColorStop(0.5, "#55699f");
+    poleGrd.addColorStop(1, "#26335a");
+    ctx.fillStyle = poleGrd;
+    ctx.fillRect(W / 2 - 17, 0, 34, H);
+
+    /* 底座 */
+    var bsy = g.baseY - camY;
+    if (bsy < H + 60) {
+      ctx.beginPath();
+      ctx.ellipse(W / 2, bsy, RX + 14, RY + 6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "#f59e0b";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(W / 2, bsy - 6, RX + 14, RY + 6, 0, Math.PI, Math.PI * 2, false);
+      ctx.fillStyle = "#fbbf24";
+      ctx.fill();
+    }
+
+    for (var i = g.rings.length - 1; i >= 0; i--) {
+      var r = g.rings[i];
+      if (r.broken) continue;
+      drawRing(r, camY);
+    }
+
+    /* 碎片 */
+    ctx.fillStyle = "#fbbf24";
+    for (var si = 0; si < g.shards.length; si++) {
+      var sh = g.shards[si];
+      ctx.fillRect(sh.x - 3, sh.y - camY - 3, 6, 6);
+    }
+
+    /* 球 */
+    var by = g.ball.y - camY;
+    var sq = g.squash > 0 ? g.squash / 8 : 0;
+    if (g.fever) {
+      for (var f = 1; f <= 4; f++) {
+        ctx.beginPath();
+        ctx.arc(W / 2, by - g.ball.vy * f * 1.4, BR * (1 - f * 0.16), 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(249,115,22," + (0.5 - f * 0.1) + ")";
+        ctx.fill();
+      }
+    }
+    ctx.beginPath();
+    ctx.ellipse(W / 2, by, BR * (1 + sq * 0.35), BR * (1 - sq * 0.35), 0, 0, Math.PI * 2);
+    ctx.fillStyle = g.fever ? "#fb923c" : "#facc15";
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(W / 2 - 3, by - 3, BR * 0.35, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,.7)";
+    ctx.fill();
+
+    /* HUD */
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+    ctx.fillRect(0, 0, W, 34);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 14px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("第 " + g.lv + " 层塔", 10, 22);
+    ctx.textAlign = "center";
+    ctx.fillText("分数 " + g.score, W / 2, 22);
+    ctx.textAlign = "right";
+    var hearts = "";
+    for (var hh = 0; hh < g.lives; hh++) hearts += "❤";
+    ctx.fillText((hearts || "…") + "  最高 " + best, W - 10, 22);
+
+    /* 进度条 */
+    var total = g.rings.length, done = 0;
+    for (var d = 0; d < total; d++) if (g.rings[d].passed || g.rings[d].broken) done++;
+    ctx.fillStyle = "rgba(255,255,255,.15)";
+    ctx.fillRect(0, 34, W, 4);
+    ctx.fillStyle = g.fever ? "#fb923c" : "#22c55e";
+    ctx.fillRect(0, 34, W * (total ? done / total : 0), 4);
+
+    if (g.fever) {
+      ctx.fillStyle = "#fb923c";
+      ctx.font = "bold 16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🔥 火球模式！砸穿下一层！", W / 2, 58);
+    }
+    if (g.state === "dying") {
+      ctx.fillStyle = "rgba(239,68,68," + (0.25 + 0.2 * Math.sin(g.t * 0.5)) + ")";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 20px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("💥 踩中危险层！剩余 " + g.lives + " 条命", W / 2, H / 2);
+    }
+    if (g.state === "clear") {
+      ctx.fillStyle = "rgba(34,197,94,.25)";
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 22px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🎉 通关第 " + g.lv + " 层塔！", W / 2, H / 2 - 10);
+      ctx.font = "14px sans-serif";
+      ctx.fillText("即将进入第 " + (g.lv + 1) + " 层……", W / 2, H / 2 + 18);
+    }
+    ctx.textAlign = "left";
+  }
+
+  /* ---------- 弹窗 ---------- */
+  function showMsg(t, s, btn) {
+    var m = $h("hxMsg");
+    if (!m) return;
+    $h("hxMsgT").textContent = t;
+    $h("hxMsgS").textContent = s;
+    $h("hxMsgBtn").textContent = btn || "开始";
+    m.classList.add("show");
+  }
+  function hideMsg() {
+    var m = $h("hxMsg");
+    if (m) m.classList.remove("show");
+  }
+
+  function restart() {
+    newGame();
+  }
+
+  function bindEvents() {
+    if (bound) return;
+    bound = true;
+    canvas.addEventListener("pointerdown", function (e) {
+      if (!active) return;
+      e.preventDefault();
+      dragX = e.clientX;
+    });
+    canvas.addEventListener("pointermove", function (e) {
+      if (!active || dragX === null || !g) return;
+      var dx = e.clientX - dragX;
+      dragX = e.clientX;
+      g.rot += dx * 0.011;
+    });
+    canvas.addEventListener("pointerup", function () { dragX = null; });
+    canvas.addEventListener("pointercancel", function () { dragX = null; });
+    var bindHold = function (id, key) {
+      var b = $h(id);
+      if (!b) return;
+      b.addEventListener("pointerdown", function (e) { e.preventDefault(); if (active) keys[key] = true; });
+      b.addEventListener("pointerup", function () { keys[key] = false; });
+      b.addEventListener("pointerleave", function () { keys[key] = false; });
+    };
+    bindHold("hxLeft", "left");
+    bindHold("hxRight", "right");
+    var nb = $h("hxNew");
+    if (nb) nb.addEventListener("click", function () { if (active) restart(); });
+    var mb = $h("hxMsgBtn");
+    if (mb) mb.addEventListener("click", function () { if (active) restart(); });
+    document.addEventListener("keydown", function (e) {
+      if (!active) return;
+      var k = e.key;
+      var used = true;
+      if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = true;
+      else if (k === "ArrowRight" || k === "d" || k === "D") keys.right = true;
+      else if (k === "Enter") { if (g && g.over) restart(); }
+      else used = false;
+      if (used && e.preventDefault) e.preventDefault();
+    });
+    document.addEventListener("keyup", function (e) {
+      var k = e.key;
+      if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = false;
+      else if (k === "ArrowRight" || k === "d" || k === "D") keys.right = false;
+    });
+  }
+
+  function init() {
+    if (inited) return;
+    canvas = $h("hxCanvas");
+    if (!canvas) return;
+    ctx = canvas.getContext("2d");
+    canvas.width = W * 2;
+    canvas.height = H * 2;
+    if (ctx.setTransform) ctx.setTransform(2, 0, 0, 2, 0, 0);
+    loadBest();
+    bindEvents();
+    newGame();
+    g.over = true;
+    showMsg("🌀 螺旋塔跳跃", "拖动 / 方向键旋转螺旋塔，让小球从缺口一路坠落！\n连续穿过 3 层进入火球模式，可以砸穿任意平台；\n踩到红色危险层会损命，3 条命耗尽结束。\n落到金色底座即通关，塔会越来越险！", "开始下坠");
+    inited = true;
+  }
+
+  function loop() {
+    if (!active) return;
+    update();
+    render();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  window.helixRender = function () {
+    init();
+    if (!inited) return;
+    if (active) return;
+    active = true;
+    loop();
+  };
+  window.helixStop = function () {
+    active = false;
+    keys = {};
+    dragX = null;
+    if (rafId !== null) {
+      try { cancelAnimationFrame(rafId); } catch (e) {}
+      rafId = null;
+    }
+  };
+  window.__helixHooks = {
+    newGame: newGame, update: update, render: render,
+    getG: function () { return g; },
+    getBest: function () { return best; }, setBest: function (v) { best = v; },
+    saveBest: saveBest, loadBest: loadBest,
+    genLevel: genLevel, segAt: segAt, die: die, gameOver: gameOver,
+    respawn: respawn, levelClear: levelClear, nextLevel: nextLevel,
+    firstAliveRing: firstAliveRing,
+    setKeys: function (k) { keys = k; },
+    W: W, H: H, SEGN: SEGN, SEG_ARC: SEG_ARC, GAPY: GAPY, BR: BR,
+    GRAV: GRAV, JUMP: JUMP, FEVER_N: FEVER_N
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🌀", name: "螺旋新手", desc: "在螺旋塔跳跃里完整玩过一局", test: function (u) { return (u.helix || 0) >= 1; } },
+      { emoji: "☄️", name: "破界火球", desc: "在火球模式下砸穿一块红色危险层", test: function (u) { return (u.helixred || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "下坠不可怕，可怕的是没找准缺口。",
+      "连续突破三层，你自己就会燃起来。",
+      "旋转世界的不是塔，是你的手。",
+      "红色的坑，绕开一次就长一次记性。",
+      "每一层塔都有出口，只是角度问题。"
     );
   }
 })();
