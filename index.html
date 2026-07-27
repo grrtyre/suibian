@@ -1547,6 +1547,7 @@
         <button data-tab="bomber">💣 炸弹人</button>
         <button data-tab="towerdef">🗼 塔防</button>
         <button data-tab="qbert">🟧 跳跳金字塔</button>
+        <button data-tab="digdug">⛏️ 挖地小子</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7417,6 +7418,44 @@
       <div class="qb-tip">⌨️ 方向键 / WASD 斜向跳（← 左上、↑ 右上、↓ 左下、→ 右下），⏎ 回车重开；📱 手机上直接点小人四周的斜向位置或用下方按钮。每把方块跳一步色 +25，跳完整座金字塔过关；第 2 关要跳两步变色，第 3 关起跳错会变回去！红球🔴碰到就没命，紫蛇🐍会一路追杀——站在边缘跳上 🛸 飞盘可回到塔顶，追得太紧的蛇会跟着摔下悬崖（+500）。接住绿球🟢冻结全场敌人。3 条命，最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="digdug">
+    <h2>⛏️ 挖地小子</h2>
+    <p class="sub">1982 街机名作 Dig Dug 复刻：在地底挖出自己的隉道迷宫，用打气筒把怪物充气充到爆！挖空岩石下方还能用落石一口气砸扁两只怪。越深的地方分数越高！</p>
+    <style>
+      #digdug .dg-wrap { max-width:420px; margin:0 auto; }
+      #digdug .dg-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #digdug .dg-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #digdug .dg-top button:hover { background:rgba(255,255,255,.12); }
+      #digdug .dg-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #digdug canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#132441; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+      #digdug .dg-pad { display:flex; gap:10px; justify-content:center; margin-top:10px; }
+      #digdug .dg-pad button { padding:10px 26px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:1rem; cursor:pointer; }
+      #digdug .dg-pad button:hover { background:rgba(255,255,255,.12); }
+      #digdug .dg-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(19,36,65,.92); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #digdug .dg-msg.show { display:flex; }
+      #digdug .dg-msg .t { font-size:1.5rem; font-weight:800; }
+      #digdug .dg-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #digdug .dg-msg button { padding:9px 24px; border-radius:10px; border:0; background:#f59e0b; color:#3b2303; font-weight:700; cursor:pointer; }
+      #digdug .dg-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="dg-wrap">
+      <div class="dg-top">
+        <button id="dgNew">🔄 新的一局</button>
+      </div>
+      <div class="dg-canvas-wrap">
+        <canvas id="dgCanvas"></canvas>
+        <div class="dg-msg" id="dgMsg">
+          <div class="t" id="dgMsgT">⛏️ 挖地小子</div>
+          <div class="s" id="dgMsgS">在地底挖隉道，把怪物充爆！</div>
+          <button id="dgMsgBtn">开始挖掘</button>
+        </div>
+      </div>
+      <div class="dg-pad">
+        <button id="dgPump">💨 打气</button>
+      </div>
+      <div class="dg-tip">⌨️ 方向键 / WASD 移动挖土，空格 / J 发射打气筒（连按几下把怪充爆），⏎ 回车重开；📱 手机上按住拖动控制方向、轻点屏幕或按下方按钮打气。红色波卡🔴和喷火绿龙🐲碰到就没命，它们还会变成幽灵穿土追杀；挖空岩石🪨下方能砸怪（+800，一石二鸟有徽章）。越深处充爆得分越高（200～500），绿龙双倍；清层进下一层，怪物更多更快。3 条命，最高分本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7785,6 +7824,7 @@
     if (id === "bomber") bomberRender();
     if (id === "towerdef") towerdefRender();
     if (id === "qbert") qbertRender();
+    if (id === "digdug") digdugRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7814,6 +7854,7 @@
     if (id !== "bomber" && typeof bomberStop === "function") bomberStop();
     if (id !== "towerdef" && typeof towerdefStop === "function") towerdefStop();
     if (id !== "qbert" && typeof qbertStop === "function") qbertStop();
+    if (id !== "digdug" && typeof digdugStop === "function") digdugStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -7974,6 +8015,7 @@
     bomber: "炸弹人 bomberman bomber 炸弹 爆破 迷宫 砖块 道具 火力 连环 幽灵 街机 经典 放炸弹 拆迁 game",
     towerdef: "塔防 tower defense towerdef 箭塔 冰塔 炮塔 守城 波次 防御 策略 升级 boss 溅射 减速 建塔 game",
     qbert: "跳跳金字塔 qbert 金字塔 方块 变色 斜跳 蹦跳 蛇 飞盘 街机 经典 等距 立方体 弹跳 game",
+    digdug: "挖地小子 digdug 挖土 地道 隉道 打气 气筒 岩石 落石 恶龙 喷火 街机 经典 挖掘 地底 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8194,6 +8236,7 @@ splitbill:"tools",
     bomber:"games",
     towerdef:"games",
     qbert:"games",
+    digdug:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -38427,6 +38470,808 @@ splitbill:"tools",
       "有些方块要跳两次才变色，有些事要做两遍才做对。",
       "站在塔顶往下看，每个格子都是自己一步步跳出来的。",
       "别怕跳错颜色，大不了再跳一次，金字塔不会催你。"
+    );
+  }
+})();
+(function () {
+  // ===== ⛏️ 挖地小子 Dig Dug =====
+  var W = 360, H = 400, COLS = 12, ROWS = 12, CELL = 30, OY = 40;
+  var PUMP_MAX = CELL * 3;
+  var canvas = null, ctx = null, mask = null, mctx = null;
+  var inited = false, active = false, rafId = null, bound = false;
+  var best = 0, g = null, seedFn = null;
+  var keys = {};
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function rng() { return seedFn ? seedFn() : Math.random(); }
+  function saveBest() { try { localStorage.setItem("suibian_digdug", String(best)); } catch (e) {} }
+  function loadBest() { try { best = parseInt(localStorage.getItem("suibian_digdug") || "0", 10) || 0; } catch (e) { best = 0; } }
+
+  function inGrid(c, r) { return c >= 0 && c < COLS && r >= 0 && r < ROWS; }
+  function cellX(c) { return c * CELL + CELL / 2; }
+  function cellY(r) { return OY + r * CELL + CELL / 2; }
+  function colOf(x) { return Math.floor(x / CELL); }
+  function rowOf(y) { return Math.floor((y - OY) / CELL); }
+  function isDug(c, r) { return inGrid(c, r) && g.dug[r][c]; }
+  function depthScore(r) { return r <= 3 ? 200 : r <= 6 ? 300 : r <= 9 ? 400 : 500; }
+
+  var DIRV = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+
+  function carveCell(c, r) {
+    if (!inGrid(c, r) || g.dug[r][c]) return false;
+    g.dug[r][c] = true;
+    if (mctx) {
+      mctx.save();
+      mctx.globalCompositeOperation = "destination-out";
+      mctx.fillRect(c * CELL * 2, (OY + r * CELL) * 2, CELL * 2, CELL * 2);
+      mctx.restore();
+    }
+    return true;
+  }
+  function carveCircle(x, y, rad) {
+    if (!mctx) return;
+    mctx.save();
+    mctx.globalCompositeOperation = "destination-out";
+    mctx.beginPath();
+    mctx.arc(x * 2, y * 2, rad * 2, 0, Math.PI * 2);
+    mctx.fill();
+    mctx.restore();
+  }
+  function paintDirt() {
+    if (!mctx) return;
+    mctx.save();
+    mctx.globalCompositeOperation = "source-over";
+    mctx.clearRect(0, 0, W * 2, H * 2);
+    var bands = ["#c2803a", "#a85f2c", "#8a4a26", "#6b3520"];
+    for (var r = 1; r < ROWS; r++) {
+      mctx.fillStyle = bands[r <= 3 ? 0 : r <= 6 ? 1 : r <= 9 ? 2 : 3];
+      mctx.fillRect(0, (OY + r * CELL) * 2, W * 2, CELL * 2);
+    }
+    mctx.fillStyle = "rgba(0,0,0,.12)";
+    for (var rr = 1; rr < ROWS; rr++) for (var cc = 0; cc < COLS; cc++) {
+      if ((rr + cc) % 2 === 0) mctx.fillRect(cc * CELL * 2, (OY + rr * CELL) * 2, CELL * 2, CELL * 2);
+    }
+    mctx.restore();
+    for (var r2 = 0; r2 < ROWS; r2++) for (var c2 = 0; c2 < COLS; c2++) {
+      if (g.dug[r2][c2]) {
+        mctx.save();
+        mctx.globalCompositeOperation = "destination-out";
+        mctx.fillRect(c2 * CELL * 2, (OY + r2 * CELL) * 2, CELL * 2, CELL * 2);
+        mctx.restore();
+      }
+    }
+  }
+
+  function mkEnemy(type, c, r) {
+    return {
+      type: type, c: c, r: r, x: cellX(c), y: cellY(r),
+      dir: rng() < 0.5 ? "left" : "right",
+      inflate: 0, deflT: 0, ghost: false, ghostT: Math.floor(200 + rng() * 500),
+      fireCharge: 0, flame: null, escaping: false, dead: false
+    };
+  }
+
+  function genMap(lv) {
+    g.dug = [];
+    for (var r = 0; r < ROWS; r++) {
+      var row = [];
+      for (var c = 0; c < COLS; c++) row.push(r === 0);
+      g.dug.push(row);
+    }
+    var sc = 5;
+    for (var rr = 1; rr <= 5; rr++) g.dug[rr][sc] = true;
+    g.enemies = [];
+    var n = Math.min(6, 1 + lv);
+    var nFy = lv >= 2 ? Math.min(2, Math.floor(lv / 2)) : 0;
+    var used = {};
+    for (var i = 0; i < n; i++) {
+      for (var tryi = 0; tryi < 60; tryi++) {
+        var er = 2 + Math.floor(rng() * (ROWS - 3));
+        var ec = 1 + Math.floor(rng() * (COLS - 4));
+        var key = er + ":" + ec;
+        if (used[key] || (er <= 5 && ec <= sc + 1 && ec + 2 >= sc - 1)) continue;
+        used[key] = 1;
+        g.dug[er][ec] = true; g.dug[er][ec + 1] = true; g.dug[er][ec + 2] = true;
+        g.enemies.push(mkEnemy(i < nFy ? "fygar" : "pooka", ec + 1, er));
+        break;
+      }
+    }
+    g.rocks = [];
+    var rocktry = 0;
+    while (g.rocks.length < 4 && rocktry < 200) {
+      rocktry++;
+      var kc = Math.floor(rng() * COLS);
+      var kr = 2 + Math.floor(rng() * (ROWS - 3));
+      if (g.dug[kr][kc] || (inGrid(kc, kr + 1) && g.dug[kr + 1][kc])) continue;
+      var dup = false;
+      for (var k = 0; k < g.rocks.length; k++) if (g.rocks[k].c === kc && Math.abs(g.rocks[k].r - kr) <= 1) { dup = true; break; }
+      if (dup) continue;
+      g.rocks.push({ c: kc, r: kr, x: cellX(kc), y: cellY(kr), state: "idle", t: 0, kills: 0 });
+    }
+    g.player.c = sc; g.player.r = 0;
+    g.player.x = cellX(sc); g.player.y = cellY(0);
+    g.player.tc = -1; g.player.tr = -1;
+    g.player.face = "down";
+    g.pump = null;
+    paintDirt();
+  }
+
+  function newGame(seed) {
+    seedFn = (seed !== undefined) ? mulberry32(seed) : null;
+    g = {
+      score: 0, lv: 1, lives: 3, over: false, win: false,
+      dug: null, enemies: [], rocks: [], pump: null,
+      player: { c: 5, r: 0, x: 0, y: 0, tc: -1, tr: -1, face: "down", inv: 0 },
+      dying: 0, waveT: 0, banner: 0, frame: 0, shake: 0, played: false,
+      fx: []
+    };
+    genMap(1);
+  }
+
+  function addScore(n) {
+    g.score += n;
+    if (g.score > best) { best = g.score; }
+  }
+  function addFx(x, y, txt) { g.fx.push({ x: x, y: y, txt: txt, t: 50 }); }
+
+  function gameOver() {
+    if (g.over) return;
+    g.over = true;
+    if (g.score > best) best = g.score;
+    saveBest();
+    try { bumpUsage("digdug"); } catch (e) {}
+    showMsg("💀 游戏结束", "得分 " + g.score + " · 最高 " + best + "\n地底世界永远欢迎再来一铲。", "再挖一局");
+  }
+
+  function killPlayer() {
+    if (g.player.inv > 0 || g.dying > 0 || g.over) return;
+    g.dying = 66;
+    g.pump = null;
+    g.shake = 14;
+  }
+
+  function respawn() {
+    g.lives--;
+    if (g.lives < 0) { gameOver(); return; }
+    g.player.c = 5; g.player.r = 0;
+    g.player.x = cellX(5); g.player.y = cellY(0);
+    g.player.tc = -1; g.player.tr = -1;
+    g.player.face = "down"; g.player.inv = 150;
+    g.pump = null;
+    for (var i = 0; i < g.enemies.length; i++) {
+      var e = g.enemies[i];
+      e.inflate = 0; e.flame = null; e.fireCharge = 0;
+    }
+  }
+
+  function popEnemy(e) {
+    var s = depthScore(e.r) * (e.type === "fygar" ? 2 : 1);
+    addScore(s);
+    addFx(e.x, e.y, "+" + s);
+    e.dead = true;
+    try { if (typeof settings !== "undefined" && settings.sound) playDing(); } catch (er) {}
+  }
+
+  function pumpFire() {
+    if (g.over || g.dying > 0) return;
+    if (g.pump && g.pump.state === "attached") {
+      var e = g.pump.target;
+      if (e && !e.dead) {
+        e.inflate++;
+        e.deflT = 0;
+        g.pump.holdT = 55;
+        if (e.inflate >= 4) { popEnemy(e); g.pump = null; }
+      }
+      return;
+    }
+    if (g.pump) return;
+    g.pump = { dir: g.player.face, len: 8, state: "fly", target: null, holdT: 0 };
+  }
+
+  function cancelPump() {
+    if (g.pump) {
+      var e = g.pump.target;
+      if (e && !e.dead && e.inflate > 0) e.deflT = 1;
+      g.pump = null;
+    }
+  }
+
+  function updatePump() {
+    var p = g.pump;
+    if (!p) return;
+    var v = DIRV[p.dir];
+    if (p.state === "fly") {
+      p.len += 6;
+      var tipx = g.player.x + v[0] * p.len;
+      var tipy = g.player.y + v[1] * p.len;
+      if (p.len >= PUMP_MAX || tipx < 4 || tipx > W - 4 || tipy < OY + 4 || tipy > H - 4) { g.pump = null; return; }
+      var tc = colOf(tipx), tr = rowOf(tipy);
+      if (!inGrid(tc, tr) || !g.dug[tr][tc]) { g.pump = null; return; }
+      for (var i = 0; i < g.enemies.length; i++) {
+        var e = g.enemies[i];
+        if (e.dead || e.ghost || e.escaping) continue;
+        var dx = e.x - tipx, dy = e.y - tipy;
+        if (dx * dx + dy * dy < 15 * 15) {
+          p.state = "attached"; p.target = e; p.holdT = 55;
+          e.inflate = 1; e.deflT = 0;
+          return;
+        }
+      }
+    } else {
+      var t = p.target;
+      if (!t || t.dead) { g.pump = null; return; }
+      p.holdT--;
+      var dx2 = t.x - g.player.x, dy2 = t.y - g.player.y;
+      if (p.holdT <= 0 || dx2 * dx2 + dy2 * dy2 > (PUMP_MAX + 20) * (PUMP_MAX + 20)) {
+        t.deflT = 1;
+        g.pump = null;
+      }
+    }
+  }
+
+  function tryDir(dir) {
+    var pl = g.player;
+    if (pl.tc >= 0) return false;
+    var v = DIRV[dir];
+    var nc = pl.c + v[0], nr = pl.r + v[1];
+    pl.face = dir;
+    if (!inGrid(nc, nr)) return false;
+    cancelPump();
+    pl.tc = nc; pl.tr = nr;
+    return true;
+  }
+
+  function updatePlayer() {
+    var pl = g.player;
+    if (pl.inv > 0) pl.inv--;
+    var want = null;
+    if (keys.up) want = "up"; else if (keys.down) want = "down";
+    else if (keys.left) want = "left"; else if (keys.right) want = "right";
+    if (g.touchDir) want = g.touchDir;
+    if (want && pl.tc < 0) tryDir(want);
+    if (pl.tc >= 0) {
+      var tx = cellX(pl.tc), ty = cellY(pl.tr);
+      var digging = !g.dug[pl.tr][pl.tc];
+      var sp = digging ? 1.15 : 1.95;
+      var dx = tx - pl.x, dy = ty - pl.y;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d <= sp) {
+        pl.x = tx; pl.y = ty;
+        var wasNew = carveCell(pl.tc, pl.tr);
+        if (wasNew) addScore(10);
+        pl.c = pl.tc; pl.r = pl.tr;
+        pl.tc = -1; pl.tr = -1;
+      } else {
+        pl.x += dx / d * sp;
+        pl.y += dy / d * sp;
+        if (digging && pl.y > OY) carveCircle(pl.x, pl.y, 12);
+        if (digging && d < CELL * 0.45) { if (carveCell(pl.tc, pl.tr)) addScore(10); }
+      }
+    }
+  }
+
+  function enemyChoose(e) {
+    var dirs = ["up", "down", "left", "right"];
+    var opts = [];
+    var back = { up: "down", down: "up", left: "right", right: "left" }[e.dir];
+    for (var i = 0; i < 4; i++) {
+      var v = DIRV[dirs[i]];
+      var nc = e.c + v[0], nr = e.r + v[1];
+      if (!inGrid(nc, nr) || !g.dug[nr][nc]) continue;
+      opts.push(dirs[i]);
+    }
+    if (!opts.length) return null;
+    if (opts.length > 1) {
+      var noback = [];
+      for (var j = 0; j < opts.length; j++) if (opts[j] !== back) noback.push(opts[j]);
+      if (noback.length) opts = noback;
+    }
+    if (rng() < 0.72) {
+      var bestD = Infinity, bestDir = opts[0];
+      for (var k = 0; k < opts.length; k++) {
+        var v2 = DIRV[opts[k]];
+        var ddx = cellX(e.c + v2[0]) - g.player.x;
+        var ddy = cellY(e.r + v2[1]) - g.player.y;
+        var dd = ddx * ddx + ddy * ddy;
+        if (dd < bestD) { bestD = dd; bestDir = opts[k]; }
+      }
+      return bestDir;
+    }
+    return opts[Math.floor(rng() * opts.length)];
+  }
+
+  function updateEnemy(e) {
+    if (e.dead) return;
+    if (e.inflate > 0) {
+      if (e.deflT > 0) {
+        e.deflT++;
+        if (e.deflT >= 30) { e.inflate--; e.deflT = e.inflate > 0 ? 1 : 0; }
+      }
+      return;
+    }
+    var speed = Math.min(1.5, 0.85 + g.lv * 0.07) * (e.type === "fygar" ? 0.92 : 1);
+    if (e.escaping) {
+      var gx = -20, gy = cellY(0);
+      if (e.r === 0 || e.y <= cellY(0) + 2) {
+        e.y = cellY(0);
+        e.x -= speed * 1.4;
+        e.c = colOf(e.x); e.r = 0;
+        if (e.x < -16) e.dead = true;
+      } else {
+        var ang = Math.atan2(gy - e.y, gx - e.x);
+        e.x += Math.cos(ang) * 0.8;
+        e.y += Math.sin(ang) * 0.8;
+        e.c = colOf(e.x); e.r = Math.max(0, rowOf(e.y));
+      }
+      return;
+    }
+    if (e.ghost) {
+      var ang2 = Math.atan2(g.player.y - e.y, g.player.x - e.x);
+      e.x += Math.cos(ang2) * 0.78;
+      e.y += Math.sin(ang2) * 0.78;
+      e.c = colOf(e.x); e.r = rowOf(e.y);
+      var pdx = g.player.x - e.x, pdy = g.player.y - e.y;
+      if (isDug(e.c, e.r) && pdx * pdx + pdy * pdy < CELL * CELL * 2.6) {
+        e.ghost = false;
+        e.x = cellX(e.c); e.y = cellY(e.r);
+        e.ghostT = Math.floor(500 + rng() * 700);
+      }
+      return;
+    }
+    e.ghostT--;
+    if (e.ghostT <= 0) { e.ghost = true; return; }
+    if (e.type === "fygar") {
+      if (e.flame) {
+        e.flame.t--;
+        if (e.flame.t <= 0) e.flame = null;
+        return;
+      }
+      if (e.fireCharge > 0) {
+        e.fireCharge--;
+        if (e.fireCharge === 0) {
+          var fv = DIRV[e.dir];
+          if (fv[1] === 0) {
+            var cells = [];
+            for (var fi = 1; fi <= 2; fi++) {
+              var fc = e.c + fv[0] * fi;
+              if (!inGrid(fc, e.r) || !g.dug[e.r][fc]) break;
+              cells.push([fc, e.r]);
+            }
+            if (cells.length) e.flame = { dir: e.dir, cells: cells, t: 26 };
+          }
+        }
+        return;
+      }
+      if (e.r === g.player.r && Math.abs(e.c - g.player.c) <= 4 && rng() < 0.008) {
+        e.dir = g.player.c < e.c ? "left" : "right";
+        e.fireCharge = 42;
+        return;
+      }
+    }
+    var tx2 = cellX(e.c), ty2 = cellY(e.r);
+    var adx = tx2 - e.x, ady = ty2 - e.y;
+    if (Math.abs(adx) < speed && Math.abs(ady) < speed) {
+      e.x = tx2; e.y = ty2;
+      var nd = enemyChoose(e);
+      if (nd) {
+        e.dir = nd;
+        var nv = DIRV[nd];
+        e.c += nv[0]; e.r += nv[1];
+      }
+    } else {
+      var mvx = cellX(e.c) - e.x, mvy = cellY(e.r) - e.y;
+      var md = Math.sqrt(mvx * mvx + mvy * mvy) || 1;
+      e.x += mvx / md * speed;
+      e.y += mvy / md * speed;
+    }
+  }
+
+  function updateRock(rk) {
+    if (rk.state === "gone") return;
+    if (rk.state === "idle") {
+      if (isDug(rk.c, rk.r + 1) && !(g.player.tc === rk.c && g.player.tr === rk.r)) {
+        rk.state = "wobble"; rk.t = 38;
+      }
+      return;
+    }
+    if (rk.state === "wobble") {
+      rk.t--;
+      if (rk.t <= 0) { rk.state = "fall"; rk.kills = 0; }
+      return;
+    }
+    if (rk.state === "fall") {
+      rk.y += 4.2;
+      rk.r = rowOf(rk.y);
+      for (var i = 0; i < g.enemies.length; i++) {
+        var e = g.enemies[i];
+        if (e.dead) continue;
+        var dx = e.x - rk.x, dy = e.y - rk.y;
+        if (dx * dx + dy * dy < 19 * 19) {
+          e.dead = true; rk.kills++;
+          addScore(800); addFx(e.x, e.y, "+800");
+          if (rk.kills >= 2) {
+            try { bumpUsage("digdugrock"); } catch (er) {}
+            try { confettiBurst(); } catch (er2) {}
+          }
+        }
+      }
+      var pdx = g.player.x - rk.x, pdy = g.player.y - rk.y;
+      if (pdx * pdx + pdy * pdy < 18 * 18) killPlayer();
+      var nr = rowOf(rk.y + CELL / 2 + 2);
+      if (nr >= ROWS || !isDug(rk.c, nr)) {
+        rk.y = cellY(Math.min(ROWS - 1, rowOf(rk.y)));
+        rk.state = "break"; rk.t = 22;
+      }
+      return;
+    }
+    if (rk.state === "break") {
+      rk.t--;
+      if (rk.t <= 0) rk.state = "gone";
+    }
+  }
+
+  function update() {
+    if (!g || g.over) return;
+    g.frame++;
+    if (g.shake > 0) g.shake--;
+    if (g.banner > 0) {
+      g.banner--;
+      if (g.banner === 0) { g.lv++; genMap(g.lv); }
+      return;
+    }
+    if (g.dying > 0) {
+      g.dying--;
+      if (g.dying === 0) respawn();
+      return;
+    }
+    updatePlayer();
+    updatePump();
+    var alive = 0;
+    for (var i = 0; i < g.enemies.length; i++) {
+      var e = g.enemies[i];
+      updateEnemy(e);
+      if (!e.dead) alive++;
+    }
+    for (var r = 0; r < g.rocks.length; r++) updateRock(g.rocks[r]);
+    if (alive === 1 && g.lv + 1 > 2 && !g.enemies.escapeSet) {
+      for (var j = 0; j < g.enemies.length; j++) {
+        var le = g.enemies[j];
+        if (!le.dead && !le.escaping && le.ghostT < 60 && rng() < 0.005) { le.escaping = true; le.ghost = false; le.inflate = 0; }
+      }
+    }
+    for (var k = 0; k < g.enemies.length; k++) {
+      var ce = g.enemies[k];
+      if (ce.dead || ce.inflate > 0) continue;
+      var dx = ce.x - g.player.x, dy = ce.y - g.player.y;
+      var lim = ce.ghost ? 15 : 17;
+      if (dx * dx + dy * dy < lim * lim) killPlayer();
+      if (ce.flame) {
+        for (var f = 0; f < ce.flame.cells.length; f++) {
+          var fc = ce.flame.cells[f];
+          var fx = cellX(fc[0]), fy = cellY(fc[1]);
+          var fdx = g.player.x - fx, fdy = g.player.y - fy;
+          if (fdx * fdx + fdy * fdy < 18 * 18) killPlayer();
+        }
+      }
+    }
+    for (var q = g.fx.length - 1; q >= 0; q--) {
+      g.fx[q].t--; g.fx[q].y -= 0.5;
+      if (g.fx[q].t <= 0) g.fx.splice(q, 1);
+    }
+    if (alive === 0 && g.dying === 0) {
+      var bonus = 200 + 100 * g.lv;
+      addScore(bonus);
+      g.banner = 100;
+      g.bannerTxt = "第 " + g.lv + " 层清空 +" + bonus;
+      saveBest();
+      try { bumpUsage("digdug"); } catch (e2) {}
+      try { confettiBurst(); } catch (e3) {}
+    }
+  }
+
+  /* ---------- 渲染 ---------- */
+  function drawBg() {
+    var grd = ctx.createLinearGradient(0, 0, 0, OY + CELL);
+    grd.addColorStop(0, "#0e1a3a");
+    grd.addColorStop(1, "#28457a");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, OY + CELL);
+    ctx.fillStyle = "#132441";
+    ctx.fillRect(0, OY + CELL, W, H - OY - CELL);
+    ctx.fillStyle = "#3d7a34";
+    ctx.fillRect(0, OY + CELL - 4, W, 4);
+    if (mask) ctx.drawImage(mask, 0, 0, W, H);
+  }
+  function drawPlayer() {
+    var pl = g.player;
+    if (g.dying > 0 && Math.floor(g.dying / 5) % 2 === 0) return;
+    if (pl.inv > 0 && Math.floor(g.frame / 5) % 2 === 0) return;
+    ctx.save();
+    ctx.translate(pl.x, pl.y);
+    ctx.fillStyle = "#f8fafc";
+    ctx.beginPath(); ctx.arc(0, -2, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#2563eb";
+    ctx.fillRect(-8, 2, 16, 9);
+    ctx.fillStyle = "#ef4444";
+    ctx.fillRect(-8, -10, 16, 5);
+    ctx.fillStyle = "#0f172a";
+    var eo = pl.face === "left" ? -3 : pl.face === "right" ? 3 : 0;
+    ctx.fillRect(-3 + eo, -5, 2.5, 2.5); ctx.fillRect(1.5 + eo, -5, 2.5, 2.5);
+    ctx.restore();
+  }
+  function drawEnemy(e) {
+    if (e.dead) return;
+    ctx.save();
+    ctx.translate(e.x, e.y);
+    if (e.ghost) ctx.globalAlpha = 0.55;
+    var sc = 1 + e.inflate * 0.32;
+    ctx.scale(sc, sc);
+    if (e.type === "pooka") {
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fbbf24";
+      ctx.beginPath(); ctx.arc(-4, 3, 3, 0, Math.PI * 2); ctx.arc(4, 3, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(-4, -3, 3.4, 0, Math.PI * 2); ctx.arc(4, -3, 3.4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(-5, -4, 2.4, 2.4); ctx.fillRect(3, -4, 2.4, 2.4);
+    } else {
+      ctx.fillStyle = "#16a34a";
+      ctx.beginPath(); ctx.arc(0, 0, 10.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#facc15";
+      ctx.beginPath();
+      ctx.moveTo(-10, -6); ctx.lineTo(-3, -12); ctx.lineTo(0, -6);
+      ctx.lineTo(3, -12); ctx.lineTo(10, -6); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(-4, -2, 3.2, 0, Math.PI * 2); ctx.arc(4, -2, 3.2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#7f1d1d";
+      ctx.fillRect(-5, -3, 2.4, 2.4); ctx.fillRect(3, -3, 2.4, 2.4);
+      if (e.fireCharge > 0 && Math.floor(e.fireCharge / 4) % 2 === 0) {
+        ctx.fillStyle = "#f97316";
+        ctx.beginPath(); ctx.arc(e.dir === "left" ? -12 : 12, 2, 3.5, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+    if (e.flame) {
+      for (var i = 0; i < e.flame.cells.length; i++) {
+        var fc = e.flame.cells[i];
+        var fx = cellX(fc[0]), fy = cellY(fc[1]);
+        ctx.save();
+        ctx.globalAlpha = 0.5 + 0.5 * Math.sin(g.frame * 0.6 + i);
+        ctx.fillStyle = i === 0 ? "#f97316" : "#facc15";
+        ctx.beginPath(); ctx.arc(fx, fy, 11 - i * 2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+  function drawRock(rk) {
+    if (rk.state === "gone") return;
+    ctx.save();
+    var wx = rk.state === "wobble" ? Math.sin(rk.t * 0.8) * 2.5 : 0;
+    ctx.translate(rk.x + wx, rk.y);
+    if (rk.state === "break") {
+      ctx.globalAlpha = rk.t / 22;
+      ctx.fillStyle = "#94a3b8";
+      ctx.beginPath(); ctx.arc(-7, 2, 5, 0, Math.PI * 2); ctx.arc(7, 3, 5, 0, Math.PI * 2); ctx.arc(0, -4, 5, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.fillStyle = "#78716c";
+      ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#a8a29e";
+      ctx.beginPath(); ctx.arc(-3, -4, 5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function drawPump() {
+    var p = g.pump;
+    if (!p) return;
+    var v = DIRV[p.dir];
+    var len = p.state === "attached" && p.target ? Math.sqrt(Math.pow(p.target.x - g.player.x, 2) + Math.pow(p.target.y - g.player.y, 2)) : p.len;
+    ctx.save();
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(g.player.x, g.player.y);
+    ctx.lineTo(g.player.x + v[0] * len, g.player.y + v[1] * len);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#f8fafc";
+    ctx.beginPath(); ctx.arc(g.player.x + v[0] * len, g.player.y + v[1] * len, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  function render() {
+    if (!ctx) return;
+    ctx.save();
+    ctx.setTransform(2, 0, 0, 2, 0, 0);
+    if (g.shake > 0) ctx.translate((Math.random() - 0.5) * g.shake, (Math.random() - 0.5) * g.shake);
+    ctx.clearRect(-10, -10, W + 20, H + 20);
+    drawBg();
+    for (var r = 0; r < g.rocks.length; r++) drawRock(g.rocks[r]);
+    drawPump();
+    for (var i = 0; i < g.enemies.length; i++) drawEnemy(g.enemies[i]);
+    drawPlayer();
+    for (var q = 0; q < g.fx.length; q++) {
+      var fx = g.fx[q];
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, fx.t / 25);
+      ctx.fillStyle = "#fef08a";
+      ctx.font = "bold 13px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(fx.txt, fx.x, fx.y);
+      ctx.restore();
+    }
+    ctx.fillStyle = "rgba(10,14,30,.85)";
+    ctx.fillRect(0, 0, W, OY - 6);
+    ctx.fillStyle = "#f1f5f9";
+    ctx.font = "bold 14px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("分 " + g.score, 10, 23);
+    ctx.textAlign = "center";
+    ctx.fillText("第 " + g.lv + " 层", W / 2, 23);
+    ctx.textAlign = "right";
+    ctx.fillText("最高 " + best, W - 10, 23);
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    var hearts = "";
+    for (var h = 0; h < Math.max(0, g.lives); h++) hearts += "❤";
+    ctx.fillStyle = "#f87171";
+    ctx.fillText(hearts, 10, OY - 12 + 2);
+    if (g.banner > 0) {
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      ctx.fillRect(0, H / 2 - 26, W, 52);
+      ctx.fillStyle = "#fde047";
+      ctx.font = "bold 18px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(g.bannerTxt || "", W / 2, H / 2 + 6);
+    }
+    ctx.restore();
+  }
+
+  /* ---------- 消息层 ---------- */
+  function $id(x) { return document.getElementById(x); }
+  function showMsg(t, s, btn) {
+    var m = $id("dgMsg");
+    if (!m) return;
+    $id("dgMsgT").textContent = t;
+    $id("dgMsgS").textContent = s;
+    $id("dgMsgBtn").textContent = btn || "开始挖掘";
+    m.classList.add("show");
+  }
+  function hideMsg() {
+    var m = $id("dgMsg");
+    if (m) m.classList.remove("show");
+  }
+
+  /* ---------- 输入 ---------- */
+  var KEYMAP = {
+    ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
+    w: "up", s: "down", a: "left", d: "right", W: "up", S: "down", A: "left", D: "right"
+  };
+  function onKeyDown(ev) {
+    if (!active || !g) return;
+    var k = ev.key;
+    if (k === "Enter") { newGame(); hideMsg(); ev.preventDefault(); return; }
+    if (g.over) return;
+    if (k === " " || k === "j" || k === "J") { pumpFire(); ev.preventDefault(); return; }
+    var d = KEYMAP[k];
+    if (d) { keys[d] = true; ev.preventDefault(); }
+  }
+  function onKeyUp(ev) {
+    var d = KEYMAP[ev.key];
+    if (d) keys[d] = false;
+  }
+  var touch = null;
+  function onPointerDown(ev) {
+    if (!active || !g || g.over) return;
+    ev.preventDefault();
+    touch = { x: ev.clientX, y: ev.clientY, t: Date.now(), moved: false };
+    try { canvas.setPointerCapture(ev.pointerId); } catch (e) {}
+  }
+  function onPointerMove(ev) {
+    if (!touch || !g || g.over) return;
+    var dx = ev.clientX - touch.x, dy = ev.clientY - touch.y;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      touch.moved = true;
+      g.touchDir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+    }
+  }
+  function onPointerUp(ev) {
+    if (!touch) return;
+    g.touchDir = null;
+    if (!touch.moved && Date.now() - touch.t < 280) pumpFire();
+    touch = null;
+  }
+
+  function bind() {
+    if (bound) return;
+    bound = true;
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointercancel", onPointerUp);
+    var nb = $id("dgNew");
+    if (nb) nb.addEventListener("click", function () { newGame(); hideMsg(); });
+    var pb = $id("dgPump");
+    if (pb) pb.addEventListener("click", function () { pumpFire(); });
+    var mb = $id("dgMsgBtn");
+    if (mb) mb.addEventListener("click", function () { newGame(); hideMsg(); });
+  }
+
+  function init() {
+    if (inited) return;
+    canvas = $id("dgCanvas");
+    if (!canvas) return;
+    canvas.width = W * 2;
+    canvas.height = H * 2;
+    ctx = canvas.getContext("2d");
+    try {
+      mask = document.createElement("canvas");
+      mask.width = W * 2; mask.height = H * 2;
+      mctx = mask.getContext("2d");
+    } catch (e) { mask = null; mctx = null; }
+    loadBest();
+    bind();
+    newGame();
+    g.over = true;
+    showMsg("⛏️ 挖地小子", "在地底挖出自己的隧道，用打气筒把怪物充爆！\n小心红色的波卡🔴和会喷火的绿龙🐲，\n挖空岩石下方还能用落石砸怪。", "开始挖掘");
+    inited = true;
+  }
+
+  function loop() {
+    if (!active) return;
+    update();
+    render();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  window.digdugRender = function () {
+    init();
+    if (!inited) return;
+    if (active) return;
+    active = true;
+    loop();
+  };
+  window.digdugStop = function () {
+    active = false;
+    keys = {};
+    if (rafId !== null) {
+      try { cancelAnimationFrame(rafId); } catch (e) {}
+      rafId = null;
+    }
+  };
+  window.__digdugHooks = {
+    newGame: newGame, update: update, render: render, tryDir: tryDir,
+    pumpFire: pumpFire, cancelPump: cancelPump, getG: function () { return g; },
+    getBest: function () { return best; }, setBest: function (v) { best = v; },
+    saveBest: saveBest, loadBest: loadBest, carveCell: carveCell,
+    depthScore: depthScore, isDug: function (c, r) { return isDug(c, r); },
+    genMap: genMap, popEnemy: popEnemy, killPlayer: killPlayer, gameOver: gameOver,
+    setKeys: function (k) { keys = k; },
+    W: W, H: H, COLS: COLS, ROWS: ROWS, CELL: CELL, OY: OY, cellX: cellX, cellY: cellY
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "⛏️", name: "地道战神", desc: "在挖地小子里完整玩过一局", test: function (u) { return (u.digdug || 0) >= 1; } },
+      { emoji: "🪨", name: "一石二鸟", desc: "一块落石同时砸中两只怪物", test: function (u) { return (u.digdugrock || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "人生和挖隧道一样：路是自己一铲一铲挖出来的。",
+      "有些压力要及时释放，不然谁都会像波卡一样被撑爆。",
+      "别站在摇晃的石头下面思考人生，先挪一步再想。",
+      "越深的地方分数越高，敢往下挖的人才拿得到。",
+      "追你的怪物穿墙而来也别慌，它现身的那一刻就是破绽。"
     );
   }
 })();
