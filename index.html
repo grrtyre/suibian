@@ -1553,6 +1553,7 @@
         <button data-tab="knight">♞ 骑士巡游</button>
         <button data-tab="peggle">🎯 弹珠打钉</button>
         <button data-tab="watersort">🧪 倒水排序</button>
+        <button data-tab="mahjong">🀄 上海麻将</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7687,6 +7688,58 @@
       <div class="wsx-tip">🖱️ 点一根试管选中（会跳起来），再点另一根把顶部同色的水整段倒过去；只能倒进空管或顶色相同且有空位的管子。把每种颜色各自集满一整管即通关！关卡无限，颜色从 4 种一路涨到 9 种、越倒越乱——但每一关都由「反向倒水」生成，保证必定有解。⌨️ 数字键选管 / U 悔一步（不限次）/ R 重开本关 / N 换一副 / ⏎ 下一关。进度自动本地存档（suibian_watersort），通关 7 色局解锁「分层大师」徽章。</div>
     </div>
   </section>
+  <!-- 上海麻将 -->
+  <section class="panel" id="mahjong">
+    <h2>🀄 上海麻将</h2>
+    <style>
+      #mahjong .mjx-wrap { max-width:700px; margin:0 auto; }
+      #mahjong .mjx-hud { display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:8px; font-size:.9rem; }
+      #mahjong .mjx-hud b { color:#facc15; }
+      #mahjong .mjx-stage { position:relative; overflow-x:auto; padding-bottom:4px; }
+      #mahjong .mjx-board { position:relative; margin:0 auto; min-height:220px; }
+      #mahjong .mjx-tile { position:absolute; width:40px; height:52px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:22px; border-radius:6px; border:1px solid rgba(0,0,0,.5); background:linear-gradient(160deg,#fdf6e3,#e8dcc0); box-shadow:2px 3px 0 #b9a878, 3px 5px 8px rgba(0,0,0,.45); cursor:pointer; user-select:none; transition:transform .12s ease, box-shadow .12s ease, filter .12s ease; }
+      #mahjong .mjx-tile.lock { filter:brightness(.62) saturate(.75); cursor:not-allowed; }
+      #mahjong .mjx-tile.free:hover { transform:translateY(-3px); box-shadow:2px 6px 0 #b9a878, 3px 9px 12px rgba(0,0,0,.5); }
+      #mahjong .mjx-tile.sel { outline:3px solid #facc15; transform:translateY(-5px); box-shadow:0 10px 18px rgba(250,204,21,.45); }
+      #mahjong .mjx-tile.hint { outline:3px dashed #22d3ee; animation:mjxBlink .55s ease infinite alternate; }
+      @keyframes mjxBlink { from { filter:brightness(1); } to { filter:brightness(1.45); } }
+      #mahjong .mjx-msg { position:absolute; inset:0; display:none; flex-direction:column; gap:10px; align-items:center; justify-content:center; background:rgba(10,12,24,.86); border-radius:14px; text-align:center; padding:18px; z-index:99; }
+      #mahjong .mjx-msg.show { display:flex; }
+      #mahjong .mjx-msg .t { font-size:1.3rem; font-weight:800; }
+      #mahjong .mjx-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #mahjong .mjx-msg button { padding:9px 24px; border-radius:10px; border:0; background:#facc15; color:#3b2f03; font-weight:700; cursor:pointer; }
+      #mahjong .mjx-btns { display:flex; justify-content:center; gap:10px; margin-top:14px; flex-wrap:wrap; }
+      #mahjong .mjx-btns button { padding:8px 16px; border-radius:10px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:inherit; cursor:pointer; font-size:.9rem; }
+      #mahjong .mjx-btns button:hover { background:rgba(255,255,255,.16); }
+      #mahjong .mjx-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="mjx-wrap">
+      <div class="mjx-hud">
+        <span>🏆 关卡 <b id="mjxLv">1</b></span>
+        <span>🗺️ 布局 <b id="mjxLayout">龟阵</b></span>
+        <span>🀄 剩余 <b id="mjxLeft">0</b></span>
+        <span>👀 可消对 <b id="mjxPairs">0</b></span>
+        <span>⏱️ <b id="mjxTime">00:00</b></span>
+        <span>✅ 累计通关 <b id="mjxWins">0</b></span>
+      </div>
+      <div class="mjx-stage">
+        <div class="mjx-board" id="mjxBoard"></div>
+        <div class="mjx-msg" id="mjxMsg">
+          <div class="t" id="mjxMsgT">🎉 拆平！</div>
+          <div class="s" id="mjxMsgS"></div>
+          <button id="mjxMsgBtn">下一关 ▶</button>
+        </div>
+      </div>
+      <div class="mjx-btns">
+        <button id="mjxHint">💡 提示 (H)</button>
+        <button id="mjxUndo">↩ 悔一步 (U)</button>
+        <button id="mjxShuffle">🔀 洗牌 (S)</button>
+        <button id="mjxRestart">🔄 重开本关 (R)</button>
+      </div>
+      <div class="mjx-best" id="mjxBest" style="text-align:center;margin-top:8px;font-size:.88rem;opacity:.85;"></div>
+      <div class="mjx-tip">🀄 经典 Mahjong Solitaire：点击两张<b>图案相同</b>且<b>自由</b>的牌把它们消掉，拆光整座牌山即通关。「自由」= 上面没有压牌、且左右至少一侧是空的（被压暗的牌不可选）。龟阵 / 金字塔 / 十字阵三套立体牌山随关卡轮换，每一局都由「反向拆牌」算法发牌、<b>数学上保证有解</b>；实在卡住可以 💡 提示、↩ 无限悔棋、🔀 洗牌续命（洗完仍保证有解）。⌨️ H 提示 / U 悔棋 / S 洗牌 / R 重开 / Esc 取消选中 / ⏎ 下一关。通关纪录与关卡进度本地存档（suibian_mahjong），不用提示不洗牌通关可解锁「一气呵成」徽章。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8061,6 +8114,7 @@
     if (id === "knight") knightRender();
     if (id === "peggle") peggleRender();
     if (id === "watersort") watersortRender();
+    if (id === "mahjong") mahjongRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8096,6 +8150,7 @@
     if (id !== "knight" && typeof knightStop === "function") knightStop();
     if (id !== "peggle" && typeof peggleStop === "function") peggleStop();
     if (id !== "watersort" && typeof watersortStop === "function") watersortStop();
+    if (id !== "mahjong" && typeof mahjongStop === "function") mahjongStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8262,6 +8317,7 @@
     knight: "骑士巡游 knight tour 骑士 马走日 棋盘 谜题 puzzle 提示 演示 益智 game",
     peggle: "弹珠打钉 peggle 弹珠 打钉 弹弓 弹跳 物理 发射 橘钉 橙钉 接珠篮 街机 弹射 game",
     watersort: "倒水排序 watersort water sort 试管 倒水 排序 颜色 分层 益智 解谜 puzzle 悖棋 换一副 game",
+    mahjong: "上海麻将 mahjong solitaire 麻将 连连消 牌山 龟阵 金字塔 拆牌 配对 益智 解谜 puzzle game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8488,6 +8544,7 @@ splitbill:"tools",
     knight:"games",
     peggle:"games",
     watersort:"games",
+    mahjong:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -41737,6 +41794,400 @@ splitbill:"tools",
       "颜色分层和生活一样，急不得。",
       "倒错了没关系，悔棋是种美德。",
       "看似无路可走时，先退一步再看。"
+    );
+  }
+})();
+(function () {
+  // 🀄 上海麻将（Mahjong Solitaire）模块
+  var $m = function (id) { return document.getElementById(id); };
+  var bound = false;
+  var g = null; // { lv, salt, wins, fast, pos, faces, alive, sel, hist, moves, hints, shuf, time, won, msgMode, hintPair }
+  var timer = null;
+  var UX = 21, UY = 27, TW = 40, TH = 52, ZS = 5;
+  var FACES = ["\uD83C\uDC04", "\uD83C\uDF38", "\uD83C\uDF8D", "\uD83C\uDF40", "\uD83C\uDF19", "\u2600\uFE0F", "\u2B50", "\uD83D\uDD25", "\uD83D\uDCA7", "\u26A1", "\uD83D\uDC09", "\uD83D\uDC3C", "\uD83C\uDF51", "\uD83C\uDF90", "\uD83D\uDC1F", "\uD83E\uDD8B", "\uD83C\uDF41", "\uD83C\uDFEE", "\uD83C\uDF0A", "\uD83C\uDFB2"];
+
+  function mulberry32(seed) {
+    var t0 = seed >>> 0;
+    return function () {
+      t0 = (t0 + 0x6D2B79F5) >>> 0;
+      var t = t0;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ---------- 三套牌山布局（坐标为半格制：牌占 2x2） ---------- */
+  function layoutTurtle() {
+    var p = [], x, y;
+    for (x = 0; x <= 22; x += 2) p.push({ x: x, y: 0, z: 0 });
+    for (x = 2; x <= 20; x += 2) p.push({ x: x, y: 2, z: 0 });
+    for (x = 0; x <= 22; x += 2) p.push({ x: x, y: 4, z: 0 });
+    for (x = 2; x <= 20; x += 2) p.push({ x: x, y: 6, z: 0 });
+    for (x = 0; x <= 22; x += 2) p.push({ x: x, y: 8, z: 0 });
+    p.push({ x: -2, y: 4, z: 0 }); p.push({ x: 24, y: 4, z: 0 });
+    for (x = 8; x <= 14; x += 2) for (y = 2; y <= 6; y += 2) p.push({ x: x, y: y, z: 1 });
+    p.push({ x: 10, y: 4, z: 2 }); p.push({ x: 12, y: 4, z: 2 });
+    return p; // 72
+  }
+  function layoutPyramid() {
+    var p = [], x, y;
+    for (x = 0; x <= 14; x += 2) for (y = 0; y <= 8; y += 2) p.push({ x: x, y: y, z: 0 });
+    for (x = 2; x <= 12; x += 2) for (y = 2; y <= 6; y += 2) p.push({ x: x, y: y, z: 1 });
+    for (x = 4; x <= 10; x += 2) p.push({ x: x, y: 4, z: 2 });
+    p.push({ x: 6, y: 4, z: 3 }); p.push({ x: 8, y: 4, z: 3 });
+    return p; // 64
+  }
+  function layoutCross() {
+    var p = [], x, y;
+    for (y = 4; y <= 6; y += 2) for (x = 0; x <= 20; x += 2) p.push({ x: x, y: y, z: 0 });
+    for (x = 8; x <= 12; x += 2) { p.push({ x: x, y: 0, z: 0 }); p.push({ x: x, y: 2, z: 0 }); p.push({ x: x, y: 8, z: 0 }); p.push({ x: x, y: 10, z: 0 }); }
+    for (x = 8; x <= 12; x += 2) for (y = 4; y <= 6; y += 2) p.push({ x: x, y: y, z: 1 });
+    p.push({ x: 9, y: 5, z: 2 }); p.push({ x: 11, y: 5, z: 2 });
+    return p; // 42
+  }
+  var LAYOUTS = [
+    { name: "\u9F9F\u9635", fn: layoutTurtle },
+    { name: "\u91D1\u5B57\u5854", fn: layoutPyramid },
+    { name: "\u5341\u5B57\u9635", fn: layoutCross }
+  ];
+  function layoutFor(lv) { return LAYOUTS[(lv - 1) % LAYOUTS.length]; }
+
+  /* ---------- 自由牌判定：上方无压牌，且左右至少一侧无邻牌 ---------- */
+  function isFreeIdx(pos, alive, i) {
+    var pi = pos[i], j, pj;
+    for (j = 0; j < pos.length; j++) {
+      if (!alive[j] || j === i) continue;
+      pj = pos[j];
+      if (pj.z === pi.z + 1 && Math.abs(pj.x - pi.x) <= 1 && Math.abs(pj.y - pi.y) <= 1) return false;
+    }
+    var L = false, R = false;
+    for (j = 0; j < pos.length; j++) {
+      if (!alive[j] || j === i) continue;
+      pj = pos[j];
+      if (pj.z !== pi.z || Math.abs(pj.y - pi.y) > 1) continue;
+      if (pj.x === pi.x - 2) L = true;
+      if (pj.x === pi.x + 2) R = true;
+    }
+    return !(L && R);
+  }
+
+  /* ---------- 发牌：在满牌山上模拟一条完整消除路线，倒推分配牌面 ⇒ 必定有解 ---------- */
+  function simPairs(pos, aliveIn, rnd) {
+    var alive = aliveIn.slice(), remaining = 0, i;
+    for (i = 0; i < alive.length; i++) if (alive[i]) remaining++;
+    if (remaining % 2 !== 0) return null;
+    var order = [];
+    while (remaining > 0) {
+      var free = [];
+      for (i = 0; i < pos.length; i++) if (alive[i] && isFreeIdx(pos, alive, i)) free.push(i);
+      if (free.length < 2) return null;
+      var a = free[Math.floor(rnd() * free.length)], b = a;
+      while (b === a) b = free[Math.floor(rnd() * free.length)];
+      alive[a] = false; alive[b] = false;
+      order.push([a, b]); remaining -= 2;
+    }
+    return order;
+  }
+  function genLevel(lv, salt) {
+    var pos = layoutFor(lv).fn();
+    var rnd = mulberry32((lv * 7919 + salt * 104729 + 54321) >>> 0);
+    var aliveAll = [], i;
+    for (i = 0; i < pos.length; i++) aliveAll.push(true);
+    for (var attempt = 0; attempt < 80; attempt++) {
+      var order = simPairs(pos, aliveAll, rnd);
+      if (!order) continue;
+      var pairsN = pos.length / 2, facesN = Math.ceil(pairsN / 2), slots = [], f;
+      for (f = 0; f < facesN; f++) { slots.push(f); slots.push(f); }
+      slots = slots.slice(0, pairsN);
+      for (i = slots.length - 1; i > 0; i--) { var k = Math.floor(rnd() * (i + 1)); var t = slots[i]; slots[i] = slots[k]; slots[k] = t; }
+      var faces = new Array(pos.length);
+      for (i = 0; i < order.length; i++) { faces[order[i][0]] = slots[i]; faces[order[i][1]] = slots[i]; }
+      return { pos: pos, faces: faces };
+    }
+    return null;
+  }
+
+  /* ---------- 局面工具 ---------- */
+  function freeList() {
+    var out = [], i;
+    for (i = 0; i < g.pos.length; i++) if (g.alive[i] && isFreeIdx(g.pos, g.alive, i)) out.push(i);
+    return out;
+  }
+  function findPairs() {
+    var free = freeList(), by = {}, i;
+    for (i = 0; i < free.length; i++) {
+      var f = g.faces[free[i]];
+      (by[f] = by[f] || []).push(free[i]);
+    }
+    var pairs = [];
+    for (var k in by) {
+      var arr = by[k];
+      for (i = 0; i + 1 < arr.length; i += 2) pairs.push([arr[i], arr[i + 1]]);
+    }
+    return pairs;
+  }
+  function pairCount() {
+    var free = freeList(), by = {}, i, n = 0;
+    for (i = 0; i < free.length; i++) { var f = g.faces[free[i]]; by[f] = (by[f] || 0) + 1; }
+    for (var k in by) n += Math.floor(by[k] / 2);
+    return n;
+  }
+  function remainCount() {
+    var n = 0, i;
+    for (i = 0; i < g.alive.length; i++) if (g.alive[i]) n++;
+    return n;
+  }
+
+  /* ---------- 洗牌：对剩余牌重新模拟消除路线再分牌面，仍保证有解 ---------- */
+  function reshuffle() {
+    if (!g || g.won) return;
+    if (remainCount() === 0) return;
+    var rnd = mulberry32(((Date.now() % 1000000) + g.lv * 131) >>> 0), i;
+    var cnt = {}, ok = false;
+    for (i = 0; i < g.alive.length; i++) if (g.alive[i]) cnt[g.faces[i]] = (cnt[g.faces[i]] || 0) + 1;
+    for (var attempt = 0; attempt < 30; attempt++) {
+      var order = simPairs(g.pos, g.alive, rnd);
+      if (!order) continue;
+      var slots = [];
+      for (var k in cnt) for (i = 0; i < cnt[k] / 2; i++) slots.push(parseInt(k, 10));
+      for (i = slots.length - 1; i > 0; i--) { var r = Math.floor(rnd() * (i + 1)); var t = slots[i]; slots[i] = slots[r]; slots[r] = t; }
+      for (i = 0; i < order.length; i++) { g.faces[order[i][0]] = slots[i]; g.faces[order[i][1]] = slots[i]; }
+      ok = true; break;
+    }
+    if (!ok) { // 极端兜底：纯随机重排（保持牌面多重集）
+      var pool = [], idx = [];
+      for (i = 0; i < g.alive.length; i++) if (g.alive[i]) { pool.push(g.faces[i]); idx.push(i); }
+      for (i = pool.length - 1; i > 0; i--) { var r2 = Math.floor(rnd() * (i + 1)); var t2 = pool[i]; pool[i] = pool[r2]; pool[r2] = t2; }
+      for (i = 0; i < idx.length; i++) g.faces[idx[i]] = pool[i];
+    }
+    g.shuf++; g.sel = -1; g.hist = []; g.hintPair = null; g.msgMode = "";
+    hideMsg(); render();
+    try { toast("\uD83D\uDD00 \u5DF2\u6D17\u724C\uFF08\u60AC\u5F03\u6096\u68CB\u5386\u53F2\uFF09"); } catch (e) {}
+  }
+
+  /* ---------- 存档 ---------- */
+  function save() {
+    try { localStorage.setItem("suibian_mahjong", JSON.stringify({ lv: g.lv, salt: g.salt, wins: g.wins, fast: g.fast })); } catch (e) {}
+  }
+  function load() {
+    var d = { lv: 1, salt: 0, wins: 0, fast: 0 };
+    try {
+      var raw = JSON.parse(localStorage.getItem("suibian_mahjong") || "{}");
+      if (raw && typeof raw === "object") {
+        d.lv = Math.max(1, parseInt(raw.lv, 10) || 1);
+        d.salt = Math.max(0, parseInt(raw.salt, 10) || 0);
+        d.wins = Math.max(0, parseInt(raw.wins, 10) || 0);
+        d.fast = Math.max(0, parseInt(raw.fast, 10) || 0);
+      }
+    } catch (e) {}
+    return d;
+  }
+
+  /* ---------- 渲染 ---------- */
+  function fmtTime(s) {
+    var m = Math.floor(s / 60), r = s % 60;
+    return (m < 10 ? "0" + m : m) + ":" + (r < 10 ? "0" + r : r);
+  }
+  function render() {
+    var board = $m("mjxBoard");
+    if (!board || !g || !g.pos) return;
+    var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9, maxZ = 0, i, p;
+    for (i = 0; i < g.pos.length; i++) {
+      p = g.pos[i];
+      if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+      if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+      if (p.z > maxZ) maxZ = p.z;
+    }
+    var pad = 10 + maxZ * ZS;
+    var W = (maxX - minX) * UX + TW + pad * 2, H = (maxY - minY) * UY + TH + pad * 2;
+    var free = {}, fl = freeList();
+    for (i = 0; i < fl.length; i++) free[fl[i]] = true;
+    var hintA = g.hintPair ? g.hintPair[0] : -1, hintB = g.hintPair ? g.hintPair[1] : -1;
+    var html = "";
+    for (i = 0; i < g.pos.length; i++) {
+      if (!g.alive[i]) continue;
+      p = g.pos[i];
+      var left = pad + (p.x - minX) * UX - p.z * ZS, top = pad + (p.y - minY) * UY - p.z * ZS;
+      var cls = "mjx-tile";
+      if (free[i]) cls += " free"; else cls += " lock";
+      if (g.sel === i) cls += " sel";
+      if (i === hintA || i === hintB) cls += " hint";
+      html += '<div class="' + cls + '" data-i="' + i + '" style="left:' + left + "px;top:" + top + "px;z-index:" + (p.z * 10 + 1) + '">' + FACES[g.faces[i] % FACES.length] + "</div>";
+    }
+    board.style.width = W + "px"; board.style.height = H + "px";
+    board.innerHTML = html;
+    var el;
+    if ((el = $m("mjxLv"))) el.textContent = g.lv;
+    if ((el = $m("mjxLayout"))) el.textContent = layoutFor(g.lv).name;
+    if ((el = $m("mjxLeft"))) el.textContent = remainCount();
+    if ((el = $m("mjxPairs"))) el.textContent = pairCount();
+    if ((el = $m("mjxTime"))) el.textContent = fmtTime(g.time);
+    if ((el = $m("mjxWins"))) el.textContent = g.wins;
+    if ((el = $m("mjxBest"))) el.textContent = g.fast > 0 ? ("\uD83C\uDFC5 \u6700\u5FEB\u901A\u5173\uFF1A" + fmtTime(g.fast)) : "\u8FD8\u6CA1\u6709\u901A\u5173\u7EAA\u5F55\uFF0C\u724C\u5C71\u5728\u7B49\u4F60\u62C6\u5E73\uFF5E";
+  }
+  function showMsg(t, s, btn) {
+    var m = $m("mjxMsg"); if (!m) return;
+    var e;
+    if ((e = $m("mjxMsgT"))) e.textContent = t;
+    if ((e = $m("mjxMsgS"))) e.textContent = s;
+    if ((e = $m("mjxMsgBtn"))) e.textContent = btn;
+    m.classList.add("show");
+  }
+  function hideMsg() { var m = $m("mjxMsg"); if (m) m.classList.remove("show"); }
+
+  /* ---------- 计时 ---------- */
+  function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+  function startTimer() {
+    stopTimer();
+    timer = setInterval(function () {
+      var sec = document.getElementById("mahjong");
+      if (!sec || !sec.classList.contains("active") || !g || g.won) return;
+      g.time++;
+      var el = $m("mjxTime");
+      if (el) el.textContent = fmtTime(g.time);
+    }, 1000);
+  }
+
+  /* ---------- 流程 ---------- */
+  function deal(lv, salt) {
+    var made = genLevel(lv, salt);
+    if (!made) { salt++; made = genLevel(lv, salt); }
+    g.lv = lv; g.salt = salt;
+    g.pos = made.pos; g.faces = made.faces;
+    g.alive = []; for (var i = 0; i < g.pos.length; i++) g.alive.push(true);
+    g.sel = -1; g.hist = []; g.moves = 0; g.hints = 0; g.shuf = 0;
+    g.time = 0; g.won = false; g.msgMode = ""; g.hintPair = null;
+    hideMsg(); save(); render(); startTimer();
+  }
+  function winLevel() {
+    g.won = true; g.wins++;
+    if (g.fast === 0 || g.time < g.fast) g.fast = g.time;
+    try { bumpUsage("mahjong"); } catch (e) {}
+    if (g.hints === 0 && g.shuf === 0) { try { bumpUsage("mahjongpure"); } catch (e) {} }
+    try { confettiBurst(); } catch (e) {}
+    save();
+    g.msgMode = "win";
+    var pure = (g.hints === 0 && g.shuf === 0) ? "\n\u4E0D\u7528\u63D0\u793A\u4E0D\u6D17\u724C\uFF0C\u4E00\u6C14\u5475\u6210\uFF01" : "";
+    showMsg("\uD83C\uDF89 \u7B2C " + g.lv + " \u5173\u62C6\u5E73\uFF01", "\u5E03\u5C40\u300C" + layoutFor(g.lv).name + "\u300D \u00B7 \u7528\u65F6 " + fmtTime(g.time) + " \u00B7 " + g.moves + " \u5BF9" + pure, "\u4E0B\u4E00\u5173 \u25B6");
+    render();
+  }
+  function afterMove() {
+    if (remainCount() === 0) { winLevel(); return; }
+    if (pairCount() === 0) {
+      g.msgMode = "dead";
+      try { toast("\uD83D\uDC80 \u6CA1\u6709\u53EF\u6D88\u7684\u5BF9\u5B50\u4E86\uFF01"); } catch (e) {}
+      showMsg("\uD83D\uDC80 \u65E0\u724C\u53EF\u6D88", "\u522B\u614C\uFF1A\u53EF\u4EE5\u6096\u68CB\u56DE\u9000\uFF0C\n\u4E5F\u53EF\u4EE5\u6D17\u724C\u7EED\u547D\uFF08\u6D17\u5B8C\u4ECD\u4FDD\u8BC1\u6709\u89E3\uFF09\u3002", "\uD83D\uDD00 \u6D17\u724C\u7EED\u547D");
+    }
+  }
+  function clickTile(i) {
+    if (!g || g.won || !g.alive || !g.alive[i]) return;
+    if (!isFreeIdx(g.pos, g.alive, i)) {
+      try { toast("\u8FD9\u5F20\u724C\u88AB\u538B\u4F4F\u4E86\uFF0C\u5148\u62C6\u4E0A\u9762 / \u4E24\u4FA7\u7684\u724C\uFF5E"); } catch (e) {}
+      return;
+    }
+    g.hintPair = null;
+    if (g.sel === -1) { g.sel = i; render(); return; }
+    if (g.sel === i) { g.sel = -1; render(); return; }
+    if (g.faces[g.sel] === g.faces[i]) {
+      var a = g.sel;
+      g.alive[a] = false; g.alive[i] = false;
+      g.hist.push({ a: a, b: i });
+      g.moves++; g.sel = -1;
+      render(); afterMove();
+    } else {
+      g.sel = i; render();
+    }
+  }
+  function undo() {
+    if (!g || g.won) return;
+    var h = g.hist.pop();
+    if (!h) { try { toast("\u6CA1\u6709\u53EF\u6096\u7684\u6B65\u4E86"); } catch (e) {} return; }
+    g.alive[h.a] = true; g.alive[h.b] = true;
+    g.moves = Math.max(0, g.moves - 1);
+    g.sel = -1; g.hintPair = null; g.msgMode = ""; hideMsg(); render();
+  }
+  function hint() {
+    if (!g || g.won) return;
+    var ps = findPairs();
+    if (!ps.length) { try { toast("\u5F53\u524D\u6CA1\u6709\u53EF\u6D88\u7684\u5BF9\u5B50\uFF0C\u8BD5\u8BD5\u6D17\u724C"); } catch (e) {} return; }
+    g.hintPair = ps[0]; g.hints++; g.sel = -1; render();
+  }
+  function restart() { if (g) deal(g.lv, g.salt); }
+  function msgAction() {
+    if (!g) return;
+    if (g.msgMode === "win") { deal(g.lv + 1, g.salt); return; }
+    hideMsg(); reshuffle();
+  }
+
+  /* ---------- 输入 ---------- */
+  function onKey(ev) {
+    var sec = document.getElementById("mahjong");
+    if (!sec || !sec.classList.contains("active")) return;
+    var tag = (ev.target && ev.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if (!g) return;
+    var k = ev.key;
+    if (k === "Enter" && g.won) { msgAction(); ev.preventDefault(); return; }
+    if (k === "h" || k === "H") { hint(); ev.preventDefault(); return; }
+    if (k === "u" || k === "U") { undo(); ev.preventDefault(); return; }
+    if (k === "s" || k === "S") { reshuffle(); ev.preventDefault(); return; }
+    if (k === "r" || k === "R") { restart(); ev.preventDefault(); return; }
+    if (k === "Escape") { if (g.sel !== -1) { g.sel = -1; render(); } }
+  }
+
+  /* ---------- 生命周期 ---------- */
+  window.mahjongRender = function () {
+    if (!bound) {
+      bound = true;
+      var board = $m("mjxBoard");
+      if (board) board.addEventListener("click", function (ev) {
+        var el = ev.target && ev.target.closest ? ev.target.closest(".mjx-tile") : null;
+        if (el && el.dataset && el.dataset.i !== undefined) clickTile(parseInt(el.dataset.i, 10));
+      });
+      var e;
+      if ((e = $m("mjxMsgBtn"))) e.addEventListener("click", msgAction);
+      if ((e = $m("mjxHint"))) e.addEventListener("click", hint);
+      if ((e = $m("mjxUndo"))) e.addEventListener("click", undo);
+      if ((e = $m("mjxShuffle"))) e.addEventListener("click", reshuffle);
+      if ((e = $m("mjxRestart"))) e.addEventListener("click", restart);
+      document.addEventListener("keydown", onKey);
+    }
+    if (!g) {
+      var d = load();
+      g = { lv: d.lv, salt: d.salt, wins: d.wins, fast: d.fast, pos: null, faces: null, alive: null, sel: -1, hist: [], moves: 0, hints: 0, shuf: 0, time: 0, won: false, msgMode: "", hintPair: null };
+      deal(g.lv, g.salt);
+    } else { render(); startTimer(); }
+  };
+  window.mahjongStop = function () {
+    stopTimer();
+    if (g && g.sel !== -1) { g.sel = -1; render(); }
+  };
+
+  window.__mjxHooks = {
+    layoutTurtle: layoutTurtle, layoutPyramid: layoutPyramid, layoutCross: layoutCross,
+    layoutFor: layoutFor, isFreeIdx: isFreeIdx, simPairs: simPairs, genLevel: genLevel,
+    freeList: freeList, findPairs: findPairs, pairCount: pairCount, remainCount: remainCount,
+    reshuffle: reshuffle, clickTile: clickTile, undo: undo, hint: hint, restart: restart,
+    msgAction: msgAction, afterMove: afterMove, onKey: onKey, deal: deal, render: render,
+    fmtTime: fmtTime, mulberry32: mulberry32,
+    getG: function () { return g; }, setG: function (v) { g = v; },
+    save: save, load: load
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "\uD83C\uDC04", name: "\u96C0\u5723\u5165\u95E8", desc: "\u901A\u5173\u4EFB\u610F\u4E00\u5C40\u4E0A\u6D77\u9EBB\u5C06", test: function (u) { return (u.mahjong || 0) >= 1; } },
+      { emoji: "\uD83C\uDFEF", name: "\u4E00\u6C14\u5475\u6210", desc: "\u4E0D\u7528\u63D0\u793A\u3001\u4E0D\u6D17\u724C\u901A\u5173\u4E00\u5C40\u4E0A\u6D77\u9EBB\u5C06", test: function (u) { return (u.mahjongpure || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "\u724C\u5C71\u518D\u9AD8\uFF0C\u4E5F\u662F\u4E00\u5BF9\u4E00\u5BF9\u62C6\u5E73\u7684\u3002",
+      "\u88AB\u538B\u4F4F\u7684\u724C\u4E0D\u7740\u6025\uFF0C\u603B\u6709\u91CD\u89C1\u5929\u65E5\u7684\u65F6\u5019\u3002",
+      "\u5148\u62C6\u9AD8\u5904\uFF0C\u518D\u62C6\u4E24\u7FFC\uFF0C\u751F\u6D3B\u4E5F\u4E00\u6837\u3002",
+      "\u6D17\u724C\u4E0D\u662F\u8BA4\u8F93\uFF0C\u662F\u6362\u4E2A\u601D\u8DEF\u3002",
+      "\u770B\u4F3C\u65E0\u724C\u53EF\u6D88\uFF0C\u5176\u5B9E\u662F\u8FD8\u6CA1\u62C6\u5BF9\u5730\u65B9\u3002"
     );
   }
 })();
