@@ -1548,6 +1548,7 @@
         <button data-tab="towerdef">🗼 塔防</button>
         <button data-tab="qbert">🟧 跳跳金字塔</button>
         <button data-tab="digdug">⛏️ 挖地小子</button>
+        <button data-tab="snakeio">🐍 蛇蛇大作战</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7456,6 +7457,44 @@
       <div class="dg-tip">⌨️ 方向键 / WASD 移动挖土，空格 / J 发射打气筒（连按几下把怪充爆），⏎ 回车重开；📱 手机上按住拖动控制方向、轻点屏幕或按下方按钮打气。红色波卡🔴和喷火绿龙🐲碰到就没命，它们还会变成幽灵穿土追杀；挖空岩石🪨下方能砸怪（+800，一石二鸟有徽章）。越深处充爆得分越高（200～500），绿龙双倍；清层进下一层，怪物更多更快。3 条命，最高分本地存档。</div>
     </div>
   </section>
+  <section class="panel" id="snakeio">
+    <h2>🐍 蛇蛇大作战</h2>
+    <p class="sub">io 风格贪吃蛇大混战：在 1300×1300 的大地图里吃豆变长，和 6 条各怀鬼胎的 AI 蛇抢地盘。用身体拦截别人、按住加速甩尾走位，把它们统统撞翻，吃掉它们掉落的能量豆，冲上排行榜第一！</p>
+    <style>
+      #snakeio .sio-wrap { max-width:420px; margin:0 auto; }
+      #snakeio .sio-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #snakeio .sio-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #snakeio .sio-top button:hover { background:rgba(255,255,255,.12); }
+      #snakeio .sio-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #snakeio canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#0d1930; box-shadow:0 12px 30px rgba(0,0,0,.5); cursor:crosshair; }
+      #snakeio .sio-pad { display:flex; gap:10px; justify-content:center; margin-top:10px; }
+      #snakeio .sio-pad button { padding:10px 34px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:1rem; cursor:pointer; user-select:none; }
+      #snakeio .sio-pad button:hover { background:rgba(255,255,255,.12); }
+      #snakeio .sio-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(13,25,48,.92); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #snakeio .sio-msg.show { display:flex; }
+      #snakeio .sio-msg .t { font-size:1.5rem; font-weight:800; }
+      #snakeio .sio-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #snakeio .sio-msg button { padding:9px 24px; border-radius:10px; border:0; background:#facc15; color:#3b2f03; font-weight:700; cursor:pointer; }
+      #snakeio .sio-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="sio-wrap">
+      <div class="sio-top">
+        <button id="sioNew">🔄 新的一局</button>
+      </div>
+      <div class="sio-canvas-wrap">
+        <canvas id="sioCanvas"></canvas>
+        <div class="sio-msg" id="sioMsg">
+          <div class="t" id="sioMsgT">🐍 蛇蛇大作战</div>
+          <div class="s" id="sioMsgS">吃豆变长，把 AI 蛇统统送走！</div>
+          <button id="sioMsgBtn">开始混战</button>
+        </div>
+      </div>
+      <div class="sio-pad">
+        <button id="sioBoost">⚡ 加速</button>
+      </div>
+      <div class="sio-tip">🖱️ 鼠标移动控制方向，按住左键 / 空格加速（加速消耗长度）；⌨️ 也可用方向键 / WASD 转向，⏎ 回车重开；📱 手机拖动屏幕转向、按住下方按钮加速。撞到别的蛇的身体或世界红色边界就出局；别的蛇撞上你的身体则它出局，尸体化作橙色能量豆（双倍营养）。头对头相撞时更长的一方获胜。单局击杀 3 条 AI 解锁「围蛇猎手」徽章，最长长度本地存档。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7825,6 +7864,7 @@
     if (id === "towerdef") towerdefRender();
     if (id === "qbert") qbertRender();
     if (id === "digdug") digdugRender();
+    if (id === "snakeio") snakeioRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7855,6 +7895,7 @@
     if (id !== "towerdef" && typeof towerdefStop === "function") towerdefStop();
     if (id !== "qbert" && typeof qbertStop === "function") qbertStop();
     if (id !== "digdug" && typeof digdugStop === "function") digdugStop();
+    if (id !== "snakeio" && typeof snakeioStop === "function") snakeioStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8016,6 +8057,7 @@
     towerdef: "塔防 tower defense towerdef 箭塔 冰塔 炮塔 守城 波次 防御 策略 升级 boss 溅射 减速 建塔 game",
     qbert: "跳跳金字塔 qbert 金字塔 方块 变色 斜跳 蹦跳 蛇 飞盘 街机 经典 等距 立方体 弹跳 game",
     digdug: "挖地小子 digdug 挖土 地道 隉道 打气 气筒 岩石 落石 恶龙 喷火 街机 经典 挖掘 地底 game",
+    snakeio: "蛇蛇大作战 snakeio slither 贪吃蛇 大作战 io 混战 对战 AI 加速 击杀 排行榜 蛇 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8237,6 +8279,7 @@ splitbill:"tools",
     towerdef:"games",
     qbert:"games",
     digdug:"games",
+    snakeio:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -39272,6 +39315,559 @@ splitbill:"tools",
       "别站在摇晃的石头下面思考人生，先挪一步再想。",
       "越深的地方分数越高，敢往下挖的人才拿得到。",
       "追你的怪物穿墙而来也别慌，它现身的那一刻就是破绽。"
+    );
+  }
+})();
+
+(function () {
+  "use strict";
+  var $s = function (id) { return document.getElementById(id); };
+
+  var W = 360, H = 480, WORLD = 1300;
+  var BASE_LEN = 90, MIN_LEN = 70, GROW = 14, FOOD_N = 90, FOOD_MAX = 220;
+  var SP = 1.7, SP_BOOST = 3.1, TURN = 0.085, TURN_BOOST = 0.06, DRAIN = 0.55;
+  var BOT_N = 6;
+  var BOT_NAMES = ["红闪", "绿豆", "紫电", "金爪", "蓝忍", "粉桃"];
+  var BOT_COLORS = ["#ef4444", "#22c55e", "#a855f7", "#f59e0b", "#38bdf8", "#f472b6"];
+
+  var canvas = null, ctx = null;
+  var inited = false, active = false, rafId = null, bound = false;
+  var best = 0, g = null, seedFn = null;
+  var keys = {};
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function rng() { return seedFn ? seedFn() : Math.random(); }
+  function saveBest() { try { localStorage.setItem("suibian_snakeio", String(best)); } catch (e) {} }
+  function loadBest() { try { best = parseInt(localStorage.getItem("suibian_snakeio") || "0", 10) || 0; } catch (e) { best = 0; } }
+
+  function normAng(a) {
+    while (a > Math.PI) a -= Math.PI * 2;
+    while (a < -Math.PI) a += Math.PI * 2;
+    return a;
+  }
+  function girthOf(sn) { return Math.min(13, 6 + sn.len / 400); }
+
+  function mkSnake(x, y, ang, isBot, name, color) {
+    return {
+      x: x, y: y, ang: ang, tAng: ang, len: BASE_LEN, totLen: 0,
+      pts: [{ x: x, y: y }], alive: true, isBot: isBot,
+      name: name, color: color, kills: 0, boost: false, boostT: 0,
+      respawnAt: -1, foodX: -1, foodY: -1, aiPhase: 0, avoidT: 0
+    };
+  }
+
+  function spawnBot(i) {
+    var px = g.player.alive ? g.player.x : WORLD / 2;
+    var py = g.player.alive ? g.player.y : WORLD / 2;
+    var x = 0, y = 0, tries = 0;
+    do {
+      x = 90 + rng() * (WORLD - 180);
+      y = 90 + rng() * (WORLD - 180);
+      tries++;
+    } while (tries < 30 && (x - px) * (x - px) + (y - py) * (y - py) < 260 * 260);
+    var sn = mkSnake(x, y, rng() * Math.PI * 2 - Math.PI, true, BOT_NAMES[i % BOT_NAMES.length], BOT_COLORS[i % BOT_COLORS.length]);
+    sn.aiPhase = i * 4 % 25;
+    g.bots[i] = sn;
+    return sn;
+  }
+
+  function addFood(x, y, v) {
+    if (g.foods.length >= FOOD_MAX) return;
+    g.foods.push({ x: x, y: y, v: v || 1 });
+  }
+  function randFood() {
+    addFood(30 + rng() * (WORLD - 60), 30 + rng() * (WORLD - 60), 1);
+  }
+
+  function newGame(seed) {
+    if (typeof seed === "number") seedFn = mulberry32(seed);
+    g = {
+      t: 0, over: false, foods: [], bots: [], rank: 1, endMsg: "",
+      player: mkSnake(WORLD / 2, WORLD / 2, -Math.PI / 2, false, "你", "#facc15")
+    };
+    for (var i = 0; i < BOT_N; i++) spawnBot(i);
+    for (var f = 0; f < FOOD_N; f++) randFood();
+    hideMsg();
+    return g;
+  }
+
+  function allSnakes() {
+    var arr = [g.player];
+    for (var i = 0; i < g.bots.length; i++) arr.push(g.bots[i]);
+    return arr;
+  }
+
+  function dropPellets(sn) {
+    var step = 16, acc = 0, n = 0;
+    for (var i = sn.pts.length - 1; i > 0 && n < 40; i--) {
+      acc += Math.hypot(sn.pts[i].x - sn.pts[i - 1].x, sn.pts[i].y - sn.pts[i - 1].y);
+      if (acc >= step) { acc = 0; addFood(sn.pts[i].x, sn.pts[i].y, 2); n++; }
+    }
+  }
+
+  function dieSnake(sn, killer) {
+    if (!sn.alive) return;
+    sn.alive = false;
+    if (killer && killer.alive) killer.kills++;
+    dropPellets(sn);
+    if (sn.isBot) {
+      sn.respawnAt = g.t + 90;
+    } else {
+      gameOver(killer ? ("被「" + killer.name + "」撞翻了！") : "撞上了世界边缘！");
+    }
+  }
+
+  function calcRank() {
+    var arr = allSnakes().filter(function (s) { return s.alive; });
+    arr.sort(function (a, b) { return b.len - a.len; });
+    for (var i = 0; i < arr.length; i++) if (arr[i] === g.player) return i + 1;
+    return arr.length + 1;
+  }
+
+  function gameOver(reason) {
+    if (g.over) return;
+    g.over = true;
+    g.rank = calcRank();
+    var score = Math.floor(g.player.len);
+    var isNew = score > best;
+    if (isNew) { best = score; }
+    saveBest();
+    try { bumpUsage("snakeio"); } catch (e) {}
+    if (g.player.kills >= 3) {
+      try { bumpUsage("snakeiokill"); } catch (e2) {}
+      try { confettiBurst(); } catch (e3) {}
+    }
+    var secs = Math.floor(g.t / 60);
+    g.endMsg = reason + "\n长度 " + score + " · 击杀 " + g.player.kills + " · 存活 " + secs + " 秒" +
+      (isNew ? "\n🎉 新纪录！" : "\n最高纪录 " + best);
+    showMsg("🐍 游戏结束", g.endMsg, "再战一局");
+  }
+
+  function keyVec() {
+    var vx = 0, vy = 0;
+    if (keys.left) vx -= 1;
+    if (keys.right) vx += 1;
+    if (keys.up) vy -= 1;
+    if (keys.down) vy += 1;
+    if (vx === 0 && vy === 0) return null;
+    return Math.atan2(vy, vx);
+  }
+
+  function turnToward(sn) {
+    var d = normAng(sn.tAng - sn.ang);
+    var mx = sn.boost ? TURN_BOOST : TURN;
+    if (d > mx) d = mx;
+    if (d < -mx) d = -mx;
+    sn.ang = normAng(sn.ang + d);
+  }
+
+  function probeDanger(sn, look) {
+    var px = sn.x + Math.cos(sn.ang) * look;
+    var py = sn.y + Math.sin(sn.ang) * look;
+    if (px < 60 || px > WORLD - 60 || py < 60 || py > WORLD - 60) return "wall";
+    var all = allSnakes();
+    for (var i = 0; i < all.length; i++) {
+      var o = all[i];
+      if (o === sn || !o.alive) continue;
+      for (var j = 0; j < o.pts.length - 6; j += 4) {
+        var dx = o.pts[j].x - px, dy = o.pts[j].y - py;
+        if (dx * dx + dy * dy < 34 * 34) return "body";
+      }
+    }
+    return null;
+  }
+
+  function steerBot(sn) {
+    if (sn.foodX < 0 || g.t % 25 === sn.aiPhase) {
+      var bi = -1, bd = 1e18;
+      for (var k = 0; k < g.foods.length; k += 2) {
+        var fx = g.foods[k].x - sn.x, fy = g.foods[k].y - sn.y;
+        var dd = fx * fx + fy * fy;
+        if (dd < bd) { bd = dd; bi = k; }
+      }
+      if (bi >= 0) { sn.foodX = g.foods[bi].x; sn.foodY = g.foods[bi].y; }
+    }
+    var desired = sn.foodX >= 0 ? Math.atan2(sn.foodY - sn.y, sn.foodX - sn.x) : sn.ang;
+    var danger = probeDanger(sn, 70);
+    if (danger === "wall") {
+      desired = Math.atan2(WORLD / 2 - sn.y, WORLD / 2 - sn.x);
+    } else if (danger === "body") {
+      if (sn.avoidT <= 0) { sn.avoidT = 30; sn.avoidDir = rng() < 0.5 ? 1 : -1; }
+      desired = sn.ang + 1.5 * (sn.avoidDir || 1);
+    }
+    if (sn.avoidT > 0) sn.avoidT--;
+    sn.tAng = normAng(desired);
+    if (sn.boostT > 0) { sn.boostT--; sn.boost = sn.len > BASE_LEN + 40; }
+    else if (sn.len > BASE_LEN + 80 && rng() < 0.004) { sn.boostT = 36; }
+    else sn.boost = false;
+  }
+
+  function moveSnake(sn) {
+    turnToward(sn);
+    var boosting = sn.boost && sn.len > MIN_LEN;
+    var sp = boosting ? SP_BOOST : SP;
+    if (boosting) sn.len = Math.max(MIN_LEN, sn.len - DRAIN);
+    sn.x += Math.cos(sn.ang) * sp;
+    sn.y += Math.sin(sn.ang) * sp;
+    sn.pts.push({ x: sn.x, y: sn.y });
+    sn.totLen += sp;
+    while (sn.pts.length > 2) {
+      var seg = Math.hypot(sn.pts[1].x - sn.pts[0].x, sn.pts[1].y - sn.pts[0].y);
+      if (sn.totLen - seg >= sn.len) { sn.pts.shift(); sn.totLen -= seg; }
+      else break;
+    }
+    var r = girthOf(sn);
+    if (sn.x < r || sn.x > WORLD - r || sn.y < r || sn.y > WORLD - r) dieSnake(sn, null);
+  }
+
+  function eatFoods(sn) {
+    var gr = girthOf(sn);
+    var eatR = (gr + 7) * (gr + 7), magR = (gr + 26) * (gr + 26);
+    for (var i = g.foods.length - 1; i >= 0; i--) {
+      var f = g.foods[i];
+      var dx = sn.x - f.x, dy = sn.y - f.y;
+      var d2 = dx * dx + dy * dy;
+      if (d2 < eatR) {
+        sn.len += GROW * f.v;
+        g.foods.splice(i, 1);
+      } else if (d2 < magR) {
+        var d = Math.sqrt(d2) || 1;
+        f.x += dx / d * 3.2;
+        f.y += dy / d * 3.2;
+      }
+    }
+  }
+
+  function checkCollisions() {
+    var all = allSnakes(), i, j, k;
+    var dead = [];
+    for (i = 0; i < all.length; i++) {
+      var a = all[i];
+      if (!a.alive) continue;
+      var ga = girthOf(a);
+      for (j = 0; j < all.length; j++) {
+        if (i === j) continue;
+        var b = all[j];
+        if (!b.alive) continue;
+        var gb = girthOf(b);
+        var hd = Math.hypot(a.x - b.x, a.y - b.y);
+        if (hd < ga + gb - 2) {
+          if (a.len <= b.len) { if (dead.indexOf(a) < 0) dead.push({ sn: a, by: b }); }
+          continue;
+        }
+        var lim = ga + gb;
+        for (k = 0; k < b.pts.length - 8; k += 2) {
+          var dx = b.pts[k].x - a.x, dy = b.pts[k].y - a.y;
+          if (dx * dx + dy * dy < lim * lim) {
+            dead.push({ sn: a, by: b });
+            k = -1;
+            break;
+          }
+        }
+        if (k === -1) break;
+      }
+    }
+    for (i = 0; i < dead.length; i++) {
+      var d = dead[i].sn ? dead[i] : { sn: dead[i], by: null };
+      dieSnake(d.sn, d.by);
+    }
+  }
+
+  function update() {
+    if (!g || g.over) return;
+    g.t++;
+    var p = g.player;
+    if (p.alive) {
+      var ka = keyVec();
+      if (ka !== null) p.tAng = ka;
+      p.boost = !!keys.boost;
+      moveSnake(p);
+      if (p.alive) eatFoods(p);
+    }
+    for (var i = 0; i < g.bots.length; i++) {
+      var b = g.bots[i];
+      if (!b.alive) {
+        if (b.respawnAt >= 0 && g.t >= b.respawnAt) spawnBot(i);
+        continue;
+      }
+      steerBot(b);
+      moveSnake(b);
+      if (b.alive) eatFoods(b);
+    }
+    if (!g.over) checkCollisions();
+    var baseCnt = 0;
+    for (var f = 0; f < g.foods.length; f++) if (g.foods[f].v === 1) baseCnt++;
+    if (baseCnt < FOOD_N && g.t % 3 === 0) randFood();
+    g.rank = calcRank();
+  }
+
+  /* ---------- 渲染 ---------- */
+  function camPos() {
+    var cx = Math.max(0, Math.min(WORLD - W, g.player.x - W / 2));
+    var cy = Math.max(0, Math.min(WORLD - H, g.player.y - H / 2));
+    return { x: cx, y: cy };
+  }
+
+  function drawSnake(sn, cam) {
+    var gr = girthOf(sn);
+    ctx.fillStyle = sn.color;
+    var acc = 0, gap = 8;
+    for (var i = sn.pts.length - 1; i >= 0; i--) {
+      if (i < sn.pts.length - 1) {
+        acc += Math.hypot(sn.pts[i + 1].x - sn.pts[i].x, sn.pts[i + 1].y - sn.pts[i].y);
+        if (acc < gap) continue;
+        acc = 0;
+      }
+      var sx = sn.pts[i].x - cam.x, sy = sn.pts[i].y - cam.y;
+      if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) continue;
+      ctx.globalAlpha = sn.boost ? 0.95 : 0.85;
+      ctx.beginPath();
+      ctx.arc(sx, sy, gr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    var hx = sn.x - cam.x, hy = sn.y - cam.y;
+    if (hx >= -20 && hx <= W + 20 && hy >= -20 && hy <= H + 20) {
+      ctx.beginPath();
+      ctx.arc(hx, hy, gr + 1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      var ex = Math.cos(sn.ang + 0.6) * gr * 0.55, ey = Math.sin(sn.ang + 0.6) * gr * 0.55;
+      ctx.beginPath(); ctx.arc(hx + ex, hy + ey, gr * 0.32, 0, Math.PI * 2); ctx.fill();
+      ex = Math.cos(sn.ang - 0.6) * gr * 0.55; ey = Math.sin(sn.ang - 0.6) * gr * 0.55;
+      ctx.beginPath(); ctx.arc(hx + ex, hy + ey, gr * 0.32, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#0f172a";
+      ex = Math.cos(sn.ang + 0.6) * gr * 0.62; ey = Math.sin(sn.ang + 0.6) * gr * 0.62;
+      ctx.beginPath(); ctx.arc(hx + ex, hy + ey, gr * 0.15, 0, Math.PI * 2); ctx.fill();
+      ex = Math.cos(sn.ang - 0.6) * gr * 0.62; ey = Math.sin(sn.ang - 0.6) * gr * 0.62;
+      ctx.beginPath(); ctx.arc(hx + ex, hy + ey, gr * 0.15, 0, Math.PI * 2); ctx.fill();
+      if (sn.isBot) {
+        ctx.fillStyle = "rgba(255,255,255,.75)";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(sn.name, hx, hy - gr - 6);
+      }
+    }
+  }
+
+  function render() {
+    if (!ctx || !g) return;
+    ctx.fillStyle = "#0d1930";
+    ctx.fillRect(0, 0, W, H);
+    var cam = camPos();
+    ctx.strokeStyle = "rgba(255,255,255,.05)";
+    ctx.lineWidth = 1;
+    var gs = 52;
+    for (var gx = -(cam.x % gs); gx < W; gx += gs) {
+      ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+    }
+    for (var gy = -(cam.y % gs); gy < H; gy += gs) {
+      ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+    }
+    ctx.strokeStyle = "rgba(239,68,68,.85)";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(-cam.x, -cam.y, WORLD, WORLD);
+    for (var i = 0; i < g.foods.length; i++) {
+      var f = g.foods[i];
+      var fx = f.x - cam.x, fy = f.y - cam.y;
+      if (fx < -10 || fx > W + 10 || fy < -10 || fy > H + 10) continue;
+      ctx.fillStyle = f.v > 1 ? "#fb923c" : "#34d399";
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.arc(fx, fy, f.v > 1 ? 4.5 : 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    var all = allSnakes();
+    for (var s = 1; s < all.length; s++) if (all[s].alive) drawSnake(all[s], cam);
+    if (g.player.alive) drawSnake(g.player, cam);
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(255,255,255,.92)";
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText("长度 " + Math.floor(g.player.len) + " · 击杀 " + g.player.kills, 10, 20);
+    ctx.font = "11px sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,.6)";
+    ctx.fillText("最高 " + best + " · 排名 " + g.rank + "/" + allSnakes().filter(function (x) { return x.alive; }).length, 10, 36);
+
+    var board = allSnakes().filter(function (x) { return x.alive; });
+    board.sort(function (a, b) { return b.len - a.len; });
+    ctx.textAlign = "right";
+    ctx.font = "10px sans-serif";
+    for (var r = 0; r < Math.min(5, board.length); r++) {
+      var sn2 = board[r];
+      ctx.fillStyle = sn2 === g.player ? "#facc15" : "rgba(255,255,255,.55)";
+      ctx.fillText((r + 1) + ". " + sn2.name + " " + Math.floor(sn2.len), W - 10, 18 + r * 13);
+    }
+
+    var ms = 64, msc = ms / WORLD, mx0 = 10, my0 = H - ms - 10;
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = "rgba(0,0,0,.45)";
+    ctx.fillRect(mx0, my0, ms, ms);
+    ctx.strokeStyle = "rgba(255,255,255,.3)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(mx0, my0, ms, ms);
+    for (var m = 0; m < all.length; m++) {
+      if (!all[m].alive) continue;
+      ctx.fillStyle = all[m] === g.player ? "#facc15" : all[m].color;
+      ctx.beginPath();
+      ctx.arc(mx0 + all[m].x * msc, my0 + all[m].y * msc, all[m] === g.player ? 2.5 : 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.textAlign = "left";
+  }
+
+  /* ---------- 界面 ---------- */
+  function showMsg(t, s, btn) {
+    var m = $s("sioMsg");
+    if (!m) return;
+    $s("sioMsgT").textContent = t;
+    $s("sioMsgS").textContent = s;
+    $s("sioMsgBtn").textContent = btn || "开始";
+    m.classList.add("show");
+  }
+  function hideMsg() {
+    var m = $s("sioMsg");
+    if (m) m.classList.remove("show");
+  }
+
+  function restart() {
+    seedFn = null;
+    newGame();
+  }
+
+  function setSteerFromPointer(e) {
+    if (!canvas || !g || g.over || !g.player.alive) return;
+    var rect = canvas.getBoundingClientRect();
+    if (!rect.width) return;
+    var mx = (e.clientX - rect.left) * (W / rect.width);
+    var my = (e.clientY - rect.top) * (H / rect.height);
+    var cam = camPos();
+    var hx = g.player.x - cam.x, hy = g.player.y - cam.y;
+    var dx = mx - hx, dy = my - hy;
+    if (dx * dx + dy * dy > 14 * 14) g.player.tAng = Math.atan2(dy, dx);
+  }
+
+  function bindEvents() {
+    if (bound) return;
+    bound = true;
+    canvas.addEventListener("pointermove", function (e) {
+      if (!active) return;
+      setSteerFromPointer(e);
+    });
+    canvas.addEventListener("pointerdown", function (e) {
+      if (!active) return;
+      e.preventDefault();
+      setSteerFromPointer(e);
+      keys.boost = true;
+    });
+    canvas.addEventListener("pointerup", function () { keys.boost = false; });
+    canvas.addEventListener("pointercancel", function () { keys.boost = false; });
+    var btn = $s("sioBoost");
+    if (btn) {
+      btn.addEventListener("pointerdown", function (e) { e.preventDefault(); if (active) keys.boost = true; });
+      btn.addEventListener("pointerup", function () { keys.boost = false; });
+      btn.addEventListener("pointerleave", function () { keys.boost = false; });
+    }
+    var nb = $s("sioNew");
+    if (nb) nb.addEventListener("click", function () { if (active) restart(); });
+    var mb = $s("sioMsgBtn");
+    if (mb) mb.addEventListener("click", function () { if (active) restart(); });
+    document.addEventListener("keydown", function (e) {
+      if (!active) return;
+      var k = e.key;
+      var used = true;
+      if (k === "ArrowUp" || k === "w" || k === "W") keys.up = true;
+      else if (k === "ArrowDown" || k === "s" || k === "S") keys.down = true;
+      else if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = true;
+      else if (k === "ArrowRight" || k === "d" || k === "D") keys.right = true;
+      else if (k === " ") keys.boost = true;
+      else if (k === "Enter") { if (g && g.over) restart(); }
+      else used = false;
+      if (used && e.preventDefault) e.preventDefault();
+    });
+    document.addEventListener("keyup", function (e) {
+      var k = e.key;
+      if (k === "ArrowUp" || k === "w" || k === "W") keys.up = false;
+      else if (k === "ArrowDown" || k === "s" || k === "S") keys.down = false;
+      else if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = false;
+      else if (k === "ArrowRight" || k === "d" || k === "D") keys.right = false;
+      else if (k === " ") keys.boost = false;
+    });
+  }
+
+  function init() {
+    if (inited) return;
+    canvas = $s("sioCanvas");
+    if (!canvas) return;
+    ctx = canvas.getContext("2d");
+    canvas.width = W * 2;
+    canvas.height = H * 2;
+    if (ctx.setTransform) ctx.setTransform(2, 0, 0, 2, 0, 0);
+    loadBest();
+    bindEvents();
+    newGame();
+    g.over = true;
+    showMsg("🐍 蛇蛇大作战", "io 风格贪吃蛇混战：吃豆变长，别撞别人的身体！\n按住 空格 / 屏幕 加速（消耗长度），\n把 6 条 AI 蛇统统送走，冲上排行榜第一！", "开始混战");
+    inited = true;
+  }
+
+  function loop() {
+    if (!active) return;
+    update();
+    render();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  window.snakeioRender = function () {
+    init();
+    if (!inited) return;
+    if (active) return;
+    active = true;
+    loop();
+  };
+  window.snakeioStop = function () {
+    active = false;
+    keys = {};
+    if (rafId !== null) {
+      try { cancelAnimationFrame(rafId); } catch (e) {}
+      rafId = null;
+    }
+  };
+  window.__snakeioHooks = {
+    newGame: newGame, update: update, render: render,
+    getG: function () { return g; },
+    getBest: function () { return best; }, setBest: function (v) { best = v; },
+    saveBest: saveBest, loadBest: loadBest,
+    steerBot: steerBot, spawnBot: spawnBot, dieSnake: dieSnake, gameOver: gameOver,
+    moveSnake: moveSnake, eatFoods: eatFoods, checkCollisions: checkCollisions,
+    addFood: addFood, calcRank: calcRank, girthOf: girthOf, probeDanger: probeDanger,
+    setKeys: function (k) { keys = k; },
+    W: W, H: H, WORLD: WORLD, BASE_LEN: BASE_LEN, MIN_LEN: MIN_LEN,
+    GROW: GROW, FOOD_N: FOOD_N, BOT_N: BOT_N
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🐍", name: "蛇界新丁", desc: "在蛇蛇大作战里完整玩过一局", test: function (u) { return (u.snakeio || 0) >= 1; } },
+      { emoji: "⚔️", name: "围蛇猎手", desc: "在蛇蛇大作战单局击杀 3 条 AI 蛇", test: function (u) { return (u.snakeiokill || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "变强的路上别急着加速，加速是要消耗积累的。",
+      "挡在别人前面之前，先确认自己够长。",
+      "排行榜第一名的蛇，也是从一颗豆子吃起的。",
+      "被撞翻不可怕，你留下的能量会喂饱后来者。",
+      "地图很大，别总在出生点打转。"
     );
   }
 })();
