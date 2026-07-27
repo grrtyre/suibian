@@ -1554,6 +1554,7 @@
         <button data-tab="peggle">🎯 弹珠打钉</button>
         <button data-tab="watersort">🧪 倒水排序</button>
         <button data-tab="mahjong">🀄 上海麻将</button>
+        <button data-tab="typefall">⌨️ 打字雨</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7740,6 +7741,41 @@
       <div class="mjx-tip">🀄 经典 Mahjong Solitaire：点击两张<b>图案相同</b>且<b>自由</b>的牌把它们消掉，拆光整座牌山即通关。「自由」= 上面没有压牌、且左右至少一侧是空的（被压暗的牌不可选）。龟阵 / 金字塔 / 十字阵三套立体牌山随关卡轮换，每一局都由「反向拆牌」算法发牌、<b>数学上保证有解</b>；实在卡住可以 💡 提示、↩ 无限悔棋、🔀 洗牌续命（洗完仍保证有解）。⌨️ H 提示 / U 悔棋 / S 洗牌 / R 重开 / Esc 取消选中 / ⏎ 下一关。通关纪录与关卡进度本地存档（suibian_mahjong），不用提示不洗牌通关可解锁「一气呵成」徽章。</div>
     </div>
   </section>
+  <!-- 打字雨 -->
+  <section class="panel" id="typefall">
+    <h2>⌨️ 打字雨</h2>
+    <style>
+      #typefall .tf-wrap { max-width:420px; margin:0 auto; }
+      #typefall .tf-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #typefall .tf-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #typefall .tf-top button:hover { background:rgba(255,255,255,.12); }
+      #typefall .tf-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #typefall canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:manipulation; background:#0b1026; box-shadow:0 12px 30px rgba(0,0,0,.5); cursor:text; }
+      #typefall .tf-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(11,16,38,.93); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #typefall .tf-msg.show { display:flex; }
+      #typefall .tf-msg .t { font-size:1.5rem; font-weight:800; }
+      #typefall .tf-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #typefall .tf-msg button { padding:9px 24px; border-radius:10px; border:0; background:#facc15; color:#3b2f03; font-weight:700; cursor:pointer; }
+      #typefall #tfInput { position:absolute; left:-9999px; top:0; width:10px; height:10px; opacity:0; border:0; padding:0; }
+      #typefall .tf-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="tf-wrap">
+      <div class="tf-top">
+        <button id="tfNew">🔄 新的一局</button>
+        <button id="tfKb">📱 呼出键盘</button>
+      </div>
+      <div class="tf-canvas-wrap">
+        <canvas id="tfCanvas"></canvas>
+        <input id="tfInput" type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="-1" />
+        <div class="tf-msg" id="tfMsg">
+          <div class="t" id="tfMsgT">⌨️ 打字雨</div>
+          <div class="s" id="tfMsgS">单词像雨一样落下，敲出完整单词把它击碎！</div>
+          <button id="tfMsgBtn">开始迎击</button>
+        </div>
+      </div>
+      <div class="tf-tip">⌨️ 直接敲字母：打出单词的<b>首字母</b>会自动锁定离地面最近的目标（黄色高亮），继续把整个词敲完即可击碎；敲错会<b>断连击</b>，⌫ 退格可放弃当前锁定换目标，⏎ 回车开局 / 重开。💚 连击越高得分倍率越高（最高 3 倍），连击 x15 解锁「盲打如飞」徽章；每击落 10 词天降金色 <b>BOSS 长词</b>（3 倍分值）。任何单词落到底部红线都会砸掉 1 条命，3 条命全失即结束。📱 手机点「呼出键盘」或点画面即可召唤软键盘。最高分本地存档（suibian_typefall）。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8115,6 +8151,7 @@
     if (id === "peggle") peggleRender();
     if (id === "watersort") watersortRender();
     if (id === "mahjong") mahjongRender();
+    if (id === "typefall") typefallRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8151,6 +8188,7 @@
     if (id !== "peggle" && typeof peggleStop === "function") peggleStop();
     if (id !== "watersort" && typeof watersortStop === "function") watersortStop();
     if (id !== "mahjong" && typeof mahjongStop === "function") mahjongStop();
+    if (id !== "typefall" && typeof typefallStop === "function") typefallStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8318,6 +8356,7 @@
     peggle: "弹珠打钉 peggle 弹珠 打钉 弹弓 弹跳 物理 发射 橘钉 橙钉 接珠篮 街机 弹射 game",
     watersort: "倒水排序 watersort water sort 试管 倒水 排序 颜色 分层 益智 解谜 puzzle 悖棋 换一副 game",
     mahjong: "上海麻将 mahjong solitaire 麻将 连连消 牌山 龟阵 金字塔 拆牌 配对 益智 解谜 puzzle game",
+    typefall: "打字雨 typefall ztype 打字游戏 键盘 打字 单词 雨 街机 连击 打字练习 typing game arcade",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8545,6 +8584,7 @@ splitbill:"tools",
     peggle:"games",
     watersort:"games",
     mahjong:"games",
+    typefall:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -42188,6 +42228,385 @@ splitbill:"tools",
       "\u5148\u62C6\u9AD8\u5904\uFF0C\u518D\u62C6\u4E24\u7FFC\uFF0C\u751F\u6D3B\u4E5F\u4E00\u6837\u3002",
       "\u6D17\u724C\u4E0D\u662F\u8BA4\u8F93\uFF0C\u662F\u6362\u4E2A\u601D\u8DEF\u3002",
       "\u770B\u4F3C\u65E0\u724C\u53EF\u6D88\uFF0C\u5176\u5B9E\u662F\u8FD8\u6CA1\u62C6\u5BF9\u5730\u65B9\u3002"
+    );
+  }
+})();
+(function () {
+  "use strict";
+  var W = 360, H = 480, DPR = 2;
+  var GROUND = H - 34;
+  var SHORT = ["cat","dog","sun","run","sky","red","box","cup","key","map","net","pen","ice","egg","fox","jam","log","mud","nut","owl","pig","rat","sea","tea","van","web","zip","arm","bag","bed","bee","bus","car","day","ear","eye","fan","fig","gem","hat","ink","jar","leg","lip","moon","rain","wind","fire","star","book","door","fish","game","hand","jump","king","lamp","milk","nose","park","rose","ship","tree","wave","wolf","code","data","byte","blue","gold","leaf","snow","frog","duck","bear","lion","cake","corn","rice","salt","song","time","road","hill","lake","ring","sand","seed","silk","tent","vast","wing","yarn","zero"];
+  var MID = ["apple","beach","cloud","dream","earth","flame","grape","house","image","juice","knife","lemon","magic","night","ocean","piano","queen","river","storm","tiger","unity","video","water","young","zebra","bridge","camera","dragon","energy","forest","garden","hammer","island","jungle","letter","monkey","number","orange","pencil","rabbit","silver","temple","violet","window","yellow","wizard","rocket","planet","spring","summer","winter","autumn","coffee","cookie","guitar","market","mirror","pocket","secret","ticket","tunnel","valley","breeze","candle","desert","engine","falcon","galaxy","harbor","insect","jacket","kitten","lively","melody","nebula","oyster","puzzle","quiver","ribbon","shadow","thunder","volume","whisper","anchor","blossom","crystal","dolphin","emerald","feather","glacier","horizon","journey","lantern","mystery","organic","penguin","quantum","rainbow","sunrise","tornado","volcano"];
+  var BOSS = ["adventure","butterfly","challenge","chocolate","dinosaur","discovery","earthquake","festival","firework","happiness","important","invisible","knowledge","lightning","marvelous","mountains","mysterious","nightmare","orchestra","paradise","sandwich","telescope","treasure","universe","waterfall","wonderful","xylophone","yesterday","algorithm","framework","developer","interface","satellite","symphony","labyrinth","hurricane","chandelier","revolution","atmosphere","celebration"];
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  var canvas = null, ctx = null, raf = 0, st = null, bound = false;
+  function loadBest() {
+    var b = 0;
+    try { b = parseInt(localStorage.getItem("suibian_typefall") || "0", 10) || 0; } catch (e) { b = 0; }
+    return b > 0 ? b : 0;
+  }
+  function saveBest(v) {
+    try { localStorage.setItem("suibian_typefall", String(v)); } catch (e) {}
+  }
+  function newGame(seed) {
+    var s = (seed === undefined || seed === null) ? ((Date.now() ^ (Math.random() * 1e9)) >>> 0) : (seed >>> 0);
+    st = {
+      seed: s, rng: mulberry32(s),
+      words: [], parts: [], deco: [],
+      score: 0, combo: 0, maxCombo: 0, comboBadge: false,
+      lives: 3, lv: 1, kills: 0, bossPending: false,
+      spawnT: 40, frame: 0, lock: -1,
+      idle: false, over: false, flash: 0, shake: 0,
+      best: loadBest()
+    };
+    var i;
+    for (i = 0; i < 26; i++) {
+      st.deco.push({ x: st.rng() * W, y: st.rng() * H, l: 6 + st.rng() * 14, sp: 0.6 + st.rng() * 1.4 });
+    }
+    hideMsg();
+    return st;
+  }
+  function measureW(text, big) {
+    var per = big ? 11.4 : 10.2;
+    if (ctx) {
+      try {
+        ctx.font = (big ? "bold 19px" : "bold 17px") + " ui-monospace, Consolas, monospace";
+        var m = ctx.measureText(text);
+        if (m && m.width) return m.width;
+      } catch (e) {}
+    }
+    return text.length * per;
+  }
+  function pickWord() {
+    var r = st.rng();
+    var pShort = Math.max(0.22, 0.72 - st.lv * 0.07);
+    var pool = r < pShort ? SHORT : MID;
+    return pool[Math.floor(st.rng() * pool.length)];
+  }
+  function spawnWord() {
+    var boss = false, text;
+    if (st.bossPending) {
+      boss = true; st.bossPending = false;
+      text = BOSS[Math.floor(st.rng() * BOSS.length)];
+    } else {
+      text = pickWord();
+    }
+    var w = measureW(text, boss);
+    var x = 12 + st.rng() * Math.max(10, W - 24 - w);
+    var sp = (0.34 + st.lv * 0.055) * (0.85 + st.rng() * 0.3);
+    if (boss) sp *= 0.55;
+    if (sp > 2.1) sp = 2.1;
+    st.words.push({ text: text, typed: 0, x: x, y: -14, sp: sp, boss: boss, w: w });
+  }
+  function spawnInterval() { return Math.max(42, 112 - st.lv * 7); }
+  function burst(x, y, boss) {
+    var n = boss ? 26 : 12, i;
+    for (i = 0; i < n; i++) {
+      st.parts.push({
+        x: x, y: y,
+        vx: (st.rng() - 0.5) * (boss ? 7 : 4.6),
+        vy: (st.rng() - 0.9) * (boss ? 6 : 4.2),
+        t: 28 + Math.floor(st.rng() * 16),
+        c: boss ? "#fbbf24" : ["#4ade80", "#22d3ee", "#a78bfa", "#f472b6"][Math.floor(st.rng() * 4)]
+      });
+    }
+  }
+  function completeWord(idx) {
+    var w = st.words[idx];
+    var mult = 1 + Math.min(st.combo, 20) * 0.1;
+    var gain = Math.round(w.text.length * 10 * mult) * (w.boss ? 3 : 1);
+    st.score += gain;
+    st.kills++;
+    st.combo++;
+    if (st.combo > st.maxCombo) st.maxCombo = st.combo;
+    burst(w.x + w.w / 2, w.y, w.boss);
+    if (w.boss) { try { toast("💥 BOSS 词击破 +" + gain + "！"); } catch (e) {} }
+    if (st.combo >= 15 && !st.comboBadge) {
+      st.comboBadge = true;
+      try { bumpUsage("typefallcombo"); } catch (e) {}
+      try { confettiBurst(60); } catch (e) {}
+      try { toast("⚡ 连击 x15！盲打如飞！"); } catch (e) {}
+    }
+    st.lv = 1 + Math.floor(st.kills / 12);
+    if (st.kills > 0 && st.kills % 10 === 0) st.bossPending = true;
+    st.words.splice(idx, 1);
+    st.lock = -1;
+  }
+  function gameOver() {
+    st.over = true;
+    st.lock = -1;
+    if (st.score > st.best) { st.best = st.score; saveBest(st.best); }
+    try { bumpUsage("typefall"); } catch (e) {}
+    showMsg("💀 键盘失守", "得分 " + st.score + " ｜ 最高连击 x" + st.maxCombo + " ｜ 击落 " + st.kills + " 词\n历史最佳 " + st.best + "\n按 ⏎ 或点按钮再战一场", "再来一局");
+  }
+  function handleChar(ch) {
+    if (!st || st.idle || st.over) return;
+    if (!/^[a-z]$/.test(ch)) return;
+    var i, w;
+    if (st.lock >= 0 && st.lock < st.words.length) {
+      w = st.words[st.lock];
+      if (w.text.charAt(w.typed) === ch) {
+        w.typed++;
+        st.score += 1;
+        if (w.typed >= w.text.length) completeWord(st.lock);
+      } else {
+        st.combo = 0;
+        st.flash = 6;
+        st.shake = 4;
+      }
+      return;
+    }
+    var best = -1, bestY = -1e9;
+    for (i = 0; i < st.words.length; i++) {
+      w = st.words[i];
+      if (w.typed === 0 && w.text.charAt(0) === ch && w.y > bestY) { best = i; bestY = w.y; }
+    }
+    if (best >= 0) {
+      st.lock = best;
+      st.words[best].typed = 1;
+      st.score += 1;
+      if (st.words[best].typed >= st.words[best].text.length) completeWord(best);
+    }
+  }
+  function unlock() {
+    if (!st || st.lock < 0) return;
+    if (st.lock < st.words.length) st.words[st.lock].typed = 0;
+    st.lock = -1;
+  }
+  function update() {
+    if (!st || st.idle || st.over) return;
+    st.frame++;
+    st.spawnT--;
+    if (st.spawnT <= 0) { spawnWord(); st.spawnT = spawnInterval(); }
+    var i;
+    for (i = st.words.length - 1; i >= 0; i--) {
+      var w = st.words[i];
+      w.y += w.sp;
+      if (w.y >= GROUND) {
+        st.words.splice(i, 1);
+        if (st.lock === i) st.lock = -1;
+        else if (st.lock > i) st.lock--;
+        st.lives--;
+        st.combo = 0;
+        st.flash = 14;
+        st.shake = 9;
+        if (st.lives <= 0) { st.lives = 0; gameOver(); return; }
+      }
+    }
+    for (i = st.parts.length - 1; i >= 0; i--) {
+      var p = st.parts[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.14; p.t--;
+      if (p.t <= 0) st.parts.splice(i, 1);
+    }
+    for (i = 0; i < st.deco.length; i++) {
+      var d = st.deco[i];
+      d.y += d.sp;
+      if (d.y > H + 20) { d.y = -20; d.x = st.rng() * W; }
+    }
+    if (st.flash > 0) st.flash--;
+    if (st.shake > 0) st.shake--;
+  }
+  function render() {
+    if (!ctx || !st) return;
+    ctx.save();
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (st.shake > 0) ctx.translate((Math.random() - 0.5) * st.shake, (Math.random() - 0.5) * st.shake);
+    var grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#0b1026");
+    grd.addColorStop(1, "#141c3f");
+    ctx.fillStyle = grd;
+    ctx.fillRect(-8, -8, W + 16, H + 16);
+    var i;
+    ctx.strokeStyle = "rgba(120,150,255,.14)";
+    ctx.lineWidth = 1;
+    for (i = 0; i < st.deco.length; i++) {
+      var d = st.deco[i];
+      ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x, d.y + d.l); ctx.stroke();
+    }
+    ctx.fillStyle = st.flash > 0 ? "rgba(248,113,113,.55)" : "rgba(148,163,184,.35)";
+    ctx.fillRect(0, GROUND, W, 2);
+    ctx.fillStyle = "rgba(30,41,59,.6)";
+    ctx.fillRect(0, GROUND + 2, W, H - GROUND - 2);
+    for (i = 0; i < st.words.length; i++) {
+      var w = st.words[i];
+      var big = w.boss;
+      ctx.font = (big ? "bold 19px" : "bold 17px") + " ui-monospace, Consolas, monospace";
+      ctx.textBaseline = "middle";
+      var done = w.text.slice(0, w.typed);
+      var rest = w.text.slice(w.typed);
+      var locked = (i === st.lock);
+      if (locked || big) {
+        ctx.fillStyle = big ? "rgba(251,191,36,.16)" : "rgba(250,204,21,.13)";
+        var pad = 5;
+        ctx.fillRect(w.x - pad, w.y - (big ? 13 : 12), w.w + pad * 2, big ? 26 : 24);
+      }
+      var dx = w.x;
+      if (done) {
+        ctx.fillStyle = "#4ade80";
+        ctx.fillText(done, dx, w.y);
+        dx += measureW(done, big);
+      }
+      ctx.fillStyle = big ? "#fbbf24" : (locked ? "#fde047" : "#e2e8f0");
+      ctx.fillText(rest, dx, w.y);
+      if (locked) {
+        ctx.fillStyle = "#facc15";
+        ctx.fillRect(dx, w.y + (big ? 12 : 11), Math.max(6, measureW(rest, big)), 2);
+      }
+    }
+    for (i = 0; i < st.parts.length; i++) {
+      var p = st.parts[i];
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.t / 24));
+      ctx.fillStyle = p.c;
+      ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+    }
+    ctx.globalAlpha = 1;
+    ctx.font = "bold 13px ui-monospace, Consolas, monospace";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#e2e8f0";
+    ctx.fillText("分数 " + st.score, 10, 20);
+    ctx.fillStyle = "#94a3b8";
+    var bt = "最佳 " + st.best;
+    ctx.fillText(bt, W - 10 - measureW(bt, false) * 13 / 17, 20);
+    var hearts = "";
+    for (i = 0; i < 3; i++) hearts += i < st.lives ? "❤" : "♡";
+    ctx.fillStyle = "#f87171";
+    ctx.fillText(hearts, 10, 40);
+    ctx.fillStyle = "#22d3ee";
+    ctx.fillText("Lv." + st.lv, W / 2 - 18, 20);
+    if (st.combo >= 2) {
+      ctx.fillStyle = st.combo >= 15 ? "#fbbf24" : "#a78bfa";
+      ctx.font = "bold 15px ui-monospace, Consolas, monospace";
+      ctx.fillText("连击 x" + st.combo + "  ·" + (1 + Math.min(st.combo, 20) * 0.1).toFixed(1) + "倍", W / 2 - 60, 42);
+    }
+    ctx.restore();
+  }
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    update();
+    render();
+  }
+  function showMsg(t, s, btn) {
+    var m = document.getElementById("tfMsg");
+    if (!m) return;
+    document.getElementById("tfMsgT").textContent = t;
+    document.getElementById("tfMsgS").textContent = s;
+    document.getElementById("tfMsgBtn").textContent = btn || "开始";
+    m.classList.add("show");
+  }
+  function hideMsg() {
+    var m = document.getElementById("tfMsg");
+    if (m) m.classList.remove("show");
+  }
+  function startPlay() {
+    if (!st || (!st.idle && !st.over)) return;
+    if (st.over) newGame();
+    st.idle = false;
+    hideMsg();
+    focusKb();
+  }
+  function focusKb() {
+    var inp = document.getElementById("tfInput");
+    if (inp) { try { inp.focus({ preventScroll: true }); } catch (e) { try { inp.focus(); } catch (e2) {} } }
+  }
+  function isActive() {
+    var sec = document.getElementById("typefall");
+    return !!(sec && sec.classList.contains("active"));
+  }
+  function onKey(e) {
+    if (!isActive() || !st) return;
+    var tgt = e.target;
+    if (tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA") && tgt.id !== "tfInput") return;
+    if (e.key === "Enter") {
+      if (st.over || st.idle) { e.preventDefault(); startPlay(); }
+      return;
+    }
+    if (e.key === "Backspace") {
+      if (!st.idle && !st.over) { e.preventDefault(); unlock(); }
+      return;
+    }
+    if (e.key && /^[a-zA-Z]$/.test(e.key)) {
+      if (st.idle || st.over) return;
+      e.preventDefault();
+      handleChar(e.key.toLowerCase());
+    }
+  }
+  function onInput() {
+    var inp = document.getElementById("tfInput");
+    if (!inp || !st || st.idle || st.over) { if (inp) inp.value = ""; return; }
+    var v = inp.value;
+    inp.value = "";
+    if (!v) return;
+    var ch = v.charAt(v.length - 1).toLowerCase();
+    if (/^[a-z]$/.test(ch)) handleChar(ch);
+  }
+  function bindOnce() {
+    if (bound) return;
+    bound = true;
+    document.addEventListener("keydown", onKey);
+    var inp = document.getElementById("tfInput");
+    if (inp) inp.addEventListener("input", onInput);
+    var btnNew = document.getElementById("tfNew");
+    if (btnNew) btnNew.addEventListener("click", function () { newGame(); st.idle = false; focusKb(); });
+    var btnKb = document.getElementById("tfKb");
+    if (btnKb) btnKb.addEventListener("click", function () { focusKb(); });
+    var btnMsg = document.getElementById("tfMsgBtn");
+    if (btnMsg) btnMsg.addEventListener("click", startPlay);
+    if (canvas) {
+      canvas.addEventListener("pointerdown", function () {
+        if (st && (st.idle || st.over)) startPlay();
+        else focusKb();
+      });
+    }
+  }
+  window.typefallRender = function () {
+    if (!canvas) {
+      canvas = document.getElementById("tfCanvas");
+      if (!canvas) return;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      ctx = canvas.getContext("2d");
+    }
+    bindOnce();
+    if (!st) {
+      newGame();
+      st.idle = true;
+      showMsg("⌨️ 打字雨", "单词像雨一样落下！\n敲出完整单词把它击碎，别让任何一个词砸到地面。\n连击越高倍率越高，每 10 词召唤金色 BOSS 长词（3 倍分）。", "开始迎击");
+    }
+    if (!raf) loop();
+  };
+  window.typefallStop = function () {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+  window.__tfHooks = {
+    mulberry32: mulberry32, newGame: newGame, spawnWord: spawnWord, pickWord: pickWord,
+    spawnInterval: spawnInterval, handleChar: handleChar, completeWord: completeWord,
+    unlock: unlock, update: update, render: render, gameOver: gameOver,
+    startPlay: startPlay, onKey: onKey, onInput: onInput, loadBest: loadBest, saveBest: saveBest,
+    measureW: measureW, isActive: isActive,
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    getRaf: function () { return raf; },
+    pools: { SHORT: SHORT, MID: MID, BOSS: BOSS }
+  };
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "⌨️", name: "雨中打手", desc: "完整打完一局打字雨", test: function (u) { return (u.typefall || 0) >= 1; } },
+      { emoji: "⚡", name: "盲打如飞", desc: "打字雨单局连击达到 15", test: function (u) { return (u.typefallcombo || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "落下来的不是单词，是没打完的待办。",
+      "手速追不上生活，就先追上一个单词。",
+      "连击断了没关系，键盘还在，你就还在。",
+      "每个 BOSS 长词，拆开看也只是一个个字母。",
+      "接不住所有的雨，就先接住眼前这一滴。"
     );
   }
 })();
