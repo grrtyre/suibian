@@ -1556,6 +1556,7 @@
         <button data-tab="mahjong">🀄 上海麻将</button>
         <button data-tab="typefall">⌨️ 打字雨</button>
         <button data-tab="fishy">🐟 大鱼吃小鱼</button>
+        <button data-tab="miner">⛏️ 黄金矿工</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7807,6 +7808,36 @@
       <div class="fy-tip">🐟 移动鼠标 / 手指拖动，小鱼会游向指针；也可用 <b>←↑↓→ / WASD</b> 键盘控制，⏎ 回车开局 / 重开。只能吃<b>比自己小</b>的鱼（灰色剪影是吃不动的大家伙，✨ 金鱼高速掠过 +60 分），撞上大鱼或 🪼 水母会损 1 命（共 3 条命，受击后短暂无敌闪烁）。把右上角成长条吃满即可<b>称霸这片海域</b>、带分进入更凶险的下一片海（解锁「深海霸主」徽章）。最高分本地存档（suibian_fishy）。</div>
     </div>
   </section>
+  <!-- 黄金矿工 -->
+  <section class="panel" id="miner">
+    <h2>⛏️ 黄金矿工</h2>
+    <style>
+      #miner .mn-wrap { max-width:420px; margin:0 auto; }
+      #miner .mn-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #miner .mn-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #miner .mn-top button:hover { background:rgba(255,255,255,.12); }
+      #miner .mn-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto; }
+      #miner canvas { display:block; width:100%; height:auto; border-radius:14px; touch-action:none; background:#2a1608; box-shadow:0 12px 30px rgba(0,0,0,.5); cursor:pointer; }
+      #miner .mn-msg { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:rgba(26,14,4,.93); border-radius:14px; color:#fff; text-align:center; padding:20px; }
+      #miner .mn-msg.show { display:flex; }
+      #miner .mn-msg .t { font-size:1.5rem; font-weight:800; }
+      #miner .mn-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #miner .mn-msg button { padding:9px 24px; border-radius:10px; border:0; background:#fbbf24; color:#3b2205; font-weight:700; cursor:pointer; }
+      #miner .mn-best { text-align:center; margin-top:8px; font-size:.88rem; opacity:.85; }
+      #miner .mn-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="mn-wrap">
+      <div class="mn-top">
+        <button id="mnNew">🔄 重新开始</button>
+      </div>
+      <div class="mn-canvas-wrap">
+        <canvas id="mnCanvas" width="720" height="960"></canvas>
+        <div class="mn-msg" id="mnMsg"><div class="t" id="mnMsgT"></div><div class="s" id="mnMsgS"></div><button id="mnMsgBtn">开始</button></div>
+      </div>
+      <div class="mn-best" id="mnBest"></div>
+      <div class="mn-tip">⛏️ 钩子自动左右摇摆，<b>空格 / ↓ / ⏎ / 点按屏幕</b>甩钩抓取。金块越大越值钱、💎 钻石 +500、💰 神秘钱袋随机开奖，石头又重又不值钱（拉回极慢，小心浪费时间）。<b>60 秒</b>内挖够左上角 🎯 目标金额即可深入下一层矿洞（目标更高、石头更多，还有过关加成 +200），时间到没挖够就收工失败。同一种子矿层布局完全可复现，最高分本地存档（suibian_miner），过关一次解锁「矿业大亨」徽章。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8184,6 +8215,7 @@
     if (id === "mahjong") mahjongRender();
     if (id === "typefall") typefallRender();
     if (id === "fishy") fishyRender();
+    if (id === "miner") minerRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8222,6 +8254,7 @@
     if (id !== "mahjong" && typeof mahjongStop === "function") mahjongStop();
     if (id !== "typefall" && typeof typefallStop === "function") typefallStop();
     if (id !== "fishy" && typeof fishyStop === "function") fishyStop();
+    if (id !== "miner" && typeof minerStop === "function") minerStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8391,6 +8424,7 @@
     mahjong: "上海麻将 mahjong solitaire 麻将 连连消 牌山 龟阵 金字塔 拆牌 配对 益智 解谜 puzzle game",
     typefall: "打字雨 typefall ztype 打字游戏 键盘 打字 单词 雨 街机 连击 打字练习 typing game arcade",
     fishy: "大鱼吃小鱼 fishy feeding frenzy 吃鱼 海洋 鲨鱼 街机 成长 大鱼 小鱼 水母 arcade fish ocean",
+    miner: "黄金矿工 miner gold 挖金子 淘金 钩子 矿洞 钻石 金块 街机 arcade gold miner 抖金",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8620,6 +8654,7 @@ splitbill:"tools",
     mahjong:"games",
     typefall:"games",
     fishy:"games",
+    miner:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -43059,6 +43094,426 @@ splitbill:"tools",
       "躲得过鲨口，才轮得到你慢慢长大。",
       "水母不咬人，但它从来不讲道理。",
       "换一片海域，不是逃跑，是长大了。"
+    );
+  }
+})();
+/* ====== ⛏️ 黄金矿工 miner ====== */
+(function () {
+  "use strict";
+  var W = 360, H = 480, DPR = 2;
+  var AX = W / 2, AY = 64, LEN0 = 26, GY = 70;
+  var canvas = null, ctx = null, raf = 0, st = null, bound = false;
+  var TYPES = {
+    goldL: { r: 16, val: 250, wt: 4.2 },
+    goldM: { r: 11, val: 120, wt: 2.6 },
+    goldS: { r: 7, val: 50, wt: 1.4 },
+    rockL: { r: 14, val: 20, wt: 4.8 },
+    rockS: { r: 9, val: 11, wt: 3.0 },
+    diam: { r: 6, val: 500, wt: 1.0 },
+    bag: { r: 11, val: 0, wt: 2.2 }
+  };
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function loadBest() {
+    var b = 0;
+    try { b = parseInt(localStorage.getItem("suibian_miner") || "0", 10) || 0; } catch (e) { b = 0; }
+    return b > 0 ? b : 0;
+  }
+  function saveBest(v) {
+    try { localStorage.setItem("suibian_miner", String(v)); } catch (e) {}
+  }
+  function updateBestLine() {
+    var el = document.getElementById("mnBest");
+    if (el && st) el.textContent = "🏆 最高分 " + st.best + " · 当前第 " + st.lv + " 层矿洞";
+  }
+  function layout() {
+    var rng = st.rng, lv = st.lv;
+    st.items = [];
+    var plan = [];
+    function addN(tp, n) { for (var i = 0; i < n; i++) plan.push(tp); }
+    addN("goldL", 1 + (lv >= 3 ? 1 : 0));
+    addN("goldM", 2);
+    addN("goldS", 3);
+    addN("rockL", 2 + Math.min(2, lv - 1));
+    addN("rockS", 2 + Math.min(2, Math.floor(lv / 2)));
+    addN("diam", lv >= 2 ? 1 : (rng() < 0.5 ? 1 : 0));
+    addN("bag", 1 + (lv >= 2 ? 1 : 0));
+    for (var k = 0; k < plan.length; k++) {
+      var tp = plan[k], def = TYPES[tp];
+      var deep = (tp === "goldL" || tp === "diam");
+      var x = 0, y = 0, ok = false;
+      for (var tr = 0; tr < 60 && !ok; tr++) {
+        x = 24 + rng() * (W - 48);
+        y = deep ? 300 + rng() * (H - 330) : 130 + rng() * (H - 160);
+        ok = true;
+        for (var m = 0; m < st.items.length; m++) {
+          var o = st.items[m];
+          var dx = o.x - x, dy = o.y - y, rr = o.r + def.r + 10;
+          if (dx * dx + dy * dy < rr * rr) { ok = false; break; }
+        }
+      }
+      var val = def.val;
+      if (tp === "bag") val = 40 + Math.floor(rng() * 240);
+      st.items.push({ type: tp, x: x, y: y, r: def.r, val: val, wt: def.wt });
+    }
+  }
+  function newGame(seed) {
+    var s = (seed === undefined || seed === null) ? ((Date.now() ^ (Math.random() * 1e9)) >>> 0) : (seed >>> 0);
+    var rng = mulberry32(s);
+    st = {
+      seed: s, rng: rng,
+      items: [], parts: [],
+      score: 0, lv: 1, target: 350, time: 3600, grabbed: 0,
+      hook: { ph: 0, ang: 0, state: "swing", len: LEN0, item: null },
+      banner: 0, bannerTxt: "", shake: 0,
+      t: 0, over: false, idle: false,
+      best: loadBest()
+    };
+    layout();
+    updateBestLine();
+  }
+  function tipPos() {
+    var hk = st.hook;
+    return { x: AX + Math.sin(hk.ang) * hk.len, y: AY + Math.cos(hk.ang) * hk.len };
+  }
+  function dropHook() {
+    if (!st || st.idle || st.over) return;
+    if (st.hook.state === "swing") st.hook.state = "shoot";
+  }
+  function spawnParts(x, y, color, n) {
+    for (var i = 0; i < (n || 12); i++) {
+      var a = Math.random() * 6.283, s = 0.6 + Math.random() * 2.4;
+      st.parts.push({ x: x, y: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 0.6, life: 26 + Math.random() * 14, color: color });
+    }
+  }
+  function collect(it) {
+    st.score += it.val;
+    st.grabbed++;
+    var col = (it.type === "diam") ? "#67e8f9" : (it.type === "bag" ? "#fbbf24" : (it.type.indexOf("rock") === 0 ? "#94a3b8" : "#fde047"));
+    spawnParts(AX, AY + 16, col);
+    if (it.type === "diam") { try { toast("💎 钻石到手 +500"); } catch (e) {} }
+    else if (it.type === "bag") { try { toast("💰 神秘钱袋开出 +" + it.val); } catch (e) {} }
+    updateBestLine();
+  }
+  function endLevel() {
+    if (!st || st.over) return;
+    if (st.score >= st.target) {
+      var bonus = Math.max(0, Math.ceil(st.time / 60)) * 3 + 200;
+      st.score += bonus;
+      st.lv++;
+      st.target += 275;
+      st.time = 3600;
+      st.hook.state = "swing";
+      st.hook.item = null;
+      st.hook.len = LEN0;
+      layout();
+      st.banner = 110;
+      st.bannerTxt = "⛏️ 达标过关！深入第 " + st.lv + " 层矿洞";
+      try { bumpUsage("minerpass"); } catch (e) {}
+      try { confettiBurst(); } catch (e) {}
+      updateBestLine();
+    } else {
+      gameOver();
+    }
+  }
+  function gameOver() {
+    st.over = true;
+    if (st.score > st.best) { st.best = st.score; saveBest(st.best); }
+    try { bumpUsage("miner"); } catch (e) {}
+    updateBestLine();
+    showMsg("⏰ 收工失败", "时间到，没挖够目标金额…\n本局挖到 " + st.score + " / 目标 " + st.target + "\n最高分 " + st.best + " · 深入第 " + st.lv + " 层 · 抓上 " + st.grabbed + " 件\n⏎ 或点按钮再挖一轮", "再挖一轮");
+  }
+  function update() {
+    if (!st || st.idle || st.over) return;
+    st.t++;
+    if (st.shake > 0) st.shake--;
+    if (st.banner > 0) st.banner--;
+    st.time--;
+    if (st.time <= 0) { endLevel(); return; }
+    var hk = st.hook, i;
+    if (hk.state === "swing") {
+      hk.ph += 0.026;
+      hk.ang = Math.sin(hk.ph) * 1.18;
+    } else if (hk.state === "shoot") {
+      hk.len += 5.2;
+      var tip = tipPos();
+      for (i = 0; i < st.items.length; i++) {
+        var it = st.items[i];
+        var dx = it.x - tip.x, dy = it.y - tip.y, rr = it.r + 7;
+        if (dx * dx + dy * dy < rr * rr) {
+          hk.item = it;
+          st.items.splice(i, 1);
+          hk.state = "pull";
+          if (it.type.indexOf("rock") === 0) st.shake = 6;
+          break;
+        }
+      }
+      if (hk.state === "shoot" && (tip.x < 4 || tip.x > W - 4 || tip.y > H - 4)) hk.state = "pull";
+    } else if (hk.state === "pull") {
+      var sp = hk.item ? Math.max(0.85, 3.4 - hk.item.wt * 0.62) : 7;
+      hk.len -= sp;
+      if (hk.len <= LEN0) {
+        hk.len = LEN0;
+        if (hk.item) collect(hk.item);
+        hk.item = null;
+        hk.state = "swing";
+        if (st.items.length === 0) { endLevel(); return; }
+      }
+    }
+    for (i = st.parts.length - 1; i >= 0; i--) {
+      var q = st.parts[i];
+      q.x += q.vx; q.y += q.vy; q.vy += 0.05; q.life--;
+      if (q.life <= 0) st.parts.splice(i, 1);
+    }
+  }
+  function drawItem(tp, x, y, r, tt) {
+    if (tp === "diam") {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(0.785);
+      ctx.fillStyle = "#67e8f9";
+      ctx.fillRect(-r, -r, r * 2, r * 2);
+      ctx.strokeStyle = "rgba(255,255,255,.85)";
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(-r, -r, r * 2, r * 2);
+      ctx.restore();
+      return;
+    }
+    if (tp === "bag") {
+      ctx.fillStyle = "#a16207";
+      ctx.beginPath(); ctx.arc(x, y + 1, r, 0, 6.283); ctx.fill();
+      ctx.fillStyle = "#713f12";
+      ctx.fillRect(x - 3.5, y - r - 3, 7, 5);
+      ctx.fillStyle = "#fef3c7";
+      ctx.font = "bold 11px system-ui, sans-serif";
+      ctx.textBaseline = "middle";
+      ctx.fillText("?", x - 3, y + 2);
+      return;
+    }
+    if (tp.indexOf("rock") === 0) {
+      ctx.fillStyle = "#64748b";
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+      ctx.fillStyle = "#475569";
+      ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.25, r * 0.38, 0, 6.283); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + r * 0.3, y + r * 0.3, r * 0.28, 0, 6.283); ctx.fill();
+      return;
+    }
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = "#b45309";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.stroke();
+    ctx.fillStyle = "#fde68a";
+    ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.3, r * 0.32, 0, 6.283); ctx.fill();
+    if ((((tt || 0) * 0.05 + x * 0.1) % 6.283) < 1.2) {
+      ctx.strokeStyle = "rgba(255,255,255,.9)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x - r * 0.1 - 4, y - r * 0.6); ctx.lineTo(x - r * 0.1 + 4, y - r * 0.6);
+      ctx.moveTo(x - r * 0.1, y - r * 0.6 - 4); ctx.lineTo(x - r * 0.1, y - r * 0.6 + 4);
+      ctx.stroke();
+    }
+  }
+  function render() {
+    if (!ctx) return;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var sx = 0, sy = 0;
+    if (st && st.shake > 0) { sx = (Math.random() - 0.5) * 5; sy = (Math.random() - 0.5) * 5; }
+    ctx.translate(sx, sy);
+    var g = ctx.createLinearGradient(0, 0, 0, GY);
+    g.addColorStop(0, "#0c4a6e");
+    g.addColorStop(1, "#f97316");
+    ctx.fillStyle = g;
+    ctx.fillRect(-10, -10, W + 20, GY + 10);
+    var g2 = ctx.createLinearGradient(0, GY, 0, H);
+    g2.addColorStop(0, "#92400e");
+    g2.addColorStop(0.45, "#5b2d0e");
+    g2.addColorStop(1, "#1c0f06");
+    ctx.fillStyle = g2;
+    ctx.fillRect(-10, GY, W + 20, H - GY + 20);
+    ctx.strokeStyle = "rgba(0,0,0,.25)";
+    ctx.lineWidth = 2;
+    var k;
+    for (k = 1; k <= 4; k++) {
+      var ly = GY + k * 90;
+      ctx.beginPath();
+      ctx.moveTo(-10, ly);
+      ctx.quadraticCurveTo(W / 2, ly + (k % 2 ? 12 : -12), W + 10, ly);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "rgba(0,0,0,.28)";
+    for (k = 0; k < 14; k++) {
+      var px = ((k * 97 + 31) % W), py = GY + 30 + ((k * 151 + 67) % (H - GY - 50));
+      ctx.beginPath(); ctx.arc(px, py, 2.2, 0, 6.283); ctx.fill();
+    }
+    ctx.fillStyle = "#78350f";
+    ctx.fillRect(0, GY - 4, W, 4);
+    if (!st) return;
+    var tt = st.t;
+    for (k = 0; k < st.items.length; k++) {
+      var it = st.items[k];
+      drawItem(it.type, it.x, it.y, it.r, tt);
+    }
+    var hk = st.hook;
+    var tip = tipPos();
+    ctx.strokeStyle = "#d6c9a8";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(AX, AY); ctx.lineTo(tip.x, tip.y); ctx.stroke();
+    ctx.save();
+    ctx.translate(tip.x, tip.y);
+    ctx.rotate(hk.ang);
+    ctx.strokeStyle = "#e5e7eb";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(-6, 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(6, 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(0, 8); ctx.stroke();
+    ctx.restore();
+    if (hk.item) drawItem(hk.item.type, tip.x, tip.y + hk.item.r + 4, hk.item.r, tt);
+    ctx.fillStyle = "#57534e";
+    ctx.beginPath(); ctx.arc(AX, AY, 6, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = "#a8a29e";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(AX - 14, GY - 4); ctx.lineTo(AX, AY - 4); ctx.lineTo(AX + 14, GY - 4); ctx.stroke();
+    ctx.font = "20px system-ui, sans-serif";
+    ctx.textBaseline = "middle";
+    ctx.fillText("👷", AX + 20, 50);
+    for (k = 0; k < st.parts.length; k++) {
+      var q = st.parts[k];
+      ctx.globalAlpha = Math.max(0, q.life / 34);
+      ctx.fillStyle = q.color;
+      ctx.fillRect(q.x - 1.5, q.y - 1.5, 3, 3);
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "rgba(12,10,4,.55)";
+    ctx.fillRect(0, 0, W, 26);
+    ctx.font = "bold 12px system-ui, sans-serif";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#fde68a";
+    ctx.fillText("💰 " + st.score, 8, 13);
+    ctx.fillStyle = "#e2f3ff";
+    ctx.fillText("🎯 " + st.target, 92, 13);
+    var sec = Math.ceil(st.time / 60);
+    ctx.fillStyle = sec <= 10 ? "#f87171" : "#e2f3ff";
+    ctx.fillText("⏱ " + sec, 182, 13);
+    ctx.fillStyle = "#e2f3ff";
+    ctx.fillText("第 " + st.lv + " 层", 244, 13);
+    if (st.banner > 0) {
+      ctx.globalAlpha = Math.min(1, st.banner / 30);
+      ctx.fillStyle = "#facc15";
+      ctx.font = "bold 19px system-ui, sans-serif";
+      var tw = ctx.measureText(st.bannerTxt).width;
+      ctx.fillText(st.bannerTxt, (W - tw) / 2, 150);
+      ctx.globalAlpha = 1;
+    }
+  }
+  function showMsg(t, s, btn) {
+    var box = document.getElementById("mnMsg");
+    var tt = document.getElementById("mnMsgT");
+    var ss = document.getElementById("mnMsgS");
+    var bb = document.getElementById("mnMsgBtn");
+    if (!box) return;
+    if (tt) tt.textContent = t;
+    if (ss) ss.textContent = s;
+    if (bb) bb.textContent = btn || "开始";
+    box.classList.add("show");
+  }
+  function hideMsg() {
+    var box = document.getElementById("mnMsg");
+    if (box) box.classList.remove("show");
+  }
+  function startPlay() {
+    if (!st || st.over) newGame();
+    st.idle = false;
+    hideMsg();
+  }
+  function isActive() {
+    var sec = document.getElementById("miner");
+    return !!(sec && sec.classList.contains("active"));
+  }
+  function onKey(e) {
+    if (!isActive() || !st) return;
+    var tgt = e.target;
+    if (tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA")) return;
+    if (e.key === "Enter") {
+      if (e.preventDefault) e.preventDefault();
+      if (st.over || st.idle) startPlay();
+      else dropHook();
+      return;
+    }
+    if (e.key === " " || e.key === "Spacebar" || e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
+      if (e.preventDefault) e.preventDefault();
+      if (st.over || st.idle) startPlay();
+      else dropHook();
+    }
+  }
+  function bindOnce() {
+    if (bound) return;
+    bound = true;
+    document.addEventListener("keydown", onKey);
+    var btnNew = document.getElementById("mnNew");
+    if (btnNew) btnNew.addEventListener("click", function () { newGame(); st.idle = false; hideMsg(); });
+    var btnMsg = document.getElementById("mnMsgBtn");
+    if (btnMsg) btnMsg.addEventListener("click", startPlay);
+    if (canvas) {
+      canvas.addEventListener("pointerdown", function () {
+        if (st && (st.idle || st.over)) { startPlay(); return; }
+        dropHook();
+      });
+    }
+  }
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    update();
+    render();
+  }
+  window.minerRender = function () {
+    if (!canvas) {
+      canvas = document.getElementById("mnCanvas");
+      if (!canvas) return;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      ctx = canvas.getContext("2d");
+    }
+    bindOnce();
+    if (!st) {
+      newGame();
+      st.idle = true;
+      showMsg("⛏️ 黄金矿工", "钩子会左右摇摆，看准时机甩下去！\n金块 / 💎 钻石 / 神秘钱袋换钱，石头又重又不值钱。\n60 秒内挖够目标金额，就能深入下一层矿洞。", "开工挖矿");
+    }
+    if (!raf) loop();
+  };
+  window.minerStop = function () {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+  window.__mnHooks = {
+    mulberry32: mulberry32, newGame: newGame, layout: layout, dropHook: dropHook,
+    tipPos: tipPos, collect: collect, endLevel: endLevel, gameOver: gameOver,
+    update: update, render: render, startPlay: startPlay, onKey: onKey,
+    loadBest: loadBest, saveBest: saveBest, isActive: isActive,
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    getRaf: function () { return raf; },
+    consts: { W: W, H: H, AX: AX, AY: AY, LEN0: LEN0, GY: GY, TYPES: TYPES }
+  };
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "⛏️", name: "淘金新手", desc: "完整玩完一局黄金矿工", test: function (u) { return (u.miner || 0) >= 1; } },
+      { emoji: "💰", name: "矿业大亨", desc: "在黄金矿工中挖够目标金额、成功过关", test: function (u) { return (u.minerpass || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "钩子甩出去之前，先想清楚要的是金子还是石头。",
+      "时间不等人，矿洞更不等人。",
+      "拉上来是石头也别灰心，至少你排除了一个错误答案。",
+      "神秘钱袋告诉我们：人生总得给未知留一钩。",
+      "挖到钻石的人，都曾在石头堆里空手荡过很多回。"
     );
   }
 })();
