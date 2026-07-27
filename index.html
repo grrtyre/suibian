@@ -1551,6 +1551,7 @@
         <button data-tab="snakeio">🐍 蛇蛇大作战</button>
         <button data-tab="helix">🌀 螺旋塔跳跃</button>
         <button data-tab="knight">♞ 骑士巡游</button>
+        <button data-tab="peggle">🎯 弹珠打钉</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7594,6 +7595,41 @@
       <div class="kt-tip">🖱️ 点任意格子放下骑士（红框标记起点），之后只能按「马走日」跳到蓝点提示的未访问格；走满全盘即获胜，无路可走则被困。💡 每局 3 次提示（橙色格 = Warnsdorff 法则推荐、出路最少的格子优先）；🤖 AI 演示会从当前局面自动走完（演示不计入成就与纪录）。⌨️ U 悔一步 / H 提示 / ⏎ 重开。小知识：5×5 棋盘只有从与四角同色的格子出发才有解。完成 8×8 巡游可解锁「八八纵横」徽章，各尺寸最快用时本地存档。</div>
     </div>
   </section>
+  <!-- 弹珠打钉 -->
+  <section class="panel" id="peggle">
+    <h2>🎯 弹珠打钉</h2>
+    <style>
+      #peggle .pg-wrap { max-width:420px; margin:0 auto; }
+      #peggle .pg-hud { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px; font-size:.9rem; }
+      #peggle .pg-hud b { color:#facc15; }
+      #peggle .pg-canvas-wrap { position:relative; width:100%; max-width:400px; margin:0 auto; }
+      #peggle canvas { display:block; width:100%; height:auto; border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,.5); cursor:crosshair; touch-action:none; }
+      #peggle .pg-msg { position:absolute; inset:0; display:none; flex-direction:column; gap:10px; align-items:center; justify-content:center; background:rgba(10,12,24,.82); border-radius:14px; text-align:center; padding:18px; z-index:3; }
+      #peggle .pg-msg.show { display:flex; }
+      #peggle .pg-msg .t { font-size:1.35rem; font-weight:800; }
+      #peggle .pg-msg .s { font-size:.92rem; opacity:.85; line-height:1.65; white-space:pre-line; }
+      #peggle .pg-msg button { padding:9px 24px; border-radius:10px; border:0; background:#facc15; color:#3b2f03; font-weight:700; cursor:pointer; }
+      #peggle .pg-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="pg-wrap">
+      <div class="pg-hud">
+        <span>🏆 关卡 <b id="pgLv">1</b></span>
+        <span>⭐ 得分 <b id="pgScore">0</b></span>
+        <span>🎱 余球 <b id="pgBalls">10</b></span>
+        <span>🍊 剩橙 <b id="pgOrange">0</b></span>
+      </div>
+      <div class="pg-canvas-wrap">
+        <canvas id="pgCv" width="360" height="480"></canvas>
+        <div class="pg-msg" id="pgMsg">
+          <div class="t" id="pgMsgT">🎯 弹珠打钉</div>
+          <div class="s" id="pgMsgS">瞄准发射弹珠，清光所有橙色钉子！</div>
+          <button id="pgMsgBtn">开始游戏</button>
+        </div>
+      </div>
+      <div class="pg-best" id="pgBest" style="text-align:center;margin-top:8px;font-size:.88rem;opacity:.85;"></div>
+      <div class="pg-tip">🖱️ 移动鼠标瞄准（带弹道预览虚线），点击发射；⌨️ ← → 微调角度、空格/⏎ 发射。弹珠会在钉子间弹跳，碰过的钉子在弹珠落地后消失：🔵 蓝钉 10 分、🍊 橙钉 100 分、💚 绿钉立得 +1 球。清光全部橙钉即过关（最后一颗橙钉 +500 撒花），关卡越深钉阵越刁钻；底部🧺接珠篮左右巡逻，弹珠落篮免费返还 1 球。球用完且橙钉未清则一局结束，最高分本地存档（suibian_peggle）。清过一关可解锁「清橙大师」徽章。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -7966,6 +8002,7 @@
     if (id === "snakeio") snakeioRender();
     if (id === "helix") helixRender();
     if (id === "knight") knightRender();
+    if (id === "peggle") peggleRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -7999,6 +8036,7 @@
     if (id !== "snakeio" && typeof snakeioStop === "function") snakeioStop();
     if (id !== "helix" && typeof helixStop === "function") helixStop();
     if (id !== "knight" && typeof knightStop === "function") knightStop();
+    if (id !== "peggle" && typeof peggleStop === "function") peggleStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8163,6 +8201,7 @@
     snakeio: "蛇蛇大作战 snakeio slither 贪吃蛇 大作战 io 混战 对战 AI 加速 击杀 排行榜 蛇 game",
     helix: "螺旋塔跳跃 helix jump 螺旋 塔 下落 弹跳 火球 旋转 缺口 街机 反应 game",
     knight: "骑士巡游 knight tour 骑士 马走日 棋盘 谜题 puzzle 提示 演示 益智 game",
+    peggle: "弹珠打钉 peggle 弹珠 打钉 弹弓 弹跳 物理 发射 橘钉 橙钉 接珠篮 街机 弹射 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8387,6 +8426,7 @@ splitbill:"tools",
     snakeio:"games",
     helix:"games",
     knight:"games",
+    peggle:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -40862,6 +40902,494 @@ splitbill:"tools",
       "被困住时，先回头看看来时的路。",
       "每个格子只经过一次，像极了时间。",
       "好的起点，是巡游成功的一半。"
+    );
+  }
+})();
+(function () {
+  "use strict";
+  // 🎯 弹珠打钉（Peggle 风物理弹珠）模块
+  var W = 360, H = 480;
+  var BALL_R = 6, PEG_R = 8;
+  var GRAV = 0.11, LAUNCH_V = 5.6, DAMP = 0.86, WALL_DAMP = 0.85, MAXV = 9;
+  var LX = W / 2, LY = 26;               // 发射器位置
+  var BUCKET_W = 64, BUCKET_H = 16;
+  var bound = false, rafId = null;
+  var best = 0;
+  var g = null;
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function saveBest() { try { localStorage.setItem("suibian_peggle", String(best)); } catch (e) {} }
+  function loadBest() {
+    try { best = parseInt(localStorage.getItem("suibian_peggle"), 10) || 0; } catch (e) { best = 0; }
+  }
+
+  /* ---------- 关卡生成 ---------- */
+  function genLevel(lv, seed) {
+    var rng = mulberry32((seed === undefined ? (lv * 7919 + 12345) : seed) | 0);
+    var pts = [], i, j, x, y;
+    var pat = (lv - 1) % 3;
+    if (pat === 0) {            // 错位网格
+      for (i = 0; i < 6; i++) {
+        var off = (i % 2) ? 22 : 0;
+        for (j = 0; j < 8; j++) {
+          x = 32 + off + j * 42; y = 112 + i * 44;
+          if (x > W - 20) continue;
+          pts.push([x + (rng() - 0.5) * 6, y + (rng() - 0.5) * 6]);
+        }
+      }
+    } else if (pat === 1) {     // 同心圆环
+      var cx = W / 2, cy = 235;
+      var rings = [[52, 8], [95, 14], [136, 18]];
+      for (i = 0; i < rings.length; i++) {
+        var rr = rings[i][0], n = rings[i][1];
+        for (j = 0; j < n; j++) {
+          var a = (Math.PI * 2 * j) / n + rng() * 0.15;
+          x = cx + Math.cos(a) * rr; y = cy + Math.sin(a) * rr * 0.82;
+          if (x < 18 || x > W - 18 || y < 100 || y > 372) continue;
+          pts.push([x, y]);
+        }
+      }
+      pts.push([cx, cy]);
+    } else {                    // 三条波浪
+      for (i = 0; i < 3; i++) {
+        for (j = 0; j < 11; j++) {
+          x = 24 + j * 31.2;
+          y = 140 + i * 88 + Math.sin(j * 0.9 + i * 1.7) * 34;
+          pts.push([x + (rng() - 0.5) * 4, y]);
+        }
+      }
+    }
+    // 去重（防止过近重叠）
+    var pos = [];
+    for (i = 0; i < pts.length; i++) {
+      var ok = true;
+      for (j = 0; j < pos.length; j++) {
+        var dx = pts[i][0] - pos[j][0], dy = pts[i][1] - pos[j][1];
+        if (dx * dx + dy * dy < (PEG_R * 2.3) * (PEG_R * 2.3)) { ok = false; break; }
+      }
+      if (ok) pos.push(pts[i]);
+    }
+    // 洗牌后分配颜色
+    for (i = pos.length - 1; i > 0; i--) {
+      j = Math.floor(rng() * (i + 1));
+      var tmp = pos[i]; pos[i] = pos[j]; pos[j] = tmp;
+    }
+    var orangeN = Math.min(8 + 2 * (lv - 1), Math.floor(pos.length * 0.45));
+    if (orangeN < 1) orangeN = 1;
+    var greenN = Math.min(2, Math.max(0, pos.length - orangeN - 1));
+    var pegs = [];
+    for (i = 0; i < pos.length; i++) {
+      var kind = i < orangeN ? "o" : (i < orangeN + greenN ? "g" : "b");
+      pegs.push({ x: pos[i][0], y: pos[i][1], k: kind, hit: false });
+    }
+    return pegs;
+  }
+
+  function orangeLeft() {
+    var n = 0;
+    for (var i = 0; i < g.pegs.length; i++) if (g.pegs[i].k === "o" && !g.pegs[i].hit) n++;
+    return n;
+  }
+
+  function newGame(lv, seed) {
+    var carry = (g && lv > 1) ? g.balls : 0;
+    var score = (g && lv > 1) ? g.score : 0;
+    g = {
+      lv: lv || 1, score: score, balls: Math.min(15, 10 + carry),
+      pegs: genLevel(lv || 1, seed),
+      state: "aim",           // aim | fly | clear | over | idle
+      ball: null, trail: [],
+      aimA: 0,                // 相对竖直向下的偏角
+      aimX: LX, aimY: 200,    // 鼠标瞄准点
+      useMouse: false,
+      t: 0, dying: [], cleared: false, shots: 0
+    };
+    updateHud();
+  }
+
+  /* ---------- 物理 ---------- */
+  function aimVec() {
+    var dx, dy;
+    if (g.useMouse) { dx = g.aimX - LX; dy = g.aimY - LY; }
+    else { dx = Math.sin(g.aimA); dy = Math.cos(g.aimA); }
+    var len = Math.sqrt(dx * dx + dy * dy) || 1;
+    dx /= len; dy /= len;
+    if (dy < 0.12) {            // 不允许朝上/过平发射
+      dy = 0.12; var s = Math.sqrt(1 - dy * dy);
+      dx = (dx < 0 ? -1 : 1) * s;
+    }
+    return [dx, dy];
+  }
+
+  function shoot() {
+    if (!g || g.state !== "aim" || g.balls <= 0) return false;
+    var v = aimVec();
+    g.ball = { x: LX, y: LY, vx: v[0] * LAUNCH_V, vy: v[1] * LAUNCH_V };
+    g.trail = [];
+    g.balls--; g.shots++; g.flyT = 0;
+    g.state = "fly";
+    updateHud();
+    return true;
+  }
+
+  // 单步物理推进；返回 "fly" | "end" | "bucket"
+  function physStep(b, pegsHitCb) {
+    b.vy += GRAV;
+    var sp = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+    if (sp > MAXV) { b.vx = b.vx / sp * MAXV; b.vy = b.vy / sp * MAXV; }
+    b.x += b.vx; b.y += b.vy;
+    if (b.x < BALL_R) { b.x = BALL_R; b.vx = Math.abs(b.vx) * WALL_DAMP; }
+    if (b.x > W - BALL_R) { b.x = W - BALL_R; b.vx = -Math.abs(b.vx) * WALL_DAMP; }
+    if (b.y < BALL_R + 2) { b.y = BALL_R + 2; b.vy = Math.abs(b.vy) * WALL_DAMP; }
+    // 钉子碰撞
+    for (var i = 0; i < g.pegs.length; i++) {
+      var p = g.pegs[i];
+      var dx = b.x - p.x, dy = b.y - p.y;
+      var d2 = dx * dx + dy * dy, R = BALL_R + PEG_R;
+      if (d2 < R * R) {
+        var d = Math.sqrt(d2) || 0.001;
+        var nx = dx / d, ny = dy / d;
+        b.x = p.x + nx * R; b.y = p.y + ny * R;
+        var dot = b.vx * nx + b.vy * ny;
+        b.vx = (b.vx - 2 * dot * nx) * DAMP;
+        b.vy = (b.vy - 2 * dot * ny) * DAMP;
+        if (Math.abs(b.vx) + Math.abs(b.vy) < 0.9) b.vy -= 1.2; // 防止黏死在钉子上
+        if (!p.hit && pegsHitCb) pegsHitCb(p);
+      }
+    }
+    // 接珠篮
+    var bx = bucketX(g.t);
+    if (b.y > H - BUCKET_H - BALL_R - 4 && b.y < H + BALL_R &&
+        Math.abs(b.x - bx) < BUCKET_W / 2 - 4 && b.vy > 0) return "bucket";
+    if (b.y > H + BALL_R * 2) return "end";
+    return "fly";
+  }
+
+  function bucketX(t) {
+    return W / 2 + Math.sin(t * 0.017) * (W / 2 - BUCKET_W / 2 - 8);
+  }
+
+  function onPegHit(p) {
+    p.hit = true;
+    if (p.k === "b") g.score += 10;
+    else if (p.k === "g") {
+      g.score += 50;
+      g.balls = Math.min(15, g.balls + 1);
+      try { toast("💚 绿钉！+1 球"); } catch (e) {}
+    } else if (p.k === "o") {
+      g.score += 100;
+      if (orangeLeft() === 0) {
+        g.score += 500;
+        g.cleared = true;
+        try { confettiBurst(90); } catch (e) {}
+        try { bumpUsage("peggleclear"); } catch (e) {}
+      }
+    }
+    updateHud();
+  }
+
+  // 弹珠落地/入篮后的结算
+  function resolveBall(caught) {
+    if (caught) {
+      g.balls = Math.min(15, g.balls + 1);
+      try { toast("🧺 接住！免费返还 1 球"); } catch (e) {}
+    }
+    // 命中的钉子转入消散动画
+    var left = [];
+    for (var i = 0; i < g.pegs.length; i++) {
+      if (g.pegs[i].hit) g.dying.push({ x: g.pegs[i].x, y: g.pegs[i].y, k: g.pegs[i].k, a: 1 });
+      else left.push(g.pegs[i]);
+    }
+    g.pegs = left;
+    g.ball = null; g.trail = [];
+    if (g.cleared) {
+      g.state = "clear";
+      showMsg("🎉 第 " + g.lv + " 关通关！", "得分 " + g.score + "\n下一关钉阵更刁钻，剩余球带入下关（上限 15）", "下一关 ▶");
+    } else if (g.balls <= 0) {
+      gameOver();
+    } else {
+      g.state = "aim";
+    }
+    updateHud();
+  }
+
+  function gameOver() {
+    g.state = "over";
+    var nb = g.score > best;
+    if (nb) { best = g.score; saveBest(); }
+    try { bumpUsage("peggle"); } catch (e) {}
+    showMsg("💀 弹珠用尽", "最终得分 " + g.score + (nb ? "（🎉 新纪录！）" : "（最高 " + best + "）") + "\n闯到第 " + g.lv + " 关", "再来一局");
+    updateHud();
+  }
+
+  /* ---------- 主循环 ---------- */
+  function step() {
+    g.t++;
+    if (g.state === "fly" && g.ball) {
+      g.flyT = (g.flyT || 0) + 1;
+      if (g.flyT > 1800) { resolveBall(false); return; } // 防卡死兜底
+      for (var s = 0; s < 2; s++) {      // 每帧两个子步，弹道更顺滑
+        if (g.state !== "fly") break;
+        var r = physStep(g.ball, onPegHit);
+        g.trail.push([g.ball.x, g.ball.y]);
+        if (g.trail.length > 14) g.trail.shift();
+        if (r === "bucket") { resolveBall(true); break; }
+        if (r === "end") { resolveBall(false); break; }
+      }
+    }
+    // 消散动画
+    for (var i = g.dying.length - 1; i >= 0; i--) {
+      g.dying[i].a -= 0.06;
+      if (g.dying[i].a <= 0) g.dying.splice(i, 1);
+    }
+  }
+
+  /* ---------- 弹道预览 ---------- */
+  function previewPath() {
+    var v = aimVec();
+    var b = { x: LX, y: LY, vx: v[0] * LAUNCH_V, vy: v[1] * LAUNCH_V };
+    var dots = [];
+    for (var s = 0; s < 64; s++) {
+      b.vy += GRAV;
+      b.x += b.vx; b.y += b.vy;
+      if (b.x < BALL_R) { b.x = BALL_R; b.vx = Math.abs(b.vx); }
+      if (b.x > W - BALL_R) { b.x = W - BALL_R; b.vx = -Math.abs(b.vx); }
+      var hit = false;
+      for (var i = 0; i < g.pegs.length; i++) {
+        var dx = b.x - g.pegs[i].x, dy = b.y - g.pegs[i].y;
+        var R = BALL_R + PEG_R;
+        if (dx * dx + dy * dy < R * R) { hit = true; break; }
+      }
+      if (s % 3 === 0) dots.push([b.x, b.y]);
+      if (hit || b.y > H) break;
+    }
+    return dots;
+  }
+
+  /* ---------- 渲染 ---------- */
+  var cv = null, ctx = null, dpr = 1;
+  var COLORS = { b: "#3b82f6", o: "#fb923c", g: "#34d399" };
+  var GLOWS = { b: "rgba(59,130,246,.55)", o: "rgba(251,146,60,.65)", g: "rgba(52,211,153,.6)" };
+
+  function draw() {
+    if (!ctx) return;
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#101426"); bg.addColorStop(1, "#1a1030");
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    // 星点装饰
+    ctx.fillStyle = "rgba(255,255,255,.08)";
+    for (var i = 0; i < 24; i++) {
+      var sx = (i * 97 + 31) % W, sy = (i * 173 + 59) % H;
+      ctx.fillRect(sx, sy, 2, 2);
+    }
+    // 消散中的钉子
+    for (i = 0; i < g.dying.length; i++) {
+      var dp = g.dying[i];
+      ctx.globalAlpha = Math.max(0, dp.a);
+      ctx.fillStyle = COLORS[dp.k];
+      ctx.beginPath(); ctx.arc(dp.x, dp.y, PEG_R * (1 + (1 - dp.a) * 0.8), 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // 钉子
+    for (i = 0; i < g.pegs.length; i++) {
+      var p = g.pegs[i];
+      ctx.shadowColor = GLOWS[p.k]; ctx.shadowBlur = p.hit ? 16 : 8;
+      ctx.fillStyle = p.hit ? "#fef9c3" : COLORS[p.k];
+      ctx.beginPath(); ctx.arc(p.x, p.y, PEG_R, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = p.hit ? "#fde047" : "rgba(255,255,255,.35)";
+      ctx.lineWidth = p.hit ? 2.5 : 1.2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, PEG_R - 1, 0, Math.PI * 2); ctx.stroke();
+    }
+    // 弹道预览
+    if (g.state === "aim") {
+      var dots = previewPath();
+      ctx.fillStyle = "rgba(255,255,255,.4)";
+      for (i = 0; i < dots.length; i++) {
+        ctx.beginPath(); ctx.arc(dots[i][0], dots[i][1], 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    // 发射器
+    var av = aimVec();
+    ctx.strokeStyle = "#facc15"; ctx.lineWidth = 5; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(LX, LY);
+    ctx.lineTo(LX + av[0] * 26, LY + av[1] * 26); ctx.stroke();
+    ctx.fillStyle = "#eab308";
+    ctx.beginPath(); ctx.arc(LX, LY, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#713f12";
+    ctx.beginPath(); ctx.arc(LX, LY, 5, 0, Math.PI * 2); ctx.fill();
+    // 弹珠拖尾 + 本体
+    if (g.ball) {
+      for (i = 0; i < g.trail.length; i++) {
+        ctx.globalAlpha = (i + 1) / g.trail.length * 0.35;
+        ctx.fillStyle = "#fef08a";
+        ctx.beginPath(); ctx.arc(g.trail[i][0], g.trail[i][1], BALL_R * 0.7, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.shadowColor = "rgba(250,204,21,.8)"; ctx.shadowBlur = 12;
+      ctx.fillStyle = "#fef9c3";
+      ctx.beginPath(); ctx.arc(g.ball.x, g.ball.y, BALL_R, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    // 接珠篮
+    var bx = bucketX(g.t);
+    ctx.fillStyle = "#b45309";
+    ctx.beginPath();
+    ctx.moveTo(bx - BUCKET_W / 2, H - BUCKET_H);
+    ctx.lineTo(bx + BUCKET_W / 2, H - BUCKET_H);
+    ctx.lineTo(bx + BUCKET_W / 2 - 8, H);
+    ctx.lineTo(bx - BUCKET_W / 2 + 8, H);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#f59e0b";
+    ctx.fillRect(bx - BUCKET_W / 2, H - BUCKET_H, BUCKET_W, 4);
+    ctx.restore();
+  }
+
+  /* ---------- HUD / 提示 ---------- */
+  function $p(id) { return document.getElementById(id); }
+  function updateHud() {
+    var e;
+    if ((e = $p("pgLv"))) e.textContent = g ? g.lv : 1;
+    if ((e = $p("pgScore"))) e.textContent = g ? g.score : 0;
+    if ((e = $p("pgBalls"))) e.textContent = g ? g.balls : 10;
+    if ((e = $p("pgOrange"))) e.textContent = g ? orangeLeft() : 0;
+    if ((e = $p("pgBest"))) e.textContent = best > 0 ? ("🏅 历史最高分：" + best) : "还没有纪录，来打出第一个高分吧！";
+  }
+  function showMsg(t, s, btn) {
+    var m = $p("pgMsg");
+    if (!m) return;
+    $p("pgMsgT").textContent = t;
+    $p("pgMsgS").textContent = s;
+    $p("pgMsgBtn").textContent = btn;
+    m.classList.add("show");
+  }
+  function hideMsg() {
+    var m = $p("pgMsg");
+    if (m) m.classList.remove("show");
+  }
+
+  function msgAction() {
+    hideMsg();
+    if (!g || g.state === "idle") { newGame(1); }
+    else if (g.state === "clear") { newGame(g.lv + 1); }
+    else if (g.state === "over") { g = null; newGame(1); }
+  }
+
+  /* ---------- 输入 ---------- */
+  function canvasPos(ev) {
+    var r = cv.getBoundingClientRect();
+    var cx = (ev.touches && ev.touches[0]) ? ev.touches[0].clientX : ev.clientX;
+    var cy = (ev.touches && ev.touches[0]) ? ev.touches[0].clientY : ev.clientY;
+    return [(cx - r.left) / r.width * W, (cy - r.top) / r.height * H];
+  }
+  function onMove(ev) {
+    if (!g || g.state !== "aim") return;
+    var p = canvasPos(ev);
+    g.aimX = p[0]; g.aimY = Math.max(p[1], LY + 30);
+    g.useMouse = true;
+    if (ev.touches) ev.preventDefault();
+  }
+  function onShootClick(ev) {
+    if (!g) return;
+    if (g.state === "aim") {
+      if (ev.touches) { onMove(ev); ev.preventDefault(); }
+      shoot();
+    }
+  }
+  function onKey(ev) {
+    var sec = document.getElementById("peggle");
+    if (!sec || !sec.classList.contains("active")) return;
+    var tag = (ev.target && ev.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if (!g) return;
+    if (ev.key === "Enter" && (g.state === "over" || g.state === "clear" || g.state === "idle")) {
+      msgAction(); ev.preventDefault(); return;
+    }
+    if (g.state !== "aim") return;
+    if (ev.key === "ArrowLeft") {
+      if (g.useMouse) { g.aimA = Math.atan2(g.aimX - LX, Math.max(g.aimY - LY, 1)); g.useMouse = false; }
+      g.aimA = Math.max(-1.35, g.aimA - 0.05); ev.preventDefault();
+    } else if (ev.key === "ArrowRight") {
+      if (g.useMouse) { g.aimA = Math.atan2(g.aimX - LX, Math.max(g.aimY - LY, 1)); g.useMouse = false; }
+      g.aimA = Math.min(1.35, g.aimA + 0.05); ev.preventDefault();
+    } else if (ev.key === " " || ev.key === "Enter") {
+      shoot(); ev.preventDefault();
+    }
+  }
+
+  /* ---------- 生命周期 ---------- */
+  function loop() {
+    if (g && g.state !== "idle") step();
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  window.peggleRender = function () {
+    if (!bound) {
+      bound = true;
+      loadBest();
+      cv = $p("pgCv");
+      if (cv) {
+        dpr = Math.min(2, window.devicePixelRatio || 1);
+        cv.width = W * dpr; cv.height = H * dpr;
+        ctx = cv.getContext("2d");
+        cv.addEventListener("mousemove", onMove);
+        cv.addEventListener("click", onShootClick);
+        cv.addEventListener("touchmove", onMove, { passive: false });
+        cv.addEventListener("touchstart", onShootClick, { passive: false });
+      }
+      var mb = $p("pgMsgBtn");
+      if (mb) mb.addEventListener("click", msgAction);
+      document.addEventListener("keydown", onKey);
+    }
+    if (!g) {
+      // 首屏冻结：生成第一关但不开跑，点「开始游戏」再动
+      newGame(1);
+      g.state = "idle";
+      showMsg("🎯 弹珠打钉", "瞄准发射弹珠，清光所有 🍊 橙色钉子即可过关！\n💚 绿钉 +1 球，🧺 底部接珠篮接住弹珠免费返还。", "开始游戏");
+      updateHud();
+    }
+    if (rafId === null) loop();
+  };
+
+  window.peggleStop = function () {
+    if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+  };
+
+  window.__peggleHooks = {
+    newGame: newGame, shoot: shoot, step: step, physStep: physStep,
+    genLevel: genLevel, aimVec: aimVec, previewPath: previewPath,
+    resolveBall: resolveBall, gameOver: gameOver, onPegHit: onPegHit,
+    bucketX: bucketX, orangeLeft: orangeLeft, msgAction: msgAction,
+    getG: function () { return g; },
+    setG: function (v) { g = v; },
+    getBest: function () { return best; },
+    loadBest: loadBest, saveBest: saveBest
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🎯", name: "弹珠神射", desc: "在弹珠打钉里完整打完一局", test: function (u) { return (u.peggle || 0) >= 1; } },
+      { emoji: "🍊", name: "清橙大师", desc: "清光一整关的橙色钉子", test: function (u) { return (u.peggleclear || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "弹珠不会走直线，人生也一样。",
+      "瞄得再准，也要给弹跳留点余地。",
+      "最后一颗橙钉，值得多绕几个弯。",
+      "接珠篮一直在动，机会也是。",
+      "打偏了没关系，下一球还在手里。"
     );
   }
 })();
