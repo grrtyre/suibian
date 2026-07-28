@@ -1567,6 +1567,7 @@
         <button data-tab="fishing">🎣 钓鱼佬模拟</button>
         <button data-tab="lemmings">🐹 旅鼠大迁徙</button>
         <button data-tab="farm">🌾 随便农场</button>
+        <button data-tab="mon">🐲 随便兽</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8137,6 +8138,59 @@
       <div class="fh-tip">🎣 <b>空格 / 点画面一键三连：抛竿蓄力 → 锁定力度 → 浮漂猛沉的一瞬间起竿</b>；抛得越远水越深，湖心与深水才藏着稀有和传说级大物。中鱼后进入遛鱼：按住收线张力猛涨、松手泄力鱼往外逃，张力拉满会切线、泄力太久会脱钩，把距离磨到 0 才能抄网上岸。21 种渔获分普通 / 稀有 / 史诗 / 传说四档（还有三件湖底垃圾等你做环保），图鉴、总渔获与最大单尾纪录本地存档（suibian_fishing），钓上第一条真鱼解锁「空军毕业」、请上传说级大物解锁「湖中传说」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="mon">
+    <h2>🐲 随便兽</h2>
+    <p class="sub">草丛里蹲一只，随便球丢过去：收服、升级、进化，集齐 12 只图鉴</p>
+    <style>
+      #mon .mn-wrap { max-width:560px; margin:0 auto; }
+      #mon .mn-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #mon .mn-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #mon .mn-party { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #mon .mn-chip { padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.88rem; cursor:pointer; }
+      #mon .mn-chip.on { background:#7e57c2; border-color:#b39ddb; font-weight:700; }
+      #mon .mn-card { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.16); background:rgba(0,0,0,.22); margin-bottom:10px; text-align:left; }
+      #mon .mn-card.wild { border-color:rgba(255,138,101,.45); background:rgba(80,30,20,.25); }
+      #mon .mn-card.home { border-color:rgba(129,199,132,.4); }
+      #mon .mn-card i { font-style:normal; font-size:2.4rem; line-height:1; }
+      #mon .mn-info { flex:1; min-width:0; }
+      #mon .mn-info b { display:block; font-size:.95rem; margin-bottom:5px; }
+      #mon .mn-info b em { font-style:normal; opacity:.8; font-weight:400; }
+      #mon .mn-info b u { text-decoration:none; font-size:.72rem; padding:1px 7px; border-radius:99px; background:rgba(255,255,255,.12); margin-left:4px; }
+      #mon .mn-info small { display:block; margin-top:4px; font-size:.72rem; opacity:.75; }
+      #mon .mn-bar { display:block; height:7px; border-radius:99px; background:rgba(255,255,255,.13); overflow:hidden; }
+      #mon .mn-bar span { display:block; height:100%; border-radius:99px; transition:width .25s; }
+      #mon .mn-bar .ok { background:linear-gradient(90deg,#66bb6a,#9ccc65); }
+      #mon .mn-bar .low { background:linear-gradient(90deg,#ef5350,#ff8a65); }
+      #mon .mn-bar .exp { background:linear-gradient(90deg,#42a5f5,#7e57c2); }
+      #mon .mn-en { text-align:center; letter-spacing:4px; color:#ffd54f; margin:2px 0 8px; font-size:.9rem; }
+      #mon .mn-log { border:1px dashed rgba(255,255,255,.18); border-radius:12px; padding:8px 12px; font-size:.82rem; line-height:1.65; margin-bottom:10px; min-height:44px; text-align:left; background:rgba(0,0,0,.18); }
+      #mon .mn-acts { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+      #mon .mn-acts button { padding:9px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.24); background:rgba(0,0,0,.3); color:inherit; font-size:.95rem; cursor:pointer; }
+      #mon .mn-acts button.big { background:#43a047; border-color:#66bb6a; font-weight:700; }
+      #mon .mn-acts button:disabled { opacity:.4; cursor:not-allowed; }
+      #mon .mn-acts button:hover:not(:disabled) { transform:translateY(-1px); }
+      #mon .mn-starter p { margin:6px 0 12px; }
+      #mon .mn-strow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+      #mon .mn-stbtn { display:flex; flex-direction:column; align-items:center; gap:4px; padding:14px 18px; border-radius:14px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; cursor:pointer; }
+      #mon .mn-stbtn i { font-style:normal; font-size:2.2rem; }
+      #mon .mn-stbtn em { font-style:normal; font-size:.72rem; opacity:.75; }
+      #mon .mn-stbtn:hover { border-color:#7e57c2; transform:translateY(-2px); }
+      #mon .mn-dex { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px; }
+      #mon .mn-dexcell { padding:10px 6px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.22); display:flex; flex-direction:column; align-items:center; gap:3px; }
+      #mon .mn-dexcell i { font-style:normal; font-size:1.6rem; filter:grayscale(1); opacity:.5; }
+      #mon .mn-dexcell.got i { filter:none; opacity:1; }
+      #mon .mn-dexcell b { font-size:.72rem; }
+      #mon .mn-dexcell em { font-style:normal; font-size:.62rem; opacity:.65; }
+      @media (max-width:520px) { #mon .mn-dex { grid-template-columns:repeat(3,1fr); } }
+    </style>
+    <div class="mn-wrap">
+      <div class="mn-hud">
+        <span id="mnBalls">🎾 随便球 ×5</span><span id="mnWins">⚔️ 胜场 0</span><span id="mnDexN">📖 图鉴 0/12</span>
+      </div>
+      <div class="mn-party" id="mnParty"></div>
+      <div id="mnMain"></div>
+    </div>
+  </section>
   <section class="panel" id="farm">
     <h2>🌾 随便农场</h2>
     <p class="sub">种下去就算关掉网页也在长：一块会等你回来的像素田</p>
@@ -8602,6 +8656,7 @@
     if (id === "fishing") fishingRender();
     if (id === "lemmings") lemmingsRender();
     if (id === "farm") farmRender();
+    if (id === "mon") monRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8652,6 +8707,7 @@
     if (id !== "fishing" && typeof fishingStop === "function") fishingStop();
     if (id !== "lemmings" && typeof lemmingsStop === "function") lemmingsStop();
     if (id !== "farm" && typeof farmStop === "function") farmStop();
+    if (id !== "mon" && typeof monStop === "function") monStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8832,6 +8888,7 @@
     fishing: "钓鱼佬模拟 fishing 钓鱼 抛竿 浮漂 起竿 遛鱼 收线 图鉴 渔获 锦鲤 龙王 空军 湖 fish angler",
     lemmings: "旅鼠大迁徙 lemmings 旅鼠 搭桥 雨伞 挖洞 堵路 引爆 救援 迁徙 关卡 解谜 指挥 小鼠 过关 puzzle 策略 街机 arcade game",
     farm: "随便农场 farm 农场 种田 种菜 播种 浇水 收获 庄稼 作物 萝卜 麦子 玉米 南瓜 西瓜 灵芝 图鉴 金币 开垦 挂机 放置 idle 种植 harvest garden",
+    mon: "随便兽 mon monster 宝可梦 口袋妖怪 精灵 收服 抓宠 捕捉 对战 战斗 进化 图鉴 训练师 草丛 随便球 精灵球 宠物 收集 pokemon collect battle",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9072,6 +9129,7 @@ splitbill:"tools",
     fishing:"games",
     lemmings:"games",
     farm:"games",
+    mon:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -48325,6 +48383,410 @@ splitbill:"tools",
       "浇下去的是水，长出来的是盼头。",
       "别嫌小萝卜便宜，大亨都是从第一茬开始的。",
       "离开的时候庄稼也在长，这就是农场的温柔。"
+    );
+  }
+})();
+/* ===== 🐲 随便兽 mon ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_monster";
+  var DEX_TOTAL = 12;
+  var PARTY_MAX = 6;
+  var BALL_MAX = 15;
+  var SPECIES = [
+    { id: "huomiao", nm: "小火苗", em: "🔥", el: "fire", tier: 1, evo: "yanhu", evoLv: 6, hp: 38, atk: 12, df: 8 },
+    { id: "yanhu", nm: "焰尾狐", em: "🦊", el: "fire", tier: 2, evo: "yanlong", evoLv: 14, hp: 60, atk: 18, df: 12 },
+    { id: "yanlong", nm: "炎烬龙", em: "🐲", el: "fire", tier: 3, evo: null, evoLv: 0, hp: 92, atk: 26, df: 17 },
+    { id: "shuidi", nm: "水滴滴", em: "💧", el: "water", tier: 1, evo: "paoxie", evoLv: 6, hp: 42, atk: 10, df: 9 },
+    { id: "paoxie", nm: "泡泡蟹", em: "🦀", el: "water", tier: 2, evo: "haijing", evoLv: 14, hp: 66, atk: 16, df: 14 },
+    { id: "haijing", nm: "沧海鲸", em: "🐋", el: "water", tier: 3, evo: null, evoLv: 0, hp: 104, atk: 23, df: 19 },
+    { id: "caoya", nm: "草芽芽", em: "🌱", el: "grass", tier: 1, evo: "tengwei", evoLv: 6, hp: 40, atk: 11, df: 9 },
+    { id: "tengwei", nm: "藤球猬", em: "🦔", el: "grass", tier: 2, evo: "senxiong", evoLv: 14, hp: 64, atk: 17, df: 13 },
+    { id: "senxiong", nm: "森罗熊", em: "🐻", el: "grass", tier: 3, evo: null, evoLv: 0, hp: 98, atk: 24, df: 18 },
+    { id: "dianhua", nm: "电火花", em: "⚡", el: "elec", tier: 1, evo: "leishu", evoLv: 6, hp: 36, atk: 13, df: 7 },
+    { id: "leishu", nm: "雷雷鼠", em: "🐭", el: "elec", tier: 2, evo: "leipeng", evoLv: 14, hp: 58, atk: 19, df: 11 },
+    { id: "leipeng", nm: "雷霆鹏", em: "🦅", el: "elec", tier: 3, evo: null, evoLv: 0, hp: 90, atk: 27, df: 16 }
+  ];
+  var ELEM_NM = { fire: "🔥火", water: "💧水", grass: "🌿草", elec: "⚡电" };
+  var CHART = {
+    fire: { grass: 2, water: 0.5, fire: 0.5 },
+    water: { fire: 2, grass: 0.5, water: 0.5 },
+    grass: { water: 2, fire: 0.5, grass: 0.5 },
+    elec: { water: 2, grass: 0.5, elec: 0.5 }
+  };
+  var STARTERS = ["huomiao", "shuidi", "caoya"];
+  var rnd = Math.random;
+  var activeMn = false;
+  var st = null;
+  var bt = null; // battle state
+  var view = "idle"; // starter | idle | battle | dex
+  var logs = [];
+
+  function spById(id) { for (var i = 0; i < SPECIES.length; i++) if (SPECIES[i].id === id) return SPECIES[i]; return null; }
+  function mult(a, d) { return (CHART[a] && CHART[a][d]) || 1; }
+  function hpOf(sp, lv) { return Math.round(sp.hp + lv * 5); }
+  function atkOf(sp, lv) { return Math.round(sp.atk + lv * 2); }
+  function dfOf(sp, lv) { return Math.round(sp.df + lv * 1.4); }
+  function needExp(lv) { return 20 + lv * 15; }
+
+  function defState() { return { mons: [], act: 0, dex: [], balls: 5, wins: 0, king: 0 }; }
+  function loadRec() {
+    var s = defState();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return s;
+      var d = JSON.parse(raw);
+      if (!d || typeof d !== "object") return s;
+      if (Object.prototype.toString.call(d.mons) === "[object Array]") {
+        for (var i = 0; i < d.mons.length && s.mons.length < PARTY_MAX; i++) {
+          var m = d.mons[i];
+          if (!m || !spById(m.sp)) continue;
+          var lv = Math.max(1, Math.min(40, Math.floor(+m.lv || 1)));
+          var exp = Math.max(0, Math.min(9999, Math.floor(+m.exp || 0)));
+          s.mons.push({ sp: m.sp, lv: lv, exp: exp });
+        }
+      }
+      if (Object.prototype.toString.call(d.dex) === "[object Array]") {
+        for (var j = 0; j < d.dex.length; j++) {
+          if (spById(d.dex[j]) && s.dex.indexOf(d.dex[j]) < 0) s.dex.push(d.dex[j]);
+        }
+      }
+      s.act = Math.max(0, Math.min(s.mons.length ? s.mons.length - 1 : 0, Math.floor(+d.act || 0)));
+      s.balls = Math.max(0, Math.min(99, Math.floor(+d.balls || 0)));
+      s.wins = Math.max(0, Math.min(999999, Math.floor(+d.wins || 0)));
+      s.king = d.king ? 1 : 0;
+      return s;
+    } catch (e) { return defState(); }
+  }
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+
+  function log(msg) { logs.push(msg); if (logs.length > 6) logs = logs.slice(logs.length - 6); }
+
+  function addDex(id) {
+    if (st.dex.indexOf(id) < 0) st.dex.push(id);
+    if (st.dex.length >= DEX_TOTAL && !st.king) {
+      st.king = 1;
+      try { bumpUsage("mondex"); } catch (e0) {}
+      log("🏆 图鉴集齐 12 只！你就是随便兽大师！");
+    }
+  }
+
+  function pickStarter(id) {
+    if (st.mons.length > 0 || STARTERS.indexOf(id) < 0) return;
+    st.mons.push({ sp: id, lv: 5, exp: 0 });
+    st.act = 0;
+    addDex(id);
+    saveRec();
+    var sp = spById(id);
+    log("🎉 你选择了 " + sp.em + " " + sp.nm + "！它看起来跃跃欲试。");
+    view = "idle";
+  }
+
+  function genWild(maxLv, r) {
+    r = r || rnd;
+    var pool = [];
+    for (var i = 0; i < SPECIES.length; i++) {
+      var sp = SPECIES[i];
+      var w = 0;
+      if (sp.tier === 1) w = 60;
+      else if (sp.tier === 2 && maxLv >= 8) w = 30;
+      else if (sp.tier === 3 && maxLv >= 16) w = 10;
+      if (w > 0) pool.push([sp.id, w]);
+    }
+    var total = 0, k;
+    for (k = 0; k < pool.length; k++) total += pool[k][1];
+    var roll = r() * total, pick = pool[0][0];
+    for (k = 0; k < pool.length; k++) { roll -= pool[k][1]; if (roll <= 0) { pick = pool[k][0]; break; } }
+    var lv = Math.max(1, Math.min(30, maxLv + Math.floor(r() * 5) - 2));
+    var wsp = spById(pick);
+    if (wsp.tier === 2) lv = Math.max(lv, 8);
+    if (wsp.tier === 3) lv = Math.max(lv, 16);
+    return { sp: pick, lv: lv, hp: hpOf(wsp, lv), mhp: hpOf(wsp, lv) };
+  }
+
+  function dmg(atk, lv, ael, df, del, r) {
+    r = r || rnd;
+    var base = atk * 1.5 + lv * 2 - df * 0.8;
+    if (base < 3) base = 3;
+    var m = mult(ael, del);
+    var roll = 0.85 + r() * 0.3;
+    var crit = r() < 0.1 ? 1.5 : 1;
+    return Math.max(1, Math.round(base * m * roll * crit));
+  }
+
+  function catchProb(w) {
+    var sp = spById(w.sp);
+    var ratio = w.mhp > 0 ? w.hp / w.mhp : 1;
+    var tf = sp.tier === 1 ? 1 : sp.tier === 2 ? 0.6 : 0.38;
+    var p = ((1 - ratio) * 0.65 + 0.18) * tf;
+    return Math.min(0.95, Math.max(0.05, p));
+  }
+
+  function maxPartyLv() {
+    var mx = 1;
+    for (var i = 0; i < st.mons.length; i++) if (st.mons[i].lv > mx) mx = st.mons[i].lv;
+    return mx;
+  }
+
+  function gainExp(mon, amount) {
+    mon.exp += amount;
+    var evolved = null;
+    while (mon.exp >= needExp(mon.lv) && mon.lv < 40) {
+      mon.exp -= needExp(mon.lv);
+      mon.lv++;
+      var sp = spById(mon.sp);
+      if (sp.evo && mon.lv >= sp.evoLv) {
+        mon.sp = sp.evo;
+        evolved = spById(sp.evo);
+        addDex(sp.evo);
+      }
+    }
+    return evolved;
+  }
+
+  function startBattle() {
+    if (!st.mons.length) return;
+    var w = genWild(maxPartyLv());
+    var mi = st.act >= st.mons.length ? 0 : st.act;
+    st.act = mi;
+    var mon = st.mons[mi];
+    var msp = spById(mon.sp);
+    bt = {
+      wild: w,
+      me: { i: mi, hp: hpOf(msp, mon.lv), mhp: hpOf(msp, mon.lv) },
+      en: 0, on: true
+    };
+    var wsp = spById(w.sp);
+    logs = [];
+    log("🌿 草丛一阵晃动…… 野生的 " + wsp.em + " " + wsp.nm + " Lv." + w.lv + " 跳了出来！");
+    view = "battle";
+  }
+
+  function wildTurn() {
+    if (!bt || !bt.on || bt.wild.hp <= 0) return;
+    var wsp = spById(bt.wild.sp);
+    var mon = st.mons[bt.me.i];
+    var msp = spById(mon.sp);
+    var d = dmg(atkOf(wsp, bt.wild.lv), bt.wild.lv, wsp.el, dfOf(msp, mon.lv), msp.el);
+    bt.me.hp = Math.max(0, bt.me.hp - d);
+    log("💢 " + wsp.nm + " 反击，造成 " + d + " 点伤害！");
+    if (bt.me.hp <= 0) {
+      bt.on = false;
+      log("😵 " + msp.nm + " 眼前一黑倒下了…被随便兽中心救回，休息一下再来！");
+    }
+  }
+
+  function endWin() {
+    var wsp = spById(bt.wild.sp);
+    st.wins++;
+    if (st.balls < BALL_MAX) st.balls++;
+    var mon = st.mons[bt.me.i];
+    var gain = bt.wild.lv * 8 * wsp.tier;
+    var msp0 = spById(mon.sp);
+    var evolved = gainExp(mon, gain);
+    log("🎊 战斗胜利！" + msp0.nm + " 获得 " + gain + " 点经验（+1 随便球）");
+    if (evolved) log("✨ 光芒四射！进化成了 " + evolved.em + " " + evolved.nm + "！");
+    bt.on = false;
+    saveRec();
+  }
+
+  function act(kind) {
+    if (!bt || !bt.on) return;
+    var mon = st.mons[bt.me.i];
+    var msp = spById(mon.sp);
+    var wsp = spById(bt.wild.sp);
+    if (kind === "atk" || kind === "skill") {
+      var mul = 1;
+      if (kind === "skill") {
+        if (bt.en < 3) { log("⚠️ 能量不足，普攻攒 3 格能量后才能放必杀技！"); return; }
+        bt.en = 0; mul = 1.8;
+      } else {
+        bt.en = Math.min(3, bt.en + 1);
+      }
+      var d = Math.round(dmg(atkOf(msp, mon.lv), mon.lv, msp.el, dfOf(wsp, bt.wild.lv), wsp.el) * mul);
+      bt.wild.hp = Math.max(0, bt.wild.hp - d);
+      var em = mult(msp.el, wsp.el);
+      log((kind === "skill" ? "💥 必杀技命中！" : "🗡️ 攻击命中，") + "造成 " + d + " 点伤害" + (em > 1 ? "（效果拔群！）" : em < 1 ? "（效果一般…）" : "") );
+      if (bt.wild.hp <= 0) { endWin(); return; }
+      wildTurn();
+    } else if (kind === "ball") {
+      if (st.balls <= 0) { log("🎾 没有随便球了！打赢野怪能捡回随便球。"); return; }
+      st.balls--;
+      var p = catchProb(bt.wild);
+      if (rnd() < p) {
+        bt.on = false;
+        log("🎾 随便球晃了三下…咔哒！收服了 " + wsp.em + " " + wsp.nm + " Lv." + bt.wild.lv + "！");
+        try { bumpUsage("moncatch"); } catch (e1) {}
+        if (st.mons.length >= PARTY_MAX) {
+          var candy = 50;
+          gainExp(st.mons[st.act], candy);
+          log("🎒 队伍满员，" + wsp.nm + " 化作神奇糖果：" + spById(st.mons[st.act].sp).nm + " +" + candy + " 经验");
+          addDex(wsp.id);
+        } else {
+          st.mons.push({ sp: wsp.id, lv: bt.wild.lv, exp: 0 });
+          addDex(wsp.id);
+        }
+        saveRec();
+      } else {
+        log("💨 " + wsp.nm + " 挣脱了随便球！（成功率约 " + Math.round(p * 100) + "%）");
+        saveRec();
+        wildTurn();
+      }
+    } else if (kind === "run") {
+      if (rnd() < 0.7) {
+        bt.on = false;
+        log("🏃 成功逃跑了，草丛恢复了平静。");
+      } else {
+        log("🚫 没跑掉！" + wsp.nm + " 拦住了去路！");
+        wildTurn();
+      }
+    }
+  }
+
+  function fmtBar(cur, max, cls) {
+    var pct = max > 0 ? Math.round((cur / max) * 100) : 0;
+    return '<span class="mn-bar"><span class="' + cls + '" style="width:' + pct + '%"></span></span>';
+  }
+
+  function monCard(spid, lv, hp, mhp, wild) {
+    var sp = spById(spid);
+    return '<div class="mn-card' + (wild ? " wild" : "") + '">' +
+      '<i>' + sp.em + '</i><div class="mn-info"><b>' + (wild ? "野生 " : "") + sp.nm + ' <em>Lv.' + lv + '</em> <u>' + ELEM_NM[sp.el] + '</u></b>' +
+      fmtBar(hp, mhp, hp / (mhp || 1) > 0.35 ? "ok" : "low") +
+      '<small>HP ' + hp + ' / ' + mhp + '</small></div></div>';
+  }
+
+  function mnSync() {
+    if (typeof document === "undefined") return;
+    var main = document.getElementById("mnMain");
+    if (!main) return;
+    var elBalls = document.getElementById("mnBalls");
+    var elWins = document.getElementById("mnWins");
+    var elDex = document.getElementById("mnDexN");
+    if (elBalls) elBalls.textContent = "🎾 随便球 ×" + st.balls;
+    if (elWins) elWins.textContent = "⚔️ 胜场 " + st.wins;
+    if (elDex) elDex.textContent = "📖 图鉴 " + st.dex.length + "/" + DEX_TOTAL;
+    var party = document.getElementById("mnParty");
+    if (party) {
+      var ph = "";
+      for (var i = 0; i < st.mons.length; i++) {
+        var m = st.mons[i], sp = spById(m.sp);
+        ph += '<button class="mn-chip' + (i === st.act ? " on" : "") + '" data-mnact="sel-' + i + '">' + sp.em + ' Lv.' + m.lv + '</button>';
+      }
+      party.innerHTML = ph;
+    }
+    var h = "";
+    if (view === "starter" || !st.mons.length) {
+      h += '<div class="mn-starter"><p>欢迎来到随便兽世界！选一只初始伙伴吧：</p><div class="mn-strow">';
+      for (var s = 0; s < STARTERS.length; s++) {
+        var ssp = spById(STARTERS[s]);
+        h += '<button class="mn-stbtn" data-mnact="star-' + ssp.id + '"><i>' + ssp.em + '</i><b>' + ssp.nm + '</b><em>' + ELEM_NM[ssp.el] + '</em></button>';
+      }
+      h += '</div></div>';
+    } else if (view === "battle" && bt) {
+      var mon = st.mons[bt.me.i];
+      h += monCard(bt.wild.sp, bt.wild.lv, bt.wild.hp, bt.wild.mhp, true);
+      h += monCard(mon.sp, mon.lv, bt.me.hp, bt.me.mhp, false);
+      h += '<div class="mn-en">能量 ';
+      for (var e = 0; e < 3; e++) h += e < bt.en ? "●" : "○";
+      h += '</div>';
+      h += '<div class="mn-log">' + logs.map(function (x) { return "<div>" + x + "</div>"; }).join("") + '</div>';
+      if (bt.on) {
+        h += '<div class="mn-acts">' +
+          '<button data-mnact="atk">🗡️ 攻击</button>' +
+          '<button data-mnact="skill"' + (bt.en < 3 ? " disabled" : "") + '>💥 必杀技</button>' +
+          '<button data-mnact="ball"' + (st.balls <= 0 ? " disabled" : "") + '>🎾 随便球</button>' +
+          '<button data-mnact="run">🏃 逃跑</button></div>';
+      } else {
+        h += '<div class="mn-acts"><button data-mnact="explore">🌿 再探草丛</button><button data-mnact="back">↩️ 返回</button></div>';
+      }
+    } else if (view === "dex") {
+      h += '<div class="mn-dex">';
+      for (var d = 0; d < SPECIES.length; d++) {
+        var dsp = SPECIES[d];
+        var got = st.dex.indexOf(dsp.id) >= 0;
+        h += '<div class="mn-dexcell' + (got ? " got" : "") + '"><i>' + (got ? dsp.em : "❓") + '</i><b>' + (got ? dsp.nm : "？？？") + '</b><em>' + (got ? ELEM_NM[dsp.el] + " · T" + dsp.tier : "未发现") + '</em></div>';
+      }
+      h += '</div><div class="mn-acts"><button data-mnact="back">↩️ 返回</button></div>';
+    } else {
+      var am = st.mons[st.act >= st.mons.length ? 0 : st.act];
+      var asp = spById(am.sp);
+      h += '<div class="mn-card home"><i>' + asp.em + '</i><div class="mn-info"><b>' + asp.nm + ' <em>Lv.' + am.lv + '</em> <u>' + ELEM_NM[asp.el] + '</u></b>' +
+        fmtBar(am.exp, needExp(am.lv), "exp") +
+        '<small>经验 ' + am.exp + ' / ' + needExp(am.lv) + (spById(am.sp).evo ? '　·　Lv.' + spById(am.sp).evoLv + ' 进化' : '　·　最终形态') + '</small></div></div>';
+      if (logs.length) h += '<div class="mn-log">' + logs.map(function (x) { return "<div>" + x + "</div>"; }).join("") + '</div>';
+      h += '<div class="mn-acts"><button class="big" data-mnact="explore">🌿 去草丛探索</button><button data-mnact="dex">📖 图鉴</button></div>';
+    }
+    main.innerHTML = h;
+  }
+
+  function handle(actId) {
+    if (actId === "explore") { startBattle(); }
+    else if (actId === "dex") { if (!bt || !bt.on) view = "dex"; }
+    else if (actId === "back") { if (!bt || !bt.on) { view = "idle"; bt = null; } }
+    else if (actId === "atk" || actId === "skill" || actId === "ball" || actId === "run") { act(actId); }
+    else if (actId.indexOf("star-") === 0) { pickStarter(actId.slice(5)); }
+    else if (actId.indexOf("sel-") === 0) {
+      if (bt && bt.on) { log("⚔️ 对战中不能换随便兽！"); }
+      else { var i = +actId.slice(4); if (i >= 0 && i < st.mons.length) { st.act = i; saveRec(); } }
+    }
+    mnSync();
+  }
+
+  function bind() {
+    var sec = document.getElementById("mon");
+    if (!sec || sec._mnBound) return;
+    sec._mnBound = true;
+    sec.addEventListener("click", function (e) {
+      var t = e.target.closest ? e.target.closest("button") : null;
+      if (!t || !t.dataset || t.dataset.mnact === undefined || t.dataset.mnact === "") return;
+      if (t.disabled) return;
+      handle(t.dataset.mnact);
+    });
+  }
+
+  window.monRender = function () {
+    bind();
+    activeMn = true;
+    st = loadRec();
+    bt = null;
+    logs = [];
+    view = st.mons.length ? "idle" : "starter";
+    if (st.mons.length) log("👋 " + spById(st.mons[st.act >= st.mons.length ? 0 : st.act].sp).nm + " 精神饱满，随时可以出发！");
+    mnSync();
+  };
+  window.monStop = function () {
+    activeMn = false;
+    if (st) saveRec();
+  };
+
+  window.__mnTest = {
+    getState: function () { return st; }, setState: function (s) { st = s; },
+    getBt: function () { return bt; }, setBt: function (b) { bt = b; },
+    getView: function () { return view; }, setView: function (v) { view = v; },
+    getLogs: function () { return logs; },
+    setRnd: function (fn) { rnd = fn; },
+    spById: spById, mult: mult, hpOf: hpOf, atkOf: atkOf, dfOf: dfOf, needExp: needExp,
+    defState: defState, loadRec: loadRec, saveRec: saveRec,
+    pickStarter: pickStarter, genWild: genWild, dmg: dmg, catchProb: catchProb,
+    maxPartyLv: maxPartyLv, gainExp: gainExp, startBattle: startBattle, wildTurn: wildTurn,
+    act: act, handle: handle, addDex: addDex, mnSync: mnSync,
+    consts: { KEY: KEY, SPECIES: SPECIES, CHART: CHART, STARTERS: STARTERS, DEX_TOTAL: DEX_TOTAL, PARTY_MAX: PARTY_MAX, BALL_MAX: BALL_MAX }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🐲", name: "初训师", desc: "在随便兽收服第一只野生随便兽", test: function (u) { return (u.moncatch || 0) >= 1; } },
+      { emoji: "🧬", name: "图鉴集大成", desc: "集齐随便兽全部 12 只图鉴", test: function (u) { return (u.mondex || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "草丛会晃，机会也会晃，都得扑上去才知道。",
+      "随便球晃三下的时间，比很多决定都漫长。",
+      "效果拔群的不只是属性克制，还有坚持。",
+      "进化不是变成别人，是变成更亮的自己。",
+      "图鉴的最后一格，留给还没放弃的你。"
     );
   }
 })();
