@@ -1558,6 +1558,7 @@
         <button data-tab="fishy">🐟 大鱼吃小鱼</button>
         <button data-tab="miner">⛏️ 黄金矿工</button>
         <button data-tab="pool">🎱 黑八台球</button>
+        <button data-tab="escape">🚪 密室逃脱</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7868,6 +7869,54 @@
       <div class="p8-tip">🎱 <b>拖动瞄准、松手出杆</b>：拖得越远力度越大（底部力度条实时显示），松手前可随意调整方向；键盘党用 <b>← →</b> 微调角度、<b>↑ ↓</b> 调力度、<b>空格 / ⏎</b> 出杆、<b>R</b> 重新开球。规则就一条：先把 7 颗彩球全部送进袋，<b>最后</b>再收黑八即可清台获胜；黑八提前落袋直接判负，母球落袋 -50 分并摆回置球点。进球 +100、同一杆连落多球有连击加成，清台还有黑八奖励（用杆越少奖励越高）。真实碰撞物理 + 库边反弹 + 同种子摆球可复现（mulberry32），最高分本地存档（suibian_pool），清台一次解锁「黑八传奇」徽章。</div>
     </div>
   </section>
+  <section class="panel" id="escape">
+    <h2>🚪 深夜密室逃脱</h2>
+    <style>
+      #escape .esc-wrap { max-width:560px; margin:0 auto; }
+      #escape .esc-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #escape .esc-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #escape .esc-top button:hover { background:rgba(255,255,255,.12); }
+      #escape .esc-hud { display:flex; gap:14px; justify-content:center; font-size:.85rem; opacity:.88; margin-bottom:8px; flex-wrap:wrap; }
+      #escape .esc-stage { background:linear-gradient(180deg,#131320,#1c1a2e); border:1px solid rgba(255,255,255,.14); border-radius:14px; padding:16px; box-shadow:0 12px 30px rgba(0,0,0,.45); }
+      #escape .esc-stage.esc-dark { background:linear-gradient(180deg,#07070c,#0d0c14); }
+      #escape .esc-stage.esc-win { animation:escGlow 1.2s ease infinite alternate; }
+      @keyframes escGlow { from { box-shadow:0 0 12px rgba(52,211,153,.25); } to { box-shadow:0 0 28px rgba(52,211,153,.6); } }
+      #escape .esc-room-name { font-weight:800; font-size:1.08rem; margin-bottom:6px; }
+      #escape .esc-desc { font-size:.92rem; line-height:1.7; opacity:.92; min-height:3em; white-space:pre-line; }
+      #escape .esc-objs { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+      #escape .esc-objs button { padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:inherit; cursor:pointer; font-size:.88rem; transition:transform .12s ease, background .12s ease; }
+      #escape .esc-objs button:hover { background:rgba(255,255,255,.14); transform:translateY(-1px); }
+      #escape .esc-panel { margin-top:12px; }
+      #escape .esc-code-row { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; }
+      #escape .esc-code-row input { width:120px; text-align:center; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.25); background:rgba(0,0,0,.3); color:inherit; font-size:1.05rem; letter-spacing:6px; }
+      #escape .esc-code-row button { padding:8px 16px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:inherit; cursor:pointer; }
+      #escape .esc-cbtn { width:40px; height:40px; border-radius:50%; border:2px solid rgba(255,255,255,.35); cursor:pointer; padding:0; }
+      #escape .esc-inv { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; min-height:34px; align-items:center; }
+      #escape .esc-inv .esc-inv-label { font-size:.8rem; opacity:.55; }
+      #escape .esc-item { padding:6px 12px; border-radius:999px; border:1px dashed rgba(255,255,255,.3); background:rgba(0,0,0,.25); cursor:pointer; font-size:.85rem; user-select:none; }
+      #escape .esc-item.sel { border-style:solid; border-color:#fbbf24; background:rgba(251,191,36,.18); box-shadow:0 0 10px rgba(251,191,36,.4); }
+      #escape .esc-log { margin-top:12px; font-size:.82rem; opacity:.75; line-height:1.7; max-height:8em; overflow:auto; border-top:1px dashed rgba(255,255,255,.15); padding-top:8px; }
+      #escape .esc-best { text-align:center; margin-top:10px; font-size:.88rem; opacity:.85; }
+      #escape .esc-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="esc-wrap">
+      <div class="esc-top">
+        <button id="escNew">🔄 重新开局</button>
+        <button id="escHintBtn">💡 求提示（+2 步）</button>
+      </div>
+      <div class="esc-hud"><span id="escRoomHud">🚪 第 1 间</span><span id="escSteps">👣 0 步</span><span id="escElapsed">⏱ 00:00</span></div>
+      <div class="esc-stage" id="escStage">
+        <div class="esc-room-name" id="escRoomName"></div>
+        <div class="esc-desc" id="escDesc"></div>
+        <div class="esc-objs" id="escObjs"></div>
+        <div class="esc-panel" id="escPanel"></div>
+        <div class="esc-inv" id="escInv"></div>
+        <div class="esc-log" id="escLog"></div>
+      </div>
+      <div class="esc-best" id="escBest"></div>
+      <div class="esc-tip">🚪 <b>点物件调查、点道具选中再点目标使用</b>：深夜醒来被反锁在陌生老宅，书房 → 地下室 → 阁楼三间房环环相扣——开灯找密码、撬箱换保险丝、按对颜色顺序、把座钟拨回案发时刻，最后推开天窗金蝉脱壳。谜题全靠房间里的线索自洽解开，卡住可点「求提示」（每次 +2 步）；步数与用时实时统计，逃脱后记录「最少步数」本地存档（suibian_escape），永远只会被更好的成绩刷新。开一局解锁「密室初探」徽章，成功逃出再解锁「金蝉脱壳」。纯前端零依赖，剧情文本全离线。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8287,6 +8336,8 @@
     if (id !== "fishy" && typeof fishyStop === "function") fishyStop();
     if (id !== "miner" && typeof minerStop === "function") minerStop();
     if (id !== "pool" && typeof poolStop === "function") poolStop();
+    if (id === "escape" && typeof window.escShow === "function") window.escShow();
+    if (id !== "escape" && typeof escStop === "function") escStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8458,6 +8509,7 @@
     fishy: "大鱼吃小鱼 fishy feeding frenzy 吃鱼 海洋 鲨鱼 街机 成长 大鱼 小鱼 水母 arcade fish ocean",
     miner: "黄金矿工 miner gold 挖金子 淘金 钩子 矿洞 钻石 金块 街机 arcade gold miner 抖金",
     pool: "黑八台球 pool 台球 桌球 八号球 8ball billiards 斯诺克 snooker 街机 打台球 黑8 清台",
+    escape: "密室逃脱 escape room 解谜 逃脱 密室 谜题 剧情 冒险 点击 探索 线索 推理 密码锁 暗格 老宅 game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8689,6 +8741,7 @@ splitbill:"tools",
     fishy:"games",
     miner:"games",
     pool:"games",
+    escape:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -44122,6 +44175,401 @@ splitbill:"tools",
       "黑八要留到最后打，好牌要留到关键时刻出。",
       "母球落袋不可怕，可怕的是下一杆还不长记性。",
       "清台的秘诀不是每杆都进，而是每杆都给下一杆留好位置。"
+    );
+  }
+})();
+(function () {
+  "use strict";
+  var timer = 0, bound = false, st = null;
+  var IT_KEY = "🗝 铜钥匙", IT_NOTE = "📜 纸条", IT_MATCH = "🔥 火柴";
+  var IT_FUSE = "🔌 保险丝", IT_DRIVER = "🪛 螺丝刀", IT_CROW = "🪝 撬棍", IT_OIL = "🛢 油壶";
+  var ITEM_DESC = {};
+  ITEM_DESC[IT_KEY] = "一把黄铜小钥匙，齿口磨得发亮。";
+  ITEM_DESC[IT_NOTE] = "纸条上写着：「门的密码，是生日倒着写。」";
+  ITEM_DESC[IT_MATCH] = "半盒火柴，还很干燥。";
+  ITEM_DESC[IT_FUSE] = "一根崭新的玻璃管保险丝。";
+  ITEM_DESC[IT_DRIVER] = "十字螺丝刀，握把有防滑纹。";
+  ITEM_DESC[IT_CROW] = "沉甸甸的铁撬棍，够趁手。";
+  ITEM_DESC[IT_OIL] = "小半壶防锈润滑油。";
+  var ROOM_NAMES = ["", "📖 书房", "🍷 地下室", "🕰 阁楼"];
+  function $g(id) { return document.getElementById(id); }
+  function loadBest() {
+    var b = 0;
+    try { b = parseInt(localStorage.getItem("suibian_escape") || "0", 10) || 0; } catch (e) { b = 0; }
+    return b > 0 ? b : 0;
+  }
+  function saveBest(v) {
+    try { localStorage.setItem("suibian_escape", String(v)); } catch (e) {}
+  }
+  function fmt(s) {
+    var m = Math.floor(s / 60), ss = s % 60;
+    return (m < 10 ? "0" : "") + m + ":" + (ss < 10 ? "0" : "") + ss;
+  }
+  function isActive() {
+    var sec = $g("escape");
+    return !!(sec && sec.classList && sec.classList.contains("active"));
+  }
+  function addLog(m) {
+    st.log.unshift(m);
+    if (st.log.length > 10) st.log.length = 10;
+  }
+  function ensureTimer() {
+    if (timer || !st || st.won) return;
+    timer = setInterval(function () {
+      if (st && !st.won && st.started && isActive()) {
+        st.sec++;
+        var el = $g("escElapsed");
+        if (el) el.textContent = "⏱ " + fmt(st.sec);
+      }
+    }, 1000);
+  }
+  function step(n) {
+    st.steps += (n || 1);
+    if (!st.started) st.started = true;
+    ensureTimer();
+  }
+  function give(item) {
+    st.inv.push(item);
+    addLog("获得道具：" + item);
+  }
+  function take(item) {
+    var i = st.inv.indexOf(item);
+    if (i >= 0) st.inv.splice(i, 1);
+    if (st.sel === item) st.sel = null;
+  }
+  function newGame() {
+    st = {
+      room: 1, steps: 0, sec: 0, inv: [], sel: null, panel: "", seq: [],
+      ch: 3, cm: 45, flags: {}, log: [], won: false, started: false, best: loadBest()
+    };
+    addLog("你在陌生的书房里醒来，门被反锁了……");
+    try { bumpUsage("escape"); } catch (e) {}
+    render();
+  }
+  function win() {
+    st.won = true;
+    st.panel = "";
+    take(IT_CROW);
+    addLog("撬棍一别，天窗「砰」地弹开——夜风灌进来，你爬上屋顶，自由了！");
+    if (st.best === 0 || st.steps < st.best) { st.best = st.steps; saveBest(st.best); }
+    try { bumpUsage("escapeout"); } catch (e) {}
+    if (typeof confettiBurst === "function") { try { confettiBurst(90); } catch (e) {} }
+    if (typeof toast === "function") { try { toast("🎉 成功逃脱！共 " + st.steps + " 步 · 用时 " + fmt(st.sec)); } catch (e) {} }
+  }
+  function doObj(id) {
+    if (!st || st.won) return;
+    step(1);
+    var f = st.flags, sel = st.sel;
+    if (st.room === 1) {
+      if (id === "lamp") {
+        if (!f.lamp) { f.lamp = true; addLog("「啪」——台灯亮了，房间的轮廓浮现出来。"); }
+        else addLog("台灯安静地亮着。");
+      } else if (!f.lamp) {
+        addLog("黑得什么都看不清，先找到光源吧。");
+      } else if (id === "rug") {
+        if (!f.key) { f.key = true; give(IT_KEY); addLog("掀开地毯翘起的边角，一把铜钥匙躺在下面。"); }
+        else addLog("地毯下面只剩灰了。");
+      } else if (id === "shelf") {
+        f.album = true;
+        addLog("相册里夹着一张泛黄的照片，背面写着：「小满的生日：02-19」。");
+      } else if (id === "painting") {
+        addLog("你扶正了歪掉的油画，露出墙上一行小字：「重要的日子，倒过来看」。");
+      } else if (id === "drawer") {
+        if (f.drawer) addLog("抽屉已经空了。");
+        else if (sel === IT_KEY) {
+          f.drawer = true; take(IT_KEY); give(IT_NOTE); give(IT_MATCH);
+          addLog("铜钥匙一拧，抽屉开了：一张纸条和一盒火柴。");
+        } else addLog("抽屉锁着，钥匙孔是黄铜色的。");
+      } else if (id === "door1") {
+        st.panel = "code";
+        addLog("门上的四位数字键盘亮着微光，等待输入。");
+      }
+    } else if (st.room === 2) {
+      if (id === "candle") {
+        if (f.candle) addLog("烛火安稳地跳动着。");
+        else if (sel === IT_MATCH) { f.candle = true; take(IT_MATCH); addLog("「嗤」——火柴燃起，烛光摇曳，地下室有了轮廓。"); }
+        else addLog("摸到一个烛台，蜡烛还很完整，可惜你点不着。");
+      } else if (!f.candle) {
+        addLog("黑得伸手不见五指，你需要一点火光。");
+      } else if (id === "wine") {
+        f.wine = true;
+        addLog("三瓶酒从左到右贴着色标：❤️ 红、💚 绿、💙 蓝。像是某种顺序。");
+      } else if (id === "box2") {
+        if (f.box) addLog("工具箱已经空了。");
+        else { st.panel = "colors"; st.seq = []; addLog("工具箱上并排四个彩色按钮，似乎要按对顺序。"); }
+      } else if (id === "breaker") {
+        if (f.power) addLog("电闸合着，运转正常。");
+        else if (sel === IT_FUSE) { f.power = true; take(IT_FUSE); addLog("装上保险丝、合闸——头顶灯泡亮起，铁门传来「咔」的一声。"); }
+        else addLog("电闸盒敞着，里面一根保险丝烧得焦黑，缺根新的。");
+      } else if (id === "irondoor") {
+        if (f.power) { st.room = 3; st.panel = ""; st.sel = null; addLog("铁门缓缓开启，一段窄梯通向阁楼。"); }
+        else addLog("铁门纹丝不动，门边的电子锁没有一点光。");
+      }
+    } else if (st.room === 3) {
+      if (id === "letter") {
+        f.letter = true;
+        addLog("旧信残页：「……那晚，座钟永远停在了十点十分。」");
+      } else if (id === "clock") {
+        if (f.clock) addLog("座钟底座的暗格敞着。");
+        else { st.panel = "clock"; addLog("老座钟的指针可以拨动，现在停在 " + st.ch + " 点 " + (st.cm < 10 ? "0" : "") + st.cm + " 分。"); }
+      } else if (id === "box3") {
+        if (f.box3) addLog("木箱已经空了。");
+        else if (sel === IT_DRIVER) { f.box3 = true; give(IT_OIL); addLog("卸下四颗螺丝，箱子里是小半壶防锈油。"); }
+        else addLog("木箱盖用螺丝拧得死死的，用手抠不开。");
+      } else if (id === "skylight") {
+        if (!f.oiled) {
+          if (sel === IT_OIL) { f.oiled = true; take(IT_OIL); addLog("给锈死的合页上了油，天窗松动了一些。"); }
+          else addLog("天窗被钉死，合页锈得通红——硬撬怕是要断。");
+        } else if (sel === IT_CROW) {
+          win();
+        } else addLog("合页润滑了，还差一件趁手的家伙撬开它。");
+      }
+    }
+    render();
+  }
+  function pressColor(c) {
+    if (!st || st.won || st.flags.box) return;
+    step(1);
+    st.seq.push(c);
+    if (st.seq.length >= 3) {
+      if (st.seq[0] === "r" && st.seq[1] === "g" && st.seq[2] === "b") {
+        st.flags.box = true; st.panel = "";
+        give(IT_FUSE); give(IT_DRIVER);
+        addLog("「咔哒」！工具箱弹开：一根新保险丝和一把螺丝刀。");
+      } else {
+        addLog("按钮全部弹了回去——顺序不对。");
+      }
+      st.seq = [];
+    }
+    render();
+  }
+  function tryCode(v) {
+    if (!st || st.won) return;
+    step(1);
+    if (String(v) === "9120") {
+      st.room = 2; st.panel = ""; st.sel = null;
+      addLog("键盘绿灯亮起，房门开了。门后石阶向下，通往地下室。");
+    } else {
+      addLog("键盘红灯闪了闪：密码错误。");
+    }
+    render();
+  }
+  function clockAdj(part, d) {
+    if (!st || st.won) return;
+    if (part === "h") { st.ch += d; if (st.ch > 12) st.ch = 1; if (st.ch < 1) st.ch = 12; }
+    else { st.cm += d * 5; if (st.cm >= 60) st.cm = 0; if (st.cm < 0) st.cm = 55; }
+    render();
+  }
+  function clockConfirm() {
+    if (!st || st.won || st.flags.clock) return;
+    step(1);
+    if (st.ch === 10 && st.cm === 10) {
+      st.flags.clock = true; st.panel = "";
+      give(IT_CROW);
+      addLog("指针停在十点十分——座钟底座「咔」地弹出暗格，里面是一根撬棍。");
+    } else {
+      addLog("座钟晃了晃，没有任何动静。");
+    }
+    render();
+  }
+  function hint() {
+    if (!st || st.won) return;
+    step(2);
+    var f = st.flags, m;
+    if (st.room === 1) {
+      if (!f.lamp) m = "先摸黑找找光源，墙边好像有根开关绳。";
+      else if (!f.key) m = "地毯的边角翘起来了，掀开看看。";
+      else if (!f.drawer) m = "铜钥匙应该配黄铜色的锁孔。";
+      else m = "生日 02-19 倒过来读读看……门码就是它。";
+    } else if (st.room === 2) {
+      if (!f.candle) m = "火柴该派上用场了，找个能点着的东西。";
+      else if (!f.box) m = "酒架上的颜色就是按钮顺序：红 → 绿 → 蓝。";
+      else if (!f.power) m = "电闸缺的那样东西，工具箱里刚拿到了。";
+      else m = "通电了，去推推铁门。";
+    } else {
+      if (!f.clock) m = "先读桌上的旧信，再把座钟拨到那个时刻。";
+      else if (!f.box3) m = "螺丝刀还没派上用场？看看墙角的木箱。";
+      else if (!f.oiled) m = "锈死的合页需要先润滑。";
+      else m = "撬棍 + 天窗 = 自由。";
+    }
+    addLog("💡 提示：" + m);
+    render();
+  }
+  function selectItem(item) {
+    if (!st || st.won) return;
+    if (st.sel === item) { st.sel = null; }
+    else { st.sel = item; addLog(item + "：" + (ITEM_DESC[item] || "")); }
+    render();
+  }
+  function visibleObjs() {
+    var f = st.flags, list = [];
+    if (st.room === 1) {
+      list.push(["lamp", "🕯 台灯"]);
+      if (f.lamp) {
+        list.push(["painting", "🖼 油画"], ["shelf", "📚 书架"], ["rug", "🧶 地毯"], ["drawer", "🗄 书桌抽屉"], ["door1", "🚪 房门"]);
+      } else {
+        list.push(["door1", "🚪 房门"]);
+      }
+    } else if (st.room === 2) {
+      list.push(["candle", "🕯 烛台"]);
+      if (f.candle) {
+        list.push(["wine", "🍷 酒架"], ["box2", "🧰 工具箱"], ["breaker", "⚡ 电闸"], ["irondoor", "🚪 铁门"]);
+      }
+    } else {
+      list.push(["letter", "✉️ 旧信"], ["clock", "🕰 老座钟"], ["box3", "📦 木箱"], ["skylight", "🪟 天窗"]);
+    }
+    return list;
+  }
+  function roomDesc() {
+    var f = st.flags;
+    if (st.won) return "🌙 屋顶之上，晚风正好。你自由了。\n共 " + st.steps + " 步 · 用时 " + fmt(st.sec);
+    if (st.room === 1) {
+      return f.lamp
+        ? "书房里一股旧纸味。油画挂得有点歪，书桌落了层灰，地毯边角微微翘起。房门紧锁，门上嵌着一个四位数字键盘。"
+        : "一片漆黑。你摸到了墙边一盏台灯的开关绳。";
+    }
+    if (st.room === 2) {
+      if (!f.candle) return "黑得伸手不见五指，空气里有潮湿的酒味和……一丝烛蜡味。";
+      return f.power
+        ? "灯泡嗡嗡作响，地下室亮堂了。铁门的电子锁泛着绿光。"
+        : "烛光摇曳。酒架、工具箱，还有墙上一个敞着的电闸盒。";
+    }
+    return "阁楼低矮，灰尘在光柱里飞舞。一座老座钟停摆多年，墙角有个上了螺丝的木箱，头顶是一扇钉死的天窗。桌上压着一封旧信。";
+  }
+  function mkBtn(label, fn, cls) {
+    var b = document.createElement("button");
+    b.textContent = label;
+    if (cls) b.className = cls;
+    b.onclick = fn;
+    return b;
+  }
+  function render() {
+    if (!st) return;
+    var el;
+    el = $g("escRoomHud"); if (el) el.textContent = "🚪 第 " + st.room + " 间 · " + ROOM_NAMES[st.room];
+    el = $g("escSteps"); if (el) el.textContent = "👣 " + st.steps + " 步";
+    el = $g("escElapsed"); if (el) el.textContent = "⏱ " + fmt(st.sec);
+    el = $g("escRoomName"); if (el) el.textContent = ROOM_NAMES[st.room];
+    el = $g("escDesc"); if (el) el.textContent = roomDesc();
+    var stage = $g("escStage");
+    if (stage && stage.classList) {
+      var dark = (st.room === 1 && !st.flags.lamp) || (st.room === 2 && !st.flags.candle);
+      if (dark && !st.won) stage.classList.add("esc-dark"); else stage.classList.remove("esc-dark");
+      if (st.won) stage.classList.add("esc-win"); else stage.classList.remove("esc-win");
+    }
+    var objs = $g("escObjs");
+    if (objs) {
+      objs.innerHTML = "";
+      if (!st.won) {
+        var list = visibleObjs();
+        for (var i = 0; i < list.length; i++) {
+          (function (pair) {
+            objs.appendChild(mkBtn(pair[1], function () { doObj(pair[0]); }));
+          })(list[i]);
+        }
+      }
+    }
+    var panel = $g("escPanel");
+    if (panel) {
+      panel.innerHTML = "";
+      if (!st.won && st.panel === "code" && st.room === 1) {
+        var row = document.createElement("div");
+        row.className = "esc-code-row";
+        var inp = document.createElement("input");
+        inp.id = "escCode"; inp.maxLength = 4; inp.placeholder = "····";
+        inp.setAttribute("inputmode", "numeric");
+        row.appendChild(inp);
+        row.appendChild(mkBtn("确认", function () { tryCode(inp.value || ""); }));
+        panel.appendChild(row);
+      } else if (!st.won && st.panel === "colors" && st.room === 2 && !st.flags.box) {
+        var crow = document.createElement("div");
+        crow.className = "esc-code-row";
+        var colors = [["r", "#ef4444"], ["g", "#10b981"], ["b", "#3b82f6"], ["y", "#fbbf24"]];
+        for (var c = 0; c < colors.length; c++) {
+          (function (cc) {
+            var cb = mkBtn("", function () { pressColor(cc[0]); }, "esc-cbtn");
+            cb.style.background = cc[1];
+            crow.appendChild(cb);
+          })(colors[c]);
+        }
+        var prog = document.createElement("span");
+        prog.textContent = "已按 " + st.seq.length + "/3";
+        crow.appendChild(prog);
+        panel.appendChild(crow);
+      } else if (!st.won && st.panel === "clock" && st.room === 3 && !st.flags.clock) {
+        var krow = document.createElement("div");
+        krow.className = "esc-code-row";
+        var disp = document.createElement("b");
+        disp.textContent = "🕰 " + st.ch + ":" + (st.cm < 10 ? "0" : "") + st.cm;
+        krow.appendChild(disp);
+        krow.appendChild(mkBtn("时+", function () { clockAdj("h", 1); }));
+        krow.appendChild(mkBtn("时-", function () { clockAdj("h", -1); }));
+        krow.appendChild(mkBtn("分+", function () { clockAdj("m", 1); }));
+        krow.appendChild(mkBtn("分-", function () { clockAdj("m", -1); }));
+        krow.appendChild(mkBtn("拨好了", function () { clockConfirm(); }));
+        panel.appendChild(krow);
+      }
+    }
+    var inv = $g("escInv");
+    if (inv) {
+      inv.innerHTML = "";
+      var lab = document.createElement("span");
+      lab.className = "esc-inv-label";
+      lab.textContent = st.inv.length ? "🎒 道具：" : "🎒 道具：（空，点物件调查看看）";
+      inv.appendChild(lab);
+      for (var k = 0; k < st.inv.length; k++) {
+        (function (item) {
+          var chip = document.createElement("span");
+          chip.className = "esc-item" + (st.sel === item ? " sel" : "");
+          chip.textContent = item;
+          chip.onclick = function () { selectItem(item); };
+          inv.appendChild(chip);
+        })(st.inv[k]);
+      }
+    }
+    el = $g("escLog");
+    if (el) el.textContent = st.log.join("\n");
+    el = $g("escBest");
+    if (el) el.textContent = st.best > 0 ? ("🏆 最快纪录：" + st.best + " 步逃脱") : "还没有逃脱记录，今晚就是第一次。";
+  }
+  function bind() {
+    if (bound) return;
+    bound = true;
+    var b = $g("escNew");
+    if (b) b.onclick = function () { newGame(); };
+    b = $g("escHintBtn");
+    if (b) b.onclick = function () { hint(); };
+  }
+  window.escShow = function () {
+    bind();
+    if (!st) newGame(); else render();
+    if (st.started && !st.won) ensureTimer();
+  };
+  window.escStop = function () {
+    if (timer) { clearInterval(timer); timer = 0; }
+  };
+  window.__escHooks = {
+    newGame: newGame, doObj: doObj, pressColor: pressColor, tryCode: tryCode,
+    clockAdj: clockAdj, clockConfirm: clockConfirm, hint: hint, selectItem: selectItem,
+    visibleObjs: visibleObjs, roomDesc: roomDesc, render: render, fmt: fmt,
+    loadBest: loadBest, saveBest: saveBest, isActive: isActive,
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    getTimer: function () { return timer; },
+    items: { KEY: IT_KEY, NOTE: IT_NOTE, MATCH: IT_MATCH, FUSE: IT_FUSE, DRIVER: IT_DRIVER, CROW: IT_CROW, OIL: IT_OIL }
+  };
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🚪", name: "密室初探", desc: "开始一局深夜密室逃脱", test: function (u) { return (u.escape || 0) >= 1; } },
+      { emoji: "🗝", name: "金蝉脱壳", desc: "从深夜老宅中成功逃脱", test: function (u) { return (u.escapeout || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "被锁住的从来不是房间，是不肯找钥匙的人。",
+      "线索就摆在那里，只等你把灯打开。",
+      "密码猜不出来的时候，回头看看你错过了什么。",
+      "出口一直都在头顶，只是你习惯了盯着门。",
+      "逃出去的那一刻你会明白：每一步都没白走。"
     );
   }
 })();
