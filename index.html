@@ -1562,6 +1562,7 @@
         <button data-tab="tanks">🎖️ 炮弹对决</button>
         <button data-tab="bowling">🎳 保龄球馆</button>
         <button data-tab="racing">🏁 极速飙车</button>
+        <button data-tab="golf">⛳ 迷你高尔夫</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8035,6 +8036,32 @@
       <div class="rc-tip">🏁 <b>←→（或 A/D）转向、↑（或 W / 按住「油门」）加速、↓（或 S / 「刹车」）减速，空格开跑</b>（手机可直接按住画面加速、左右滑动转向）：OutRun 式伪 3D 公路竞速——透视路面、丘陵起伏、弯道有真实离心力，速度越快越容易被甩出弯外；压到路肩外的草地会疯狂掉速，追尾前车会瞬间失速。60 秒倒计时开局，跑完一整圈奖励 +35 秒，看你能在时间耗尽前跑多远；赛道由 mulberry32 种子生成、同种子完全复现，车流每局随机。最远里程本地存档（suibian_racing）只增不减。完整跑完一局解锁「飙车上路」，单局跑完一整圈解锁「赛道之王」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="golf">
+    <h2>⛳ 迷你高尔夫</h2>
+    <p class="sub">九洞掌上果岭：弹弓式拖拽出杆，绕过墙壁、沙坑与水塘，杆数越少越光荣！</p>
+    <style>
+      #golf .gf-wrap { max-width:560px; margin:0 auto; }
+      #golf .gf-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #golf .gf-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #golf .gf-top button:hover { background:rgba(255,255,255,.12); }
+      #golf .gf-hud { display:flex; gap:12px; justify-content:center; font-size:.85rem; opacity:.9; margin-bottom:8px; flex-wrap:wrap; }
+      #golf canvas { display:block; width:100%; max-width:360px; margin:0 auto; border-radius:14px; border:1px solid rgba(255,255,255,.16); background:#0b1512; touch-action:none; cursor:crosshair; box-shadow:0 12px 30px rgba(0,0,0,.45); }
+      #golf .gf-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="gf-wrap">
+      <div class="gf-top">
+        <button id="gfNew">🔄 再来一局</button>
+      </div>
+      <div class="gf-hud">
+        <span id="gfHole">⛳ 第 1/9 洞 · Par 2</span>
+        <span id="gfStroke">🏌️ 本洞 0 杆</span>
+        <span id="gfTotal">Σ 总计 0 杆（Par 26）</span>
+        <span id="gfBest">🏆 最佳 —</span>
+      </div>
+      <canvas id="gfCanvas"></canvas>
+      <div class="gf-tip">⛳ <b>在画面上按住并向后拖拽、松手出杆（弹弓式，拖得越远力越大）；键盘党用 ←→（或 A/D）调方向、↑↓（或 W/S）调力度、空格出杆</b>：九洞掌上迷你高尔夫——墙壁真实反弹、沙坑重滞减速、水塘落水罚一杆并退回出手点，球速太快还会滑过洞口「唇弹」；每洞设有 Par 标准杆，打出一杆进洞 / 老鹰 / 博蒂 / 柏忌实时报喜，第九洞结束弹出整场记分卡；总杆数「最佳纪录」本地存档（suibian_golf）只被更低杆数刷新。打完九洞解锁「果岭首秀」，打出一杆进洞解锁「一杆进洞」徽章。纯前端零依赖。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8417,6 +8444,7 @@
     if (id === "tanks") tanksRender();
     if (id === "bowling") bowlingRender();
     if (id === "racing") racingRender();
+    if (id === "golf") golfRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8462,6 +8490,7 @@
     if (id !== "tanks" && typeof tanksStop === "function") tanksStop();
     if (id !== "bowling" && typeof bowlingStop === "function") bowlingStop();
     if (id !== "racing" && typeof racingStop === "function") racingStop();
+    if (id !== "golf" && typeof golfStop === "function") golfStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8637,6 +8666,7 @@
     tanks: "炮弹对决 tanks artillery 坦克 火炮 大炮 曲射 弹道 风力 弹坑 对轰 炮击 worms 百战天虫 街机 arcade game",
     bowling: "保龄球馆 bowling 保龄球 全中 strike spare 补中 十格 计分 球瓶 球道 洗沟 旋球 蓄力 街机 体育 sports arcade game",
     racing: "极速飙车 racing 赛车 竞速 超车 弯道 公路 outrun 伪3D 车流 油门 刹车 漂移 开车 driving 街机 arcade game",
+    golf: "迷你高尔夫 golf minigolf 高尔夫 推杆 果岭 九洞 沙坑 水塘 一杆进洞 ace par 博蒂 弹弓 街机 体育 sports arcade game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8872,6 +8902,7 @@ splitbill:"tools",
     tanks:"games",
     bowling:"games",
     racing:"games",
+    golf:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -46041,6 +46072,407 @@ splitbill:"tools",
     BADGES.push(
       { emoji: "🏁", name: "飙车上路", desc: "在极速飙车里完整跑完一局", test: function (u) { return (u.racing || 0) >= 1; } },
       { emoji: "👑", name: "赛道之王", desc: "单局之内跑完一整圈赛道", test: function (u) { return (u.racingking || 0) >= 1; } }
+    );
+  }
+})();
+(function () {
+  "use strict";
+  const W = 360, H = 440, DPR = Math.min(2, (window.devicePixelRatio || 1));
+  const BX = 14, BY = 14, BXM = 346, BYM = 426;
+  const R = 7, CUPR = 11, DT = 1 / 60;
+  const SHOTK = 6.4, REST = 0.8, SINKSPD = 170;
+  const FRG = 0.9, FRS = 3.4, DECG = 26, DECS = 260, STOPV = 5;
+  const HOLES = [
+    { par: 2, tee: { x: 180, y: 385 }, cup: { x: 180, y: 70 }, walls: [], sand: [], water: [] },
+    { par: 2, tee: { x: 80, y: 385 }, cup: { x: 80, y: 70 }, walls: [{ x: 14, y: 205, w: 225, h: 14 }], sand: [], water: [] },
+    { par: 3, tee: { x: 180, y: 385 }, cup: { x: 180, y: 65 }, walls: [], sand: [{ x: 100, y: 160, w: 160, h: 120 }], water: [] },
+    { par: 3, tee: { x: 70, y: 385 }, cup: { x: 70, y: 65 }, walls: [], sand: [], water: [{ x: 14, y: 200, w: 240, h: 56 }] },
+    { par: 3, tee: { x: 85, y: 385 }, cup: { x: 265, y: 385 }, walls: [{ x: 166, y: 120, w: 14, h: 306 }], sand: [], water: [] },
+    { par: 2, tee: { x: 180, y: 385 }, cup: { x: 180, y: 65 }, walls: [{ x: 90, y: 110, w: 14, h: 230 }, { x: 256, y: 110, w: 14, h: 230 }], sand: [], water: [] },
+    { par: 4, tee: { x: 70, y: 390 }, cup: { x: 70, y: 75 }, walls: [{ x: 14, y: 150, w: 200, h: 14 }, { x: 146, y: 290, w: 200, h: 14 }], sand: [{ x: 240, y: 50, w: 100, h: 80 }], water: [] },
+    { par: 3, tee: { x: 180, y: 390 }, cup: { x: 180, y: 65 }, walls: [], sand: [{ x: 40, y: 170, w: 70, h: 95 }], water: [{ x: 125, y: 170, w: 115, h: 95 }] },
+    { par: 4, tee: { x: 300, y: 390 }, cup: { x: 300, y: 70 }, walls: [{ x: 100, y: 320, w: 246, h: 14 }, { x: 14, y: 220, w: 246, h: 14 }, { x: 100, y: 120, w: 246, h: 14 }], sand: [], water: [] }
+  ];
+  const PARTOT = HOLES.reduce((a, h) => a + h.par, 0);
+  let canvas = null, ctx = null, raf = 0, bound = false, st = null;
+
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function loadBest() {
+    try { return Math.max(0, parseInt(localStorage.getItem("suibian_golf") || "0", 10) || 0); } catch (e) { return 0; }
+  }
+  function saveBest(v) {
+    try {
+      const old = loadBest();
+      if (v > 0 && (old === 0 || v < old)) localStorage.setItem("suibian_golf", String(v));
+    } catch (e) {}
+  }
+  function isActive() {
+    const sec = document.getElementById("golf");
+    return !!(sec && sec.classList.contains("active"));
+  }
+  function inRect(x, y, rc) { return x >= rc.x && x <= rc.x + rc.w && y >= rc.y && y <= rc.y + rc.h; }
+
+  function newGame() {
+    st = {
+      hole: 0, strokes: 0, total: 0, scores: [],
+      ball: { x: 0, y: 0, vx: 0, vy: 0 },
+      phase: "aim", phaseT: 0, aimA: 0, aimP: 55,
+      shotFrom: { x: 0, y: 0 }, drag: null,
+      msg: "", msgT: 0, frame: 0, ace: false, best: loadBest()
+    };
+    loadHole(0);
+    return st;
+  }
+  function loadHole(i) {
+    const h = HOLES[i];
+    st.hole = i; st.strokes = 0;
+    st.ball.x = h.tee.x; st.ball.y = h.tee.y; st.ball.vx = 0; st.ball.vy = 0;
+    st.shotFrom = { x: h.tee.x, y: h.tee.y };
+    st.aimA = Math.atan2(h.cup.y - h.tee.y, h.cup.x - h.tee.x);
+    st.phase = "aim"; st.phaseT = 0; st.drag = null;
+    st.msg = "⛳ 第 " + (i + 1) + " 洞 · Par " + h.par; st.msgT = 110;
+    syncHud();
+  }
+  function shoot(angle, power) {
+    if (!st || st.phase !== "aim") return;
+    const p = clamp(power, 10, 100);
+    st.shotFrom = { x: st.ball.x, y: st.ball.y };
+    st.ball.vx = Math.cos(angle) * p * SHOTK;
+    st.ball.vy = Math.sin(angle) * p * SHOTK;
+    st.strokes++; st.phase = "roll"; st.drag = null;
+    st.msg = ""; st.msgT = 0;
+    syncHud();
+  }
+  function collideRect(b, rc) {
+    const cx = clamp(b.x, rc.x, rc.x + rc.w);
+    const cy = clamp(b.y, rc.y, rc.y + rc.h);
+    let dx = b.x - cx, dy = b.y - cy;
+    const d2 = dx * dx + dy * dy;
+    if (d2 >= R * R) return false;
+    if (d2 === 0) {
+      const dl = b.x - rc.x, dr = rc.x + rc.w - b.x, dt = b.y - rc.y, db = rc.y + rc.h - b.y;
+      const m = Math.min(dl, dr, dt, db);
+      if (m === dl) { dx = -1; dy = 0; } else if (m === dr) { dx = 1; dy = 0; }
+      else if (m === dt) { dx = 0; dy = -1; } else { dx = 0; dy = 1; }
+      b.x = cx + dx * R; b.y = cy + dy * R;
+    } else {
+      const d = Math.sqrt(d2);
+      dx /= d; dy /= d;
+      b.x = cx + dx * R; b.y = cy + dy * R;
+    }
+    const dot = b.vx * dx + b.vy * dy;
+    if (dot < 0) {
+      b.vx = (b.vx - 2 * dot * dx) * REST;
+      b.vy = (b.vy - 2 * dot * dy) * REST;
+    }
+    return true;
+  }
+  function sinkScore() {
+    const h = HOLES[st.hole];
+    const s = st.strokes, diff = s - h.par;
+    st.scores[st.hole] = s;
+    st.total += s;
+    let name;
+    if (s === 1) { name = "🕳️ 一杆进洞！Ace！"; st.ace = true; try { bumpUsage("golface"); } catch (e) {} }
+    else if (diff <= -2) name = "🦅 老鹰球！";
+    else if (diff === -1) name = "🐦 博蒂！";
+    else if (diff === 0) name = "✅ 标准杆";
+    else if (diff === 1) name = "😅 柏忌";
+    else if (diff === 2) name = "😰 双柏忌";
+    else name = "💦 +" + diff + " 杆";
+    st.phase = "sunk"; st.phaseT = 85;
+    st.msg = name + "（" + s + " 杆 / Par " + h.par + "）"; st.msgT = 85;
+    st.ball.vx = 0; st.ball.vy = 0;
+    syncHud();
+  }
+  function gameOver() {
+    if (!st || st.phase === "over") return;
+    st.phase = "over";
+    saveBest(st.total);
+    st.best = loadBest();
+    try { bumpUsage("golf"); } catch (e) {}
+    syncHud();
+  }
+  function nextHole() {
+    if (st.hole >= HOLES.length - 1) gameOver();
+    else loadHole(st.hole + 1);
+  }
+  function update(dt) {
+    if (!st) return;
+    st.frame++;
+    if (st.msgT > 0) st.msgT--;
+    if (st.phase === "sunk") {
+      st.phaseT--;
+      if (st.phaseT <= 0) nextHole();
+      return;
+    }
+    if (st.phase !== "roll") return;
+    const h = HOLES[st.hole], b = st.ball;
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    if (b.x < BX + R) { b.x = BX + R; if (b.vx < 0) b.vx = -b.vx * REST; }
+    if (b.x > BXM - R) { b.x = BXM - R; if (b.vx > 0) b.vx = -b.vx * REST; }
+    if (b.y < BY + R) { b.y = BY + R; if (b.vy < 0) b.vy = -b.vy * REST; }
+    if (b.y > BYM - R) { b.y = BYM - R; if (b.vy > 0) b.vy = -b.vy * REST; }
+    for (let i = 0; i < h.walls.length; i++) collideRect(b, h.walls[i]);
+    for (let i = 0; i < h.water.length; i++) {
+      if (inRect(b.x, b.y, h.water[i])) {
+        st.strokes++;
+        b.x = st.shotFrom.x; b.y = st.shotFrom.y; b.vx = 0; b.vy = 0;
+        st.phase = "aim";
+        st.aimA = Math.atan2(h.cup.y - b.y, h.cup.x - b.x);
+        st.msg = "💦 落水！罚一杆，退回出手点"; st.msgT = 110;
+        syncHud();
+        return;
+      }
+    }
+    let sand = false;
+    for (let i = 0; i < h.sand.length; i++) if (inRect(b.x, b.y, h.sand[i])) { sand = true; break; }
+    const fr = sand ? FRS : FRG, dec = sand ? DECS : DECG;
+    b.vx -= b.vx * fr * dt; b.vy -= b.vy * fr * dt;
+    let spd = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+    if (spd > 0) {
+      const ns = Math.max(0, spd - dec * dt);
+      b.vx *= ns / spd; b.vy *= ns / spd;
+      spd = ns;
+    }
+    const cdx = b.x - h.cup.x, cdy = b.y - h.cup.y;
+    const cd = Math.sqrt(cdx * cdx + cdy * cdy);
+    if (cd < CUPR - 1) {
+      if (spd < SINKSPD) { sinkScore(); return; }
+      b.vx *= 0.75; b.vy *= 0.75;
+    }
+    if (spd < STOPV) {
+      b.vx = 0; b.vy = 0;
+      st.phase = "aim";
+      st.aimA = Math.atan2(h.cup.y - b.y, h.cup.x - b.x);
+      syncHud();
+    }
+  }
+  function syncHud() {
+    if (!st) return;
+    const eH = document.getElementById("gfHole"), eP = document.getElementById("gfStroke"),
+      eT = document.getElementById("gfTotal"), eB = document.getElementById("gfBest");
+    if (eH) eH.textContent = "⛳ 第 " + (st.hole + 1) + "/9 洞 · Par " + HOLES[st.hole].par;
+    if (eP) eP.textContent = "🏌️ 本洞 " + st.strokes + " 杆";
+    if (eT) eT.textContent = "Σ 总计 " + st.total + " 杆（Par " + PARTOT + "）";
+    if (eB) eB.textContent = "🏆 最佳 " + (st.best > 0 ? st.best + " 杆" : "—");
+  }
+
+  function render() {
+    if (!ctx || !st) return;
+    const h = HOLES[st.hole];
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = "#0b1512"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#166534"; ctx.fillRect(BX, BY, BXM - BX, BYM - BY);
+    ctx.fillStyle = "rgba(255,255,255,.04)";
+    for (let y = BY, k = 0; y < BYM; y += 41, k++) if (k % 2 === 0) ctx.fillRect(BX, y, BXM - BX, Math.min(41, BYM - y));
+    for (let i = 0; i < h.sand.length; i++) {
+      const s = h.sand[i];
+      ctx.fillStyle = "#d4b268"; ctx.fillRect(s.x, s.y, s.w, s.h);
+      ctx.fillStyle = "#b8945a";
+      for (let k = 0; k < 14; k++) ctx.fillRect(s.x + ((k * 53) % (s.w - 4)) + 2, s.y + ((k * 37) % (s.h - 4)) + 2, 3, 3);
+    }
+    for (let i = 0; i < h.water.length; i++) {
+      const wtr = h.water[i];
+      ctx.fillStyle = "#1e40af"; ctx.fillRect(wtr.x, wtr.y, wtr.w, wtr.h);
+      ctx.strokeStyle = "rgba(147,197,253,.5)"; ctx.lineWidth = 1.5;
+      for (let k = 0; k < 3; k++) {
+        const wy = wtr.y + (wtr.h / 4) * (k + 1) + Math.sin(st.frame * 0.05 + k) * 2;
+        ctx.beginPath();
+        for (let x = wtr.x + 6; x < wtr.x + wtr.w - 6; x += 12) {
+          ctx.moveTo(x, wy); ctx.quadraticCurveTo(x + 3, wy - 3, x + 6, wy);
+        }
+        ctx.stroke();
+      }
+    }
+    ctx.strokeStyle = "#7c5c36"; ctx.lineWidth = 6; ctx.strokeRect(BX - 3, BY - 3, BXM - BX + 6, BYM - BY + 6);
+    for (let i = 0; i < h.walls.length; i++) {
+      const wl = h.walls[i];
+      ctx.fillStyle = "#8b5e34"; ctx.fillRect(wl.x, wl.y, wl.w, wl.h);
+      ctx.fillStyle = "rgba(255,255,255,.18)"; ctx.fillRect(wl.x, wl.y, wl.w, 3);
+    }
+    ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(h.tee.x, h.tee.y - 9); ctx.lineTo(h.tee.x, h.tee.y + 9);
+    ctx.moveTo(h.tee.x - 9, h.tee.y); ctx.lineTo(h.tee.x + 9, h.tee.y); ctx.stroke();
+    drawFlag(h.cup.x, h.cup.y);
+    if ((st.phase === "aim") && !st.drag) {
+      const r = 30 + st.aimP * 0.7;
+      const ex = st.ball.x + Math.cos(st.aimA) * r, ey = st.ball.y + Math.sin(st.aimA) * r;
+      ctx.strokeStyle = "#fde047"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(st.ball.x, st.ball.y); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.fillStyle = "#fde047";
+      ctx.beginPath();
+      ctx.moveTo(ex + Math.cos(st.aimA) * 9, ey + Math.sin(st.aimA) * 9);
+      ctx.lineTo(ex + Math.cos(st.aimA + 2.6) * 7, ey + Math.sin(st.aimA + 2.6) * 7);
+      ctx.lineTo(ex + Math.cos(st.aimA - 2.6) * 7, ey + Math.sin(st.aimA - 2.6) * 7);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#0b1512"; ctx.font = "bold 11px sans-serif";
+      ctx.fillText(st.aimP + "%", st.ball.x + 9, st.ball.y - 9);
+    }
+    if (st.drag) {
+      const dx = st.drag.x - st.ball.x, dy = st.drag.y - st.ball.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d > 6) {
+        const a = Math.atan2(-dy, -dx), pw = clamp(d * 0.5, 10, 100);
+        const r = 30 + pw * 0.7;
+        const ex = st.ball.x + Math.cos(a) * r, ey = st.ball.y + Math.sin(a) * r;
+        ctx.setLineDash([6, 6]); ctx.strokeStyle = "#fde047"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(st.ball.x, st.ball.y); ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#0b1512"; ctx.font = "bold 11px sans-serif";
+        ctx.fillText(Math.round(pw) + "%", st.ball.x + 9, st.ball.y - 9);
+      }
+    }
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+    ctx.beginPath(); ctx.arc(st.ball.x + 2, st.ball.y + 3, R, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#fafafa";
+    ctx.beginPath(); ctx.arc(st.ball.x, st.ball.y, R, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.7)";
+    ctx.beginPath(); ctx.arc(st.ball.x - 2, st.ball.y - 2, 2.4, 0, Math.PI * 2); ctx.fill();
+    if (st.msg && st.msgT > 0) {
+      ctx.font = "bold 15px sans-serif"; ctx.textAlign = "center";
+      const tw = ctx.measureText(st.msg).width + 24;
+      ctx.fillStyle = "rgba(0,0,0,.72)";
+      ctx.fillRect(W / 2 - tw / 2, 16, tw, 30);
+      ctx.fillStyle = "#fde047"; ctx.fillText(st.msg, W / 2, 36);
+      ctx.textAlign = "left";
+    }
+    if (st.phase === "over") drawScorecard();
+  }
+  function drawScorecard() {
+    const ox = 30, oy = 96, cw = 300, ch = 230;
+    ctx.fillStyle = "rgba(8,18,14,.94)"; ctx.fillRect(ox, oy, cw, ch);
+    ctx.strokeStyle = "#fde047"; ctx.lineWidth = 2; ctx.strokeRect(ox, oy, cw, ch);
+    ctx.fillStyle = "#fde047"; ctx.font = "bold 17px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("🏁 完赛 · 总杆 " + st.total + " / Par " + PARTOT, ox + cw / 2, oy + 28);
+    ctx.font = "12px sans-serif"; ctx.fillStyle = "#e5e7eb";
+    let good = st.total - PARTOT;
+    const tag = good === 0 ? "打平 Par" : (good < 0 ? "低于 Par " + (-good) + " 杆 🎉" : "高于 Par " + good + " 杆");
+    ctx.fillText("最佳纪录 " + (st.best > 0 ? st.best + " 杆" : "—") + " · " + tag, ox + cw / 2, oy + 48);
+    ctx.fillStyle = "#9ca3af"; ctx.font = "11px sans-serif";
+    for (let i = 0; i < HOLES.length; i++) ctx.fillText(String(i + 1), ox + 22 + i * 30, oy + 72);
+    ctx.fillStyle = "#6ee7b7";
+    for (let i = 0; i < HOLES.length; i++) ctx.fillText(String(HOLES[i].par), ox + 22 + i * 30, oy + 90);
+    for (let i = 0; i < HOLES.length; i++) {
+      const s = st.scores[i] || 0, diff = s - HOLES[i].par;
+      ctx.fillStyle = diff < 0 ? "#fde047" : (diff === 0 ? "#fff" : "#cbd5e1");
+      ctx.fillText(s ? String(s) : "-", ox + 22 + i * 30, oy + 108);
+    }
+    ctx.fillStyle = "#9ca3af"; ctx.font = "12px sans-serif";
+    ctx.fillText("空格 / 「再来一局」再来九洞", ox + cw / 2, oy + ch - 16);
+    ctx.textAlign = "left";
+  }
+  function drawFlag(cx, cy) {
+    ctx.strokeStyle = "#0006"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, CUPR, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "#08110a";
+    ctx.beginPath(); ctx.arc(cx, cy, CUPR - 1, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#e5e7eb"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - 30); ctx.stroke();
+    const wav = Math.sin(st.frame * 0.08) * 3;
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 30); ctx.lineTo(cx + 18, cy - 25 + wav); ctx.lineTo(cx, cy - 20);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function loop() {
+    if (!st || !isActive()) { raf = 0; return; }
+    update(DT);
+    render();
+    raf = requestAnimationFrame(loop);
+  }
+  function bindOnce() {
+    if (bound) return; bound = true;
+    const bn = document.getElementById("gfNew");
+    if (bn) bn.addEventListener("click", () => { newGame(); });
+    function onKey(e) {
+      const t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (!isActive()) return;
+      if (!st) return;
+      if (st.phase === "aim") {
+        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { st.aimA -= 0.06; e.preventDefault(); }
+        else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { st.aimA += 0.06; e.preventDefault(); }
+        else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") { st.aimP = clamp(st.aimP + 3, 10, 100); e.preventDefault(); }
+        else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") { st.aimP = clamp(st.aimP - 3, 10, 100); e.preventDefault(); }
+        else if (e.key === " ") { shoot(st.aimA, st.aimP); e.preventDefault(); }
+      } else if (st.phase === "over") {
+        if (e.key === " ") { newGame(); e.preventDefault(); }
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    function pos(e) {
+      const r = canvas.getBoundingClientRect();
+      const p = (e.touches && e.touches[0]) ? e.touches[0] : e;
+      return { x: (p.clientX - r.left) * (W / r.width), y: (p.clientY - r.top) * (H / r.height) };
+    }
+    function onDown(e) {
+      if (!isActive() || !st || st.phase !== "aim") return;
+      e.preventDefault();
+      st.drag = pos(e);
+    }
+    function onMove(e) {
+      if (!st || !st.drag) return;
+      e.preventDefault();
+      st.drag = pos(e);
+    }
+    function onUp(e) {
+      if (!st || !st.drag) return;
+      const d = pos(e);
+      const dx = d.x - st.ball.x, dy = d.y - st.ball.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 12) {
+        const a = Math.atan2(-dy, -dx);
+        const pw = clamp(dist * 0.5, 10, 100);
+        shoot(a, pw);
+      } else { st.drag = null; }
+    }
+    canvas.addEventListener("mousedown", onDown);
+    canvas.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    canvas.addEventListener("touchstart", onDown, { passive: false });
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    canvas.addEventListener("touchend", onUp);
+  }
+  window.golfRender = function () {
+    if (!canvas) {
+      canvas = document.getElementById("gfCanvas");
+      if (!canvas) return;
+      canvas.width = W * DPR; canvas.height = H * DPR;
+      ctx = canvas.getContext("2d");
+    }
+    bindOnce();
+    if (!st) newGame();
+    syncHud();
+    if (!raf) raf = requestAnimationFrame(loop);
+  };
+  window.golfStop = function () {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    if (st) { st.drag = null; }
+  };
+  window.__gfHooks = {
+    newGame: newGame, shoot: shoot, update: update, render: render,
+    loadHole: loadHole, nextHole: nextHole, gameOver: gameOver,
+    syncHud: syncHud, inRect: inRect, collideRect: collideRect,
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    getHoles: function () { return HOLES; }, getParTot: function () { return PARTOT; },
+    getCanvas: function () { return canvas; }, getCtx: function () { return ctx; },
+    consts: { W: W, H: H, BX: BX, BY: BY, BXM: BXM, BYM: BYM, R: R, CUPR: CUPR, DT: DT, SHOTK: SHOTK, REST: REST, SINKSPD: SINKSPD, FRG: FRG, FRS: FRS, DECG: DECG, DECS: DECS, STOPV: STOPV }
+  };
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "⛳", name: "果岭首秀", desc: "在迷你高尔夫里打完一整场九洞", test: function (u) { return (u.golf || 0) >= 1; } },
+      { emoji: "🕳️", name: "一杆进洞", desc: "在迷你高尔夫里打出一记 Ace", test: function (u) { return (u.golface || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "推杆和人生一样，力道太猛反而进不了洞。",
+      "沙坑里慢一点，比硬闯更有机会出来。",
+      "落水别慌，罚一杆，姿势还在。",
+      "瞄准时别只盯球，要看清你要去的地方。",
+      "九洞走完，比一杆进洞更难得的是没放弃。"
     );
   }
 })();
