@@ -1563,6 +1563,7 @@
         <button data-tab="bowling">🎳 保龄球馆</button>
         <button data-tab="racing">🏁 极速飙车</button>
         <button data-tab="golf">⛳ 迷你高尔夫</button>
+        <button data-tab="monopoly">🎩 随便大富翁</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8062,6 +8063,46 @@
       <div class="gf-tip">⛳ <b>在画面上按住并向后拖拽、松手出杆（弹弓式，拖得越远力越大）；键盘党用 ←→（或 A/D）调方向、↑↓（或 W/S）调力度、空格出杆</b>：九洞掌上迷你高尔夫——墙壁真实反弹、沙坑重滞减速、水塘落水罚一杆并退回出手点，球速太快还会滑过洞口「唇弹」；每洞设有 Par 标准杆，打出一杆进洞 / 老鹰 / 博蒂 / 柏忌实时报喜，第九洞结束弹出整场记分卡；总杆数「最佳纪录」本地存档（suibian_golf）只被更低杆数刷新。打完九洞解锁「果岭首秀」，打出一杆进洞解锁「一杆进洞」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="monopoly">
+    <h2>🎩 随便大富翁</h2>
+    <p class="sub">一人对战三只 AI：掷骰子、买地皮、盖高楼、收租金，把它们统统榨到破产！</p>
+    <style>
+      #monopoly .mp-wrap { max-width:560px; margin:0 auto; }
+      #monopoly .mp-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #monopoly .mp-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #monopoly .mp-sub { display:flex; gap:12px; justify-content:center; font-size:.8rem; opacity:.85; margin-bottom:8px; flex-wrap:wrap; }
+      #monopoly canvas { display:block; width:100%; max-width:360px; margin:0 auto; border-radius:14px; border:1px solid rgba(255,255,255,.16); background:#10231c; touch-action:manipulation; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.45); }
+      #monopoly .mp-msg { text-align:center; margin:10px auto 6px; font-size:.92rem; min-height:1.5em; max-width:520px; }
+      #monopoly .mp-btns { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #monopoly .mp-btns button { padding:8px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.95rem; cursor:pointer; }
+      #monopoly .mp-btns button:hover { background:rgba(255,255,255,.12); }
+      #monopoly .mp-log { max-width:520px; margin:0 auto; max-height:130px; overflow:auto; font-size:.78rem; opacity:.72; line-height:1.65; background:rgba(0,0,0,.2); border-radius:10px; padding:8px 12px; }
+      #monopoly .mp-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="mp-wrap">
+      <div class="mp-hud">
+        <span id="mpP0">🧑 你 ¥2000</span>
+        <span id="mpP1">🦊 阿橘 ¥2000</span>
+        <span id="mpP2">🐼 滚滚 ¥2000</span>
+        <span id="mpP3">🤖 铁蛋 ¥2000</span>
+      </div>
+      <div class="mp-sub">
+        <span id="mpRound">第 1/30 回合</span>
+        <span id="mpWins">🏆 累计夺冠 0 次</span>
+      </div>
+      <canvas id="mpCanvas"></canvas>
+      <div class="mp-msg" id="mpMsg">🎩 新的一局开始！你先手，掷骰子吧</div>
+      <div class="mp-btns">
+        <button id="mpRoll">🎲 掷骰子</button>
+        <button id="mpBuy" style="display:none">💰 买入</button>
+        <button id="mpUp" style="display:none">🏗️ 升级</button>
+        <button id="mpSkip" style="display:none">🙅 跳过</button>
+        <button id="mpNew" style="display:none">🔄 再来一局</button>
+      </div>
+      <div class="mp-log" id="mpLog"></div>
+      <div class="mp-tip">🎩 <b>点「掷骰子」（或空格 / 点棋盘）走起，轮到买地 / 升级时按钮二选一（N 键快速跳过）</b>：24 格环形棋盘，16 块地产分四档地段，买下后路过的对手要交租，原地升级最高 Lv3 租金翻着涨；机会卡红包 / 罚款 / 传送惊喜不断，缴税格与拘留所专治膨胀，经过起点领工资 ¥200；现金见底就破产出局、名下地产充公，笑到最后或 30 回合后身家最高者夺冠。累计夺冠次数本地存档（suibian_monopoly）只增不减，完整打完一局解锁「地产新贵」、夺冠解锁「地产大亨」徽章。纯前端零依赖。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8445,6 +8486,7 @@
     if (id === "bowling") bowlingRender();
     if (id === "racing") racingRender();
     if (id === "golf") golfRender();
+    if (id === "monopoly") monopolyRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8491,6 +8533,7 @@
     if (id !== "bowling" && typeof bowlingStop === "function") bowlingStop();
     if (id !== "racing" && typeof racingStop === "function") racingStop();
     if (id !== "golf" && typeof golfStop === "function") golfStop();
+    if (id !== "monopoly" && typeof monopolyStop === "function") monopolyStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8667,6 +8710,7 @@
     bowling: "保龄球馆 bowling 保龄球 全中 strike spare 补中 十格 计分 球瓶 球道 洗沟 旋球 蓄力 街机 体育 sports arcade game",
     racing: "极速飙车 racing 赛车 竞速 超车 弯道 公路 outrun 伪3D 车流 油门 刹车 漂移 开车 driving 街机 arcade game",
     golf: "迷你高尔夫 golf minigolf 高尔夫 推杆 果岭 九洞 沙坑 水塘 一杆进洞 ace par 博蒂 弹弓 街机 体育 sports arcade game",
+    monopoly: "随便大富翁 monopoly 大富翁 地产 买地 收租 租金 骰子 棋盘 升级 盖楼 破产 机会 富翁 对战 ai 桌游 board game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8903,6 +8947,7 @@ splitbill:"tools",
     bowling:"games",
     racing:"games",
     golf:"games",
+    monopoly:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -46473,6 +46518,541 @@ splitbill:"tools",
       "落水别慌，罚一杆，姿势还在。",
       "瞄准时别只盯球，要看清你要去的地方。",
       "九洞走完，比一杆进洞更难得的是没放弃。"
+    );
+  }
+})();
+(function () {
+  "use strict";
+  const W = 360, H = 360, DPR = Math.min(2, (window.devicePixelRatio || 1));
+  const CELL = 48, MARG = 12, N = 24;
+  const START_MONEY = 2000, SALARY = 200, MAXROUND = 30;
+  const RENTM = [0.4, 1.0, 2.2], UPK = 0.6;
+  const GCOL = ["#7ec8a9", "#6fb7e8", "#e8b56f", "#e87a7a"];
+  const PCOL = ["#ffd54f", "#ff8a65", "#4fc3f7", "#aed581"];
+  const PDEF = [
+    { name: "你", emoji: "🧑", ai: false },
+    { name: "阿橘", emoji: "🦊", ai: true },
+    { name: "滚滚", emoji: "🐼", ai: true },
+    { name: "铁蛋", emoji: "🤖", ai: true }
+  ];
+  const TILES = [
+    { t: "go", name: "起点", emoji: "🚩" },
+    { t: "p", name: "城南小巷", price: 100, g: 0 },
+    { t: "p", name: "夜市摊位", price: 110, g: 0 },
+    { t: "c", name: "机会", emoji: "❓" },
+    { t: "p", name: "老街茶馆", price: 120, g: 0 },
+    { t: "p", name: "巷口书店", price: 140, g: 0 },
+    { t: "jail", name: "拘留所", emoji: "🚔" },
+    { t: "p", name: "码头仓库", price: 160, g: 1 },
+    { t: "p", name: "渔人码头", price: 170, g: 1 },
+    { t: "tax", name: "缴税", emoji: "💸", amt: 100 },
+    { t: "p", name: "灯塔民宿", price: 180, g: 1 },
+    { t: "p", name: "海景餐厅", price: 200, g: 1 },
+    { t: "park", name: "游乐园", emoji: "🎡" },
+    { t: "p", name: "商业街口", price: 220, g: 2 },
+    { t: "p", name: "百货大楼", price: 230, g: 2 },
+    { t: "c", name: "机会", emoji: "❓" },
+    { t: "p", name: "影城中心", price: 240, g: 2 },
+    { t: "p", name: "云顶酒店", price: 260, g: 2 },
+    { t: "warp", name: "传送门", emoji: "🌀" },
+    { t: "p", name: "科技园区", price: 280, g: 3 },
+    { t: "p", name: "金融大厦", price: 300, g: 3 },
+    { t: "tax", name: "缴税", emoji: "💸", amt: 200 },
+    { t: "p", name: "环球广场", price: 320, g: 3 },
+    { t: "p", name: "摩天塔尖", price: 350, g: 3 }
+  ];
+  const CHANCE = [
+    { msg: "路边捡到大红包 +¥150", fn: function (p) { p.money += 150; } },
+    { msg: "彩票中了小奖 +¥300", fn: function (p) { p.money += 300; } },
+    { msg: "手机屏幕摔碎了 -¥120", fn: function (p) { p.money -= 120; } },
+    { msg: "请全桌喝奶茶，每人 ¥50", fn: function (p, ps) { for (const q of ps) { if (q !== p && q.alive) { p.money -= 50; q.money += 50; } } } },
+    { msg: "过生日，每人送你 ¥50", fn: function (p, ps) { for (const q of ps) { if (q !== p && q.alive) { q.money -= 50; p.money += 50; } } } },
+    { msg: "顺风车带一程：前进 3 格", move: 3 },
+    { msg: "走错路了：退回 2 格", move: -2 },
+    { msg: "税务稽查：缴纳现金的 10%", fn: function (p) { if (p.money > 0) p.money -= Math.round(p.money * 0.1); } },
+    { msg: "地产普查：每处名下地产奖励 ¥30", fn: function (p, ps, ownedCount) { p.money += ownedCount * 30; } },
+    { msg: "灵感爆棚，摆摊小赚 +¥80", fn: function (p) { p.money += 80; } }
+  ];
+  let canvas = null, ctx = null, raf = 0, bound = false, st = null;
+  let rng = Math.random;
+
+  function isActive() {
+    const sec = document.getElementById("monopoly");
+    return !!(sec && sec.classList.contains("active"));
+  }
+  function loadWins() {
+    try { return Math.max(0, parseInt(localStorage.getItem("suibian_monopoly") || "0", 10) || 0); } catch (e) { return 0; }
+  }
+  function saveWins(v) {
+    try { if (v > loadWins()) localStorage.setItem("suibian_monopoly", String(v)); } catch (e) {}
+  }
+  function tileXY(i) {
+    let col, row;
+    if (i === 0) { col = 6; row = 6; }
+    else if (i <= 5) { col = 6 - i; row = 6; }
+    else if (i === 6) { col = 0; row = 6; }
+    else if (i <= 11) { col = 0; row = 12 - i; }
+    else if (i === 12) { col = 0; row = 0; }
+    else if (i <= 17) { col = i - 12; row = 0; }
+    else if (i === 18) { col = 6; row = 0; }
+    else { col = 6; row = i - 18; }
+    return { x: MARG + col * CELL, y: MARG + row * CELL };
+  }
+  function upCost(tile) { return Math.round(tile.price * UPK); }
+  function rentOf(tile) { return Math.round(tile.price * RENTM[(tile.lv || 1) - 1]); }
+  function ownedCount(pi) {
+    let n = 0;
+    for (const t of TILES) if (t.t === "p" && t.owner === pi) n++;
+    return n;
+  }
+  function netWorth(pi) {
+    let v = st.players[pi].money;
+    for (const t of TILES) if (t.t === "p" && t.owner === pi) v += t.price + ((t.lv || 1) - 1) * upCost(t);
+    return v;
+  }
+  function aliveCount() { return st.players.filter(function (p) { return p.alive; }).length; }
+
+  function newGame() {
+    for (const t of TILES) if (t.t === "p") { t.owner = -1; t.lv = 0; }
+    st = {
+      players: PDEF.map(function (d, i) {
+        return { name: d.name, emoji: d.emoji, ai: d.ai, idx: i, pos: 0, money: START_MONEY, alive: true, skip: 0 };
+      }),
+      cur: 0, round: 1, phase: "turn", t: 0, dice: 0, diceShow: 1,
+      stepsLeft: 0, stepT: 0, decideMode: "", decideTile: -1,
+      msg: "🎩 新的一局开始！你先手，掷骰子吧", log: [], frame: 0, ended: false,
+      wins: loadWins()
+    };
+    pushLog("—— 新的一局：4 位玩家各带 ¥" + START_MONEY + " 上场 ——");
+    syncAll();
+    return st;
+  }
+  function pushLog(s) {
+    st.log.unshift(s);
+    if (st.log.length > 40) st.log.length = 40;
+    const el = document.getElementById("mpLog");
+    if (el) {
+      let htm = "";
+      for (const line of st.log) htm += "<div>" + line + "</div>";
+      el.innerHTML = htm;
+    }
+  }
+  function setMsg(s) {
+    st.msg = s;
+    const el = document.getElementById("mpMsg");
+    if (el) el.textContent = s;
+  }
+  function syncHud() {
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById("mpP" + i);
+      if (!el) continue;
+      const p = st.players[i];
+      el.textContent = p.emoji + " " + p.name + " " + (p.alive ? "¥" + p.money : "💥出局");
+      el.style.opacity = p.alive ? "1" : ".38";
+      el.style.outline = (i === st.cur && st.phase !== "over") ? "2px solid " + PCOL[i] : "none";
+    }
+    const r = document.getElementById("mpRound");
+    if (r) r.textContent = "第 " + Math.min(st.round, MAXROUND) + "/" + MAXROUND + " 回合";
+    const w = document.getElementById("mpWins");
+    if (w) w.textContent = "🏆 累计夺冠 " + st.wins + " 次";
+  }
+  function show(id, on) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = on ? "" : "none";
+  }
+  function syncBtns() {
+    const humanTurn = st.phase === "turn" && st.cur === 0 && st.players[0].alive;
+    show("mpRoll", humanTurn);
+    show("mpBuy", st.phase === "decide" && st.decideMode === "buy");
+    show("mpUp", st.phase === "decide" && st.decideMode === "up");
+    show("mpSkip", st.phase === "decide");
+    show("mpNew", st.phase === "over");
+  }
+  function syncAll() { syncHud(); syncBtns(); setMsg(st.msg); }
+
+  function doRoll() {
+    if (!st || st.phase !== "turn") return;
+    const p = st.players[st.cur];
+    if (!p.alive) { endTurn(); return; }
+    st.dice = 1 + Math.floor(rng() * 6);
+    st.phase = "dice"; st.t = 22;
+    syncBtns();
+  }
+  function stepOnce(p) {
+    p.pos = (p.pos + 1) % N;
+    if (p.pos === 0) {
+      p.money += SALARY;
+      pushLog(p.emoji + " " + p.name + " 经过起点，领工资 +¥" + SALARY);
+    }
+  }
+  function toMsgPhase(frames) { st.phase = "msg"; st.t = frames || 45; syncAll(); }
+
+  function resolve(p, depth) {
+    depth = depth || 0;
+    const tile = TILES[p.pos];
+    const tag = p.emoji + " " + p.name;
+    if (tile.t === "go") {
+      setMsg(tag + " 稳稳站在起点");
+      toMsgPhase(40); return;
+    }
+    if (tile.t === "jail") {
+      p.skip = 1;
+      setMsg(tag + " 被请进拘留所，下回合歇一轮 🚔");
+      pushLog(tag + " 进了拘留所");
+      toMsgPhase(50); return;
+    }
+    if (tile.t === "park") {
+      p.money += 50;
+      setMsg(tag + " 在游乐园白玩一圈还捡了 ¥50 🎡");
+      toMsgPhase(45); return;
+    }
+    if (tile.t === "warp") {
+      if (depth >= 2) { setMsg(tag + " 传送门冒烟了，原地休息"); toMsgPhase(40); return; }
+      const dest = Math.floor(rng() * N);
+      p.pos = dest;
+      if (dest === 0) p.money += SALARY;
+      pushLog(tag + " 被传送门甩到「" + TILES[dest].name + "」🌀");
+      resolve(p, depth + 1); return;
+    }
+    if (tile.t === "tax") {
+      p.money -= tile.amt;
+      setMsg(tag + " 依法纳税 -¥" + tile.amt + " 💸");
+      pushLog(tag + " 缴税 ¥" + tile.amt);
+      if (checkBroke(p)) return;
+      toMsgPhase(45); return;
+    }
+    if (tile.t === "c") {
+      const ev = CHANCE[Math.floor(rng() * CHANCE.length)];
+      setMsg("❓ " + tag + "：" + ev.msg);
+      pushLog(tag + " 机会卡：" + ev.msg);
+      if (ev.move) {
+        let steps = ev.move;
+        if (steps > 0) { for (let i = 0; i < steps; i++) stepOnce(p); }
+        else { p.pos = ((p.pos + steps) % N + N) % N; }
+        if (depth < 2) { resolve(p, depth + 1); return; }
+      } else if (ev.fn) {
+        ev.fn(p, st.players, ownedCount(p.idx));
+        for (const q of st.players) { if (q.alive && checkBroke(q)) return; }
+      }
+      toMsgPhase(55); return;
+    }
+    // property
+    if (tile.owner === -1) {
+      if (!p.ai) {
+        st.phase = "decide"; st.decideMode = "buy"; st.decideTile = p.pos;
+        setMsg("🏠 「" + tile.name + "」无主，买入价 ¥" + tile.price + "（租金 ¥" + Math.round(tile.price * RENTM[0]) + " 起），买吗？");
+        syncAll(); return;
+      }
+      if (p.money >= tile.price + 250) {
+        tile.owner = p.idx; tile.lv = 1; p.money -= tile.price;
+        setMsg(tag + " 买下了「" + tile.name + "」(¥" + tile.price + ")");
+        pushLog(tag + " 买入「" + tile.name + "」¥" + tile.price);
+      } else {
+        setMsg(tag + " 盯着「" + tile.name + "」摸了摸口袋，算了");
+      }
+      toMsgPhase(45); return;
+    }
+    if (tile.owner === p.idx) {
+      if ((tile.lv || 1) >= 3) { setMsg(tag + " 的「" + tile.name + "」已是摩天顶配 🏙️"); toMsgPhase(40); return; }
+      const cost = upCost(tile);
+      if (!p.ai) {
+        if (p.money < cost) { setMsg("「" + tile.name + "」想升级要 ¥" + cost + "，钱包说不行"); toMsgPhase(45); return; }
+        st.phase = "decide"; st.decideMode = "up"; st.decideTile = p.pos;
+        setMsg("⬆️ 升级「" + tile.name + "」到 Lv" + ((tile.lv || 1) + 1) + " 要 ¥" + cost + "（租金翻倍不止），升吗？");
+        syncAll(); return;
+      }
+      if (p.money >= cost + 350) {
+        tile.lv = (tile.lv || 1) + 1; p.money -= cost;
+        setMsg(tag + " 把「" + tile.name + "」升到了 Lv" + tile.lv);
+        pushLog(tag + " 升级「" + tile.name + "」→ Lv" + tile.lv);
+      } else {
+        setMsg(tag + " 回自家「" + tile.name + "」歇脚");
+      }
+      toMsgPhase(45); return;
+    }
+    const owner = st.players[tile.owner];
+    const rent = rentOf(tile);
+    p.money -= rent; owner.money += rent;
+    setMsg(tag + " 踩进 " + owner.emoji + " " + owner.name + " 的「" + tile.name + "」Lv" + (tile.lv || 1) + "，付租金 ¥" + rent);
+    pushLog(tag + " → " + owner.name + " 租金 ¥" + rent);
+    if (checkBroke(p)) return;
+    toMsgPhase(50);
+  }
+
+  function checkBroke(p) {
+    if (p.money >= 0 || !p.alive) return false;
+    p.alive = false;
+    for (const t of TILES) if (t.t === "p" && t.owner === p.idx) { t.owner = -1; t.lv = 0; }
+    pushLog("💥 " + p.emoji + " " + p.name + " 破产出局！名下地产全部充公");
+    setMsg("💥 " + p.emoji + " " + p.name + " 破产出局！");
+    const alive = st.players.filter(function (q) { return q.alive; });
+    if (alive.length === 1) { gameOver(alive[0].idx); return true; }
+    toMsgPhase(60);
+    return true;
+  }
+
+  function buy() {
+    if (!st || st.phase !== "decide" || st.decideMode !== "buy") return;
+    const p = st.players[0], tile = TILES[st.decideTile];
+    if (p.money >= tile.price && tile.owner === -1) {
+      tile.owner = 0; tile.lv = 1; p.money -= tile.price;
+      setMsg("✅ 拿下「" + tile.name + "」！从此路过要交租");
+      pushLog("🧑 你买入「" + tile.name + "」¥" + tile.price);
+    } else {
+      setMsg("钱不够，只能眼馋「" + tile.name + "」");
+    }
+    st.decideMode = ""; toMsgPhase(35);
+  }
+  function upgrade() {
+    if (!st || st.phase !== "decide" || st.decideMode !== "up") return;
+    const p = st.players[0], tile = TILES[st.decideTile];
+    const cost = upCost(tile);
+    if (p.money >= cost && tile.owner === 0 && (tile.lv || 1) < 3) {
+      tile.lv = (tile.lv || 1) + 1; p.money -= cost;
+      setMsg("🏗️ 「" + tile.name + "」升到 Lv" + tile.lv + "，租金起飞");
+      pushLog("🧑 你升级「" + tile.name + "」→ Lv" + tile.lv);
+    }
+    st.decideMode = ""; toMsgPhase(35);
+  }
+  function skipDecide() {
+    if (!st || st.phase !== "decide") return;
+    setMsg("你摆摆手：随便啦，下一位");
+    st.decideMode = ""; toMsgPhase(30);
+  }
+
+  function endTurn() {
+    if (!st || st.ended) return;
+    const alive = st.players.filter(function (q) { return q.alive; });
+    if (alive.length === 1) { gameOver(alive[0].idx); return; }
+    if (alive.length === 0) { gameOver(0); return; }
+    let i = st.cur;
+    for (let k = 0; k < 4; k++) {
+      i = (i + 1) % 4;
+      if (st.players[i].alive) break;
+    }
+    if (i <= st.cur) {
+      st.round++;
+      if (st.round > MAXROUND) {
+        let best = -1, bi = -1;
+        for (const q of st.players) {
+          if (!q.alive) continue;
+          const v = netWorth(q.idx);
+          if (v > best) { best = v; bi = q.idx; }
+        }
+        gameOver(bi); return;
+      }
+    }
+    st.cur = i;
+    st.phase = "turn"; st.t = st.players[i].ai ? 42 : 0;
+    if (!st.players[i].ai) setMsg("🎲 轮到你了，掷骰子！");
+    syncAll();
+  }
+
+  function gameOver(wi) {
+    if (st.ended) return;
+    st.ended = true; st.phase = "over";
+    const w = st.players[wi];
+    const worth = netWorth(wi);
+    setMsg("🏁 游戏结束！冠军是 " + w.emoji + " " + w.name + "（身家 ¥" + worth + "）" + (wi === 0 ? " 🎉 恭喜你当上地产大亨！" : "，再接再厉"));
+    pushLog("🏁 终局：" + w.emoji + " " + w.name + " 以身家 ¥" + worth + " 夺冠");
+    try { bumpUsage("monopoly"); } catch (e) {}
+    if (wi === 0) {
+      st.wins = loadWins() + 1;
+      saveWins(st.wins);
+      try { bumpUsage("monopolywin"); } catch (e) {}
+    }
+    syncAll();
+  }
+
+  function update() {
+    if (!st || st.phase === "over") return;
+    st.frame++;
+    const p = st.players[st.cur];
+    if (st.phase === "turn") {
+      if (!p.alive) { endTurn(); return; }
+      if (p.skip > 0) {
+        p.skip--;
+        setMsg(p.emoji + " " + p.name + " 在拘留所数窗栏，歇一轮");
+        toMsgPhase(45); return;
+      }
+      if (p.ai) {
+        st.t--;
+        if (st.t <= 0) doRoll();
+      }
+      return;
+    }
+    if (st.phase === "dice") {
+      st.t--;
+      st.diceShow = 1 + Math.floor(rng() * 6);
+      if (st.t <= 0) {
+        st.diceShow = st.dice;
+        setMsg(p.emoji + " " + p.name + " 掷出了 " + st.dice + " 点");
+        st.phase = "move"; st.stepsLeft = st.dice; st.stepT = 4;
+      }
+      return;
+    }
+    if (st.phase === "move") {
+      st.stepT--;
+      if (st.stepT <= 0) {
+        st.stepT = 8;
+        stepOnce(p);
+        st.stepsLeft--;
+        if (st.stepsLeft <= 0) { resolve(p, 0); syncHud(); }
+      }
+      return;
+    }
+    if (st.phase === "msg") {
+      st.t--;
+      if (st.t <= 0) endTurn();
+    }
+  }
+
+  function render() {
+    if (!ctx || !st) return;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#10231c";
+    ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < N; i++) {
+      const t = TILES[i], pt = tileXY(i);
+      ctx.fillStyle = "#1b3a2e";
+      ctx.fillRect(pt.x + 1, pt.y + 1, CELL - 2, CELL - 2);
+      if (t.t === "p") {
+        ctx.fillStyle = GCOL[t.g];
+        ctx.fillRect(pt.x + 1, pt.y + 1, CELL - 2, 7);
+        if (t.owner >= 0) {
+          ctx.fillStyle = PCOL[t.owner];
+          ctx.globalAlpha = 0.28;
+          ctx.fillRect(pt.x + 1, pt.y + 8, CELL - 2, CELL - 9);
+          ctx.globalAlpha = 1;
+          for (let l = 0; l < (t.lv || 1); l++) {
+            ctx.fillStyle = PCOL[t.owner];
+            ctx.fillRect(pt.x + 5 + l * 9, pt.y + CELL - 10, 7, 5);
+          }
+        }
+        ctx.fillStyle = "rgba(255,255,255,.85)";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("¥" + t.price, pt.x + CELL / 2, pt.y + 22);
+        ctx.font = "9px sans-serif";
+        ctx.fillStyle = "rgba(255,255,255,.55)";
+        ctx.fillText(t.name.slice(0, 4), pt.x + CELL / 2, pt.y + 33);
+      } else {
+        ctx.font = "16px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(t.emoji, pt.x + CELL / 2, pt.y + 26);
+        ctx.font = "9px sans-serif";
+        ctx.fillStyle = "rgba(255,255,255,.6)";
+        ctx.fillText(t.name, pt.x + CELL / 2, pt.y + 39);
+      }
+    }
+    // current player's tile highlight
+    if (st.phase !== "over") {
+      const hp = tileXY(st.players[st.cur].pos);
+      ctx.strokeStyle = PCOL[st.cur];
+      ctx.lineWidth = 2;
+      ctx.strokeRect(hp.x + 1.5, hp.y + 1.5, CELL - 3, CELL - 3);
+    }
+    // tokens
+    const OFF = [[11, 13], [37, 13], [11, 39], [37, 39]];
+    ctx.font = "13px sans-serif";
+    ctx.textAlign = "center";
+    for (let i = 0; i < 4; i++) {
+      const q = st.players[i];
+      if (!q.alive) continue;
+      const pt = tileXY(q.pos);
+      ctx.fillText(q.emoji, pt.x + OFF[i][0], pt.y + OFF[i][1] + 4);
+    }
+    // center panel
+    const cx = W / 2, cy = H / 2;
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+    ctx.fillRect(MARG + CELL + 6, MARG + CELL + 6, CELL * 5 - 12, CELL * 5 - 12);
+    const faces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+    ctx.font = "44px sans-serif";
+    ctx.fillStyle = "#fff";
+    ctx.fillText(faces[(st.diceShow || 1) - 1], cx, cy - 18);
+    ctx.font = "13px sans-serif";
+    const p = st.players[st.cur];
+    ctx.fillStyle = PCOL[st.cur];
+    ctx.fillText(st.phase === "over" ? "🏁 终局" : ("当前：" + p.emoji + " " + p.name), cx, cy + 14);
+    ctx.fillStyle = "rgba(255,255,255,.6)";
+    ctx.font = "11px sans-serif";
+    ctx.fillText("第 " + Math.min(st.round, MAXROUND) + "/" + MAXROUND + " 回合", cx, cy + 34);
+    ctx.textAlign = "left";
+  }
+
+  function loop() {
+    if (!isActive()) { raf = 0; return; }
+    update();
+    render();
+    raf = requestAnimationFrame(loop);
+  }
+
+  function primary() {
+    if (!st) return;
+    if (st.phase === "turn" && st.cur === 0 && st.players[0].alive) { doRoll(); return; }
+    if (st.phase === "decide") { if (st.decideMode === "buy") buy(); else upgrade(); return; }
+    if (st.phase === "over") { newGame(); }
+  }
+
+  window.monopolyRender = function () {
+    if (!bound) {
+      bound = true;
+      canvas = document.getElementById("mpCanvas");
+      if (canvas) {
+        canvas.width = W * DPR; canvas.height = H * DPR;
+        canvas.style.maxWidth = W + "px";
+        ctx = canvas.getContext("2d");
+        canvas.addEventListener("click", function () { primary(); });
+      }
+      const bind = function (id, fn) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("click", fn);
+      };
+      bind("mpRoll", doRoll);
+      bind("mpBuy", buy);
+      bind("mpUp", upgrade);
+      bind("mpSkip", skipDecide);
+      bind("mpNew", function () { newGame(); });
+      window.addEventListener("keydown", function (e) {
+        if (!isActive()) return;
+        const tg = e.target && e.target.tagName;
+        if (tg === "INPUT" || tg === "TEXTAREA" || tg === "SELECT") return;
+        if (e.key === " " || e.key === "Enter") { e.preventDefault(); primary(); }
+        else if (e.key === "n" || e.key === "N") { if (st && st.phase === "decide") skipDecide(); }
+      });
+    }
+    if (!st) newGame();
+    syncAll();
+    if (!raf) raf = requestAnimationFrame(loop);
+  };
+  window.monopolyStop = function () {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+  window.__mpHooks = {
+    newGame: newGame, doRoll: doRoll, update: update, render: render,
+    resolve: resolve, endTurn: endTurn, buy: buy, upgrade: upgrade,
+    skipDecide: skipDecide, checkBroke: checkBroke, gameOver: gameOver,
+    netWorth: netWorth, ownedCount: ownedCount, primary: primary,
+    tileXY: tileXY, rentOf: rentOf, upCost: upCost,
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    getTiles: function () { return TILES; },
+    setRng: function (fn) { rng = fn; },
+    consts: { W: W, H: H, N: N, CELL: CELL, MARG: MARG, START_MONEY: START_MONEY, SALARY: SALARY, MAXROUND: MAXROUND, RENTM: RENTM, UPK: UPK }
+  };
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🎩", name: "地产新贵", desc: "在随便大富翁里完整打完一局", test: function (u) { return (u.monopoly || 0) >= 1; } },
+      { emoji: "👑", name: "地产大亨", desc: "在随便大富翁里击败三位 AI 夺冠", test: function (u) { return (u.monopolywin || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "地段，地段，还是地段——买不起的时候说说也开心。",
+      "人生就像掷骰子，点数随机，走法自选。",
+      "破产不可怕，可怕的是下回合还得看别人收租。",
+      "先路过起点领工资，再考虑星辰大海。",
+      "拘留所也有好处：至少这一轮不用交租。"
     );
   }
 })();
