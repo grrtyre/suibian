@@ -1560,6 +1560,7 @@
         <button data-tab="pool">🎱 黑八台球</button>
         <button data-tab="escape">🚪 密室逃脱</button>
         <button data-tab="tanks">🎖️ 炮弹对决</button>
+        <button data-tab="bowling">🎳 保龄球馆</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7958,6 +7959,43 @@
       <div class="tk-tip">🎖️ <b>←→ 调炮口角度、↑↓ 调发射力度、空格 / 「开炮」出膛</b>（也可在画布上按住拖拽瞄准，拖得越长力越大）：经典 Artillery 火炮曲射对轰——每回合风向风力随机，炮弹吃重力也吃风，落点炸出真实弹坑、山头越轰越矮，坦克悬空会自动坠落；轰掉敌方全部装甲即攻下一座山头，下一关敌人血更厚、炮更准、风更野。造成伤害即得分，过关有基础奖 + 残血奖，阵亡结算；同种子地形与风序完全可复现（mulberry32），最高分本地存档（suibian_tanks）只增不减。打完一局解锁「炮手上阵」，轰掉一辆敌军坦克解锁「百步穿杨」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="bowling">
+    <h2>🎳 保龄球馆</h2>
+    <style>
+      #bowling .bw-wrap { max-width:560px; margin:0 auto; }
+      #bowling .bw-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #bowling .bw-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #bowling .bw-top button:hover { background:rgba(255,255,255,.12); }
+      #bowling .bw-hud { display:flex; gap:12px; justify-content:center; font-size:.85rem; opacity:.9; margin-bottom:8px; flex-wrap:wrap; }
+      #bowling .bw-board { display:grid; grid-template-columns:repeat(10,1fr); gap:3px; max-width:420px; margin:0 auto 10px; }
+      #bowling .bw-cell { border:1px solid rgba(255,255,255,.18); border-radius:6px; background:rgba(0,0,0,.28); text-align:center; padding:3px 0 4px; min-height:38px; }
+      #bowling .bw-cell.cur { border-color:#f59e0b; box-shadow:0 0 8px rgba(245,158,11,.35); }
+      #bowling .bw-cell .m { display:block; font-size:.72rem; letter-spacing:1px; opacity:.85; min-height:14px; }
+      #bowling .bw-cell .s { display:block; font-size:.8rem; font-weight:700; min-height:14px; }
+      #bowling canvas { display:block; width:100%; max-width:360px; margin:0 auto; border-radius:14px; border:1px solid rgba(255,255,255,.16); background:#0b1020; touch-action:none; cursor:crosshair; box-shadow:0 12px 30px rgba(0,0,0,.45); }
+      #bowling .bw-ctrl { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:10px; }
+      #bowling .bw-ctrl button { min-width:52px; padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.07); color:inherit; cursor:pointer; font-size:.95rem; user-select:none; }
+      #bowling .bw-ctrl button:active { transform:scale(.95); }
+      #bowling .bw-ctrl .bw-go { background:linear-gradient(135deg,#10b981,#0ea5e9); border:none; font-weight:800; padding:9px 22px; }
+      #bowling .bw-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="bw-wrap">
+      <div class="bw-top">
+        <button id="bwNew">🔄 重新开球</button>
+      </div>
+      <div class="bw-hud">
+        <span id="bwFrame">🎳 第 1 格 · 第 1 球</span><span id="bwScore">🏆 0 分</span><span id="bwBest">👑 最高 0</span><span id="bwSpin">🌀 旋球 0</span>
+      </div>
+      <div class="bw-board" id="bwBoard"></div>
+      <canvas id="bwCanvas"></canvas>
+      <div class="bw-ctrl">
+        <button id="bwLeft">←</button><button id="bwRight">→</button>
+        <button class="bw-go" id="bwGo">🎳 出球</button>
+        <button id="bwSpinL">🌀−</button><button id="bwSpinR">🌀＋</button>
+      </div>
+      <div class="bw-tip">🎳 <b>←→ 移动站位、↑↓（或 🌀 按钮）调旋球、空格 / 「出球」启动蓄力条、再按一次锁定出手</b>（也可在球道下半区按住向下拖拽、松手甩球，拖得越长力越大）：正规十格计分制保龄球——Strike 全中吃后两球、Spare 补中吃后一球、第十格全中 / 补中可加掷第三球，满分 300；球瓶真实连锁碰撞、旋球会拐出香蕉弧线，旋太狠会洗沟吃零蛋。计分板实时画出每格符号（X、⁄、数字）与累计分，同种子瓶阵抖动可复现（mulberry32），最高分本地存档（suibian_bowling）只增不减。打完一整局解锁「保龄开局」，掷出一记全中解锁「全倒时刻」徽章。纯前端零依赖。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8338,6 +8376,7 @@
     if (id === "miner") minerRender();
     if (id === "pool") poolRender();
     if (id === "tanks") tanksRender();
+    if (id === "bowling") bowlingRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8381,6 +8420,7 @@
     if (id === "escape" && typeof window.escShow === "function") window.escShow();
     if (id !== "escape" && typeof escStop === "function") escStop();
     if (id !== "tanks" && typeof tanksStop === "function") tanksStop();
+    if (id !== "bowling" && typeof bowlingStop === "function") bowlingStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8554,6 +8594,7 @@
     pool: "黑八台球 pool 台球 桌球 八号球 8ball billiards 斯诺克 snooker 街机 打台球 黑8 清台",
     escape: "密室逃脱 escape room 解谜 逃脱 密室 谜题 剧情 冒险 点击 探索 线索 推理 密码锁 暗格 老宅 game",
     tanks: "炮弹对决 tanks artillery 坦克 火炮 大炮 曲射 弹道 风力 弹坑 对轰 炮击 worms 百战天虫 街机 arcade game",
+    bowling: "保龄球馆 bowling 保龄球 全中 strike spare 补中 十格 计分 球瓶 球道 洗沟 旋球 蓄力 街机 体育 sports arcade game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8787,6 +8828,7 @@ splitbill:"tools",
     pool:"games",
     escape:"games",
     tanks:"games",
+    bowling:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -45056,6 +45098,417 @@ splitbill:"tools",
       "山头再高，也挡不住算准了的抛物线。",
       "别羡慕百发百中的人，他只是把失手都用完了。",
       "真正的对手不是对面的坦克，是你手抖的那一毫米。"
+    );
+  }
+})();
+(function () {
+  "use strict";
+  const $bw = (id) => document.getElementById(id);
+  const W = 360, H = 460, DPR = Math.min(2, (window.devicePixelRatio || 1));
+  const LX = 62, RX = 298, GW = 20, BR = 11, PR = 7, PIN_Y0 = 148, ROW_DY = 26, COL_DX = 30, BALL_Y = 414;
+  let canvas = null, ctx = null, raf = 0, bound = false, st = null, drag = null;
+
+  function bwMulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function loadBest() {
+    try { return Math.max(0, parseInt(localStorage.getItem("suibian_bowling") || "0", 10) || 0); } catch (e) { return 0; }
+  }
+  function saveBest(v) {
+    try { const old = loadBest(); if (v > old) localStorage.setItem("suibian_bowling", String(v)); } catch (e) {}
+  }
+  function isActive() {
+    const sec = document.getElementById("bowling");
+    return !!(sec && sec.classList.contains("active"));
+  }
+  function newRack() {
+    st.pins = [];
+    for (let r = 0; r < 4; r++) {
+      for (let i = 0; i <= r; i++) {
+        const px = W / 2 + (i - r / 2) * COL_DX + (st.rng() - 0.5) * 1.4;
+        const py = PIN_Y0 - r * ROW_DY + (st.rng() - 0.5) * 1.4;
+        st.pins.push({ ox: px, oy: py, x: px, y: py, vx: 0, vy: 0, down: false, gone: false });
+      }
+    }
+    st.rackFull = true;
+  }
+  function newGame(seed) {
+    st = {
+      seed: (seed === undefined ? ((Date.now() ^ (Math.random() * 1e9)) | 0) : (seed | 0)),
+      frame: 0, roll: 0, frames: [[], [], [], [], [], [], [], [], [], []],
+      best: loadBest(), phase: "aim", ballX: W / 2, spin: 0,
+      power: 55, powerDir: 1, ball: null, simT: 0, idle: st ? false : true
+    };
+    st.rng = bwMulberry32(st.seed | 0);
+    newRack();
+    syncHud(); renderBoard();
+  }
+  function standing() { return st.pins.filter((p) => !p.down && !p.gone); }
+  function scoreGame(fr) {
+    const flat = [];
+    for (let i = 0; i < 10; i++) { const a = fr[i] || []; for (let j = 0; j < a.length; j++) flat.push(a[j]); }
+    const cum = []; let total = 0, idx = 0, pending = false;
+    for (let f = 0; f < 10; f++) {
+      const r = fr[f] || [];
+      if (f < 9) {
+        if (r.length === 0) { cum.push(null); pending = true; continue; }
+        if (r[0] === 10) {
+          const n1 = flat[idx + 1], n2 = flat[idx + 2];
+          if (pending || n1 === undefined || n2 === undefined) { cum.push(null); pending = true; }
+          else { total += 10 + n1 + n2; cum.push(total); }
+          idx += 1;
+        } else if (r.length >= 2) {
+          if (r[0] + r[1] === 10) {
+            const n1 = flat[idx + 2];
+            if (pending || n1 === undefined) { cum.push(null); pending = true; }
+            else { total += 10 + n1; cum.push(total); }
+          } else if (pending) { cum.push(null); }
+          else { total += r[0] + r[1]; cum.push(total); }
+          idx += 2;
+        } else { cum.push(null); pending = true; idx += 1; }
+      } else {
+        const done = (r.length === 3) || (r.length === 2 && r[0] !== 10 && r[0] + r[1] < 10);
+        if (!done || pending) cum.push(null);
+        else { total += r.reduce((a, b) => a + b, 0); cum.push(total); }
+      }
+    }
+    return { cum: cum, total: total };
+  }
+  function frameMarks(fr, f) {
+    const r = fr[f] || [], out = [];
+    if (f < 9) {
+      if (r.length >= 1) out.push(r[0] === 10 ? "X" : (r[0] === 0 ? "-" : String(r[0])));
+      if (r.length >= 2) out.push(r[0] + r[1] === 10 ? "/" : (r[1] === 0 ? "-" : String(r[1])));
+    } else {
+      for (let i = 0; i < r.length; i++) {
+        const v = r[i];
+        if (v === 10) { out.push("X"); continue; }
+        const prev = i > 0 ? r[i - 1] : -1;
+        if (i > 0 && prev !== 10 && prev + v === 10) { out.push("/"); continue; }
+        out.push(v === 0 ? "-" : String(v));
+      }
+    }
+    return out;
+  }
+  function renderBoard() {
+    const box = $bw("bwBoard");
+    if (!box || !st) return;
+    const sc = scoreGame(st.frames);
+    let html = "";
+    for (let f = 0; f < 10; f++) {
+      const cur = (st.phase !== "over" && f === st.frame) ? " cur" : "";
+      html += '<div class="bw-cell' + cur + '"><span class="m">' + (frameMarks(st.frames, f).join(" ") || "&nbsp;") +
+        '</span><span class="s">' + (sc.cum[f] === null ? "&nbsp;" : sc.cum[f]) + "</span></div>";
+    }
+    box.innerHTML = html;
+  }
+  function syncHud() {
+    const fEl = $bw("bwFrame"), sEl = $bw("bwScore"), bEl = $bw("bwBest"), spEl = $bw("bwSpin");
+    if (!st) return;
+    if (fEl) fEl.textContent = st.phase === "over" ? "🏁 一局终了" : ("🎳 第 " + (st.frame + 1) + " 格 · 第 " + (st.roll + 1) + " 球");
+    const sc = scoreGame(st.frames);
+    let shown = 0;
+    for (let i = 0; i < 10; i++) if (sc.cum[i] !== null) shown = sc.cum[i];
+    if (sEl) sEl.textContent = "🏆 " + shown + " 分";
+    if (bEl) bEl.textContent = "👑 最高 " + Math.max(st.best, shown);
+    if (spEl) spEl.textContent = "🌀 旋球 " + (st.spin > 0 ? "+" + st.spin : String(st.spin));
+  }
+  function adjust(what, d) {
+    if (!st || (st.phase !== "aim" && st.phase !== "power")) return;
+    if (what === "x") st.ballX = Math.max(LX + BR + 2, Math.min(RX - BR - 2, st.ballX + d * 7));
+    if (what === "spin") st.spin = Math.max(-5, Math.min(5, st.spin + d));
+    syncHud();
+  }
+  function fire(powerOverride) {
+    if (!st || (st.phase !== "aim" && st.phase !== "power")) return;
+    const p = (powerOverride === undefined ? st.power : Math.max(28, Math.min(100, powerOverride)));
+    st.ball = { x: st.ballX, y: BALL_Y, vx: (drag && drag.vx) || 0, vy: -(4.2 + p * 0.05), gutter: false };
+    st.phase = "rolling"; st.simT = 0; drag = null;
+  }
+  function stepPhysics() {
+    const b = st.ball;
+    st.simT++;
+    if (b) {
+      if (!b.gutter) b.vx += st.spin * 0.03;
+      b.x += b.vx; b.y += b.vy;
+      if (!b.gutter && (b.x < LX + 4 || b.x > RX - 4)) {
+        b.gutter = true; b.vx = 0;
+        b.x = b.x < W / 2 ? LX - GW / 2 : RX + GW / 2;
+      }
+      if (!b.gutter) {
+        for (let i = 0; i < st.pins.length; i++) {
+          const p = st.pins[i];
+          if (p.down || p.gone) continue;
+          const dx = p.x - b.x, dy = p.y - b.y, d = Math.hypot(dx, dy) || 0.001;
+          if (d < BR + PR) {
+            const nx = dx / d, ny = dy / d, bs = Math.hypot(b.vx, b.vy);
+            p.vx += nx * bs * 0.72; p.vy += ny * bs * 0.72;
+            p.x = b.x + nx * (BR + PR + 0.2); p.y = b.y + ny * (BR + PR + 0.2);
+            b.vx -= nx * bs * 0.1; b.vy -= ny * bs * 0.12;
+          }
+        }
+      }
+      if (b.y < -BR - 16 || Math.hypot(b.vx, b.vy) < 0.35) st.ball = null;
+    }
+    for (let i = 0; i < st.pins.length; i++) {
+      const p = st.pins[i];
+      if (p.down || p.gone) continue;
+      p.x += p.vx; p.y += p.vy; p.vx *= 0.94; p.vy *= 0.94;
+      for (let j = i + 1; j < st.pins.length; j++) {
+        const q = st.pins[j];
+        if (q.down || q.gone) continue;
+        const dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy) || 0.001;
+        if (d < PR * 2) {
+          const nx = dx / d, ny = dy / d, rel = (p.vx - q.vx) * nx + (p.vy - q.vy) * ny;
+          if (rel > 0) {
+            q.vx += nx * rel * 0.62; q.vy += ny * rel * 0.62;
+            p.vx -= nx * rel * 0.42; p.vy -= ny * rel * 0.42;
+          }
+          const push = (PR * 2 - d) / 2;
+          q.x += nx * push; q.y += ny * push; p.x -= nx * push; p.y -= ny * push;
+        }
+      }
+      if (Math.hypot(p.x - p.ox, p.y - p.oy) > 11) p.down = true;
+      if (p.x < LX - 8 || p.x > RX + 8 || p.y < -12 || p.y > H + 12) { p.down = true; p.gone = true; }
+    }
+    const quiet = !st.ball && st.pins.every((p) => p.down || p.gone || Math.hypot(p.vx, p.vy) < 0.08);
+    if (quiet || st.simT > 900) resolveRoll();
+  }
+  function resolveRoll() {
+    const downed = st.pins.filter((p) => p.down && !p._counted);
+    const knocked = downed.length;
+    downed.forEach((p) => { p._counted = true; p.gone = true; });
+    st.pins.forEach((p) => { p.vx = 0; p.vy = 0; });
+    const wasFull = st.rackFull;
+    st.rackFull = false;
+    const f = st.frame;
+    st.frames[f].push(knocked);
+    const isStrike = wasFull && knocked === 10;
+    if (isStrike) {
+      try { bumpUsage("bowlingstrike"); } catch (e) {}
+      if (typeof toast === "function") toast("💥 STRIKE！全倒！");
+      try { if (typeof settings !== "undefined" && settings.sound && typeof playDing === "function") playDing(); } catch (e) {}
+    } else if (knocked > 0 && standing().length === 0 && typeof toast === "function") {
+      toast("✨ SPARE！补中！");
+    }
+    if (f < 9) {
+      if (st.roll === 0 && knocked < 10) { st.roll = 1; }
+      else { st.frame++; st.roll = 0; newRack(); }
+    } else {
+      const r = st.frames[9];
+      if (r.length === 1) {
+        if (r[0] === 10) newRack();
+        st.roll = 1;
+      } else if (r.length === 2) {
+        if (r[0] === 10) { if (r[1] === 10 || standing().length === 0) newRack(); st.roll = 2; }
+        else if (r[0] + r[1] === 10) { newRack(); st.roll = 2; }
+        else return gameOver();
+      } else { return gameOver(); }
+    }
+    st.phase = "aim"; st.ball = null; syncHud(); renderBoard();
+  }
+  function gameOver() {
+    st.phase = "over"; st.ball = null;
+    const total = scoreGame(st.frames).total;
+    saveBest(total); st.best = Math.max(st.best, total);
+    try { bumpUsage("bowling"); } catch (e) {}
+    if (typeof toast === "function") toast("🏁 一局打完，总分 " + total + " 分！");
+    syncHud(); renderBoard();
+  }
+  function previewPath() {
+    const pts = [];
+    let x = st.ballX, y = BALL_Y, vx = 0, vy = -(4.2 + st.power * 0.05);
+    for (let i = 0; i < 90; i++) {
+      vx += st.spin * 0.03; x += vx; y += vy;
+      if (x < LX + 4 || x > RX - 4 || y < PIN_Y0 - 3 * ROW_DY - 14) break;
+      if (i % 4 === 0) pts.push([x, y]);
+    }
+    return pts;
+  }
+  function render() {
+    if (!ctx || !st) return;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#0b1020"; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#1f2937"; ctx.fillRect(LX - GW, 0, GW, H); ctx.fillRect(RX, 0, GW, H);
+    const g = ctx.createLinearGradient(LX, 0, RX, 0);
+    g.addColorStop(0, "#8a5a2b"); g.addColorStop(0.5, "#b07a3e"); g.addColorStop(1, "#8a5a2b");
+    ctx.fillStyle = g; ctx.fillRect(LX, 0, RX - LX, H);
+    ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 1;
+    for (let x = LX + 12; x < RX; x += 16) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    ctx.fillStyle = "rgba(255,255,255,.35)";
+    for (let i = -3; i <= 3; i++) {
+      const ax = W / 2 + i * 24, ay = 292 + Math.abs(i) * 14;
+      ctx.beginPath(); ctx.moveTo(ax, ay - 9); ctx.lineTo(ax - 4, ay); ctx.lineTo(ax + 4, ay); ctx.closePath(); ctx.fill();
+    }
+    if (st.phase === "aim" || st.phase === "power") {
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      previewPath().forEach((p) => { ctx.beginPath(); ctx.arc(p[0], p[1], 1.6, 0, 6.29); ctx.fill(); });
+    }
+    st.pins.forEach((p) => {
+      if (p.gone) return;
+      ctx.globalAlpha = p.down ? 0.28 : 1;
+      ctx.beginPath(); ctx.arc(p.x, p.y, PR, 0, 6.29);
+      ctx.fillStyle = "#f3f4f6"; ctx.fill();
+      ctx.strokeStyle = "#ef4444"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, PR - 2.5, 0, 6.29); ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+    const bx = st.ball ? st.ball.x : st.ballX, by = st.ball ? st.ball.y : BALL_Y;
+    if (st.phase !== "over") {
+      const bg = ctx.createRadialGradient(bx - 3, by - 4, 2, bx, by, BR);
+      bg.addColorStop(0, "#67e8f9"); bg.addColorStop(1, "#0e7490");
+      ctx.beginPath(); ctx.arc(bx, by, BR, 0, 6.29); ctx.fillStyle = bg; ctx.fill();
+      ctx.fillStyle = "rgba(0,0,0,.45)";
+      [[-3, -2], [3, -2], [0, 3]].forEach((h) => { ctx.beginPath(); ctx.arc(bx + h[0], by + h[1], 1.4, 0, 6.29); ctx.fill(); });
+    }
+    ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.fillRect(W - 26, 96, 14, 260);
+    const ph = Math.round(260 * (st.power - 28) / 72);
+    const pg = ctx.createLinearGradient(0, 356 - ph, 0, 356);
+    pg.addColorStop(0, "#ef4444"); pg.addColorStop(1, "#10b981");
+    ctx.fillStyle = pg; ctx.fillRect(W - 24, 356 - ph, 10, ph);
+    ctx.strokeStyle = "rgba(255,255,255,.4)"; ctx.strokeRect(W - 26, 96, 14, 260);
+    ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("💥" + Math.round(st.power), W - 19, 88);
+    if (drag && drag.on) {
+      ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(st.ballX, BALL_Y); ctx.lineTo(drag.cx, drag.cy); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    if (st.phase === "over") {
+      ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(0, H / 2 - 52, W, 104);
+      ctx.fillStyle = "#fbbf24"; ctx.font = "bold 26px sans-serif";
+      ctx.fillText("🏁 总分 " + scoreGame(st.frames).total + " 分", W / 2, H / 2 - 6);
+      ctx.fillStyle = "#e5e7eb"; ctx.font = "14px sans-serif";
+      ctx.fillText("👑 历史最高 " + st.best + " · 点「重新开球」再来一局", W / 2, H / 2 + 26);
+    }
+  }
+  function update() {
+    if (st.phase === "power") {
+      st.power += 1.9 * st.powerDir;
+      if (st.power >= 100) { st.power = 100; st.powerDir = -1; }
+      if (st.power <= 28) { st.power = 28; st.powerDir = 1; }
+    }
+    if (st.phase === "rolling") stepPhysics();
+  }
+  function loop() {
+    raf = 0;
+    if (!isActive()) return;
+    update(); render();
+    if (st.phase === "power" || st.phase === "rolling") syncHud();
+    raf = requestAnimationFrame(loop);
+  }
+  function pressGo() {
+    if (!st) return;
+    if (st.phase === "over") { newGame(); return; }
+    if (st.phase === "aim") { st.phase = "power"; st.powerDir = 1; return; }
+    if (st.phase === "power") fire();
+  }
+  function onKey(e) {
+    if (!isActive() || !st) return;
+    const tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.ctrlKey || e.metaKey || e.altKey) return;
+    let used = true;
+    if (e.key === "ArrowLeft") adjust("x", -1);
+    else if (e.key === "ArrowRight") adjust("x", 1);
+    else if (e.key === "ArrowUp") adjust("spin", 1);
+    else if (e.key === "ArrowDown") adjust("spin", -1);
+    else if (e.key === " " || e.key === "Spacebar") pressGo();
+    else used = false;
+    if (used) e.preventDefault();
+  }
+  function evPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const t = (e.touches && e.touches[0]) || e;
+    return { x: (t.clientX - r.left) * (W / r.width), y: (t.clientY - r.top) * (H / r.height) };
+  }
+  function onDown(e) {
+    if (!st || (st.phase !== "aim" && st.phase !== "power")) return;
+    const p = evPos(e);
+    if (p.y < H * 0.5) return;
+    drag = { on: true, sx: p.x, sy: p.y, cx: p.x, cy: p.y, vx: 0 };
+    st.ballX = Math.max(LX + BR + 2, Math.min(RX - BR - 2, p.x));
+    st.phase = "aim"; syncHud();
+    e.preventDefault();
+  }
+  function onMove(e) {
+    if (!drag || !drag.on) return;
+    const p = evPos(e);
+    drag.cx = p.x; drag.cy = p.y;
+    e.preventDefault();
+  }
+  function onUp() {
+    if (!drag || !drag.on) return;
+    const len = Math.max(0, drag.cy - drag.sy);
+    if (len > 22 && st && st.phase === "aim") {
+      drag.vx = Math.max(-1.6, Math.min(1.6, (drag.sx - drag.cx) * 0.03));
+      fire(Math.min(100, 28 + len * 0.55));
+    } else { drag = null; }
+  }
+  function bindOnce() {
+    if (bound) return;
+    bound = true;
+    const nb = $bw("bwNew");
+    if (nb) nb.addEventListener("click", () => { newGame(); if (typeof toast === "function") toast("🎳 新的一局，冲 300 分！"); });
+    const go = $bw("bwGo"); if (go) go.addEventListener("click", pressGo);
+    const bl = $bw("bwLeft"); if (bl) bl.addEventListener("click", () => adjust("x", -1));
+    const br2 = $bw("bwRight"); if (br2) br2.addEventListener("click", () => adjust("x", 1));
+    const sl = $bw("bwSpinL"); if (sl) sl.addEventListener("click", () => adjust("spin", -1));
+    const sr = $bw("bwSpinR"); if (sr) sr.addEventListener("click", () => adjust("spin", 1));
+    window.addEventListener("keydown", onKey);
+    canvas.addEventListener("mousedown", onDown);
+    canvas.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    canvas.addEventListener("touchstart", onDown, { passive: false });
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    canvas.addEventListener("touchend", onUp);
+  }
+  window.bowlingRender = function () {
+    if (!canvas) {
+      canvas = document.getElementById("bwCanvas");
+      if (!canvas) return;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      ctx = canvas.getContext("2d");
+    }
+    bindOnce();
+    if (!st) newGame();
+    syncHud(); renderBoard();
+    if (!raf) raf = requestAnimationFrame(loop);
+  };
+  window.bowlingStop = function () {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    drag = null;
+  };
+  window.__bwHooks = {
+    mulberry32: bwMulberry32, newGame: newGame, newRack: newRack, scoreGame: scoreGame,
+    frameMarks: frameMarks, fire: fire, stepPhysics: stepPhysics, resolveRoll: resolveRoll,
+    gameOver: gameOver, adjust: adjust, pressGo: pressGo, update: update, render: render,
+    previewPath: previewPath, onKey: onKey, onDown: onDown, onMove: onMove, onUp: onUp,
+    loadBest: loadBest, saveBest: saveBest, isActive: isActive, syncHud: syncHud,
+    renderBoard: renderBoard, standing: standing,
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    getRaf: function () { return raf; },
+    consts: { W: W, H: H, LX: LX, RX: RX, BR: BR, PR: PR, PIN_Y0: PIN_Y0, BALL_Y: BALL_Y }
+  };
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🎳", name: "保龄开局", desc: "完整打完一局十格保龄球", test: function (u) { return (u.bowling || 0) >= 1; } },
+      { emoji: "💥", name: "全倒时刻", desc: "在保龄球馆掷出一记全中", test: function (u) { return (u.bowlingstrike || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "十个瓶子不会自己倒下，出手才有答案。",
+      "洗沟不丢人，丢人的是不敢再掷第二球。",
+      "全中靠的不是运气，是每次站位都认真了一毫米。",
+      "补中告诉你：第一次没做好的事，还有机会收尾。",
+      "人生像第十格，打得够好，就能多来一球。"
     );
   }
 })();
