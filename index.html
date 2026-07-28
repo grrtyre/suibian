@@ -1561,6 +1561,7 @@
         <button data-tab="escape">🚪 密室逃脱</button>
         <button data-tab="tanks">🎖️ 炮弹对决</button>
         <button data-tab="bowling">🎳 保龄球馆</button>
+        <button data-tab="racing">🏁 极速飙车</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -7996,6 +7997,44 @@
       <div class="bw-tip">🎳 <b>←→ 移动站位、↑↓（或 🌀 按钮）调旋球、空格 / 「出球」启动蓄力条、再按一次锁定出手</b>（也可在球道下半区按住向下拖拽、松手甩球，拖得越长力越大）：正规十格计分制保龄球——Strike 全中吃后两球、Spare 补中吃后一球、第十格全中 / 补中可加掷第三球，满分 300；球瓶真实连锁碰撞、旋球会拐出香蕉弧线，旋太狠会洗沟吃零蛋。计分板实时画出每格符号（X、⁄、数字）与累计分，同种子瓶阵抖动可复现（mulberry32），最高分本地存档（suibian_bowling）只增不减。打完一整局解锁「保龄开局」，掷出一记全中解锁「全倒时刻」徽章。纯前端零依赖。</div>
     </div>
   </section>
+
+  <section class="panel" id="racing">
+    <h2>🏁 极速飙车</h2>
+    <p class="sub">深夜霓虹公路，一脚油门到底——躲开车流、贴弯超车，冲过一整圈拿加时！</p>
+    <style>
+      #racing .rc-wrap { max-width:560px; margin:0 auto; }
+      #racing .rc-top { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+      #racing .rc-top button { padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #racing .rc-top button:hover { background:rgba(255,255,255,.12); }
+      #racing .rc-hud { display:flex; gap:12px; justify-content:center; font-size:.85rem; opacity:.9; margin-bottom:8px; flex-wrap:wrap; }
+      #racing canvas { display:block; width:100%; max-width:360px; margin:0 auto; border-radius:14px; border:1px solid rgba(255,255,255,.16); background:#0b1020; touch-action:none; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.45); }
+      #racing .rc-ctrl { display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:10px; }
+      #racing .rc-ctrl button { min-width:56px; padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.07); color:inherit; cursor:pointer; font-size:1rem; user-select:none; touch-action:none; }
+      #racing .rc-ctrl button:active { transform:scale(.95); }
+      #racing .rc-ctrl .rc-gas { background:linear-gradient(135deg,#f43f5e,#f59e0b); border:none; font-weight:800; padding:10px 24px; }
+      #racing .rc-tip { margin-top:12px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="rc-wrap">
+      <div class="rc-top">
+        <button id="rcNew">🔄 重开一局</button>
+      </div>
+      <div class="rc-hud">
+        <span id="rcTime">⏱ 60s</span>
+        <span id="rcSpd">🚗 0 km/h</span>
+        <span id="rcDist">📏 0.00 km</span>
+        <span id="rcLap">🏁 0 圈</span>
+        <span id="rcBest">🏆 最远 0.00 km</span>
+      </div>
+      <canvas id="rcCanvas"></canvas>
+      <div class="rc-ctrl">
+        <button id="rcLeft">◀</button>
+        <button id="rcBrake">🛑 刹车</button>
+        <button class="rc-gas" id="rcGas">🔥 油门</button>
+        <button id="rcRight">▶</button>
+      </div>
+      <div class="rc-tip">🏁 <b>←→（或 A/D）转向、↑（或 W / 按住「油门」）加速、↓（或 S / 「刹车」）减速，空格开跑</b>（手机可直接按住画面加速、左右滑动转向）：OutRun 式伪 3D 公路竞速——透视路面、丘陵起伏、弯道有真实离心力，速度越快越容易被甩出弯外；压到路肩外的草地会疯狂掉速，追尾前车会瞬间失速。60 秒倒计时开局，跑完一整圈奖励 +35 秒，看你能在时间耗尽前跑多远；赛道由 mulberry32 种子生成、同种子完全复现，车流每局随机。最远里程本地存档（suibian_racing）只增不减。完整跑完一局解锁「飙车上路」，单局跑完一整圈解锁「赛道之王」徽章。纯前端零依赖。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8377,6 +8416,7 @@
     if (id === "pool") poolRender();
     if (id === "tanks") tanksRender();
     if (id === "bowling") bowlingRender();
+    if (id === "racing") racingRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8421,6 +8461,7 @@
     if (id !== "escape" && typeof escStop === "function") escStop();
     if (id !== "tanks" && typeof tanksStop === "function") tanksStop();
     if (id !== "bowling" && typeof bowlingStop === "function") bowlingStop();
+    if (id !== "racing" && typeof racingStop === "function") racingStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8595,6 +8636,7 @@
     escape: "密室逃脱 escape room 解谜 逃脱 密室 谜题 剧情 冒险 点击 探索 线索 推理 密码锁 暗格 老宅 game",
     tanks: "炮弹对决 tanks artillery 坦克 火炮 大炮 曲射 弹道 风力 弹坑 对轰 炮击 worms 百战天虫 街机 arcade game",
     bowling: "保龄球馆 bowling 保龄球 全中 strike spare 补中 十格 计分 球瓶 球道 洗沟 旋球 蓄力 街机 体育 sports arcade game",
+    racing: "极速飙车 racing 赛车 竞速 超车 弯道 公路 outrun 伪3D 车流 油门 刹车 漂移 开车 driving 街机 arcade game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8829,6 +8871,7 @@ splitbill:"tools",
     escape:"games",
     tanks:"games",
     bowling:"games",
+    racing:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -9370,6 +9413,11 @@ splitbill:"tools",
 
   /* ---------- 句子 ---------- */
   const QUOTES = [
+    "油门踩到底之前，先想清楚下一个弯往哪拐。",
+    "人生没有倒车挡，飙起来就只管看前方。",
+    "超车的机会只有一瞬间，犹豫的人永远跟在车尾。",
+    "弯道不是障碍，是甩开别人的地方。",
+    "时间耗尽之前冲过终点线，游戏和生活都是同一个玩法。",
     "冒头的地鼠迟早会挨一锤，但躲着不动的从来没赢过。",
     "手速练不出人生，但至少能打好这一局。",
     "生活像打地鼠，摁下一个，另一个又冒出来——那就一个个来。",
@@ -45509,6 +45557,490 @@ splitbill:"tools",
       "全中靠的不是运气，是每次站位都认真了一毫米。",
       "补中告诉你：第一次没做好的事，还有机会收尾。",
       "人生像第十格，打得够好，就能多来一球。"
+    );
+  }
+})();
+(function () {
+  "use strict";
+  const $rc = (id) => document.getElementById(id);
+  const W = 360, H = 440, DPR = Math.min(2, (window.devicePixelRatio || 1));
+  const SEGL = 200, RUMBLE = 3, DRAWN = 100, ROADW = 2000, CAMH = 1000, CAMD = 0.84;
+  const PLAYERZ = Math.round(CAMH * CAMD);
+  const MAXSPD = 12000, ACC = MAXSPD / 5, BRK = -MAXSPD, DEC = -MAXSPD / 5;
+  const OFFDEC = -MAXSPD / 2, OFFLIMIT = MAXSPD / 4;
+  const CENTRIF = 0.28, STEERK = 2, DT = 1 / 60;
+  const TIME0 = 60, LAPBONUS = 35, TRAFFIC_N = 26, XLIM = 2.2;
+  const CARCOLS = ["#ef4444", "#f59e0b", "#38bdf8", "#a78bfa", "#34d399", "#f472b6"];
+  let canvas = null, ctx = null, raf = 0, bound = false, st = null;
+  const keys = { l: false, r: false, u: false, d: false };
+
+  function rcMulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function loadBest() {
+    try { return Math.max(0, parseInt(localStorage.getItem("suibian_racing") || "0", 10) || 0); } catch (e) { return 0; }
+  }
+  function saveBest(v) {
+    try { const old = loadBest(); if (v > old) localStorage.setItem("suibian_racing", String(v)); } catch (e) {}
+  }
+  function isActive() {
+    const sec = document.getElementById("racing");
+    return !!(sec && sec.classList.contains("active"));
+  }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function lerp(a, b, p) { return a + (b - a) * p; }
+  function easeIn(a, b, p) { return a + (b - a) * p * p; }
+  function easeInOut(a, b, p) { return a + (b - a) * ((-Math.cos(p * Math.PI) / 2) + 0.5); }
+
+  function lastY(segs) { return segs.length ? segs[segs.length - 1].y2 : 0; }
+  function addSeg(segs, curve, y) {
+    const n = segs.length;
+    segs.push({ i: n, curve: curve, y1: lastY(segs), y2: y, clip: 0, cars: [] });
+  }
+  function addRoad(segs, enter, hold, leave, curve, y) {
+    const startY = lastY(segs);
+    const endY = (y === undefined) ? startY : y;
+    const total = enter + hold + leave;
+    let k = 0;
+    for (let i = 0; i < enter; i++, k++) addSeg(segs, easeIn(0, curve, i / enter), easeInOut(startY, endY, (k + 1) / total));
+    for (let i = 0; i < hold; i++, k++) addSeg(segs, curve, easeInOut(startY, endY, (k + 1) / total));
+    for (let i = 0; i < leave; i++, k++) addSeg(segs, easeInOut(curve, 0, i / leave), easeInOut(startY, endY, (k + 1) / total));
+  }
+  function buildTrack(rng) {
+    const segs = [];
+    addRoad(segs, 20, 25, 20, 0);
+    while (segs.length < 1450) {
+      const r = rng();
+      if (r < 0.28) {
+        addRoad(segs, 15 + ((rng() * 25) | 0), 15 + ((rng() * 25) | 0), 15, 0);
+      } else if (r < 0.74) {
+        const c = (rng() < 0.5 ? -1 : 1) * (2 + rng() * 3.2);
+        const dy = (rng() < 0.45) ? 0 : (rng() - 0.5) * 3600;
+        addRoad(segs, 25, 28 + ((rng() * 36) | 0), 25, c, clamp(lastY(segs) + dy, -4200, 4200));
+      } else {
+        addRoad(segs, 28, 24 + ((rng() * 24) | 0), 28, 0, clamp(lastY(segs) + (rng() - 0.5) * 6400, -4200, 4200));
+      }
+    }
+    addRoad(segs, 40, 30, 40, 0, 0);
+    for (let i = 0; i < segs.length; i++) segs[i].i = i;
+    return segs;
+  }
+  function makeTraffic(rng, trackLen) {
+    const cars = [];
+    for (let i = 0; i < TRAFFIC_N; i++) {
+      cars.push({
+        z: SEGL * 18 + rng() * (trackLen - SEGL * 36),
+        off: Math.round((rng() * 1.5 - 0.75) * 100) / 100,
+        spd: MAXSPD * (0.14 + rng() * 0.34),
+        col: CARCOLS[(rng() * CARCOLS.length) | 0]
+      });
+    }
+    return cars;
+  }
+  function newRun(seed) {
+    const s = (seed === undefined) ? (((Date.now() % 2147483647) ^ 0x5bd1) >>> 0) : (seed >>> 0);
+    const rng = rcMulberry32(s);
+    const segs = buildTrack(rng);
+    const trackLen = segs.length * SEGL;
+    st = {
+      seed: s, segs: segs, trackLen: trackLen,
+      phase: "ready", pos: 0, spd: 0, px: 0, dist: 0,
+      time: TIME0, laps: 0, crashes: 0, shake: 0, frame: 0,
+      touchSteer: 0, gas: false, brake: false, msg: "", msgT: 0,
+      cars: makeTraffic(rng, trackLen), best: loadBest()
+    };
+    keys.l = keys.r = keys.u = keys.d = false;
+    return st;
+  }
+  function findSeg(z) {
+    const n = st.segs.length;
+    let i = Math.floor(z / SEGL) % n;
+    if (i < 0) i += n;
+    return st.segs[i];
+  }
+  function gameOver() {
+    if (!st || st.phase === "over") return;
+    st.phase = "over";
+    st.distM = Math.round(st.dist * 0.01);
+    saveBest(st.distM);
+    st.best = loadBest();
+    try { bumpUsage("racing"); } catch (e) {}
+    if (st.laps >= 1) { try { bumpUsage("racingking"); } catch (e) {} }
+    syncHud();
+  }
+  function startRun() {
+    if (!st) return;
+    if (st.phase === "ready") { st.phase = "run"; st.msg = "🏁 出发！躲开车流，冲过一圈拿加时"; st.msgT = 150; }
+    else if (st.phase === "over") { newRun(st.seed + 1); st.phase = "run"; }
+  }
+  function update(dt) {
+    if (!st || st.phase !== "run") return;
+    st.frame++;
+    const playerSeg = findSeg(st.pos + PLAYERZ);
+    const spdPct = st.spd / MAXSPD;
+    const dx = dt * STEERK * spdPct;
+    const steer = clamp((keys.l ? -1 : 0) + (keys.r ? 1 : 0) + st.touchSteer, -1, 1);
+    st.px += steer * dx;
+    st.px -= dx * spdPct * playerSeg.curve * CENTRIF;
+    st.px = clamp(st.px, -XLIM, XLIM);
+    const accel = keys.u || st.gas;
+    const brake = keys.d || st.brake;
+    if (accel) st.spd += ACC * dt;
+    else if (brake) st.spd += BRK * dt;
+    else st.spd += DEC * dt;
+    if ((st.px < -1 || st.px > 1) && st.spd > OFFLIMIT) st.spd += OFFDEC * dt;
+    st.spd = clamp(st.spd, 0, MAXSPD);
+    const oldPos = st.pos;
+    st.pos = (st.pos + st.spd * dt) % st.trackLen;
+    st.dist += st.spd * dt;
+    if (st.pos < oldPos && st.spd > 0) {
+      st.laps++;
+      st.time += LAPBONUS;
+      st.msg = "🏁 第 " + st.laps + " 圈完成！+" + LAPBONUS + "s";
+      st.msgT = 150;
+    }
+    const psIdx = playerSeg.i, n = st.segs.length;
+    for (let i = 0; i < st.cars.length; i++) {
+      const c = st.cars[i];
+      c.z = (c.z + c.spd * dt) % st.trackLen;
+      const ci = Math.floor(c.z / SEGL) % n;
+      if ((ci === psIdx || ci === (psIdx + 1) % n) && st.spd > c.spd && Math.abs(st.px - c.off) < 0.62) {
+        st.spd = c.spd * 0.6;
+        st.crashes++;
+        st.shake = 12;
+        st.msg = "💥 追尾了！稳住再超";
+        st.msgT = 90;
+      }
+    }
+    if (st.shake > 0) st.shake--;
+    if (st.msgT > 0) st.msgT--;
+    st.time -= dt;
+    if (st.time <= 0) { st.time = 0; gameOver(); }
+  }
+  function syncHud() {
+    if (!st) return;
+    const t = $rc("rcTime"), s = $rc("rcSpd"), d = $rc("rcDist"), l = $rc("rcLap"), b = $rc("rcBest");
+    if (t) t.textContent = "⏱ " + Math.ceil(st.time) + "s";
+    if (s) s.textContent = "🚗 " + Math.round(st.spd * 0.03) + " km/h";
+    if (d) d.textContent = "📏 " + (st.dist * 0.00001).toFixed(2) + " km";
+    if (l) l.textContent = "🏁 " + st.laps + " 圈";
+    if (b) b.textContent = "🏆 最远 " + (st.best * 0.001).toFixed(2) + " km";
+  }
+  function projScale(cz) { return CAMD / (cz / SEGL) / 5; }
+  function render() {
+    if (!ctx || !st) return;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const shakeX = st.shake > 0 ? (st.frame % 2 ? 2 : -2) : 0;
+    ctx.translate(shakeX, 0);
+    const sky = ctx.createLinearGradient(0, 0, 0, H * 0.55);
+    sky.addColorStop(0, "#0b1020");
+    sky.addColorStop(0.6, "#231b4d");
+    sky.addColorStop(1, "#4a2a6b");
+    ctx.fillStyle = sky;
+    ctx.fillRect(-4, 0, W + 8, H);
+    ctx.fillStyle = "#e2e8f0";
+    for (let i = 0; i < 40; i++) {
+      const sx = ((i * 97 + 31) % (W + 8)) - 4, sy = (i * 53 + 17) % (H * 0.4);
+      ctx.globalAlpha = 0.25 + (i % 3) * 0.2;
+      ctx.fillRect(sx, sy, 1.6, 1.6);
+    }
+    ctx.globalAlpha = 1;
+    const moonX = W * 0.78, moonY = H * 0.16;
+    ctx.fillStyle = "#fde68a";
+    ctx.beginPath(); ctx.arc(moonX, moonY, 20, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#231b4d";
+    ctx.beginPath(); ctx.arc(moonX - 8, moonY - 5, 17, 0, Math.PI * 2); ctx.fill();
+    const base = findSeg(st.pos);
+    const basePct = (st.pos % SEGL) / SEGL;
+    const pSeg = findSeg(st.pos + PLAYERZ);
+    const pPct = ((st.pos + PLAYERZ) % SEGL) / SEGL;
+    const playerY = lerp(pSeg.y1, pSeg.y2, pPct);
+    const camY = playerY + CAMH;
+    const camX = st.px * ROADW;
+    const horizon = H * 0.42 - clamp(playerY * 0.004, -40, 60);
+    ctx.fillStyle = "#131a2e";
+    ctx.beginPath();
+    ctx.moveTo(-4, horizon + 10);
+    for (let i = 0; i <= 12; i++) {
+      const hx = -4 + (W + 8) * i / 12;
+      const hy = horizon + 10 - Math.abs(Math.sin(i * 1.7 + base.curve)) * 26 - 4;
+      ctx.lineTo(hx, hy);
+    }
+    ctx.lineTo(W + 4, horizon + 10); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#0e3a26";
+    ctx.fillRect(-4, horizon, W + 8, H - horizon);
+    let maxy = H, x = 0, dx = -(base.curve * basePct);
+    const rows = [];
+    for (let nn = 0; nn < DRAWN; nn++) {
+      const seg = st.segs[(base.i + nn) % st.segs.length];
+      const cz1 = nn * SEGL - basePct * SEGL;
+      const cz2 = cz1 + SEGL;
+      seg.clip = maxy;
+      if (cz1 < 60) { x += dx; dx += seg.curve; continue; }
+      const sc1 = CAMD * SEGL / cz1, sc2 = CAMD * SEGL / cz2;
+      const wx1 = x, wx2 = x + dx;
+      x += dx; dx += seg.curve;
+      const py1 = H / 2 - sc1 * (seg.y1 - camY) * (H / 2) / SEGL;
+      const py2 = H / 2 - sc2 * (seg.y2 - camY) * (H / 2) / SEGL;
+      const px1 = W / 2 + sc1 * (wx1 - camX) * (W / 2) / SEGL;
+      const px2 = W / 2 + sc2 * (wx2 - camX) * (W / 2) / SEGL;
+      const w1 = sc1 * ROADW * (W / 2) / SEGL;
+      const w2 = sc2 * ROADW * (W / 2) / SEGL;
+      if (py2 >= maxy || py2 >= py1) continue;
+      const dark = ((seg.i / RUMBLE) | 0) % 2 === 0;
+      rows.push({ seg: seg, px1: px1, py1: py1, w1: w1, px2: px2, py2: py2, w2: w2, dark: dark, cz: cz1 });
+      ctx.fillStyle = dark ? "#0e3a26" : "#0c3120";
+      ctx.fillRect(-4, py2, W + 8, py1 - py2 + 1);
+      const rw1 = w1 / 6, rw2 = w2 / 6;
+      ctx.fillStyle = dark ? "#b3273a" : "#e8e8ee";
+      ctx.beginPath();
+      ctx.moveTo(px1 - w1 - rw1, py1); ctx.lineTo(px1 - w1, py1);
+      ctx.lineTo(px2 - w2, py2); ctx.lineTo(px2 - w2 - rw2, py2);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(px1 + w1 + rw1, py1); ctx.lineTo(px1 + w1, py1);
+      ctx.lineTo(px2 + w2, py2); ctx.lineTo(px2 + w2 + rw2, py2);
+      ctx.closePath(); ctx.fill();
+      const isStart = seg.i < RUMBLE * 2;
+      ctx.fillStyle = isStart ? (dark ? "#3b4252" : "#cbd5e1") : (dark ? "#2c2f3a" : "#262933");
+      ctx.beginPath();
+      ctx.moveTo(px1 - w1, py1); ctx.lineTo(px1 + w1, py1);
+      ctx.lineTo(px2 + w2, py2); ctx.lineTo(px2 - w2, py2);
+      ctx.closePath(); ctx.fill();
+      if (dark && !isStart) {
+        const lw1 = w1 / 32, lw2 = w2 / 32;
+        ctx.fillStyle = "#e8e8ee";
+        for (let ln = 1; ln < 3; ln++) {
+          const lx1 = px1 - w1 + (2 * w1) * ln / 3, lx2 = px2 - w2 + (2 * w2) * ln / 3;
+          ctx.beginPath();
+          ctx.moveTo(lx1 - lw1, py1); ctx.lineTo(lx1 + lw1, py1);
+          ctx.lineTo(lx2 + lw2, py2); ctx.lineTo(lx2 - lw2, py2);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+      maxy = py2;
+    }
+    for (let ri = rows.length - 1; ri >= 0; ri--) {
+      const row = rows[ri];
+      const seg = row.seg;
+      for (let ci2 = 0; ci2 < st.cars.length; ci2++) {
+        const c = st.cars[ci2];
+        const cSegIdx = Math.floor(c.z / SEGL) % st.segs.length;
+        if (cSegIdx !== seg.i) continue;
+        const pct = (c.z % SEGL) / SEGL;
+        const cx = lerp(row.px1, row.px2, pct) + lerp(row.w1, row.w2, pct) * c.off;
+        const cy = lerp(row.py1, row.py2, pct);
+        const cw = lerp(row.w1, row.w2, pct) * 0.42;
+        if (cw < 2) continue;
+        drawCar(cx, cy, cw, c.col, false, 0);
+      }
+    }
+    const bounce = (st.spd > 0) ? Math.sin(st.frame * 0.7) * clamp(st.spd / MAXSPD, 0, 1) * 1.6 : 0;
+    const steerNow = clamp((keys.l ? -1 : 0) + (keys.r ? 1 : 0) + st.touchSteer, -1, 1);
+    drawCar(W / 2, H - 34 + bounce, 52, "#f43f5e", true, steerNow);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = "rgba(11,16,32,.72)";
+    ctx.fillRect(0, 0, W, 26);
+    ctx.fillStyle = "#e2e8f0";
+    ctx.font = "bold 12px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("⏱ " + Math.ceil(st.time) + "s", 10, 17);
+    ctx.textAlign = "center";
+    ctx.fillText(Math.round(st.spd * 0.03) + " km/h", W / 2, 17);
+    ctx.textAlign = "right";
+    ctx.fillText((st.dist * 0.00001).toFixed(2) + " km · " + st.laps + "圈", W - 10, 17);
+    if (st.msgT > 0 && st.msg) {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(11,16,32,.66)";
+      ctx.fillRect(W / 2 - 130, 34, 260, 24);
+      ctx.fillStyle = "#fbbf24";
+      ctx.font = "bold 13px system-ui, sans-serif";
+      ctx.fillText(st.msg, W / 2, 50);
+    }
+    if (st.phase === "ready" || st.phase === "over") {
+      ctx.fillStyle = "rgba(5,8,18,.72)";
+      ctx.fillRect(0, 0, W, H);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#f8fafc";
+      ctx.font = "bold 26px system-ui, sans-serif";
+      ctx.fillText(st.phase === "ready" ? "🏁 极速飙车" : "⏱ 时间到！", W / 2, H * 0.3);
+      ctx.font = "14px system-ui, sans-serif";
+      ctx.fillStyle = "#cbd5e1";
+      if (st.phase === "ready") {
+        ctx.fillText("←→ 转向 · ↑ 油门 · ↓ 刹车", W / 2, H * 0.42);
+        ctx.fillText("压线出草地会疯狂掉速", W / 2, H * 0.48);
+        ctx.fillText("跑完一圈奖励 +" + LAPBONUS + " 秒", W / 2, H * 0.54);
+        ctx.fillStyle = "#fbbf24";
+        ctx.font = "bold 16px system-ui, sans-serif";
+        ctx.fillText("按 空格 或 点击画面 出发", W / 2, H * 0.66);
+      } else {
+        ctx.fillText("本局里程：" + ((st.distM || 0) * 0.001).toFixed(2) + " km", W / 2, H * 0.42);
+        ctx.fillText("完成圈数：" + st.laps + " 圈 · 追尾 " + st.crashes + " 次", W / 2, H * 0.48);
+        ctx.fillText("最远纪录：" + (st.best * 0.001).toFixed(2) + " km", W / 2, H * 0.54);
+        ctx.fillStyle = "#fbbf24";
+        ctx.font = "bold 16px system-ui, sans-serif";
+        ctx.fillText("按 空格 或 点击画面 再来一局", W / 2, H * 0.66);
+      }
+    }
+  }
+  function drawCar(cx, cy, w, col, isPlayer, steer) {
+    if (!ctx) return;
+    const h = w * 0.72;
+    ctx.save();
+    ctx.translate(cx, cy);
+    if (isPlayer && steer) ctx.rotate(steer * 0.06);
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+    ctx.beginPath();
+    ctx.ellipse(0, h * 0.08, w * 0.62, h * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#111827";
+    ctx.fillRect(-w * 0.56, -h * 0.28, w * 0.22, h * 0.42);
+    ctx.fillRect(w * 0.34, -h * 0.28, w * 0.22, h * 0.42);
+    ctx.fillStyle = col;
+    const r = w * 0.16;
+    ctx.beginPath();
+    ctx.moveTo(-w * 0.5 + r, -h * 0.62);
+    ctx.lineTo(w * 0.5 - r, -h * 0.62);
+    ctx.quadraticCurveTo(w * 0.5, -h * 0.62, w * 0.5, -h * 0.62 + r);
+    ctx.lineTo(w * 0.5, h * 0.05 - r);
+    ctx.quadraticCurveTo(w * 0.5, h * 0.05, w * 0.5 - r, h * 0.05);
+    ctx.lineTo(-w * 0.5 + r, h * 0.05);
+    ctx.quadraticCurveTo(-w * 0.5, h * 0.05, -w * 0.5, h * 0.05 - r);
+    ctx.lineTo(-w * 0.5, -h * 0.62 + r);
+    ctx.quadraticCurveTo(-w * 0.5, -h * 0.62, -w * 0.5 + r, -h * 0.62);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "rgba(15,23,42,.85)";
+    ctx.fillRect(-w * 0.34, -h * 0.56, w * 0.68, h * 0.2);
+    if (isPlayer) {
+      ctx.fillStyle = "#fca5a5";
+      ctx.fillRect(-w * 0.4, -h * 0.08, w * 0.14, h * 0.08);
+      ctx.fillRect(w * 0.26, -h * 0.08, w * 0.14, h * 0.08);
+    } else {
+      ctx.fillStyle = "#fde68a";
+      ctx.fillRect(-w * 0.4, -h * 0.08, w * 0.12, h * 0.07);
+      ctx.fillRect(w * 0.28, -h * 0.08, w * 0.12, h * 0.07);
+    }
+    ctx.restore();
+  }
+  function loop() {
+    raf = 0;
+    if (!isActive()) return;
+    update(DT);
+    render();
+    syncHud();
+    raf = requestAnimationFrame(loop);
+  }
+  function keyTag(e) {
+    const t = e && e.target;
+    const tag = t && t.tagName ? String(t.tagName).toUpperCase() : "";
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
+  }
+  function onKey(e) {
+    if (!st || keyTag(e) || !isActive()) return;
+    const k = e.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") { keys.l = true; e.preventDefault(); }
+    else if (k === "ArrowRight" || k === "d" || k === "D") { keys.r = true; e.preventDefault(); }
+    else if (k === "ArrowUp" || k === "w" || k === "W") { keys.u = true; e.preventDefault(); }
+    else if (k === "ArrowDown" || k === "s" || k === "S") { keys.d = true; e.preventDefault(); }
+    else if (k === " ") { startRun(); e.preventDefault(); }
+    else if (k === "r" || k === "R") { newRun(); syncHud(); }
+  }
+  function onKeyUp(e) {
+    const k = e.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") keys.l = false;
+    else if (k === "ArrowRight" || k === "d" || k === "D") keys.r = false;
+    else if (k === "ArrowUp" || k === "w" || k === "W") keys.u = false;
+    else if (k === "ArrowDown" || k === "s" || k === "S") keys.d = false;
+  }
+  function evXY(e) {
+    const rect = canvas && canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { left: 0, top: 0, width: W, height: H };
+    const pt = (e.touches && e.touches[0]) ? e.touches[0] : e;
+    const sx = rect.width ? W / rect.width : 1;
+    return { x: (pt.clientX - rect.left) * sx, y: (pt.clientY - rect.top) * (rect.height ? H / rect.height : 1) };
+  }
+  function onDown(e) {
+    if (!st || !isActive()) return;
+    if (e.cancelable) e.preventDefault();
+    if (st.phase !== "run") { startRun(); return; }
+    st.gas = true;
+    const p = evXY(e);
+    st.touchSteer = clamp((p.x - W / 2) / (W / 3), -1, 1);
+    st._dragging = true;
+  }
+  function onMove(e) {
+    if (!st || !st._dragging) return;
+    if (e.cancelable) e.preventDefault();
+    const p = evXY(e);
+    st.touchSteer = clamp((p.x - W / 2) / (W / 3), -1, 1);
+  }
+  function onUp() {
+    if (!st) return;
+    st.gas = false;
+    st.touchSteer = 0;
+    st._dragging = false;
+  }
+  function bindOnce() {
+    if (bound) return;
+    bound = true;
+    const bl = $rc("rcLeft"), br = $rc("rcRight"), bg = $rc("rcGas"), bb = $rc("rcBrake"), bn = $rc("rcNew");
+    const hold = (el, on, off) => {
+      if (!el) return;
+      el.addEventListener("pointerdown", (e) => { e.preventDefault(); on(); });
+      el.addEventListener("pointerup", off);
+      el.addEventListener("pointerleave", off);
+      el.addEventListener("pointercancel", off);
+    };
+    hold(bl, () => { keys.l = true; }, () => { keys.l = false; });
+    hold(br, () => { keys.r = true; }, () => { keys.r = false; });
+    hold(bg, () => { if (st && st.phase !== "run") startRun(); if (st) st.gas = true; }, () => { if (st) st.gas = false; });
+    hold(bb, () => { if (st) st.brake = true; }, () => { if (st) st.brake = false; });
+    if (bn) bn.addEventListener("click", () => { newRun(); syncHud(); });
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("keyup", onKeyUp);
+    canvas.addEventListener("mousedown", onDown);
+    canvas.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    canvas.addEventListener("touchstart", onDown, { passive: false });
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    canvas.addEventListener("touchend", onUp);
+  }
+  window.racingRender = function () {
+    if (!canvas) {
+      canvas = document.getElementById("rcCanvas");
+      if (!canvas) return;
+      canvas.width = W * DPR;
+      canvas.height = H * DPR;
+      ctx = canvas.getContext("2d");
+    }
+    bindOnce();
+    if (!st) newRun();
+    syncHud();
+    if (!raf) raf = requestAnimationFrame(loop);
+  };
+  window.racingStop = function () {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    if (st) { st.gas = false; st.brake = false; st.touchSteer = 0; st._dragging = false; }
+    keys.l = keys.r = keys.u = keys.d = false;
+  };
+  window.__rcHooks = {
+    mulberry32: rcMulberry32, buildTrack: buildTrack, makeTraffic: makeTraffic,
+    newRun: newRun, findSeg: findSeg, update: update, render: render, loop: loop,
+    startRun: startRun, gameOver: gameOver, syncHud: syncHud, drawCar: drawCar,
+    onKey: onKey, onKeyUp: onKeyUp, onDown: onDown, onMove: onMove, onUp: onUp,
+    loadBest: loadBest, saveBest: saveBest, isActive: isActive,
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    getKeys: function () { return keys; }, getRaf: function () { return raf; },
+    consts: { W: W, H: H, SEGL: SEGL, MAXSPD: MAXSPD, TIME0: TIME0, LAPBONUS: LAPBONUS, PLAYERZ: PLAYERZ, OFFLIMIT: OFFLIMIT, XLIM: XLIM, TRAFFIC_N: TRAFFIC_N, DT: DT }
+  };
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🏁", name: "飙车上路", desc: "在极速飙车里完整跑完一局", test: function (u) { return (u.racing || 0) >= 1; } },
+      { emoji: "👑", name: "赛道之王", desc: "单局之内跑完一整圈赛道", test: function (u) { return (u.racingking || 0) >= 1; } }
     );
   }
 })();
