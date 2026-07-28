@@ -1565,6 +1565,7 @@
         <button data-tab="golf">⛳ 迷你高尔夫</button>
         <button data-tab="monopoly">🎩 随便大富翁</button>
         <button data-tab="fishing">🎣 钓鱼佬模拟</button>
+        <button data-tab="lemmings">🐹 旅鼠大迁徙</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8135,6 +8136,44 @@
       <div class="fh-tip">🎣 <b>空格 / 点画面一键三连：抛竿蓄力 → 锁定力度 → 浮漂猛沉的一瞬间起竿</b>；抛得越远水越深，湖心与深水才藏着稀有和传说级大物。中鱼后进入遛鱼：按住收线张力猛涨、松手泄力鱼往外逃，张力拉满会切线、泄力太久会脱钩，把距离磨到 0 才能抄网上岸。21 种渔获分普通 / 稀有 / 史诗 / 传说四档（还有三件湖底垃圾等你做环保），图鉴、总渔获与最大单尾纪录本地存档（suibian_fishing），钓上第一条真鱼解锁「空军毕业」、请上传说级大物解锁「湖中传说」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="lemmings">
+    <h2>🐹 旅鼠大迁徙</h2>
+    <p class="sub">搭桥、撑伞、挖洞、堵路：指挥一支只知直行的小队伍安全到家</p>
+    <style>
+      #lemmings .lm-wrap { max-width:600px; margin:0 auto; }
+      #lemmings .lm-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #lemmings .lm-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #lemmings canvas { display:block; width:100%; max-width:540px; margin:0 auto; border-radius:14px; border:1px solid rgba(255,255,255,.16); background:#0d1030; touch-action:manipulation; cursor:crosshair; box-shadow:0 12px 30px rgba(0,0,0,.45); image-rendering:pixelated; }
+      #lemmings .lm-skillbar { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:10px 0 4px; }
+      #lemmings .lm-skill { padding:7px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.88rem; cursor:pointer; }
+      #lemmings .lm-skill.on { background:#5b8dee; border-color:#5b8dee; color:#fff; }
+      #lemmings .lm-skill:disabled { opacity:.35; cursor:not-allowed; }
+      #lemmings .lm-lvsel { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #lemmings .lm-lv { width:38px; height:34px; border-radius:9px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; cursor:pointer; }
+      #lemmings .lm-lv.on { background:#3ddc84; border-color:#3ddc84; color:#08331c; font-weight:700; }
+      #lemmings .lm-lv:disabled { opacity:.4; cursor:not-allowed; }
+      #lemmings .lm-btns { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:6px 0 8px; }
+      #lemmings .lm-btns button { padding:8px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.95rem; cursor:pointer; }
+      #lemmings .lm-btns button:hover { background:rgba(255,255,255,.12); }
+      #lemmings .lm-msg { text-align:center; margin:8px auto 4px; font-size:.9rem; min-height:2.6em; max-width:560px; line-height:1.55; }
+      #lemmings .lm-tip { margin-top:10px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="card lm-wrap">
+      <div class="lm-hud" id="lmHud"></div>
+      <div class="lm-lvsel" id="lmSel"></div>
+      <canvas id="lmCv" width="360" height="224"></canvas>
+      <div class="lm-skillbar" id="lmSkills"></div>
+      <div class="lm-msg" id="lmMsg"></div>
+      <div class="lm-btns">
+        <button id="lmStart">🚪 开闸放鼠</button>
+        <button id="lmFast" style="display:none">⏩ 三倍速</button>
+        <button id="lmNuke" style="display:none">💥 全体引爆</button>
+        <button id="lmRestart" style="display:none">🔄 重开本关</button>
+        <button id="lmNext" style="display:none">➡️ 下一关</button>
+      </div>
+      <div class="lm-tip">🐹 <b>先点下方技能按钮（或数字键 1-5）选中技能，再点画面里的旅鼠下达命令</b>：旅鼠只会埋头直行、碰壁折返，掉落超高会摔成肉饼。🪜搭桥架斜坡、☂️雨伞保命、⛏️向下挖穿土层（钢板免疫）、🛑堵路把大部队兜回正途、💣倒计时引爆炸开地形；空格开闸 / F 三倍速 / R 重开。六关手工关卡逐关解锁，进度与生涯营救数本地存档（suibian_lemmings），首次带队达标解锁「旅鼠指挥官」、六关全通解锁「迁徙大师」徽章。纯前端零依赖。</div>
+    </div>
+  </section>
 <script>
 (function () {
   "use strict";
@@ -8520,6 +8559,7 @@
     if (id === "golf") golfRender();
     if (id === "monopoly") monopolyRender();
     if (id === "fishing") fishingRender();
+    if (id === "lemmings") lemmingsRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8568,6 +8608,7 @@
     if (id !== "golf" && typeof golfStop === "function") golfStop();
     if (id !== "monopoly" && typeof monopolyStop === "function") monopolyStop();
     if (id !== "fishing" && typeof fishingStop === "function") fishingStop();
+    if (id !== "lemmings" && typeof lemmingsStop === "function") lemmingsStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8746,6 +8787,7 @@
     golf: "迷你高尔夫 golf minigolf 高尔夫 推杆 果岭 九洞 沙坑 水塘 一杆进洞 ace par 博蒂 弹弓 街机 体育 sports arcade game",
     monopoly: "随便大富翁 monopoly 大富翁 地产 买地 收租 租金 骰子 棋盘 升级 盖楼 破产 机会 富翁 对战 ai 桌游 board game",
     fishing: "钓鱼佬模拟 fishing 钓鱼 抛竿 浮漂 起竿 遛鱼 收线 图鉴 渔获 锦鲤 龙王 空军 湖 fish angler",
+    lemmings: "旅鼠大迁徙 lemmings 旅鼠 搭桥 雨伞 挖洞 堵路 引爆 救援 迁徙 关卡 解谜 指挥 小鼠 过关 puzzle 策略 街机 arcade game",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -8984,6 +9026,7 @@ splitbill:"tools",
     golf:"games",
     monopoly:"games",
     fishing:"games",
+    lemmings:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -47487,6 +47530,474 @@ splitbill:"tools",
       "湖边坐一天，钓的不是鱼，是心静。",
       "大鱼上钩之前，先稳住你自己。",
       "所谓耐心，就是浮漂不动我也不动。"
+    );
+  }
+})();
+(function () {
+  var T = 4, COLS = 90, ROWS = 56, W = COLS * T, H = ROWS * T;
+  var SPLAT = 56;            // 摔死临界下落像素
+  var BRICKS = 12;           // 每个建筑工的砖数
+  var BOMB_T = 180;          // 引爆倒计时(帧)
+  var cv = null, cx = null, raf = 0, active = false;
+  var grid = null, lems = [], lvl = 0, unlocked = 1;
+  var born = 0, saved = 0, dead = 0, frame = 0, fast = false, over = 0; // over:0 进行中 1 胜 2 负
+  var running = false, curSkill = "", inv = null, spawnP = null, exitP = null, cfg = null;
+  var totalSaved = 0;
+  var rng = Math.random;
+
+  function newGrid() {
+    var g = new Array(ROWS);
+    for (var r = 0; r < ROWS; r++) { g[r] = new Array(COLS); for (var c = 0; c < COLS; c++) g[r][c] = 0; }
+    return g;
+  }
+  function rect(g, c0, r0, c1, r1, v) {
+    for (var r = r0; r <= r1; r++) for (var c = c0; c <= c1; c++)
+      if (r >= 0 && r < ROWS && c >= 0 && c < COLS) g[r][c] = v;
+  }
+  function solid(x, y) {
+    if (x < 0 || x >= W) return true;
+    if (y < 0 || y >= H) return false;
+    var v = grid[(y / T) | 0][(x / T) | 0];
+    return v > 0;
+  }
+
+  // ---------- 关卡 ----------
+  var LEVELS = [
+    { name: "平原漫步", total: 10, need: 7, rate: 55,
+      skills: { build: 6, umbrella: 4, dig: 0, block: 0, bomb: 1 },
+      hint: "中间的裂谷会吞人：让排头兵搭一座斜桥跨过去（或者给几把伞赌一把）。",
+      make: function () {
+        var g = newGrid();
+        rect(g, 0, 44, COLS - 1, 47, 1);
+        rect(g, 42, 44, 48, 47, 0);                 // 裂谷
+        rect(g, 0, 34, 0, 47, 2);                   // 左钢墙
+        return { g: g, sx: 8 * T, sy: 44 * T, ex: 80 * T, ey: 44 * T };
+      } },
+    { name: "掘地三尺", total: 10, need: 7, rate: 55,
+      skills: { build: 2, umbrella: 2, dig: 3, block: 0, bomb: 1 },
+      hint: "旅鼠被钢墙圈在半空平台上打转——命令一只原地开挖，凿穿地板就能下楼。",
+      make: function () {
+        var g = newGrid();
+        rect(g, 0, 44, COLS - 1, 47, 1);
+        rect(g, 6, 32, 40, 34, 1);                  // 半空平台
+        rect(g, 5, 24, 5, 34, 2);                   // 平台围栏(钢)
+        rect(g, 41, 24, 41, 34, 2);
+        return { g: g, sx: 12 * T, sy: 32 * T, ex: 76 * T, ey: 44 * T };
+      } },
+    { name: "断崖速降", total: 12, need: 9, rate: 45,
+      skills: { build: 2, umbrella: 12, dig: 0, block: 0, bomb: 1 },
+      hint: "崖顶到谷底 130 多像素，硬着陆必成肉饼——出门就发伞，人手一把。",
+      make: function () {
+        var g = newGrid();
+        rect(g, 0, 46, COLS - 1, 49, 1);
+        rect(g, 4, 10, 30, 12, 1);                  // 崖顶平台
+        rect(g, 3, 2, 3, 12, 2);                    // 左钢墙
+        return { g: g, sx: 8 * T, sy: 10 * T, ex: 78 * T, ey: 46 * T };
+      } },
+    { name: "堵路先锋", total: 10, need: 7, rate: 50,
+      skills: { build: 2, umbrella: 2, dig: 0, block: 2, bomb: 2 },
+      hint: "右边是无底断崖而出口在左边：先派一只硬汉原地堵路，替大部队把方向兜回来。",
+      make: function () {
+        var g = newGrid();
+        rect(g, 0, 44, 62, 47, 1);                  // 右侧断崖
+        rect(g, 0, 34, 0, 47, 2);
+        return { g: g, sx: 40 * T, sy: 44 * T, ex: 10 * T, ey: 44 * T };
+      } },
+    { name: "空中走廊", total: 10, need: 7, rate: 50,
+      skills: { build: 8, umbrella: 3, dig: 2, block: 0, bomb: 1 },
+      hint: "一堵钢墙拦路，硬凿凿不动：提早在墙前搭一座够长的斜桥，借中央走廊翻越过去。",
+      make: function () {
+        var g = newGrid();
+        rect(g, 0, 44, COLS - 1, 47, 1);            // 全程地面
+        rect(g, 34, 36, 34, 43, 2);                 // 拦路钢墙
+        rect(g, 36, 38, 54, 41, 1);                 // 中央走廊(高)
+        rect(g, 0, 34, 0, 47, 2);
+        return { g: g, sx: 6 * T, sy: 44 * T, ex: 82 * T, ey: 44 * T };
+      } },
+    { name: "终极迁徙", total: 12, need: 8, rate: 45,
+      skills: { build: 8, umbrella: 12, dig: 2, block: 2, bomb: 2 },
+      hint: "毕业考：先撑伞跳下高台，再架桥跨过裂谷——每一步都是前五关教过的。",
+      make: function () {
+        var g = newGrid();
+        rect(g, 8, 24, 24, 26, 1);                  // 出生高台
+        rect(g, 7, 16, 7, 26, 2);
+        rect(g, 0, 44, 60, 47, 1);                  // 主地面
+        rect(g, 69, 44, COLS - 1, 47, 1);           // 出口平台(中间裂谷 61-68)
+        return { g: g, sx: 12 * T, sy: 24 * T, ex: 84 * T, ey: 44 * T };
+      } }
+  ];
+
+  // ---------- 存档 ----------
+  function loadRec() {
+    var o = null;
+    try { o = JSON.parse(localStorage.getItem("suibian_lemmings") || "null"); } catch (e) { o = null; }
+    if (!o || typeof o !== "object") o = {};
+    unlocked = Math.min(LEVELS.length, Math.max(1, (o.best | 0) || 1));
+    totalSaved = Math.max(0, (o.saved | 0) || 0);
+  }
+  function saveRec() {
+    try { localStorage.setItem("suibian_lemmings", JSON.stringify({ best: unlocked, saved: totalSaved })); } catch (e) {}
+  }
+
+  // ---------- 关卡装载 ----------
+  function loadLevel(i) {
+    lvl = i; cfg = LEVELS[i];
+    var m = cfg.make();
+    grid = m.g;
+    spawnP = { x: m.sx, y: m.sy }; exitP = { x: m.ex, y: m.ey };
+    lems = []; born = 0; saved = 0; dead = 0; frame = 0; over = 0; running = false;
+    curSkill = ""; fast = false;
+    inv = { build: cfg.skills.build, umbrella: cfg.skills.umbrella, dig: cfg.skills.dig, block: cfg.skills.block, bomb: cfg.skills.bomb };
+    setMsg("第 " + (i + 1) + " 关「" + cfg.name + "」：救 " + cfg.need + "/" + cfg.total + " 只。" + cfg.hint);
+    syncUI(); draw();
+  }
+
+  // ---------- 旅鼠 ----------
+  function spawn() {
+    lems.push({ x: spawnP.x, y: spawnP.y, dir: 1, st: "walk", fall: 0, um: false,
+      bricks: 0, cd: 0, bombT: -1, dead: false, out: false });
+    born++;
+  }
+  function blockerNear(x, y, self) {
+    for (var i = 0; i < lems.length; i++) {
+      var b = lems[i];
+      if (b === self || b.dead || b.out || b.st !== "block") continue;
+      if (Math.abs(b.x - x) < 4 && Math.abs(b.y - y) < 10) return true;
+    }
+    return false;
+  }
+  function explode(l) {
+    var c = (l.x / T) | 0, r = (l.y / T) | 0;
+    for (var rr = r - 3; rr <= r + 3; rr++) for (var cc = c - 3; cc <= c + 3; cc++) {
+      if (rr < 0 || rr >= ROWS || cc < 0 || cc >= COLS) continue;
+      if ((rr - r) * (rr - r) + (cc - c) * (cc - c) <= 10 && grid[rr][cc] === 1) grid[rr][cc] = 0;
+    }
+    l.dead = true; dead++;
+  }
+  function stepLem(l) {
+    if (l.dead || l.out) return;
+    if (l.bombT >= 0) { l.bombT--; if (l.bombT < 0) { explode(l); return; } }
+    // 到达出口
+    if (Math.abs(l.x - exitP.x) < 4 && Math.abs(l.y - exitP.y) < 10) {
+      l.out = true; saved++; return;
+    }
+    if (l.st === "block") return;
+    if (l.st === "fall") {
+      var vy = l.um ? 0.8 : 2.4;
+      l.y += vy; l.fall += vy;
+      if (l.y >= H) { l.dead = true; dead++; return; }
+      if (solid(l.x, l.y)) {
+        l.y = ((l.y / T) | 0) * T;
+        while (solid(l.x, l.y - 1)) l.y -= T;
+        if (l.fall > SPLAT && !l.um) { l.dead = true; dead++; return; }
+        l.fall = 0; l.st = "walk";
+      }
+      return;
+    }
+    if (l.st === "dig") {
+      l.cd++;
+      if (l.cd % 10 === 0) {
+        var r = (l.y / T) | 0, c = (l.x / T) | 0, hit = false;
+        if (r >= ROWS) { l.st = "fall"; return; }
+        for (var cc = c - 1; cc <= c + 1; cc++) {
+          if (cc < 0 || cc >= COLS) continue;
+          if (grid[r][cc] === 2) { l.st = "walk"; return; } // 钢板挡路
+          if (grid[r][cc] === 1) { grid[r][cc] = 0; hit = true; }
+        }
+        if (!hit) { l.st = "fall"; return; }
+        l.y += T;
+        if (!solid(l.x, l.y)) { l.st = "fall"; }
+      }
+      return;
+    }
+    if (l.st === "build") {
+      l.cd++;
+      if (l.cd % 16 === 0) {
+        if (l.bricks <= 0) { l.st = "walk"; return; }
+        var nc = ((l.x / T) | 0) + l.dir, nr = ((l.y / T) | 0) - 1;
+        if (nc < 0 || nc >= COLS || nr < 1) { l.st = "walk"; l.dir *= -1; return; }
+        if (grid[nr][nc] > 0 || grid[nr - 1][nc] > 0) { l.st = "walk"; l.dir *= -1; return; } // 撞头折返
+        grid[nr][nc] = 1; l.bricks--;
+        l.x = nc * T + 2; l.y = nr * T;
+      }
+      return;
+    }
+    // walker
+    if (!solid(l.x, l.y)) { l.st = "fall"; l.fall = 0; return; }
+    var sp = 0.55, nx = l.x + l.dir * sp;
+    if (nx < 2 || nx > W - 2) { l.dir *= -1; return; }
+    if (blockerNear(nx + l.dir * 2, l.y, l)) { l.dir *= -1; return; }
+    if (solid(nx, l.y - 1)) {
+      // 前方有身位障碍：尝试上一格台阶
+      if (!solid(nx, l.y - T - 1) && !solid(nx, l.y - T - 5)) { l.y -= T; l.x = nx; }
+      else l.dir *= -1;
+    } else {
+      l.x = nx;
+    }
+  }
+
+  // ---------- 主循环 ----------
+  function tick() {
+    frame++;
+    if (running && !over) {
+      if (born < cfg.total && frame % cfg.rate === 0) spawn();
+      for (var i = 0; i < lems.length; i++) stepLem(lems[i]);
+      var alive = 0;
+      for (var j = 0; j < lems.length; j++) {
+        var lj = lems[j];
+        if (lj.dead || lj.out) continue;
+        if (lj.st === "block" && lj.bombT < 0) continue; // 站岗的硬汉不拦着大伙结算
+        alive++;
+      }
+      if (born >= cfg.total && alive === 0) finish();
+    }
+  }
+  function finish() {
+    if (over) return;
+    if (saved >= cfg.need) {
+      over = 1;
+      totalSaved += saved;
+      var was = unlocked;
+      if (lvl + 1 >= unlocked && unlocked < LEVELS.length) unlocked = lvl + 2;
+      saveRec();
+      try { bumpUsage("lemmings"); } catch (e) {}
+      if (lvl === LEVELS.length - 1) { try { bumpUsage("lemmingsall"); } catch (e) {} }
+      setMsg("🎉 过关！救出 " + saved + "/" + cfg.total + " 只旅鼠" +
+        (unlocked > was ? "，解锁第 " + unlocked + " 关！" : "！") +
+        (lvl === LEVELS.length - 1 ? "六关全通，你就是迁徙大师！" : ""));
+    } else {
+      over = 2;
+      setMsg("💀 只救出 " + saved + "/" + cfg.total + "（需要 " + cfg.need + "）……按 R 或点「重开本关」再来。");
+    }
+    syncUI();
+  }
+  function nuke() {
+    if (!running || over) return;
+    for (var i = 0; i < lems.length; i++) {
+      var l = lems[i];
+      if (!l.dead && !l.out && l.bombT < 0) l.bombT = BOMB_T + i * 6;
+    }
+    born = cfg.total;
+    setMsg("💥 全体引爆倒计时……");
+  }
+
+  // ---------- 技能 ----------
+  var SKILLS = ["build", "umbrella", "dig", "block", "bomb"];
+  function applySkill(l, s) {
+    if (l.dead || l.out) return false;
+    if (s === "umbrella") { if (l.um) return false; l.um = true; return true; }
+    if (s === "bomb") { if (l.bombT >= 0) return false; l.bombT = BOMB_T; return true; }
+    if (l.st === "block") return false;
+    if (s === "block") { if (l.st !== "walk") return false; l.st = "block"; l.x = (((l.x / T) | 0) * T) + 2; return true; }
+    if (s === "dig") { if (l.st !== "walk") return false; l.st = "dig"; l.cd = 0; return true; }
+    if (s === "build") { if (l.st !== "walk") return false; l.st = "build"; l.cd = 0; l.bricks = BRICKS; return true; }
+    return false;
+  }
+  function clickAt(mx, my) {
+    if (!running || over) return;
+    if (!curSkill || inv[curSkill] <= 0) return;
+    var best = null, bd = 1e9;
+    for (var i = 0; i < lems.length; i++) {
+      var l = lems[i];
+      if (l.dead || l.out) continue;
+      var d = (l.x - mx) * (l.x - mx) + (l.y - 4 - my) * (l.y - 4 - my);
+      if (d < bd) { bd = d; best = l; }
+    }
+    if (best && bd <= 144) {
+      if (applySkill(best, curSkill)) { inv[curSkill]--; syncUI(); }
+    }
+  }
+
+  // ---------- 绘制 ----------
+  function draw() {
+    if (!cx) return;
+    var gbg = cx.createLinearGradient(0, 0, 0, H);
+    gbg.addColorStop(0, "#0d1030"); gbg.addColorStop(1, "#1c2350");
+    cx.fillStyle = gbg; cx.fillRect(0, 0, W, H);
+    // 星星
+    cx.fillStyle = "rgba(255,255,255,.35)";
+    for (var s = 0; s < 24; s++) cx.fillRect(((s * 137 + 31) % W), ((s * 89 + 17) % (H / 2)), 1, 1);
+    // 地形
+    for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+      var v = grid[r][c];
+      if (!v) continue;
+      cx.fillStyle = v === 2 ? "#7d8aa0" : ((r + c) % 2 ? "#8a5a2b" : "#7c4f24");
+      cx.fillRect(c * T, r * T, T, T);
+      if (v === 1 && (r === 0 || grid[r - 1][c] === 0)) { cx.fillStyle = "#4caf50"; cx.fillRect(c * T, r * T, T, 1); }
+    }
+    // 入口 / 出口
+    cx.fillStyle = "#5b8dee";
+    cx.fillRect(spawnP.x - 6, spawnP.y - 16, 12, 4);
+    cx.fillRect(spawnP.x - 6, spawnP.y - 16, 2, 10);
+    cx.fillRect(spawnP.x + 4, spawnP.y - 16, 2, 10);
+    cx.fillStyle = "#3ddc84";
+    cx.fillRect(exitP.x - 6, exitP.y - 14, 2, 14);
+    cx.fillRect(exitP.x + 4, exitP.y - 14, 2, 14);
+    cx.fillRect(exitP.x - 6, exitP.y - 14, 12, 3);
+    cx.fillStyle = "#ffd54f";
+    cx.fillRect(exitP.x - 1, exitP.y - 22, 1, 9);
+    cx.beginPath(); cx.moveTo(exitP.x, exitP.y - 22); cx.lineTo(exitP.x + 7, exitP.y - 19); cx.lineTo(exitP.x, exitP.y - 16); cx.fill();
+    // 旅鼠
+    for (var i = 0; i < lems.length; i++) {
+      var l = lems[i];
+      if (l.dead || l.out) continue;
+      var col = l.st === "block" ? "#ef5350" : l.st === "dig" ? "#ffa726" : l.st === "build" ? "#ffee58" : "#42a5f5";
+      cx.fillStyle = col; cx.fillRect(l.x - 1.5, l.y - 6, 3, 6);
+      cx.fillStyle = "#8bc34a"; cx.fillRect(l.x - 1.5, l.y - 8, 3, 2);
+      if (l.um && l.st === "fall") {
+        cx.strokeStyle = "#ff8a65"; cx.lineWidth = 1;
+        cx.beginPath(); cx.arc(l.x, l.y - 10, 5, Math.PI, 0); cx.stroke();
+      }
+      if (l.bombT >= 0) {
+        cx.fillStyle = "#fff";
+        cx.font = "6px monospace";
+        cx.fillText(String(1 + ((l.bombT / 60) | 0)), l.x - 2, l.y - 11);
+      }
+    }
+    // 结算横幅
+    if (over) {
+      cx.fillStyle = "rgba(0,0,0,.55)"; cx.fillRect(0, H / 2 - 20, W, 40);
+      cx.fillStyle = over === 1 ? "#3ddc84" : "#ef5350";
+      cx.font = "bold 16px sans-serif"; cx.textAlign = "center";
+      cx.fillText(over === 1 ? "🎉 过关！" + saved + " 只旅鼠安全到家" : "💀 迁徙失败 " + saved + "/" + cfg.need, W / 2, H / 2 + 6);
+      cx.textAlign = "left";
+    }
+  }
+
+  // ---------- UI ----------
+  function el(id) { return document.getElementById(id); }
+  function setMsg(t) { var m = el("lmMsg"); if (m) m.textContent = t; }
+  var SKN = { build: "🪜搭桥", umbrella: "☂️雨伞", dig: "⛏️挖掘", block: "🛑堵路", bomb: "💣引爆" };
+  function syncUI() {
+    var hud = el("lmHud");
+    if (hud) {
+      hud.innerHTML = "<span>关卡 " + (lvl + 1) + "/" + LEVELS.length + "·" + cfg.name + "</span>" +
+        "<span>出场 " + born + "/" + cfg.total + "</span>" +
+        "<span>已救 <b>" + saved + "</b>/" + cfg.need + "</span>" +
+        "<span>阵亡 " + dead + "</span>" +
+        "<span>生涯营救 " + totalSaved + "</span>";
+    }
+    var bar = el("lmSkills");
+    if (bar) {
+      var htm = "";
+      for (var i = 0; i < SKILLS.length; i++) {
+        var s = SKILLS[i];
+        htm += '<button class="lm-skill' + (curSkill === s ? " on" : "") + '" data-lmskill="' + s + '"' +
+          (inv[s] <= 0 ? " disabled" : "") + ">" + SKN[s] + " ×" + inv[s] + "</button>";
+      }
+      bar.innerHTML = htm;
+    }
+    var st = el("lmStart"); if (st) st.style.display = running ? "none" : "";
+    var rs = el("lmRestart"); if (rs) rs.style.display = running || over ? "" : "none";
+    var nk = el("lmNuke"); if (nk) nk.style.display = running && !over ? "" : "none";
+    var fs = el("lmFast"); if (fs) { fs.style.display = running && !over ? "" : "none"; fs.textContent = fast ? "🐢 恢复原速" : "⏩ 三倍速"; }
+    var nx = el("lmNext"); if (nx) nx.style.display = (over === 1 && lvl + 1 < LEVELS.length && unlocked > lvl + 1) ? "" : "none";
+    var sel = el("lmSel");
+    if (sel) {
+      var h = "";
+      for (var j = 0; j < LEVELS.length; j++) {
+        h += '<button class="lm-lv' + (j === lvl ? " on" : "") + '" data-lmlv="' + j + '"' + (j + 1 > unlocked ? " disabled" : "") + ">" +
+          (j + 1 > unlocked ? "🔒" : (j + 1)) + "</button>";
+      }
+      sel.innerHTML = h;
+    }
+  }
+
+  function loop() {
+    if (!active) return;
+    var n = fast ? 3 : 1;
+    for (var i = 0; i < n; i++) tick();
+    draw();
+    raf = requestAnimationFrame(loop);
+  }
+
+  function start() {
+    if (running) return;
+    running = true; over = 0;
+    setMsg("🐹 大门已开，旅鼠出动！点技能按钮再点旅鼠来指挥。");
+    syncUI();
+  }
+
+  function onKey(e) {
+    if (!active) return;
+    var tg = e.target;
+    if (tg && (tg.tagName === "INPUT" || tg.tagName === "TEXTAREA" || tg.isContentEditable)) return;
+    var k = e.key;
+    if (k === " " || k === "Enter") {
+      e.preventDefault();
+      if (!running) start();
+      else if (over) loadLevel(over === 1 && lvl + 1 < LEVELS.length ? lvl + 1 : lvl);
+      return;
+    }
+    if (k === "r" || k === "R") { loadLevel(lvl); return; }
+    if (k === "f" || k === "F") { fast = !fast; syncUI(); return; }
+    var idx = "12345".indexOf(k);
+    if (idx >= 0 && idx < SKILLS.length) { curSkill = SKILLS[idx]; syncUI(); }
+  }
+
+  function bind() {
+    var sec = document.getElementById("lemmings");
+    if (!sec || sec._lmBound) return;
+    sec._lmBound = true;
+    cv = el("lmCv"); cx = cv.getContext("2d");
+    cv.addEventListener("click", function (e) {
+      var rc = cv.getBoundingClientRect();
+      clickAt((e.clientX - rc.left) * (W / rc.width), (e.clientY - rc.top) * (H / rc.height));
+    });
+    sec.addEventListener("click", function (e) {
+      var t = e.target.closest ? e.target.closest("button") : null;
+      if (!t) return;
+      if (t.dataset && t.dataset.lmskill) { curSkill = t.dataset.lmskill; syncUI(); return; }
+      if (t.dataset && t.dataset.lmlv) { loadLevel(+t.dataset.lmlv); return; }
+      if (t.id === "lmStart") start();
+      else if (t.id === "lmRestart") loadLevel(lvl);
+      else if (t.id === "lmNext") loadLevel(lvl + 1);
+      else if (t.id === "lmFast") { fast = !fast; syncUI(); }
+      else if (t.id === "lmNuke") nuke();
+    });
+    document.addEventListener("keydown", onKey);
+  }
+
+  window.lemmingsRender = function () {
+    bind();
+    if (!cx) return;
+    active = true;
+    loadRec();
+    if (!grid) loadLevel(Math.min(unlocked, LEVELS.length) - 1);
+    else syncUI();
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(loop);
+  };
+  window.lemmingsStop = function () {
+    active = false;
+    cancelAnimationFrame(raf);
+  };
+
+  window.__lmTest = {
+    setEnv: function (g, sp, ep, c) { grid = g; spawnP = sp; exitP = ep; cfg = c; lems = []; born = 0; saved = 0; dead = 0; frame = 0; over = 0; running = true; inv = { build: 9, umbrella: 9, dig: 9, block: 9, bomb: 9 }; },
+    getState: function () { return { lems: lems, born: born, saved: saved, dead: dead, over: over, unlocked: unlocked, totalSaved: totalSaved, grid: grid, running: running, inv: inv, lvl: lvl, cfg: cfg }; },
+    newGrid: newGrid, rect: rect, solid: function (x, y) { return solid(x, y); },
+    spawn: spawn, stepLem: stepLem, tick: tick, finish: finish, nuke: nuke,
+    applySkill: applySkill, clickAt: clickAt, explode: explode,
+    loadLevel: loadLevel, loadRec: loadRec, saveRec: saveRec, start: start, draw: draw,
+    setRunning: function (v) { running = v; }, setOver: function (v) { over = v; },
+    setUnlocked: function (v) { unlocked = v; },
+    consts: { T: T, COLS: COLS, ROWS: ROWS, W: W, H: H, SPLAT: SPLAT, BRICKS: BRICKS, BOMB_T: BOMB_T, LEVELS: LEVELS, SKILLS: SKILLS }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🐹", name: "旅鼠指挥官", desc: "在旅鼠大迁徙里首次带队过关", test: function (u) { return (u.lemmings || 0) >= 1; } },
+      { emoji: "🏅", name: "迁徙大师", desc: "通关旅鼠大迁徙全部六关", test: function (u) { return (u.lemmingsall || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "旅鼠不问路在何方，只管一直往前走。",
+      "真正的领队，是那只先把桥搭好的。",
+      "有人堵路不是拦你，是怕你掉下悬崖。",
+      "跌落不可怕，可怕的是忘了带伞。",
+      "一只旅鼠是迷路，一群旅鼠是迁徙。"
     );
   }
 })();
