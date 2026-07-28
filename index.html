@@ -1566,6 +1566,7 @@
         <button data-tab="monopoly">🎩 随便大富翁</button>
         <button data-tab="fishing">🎣 钓鱼佬模拟</button>
         <button data-tab="lemmings">🐹 旅鼠大迁徙</button>
+        <button data-tab="farm">🌾 随便农场</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8136,6 +8137,46 @@
       <div class="fh-tip">🎣 <b>空格 / 点画面一键三连：抛竿蓄力 → 锁定力度 → 浮漂猛沉的一瞬间起竿</b>；抛得越远水越深，湖心与深水才藏着稀有和传说级大物。中鱼后进入遛鱼：按住收线张力猛涨、松手泄力鱼往外逃，张力拉满会切线、泄力太久会脱钩，把距离磨到 0 才能抄网上岸。21 种渔获分普通 / 稀有 / 史诗 / 传说四档（还有三件湖底垃圾等你做环保），图鉴、总渔获与最大单尾纪录本地存档（suibian_fishing），钓上第一条真鱼解锁「空军毕业」、请上传说级大物解锁「湖中传说」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="farm">
+    <h2>🌾 随便农场</h2>
+    <p class="sub">种下去就算关掉网页也在长：一块会等你回来的像素田</p>
+    <style>
+      #farm .fa-wrap { max-width:640px; margin:0 auto; }
+      #farm .fa-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #farm .fa-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #farm .fa-shop { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #farm .fa-seed { padding:7px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.92rem; cursor:pointer; }
+      #farm .fa-seed.on { background:#3ddc84; border-color:#3ddc84; color:#08331c; font-weight:700; }
+      #farm .fa-seed:disabled { opacity:.4; cursor:not-allowed; }
+      #farm .fa-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; max-width:480px; margin:0 auto; }
+      #farm .fa-plot { position:relative; aspect-ratio:1; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:linear-gradient(160deg,#3a2a18,#2a1d10); color:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:4px 4px 12px; overflow:hidden; }
+      #farm .fa-plot i { font-style:normal; font-size:1.7rem; line-height:1; }
+      #farm .fa-plot em { font-style:normal; font-size:.62rem; opacity:.75; }
+      #farm .fa-plot.ripe { border-color:#ffd54f; box-shadow:0 0 14px rgba(255,213,79,.35); animation:faPulse 1.2s infinite; }
+      #farm .fa-plot.empty { background:linear-gradient(160deg,#2f3a1f,#1f2a12); }
+      #farm .fa-plot.locked { background:rgba(0,0,0,.3); border-style:dashed; opacity:.75; }
+      #farm .fa-plot:disabled { cursor:not-allowed; opacity:.35; }
+      #farm .fa-bar { position:absolute; left:6px; right:6px; bottom:5px; height:4px; border-radius:99px; background:rgba(255,255,255,.15); display:block; }
+      #farm .fa-bar span { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#8bc34a,#ffd54f); }
+      @keyframes faPulse { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.04);} }
+      #farm .fa-btns { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:12px 0 4px; }
+      #farm .fa-btns button { padding:8px 16px; border-radius:10px; border:1px solid rgba(255,255,255,.22); background:rgba(0,0,0,.25); color:inherit; font-size:.9rem; cursor:pointer; }
+      #farm .fa-btns button.on { background:#ef5350; border-color:#ef5350; color:#fff; }
+      #farm .fa-msg { text-align:center; margin:8px auto 4px; font-size:.9rem; min-height:2.6em; max-width:560px; line-height:1.55; }
+      #farm .fa-tip { margin-top:10px; font-size:.82rem; opacity:.6; line-height:1.7; text-align:center; }
+    </style>
+    <div class="card fa-wrap">
+      <div class="fa-hud" id="faHud"></div>
+      <div class="fa-shop" id="faShop"></div>
+      <div class="fa-grid" id="faGrid"></div>
+      <div class="fa-btns">
+        <button id="faShovel">🪓 铲除模式：关</button>
+        <button id="faDex">📖 作物图鉴</button>
+      </div>
+      <div class="fa-msg" id="faMsg"></div>
+      <div class="fa-tip">🌾 <b>选中种子点空地播种；点生长中的作物浇一次水，剩余时间直接减半；熟透的作物会发光，点击收获换金币</b>。金币攒够可逐块开垦新田（最多 16 块）；八种作物按累计收获数逐档解锁，从 30 秒一茬的小萝卜到 8 小时的千年灵芝——按真实时间生长，关掉网页庄稼照样长，回来就能收。破产还有村长救济金兜底，铲除模式可清理手滑。进度本地存档（suibian_farm），首次收获解锁「自耕农」、集齐八种作物解锁「田园大亨」徽章。纯前端零依赖。</div>
+    </div>
+  </section>
   <section class="panel" id="lemmings">
     <h2>🐹 旅鼠大迁徙</h2>
     <p class="sub">搭桥、撑伞、挖洞、堵路：指挥一支只知直行的小队伍安全到家</p>
@@ -8560,6 +8601,7 @@
     if (id === "monopoly") monopolyRender();
     if (id === "fishing") fishingRender();
     if (id === "lemmings") lemmingsRender();
+    if (id === "farm") farmRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8609,6 +8651,7 @@
     if (id !== "monopoly" && typeof monopolyStop === "function") monopolyStop();
     if (id !== "fishing" && typeof fishingStop === "function") fishingStop();
     if (id !== "lemmings" && typeof lemmingsStop === "function") lemmingsStop();
+    if (id !== "farm" && typeof farmStop === "function") farmStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8788,6 +8831,7 @@
     monopoly: "随便大富翁 monopoly 大富翁 地产 买地 收租 租金 骰子 棋盘 升级 盖楼 破产 机会 富翁 对战 ai 桌游 board game",
     fishing: "钓鱼佬模拟 fishing 钓鱼 抛竿 浮漂 起竿 遛鱼 收线 图鉴 渔获 锦鲤 龙王 空军 湖 fish angler",
     lemmings: "旅鼠大迁徙 lemmings 旅鼠 搭桥 雨伞 挖洞 堵路 引爆 救援 迁徙 关卡 解谜 指挥 小鼠 过关 puzzle 策略 街机 arcade game",
+    farm: "随便农场 farm 农场 种田 种菜 播种 浇水 收获 庄稼 作物 萝卜 麦子 玉米 南瓜 西瓜 灵芝 图鉴 金币 开垦 挂机 放置 idle 种植 harvest garden",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9027,6 +9071,7 @@ splitbill:"tools",
     monopoly:"games",
     fishing:"games",
     lemmings:"games",
+    farm:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -47998,6 +48043,288 @@ splitbill:"tools",
       "有人堵路不是拦你，是怕你掉下悬崖。",
       "跌落不可怕，可怕的是忘了带伞。",
       "一只旅鼠是迷路，一群旅鼠是迁徙。"
+    );
+  }
+})();
+
+(function () {
+  "use strict";
+  var KEY = "suibian_farm";
+  var CROPS = [
+    { id: "carrot",  e: "🥕", n: "小萝卜",   cost: 5,   sell: 12,   grow: 30,    need: 0  },
+    { id: "wheat",   e: "🌾", n: "麦子",     cost: 10,  sell: 26,   grow: 90,    need: 0  },
+    { id: "corn",    e: "🌽", n: "甜玉米",   cost: 22,  sell: 60,   grow: 240,   need: 3  },
+    { id: "tomato",  e: "🍅", n: "番茄",     cost: 45,  sell: 130,  grow: 600,   need: 8  },
+    { id: "berry",   e: "🍓", n: "奶油草莓", cost: 90,  sell: 280,  grow: 1800,  need: 15 },
+    { id: "pumpkin", e: "🎃", n: "大南瓜",   cost: 180, sell: 620,  grow: 3600,  need: 25 },
+    { id: "melon",   e: "🍉", n: "冰糖西瓜", cost: 380, sell: 1400, grow: 10800, need: 40 },
+    { id: "lingzhi", e: "🍄", n: "千年灵芝", cost: 800, sell: 3500, grow: 28800, need: 60 }
+  ];
+  var TOTAL = 16, START_OPEN = 6, START_COINS = 20;
+  var EXPAND = [50, 90, 160, 280, 480, 800, 1300, 2100, 3400, 5500]; // 第 7~16 块地的开垦价
+  var nowMs = function () { return Date.now(); };
+  var st = null, sel = 0, shovel = false;
+  var timer = null, bound = false, activeFa = false;
+
+  function defState() {
+    var plots = [];
+    for (var i = 0; i < TOTAL; i++) plots.push({ c: null, t: 0, w: 0 });
+    return { coins: START_COINS, harv: 0, open: START_OPEN, plots: plots, dex: {}, king: 0 };
+  }
+  function loadRec() {
+    var s = defState();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && typeof d === "object") {
+          if (typeof d.coins === "number" && isFinite(d.coins)) s.coins = Math.max(0, Math.floor(d.coins));
+          if (typeof d.harv === "number" && isFinite(d.harv)) s.harv = Math.max(0, Math.floor(d.harv));
+          if (typeof d.open === "number" && isFinite(d.open)) s.open = Math.min(TOTAL, Math.max(START_OPEN, Math.floor(d.open)));
+          if (typeof d.king === "number") s.king = d.king ? 1 : 0;
+          if (d.dex && typeof d.dex === "object") {
+            for (var k in d.dex) if (typeof d.dex[k] === "number" && d.dex[k] > 0) s.dex[k] = Math.floor(d.dex[k]);
+          }
+          if (Array.isArray(d.plots)) {
+            for (var i = 0; i < TOTAL && i < d.plots.length; i++) {
+              var p = d.plots[i];
+              if (p && typeof p === "object" && typeof p.c === "string" && cropById(p.c) && typeof p.t === "number" && isFinite(p.t) && p.t > 0) {
+                s.plots[i] = { c: p.c, t: Math.min(p.t, nowMs()), w: p.w ? 1 : 0 };
+              }
+            }
+          }
+        }
+      }
+    } catch (e) { s = defState(); }
+    return s;
+  }
+  function saveRec() {
+    try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {}
+  }
+  function cropById(id) {
+    for (var i = 0; i < CROPS.length; i++) if (CROPS[i].id === id) return CROPS[i];
+    return null;
+  }
+  function cropUnlocked(c) { return st.harv >= c.need; }
+  function growState(p, now) {
+    if (!p.c) return null;
+    var c = cropById(p.c);
+    var el = Math.max(0, now - p.t);
+    var gm = c.grow * 1000;
+    var r = Math.min(1, el / gm);
+    return { crop: c, r: r, mature: r >= 1, remain: Math.max(0, Math.ceil((gm - el) / 1000)) };
+  }
+  function subsidy() {
+    // 防软锁：没钱又没种任何作物时发救济种子基金
+    var any = false;
+    for (var i = 0; i < st.open; i++) if (st.plots[i].c) { any = true; break; }
+    if (!any && st.coins < CROPS[0].cost) {
+      st.coins = CROPS[0].cost * 4;
+      saveRec();
+      return true;
+    }
+    return false;
+  }
+  function plant(i) {
+    var p = st.plots[i];
+    if (i >= st.open || p.c) return false;
+    var c = CROPS[sel];
+    if (!cropUnlocked(c)) { setMsg("🔒 " + c.e + c.n + "还没解锁：累计收获 " + c.need + " 茬后开售"); return false; }
+    if (st.coins < c.cost) { setMsg("💸 金币不够，" + c.e + c.n + "种子要 " + c.cost + " 金币"); return false; }
+    st.coins -= c.cost;
+    st.plots[i] = { c: c.id, t: nowMs(), w: 0 };
+    saveRec();
+    setMsg("🌱 种下" + c.e + c.n + "，" + fmtT(c.grow) + "后成熟（点它浇水能省一半时间）");
+    return true;
+  }
+  function water(i) {
+    var p = st.plots[i];
+    var g = growState(p, nowMs());
+    if (!g || g.mature || p.w) return false;
+    var remainMs = Math.max(0, g.crop.grow * 1000 - (nowMs() - p.t));
+    p.t -= Math.floor(remainMs / 2);
+    p.w = 1;
+    saveRec();
+    setMsg("💧 浇水成功！" + g.crop.e + g.crop.n + "长势喜人，剩余时间减半");
+    return true;
+  }
+  function dig(i) {
+    var p = st.plots[i];
+    if (!p.c) return false;
+    var c = cropById(p.c);
+    st.plots[i] = { c: null, t: 0, w: 0 };
+    saveRec();
+    setMsg("🪓 铲掉了" + c.e + c.n + "（种子钱不退，下手前想清楚）");
+    return true;
+  }
+  function harvest(i) {
+    var p = st.plots[i];
+    var g = growState(p, nowMs());
+    if (!g || !g.mature) return false;
+    var c = g.crop;
+    st.coins += c.sell;
+    st.harv += 1;
+    st.dex[c.id] = (st.dex[c.id] || 0) + 1;
+    st.plots[i] = { c: null, t: 0, w: 0 };
+    var full = true;
+    for (var k = 0; k < CROPS.length; k++) if (!st.dex[CROPS[k].id]) { full = false; break; }
+    if (full && !st.king) { st.king = 1; try { bumpUsage("farmking"); } catch (e0) {} }
+    saveRec();
+    try { bumpUsage("farmharvest"); } catch (e1) {}
+    try { if (typeof renderAchv === "function") renderAchv(); } catch (e2) {}
+    setMsg("🧺 收获" + c.e + c.n + "，卖了 " + c.sell + " 金币！累计收获 " + st.harv + " 茬" + (full && st.king ? "（八宝图鉴已集齐 👨‍🌾）" : ""));
+    return true;
+  }
+  function expand(i) {
+    if (i !== st.open || i >= TOTAL) return false;
+    var cost = EXPAND[i - START_OPEN];
+    if (st.coins < cost) { setMsg("💸 开垦这块地要 " + cost + " 金币，先攒攒吧"); return false; }
+    st.coins -= cost;
+    st.open += 1;
+    saveRec();
+    setMsg("⛰️ 新地块开垦完成！农场扩张到 " + st.open + " 块田");
+    return true;
+  }
+  function clickPlot(i) {
+    if (i >= st.open) { expand(i); syncUI(); return; }
+    var p = st.plots[i];
+    var g = growState(p, nowMs());
+    if (!p.c) { plant(i); }
+    else if (g.mature) { harvest(i); }
+    else if (shovel) { dig(i); }
+    else { if (!water(i)) setMsg("💧 这棵已经浇过水了，静待成熟（还剩 " + fmtT(g.remain) + "）"); }
+    syncUI();
+  }
+  function fmtT(sec) {
+    sec = Math.max(0, Math.round(sec));
+    if (sec >= 3600) { var h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60); return h + " 小时" + (m ? m + " 分" : ""); }
+    if (sec >= 60) { var mm = Math.floor(sec / 60), ss = sec % 60; return mm + " 分" + (ss ? ss + " 秒" : ""); }
+    return sec + " 秒";
+  }
+
+  // ---------- UI ----------
+  function el(id) { return document.getElementById(id); }
+  function setMsg(t) { var m = el("faMsg"); if (m) m.textContent = t; }
+  function dexCount() { var n = 0; for (var i = 0; i < CROPS.length; i++) if (st.dex[CROPS[i].id]) n++; return n; }
+  function syncUI() {
+    if (!st) return;
+    var now = nowMs();
+    var hud = el("faHud");
+    if (hud) {
+      hud.innerHTML = "<span>💰 <b>" + st.coins + "</b> 金币</span>" +
+        "<span>🧺 收获 " + st.harv + " 茬</span>" +
+        "<span>📖 图鉴 " + dexCount() + "/" + CROPS.length + "</span>" +
+        "<span>🗺️ 田地 " + st.open + "/" + TOTAL + "</span>";
+    }
+    var shop = el("faShop");
+    if (shop) {
+      var sh = "";
+      for (var i = 0; i < CROPS.length; i++) {
+        var c = CROPS[i], un = cropUnlocked(c);
+        sh += '<button class="fa-seed' + (sel === i ? " on" : "") + '" data-faseed="' + i + '"' + (un ? "" : " disabled") + ' title="' +
+          (un ? c.n + "：种子 " + c.cost + " 金币，" + fmtT(c.grow) + "成熟，卖 " + c.sell : "累计收获 " + c.need + " 茬解锁") + '">' +
+          (un ? c.e + " " + c.cost + "💰" : "🔒 " + c.e) + "</button>";
+      }
+      shop.innerHTML = sh;
+    }
+    var grid = el("faGrid");
+    if (grid) {
+      var h = "";
+      for (var j = 0; j < TOTAL; j++) {
+        var p = st.plots[j];
+        if (j >= st.open) {
+          var canBuy = j === st.open;
+          h += '<button class="fa-plot locked" data-fai="' + j + '"' + (canBuy ? "" : " disabled") + ">" +
+            (canBuy ? '<i>🧱</i><em>开垦 ' + EXPAND[j - START_OPEN] + "💰</em>" : "<i>🌫️</i><em>未开垦</em>") + "</button>";
+        } else if (!p.c) {
+          h += '<button class="fa-plot empty" data-fai="' + j + '"><i>➕</i><em>种 ' + CROPS[sel].e + "</em></button>";
+        } else {
+          var g = growState(p, now);
+          var icon = g.mature ? g.crop.e : (g.r < 0.34 ? "🌱" : g.r < 0.7 ? "🌿" : "🪴");
+          var lbl = g.mature ? "点击收获!" : fmtT(g.remain) + (p.w ? "" : " 💧可浇");
+          h += '<button class="fa-plot' + (g.mature ? " ripe" : "") + '" data-fai="' + j + '"><i>' + icon + "</i><em>" + lbl + "</em>" +
+            '<span class="fa-bar"><span style="width:' + Math.round(g.r * 100) + '%"></span></span></button>';
+        }
+      }
+      grid.innerHTML = h;
+    }
+    var sv = el("faShovel"); if (sv) { sv.textContent = shovel ? "🪓 铲除模式：开" : "🪓 铲除模式：关"; sv.classList.toggle("on", shovel); }
+  }
+  function showDex() {
+    var parts = [];
+    for (var i = 0; i < CROPS.length; i++) {
+      var c = CROPS[i];
+      parts.push(st.dex[c.id] ? c.e + c.n + "×" + st.dex[c.id] : "❓" + (cropUnlocked(c) ? c.n : "？？？"));
+    }
+    setMsg("📖 图鉴（" + dexCount() + "/" + CROPS.length + "）：" + parts.join("｜"));
+  }
+  function welcome() {
+    var now = nowMs(), ripe = 0;
+    for (var i = 0; i < st.open; i++) {
+      var g = growState(st.plots[i], now);
+      if (g && g.mature) ripe++;
+    }
+    if (subsidy()) setMsg("🎁 破产啦？村长送来救济种子基金 " + st.coins + " 金币，从小萝卜重新开始！");
+    else if (ripe > 0) setMsg("🌾 欢迎回来！你不在的时候有 " + ripe + " 块田悄悄熟透了，快去收！");
+    else setMsg("👨‍🌾 选个种子点空地播种；点生长中的作物浇水（剩余时间减半）；熟了点击收获换金币。");
+  }
+  function bind() {
+    var sec = document.getElementById("farm");
+    if (!sec || sec._faBound) return;
+    sec._faBound = true;
+    sec.addEventListener("click", function (e) {
+      var t = e.target.closest ? e.target.closest("button") : null;
+      if (!t) return;
+      if (t.dataset && t.dataset.faseed !== undefined && t.dataset.faseed !== "") { sel = +t.dataset.faseed; shovel = false; syncUI(); return; }
+      if (t.dataset && t.dataset.fai !== undefined && t.dataset.fai !== "") { clickPlot(+t.dataset.fai); return; }
+      if (t.id === "faShovel") { shovel = !shovel; syncUI(); return; }
+      if (t.id === "faDex") { showDex(); return; }
+    });
+  }
+  window.farmRender = function () {
+    bind();
+    activeFa = true;
+    st = loadRec();
+    if (sel >= CROPS.length) sel = 0;
+    welcome();
+    syncUI();
+    clearInterval(timer);
+    timer = setInterval(function () { if (activeFa) syncUI(); }, 1000);
+  };
+  window.farmStop = function () {
+    activeFa = false;
+    clearInterval(timer);
+    timer = null;
+  };
+
+  window.__faTest = {
+    getState: function () { return st; },
+    setState: function (s) { st = s; },
+    setNow: function (fn) { nowMs = fn; },
+    setSel: function (i) { sel = i; },
+    getSel: function () { return sel; },
+    setShovel: function (v) { shovel = !!v; },
+    defState: defState, loadRec: loadRec, saveRec: saveRec,
+    cropById: cropById, cropUnlocked: cropUnlocked, growState: growState,
+    plant: plant, water: water, dig: dig, harvest: harvest, expand: expand,
+    clickPlot: clickPlot, subsidy: subsidy, fmtT: fmtT,
+    syncUI: syncUI, showDex: showDex, welcome: welcome, dexCount: dexCount,
+    consts: { KEY: KEY, CROPS: CROPS, TOTAL: TOTAL, START_OPEN: START_OPEN, START_COINS: START_COINS, EXPAND: EXPAND }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🌾", name: "自耕农", desc: "在随便农场收获第一茬作物", test: function (u) { return (u.farmharvest || 0) >= 1; } },
+      { emoji: "👨‍🌾", name: "田园大亨", desc: "集齐随便农场全部八种作物图鉴", test: function (u) { return (u.farmking || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "种一棵树最好的时间是十年前，其次是现在。种萝卜三十秒就够。",
+      "土地不会辜负人，它只是慢一点。",
+      "浇下去的是水，长出来的是盼头。",
+      "别嫌小萝卜便宜，大亨都是从第一茬开始的。",
+      "离开的时候庄稼也在长，这就是农场的温柔。"
     );
   }
 })();
