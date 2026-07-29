@@ -1570,6 +1570,7 @@
         <button data-tab="mon">🐲 随便兽</button>
         <button data-tab="ski">⛷️ 滑雪大回转</button>
         <button data-tab="pusher">🪙 随便推币机</button>
+        <button data-tab="curl">🥌 随便冰壶</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8140,6 +8141,40 @@
       <div class="fh-tip">🎣 <b>空格 / 点画面一键三连：抛竿蓄力 → 锁定力度 → 浮漂猛沉的一瞬间起竿</b>；抛得越远水越深，湖心与深水才藏着稀有和传说级大物。中鱼后进入遛鱼：按住收线张力猛涨、松手泄力鱼往外逃，张力拉满会切线、泄力太久会脱钩，把距离磨到 0 才能抄网上岸。21 种渔获分普通 / 稀有 / 史诗 / 传说四档（还有三件湖底垃圾等你做环保），图鉴、总渔获与最大单尾纪录本地存档（suibian_fishing），钓上第一条真鱼解锁「空军毕业」、请上传说级大物解锁「湖中传说」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="curl">
+    <h2>🥌 随便冰壶</h2>
+    <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
+    <style>
+      #curl .cu-wrap { max-width:420px; margin:0 auto; }
+      #curl .cu-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #curl .cu-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #curl .cu-hud b { font-weight:700; color:#90caf9; }
+      #curl canvas { width:100%; max-width:380px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#bbdefb; display:block; margin:0 auto 10px; touch-action:none; cursor:crosshair; }
+      #curl .cu-acts { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #curl .cu-acts button { padding:9px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.24); background:rgba(0,0,0,.3); color:inherit; font-size:.95rem; cursor:pointer; }
+      #curl .cu-acts button.big { background:#1e88e5; border-color:#90caf9; color:#fff; font-weight:700; }
+      #curl .cu-acts button:hover { transform:translateY(-1px); }
+      #curl .cu-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="cu-wrap">
+      <div class="cu-hud">
+        <span>比分(你:AI) <b id="cuScore">0 : 0</b></span>
+        <span>局 <b id="cuEnd">1/3</b></span>
+        <span>余壶(你·AI) <b id="cuLeft">4 · 4</b></span>
+        <span>战绩 <b id="cuRec">0胜0负</b></span>
+      </div>
+      <canvas id="cuCav" width="380" height="620"></canvas>
+      <div class="cu-acts">
+        <button class="big" id="cuAct">🥌 投壶</button>
+        <button id="cuSpin">旋转 ↻ 右曲</button>
+      </div>
+      <p class="cu-help">
+        移动指针 / ← → 瞄准，S 或按钮切换旋转方向（带旋转的壶会拐弯）；点击 / 空格开始蓄力，再点一次锁定力度出手。<br>
+        壶滑行时狂点画布 / 空格扫冰 🧹：减小摩擦让壶滑更远、走更直。没过红色 HOG 线的壶直接拿掉，出界同理。<br>
+        每局双方各 4 壶，大本营内离圆心最近的一方得分（每颗更近的壶 +1），3 局定胜负、平分加时。赢一场解锁「冰壶主将」、单局 3 分解锁「三分好局」。战绩本地存档（suibian_curling）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="pusher">
     <h2>🪙 随便推币机</h2>
     <p class="sub">街机厅经典推币机：瞄准投币，让推板替你把整片硬币推下桌沿</p>
@@ -8729,6 +8764,7 @@
     if (id === "mon") monRender();
     if (id === "ski") skiRender();
     if (id === "pusher") pusherRender();
+    if (id === "curl") curlRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8782,6 +8818,7 @@
     if (id !== "mon" && typeof monStop === "function") monStop();
     if (id !== "ski" && typeof skiStop === "function") skiStop();
     if (id !== "pusher" && typeof pusherStop === "function") pusherStop();
+    if (id !== "curl" && typeof curlStop === "function") curlStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8965,6 +9002,7 @@
     mon: "随便兽 mon monster 宝可梦 口袋妖怪 精灵 收服 抓宠 捕捉 对战 战斗 进化 图鉴 训练师 草丛 随便球 精灵球 宠物 收集 pokemon collect battle",
     ski: "滑雪大回转 ski 滑雪 回转 旗门 雪山 雪道 下坡 躲避 树 石头 连击 竞速 无尽 slalom snow 雪人 滑行 极限运动",
     pusher: "随便推币机 pusher coin 推币 推币机 硬币 金币 宝石 街机 游戏厅 投币 推板 掉落 弹库 回币 积分 arcade 娱乐 碰撞",
+    curl: "随便冰壶 curl curling 冰壶 壶 投壶 扫冰 大本营 旋转 冬奥 雪 冰 对战 ai 人机 蓄力 瞭准 瞰准 体育 竞技",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9208,6 +9246,7 @@ splitbill:"tools",
     mon:"games",
     ski:"games",
     pusher:"games",
+    curl:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -49456,6 +49495,495 @@ splitbill:"tools",
       "有些硬币注定要漏进侧槽，就当是给机器的小费。",
       "别盯着快掉的那枚，多投几枚，整片都会是你的。",
       "宝石不会天天有，但币仓每五秒都在偷偷帮你攒。"
+    );
+  }
+})();
+/* ===== 🥌 随便冰壶 curl ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_curling";
+  var W = 380, H = 620;
+  var R = 13;
+  var BTN_X = 190, BTN_Y = 110;
+  var RINGS = [104, 72, 40, 16];
+  var HOUSE_D = 104 + R;
+  var HOG = 250, BACK = 30, SIDE = 8;
+  var THROW_X = 190, THROW_Y = 560;
+  var FRIC = 0.9895, SWEEP_F = 0.9945;
+  var CURL_A = 0.0028;
+  var STONES = 4, ENDS = 3, MAX_ENDS = 5;
+  var STOP_V = 0.06;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defState() {
+    return { wins: 0, losses: 0, draws: 0, matches: 0, ends: 0, bestEnd: 0, pts: 0, aW: 0, a3: 0 };
+  }
+  function loadRec() {
+    var d = defState();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.wins = nInt(o.wins); d.losses = nInt(o.losses); d.draws = nInt(o.draws);
+      d.matches = nInt(o.matches); d.ends = nInt(o.ends);
+      d.bestEnd = Math.min(8, nInt(o.bestEnd)); d.pts = nInt(o.pts);
+      d.aW = o.aW ? 1 : 0; d.a3 = o.a3 ? 1 : 0;
+    } catch (e) { return defState(); }
+    return d;
+  }
+  var st = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+
+  function dBtn(s) { var dx = s.x - BTN_X, dy = s.y - BTN_Y; return Math.sqrt(dx * dx + dy * dy); }
+  function inHouse(s) { return !s.out && dBtn(s) <= HOUSE_D; }
+
+  function newMatch() {
+    var g = {
+      end: 1, scoreMe: 0, scoreAi: 0, first: "me", turn: "me",
+      thrown: { me: 0, ai: 0 }, stones: [],
+      phase: "aim", aim: 0, spin: 1, pow: 0, powT: 0,
+      sweep: 0, lastIdx: -1, wait: 0, msg: "", endPts: null
+    };
+    return g;
+  }
+  function newEnd(g) {
+    g.stones = []; g.thrown = { me: 0, ai: 0 };
+    g.turn = g.first; g.lastIdx = -1; g.sweep = 0;
+    g.phase = g.turn === "me" ? "aim" : "aiwait";
+    g.wait = g.turn === "ai" ? 50 : 0;
+    g.aim = 0; g.spin = 1; g.pow = 0; g.powT = 0;
+  }
+
+  function throwStone(g, team, ang, v0, spin) {
+    var s = {
+      x: THROW_X, y: THROW_Y,
+      vx: Math.sin(ang) * v0, vy: -Math.cos(ang) * v0,
+      team: team, spin: spin || 0, out: false
+    };
+    g.stones.push(s);
+    g.lastIdx = g.stones.length - 1;
+    g.thrown[team]++;
+    g.phase = "slide";
+    g.sweep = 0;
+    return s;
+  }
+
+  function collide(stones) {
+    var i, j;
+    for (i = 0; i < stones.length; i++) {
+      for (j = i + 1; j < stones.length; j++) {
+        var a = stones[i], b = stones[j];
+        if (a.out || b.out) continue;
+        var dx = b.x - a.x, dy = b.y - a.y;
+        var min = R * 2, d2 = dx * dx + dy * dy;
+        if (d2 >= min * min || d2 === 0) continue;
+        var d = Math.sqrt(d2), nx = dx / d, ny = dy / d;
+        var ov = (min - d) / 2;
+        a.x -= nx * ov; a.y -= ny * ov;
+        b.x += nx * ov; b.y += ny * ov;
+        var rvn = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+        if (rvn < 0) {
+          var imp = -rvn * 0.95;
+          a.vx -= nx * imp; a.vy -= ny * imp;
+          b.vx += nx * imp; b.vy += ny * imp;
+        }
+      }
+    }
+  }
+
+  function physStep(stones, sweepIdx) {
+    var moving = 0, i, s;
+    for (i = 0; i < stones.length; i++) {
+      s = stones[i];
+      if (s.out) continue;
+      var sp = Math.sqrt(s.vx * s.vx + s.vy * s.vy);
+      if (sp < STOP_V) { s.vx = 0; s.vy = 0; continue; }
+      moving++;
+      var f = i === sweepIdx ? SWEEP_F : FRIC;
+      s.vx *= f; s.vy *= f;
+      if (s.spin && s.vy < -0.1) {
+        var k = 1 - sp / 6.5;
+        if (k < 0.12) k = 0.12;
+        if (k > 1) k = 1;
+        var cu = s.spin * CURL_A * k;
+        if (i === sweepIdx) cu *= 0.4;
+        s.vx += cu;
+      }
+      s.x += s.vx; s.y += s.vy;
+      if (s.x < SIDE + R || s.x > W - SIDE - R || s.y < BACK - R + 4) {
+        s.out = true; s.vx = 0; s.vy = 0;
+      }
+    }
+    collide(stones);
+    return moving;
+  }
+
+  function hogClean(g) {
+    var s = g.stones[g.lastIdx];
+    if (s && !s.out && s.y > HOG - R) { s.out = true; }
+    var i;
+    for (i = g.stones.length - 1; i >= 0; i--) {
+      if (g.stones[i].out) g.stones.splice(i, 1);
+    }
+    g.lastIdx = -1;
+  }
+
+  function scoreEnd(stones) {
+    var me = [], ai = [], i;
+    for (i = 0; i < stones.length; i++) {
+      if (inHouse(stones[i])) (stones[i].team === "me" ? me : ai).push(dBtn(stones[i]));
+    }
+    if (!me.length && !ai.length) return { who: "", pts: 0 };
+    me.sort(function (a, b) { return a - b; });
+    ai.sort(function (a, b) { return a - b; });
+    if (!ai.length) return { who: "me", pts: me.length };
+    if (!me.length) return { who: "ai", pts: ai.length };
+    var pts = 0;
+    if (me[0] < ai[0]) {
+      while (pts < me.length && me[pts] < ai[0]) pts++;
+      return { who: "me", pts: pts };
+    }
+    while (pts < ai.length && ai[pts] < me[0]) pts++;
+    return { who: "ai", pts: pts };
+  }
+
+  function vFor(dist) { return dist * (1 - FRIC) / FRIC * 1.045; }
+
+  function cloneStones(stones) {
+    var out = [], i, s;
+    for (i = 0; i < stones.length; i++) {
+      s = stones[i];
+      out.push({ x: s.x, y: s.y, vx: s.vx, vy: s.vy, team: s.team, spin: s.spin, out: s.out });
+    }
+    return out;
+  }
+
+  function simShot(stones, ang, v0, spin) {
+    var sim = cloneStones(stones);
+    sim.push({
+      x: THROW_X, y: THROW_Y,
+      vx: Math.sin(ang) * v0, vy: -Math.cos(ang) * v0,
+      team: "ai", spin: spin, out: false
+    });
+    var n = 0;
+    while (physStep(sim, -1) > 0 && n < 2600) n++;
+    var last = sim[sim.length - 1];
+    if (last && !last.out && last.y > HOG - R) last.out = true;
+    return sim;
+  }
+
+  function evalStones(stones) {
+    var v = 0, i, s, d;
+    var meB = 1e9, aiB = 1e9;
+    for (i = 0; i < stones.length; i++) {
+      s = stones[i];
+      if (!inHouse(s)) continue;
+      d = dBtn(s);
+      if (s.team === "ai") { v += (HOUSE_D - d) * 1; if (d < aiB) aiB = d; }
+      else { v -= (HOUSE_D - d) * 1.1; if (d < meB) meB = d; }
+    }
+    if (aiB < meB) v += 60;
+    return v;
+  }
+
+  function aiPlan(g) {
+    var base = cloneStones(g.stones);
+    var cands = [], i;
+    var draws = [[-38, 1], [38, -1], [0, 1], [0, -1], [0, 0], [-38, 0], [38, 0]];
+    for (i = 0; i < draws.length; i++) {
+      var tx = BTN_X + draws[i][0], ty = BTN_Y;
+      var ang = Math.atan2(tx - THROW_X, THROW_Y - ty);
+      cands.push({ ang: ang, v: vFor(Math.sqrt((tx - THROW_X) * (tx - THROW_X) + (THROW_Y - ty) * (THROW_Y - ty))), spin: draws[i][1] });
+    }
+    var pb = null, pd = 1e9, s;
+    for (i = 0; i < base.length; i++) {
+      s = base[i];
+      if (s.team === "me" && inHouse(s) && dBtn(s) < pd) { pd = dBtn(s); pb = s; }
+    }
+    if (pb) {
+      var ta = Math.atan2(pb.x - THROW_X, THROW_Y - pb.y);
+      cands.push({ ang: ta, v: 7.6, spin: 0 });
+      cands.push({ ang: ta + 0.012, v: 8.6, spin: 0 });
+    }
+    var best = null, bv = -1e18;
+    for (i = 0; i < cands.length; i++) {
+      var c = cands[i];
+      var a2 = c.ang + (rnd() - 0.5) * 0.016;
+      var v2 = c.v * (1 + (rnd() - 0.5) * 0.05);
+      var res = simShot(base, a2, v2, c.spin);
+      var val = evalStones(res);
+      if (val > bv) { bv = val; best = { ang: a2, v: v2, spin: c.spin }; }
+    }
+    return best || { ang: 0, v: vFor(450), spin: 1 };
+  }
+
+  function nextTurn(g) {
+    var other = g.turn === "me" ? "ai" : "me";
+    if (g.thrown[other] < STONES) g.turn = other;
+    else if (g.thrown[g.turn] >= STONES) { finishEnd(g); return; }
+    if (g.thrown.me >= STONES && g.thrown.ai >= STONES) { finishEnd(g); return; }
+    if (g.turn === "me") { g.phase = "aim"; g.aim = 0; g.pow = 0; g.powT = 0; }
+    else { g.phase = "aiwait"; g.wait = 46; }
+  }
+
+  function finishEnd(g) {
+    var sc = scoreEnd(g.stones);
+    g.endPts = sc;
+    st.ends++;
+    if (sc.who === "me") {
+      g.scoreMe += sc.pts; st.pts += sc.pts;
+      if (sc.pts > st.bestEnd) st.bestEnd = sc.pts;
+      if (!st.a3 && sc.pts >= 3) { st.a3 = 1; try { bumpUsage("curl3"); } catch (e1) {} }
+      g.first = "me";
+    } else if (sc.who === "ai") {
+      g.scoreAi += sc.pts;
+      g.first = "ai";
+    }
+    saveRec();
+    var over = false;
+    if (g.end >= ENDS && g.scoreMe !== g.scoreAi) over = true;
+    if (g.end >= MAX_ENDS) over = true;
+    if (over) {
+      g.phase = "done";
+      st.matches++;
+      if (g.scoreMe > g.scoreAi) {
+        st.wins++;
+        if (!st.aW) { st.aW = 1; try { bumpUsage("curlwin"); } catch (e2) {} }
+        g.msg = "🎉 你赢了 " + g.scoreMe + " : " + g.scoreAi;
+      } else if (g.scoreMe < g.scoreAi) {
+        st.losses++;
+        g.msg = "😤 憾负 " + g.scoreMe + " : " + g.scoreAi + "，再来！";
+      } else {
+        st.draws++;
+        g.msg = "🤝 平局 " + g.scoreMe + " : " + g.scoreAi;
+      }
+      saveRec();
+    } else {
+      g.phase = "endmsg";
+      g.msg = sc.who === "" ? "本局空局，无人得分"
+        : (sc.who === "me" ? "本局你得 " + sc.pts + " 分！" : "本局 AI 得 " + sc.pts + " 分");
+    }
+  }
+
+  function advance(g) {
+    if (g.phase === "endmsg") { g.end++; newEnd(g); return true; }
+    return false;
+  }
+
+  function stepGame(g) {
+    if (g.phase === "power") {
+      g.powT++;
+      g.pow = (Math.sin(g.powT * 0.055 - Math.PI / 2) + 1) / 2;
+    } else if (g.phase === "slide") {
+      var swIdx = -1;
+      if (g.sweep > 0) {
+        g.sweep--;
+        var ls = g.stones[g.lastIdx];
+        if (ls && ls.team === "me") swIdx = g.lastIdx;
+      }
+      var mv = physStep(g.stones, swIdx);
+      if (mv === 0) { hogClean(g); nextTurn(g); }
+    } else if (g.phase === "aiwait") {
+      if (--g.wait <= 0) {
+        var p = aiPlan(g);
+        throwStone(g, "ai", p.ang, p.v, p.spin);
+      }
+    }
+  }
+
+  /* ---------- DOM / 渲染 ---------- */
+  var g = null, raf = 0, active = false, inited = false;
+  var cav = null, ctx = null, els = {};
+  function $id(x) { return document.getElementById(x); }
+
+  function cuSync() {
+    if (!inited || !g) return;
+    els.score.textContent = g.scoreMe + " : " + g.scoreAi;
+    els.end.textContent = Math.min(g.end, MAX_ENDS) + "/" + ENDS + (g.end > ENDS ? "(加时)" : "");
+    els.left.textContent = (STONES - g.thrown.me) + " · " + (STONES - g.thrown.ai);
+    els.rec.textContent = st.wins + "胜" + st.losses + "负";
+    var lab = "🥌 投壶";
+    if (g.phase === "power") lab = "🔒 锁定力度";
+    else if (g.phase === "slide") lab = "🧹 扫冰！";
+    else if (g.phase === "endmsg") lab = "▶ 下一局";
+    else if (g.phase === "done") lab = "🔄 再来一场";
+    else if (g.phase === "aiwait") lab = "⏳ AI 思考中";
+    els.act.textContent = lab;
+    els.spin.textContent = g.spin > 0 ? "旋转 ↻ 右曲" : "旋转 ↺ 左曲";
+  }
+
+  function press() {
+    if (!g) return;
+    if (g.phase === "aim") { g.phase = "power"; g.powT = 0; g.pow = 0; }
+    else if (g.phase === "power") throwStone(g, "me", g.aim, 4.0 + g.pow * 6.0, g.spin);
+    else if (g.phase === "slide") { g.sweep = Math.min(45, g.sweep + 11); }
+    else if (g.phase === "endmsg") advance(g);
+    else if (g.phase === "done") { g = newMatch(); newEnd(g); }
+    cuSync();
+  }
+
+  function drawStone(s) {
+    ctx.beginPath(); ctx.arc(s.x, s.y, R, 0, Math.PI * 2);
+    ctx.fillStyle = "#9e9e9e"; ctx.fill();
+    ctx.strokeStyle = "#616161"; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(s.x, s.y, R - 5, 0, Math.PI * 2);
+    ctx.fillStyle = s.team === "me" ? "#e53935" : "#fdd835"; ctx.fill();
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#e3f2fd"); grd.addColorStop(1, "#bbdefb");
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+    var i;
+    ctx.strokeStyle = "rgba(120,144,156,.35)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.stroke();
+    var cols = ["#1565c0", "#fff", "#c62828", "#fff"];
+    for (i = 0; i < RINGS.length; i++) {
+      ctx.beginPath(); ctx.arc(BTN_X, BTN_Y, RINGS[i], 0, Math.PI * 2);
+      ctx.fillStyle = cols[i]; ctx.fill();
+    }
+    ctx.strokeStyle = "#ef5350"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(SIDE, HOG); ctx.lineTo(W - SIDE, HOG); ctx.stroke();
+    ctx.fillStyle = "rgba(69,90,100,.55)"; ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("HOG 线：壶必须滑过这里", 12, HOG - 7);
+    ctx.strokeStyle = "rgba(69,90,100,.5)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(SIDE, BACK); ctx.lineTo(W - SIDE, BACK); ctx.stroke();
+    if (!g) return;
+    for (i = 0; i < g.stones.length; i++) { if (!g.stones[i].out) drawStone(g.stones[i]); }
+    if (g.phase === "aim" || g.phase === "power") {
+      ctx.save();
+      ctx.translate(THROW_X, THROW_Y);
+      ctx.rotate(g.aim);
+      ctx.strokeStyle = "rgba(229,57,53,.8)"; ctx.lineWidth = 2;
+      ctx.setLineDash([7, 6]);
+      ctx.beginPath(); ctx.moveTo(0, -R); ctx.lineTo(0, -190); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(229,57,53,.8)";
+      ctx.beginPath(); ctx.moveTo(-6, -186); ctx.lineTo(6, -186); ctx.lineTo(0, -200); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      drawStone({ x: THROW_X, y: THROW_Y, team: "me" });
+      var cs = g.spin > 0 ? "↻" : "↺";
+      ctx.fillStyle = "#37474f"; ctx.font = "13px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(cs, THROW_X + 24, THROW_Y + 4);
+    }
+    if (g.phase === "power") {
+      ctx.fillStyle = "rgba(0,0,0,.25)";
+      ctx.fillRect(30, H - 26, W - 60, 12);
+      ctx.fillStyle = g.pow > 0.82 ? "#e53935" : "#43a047";
+      ctx.fillRect(30, H - 26, (W - 60) * g.pow, 12);
+      ctx.strokeStyle = "rgba(0,0,0,.4)"; ctx.lineWidth = 1;
+      ctx.strokeRect(30, H - 26, W - 60, 12);
+    }
+    if (g.phase === "slide" && g.sweep > 0) {
+      var ls = g.stones[g.lastIdx];
+      if (ls && !ls.out && ls.team === "me") {
+        ctx.font = "17px sans-serif"; ctx.textAlign = "center";
+        ctx.fillText("🧹", ls.x + (g.sweep % 10 < 5 ? -19 : 19), ls.y - 16);
+      }
+    }
+    if (g.phase === "endmsg" || g.phase === "done") {
+      ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(0, H / 2 - 40, W, 80);
+      ctx.fillStyle = "#fff"; ctx.font = "bold 17px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(g.msg, W / 2, H / 2 - 4);
+      ctx.font = "12px sans-serif";
+      ctx.fillText(g.phase === "done" ? "点按钮或按空格再来一场" : "点按钮或按空格进入下一局", W / 2, H / 2 + 22);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g) { stepGame(g); cuSync(); }
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function onKeyDown(ev) {
+    if (!active || !g) return;
+    var k = ev.key;
+    if (k === " ") { press(); ev.preventDefault(); return; }
+    if (g.phase === "aim") {
+      if (k === "ArrowLeft" || k === "a" || k === "A") { g.aim = Math.max(-0.42, g.aim - 0.02); ev.preventDefault(); }
+      else if (k === "ArrowRight" || k === "d" || k === "D") { g.aim = Math.min(0.42, g.aim + 0.02); ev.preventDefault(); }
+      else if (k === "s" || k === "S") { g.spin = -g.spin; cuSync(); ev.preventDefault(); }
+    }
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = $id("cuCav");
+    if (!cav) return;
+    ctx = cav.getContext("2d");
+    els = { score: $id("cuScore"), end: $id("cuEnd"), left: $id("cuLeft"),
+      rec: $id("cuRec"), act: $id("cuAct"), spin: $id("cuSpin") };
+    els.act.addEventListener("click", press);
+    els.spin.addEventListener("click", function () {
+      if (g && g.phase === "aim") { g.spin = -g.spin; cuSync(); }
+    });
+    cav.addEventListener("pointermove", function (ev) {
+      if (!g || g.phase !== "aim") return;
+      var rect = cav.getBoundingClientRect();
+      var mx = (ev.clientX - rect.left) * (W / rect.width);
+      var my = (ev.clientY - rect.top) * (H / rect.height);
+      if (my < THROW_Y - 40) {
+        var a = Math.atan2(mx - THROW_X, THROW_Y - my);
+        g.aim = Math.max(-0.42, Math.min(0.42, a));
+      }
+    });
+    cav.addEventListener("pointerdown", function () { press(); });
+    document.addEventListener("keydown", onKeyDown);
+    inited = true;
+  }
+
+  window.curlRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    st = loadRec();
+    if (!g) { g = newMatch(); newEnd(g); }
+    cuSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.curlStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__cuTest = {
+    getSt: function () { return st; }, setSt: function (s) { st = s; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defState: defState, loadRec: loadRec, saveRec: saveRec,
+    newMatch: newMatch, newEnd: newEnd, throwStone: throwStone,
+    collide: collide, physStep: physStep, hogClean: hogClean,
+    scoreEnd: scoreEnd, vFor: vFor, cloneStones: cloneStones,
+    simShot: simShot, evalStones: evalStones, aiPlan: aiPlan,
+    nextTurn: nextTurn, finishEnd: finishEnd, advance: advance,
+    stepGame: stepGame, press: press, cuSync: cuSync, draw: draw,
+    onKeyDown: onKeyDown, ensureInit: ensureInit,
+    dBtn: dBtn, inHouse: inHouse,
+    consts: { KEY: KEY, W: W, H: H, R: R, BTN_X: BTN_X, BTN_Y: BTN_Y,
+      HOUSE_D: HOUSE_D, HOG: HOG, BACK: BACK, SIDE: SIDE,
+      THROW_X: THROW_X, THROW_Y: THROW_Y, FRIC: FRIC, SWEEP_F: SWEEP_F,
+      STONES: STONES, ENDS: ENDS, MAX_ENDS: MAX_ENDS, STOP_V: STOP_V }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🥌", name: "冰壶主将", desc: "在随便冰壶赢下一场比赛", test: function (u) { return (u.curlwin || 0) >= 1; } },
+      { emoji: "🧹", name: "三分好局", desc: "在随便冰壶单局拿下 3 分以上", test: function (u) { return (u.curl3 || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "冰壶的智慧：用力过猛会滑出人生，太怂又过不了 HOG 线。",
+      "扫冰扫的不是冰，是给已经出手的决定再争取一点余地。",
+      "最后一壶才见真章，前面都是铺垫——工作也一样。",
+      "有旋转的壶才走得又远又稳，太直的路线反而容易偏。",
+      "大本营里离圆心最近的说了算，人生偶尔也要挤进核心圈。"
     );
   }
 })();
