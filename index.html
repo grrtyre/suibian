@@ -1573,6 +1573,7 @@
         <button data-tab="curl">🥌 随便冰壶</button>
         <button data-tab="balloon">🎈 随便热气球</button>
         <button data-tab="dive">🤿 随便跳水</button>
+        <button data-tab="archery">🏹 随便射箭</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8197,6 +8198,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="archery">
+    <h2>🏹 随便射箭</h2>
+    <p class="sub">奥运射箭场：摆动瞄准、振荡拉弓、读风放箭，六箭一轮冲击满环</p>
+    <style>
+      #archery .ac-wrap { max-width:420px; margin:0 auto; }
+      #archery .ac-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #archery .ac-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #archery .ac-hud b { font-weight:700; color:#ffd54f; }
+      #archery canvas { width:100%; max-width:380px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#0b2a4a; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #archery .ac-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="ac-wrap">
+      <div class="ac-hud">
+        <span>本箭 <b id="acNo">1/6</b></span>
+        <span>本轮 <b id="acTotal">0</b></span>
+        <span>最佳轮 <b id="acBest">0</b></span>
+        <span>X 环数 <b id="acX">0</b></span>
+      </div>
+      <canvas id="acCav" width="380" height="420"></canvas>
+      <p class="ac-help">
+        三步一箭：按住 / 空格开始瞄准（角度来回摆动），松开锁定角度；力度条自动振荡，再点一下放箭。<br>
+        每箭气流随机（↑ 托箭上飘 / ↓ 压箭下坠），读风微调角度与力度才是高手。<br>
+        侧视靶按命中点距靶心算环数（10 环制），正中内心记 X；飞过靶面或钉进草地都算脱靶 0 环。<br>
+        一轮 6 箭满分 60。射中 X 解锁「百步穿杨」、单轮 54 环解锁「奥运级射手」。战绩本地存档（suibian_archery）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -8823,6 +8851,7 @@
     if (id === "curl") curlRender();
     if (id === "balloon") balloonRender();
     if (id === "dive") diveRender();
+    if (id === "archery") archeryRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8879,6 +8908,7 @@
     if (id !== "curl" && typeof curlStop === "function") curlStop();
     if (id !== "balloon" && typeof balloonStop === "function") balloonStop();
     if (id !== "dive" && typeof diveStop === "function") diveStop();
+    if (id !== "archery" && typeof archeryStop === "function") archeryStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9065,6 +9095,7 @@
     curl: "随便冰壶 curl curling 冰壶 壶 投壶 扫冰 大本营 旋转 冬奥 雪 冰 对战 ai 人机 蓄力 瞭准 瞰准 体育 竞技",
     balloon: "随便热气球 balloon hot air 热气球 气球 飞行 飞天 升空 高度 燃料 风 星星 雷暴 飞鸟 躲避 摩天 冲刺 街机",
     dive: "随便跳水 dive diving 跳水 十米台 跳台 翻腾 抱膝 展体 压水花 入水 裁判 打分 奥运 水花 体育 竞技 满分 冠军",
+    archery: "随便射箭 archery 射箭 弓箭 弓 箭 靶 十环 靶心 奥运 拉弓 瞄准 风 气流 抛物线 体育 竞技 神射手 百步穿杨",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9311,6 +9342,7 @@ splitbill:"tools",
     curl:"games",
     balloon:"games",
     dive:"games",
+    archery:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -50756,6 +50788,365 @@ splitbill:"tools",
       "水花越小，掌声越大——人生很多事都是这样。",
       "站上十米台的那一刻，犹豫比失误更致命。",
       "拍在水面上也没关系，裁判记得的永远是你下一跳。"
+    );
+  }
+})();
+/* ===== 🏹 随便射箭 archery ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_archery";
+  var W = 380, H = 420;
+  var GROUND = 372, LX = 54, LY = 296;
+  var TX = 342, TY = 238, RW = 9;
+  var GRAV = 0.11, WCOEF = 0.012, WMAX = 3;
+  var ARROWS_PER_END = 6;
+  var BADGE_END = 54;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { best: 0, ends: 0, arrows: 0, tens: 0, xs: 0, aX: 0, aG: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.best = nInt(o.best); d.ends = nInt(o.ends); d.arrows = nInt(o.arrows);
+      d.tens = nInt(o.tens); d.xs = nInt(o.xs);
+      d.aX = o.aX ? 1 : 0; d.aG = o.aG ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  function newWind() { return Math.round((rnd() * 2 - 1) * WMAX * 10) / 10; }
+  function newGame() {
+    return {
+      phase: "idle", t: 0, ang: 0.2, power: 0,
+      x: LX, y: LY, vx: 0, vy: 0, wind: newWind(),
+      arrowIdx: 0, total: 0, shots: [], hits: [],
+      last: null, hitT: 0, grassT: 0
+    };
+  }
+
+  /* 瞄准角：0.06~0.62 rad 往返摆动 */
+  function angAt(t) { return 0.06 + 0.28 * (1 + Math.sin(t * 0.055 - Math.PI / 2)); }
+  /* 拉弓力度：0~1 往返振荡 */
+  function powerAt(t) { return 0.5 + 0.5 * Math.sin(t * 0.075 - Math.PI / 2); }
+  function speedOf(p) { return 8.5 + p * 7.5; }
+
+  function startAim(g) {
+    if (g.phase !== "idle") return false;
+    g.phase = "aim"; g.t = 0;
+    return true;
+  }
+  function lockAngle(g) {
+    if (g.phase !== "aim") return false;
+    g.ang = angAt(g.t);
+    g.phase = "draw"; g.t = 0; g.power = 0;
+    return true;
+  }
+  function shoot(g) {
+    if (g.phase !== "draw") return false;
+    var v = speedOf(g.power);
+    g.phase = "fly";
+    g.x = LX; g.y = LY;
+    g.vx = v * Math.cos(g.ang);
+    g.vy = -v * Math.sin(g.ang);
+    return true;
+  }
+
+  /* 环数：按命中点距靶心像素距离，每 RW 像素一环，X 为内心 */
+  function ringOf(dist) {
+    if (!isFinite(dist) || dist < 0) return 0;
+    if (dist >= RW * 10) return 0;
+    return 10 - Math.floor(dist / RW);
+  }
+  function isX(dist) { return dist <= 3; }
+
+  function scoreArrow(g, hitY, missed) {
+    if (g.phase !== "fly") return null;
+    var dist = missed ? Infinity : Math.abs(hitY - TY);
+    var ring = missed ? 0 : ringOf(dist);
+    var x10 = !missed && ring === 10 && isX(dist);
+    g.last = { ring: ring, x: x10, miss: ring === 0, hitY: hitY, wind: g.wind };
+    g.shots.push(x10 ? "X" : String(ring));
+    g.total += ring;
+    if (ring > 0) g.hits.push({ y: hitY, ring: ring });
+    g.arrowIdx++;
+    g.phase = "hit"; g.hitT = 0;
+    rec.arrows++;
+    if (ring === 10) rec.tens++;
+    if (x10) {
+      rec.xs++;
+      if (!rec.aX) { rec.aX = 1; try { bumpUsage("acx"); } catch (e1) {} }
+    }
+    if (g.arrowIdx >= ARROWS_PER_END) {
+      rec.ends++;
+      if (g.total > rec.best) rec.best = g.total;
+      if (!rec.aG && g.total >= BADGE_END) { rec.aG = 1; try { bumpUsage("acgold"); } catch (e2) {} }
+    }
+    saveRec();
+    return g.last;
+  }
+
+  function nextArrow(g) {
+    if (g.phase !== "hit" || g.hitT < 18) return false;
+    if (g.arrowIdx >= ARROWS_PER_END) { g.phase = "endOver"; return true; }
+    g.phase = "idle"; g.t = 0;
+    g.x = LX; g.y = LY; g.vx = 0; g.vy = 0;
+    g.wind = newWind();
+    return true;
+  }
+  function newEnd(g) {
+    if (g.phase !== "endOver") return false;
+    var d = newGame();
+    for (var k in d) if (Object.prototype.hasOwnProperty.call(d, k)) g[k] = d[k];
+    return true;
+  }
+
+  function step(g) {
+    g.grassT++;
+    if (g.phase === "aim" || g.phase === "draw") {
+      g.t++;
+      if (g.phase === "draw") g.power = powerAt(g.t);
+    } else if (g.phase === "fly") {
+      var px = g.x, py = g.y;
+      g.vy += GRAV - g.wind * WCOEF;
+      g.x += g.vx; g.y += g.vy;
+      if (g.x >= TX) {
+        var f = g.vx > 0 ? (TX - px) / (g.x - px) : 1;
+        var hy = py + (g.y - py) * f;
+        scoreArrow(g, hy, hy > GROUND);
+      } else if (g.y >= GROUND) {
+        scoreArrow(g, GROUND, true);
+      }
+    } else if (g.phase === "hit") {
+      g.hitT++;
+    }
+  }
+
+  /* ---------- 以下为 DOM / 绘制，仅浏览器路径 ---------- */
+  var cav = null, ctx = null, inited = false, raf = 0, active = false;
+
+  function ringColor(ring) {
+    if (ring >= 9) return "#ffd54f";
+    if (ring >= 7) return "#ef5350";
+    if (ring >= 5) return "#42a5f5";
+    if (ring >= 3) return "#455a64";
+    return "#eceff1";
+  }
+
+  function drawArcher(c, g) {
+    c.strokeStyle = "#ffe0b2"; c.lineWidth = 3; c.lineCap = "round";
+    c.beginPath(); c.moveTo(40, 300); c.lineTo(40, 340); c.stroke();
+    c.beginPath(); c.moveTo(40, 340); c.lineTo(32, 366); c.moveTo(40, 340); c.lineTo(48, 366); c.stroke();
+    c.fillStyle = "#ffcc80";
+    c.beginPath(); c.arc(40, 290, 6, 0, Math.PI * 2); c.fill();
+    /* 弓 */
+    var bend = g.phase === "draw" ? 4 + g.power * 7 : 4;
+    c.strokeStyle = "#8d6e63"; c.lineWidth = 3;
+    c.beginPath(); c.arc(52 - bend, 296, 22, -Math.PI / 2.6, Math.PI / 2.6); c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.55)"; c.lineWidth = 1;
+    var ty1 = 296 - 22 * Math.sin(Math.PI / 2.6), ty2 = 296 + 22 * Math.sin(Math.PI / 2.6);
+    var tx0 = 52 - bend + 22 * Math.cos(Math.PI / 2.6);
+    c.beginPath(); c.moveTo(tx0, ty1); c.lineTo(52 - bend - (g.phase === "draw" ? g.power * 10 : 0), 296); c.lineTo(tx0, ty2); c.stroke();
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    var c = ctx;
+    /* 天空与远山 */
+    var sky = c.createLinearGradient(0, 0, 0, GROUND);
+    sky.addColorStop(0, "#0b2a4a"); sky.addColorStop(1, "#38699e");
+    c.fillStyle = sky; c.fillRect(0, 0, W, GROUND);
+    c.fillStyle = "rgba(255,255,255,.10)";
+    c.beginPath(); c.moveTo(0, 210); c.lineTo(90, 130); c.lineTo(200, 205); c.lineTo(300, 150); c.lineTo(W, 200); c.lineTo(W, 210); c.closePath(); c.fill();
+    /* 草地 */
+    var gr = c.createLinearGradient(0, GROUND, 0, H);
+    gr.addColorStop(0, "#2e7d32"); gr.addColorStop(1, "#1b5e20");
+    c.fillStyle = gr; c.fillRect(0, GROUND, W, H - GROUND);
+    c.strokeStyle = "rgba(255,255,255,.18)"; c.lineWidth = 1;
+    c.beginPath();
+    for (var gx = 6; gx < W; gx += 14) {
+      var sw = Math.sin((gx + g.grassT * 0.7) * 0.2) * 2;
+      c.moveTo(gx, GROUND); c.lineTo(gx + sw, GROUND - 5);
+    }
+    c.stroke();
+    /* 靶：侧视条纹板 */
+    c.fillStyle = "#6d4c41"; c.fillRect(TX + 3, TY + RW * 10, 5, GROUND - TY - RW * 10);
+    for (var r = 10; r >= 1; r--) {
+      var half = (10 - r + 1) * RW;
+      c.fillStyle = ringColor(r);
+      c.fillRect(TX, TY - half, 10, RW);
+      c.fillRect(TX, TY + half - RW, 10, RW);
+    }
+    c.fillStyle = "#fff59d"; c.fillRect(TX, TY - 3, 10, 6);
+    /* 已中的箭 */
+    c.strokeStyle = "#eceff1"; c.lineWidth = 2;
+    for (var i = 0; i < g.hits.length; i++) {
+      var hh = g.hits[i];
+      c.beginPath(); c.moveTo(TX - 16, hh.y + 4); c.lineTo(TX + 2, hh.y); c.stroke();
+    }
+    /* 气流指示 */
+    c.textAlign = "center"; c.font = "bold 13px sans-serif";
+    c.fillStyle = g.wind > 0 ? "#80deea" : (g.wind < 0 ? "#ffab91" : "#cfd8dc");
+    var wt = g.wind === 0 ? "无风" : (g.wind > 0 ? "气流 ↑ " + g.wind : "气流 ↓ " + (-g.wind));
+    c.fillText(wt, W - 66, 28);
+    /* 瞄准线 */
+    if (g.phase === "aim" || g.phase === "draw") {
+      var a = g.phase === "aim" ? angAt(g.t) : g.ang;
+      c.strokeStyle = "rgba(255,213,79,.75)"; c.lineWidth = 2;
+      c.setLineDash([5, 5]);
+      c.beginPath(); c.moveTo(LX, LY); c.lineTo(LX + Math.cos(a) * 70, LY - Math.sin(a) * 70); c.stroke();
+      c.setLineDash([]);
+    }
+    /* 力度条 */
+    if (g.phase === "draw") {
+      c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(W / 2 - 70, 44, 140, 14);
+      c.fillStyle = g.power > 0.8 ? "#ffd54f" : "#4fc3f7";
+      c.fillRect(W / 2 - 68, 46, 136 * g.power, 10);
+      c.strokeStyle = "#fff"; c.lineWidth = 1; c.strokeRect(W / 2 - 70, 44, 140, 14);
+    }
+    /* 飞行中的箭 */
+    if (g.phase === "fly") {
+      var na = Math.atan2(g.vy, g.vx);
+      c.save(); c.translate(g.x, g.y); c.rotate(na);
+      c.strokeStyle = "#eceff1"; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(-14, 0); c.lineTo(4, 0); c.stroke();
+      c.fillStyle = "#ffd54f";
+      c.beginPath(); c.moveTo(4, 0); c.lineTo(-1, -3); c.lineTo(-1, 3); c.closePath(); c.fill();
+      c.restore();
+    }
+    drawArcher(c, g);
+    /* 文案层 */
+    c.textAlign = "center";
+    if (g.phase === "hit" && g.last) {
+      c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(60, 120, W - 120, 110);
+      c.fillStyle = "#fff"; c.font = "bold 15px sans-serif";
+      c.fillText(g.last.miss ? "💨 脱靶了！" : (g.last.x ? "🎯 正中靶心 X！" : "命中 " + g.last.ring + " 环"), W / 2, 150);
+      c.font = "bold 24px sans-serif"; c.fillStyle = "#ffd54f";
+      c.fillText("+" + g.last.ring, W / 2, 184);
+      c.font = "12px sans-serif"; c.fillStyle = "#b0bec5";
+      c.fillText(g.arrowIdx >= ARROWS_PER_END ? "点击查看本轮总成绩" : "点击射下一箭", W / 2, 214);
+    } else if (g.phase === "endOver") {
+      c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(50, 110, W - 100, 150);
+      c.fillStyle = "#fff"; c.font = "bold 16px sans-serif";
+      c.fillText("🏁 本轮结束", W / 2, 140);
+      c.font = "bold 26px sans-serif"; c.fillStyle = "#ffd54f";
+      c.fillText(g.total + " / 60", W / 2, 176);
+      c.font = "12px sans-serif"; c.fillStyle = "#b0bec5";
+      c.fillText("六箭: " + g.shots.join(" / "), W / 2, 204);
+      c.fillText(g.total >= BADGE_END ? "奥运级水准！" : "点击再来一轮", W / 2, 240);
+    } else if (g.phase === "idle") {
+      c.fillStyle = "rgba(255,255,255,.85)"; c.font = "13px sans-serif";
+      c.fillText("第 " + (g.arrowIdx + 1) + " / " + ARROWS_PER_END + " 箭 — 按住选角度", W / 2, 26);
+    } else if (g.phase === "aim") {
+      c.fillStyle = "rgba(255,255,255,.7)"; c.font = "12px sans-serif";
+      c.fillText("松开锁定角度", W / 2, 26);
+    } else if (g.phase === "draw") {
+      c.fillStyle = "rgba(255,255,255,.7)"; c.font = "12px sans-serif";
+      c.fillText("再点一下放箭（注意气流）", W / 2, 26);
+    }
+  }
+
+  function acSync() {
+    var e1 = document.getElementById("acNo"), e2 = document.getElementById("acTotal"),
+      e3 = document.getElementById("acBest"), e4 = document.getElementById("acX");
+    if (e1 && g) e1.textContent = Math.min(g.arrowIdx + (g.phase === "hit" || g.phase === "endOver" ? 0 : 1), ARROWS_PER_END) + "/" + ARROWS_PER_END;
+    if (e2 && g) e2.textContent = String(g.total);
+    if (e3) e3.textContent = String(rec.best);
+    if (e4) e4.textContent = String(rec.xs);
+  }
+
+  var g = null;
+
+  function press() {
+    if (!g) return;
+    if (g.phase === "idle") { startAim(g); try { bumpUsage("archery"); } catch (e) {} }
+    else if (g.phase === "draw") shoot(g);
+  }
+  function release() {
+    if (!g) return;
+    if (g.phase === "aim") lockAngle(g);
+    else if (g.phase === "hit") { nextArrow(g); acSync(); }
+    else if (g.phase === "endOver") { newEnd(g); acSync(); }
+  }
+
+  function onKeyDown(e) {
+    if (!active) return;
+    if (e.code === "Space") { e.preventDefault(); if (!e.repeat) press(); }
+  }
+  function onKeyUp(e) {
+    if (!active) return;
+    if (e.code === "Space") { e.preventDefault(); release(); }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g) { step(g); acSync(); draw(); }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("acCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); press(); });
+    cav.addEventListener("pointerup", function (e) { e.preventDefault(); release(); });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.archeryRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    acSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.archeryStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__acTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    newGame: newGame, newWind: newWind, angAt: angAt, powerAt: powerAt, speedOf: speedOf,
+    startAim: startAim, lockAngle: lockAngle, shoot: shoot,
+    ringOf: ringOf, isX: isX, scoreArrow: scoreArrow, nextArrow: nextArrow, newEnd: newEnd,
+    step: step, draw: draw, acSync: acSync, press: press, release: release,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, GROUND: GROUND, LX: LX, LY: LY, TX: TX, TY: TY,
+      RW: RW, GRAV: GRAV, WCOEF: WCOEF, WMAX: WMAX,
+      ARROWS_PER_END: ARROWS_PER_END, BADGE_END: BADGE_END }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🏹", name: "百步穿杨", desc: "在随便射箭正中靶心 X 环", test: function (u) { return (u.acx || 0) >= 1; } },
+      { emoji: "🥇", name: "奥运级射手", desc: "在随便射箭单轮六箭射出 54 环以上", test: function (u) { return (u.acgold || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "拉满弓再撒放，人生的箭没有回头路。",
+      "风在动、靶不动，心一静箭就正。",
+      "十环靠的不是运气，是把同一件事重复一万遍。",
+      "瞄得太久手会抖，人生有时候要敢于撒手。",
+      "脱靶不可怕，可怕的是不敢再搭下一支箭。"
     );
   }
 })();
