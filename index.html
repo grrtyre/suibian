@@ -1576,6 +1576,7 @@
         <button data-tab="archery">🏹 随便射箭</button>
         <button data-tab="lift">🏋️ 随便举重</button>
         <button data-tab="climb">🧗 随便攀岩</button>
+        <button data-tab="tramp">🤸 随便蹦床</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8281,6 +8282,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="tramp">
+    <h2>🤸 随便蹦床</h2>
+    <p class="sub">十跳套路蹦床赛：压床最深点蹬床起跳，空中抱膝翻腾、展体停转，指针回正稳稳落床</p>
+    <style>
+      #tramp .tp-wrap { max-width:420px; margin:0 auto; }
+      #tramp .tp-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #tramp .tp-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #tramp .tp-hud b { font-weight:700; color:#4dd0e1; }
+      #tramp canvas { width:100%; max-width:380px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#101b33; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #tramp .tp-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="tp-wrap">
+      <div class="tp-hud">
+        <span>跳次 <b id="tpNo">1/10</b></span>
+        <span>总分 <b id="tpTotal">0.0</b></span>
+        <span>上一跳 <b id="tpLast">—</b></span>
+        <span>最佳 <b id="tpBest">—</b></span>
+      </div>
+      <canvas id="tpCav" width="380" height="480"></canvas>
+      <p class="tp-help">
+        点击 / 空格开始一套 10 跳；落床后床面会下压回弹，在压到最深（力度条进金区）那一刻再点一下蹬床，蹬得越准弹得越高；<br>
+        空中按住（鼠标 / 空格 / ↑ / W）＝抱膝快速翻腾，松开＝展体几乎停转，右上角表盘指针回到正上方时落床最稳；<br>
+        每跳得分 = 高度分 + 翻腾周数 ×1.6 + 落床执行分，落床偏差太大直接摔垫、套路当场中断；<br>
+        单跳 3 周以上翻腾稳稳落床解锁「空中飞人」、十跳无摔总分 75+ 解锁「蹦床全能王」。战绩本地存档（suibian_tramp）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -8910,6 +8938,7 @@
     if (id === "archery") archeryRender();
     if (id === "lift") liftRender();
     if (id === "climb") climbRender();
+    if (id === "tramp") trampRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8969,6 +8998,7 @@
     if (id !== "archery" && typeof archeryStop === "function") archeryStop();
     if (id !== "lift" && typeof liftStop === "function") liftStop();
     if (id !== "climb" && typeof climbStop === "function") climbStop();
+    if (id !== "tramp" && typeof trampStop === "function") trampStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9157,6 +9187,8 @@
     dive: "随便跳水 dive diving 跳水 十米台 跳台 翻腾 抱膝 展体 压水花 入水 裁判 打分 奥运 水花 体育 竞技 满分 冠军",
     archery: "随便射箭 archery 射箭 弓箭 弓 箭 靶 十环 靶心 奥运 拉弓 瞄准 风 气流 抛物线 体育 竞技 神射手 百步穿杨",
     lift: "随便举重 lift 举重 杠铃 挺举 抓举 大力士 健身 撸铁 平衡 白灯 裁判 公斤 力量 体育 竞技 奥运 试举",
+    climb: "随便攀岩 climb climbing 攀岩 速度攀岩 岩壁 岩点 登顶 计时 泵感 打滑 幽灵 蜘蛛人 体育 竞技 奥运",
+    tramp: "随便蹦床 tramp trampoline 蹦床 弹床 空翻 翻腾 抱膝 展体 落床 套路 十跳 弹跳 空中飞人 体育 竞技 奥运",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9406,6 +9438,7 @@ splitbill:"tools",
     archery:"games",
     lift:"games",
     climb:"games",
+    tramp:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -51947,6 +51980,367 @@ splitbill:"tools",
       "攀岩教会人的第一课：抓得太紧，反而掉得更快。",
       "别管别人爬多快，你的路线只有你能爬。",
       "登顶那一下其实很平静，热血都用在半路上了。"
+    );
+  }
+})();
+/* ===== 🤸 随便蹦床 tramp ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_tramp";
+  var W = 380, H = 480;
+  var BED_Y = 400;
+  var CT = 36;
+  var GRAV = 0.5;
+  var V0 = 9, VP = 9;
+  var JUMPS = 10;
+  var ROT_V = 0.30, ROT_S = 0.008;
+  var LAND_T = 42, CRASH_T = 66;
+  var CLEAN = 0.12, WOBBLE = 0.30;
+  var FLIP_PT = 1.6;
+  var KING_PT = 75;
+  var TAU = Math.PI * 2;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function nNum(v) { v = Number(v); return isFinite(v) && v > 0 ? Math.round(v * 10) / 10 : 0; }
+  function defRec() {
+    return { best: 0, routines: 0, jumps: 0, crashes: 0, cleans: 0, aH: 0, aP: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.best = nNum(o.best); d.routines = nInt(o.routines); d.jumps = nInt(o.jumps);
+      d.crashes = nInt(o.crashes); d.cleans = nInt(o.cleans);
+      d.aH = o.aH ? 1 : 0; d.aP = o.aP ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function depthAt(t) { return Math.sin(Math.PI * Math.min(Math.max(t, 0), CT) / CT); }
+  function vOf(p) { return V0 + Math.min(Math.max(p, 0), 1) * VP; }
+  function flipsOf(rot) { return Math.round(rot / TAU); }
+  function errOf(rot) { return Math.abs(rot - flipsOf(rot) * TAU) / TAU; }
+  function landQual(ef) { return ef <= CLEAN ? 2 : (ef <= WOBBLE ? 1 : 0); }
+  function execOf(ef) { return Math.max(0, 2 * (1 - ef / WOBBLE)); }
+  function heightOf(v) { return (v - V0) / VP * 3; }
+  function jumpScore(v, k, ef) {
+    if (landQual(ef) === 0) return 0;
+    return Math.round((heightOf(v) + k * FLIP_PT + execOf(ef)) * 10) / 10;
+  }
+  function fmtS(n) { return (Math.round(n * 10) / 10).toFixed(1); }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, jumpIdx: 0, total: 0, scores: [],
+      y: BED_Y, vy: 0, rot: 0, tuck: false, kicked: false,
+      p: 0, v: 0, lastSc: 0, lastK: 0, lastQ: -1,
+      crashed: false, done: false, msg: ""
+    };
+  }
+  var g = newGame();
+
+  function startRoutine(gg) {
+    if (gg.phase !== "idle") return false;
+    gg.phase = "drop"; gg.jumpIdx = 0; gg.total = 0; gg.scores = [];
+    gg.y = BED_Y - 150; gg.vy = 0; gg.rot = 0; gg.tuck = false;
+    gg.crashed = false; gg.done = false; gg.msg = ""; gg.lastQ = -1;
+    return true;
+  }
+
+  function launch(gg, p) {
+    gg.p = p; gg.v = vOf(p);
+    gg.vy = -gg.v; gg.y = BED_Y;
+    gg.rot = 0; gg.tuck = false;
+    gg.phase = "air"; gg.t = 0;
+  }
+
+  function kick(gg) {
+    if (gg.phase !== "compress" || gg.kicked) return false;
+    gg.kicked = true;
+    launch(gg, depthAt(gg.t));
+    return true;
+  }
+
+  function touchdown(gg) {
+    var ef = errOf(gg.rot);
+    var k = flipsOf(gg.rot);
+    var q = landQual(ef);
+    var sc = jumpScore(gg.v, k, ef);
+    gg.lastSc = sc; gg.lastK = k; gg.lastQ = q;
+    gg.total = Math.round((gg.total + sc) * 10) / 10;
+    gg.scores.push(sc);
+    gg.jumpIdx++;
+    rec.jumps++;
+    if (q === 2) {
+      rec.cleans++;
+      if (!rec.aH && k >= 3) { rec.aH = 1; try { bumpUsage("tpfly"); } catch (e1) {} }
+    }
+    if (q === 0) {
+      gg.crashed = true;
+      rec.crashes++;
+      gg.msg = "落床失衡摔垫了！套路中断";
+    } else {
+      gg.msg = (q === 2 ? "稳稳落床！" : "落床有点晃…") + (k > 0 ? " " + k + " 周翻腾" : "") + " +" + fmtS(sc);
+    }
+    gg.phase = "land"; gg.t = 0;
+    saveRec();
+  }
+
+  function endRoutine(gg) {
+    gg.done = true;
+    rec.routines++;
+    if (gg.total > rec.best) rec.best = gg.total;
+    if (!rec.aP && !gg.crashed && gg.jumpIdx >= JUMPS && gg.total >= KING_PT) {
+      rec.aP = 1; try { bumpUsage("tpking"); } catch (e2) {} }
+    gg.phase = "result"; gg.t = 0;
+    saveRec();
+  }
+
+  function step(gg) {
+    gg.t++;
+    if (gg.phase === "drop") {
+      gg.vy += GRAV; gg.y += gg.vy;
+      if (gg.y >= BED_Y) { gg.y = BED_Y; gg.phase = "compress"; gg.t = 0; gg.kicked = false; }
+    } else if (gg.phase === "compress") {
+      if (gg.t > CT && !gg.kicked) { gg.kicked = true; launch(gg, 0.3); }
+    } else if (gg.phase === "air") {
+      gg.rot += gg.tuck ? ROT_V : ROT_S;
+      gg.vy += GRAV; gg.y += gg.vy;
+      if (gg.vy > 0 && gg.y >= BED_Y) { gg.y = BED_Y; touchdown(gg); }
+    } else if (gg.phase === "land") {
+      if (gg.crashed) {
+        if (gg.t >= CRASH_T) endRoutine(gg);
+      } else if (gg.jumpIdx >= JUMPS) {
+        if (gg.t >= LAND_T) endRoutine(gg);
+      } else if (gg.t >= LAND_T) {
+        gg.phase = "compress"; gg.t = 0; gg.kicked = false; gg.msg = "";
+      }
+    }
+  }
+
+  /* ---- 输入 ---- */
+  var cav = null, ctx = null, raf = 0, inited = false, active = false;
+
+  function press(gg) {
+    gg = gg || g;
+    if (gg.phase === "idle") {
+      if (gg.t < 2) { try { bumpUsage("tramp"); } catch (e) {} }
+      startRoutine(gg);
+    } else if (gg.phase === "compress") {
+      kick(gg);
+    } else if (gg.phase === "air") {
+      gg.tuck = true;
+    } else if (gg.phase === "result") {
+      g = newGame();
+      startRoutine(g);
+    }
+    tpSync();
+  }
+  function release(gg) {
+    gg = gg || g;
+    if (gg.phase === "air") gg.tuck = false;
+  }
+
+  function onKeyDown(e) {
+    if (!active) return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "ArrowUp" || k === "w" || k === "W") {
+      e.preventDefault();
+      if (e.repeat) return;
+      press(g);
+    }
+  }
+  function onKeyUp(e) {
+    if (!active) return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "ArrowUp" || k === "w" || k === "W") release(g);
+  }
+
+  function tpSync() {
+    try {
+      var el;
+      el = document.getElementById("tpNo"); if (el) el.textContent = Math.min(g.jumpIdx + (g.phase === "result" || g.done ? 0 : 1), JUMPS) + "/" + JUMPS;
+      el = document.getElementById("tpTotal"); if (el) el.textContent = fmtS(g.total);
+      el = document.getElementById("tpLast"); if (el) el.textContent = g.lastQ < 0 ? "—" : fmtS(g.lastSc);
+      el = document.getElementById("tpBest"); if (el) el.textContent = rec.best > 0 ? fmtS(rec.best) : "—";
+    } catch (e) {}
+  }
+
+  /* ---- 绘制 ---- */
+  function drawAthlete(c, x, y, rot, tuck, pose) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(rot);
+    c.strokeStyle = "#ffe0b2"; c.fillStyle = "#ffe0b2"; c.lineWidth = 4;
+    if (tuck) {
+      c.beginPath(); c.arc(0, 0, 14, 0, TAU); c.stroke();
+      c.beginPath(); c.arc(0, -13, 7, 0, TAU); c.fill();
+      c.beginPath(); c.moveTo(-8, 4); c.lineTo(8, 4); c.stroke();
+    } else {
+      c.beginPath(); c.arc(0, -26, 8, 0, TAU); c.fill();
+      c.beginPath(); c.moveTo(0, -18); c.lineTo(0, 12); c.stroke();
+      if (pose === "arms") {
+        c.beginPath(); c.moveTo(0, -14); c.lineTo(-12, -34); c.moveTo(0, -14); c.lineTo(12, -34); c.stroke();
+      } else {
+        c.beginPath(); c.moveTo(0, -12); c.lineTo(-12, 0); c.moveTo(0, -12); c.lineTo(12, 0); c.stroke();
+      }
+      c.beginPath(); c.moveTo(0, 12); c.lineTo(-9, 30); c.moveTo(0, 12); c.lineTo(9, 30); c.stroke();
+    }
+    c.restore();
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var c = ctx, i;
+    var grd = c.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#101b33"); grd.addColorStop(1, "#25355c");
+    c.fillStyle = grd; c.fillRect(0, 0, W, H);
+    c.fillStyle = "rgba(255,255,255,.05)";
+    for (i = 0; i < 5; i++) c.fillRect(18 + i * 74, 26, 46, 54);
+
+    /* 床面与弹床架 */
+    var sag = 0;
+    if (g.phase === "compress") sag = depthAt(g.t) * 26;
+    var cx = W / 2;
+    c.strokeStyle = "#90a4ae"; c.lineWidth = 5;
+    c.beginPath(); c.moveTo(56, BED_Y + 44); c.lineTo(56, H - 8); c.moveTo(W - 56, BED_Y + 44); c.lineTo(W - 56, H - 8); c.stroke();
+    c.strokeStyle = "#4dd0e1"; c.lineWidth = 6;
+    c.beginPath(); c.moveTo(48, BED_Y + 34);
+    c.quadraticCurveTo(cx, BED_Y + 34 + sag * 2, W - 48, BED_Y + 34);
+    c.stroke();
+    c.strokeStyle = "rgba(255,255,255,.25)"; c.lineWidth = 2;
+    for (i = 1; i < 8; i++) {
+      var sx = 48 + (W - 96) * i / 8;
+      c.beginPath(); c.moveTo(sx, BED_Y + 35 + Math.sin(Math.PI * i / 8) * sag * 2); c.lineTo(sx - 6, BED_Y + 52); c.stroke();
+    }
+
+    /* 运动员 */
+    var ay = g.y - 30;
+    if (g.phase === "compress") ay = BED_Y - 26 + sag * 1.4;
+    if (g.phase === "idle" || g.phase === "result") ay = BED_Y - 26;
+    var pose = g.phase === "air" ? "arms" : "down";
+    var rot = g.phase === "air" ? g.rot : (g.phase === "land" && g.crashed ? Math.PI / 2 : 0);
+    drawAthlete(c, cx, ay, rot, g.phase === "air" && g.tuck, pose);
+
+    /* 压床力度条 */
+    if (g.phase === "compress") {
+      var p = depthAt(g.t);
+      c.fillStyle = "rgba(0,0,0,.4)";
+      c.fillRect(60, 96, 260, 16);
+      c.fillStyle = "rgba(255,213,79,.25)"; c.fillRect(60 + 260 * 0.84, 96, 260 * 0.16, 16);
+      c.fillStyle = p >= 0.92 ? "#ffd54f" : "#4dd0e1";
+      c.fillRect(60, 96, 260 * p, 16);
+      c.fillStyle = "rgba(255,255,255,.85)"; c.font = "13px system-ui"; c.textAlign = "center";
+      c.fillText("蹬床时机：床压到最深再点！", W / 2, 84);
+    }
+
+    /* 空中转体表盘 */
+    if (g.phase === "air") {
+      var dx = W - 52, dy = 64;
+      c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 2;
+      c.beginPath(); c.arc(dx, dy, 22, 0, TAU); c.stroke();
+      c.strokeStyle = "#ffd54f";
+      c.beginPath(); c.moveTo(dx, dy - 26); c.lineTo(dx, dy - 18); c.stroke();
+      var a = g.rot % TAU;
+      c.strokeStyle = "#4dd0e1"; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(dx, dy); c.lineTo(dx + Math.sin(a) * 20, dy - Math.cos(a) * 20); c.stroke();
+      c.fillStyle = "rgba(255,255,255,.85)"; c.font = "12px system-ui"; c.textAlign = "center";
+      c.fillText((Math.round(g.rot / TAU * 10) / 10) + " 周", dx, dy + 40);
+    }
+
+    /* 文案 */
+    c.fillStyle = "rgba(255,255,255,.92)"; c.font = "bold 15px system-ui"; c.textAlign = "center";
+    if (g.phase === "idle") {
+      c.fillText("蹦床十跳套路：点击 / 空格开始", W / 2, 56);
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.7)";
+      c.fillText("压床最深点蹬床跳更高，空中按住抱膝翻腾、松开展体停转", W / 2, 78);
+      c.fillText("指针回到正上方时落床最稳", W / 2, 96);
+    } else if (g.phase === "air") {
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.7)";
+      c.fillText("按住＝抱膝翻腾 · 松开＝展体停转", W / 2, 30);
+    } else if (g.phase === "land") {
+      c.fillStyle = g.crashed ? "#ef9a9a" : (g.lastQ === 2 ? "#ffd54f" : "#ffcc80");
+      c.fillText(g.msg, W / 2, 56);
+    } else if (g.phase === "result") {
+      c.fillStyle = g.crashed ? "#ef9a9a" : "#ffd54f";
+      c.fillText(g.crashed ? "套路中断，总分 " + fmtS(g.total) : "十跳完赛！总分 " + fmtS(g.total), W / 2, 56);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.75)";
+      c.fillText(g.total >= rec.best && g.total > 0 ? "生涯最佳！点击再来一套" : "点击再来一套", W / 2, 80);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(g);
+    if (g.phase !== "idle") tpSync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("tpCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); press(g); });
+    cav.addEventListener("pointerup", function (e) { e.preventDefault(); release(g); });
+    cav.addEventListener("pointercancel", function () { release(g); });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.trampRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    tpSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.trampStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__tpTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    newGame: newGame, startRoutine: startRoutine, launch: launch, kick: kick,
+    depthAt: depthAt, vOf: vOf, flipsOf: flipsOf, errOf: errOf,
+    landQual: landQual, execOf: execOf, heightOf: heightOf, jumpScore: jumpScore,
+    fmtS: fmtS, touchdown: touchdown, endRoutine: endRoutine,
+    step: step, draw: draw, tpSync: tpSync, press: press, release: release,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, BED_Y: BED_Y, CT: CT, GRAV: GRAV, V0: V0, VP: VP,
+      JUMPS: JUMPS, ROT_V: ROT_V, ROT_S: ROT_S, LAND_T: LAND_T, CRASH_T: CRASH_T,
+      CLEAN: CLEAN, WOBBLE: WOBBLE, FLIP_PT: FLIP_PT, KING_PT: KING_PT, TAU: TAU }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🤸", name: "空中飞人", desc: "在随便蹦床单跳完成 3 周以上翻腾并稳稳落床", test: function (u) { return (u.tpfly || 0) >= 1; } },
+      { emoji: "🏆", name: "蹦床全能王", desc: "在随便蹦床十跳无摔完赛且总分 75 分以上", test: function (u) { return (u.tpking || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "蹦床的秘诀：想跳得高，先把床压到最深。",
+      "人生和空翻一样，转出去多少，就得想好怎么收回来。",
+      "落地不稳没关系，床会再把你弹起来的。",
+      "在空中慌没有用，抱紧自己转完这一周再说。",
+      "十跳套路最难的不是第一跳，是摔过之后的下一跳。"
     );
   }
 })();
