@@ -1577,6 +1577,7 @@
         <button data-tab="lift">🏋️ 随便举重</button>
         <button data-tab="climb">🧗 随便攀岩</button>
         <button data-tab="tramp">🤸 随便蹦床</button>
+        <button data-tab="horse">🏇 随便马术</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8309,6 +8310,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="horse">
+    <h2>🏇 随便马术</h2>
+    <p class="sub">场地障碍赛：策马飞驰跳过 10 道横杆，起跳点决定一切——太早掉杆，太晚拒跳</p>
+    <style>
+      #horse .hs-wrap { max-width:420px; margin:0 auto; }
+      #horse .hs-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #horse .hs-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #horse .hs-hud b { font-weight:700; color:#4dd0e1; }
+      #horse canvas { width:100%; max-width:380px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#101b33; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #horse .hs-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="hs-wrap">
+      <div class="hs-hud">
+        <span>障碍 <b id="hsObs">0/10</b></span>
+        <span>罚分 <b id="hsFault">0</b></span>
+        <span>用时 <b id="hsTime">0.0s</b></span>
+        <span>最佳 <b id="hsBest">—</b></span>
+      </div>
+      <canvas id="hsCav" width="380" height="420"></canvas>
+      <p class="hs-help">
+        点击 / 空格出发，马匹自动飞驰，临近障碍时点一下（空格 / ↑ / W）起跳；<br>
+        起跳点决定一切：太早会在下落时挂杆，太晚直接拒跳撞杆，宽的双横木要跳得更饱满才能双杆全过；<br>
+        每次掉杆或拒跳 +4 罚分，拒跳还会踉跄浪费时间；成绩先比罚分再比用时；<br>
+        零罚分完赛解锁「零罚完赛」、十道全部完美腾越（带 ★）解锁「人马合一」。战绩本地存档（suibian_horse）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -8939,6 +8967,7 @@
     if (id === "lift") liftRender();
     if (id === "climb") climbRender();
     if (id === "tramp") trampRender();
+    if (id === "horse") horseRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8999,6 +9028,7 @@
     if (id !== "lift" && typeof liftStop === "function") liftStop();
     if (id !== "climb" && typeof climbStop === "function") climbStop();
     if (id !== "tramp" && typeof trampStop === "function") trampStop();
+    if (id !== "horse" && typeof horseStop === "function") horseStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9189,6 +9219,7 @@
     lift: "随便举重 lift 举重 杠铃 挺举 抓举 大力士 健身 撸铁 平衡 白灯 裁判 公斤 力量 体育 竞技 奥运 试举",
     climb: "随便攀岩 climb climbing 攀岩 速度攀岩 岩壁 岩点 登顶 计时 泵感 打滑 幽灵 蜘蛛人 体育 竞技 奥运",
     tramp: "随便蹦床 tramp trampoline 蹦床 弹床 空翻 翻腾 抱膝 展体 落床 套路 十跳 弹跳 空中飞人 体育 竞技 奥运",
+    horse: "随便马术 horse equestrian 马术 骑马 障碍赛 跳马 骏马 骑手 横杆 罚分 独角兽 赛马 体育 竞技 奥运",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9439,6 +9470,7 @@ splitbill:"tools",
     lift:"games",
     climb:"games",
     tramp:"games",
+    horse:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -52341,6 +52373,393 @@ splitbill:"tools",
       "落地不稳没关系，床会再把你弹起来的。",
       "在空中慌没有用，抱紧自己转完这一周再说。",
       "十跳套路最难的不是第一跳，是摔过之后的下一跳。"
+    );
+  }
+})();
+/* ===== 🏇 随便马术 horse ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_horse";
+  var W = 380, H = 420;
+  var GROUND = 330;
+  var HX = 90;
+  var SPEED = 6;
+  var VY = 9.6, GRAV = 0.6;
+  var AIRT = 32;
+  var N = 10;
+  var PERF = 10;
+  var FAULT = 4;
+  var ST = 45;
+  var READY_T = 45;
+  var TAU = Math.PI * 2;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { bestF: 0, bestT: 0, rounds: 0, clears: 0, knocks: 0, perfects: 0, aC: 0, aO: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.bestF = nInt(o.bestF); d.bestT = nInt(o.bestT);
+      d.rounds = nInt(o.rounds); d.clears = nInt(o.clears);
+      d.knocks = nInt(o.knocks); d.perfects = nInt(o.perfects);
+      d.aC = o.aC ? 1 : 0; d.aO = o.aO ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function heightAt(t) {
+    if (t <= 0 || t >= AIRT) return -1;
+    return VY * t - 0.5 * GRAV * t * t;
+  }
+  function marginOf(t1, oh, ow) {
+    var h1 = heightAt(t1);
+    if (h1 < 0) return -999;
+    var m = h1 - oh;
+    if (ow > 0) {
+      var h2 = heightAt(t1 + ow / SPEED);
+      var m2 = h2 - oh;
+      if (m2 < m) m = m2;
+    }
+    return m;
+  }
+  function tierOf(m) { return m <= -900 ? -1 : (m < 0 ? 0 : (m >= PERF ? 2 : 1)); }
+  function fmtT(ms) { return (Math.round(ms / 100) / 10).toFixed(1) + "s"; }
+  function fmtBest(r) { return r.bestT > 0 ? r.bestF + "罚/" + fmtT(r.bestT) : "—"; }
+  function timeMsOf(frames) { return Math.round(frames * 1000 / 60); }
+  function betterThan(f, t, r) {
+    return r.bestT === 0 || f < r.bestF || (f === r.bestF && t < r.bestT);
+  }
+
+  function makeCourse() {
+    var arr = [], x = 560, hs = [40, 52, 64], i;
+    for (i = 0; i < N; i++) {
+      var w = (i % 3 === 2 && i !== N - 1) ? 26 : 0;
+      var h = i === N - 1 ? 64 : hs[Math.floor(rnd() * 3) % 3];
+      if (w > 0 && h > 52) h = 52;
+      arr.push({ x: x, h: h, w: w, knocked: 0, res: -9 });
+      x += 430 + Math.floor(rnd() * 3) * 60;
+    }
+    return arr;
+  }
+
+  function newGame() {
+    var course = makeCourse();
+    return {
+      phase: "idle", t: 0, wx: 0, frames: 0,
+      air: false, airT: 0, stumble: 0, idx: 0,
+      faults: 0, rubs: 0, perf: 0, knocksIn: 0,
+      course: course, finishX: course[N - 1].x + 360,
+      timeMs: 0, msg: "", msgT: 0, done: false
+    };
+  }
+  var g = newGame();
+
+  function startRound(gg) {
+    if (gg.phase !== "idle") return false;
+    gg.phase = "ready"; gg.t = 0;
+    return true;
+  }
+
+  function jump(gg) {
+    if (gg.phase !== "run" || gg.air || gg.stumble > 0) return false;
+    gg.air = true; gg.airT = 0;
+    return true;
+  }
+
+  function crossObstacle(gg) {
+    var o = gg.course[gg.idx];
+    var m = gg.air ? marginOf(gg.airT, o.h, o.w) : -999;
+    var tier = tierOf(m);
+    o.res = tier;
+    if (tier === -1) {
+      o.knocked = 1;
+      gg.faults += FAULT; gg.knocksIn++; gg.stumble = ST;
+      gg.msg = "拒跳撞杆！+4 罚分"; gg.msgT = 60;
+      rec.knocks++;
+    } else if (tier === 0) {
+      o.knocked = 1;
+      gg.faults += FAULT; gg.knocksIn++;
+      gg.msg = "碰落横杆！+4 罚分"; gg.msgT = 60;
+      rec.knocks++;
+    } else if (tier === 2) {
+      gg.perf++;
+      gg.msg = "完美腾越！"; gg.msgT = 45;
+      rec.perfects++;
+    } else {
+      gg.rubs++;
+      gg.msg = "擦杆而过…有惊无险"; gg.msgT = 45;
+    }
+    gg.idx++;
+    saveRec();
+  }
+
+  function endRound(gg) {
+    gg.done = true;
+    gg.timeMs = timeMsOf(gg.frames);
+    rec.rounds++;
+    if (gg.faults === 0) {
+      rec.clears++;
+      if (!rec.aC) { rec.aC = 1; try { bumpUsage("hsclear"); } catch (e1) {} }
+      if (!rec.aO && gg.perf >= N) { rec.aO = 1; try { bumpUsage("hsone"); } catch (e2) {} }
+    }
+    if (betterThan(gg.faults, gg.timeMs, rec)) {
+      rec.bestF = gg.faults; rec.bestT = gg.timeMs;
+    }
+    gg.phase = "result"; gg.t = 0;
+    saveRec();
+  }
+
+  function step(gg) {
+    gg.t++;
+    if (gg.phase === "ready") {
+      if (gg.t >= READY_T) { gg.phase = "run"; gg.t = 0; }
+      return;
+    }
+    if (gg.phase !== "run") return;
+    gg.frames++;
+    if (gg.msgT > 0) gg.msgT--;
+    if (gg.stumble > 0) { gg.stumble--; return; }
+    gg.wx += SPEED;
+    if (gg.air) {
+      gg.airT++;
+      if (gg.airT >= AIRT) { gg.air = false; gg.airT = 0; }
+    }
+    while (gg.idx < N && gg.wx >= gg.course[gg.idx].x) crossObstacle(gg);
+    if (gg.wx >= gg.finishX) endRound(gg);
+  }
+
+  /* ---- 输入 ---- */
+  var cav = null, ctx = null, raf = 0, inited = false, active = false;
+
+  function press(gg) {
+    gg = gg || g;
+    if (gg.phase === "idle") {
+      if (gg.t < 2) { try { bumpUsage("horse"); } catch (e) {} }
+      startRound(gg);
+    } else if (gg.phase === "run") {
+      jump(gg);
+    } else if (gg.phase === "result") {
+      g = newGame();
+      startRound(g);
+    }
+    hsSync();
+  }
+
+  function onKeyDown(e) {
+    if (!active) return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "ArrowUp" || k === "w" || k === "W") {
+      e.preventDefault();
+      if (e.repeat) return;
+      press(g);
+    }
+  }
+
+  function hsSync() {
+    try {
+      var el;
+      el = document.getElementById("hsObs"); if (el) el.textContent = Math.min(g.idx, N) + "/" + N;
+      el = document.getElementById("hsFault"); if (el) el.textContent = String(g.faults);
+      el = document.getElementById("hsTime"); if (el) el.textContent = g.phase === "result" ? fmtT(g.timeMs) : fmtT(timeMsOf(g.frames));
+      el = document.getElementById("hsBest"); if (el) el.textContent = fmtBest(rec);
+    } catch (e) {}
+  }
+
+  /* ---- 绘制 ---- */
+  function drawHorse(c, x, y, air, ph) {
+    c.save();
+    c.translate(x, y);
+    if (air) c.rotate(-0.18);
+    /* 身体 */
+    c.fillStyle = "#8d6e63";
+    c.beginPath(); c.ellipse(0, -26, 26, 13, 0, 0, TAU); c.fill();
+    /* 脖子与头 */
+    c.beginPath(); c.moveTo(18, -32); c.lineTo(34, -50); c.lineTo(40, -44); c.lineTo(26, -24); c.closePath(); c.fill();
+    c.beginPath(); c.ellipse(38, -50, 9, 5, -0.5, 0, TAU); c.fill();
+    /* 鬃毛与尾巴 */
+    c.strokeStyle = "#4e342e"; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(22, -44); c.lineTo(30, -54); c.stroke();
+    c.beginPath(); c.moveTo(-25, -28); c.quadraticCurveTo(-38, -22, -34, -8); c.stroke();
+    /* 四腿 */
+    c.strokeStyle = "#6d4c41"; c.lineWidth = 4;
+    var s = air ? 0.9 : Math.sin(ph) * 0.55;
+    c.beginPath();
+    c.moveTo(14, -18); c.lineTo(14 + s * 10, 0);
+    c.moveTo(20, -18); c.lineTo(20 - s * 8, 0);
+    c.moveTo(-14, -18); c.lineTo(-14 - s * 10, 0);
+    c.moveTo(-20, -18); c.lineTo(-20 + s * 8, 0);
+    c.stroke();
+    /* 骑手 */
+    c.fillStyle = "#ef9a9a";
+    c.beginPath(); c.arc(2, -56, 6, 0, TAU); c.fill();
+    c.strokeStyle = "#ef9a9a"; c.lineWidth = 4;
+    c.beginPath(); c.moveTo(2, -50); c.lineTo(0, -34); c.stroke();
+    c.beginPath(); c.moveTo(1, -44); c.lineTo(20, -38); c.stroke();
+    c.fillStyle = "#263238";
+    c.beginPath(); c.arc(2, -58, 6, Math.PI, TAU); c.fill();
+    c.restore();
+  }
+
+  function drawObstacle(c, sx, o) {
+    var i, gy = GROUND;
+    var posts = o.w > 0 ? [0, o.w] : [0];
+    c.lineWidth = 4;
+    for (i = 0; i < posts.length; i++) {
+      c.strokeStyle = "#a1887f";
+      c.beginPath(); c.moveTo(sx + posts[i] - 8, gy); c.lineTo(sx + posts[i] - 8, gy - o.h - 8); c.stroke();
+      c.beginPath(); c.moveTo(sx + posts[i] + 8, gy); c.lineTo(sx + posts[i] + 8, gy - o.h - 8); c.stroke();
+    }
+    var rails = Math.max(2, Math.round(o.h / 20));
+    for (i = 0; i < rails; i++) {
+      var ry = gy - o.h + i * (o.h - 6) / Math.max(1, rails - 1);
+      c.strokeStyle = i % 2 ? "#eceff1" : "#e57373";
+      c.lineWidth = 5;
+      if (o.knocked && i === 0) {
+        c.beginPath(); c.moveTo(sx - 14, gy - 4); c.lineTo(sx + (o.w || 0) + 16, gy - 14); c.stroke();
+      } else {
+        c.beginPath(); c.moveTo(sx - 10, ry); c.lineTo(sx + (o.w || 0) + 10, ry); c.stroke();
+      }
+    }
+    if (o.res === 2) {
+      c.fillStyle = "#ffd54f"; c.font = "12px system-ui"; c.textAlign = "center";
+      c.fillText("★", sx + (o.w || 0) / 2, gy - o.h - 16);
+    }
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var c = ctx, i;
+    var grd = c.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#101b33"); grd.addColorStop(0.62, "#1c2c4c"); grd.addColorStop(1, "#1d3a26");
+    c.fillStyle = grd; c.fillRect(0, 0, W, H);
+    /* 远处围栏与观众席 */
+    c.fillStyle = "rgba(255,255,255,.05)";
+    for (i = 0; i < 6; i++) c.fillRect(10 + i * 64, 60, 44, 40);
+    c.strokeStyle = "rgba(255,255,255,.18)"; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(0, GROUND - 96); c.lineTo(W, GROUND - 96); c.stroke();
+    /* 地面 */
+    c.fillStyle = "#234a2c"; c.fillRect(0, GROUND, W, H - GROUND);
+    c.strokeStyle = "rgba(255,255,255,.12)"; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(0, GROUND); c.lineTo(W, GROUND); c.stroke();
+    /* 草纹随镜头移动 */
+    for (i = 0; i < 8; i++) {
+      var gx = (i * 60 - (g.wx % 60));
+      c.beginPath(); c.moveTo(gx, GROUND + 20); c.lineTo(gx + 16, GROUND + 20); c.stroke();
+    }
+    /* 障碍与终点旗 */
+    for (i = 0; i < N; i++) {
+      var sx = g.course[i].x - g.wx + HX;
+      if (sx > -80 && sx < W + 60) drawObstacle(c, sx, g.course[i]);
+    }
+    var fx = g.finishX - g.wx + HX;
+    if (fx > -40 && fx < W + 40) {
+      c.strokeStyle = "#eceff1"; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(fx, GROUND); c.lineTo(fx, GROUND - 110); c.stroke();
+      c.fillStyle = "#ef5350";
+      c.beginPath(); c.moveTo(fx, GROUND - 110); c.lineTo(fx + 30, GROUND - 100); c.lineTo(fx, GROUND - 90); c.closePath(); c.fill();
+    }
+    /* 马 */
+    var hy = GROUND;
+    if (g.air) {
+      var hh = heightAt(g.airT);
+      if (hh > 0) hy = GROUND - hh;
+    }
+    var wob = g.stumble > 0 ? Math.sin(g.stumble * 0.8) * 3 : 0;
+    drawHorse(c, HX + wob, hy, g.air, g.wx * 0.12);
+    /* 文案 */
+    c.fillStyle = "rgba(255,255,255,.92)"; c.font = "bold 15px system-ui"; c.textAlign = "center";
+    if (g.phase === "idle") {
+      c.fillText("障碍赛 10 道杆：点击 / 空格出发", W / 2, 46);
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.7)";
+      c.fillText("临近障碍时点一下起跳，起跳点决定一切", W / 2, 68);
+      c.fillText("太早掉杆、太晚拒跳，宽的双横木要跳得更饱满", W / 2, 86);
+    } else if (g.phase === "ready") {
+      c.fillStyle = "#ffd54f"; c.font = "bold 26px system-ui";
+      c.fillText(g.t < READY_T / 2 ? "Ready…" : "GO!", W / 2, 60);
+    } else if (g.phase === "run") {
+      if (g.msgT > 0 && g.msg) {
+        c.fillStyle = g.msg.indexOf("罚") >= 0 ? "#ef9a9a" : "#ffd54f";
+        c.fillText(g.msg, W / 2, 46);
+      }
+    } else if (g.phase === "result") {
+      c.fillStyle = g.faults === 0 ? "#ffd54f" : "#ef9a9a";
+      c.fillText(g.faults === 0 ? "零罚分完赛！用时 " + fmtT(g.timeMs) : "完赛：" + g.faults + " 罚分 / " + fmtT(g.timeMs), W / 2, 46);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.75)";
+      c.fillText(g.perf >= N && g.faults === 0 ? "十道全完美，人马合一！点击再来一轮" : "点击再来一轮", W / 2, 70);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(g);
+    if (g.phase !== "idle") hsSync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("hsCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); press(g); });
+    document.addEventListener("keydown", onKeyDown);
+    inited = true;
+  }
+
+  window.horseRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    hsSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.horseStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__hsTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    heightAt: heightAt, marginOf: marginOf, tierOf: tierOf,
+    fmtT: fmtT, fmtBest: fmtBest, timeMsOf: timeMsOf, betterThan: betterThan,
+    makeCourse: makeCourse, newGame: newGame, startRound: startRound,
+    jump: jump, crossObstacle: crossObstacle, endRound: endRound,
+    step: step, draw: draw, hsSync: hsSync, press: press,
+    onKeyDown: onKeyDown, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, GROUND: GROUND, HX: HX, SPEED: SPEED,
+      VY: VY, GRAV: GRAV, AIRT: AIRT, N: N, PERF: PERF, FAULT: FAULT,
+      ST: ST, READY_T: READY_T, TAU: TAU }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🏇", name: "零罚完赛", desc: "在随便马术零罚分跳完全部 10 道障碍", test: function (u) { return (u.hsclear || 0) >= 1; } },
+      { emoji: "🦄", name: "人马合一", desc: "在随便马术十道障碍全部完美腾越并零罚分完赛", test: function (u) { return (u.hsone || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "马术的要义：先信马，马才会信你。",
+      "起跳点不对，再好的马也救不了你。",
+      "碰杆不可怕，可怕的是下一道还想着上一道。",
+      "缰绳松一点，路反而直一点。",
+      "十道障碍就一道一道跳，人生也是。"
     );
   }
 })();
