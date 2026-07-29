@@ -1578,6 +1578,7 @@
         <button data-tab="climb">🧗 随便攀岩</button>
         <button data-tab="tramp">🤸 随便蹦床</button>
         <button data-tab="horse">🏇 随便马术</button>
+        <button data-tab="sail">⛵ 随便帆船</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8337,6 +8338,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="sail">
+    <h2>⛵ 随便帆船</h2>
+    <p class="sub">上风航线帆船赛：风向左右摆荡，点一下换舷抢住顺移风，顶着风走就是慢</p>
+    <style>
+      #sail .sl-wrap { max-width:420px; margin:0 auto; }
+      #sail .sl-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #sail .sl-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #sail .sl-hud b { font-weight:700; color:#4dd0e1; }
+      #sail canvas { width:100%; max-width:380px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#0d2b4d; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #sail .sl-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="sl-wrap">
+      <div class="sl-hud">
+        <span>航程 <b id="slProg">0%</b></span>
+        <span>用时 <b id="slTime">0.0s</b></span>
+        <span>抢风率 <b id="slLift">0%</b></span>
+        <span>最佳 <b id="slBest">—</b></span>
+      </div>
+      <canvas id="slCav" width="380" height="480"></canvas>
+      <p class="sl-help">
+        点击 / 空格出发，帆船自动顶风前进，再点一下（空格 / ← / → / A / D）换舷；<br>
+        顶部风向表是命门：绿点=当前舷抢到顺移风在加速，红点=顶风在减速，看到变红就该换舷了；<br>
+        换舷本身要损失几秒船速，别乱换；撞到航道边界会强制换舷并失速更久；蓝色阵风带里船速 ×1.5；<br>
+        成绩纯比用时，18 秒内完赛解锁「疾风快航」、抢风率 70%+ 且零触界解锁「风之子」。战绩本地存档（suibian_sail）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -8968,6 +8996,7 @@
     if (id === "climb") climbRender();
     if (id === "tramp") trampRender();
     if (id === "horse") horseRender();
+    if (id === "sail") sailRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9029,6 +9058,7 @@
     if (id !== "climb" && typeof climbStop === "function") climbStop();
     if (id !== "tramp" && typeof trampStop === "function") trampStop();
     if (id !== "horse" && typeof horseStop === "function") horseStop();
+    if (id !== "sail" && typeof sailStop === "function") sailStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9220,6 +9250,7 @@
     climb: "随便攀岩 climb climbing 攀岩 速度攀岩 岩壁 岩点 登顶 计时 泵感 打滑 幽灵 蜘蛛人 体育 竞技 奥运",
     tramp: "随便蹦床 tramp trampoline 蹦床 弹床 空翻 翻腾 抱膝 展体 落床 套路 十跳 弹跳 空中飞人 体育 竞技 奥运",
     horse: "随便马术 horse equestrian 马术 骑马 障碍赛 跳马 骏马 骑手 横杆 罚分 独角兽 赛马 体育 竞技 奥运",
+    sail: "随便帆船 sail sailing regatta 帆船 帆船赛 航海 抢风 换舷 顺移风 阵风 浮标 水手 风帆 起航 体育 竞技 奥运",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9471,6 +9502,7 @@ splitbill:"tools",
     climb:"games",
     tramp:"games",
     horse:"games",
+    sail:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -52760,6 +52792,363 @@ splitbill:"tools",
       "碰杆不可怕，可怕的是下一道还想着上一道。",
       "缰绳松一点，路反而直一点。",
       "十道障碍就一道一道跳，人生也是。"
+    );
+  }
+})();
+/* ===== ⛵ 随便帆船 sail ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_sail";
+  var W = 380, H = 480;
+  var CX = W / 2;
+  var BOATY = H - 110;
+  var D = 6000;
+  var BASE = 5;
+  var LIFT = 0.35;
+  var TK = 30;
+  var SLOW = 45;
+  var LIM = 140;
+  var LAT = 2.2;
+  var GUSTX = 1.5;
+  var READY_T = 45;
+  var DEAD = 0.05;
+  var FASTMS = 18000;
+  var LIFTPCT = 70;
+  var SCALE = 0.5;
+  var TAU = Math.PI * 2;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { best: 0, races: 0, tacks: 0, hits: 0, aF: 0, aW: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.best = nInt(o.best); d.races = nInt(o.races);
+      d.tacks = nInt(o.tacks); d.hits = nInt(o.hits);
+      d.aF = o.aF ? 1 : 0; d.aW = o.aW ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function shiftAt(f, p1, p2) {
+    return Math.sin(f / 60 + p1) * 0.7 + Math.sin(f / 137 + p2) * 0.3;
+  }
+  function speedFactor(tackT, slowT) {
+    if (slowT > 0) return 0.2;
+    return tackT < TK ? 0.25 + 0.75 * tackT / TK : 1;
+  }
+  function liftMult(s, tack) { return 1 + LIFT * s * tack; }
+  function gustMult(prog, gusts) {
+    for (var i = 0; i < gusts.length; i++) {
+      if (prog >= gusts[i].y && prog < gusts[i].y + gusts[i].len) return GUSTX;
+    }
+    return 1;
+  }
+  function vOf(s, tack, tackT, slowT, gm) {
+    return BASE * liftMult(s, tack) * speedFactor(tackT, slowT) * gm;
+  }
+  function timeMsOf(frames) { return Math.round(frames * 1000 / 60); }
+  function liftPctOf(liftF, frames) { return frames > 0 ? Math.round(100 * liftF / frames) : 0; }
+  function betterThan(t, r) { return r.best === 0 || t < r.best; }
+  function fmtT(ms) { return (Math.round(ms / 100) / 10).toFixed(1) + "s"; }
+  function fmtBest(r) { return r.best > 0 ? fmtT(r.best) : "—"; }
+  function makeGusts() {
+    var arr = [], i;
+    for (i = 0; i < 4; i++) {
+      arr.push({ y: 900 + i * 1200 + Math.floor(rnd() * 400), len: 350 + Math.floor(rnd() * 200) });
+    }
+    return arr;
+  }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, prog: 0, x: 0, tack: 1, tackT: TK, slowT: 0,
+      frames: 0, liftF: 0, tacks: 0, hits: 0,
+      ph1: rnd() * TAU, ph2: rnd() * TAU, gusts: makeGusts(),
+      msg: "", msgT: 0, done: 0, timeMs: 0, liftPct: 0
+    };
+  }
+  var g = null;
+
+  function startRound(gg) {
+    var ng = newGame();
+    for (var k in ng) if (Object.prototype.hasOwnProperty.call(ng, k)) gg[k] = ng[k];
+    gg.phase = "ready"; gg.t = 0;
+  }
+
+  function doTack(gg) {
+    if (gg.phase !== "race" || gg.slowT > 0) return;
+    gg.tack = -gg.tack; gg.tackT = 0; gg.tacks++;
+  }
+
+  function endRound(gg) {
+    gg.done = 1;
+    gg.timeMs = timeMsOf(gg.frames);
+    gg.liftPct = liftPctOf(gg.liftF, gg.frames);
+    rec.races++; rec.tacks += gg.tacks; rec.hits += gg.hits;
+    if (gg.timeMs <= FASTMS && !rec.aF) { rec.aF = 1; try { bumpUsage("slfast"); } catch (e1) {} }
+    if (gg.liftPct >= LIFTPCT && gg.hits === 0 && !rec.aW) { rec.aW = 1; try { bumpUsage("slwind"); } catch (e2) {} }
+    if (betterThan(gg.timeMs, rec)) rec.best = gg.timeMs;
+    gg.phase = "result"; gg.t = 0;
+    saveRec();
+  }
+
+  function step(gg) {
+    gg.t++;
+    if (gg.phase === "ready") {
+      if (gg.t >= READY_T) { gg.phase = "race"; gg.t = 0; }
+      return;
+    }
+    if (gg.phase !== "race") return;
+    gg.frames++;
+    if (gg.msgT > 0) gg.msgT--;
+    if (gg.slowT > 0) gg.slowT--;
+    if (gg.tackT < TK * 4) gg.tackT++;
+    var s = shiftAt(gg.frames, gg.ph1, gg.ph2);
+    var sf = speedFactor(gg.tackT, gg.slowT);
+    var gm = gustMult(gg.prog, gg.gusts);
+    gg.prog += vOf(s, gg.tack, gg.tackT, gg.slowT, gm);
+    gg.x += gg.tack * LAT * sf;
+    if (gg.x > LIM || gg.x < -LIM) {
+      gg.x = gg.x > LIM ? LIM : -LIM;
+      gg.tack = -gg.tack; gg.tackT = 0; gg.slowT = SLOW; gg.hits++;
+      gg.msg = "触界！强制换舷失速"; gg.msgT = 50;
+    }
+    if (s * gg.tack > DEAD) gg.liftF++;
+    if (gg.prog >= D) endRound(gg);
+  }
+
+  /* ---- 输入 ---- */
+  var cav = null, ctx = null, raf = 0, inited = false, active = false;
+
+  function press(gg) {
+    gg = gg || g;
+    if (gg.phase === "idle") {
+      if (gg.t < 2) { try { bumpUsage("sail"); } catch (e) {} }
+      startRound(gg);
+    } else if (gg.phase === "race") {
+      doTack(gg);
+    } else if (gg.phase === "result") {
+      g = newGame();
+      startRound(g);
+    }
+    slSync();
+  }
+
+  function onKeyDown(e) {
+    if (!active) return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "ArrowLeft" || k === "ArrowRight" ||
+        k === "a" || k === "A" || k === "d" || k === "D") {
+      e.preventDefault();
+      if (e.repeat) return;
+      press(g);
+    }
+  }
+
+  function slSync() {
+    try {
+      var el;
+      el = document.getElementById("slProg"); if (el) el.textContent = Math.min(100, Math.floor(g.prog / D * 100)) + "%";
+      el = document.getElementById("slTime"); if (el) el.textContent = g.phase === "result" ? fmtT(g.timeMs) : fmtT(timeMsOf(g.frames));
+      el = document.getElementById("slLift"); if (el) el.textContent = (g.phase === "result" ? g.liftPct : liftPctOf(g.liftF, g.frames)) + "%";
+      el = document.getElementById("slBest"); if (el) el.textContent = fmtBest(rec);
+    } catch (e) {}
+  }
+
+  /* ---- 绘制 ---- */
+  function drawBoat(c, x, y, tack, slow) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(tack * 0.22);
+    c.fillStyle = slow ? "#90a4ae" : "#eceff1";
+    c.beginPath();
+    c.moveTo(0, -18); c.quadraticCurveTo(9, -4, 7, 12);
+    c.lineTo(-7, 12); c.quadraticCurveTo(-9, -4, 0, -18);
+    c.closePath(); c.fill();
+    c.strokeStyle = "#546e7a"; c.lineWidth = 1.5; c.stroke();
+    c.fillStyle = slow ? "#b0bec5" : "#ffd54f";
+    c.beginPath();
+    c.moveTo(0, -14);
+    c.quadraticCurveTo(tack * 16, -4, tack * 3, 8);
+    c.lineTo(0, 8);
+    c.closePath(); c.fill();
+    c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(0, -14); c.lineTo(0, 8); c.stroke();
+    c.restore();
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var c = ctx, i;
+    var grad = c.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#0d2b4d"); grad.addColorStop(1, "#123a63");
+    c.fillStyle = grad; c.fillRect(0, 0, W, H);
+
+    /* 阵风带 */
+    for (i = 0; i < g.gusts.length; i++) {
+      var gu = g.gusts[i];
+      var y2 = BOATY - (gu.y - g.prog) * SCALE;
+      var y1 = BOATY - (gu.y + gu.len - g.prog) * SCALE;
+      if (y2 < -30 || y1 > H + 30) continue;
+      c.fillStyle = "rgba(38,110,182,.45)";
+      c.fillRect(0, y1, W, y2 - y1);
+      c.fillStyle = "rgba(255,255,255,.25)";
+      c.font = "11px system-ui"; c.textAlign = "left";
+      c.fillText("~ 阵风带 ~", 10, Math.max(14, y1 + 14));
+    }
+
+    /* 波纹 */
+    c.strokeStyle = "rgba(255,255,255,.08)"; c.lineWidth = 1;
+    for (i = 0; i < 9; i++) {
+      var wy = ((i * 60 + g.prog * SCALE) % (H + 40)) - 20;
+      c.beginPath(); c.moveTo(20, wy);
+      c.quadraticCurveTo(W / 2, wy + 6, W - 20, wy);
+      c.stroke();
+    }
+
+    /* 航道边界 + 浮标 */
+    c.strokeStyle = "rgba(255,138,128,.4)"; c.lineWidth = 2;
+    c.setLineDash([6, 8]);
+    c.beginPath(); c.moveTo(CX - LIM - 14, 0); c.lineTo(CX - LIM - 14, H); c.stroke();
+    c.beginPath(); c.moveTo(CX + LIM + 14, 0); c.lineTo(CX + LIM + 14, H); c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = "#ff8a80";
+    for (i = 0; i < 5; i++) {
+      var by = ((i * 120 + g.prog * SCALE) % (H + 30)) - 15;
+      c.beginPath(); c.arc(CX - LIM - 14, by, 4, 0, TAU); c.fill();
+      c.beginPath(); c.arc(CX + LIM + 14, by, 4, 0, TAU); c.fill();
+    }
+
+    /* 终点标 */
+    var fy = BOATY - (D - g.prog) * SCALE;
+    if (fy > -40) {
+      c.strokeStyle = "rgba(255,213,79,.85)"; c.lineWidth = 3;
+      c.setLineDash([10, 6]);
+      c.beginPath(); c.moveTo(20, fy); c.lineTo(W - 20, fy); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = "#ffd54f";
+      c.beginPath(); c.arc(CX, fy, 8, 0, TAU); c.fill();
+      c.fillStyle = "rgba(255,255,255,.9)"; c.font = "bold 12px system-ui"; c.textAlign = "center";
+      c.fillText("上风标", CX, fy - 14);
+    }
+
+    /* 尾迹 */
+    c.strokeStyle = "rgba(255,255,255,.22)"; c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(CX + g.x, BOATY + 14);
+    c.quadraticCurveTo(CX + g.x - g.tack * 14, BOATY + 34, CX + g.x - g.tack * 22, BOATY + 58);
+    c.stroke();
+
+    drawBoat(c, CX + g.x, BOATY, g.tack, g.slowT > 0);
+
+    /* 风向表 */
+    var s = shiftAt(g.frames, g.ph1, g.ph2);
+    var lifted = s * g.tack > DEAD;
+    c.fillStyle = "rgba(0,0,0,.4)";
+    c.fillRect(40, 8, W - 80, 34);
+    c.strokeStyle = "rgba(255,255,255,.25)"; c.lineWidth = 1;
+    c.strokeRect(40, 8, W - 80, 34);
+    c.strokeStyle = "rgba(255,255,255,.35)";
+    c.beginPath(); c.moveTo(CX, 12); c.lineTo(CX, 26); c.stroke();
+    c.fillStyle = lifted ? "#69f0ae" : "#ff8a80";
+    c.beginPath(); c.arc(CX + s * (W / 2 - 52), 19, 6, 0, TAU); c.fill();
+    c.fillStyle = "rgba(255,255,255,.85)"; c.font = "11px system-ui"; c.textAlign = "center";
+    c.fillText(g.phase === "race" ? (lifted ? "抢到风了，正在加速" : "顶风了，考虑换舷！") : "风向表", CX, 37);
+
+    /* 文案 */
+    c.fillStyle = "rgba(255,255,255,.92)"; c.font = "bold 15px system-ui"; c.textAlign = "center";
+    if (g.phase === "idle") {
+      c.fillText("上风航线帆船赛：点击 / 空格出发", W / 2, 70);
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.7)";
+      c.fillText("风向左右摆荡，点一下换舷，永远抢住顺移风", W / 2, 92);
+      c.fillText("绿点=抢风加速，红点=顶风减速，别撞航道边界", W / 2, 110);
+    } else if (g.phase === "ready") {
+      c.fillStyle = "#ffd54f"; c.font = "bold 26px system-ui";
+      c.fillText(g.t < READY_T / 2 ? "Ready…" : "起航！", W / 2, 76);
+    } else if (g.phase === "race") {
+      if (g.msgT > 0 && g.msg) {
+        c.fillStyle = "#ef9a9a"; c.fillText(g.msg, W / 2, 66);
+      }
+    } else if (g.phase === "result") {
+      c.fillStyle = g.hits === 0 ? "#ffd54f" : "#ef9a9a";
+      c.fillText("绕标完赛！用时 " + fmtT(g.timeMs) + " / 抢风率 " + g.liftPct + "%", W / 2, 66);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.75)";
+      c.fillText(g.hits === 0 && g.liftPct >= LIFTPCT ? "教科书级航线，风之子！点击再来一轮" : "点击再来一轮", W / 2, 90);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(g);
+    if (g.phase !== "idle") slSync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("slCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); press(g); });
+    document.addEventListener("keydown", onKeyDown);
+    inited = true;
+  }
+
+  window.sailRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    slSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.sailStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__slTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    shiftAt: shiftAt, speedFactor: speedFactor, liftMult: liftMult,
+    gustMult: gustMult, vOf: vOf, timeMsOf: timeMsOf, liftPctOf: liftPctOf,
+    betterThan: betterThan, fmtT: fmtT, fmtBest: fmtBest, makeGusts: makeGusts,
+    newGame: newGame, startRound: startRound, doTack: doTack, endRound: endRound,
+    step: step, draw: draw, slSync: slSync, press: press,
+    onKeyDown: onKeyDown, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, D: D, BASE: BASE, LIFT: LIFT, TK: TK,
+      SLOW: SLOW, LIM: LIM, LAT: LAT, GUSTX: GUSTX, READY_T: READY_T,
+      DEAD: DEAD, FASTMS: FASTMS, LIFTPCT: LIFTPCT, SCALE: SCALE, TAU: TAU }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "⛵", name: "疾风快航", desc: "在随便帆船 18 秒内完成上风航线", test: function (u) { return (u.slfast || 0) >= 1; } },
+      { emoji: "🌬️", name: "风之子", desc: "在随便帆船抢风率 70% 以上且零触界完赛", test: function (u) { return (u.slwind || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "帆船的秘密：你改变不了风，但能改变帆。",
+      "顶风的时候别硬撑，换个舷，世界就顺了。",
+      "抢风不是运气，是每三秒做一次的小决定。",
+      "航线歪一点没关系，方向对就行。",
+      "风大风小都得出海，这就是水手。"
     );
   }
 })();
