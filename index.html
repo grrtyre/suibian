@@ -1581,6 +1581,7 @@
         <button data-tab="sail">⛵ 随便帆船</button>
         <button data-tab="glide">🪂 随便滑翔伞</button>
         <button data-tab="skate">🎀 随便花样滑冰</button>
+        <button data-tab="crack">🕵️ 随便密码破译</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -1668,7 +1669,7 @@
       <h2>抛硬币</h2>
       <div class="hint">正反面，天注定。</div>
       <div class="stage">
-        <div class="coin" id="coin"><span class="face">？</span></div>
+        <div class="coin" id="coinDisc"><span class="face">？</span></div>
         <button class="btn" id="coinBtn">抛一下</button>
         <div class="result" id="coinResult">等待抛掷…</div>
       </div>
@@ -4553,7 +4554,7 @@
       </div>
       <div class="wc-stage">
         <canvas id="wc-canvas" class="wc-canvas"></canvas>
-        <div class="wc-empty" id="wcEmpty">还没有词云，贴段文字点「✨ 生成词云」吧～</div>
+        <div class="wc-empty" id="wcloudEmpty">还没有词云，贴段文字点「✨ 生成词云」吧～</div>
       </div>
       <div class="wc-gallery" id="wcGallery"></div>
     </div>
@@ -5093,7 +5094,7 @@
         <div class="pwd-stats" id="pwStats"></div>
         <div class="row">
           <button class="btn" id="pwGen">🎲 生成强密码</button>
-          <button class="btn ghost" id="pwCopy">复制强密码</button>
+          <button class="btn ghost" id="pwcCopy">复制强密码</button>
           <button class="btn ghost" id="pwClear">清空</button>
         </div>
         <div class="result" id="pwOut"></div>
@@ -8383,7 +8384,7 @@
         <span>进度 <b id="pgProg">0%</b></span>
         <span>高度 <b id="pgAlt">260m</b></span>
         <span>用时 <b id="pgTime">0.0s</b></span>
-        <span>最快 <b id="pgBest">—</b></span>
+        <span>最快 <b id="gldBest">—</b></span>
       </div>
       <canvas id="pgCav" width="380" height="480"></canvas>
       <p class="pg-help">
@@ -8407,16 +8408,69 @@
     </style>
     <div class="sk-wrap">
       <div class="sk-hud">
-        <span>得分 <b id="skScore">0</b></span>
-        <span>连击 <b id="skCombo">—</b></span>
-        <span>进度 <b id="skProg">—</b></span>
-        <span>最佳 <b id="skBest">—</b></span>
+        <span>得分 <b id="fskScore">0</b></span>
+        <span>连击 <b id="fskCombo">—</b></span>
+        <span>进度 <b id="fskProg">—</b></span>
+        <span>最佳 <b id="fskBest">—</b></span>
       </div>
-      <canvas id="skCav" width="380" height="480"></canvas>
+      <canvas id="fskCav" width="380" height="480"></canvas>
       <p class="sk-help">
         点击 / 空格 开始一套 12 个动作的节目；黄球滑入绿区时，按动作要求的数字键（1/2/3/4）或对应方向键（←↑→↓）出手，<br>
         时机越准（完美 / 很好 / 不错）分越高，连续命中叠加连击倍率（最高 ×2.0）；按错键或错过则连击断掉；<br>
         成功完成一次四周跳（4 周）解锁「⛸️ 四周跳」、单套节目总分 ≥120 解锁「🎀 完美节目」徽章，战绩本地存档（suibian_skate）。
+      </p>
+    </div>
+  </section>
+  <section class="panel" id="crack">
+    <h2>🕵️ 随便密码破译</h2>
+    <p class="sub">经典 1A2B 推理游戏：4 位互不重复的数字密码，10 次机会，A=位置对 B=数字对，破译保险箱</p>
+    <style>
+      #crack .ck-wrap { max-width:420px; margin:0 auto; }
+      #crack .ck-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #crack .ck-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #crack .ck-hud b { font-weight:700; color:#ffd54f; }
+      #crack .ck-cur { display:flex; gap:10px; justify-content:center; margin:6px 0 4px; }
+      #crack .ck-slot { width:52px; height:60px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.7rem; font-weight:700; background:rgba(255,255,255,.06); border:2px dashed rgba(255,255,255,.25); color:rgba(255,255,255,.35); }
+      #crack .ck-slot.on { border-style:solid; border-color:#ffd54f; color:#ffd54f; background:rgba(255,213,79,.08); }
+      #crack .ck-msg { font-size:.8rem; opacity:.7; margin-bottom:8px; }
+      #crack .ck-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:300px; margin:0 auto 10px; }
+      #crack .ck-pad button { padding:12px 0; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.07); color:inherit; font-size:1.1rem; font-weight:700; cursor:pointer; }
+      #crack .ck-pad button:hover { transform:translateY(-1px); background:rgba(255,255,255,.12); }
+      #crack .ck-pad button.ck-go { background:#1e88e5; border-color:#64b5f6; }
+      #crack .ck-pad button.ck-del { font-size:.95rem; }
+      #crack .ck-new { display:block; margin:0 auto 12px; padding:9px 22px; border-radius:999px; border:1px solid rgba(255,255,255,.24); background:rgba(0,0,0,.3); color:inherit; font-size:.9rem; cursor:pointer; }
+      #crack .ck-rows { max-width:340px; margin:0 auto 10px; display:flex; flex-direction:column; gap:6px; max-height:260px; overflow:auto; }
+      #crack .ck-row { display:flex; align-items:center; gap:12px; padding:7px 14px; border-radius:10px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); font-size:.95rem; }
+      #crack .ck-no { opacity:.5; font-size:.8rem; width:28px; text-align:left; }
+      #crack .ck-g { font-weight:700; letter-spacing:.35em; flex:1; text-align:center; }
+      #crack .ck-ab { width:74px; text-align:right; font-size:.9rem; }
+      #crack .ck-ab b { color:#66bb6a; margin-right:6px; }
+      #crack .ck-win { background:rgba(102,187,106,.14); border-color:rgba(102,187,106,.4); justify-content:center; font-weight:700; }
+      #crack .ck-lose { background:rgba(239,83,80,.12); border-color:rgba(239,83,80,.35); justify-content:center; }
+      #crack .ck-hint { justify-content:center; opacity:.6; font-size:.85rem; }
+      #crack .ck-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="ck-wrap">
+      <div class="ck-hud">
+        <span>尝试 <b id="ckTries">0/10</b></span>
+        <span>连胜 <b id="ckStreak">—</b></span>
+        <span>最少 <b id="ckBestT">—</b></span>
+        <span>最快 <b id="ckBestM">—</b></span>
+      </div>
+      <div class="ck-cur" id="ckCur"><span class="ck-slot">·</span><span class="ck-slot">·</span><span class="ck-slot">·</span><span class="ck-slot">·</span></div>
+      <div class="ck-msg" id="ckMsg">A=数字位置全对 · B=数字对位置不对</div>
+      <div class="ck-pad" id="ckPad">
+        <button data-ck="1">1</button><button data-ck="2">2</button><button data-ck="3">3</button>
+        <button data-ck="4">4</button><button data-ck="5">5</button><button data-ck="6">6</button>
+        <button data-ck="7">7</button><button data-ck="8">8</button><button data-ck="9">9</button>
+        <button data-ck="del" class="ck-del">⌫ 删除</button><button data-ck="0">0</button><button data-ck="go" class="ck-go">破译</button>
+      </div>
+      <button class="ck-new" id="ckAgain">🔄 新开一局</button>
+      <div class="ck-rows" id="ckRows"><div class="ck-row ck-hint">还没有猜过，输入 4 个不重复数字开始推理</div></div>
+      <p class="ck-help">
+        系统随机生成 4 位互不重复的数字密码（可含 0，可 0 开头），你有 10 次机会；<br>
+        每次提交后反馈 xAyB：A 是「数字对且位置对」的个数，B 是「数字对但位置不对」的个数，4A 即破译成功；<br>
+        支持键盘输入（数字 / 退格 / 回车提交，胜负后回车开新局）。4 次以内破解解锁「🕵️ 神探本探」、连胜 3 局解锁「🔓 连环解密」，战绩本地存档（suibian_crack）。
       </p>
     </div>
   </section>
@@ -8505,15 +8559,15 @@
     </style>
     <div class="sk-wrap">
       <div class="sk-hud">
-        <span>得分 <b id="skScore">0</b></span>
-        <span>滑行 <b id="skDist">0m</b></span>
-        <span>旗门 <b id="skGates">0</b></span>
-        <span>连击 <b id="skCombo">x1</b></span>
-        <span>最佳 <b id="skBest">0 / 0m / 0门</b></span>
+        <span>得分 <b id="skiScore">0</b></span>
+        <span>滑行 <b id="skiDist">0m</b></span>
+        <span>旗门 <b id="skiGates">0</b></span>
+        <span>连击 <b id="skiCombo">x1</b></span>
+        <span>最佳 <b id="skiBest">0 / 0m / 0门</b></span>
       </div>
-      <canvas id="skCav" width="420" height="560"></canvas>
+      <canvas id="skiCav" width="420" height="560"></canvas>
       <div class="sk-acts">
-        <button class="big" id="skStart">⛷️ 开始滑行</button>
+        <button class="big" id="skiStart">⛷️ 开始滑行</button>
       </div>
       <p class="sk-help">
         ← → 或 A / D 转向，手机按住画面左右半边转向；空格开滑 / 重开，R 重开。<br>
@@ -9312,6 +9366,7 @@
     sail: "随便帆船 sail sailing regatta 帆船 帆船赛 航海 抢风 换舷 顺移风 阵风 浮标 水手 风帆 起航 体育 竞技 奥运",
     glide: "随便滑翔伞 glide paraglider paragliding 滑翔 滑翔伞 热气流 上升气流 越野 飞行 云底 加速杆 高度 天空 翱翔 体育 竞技",
     skate: "随便花样滑冰 skate figure skating 花样 滑冰 冰舞 四周跳 节目 连击 节奏 体育 竞技 动作 游戏 休闲",
+    crack: "随便密码破译 crack 1A2B 猜密码 破译 密码 保险箱 推理 侦探 数字 逻辑 bulls cows 益智 烧脑 解谜 游戏",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9566,6 +9621,7 @@ splitbill:"tools",
     sail:"games",
     glide:"games",
     skate:"games",
+    crack:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -10020,7 +10076,7 @@ splitbill:"tools",
   nickResult.addEventListener("click", copyNick);
 
   /* ---------- 硬币 ---------- */
-  const coin = $("coin"), coinResult = $("coinResult");
+  const coin = $("coinDisc"), coinResult = $("coinResult");
   $("coinBtn").addEventListener("click", () => {
     coin.classList.remove("flip"); void coin.offsetWidth; coin.classList.add("flip");
     coin.querySelector(".face").textContent = "?";
@@ -20005,7 +20061,7 @@ splitbill:"tools",
     const usr = $("pwUser"); if (usr) usr.addEventListener("input", pwRender);
     const tg = $("pwToggle"); if (tg) tg.addEventListener("click", function () { const i = $("pwInput"); if (!i) return; i.type = (i.type === "password") ? "text" : "password"; tg.textContent = (i.type === "password") ? "显示" : "隐藏"; });
     const gen = $("pwGen"); if (gen) gen.addEventListener("click", function () { const p = pwGenPw(16); const i = $("pwInput"); if (i) { i.value = p; i.type = "text"; const t = $("pwToggle"); if (t) t.textContent = "隐藏"; } pwLastGood = p; pwRender(); if (typeof playClick === "function") playClick(); });
-    const cp = $("pwCopy"); if (cp) cp.addEventListener("click", function () { if (!pwLastGood) { if (typeof toast === "function") toast("先点「生成强密码」"); return; } try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pwLastGood).then(function () { if (typeof toast === "function") toast("已复制强密码 ✓"); }).catch(function () { if (typeof toast === "function") toast("复制失败，请手动选择"); }); else if (typeof toast === "function") toast("当前环境不支持自动复制"); } catch (e) { if (typeof toast === "function") toast("复制失败"); } });
+    const cp = $("pwcCopy"); if (cp) cp.addEventListener("click", function () { if (!pwLastGood) { if (typeof toast === "function") toast("先点「生成强密码」"); return; } try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(pwLastGood).then(function () { if (typeof toast === "function") toast("已复制强密码 ✓"); }).catch(function () { if (typeof toast === "function") toast("复制失败，请手动选择"); }); else if (typeof toast === "function") toast("当前环境不支持自动复制"); } catch (e) { if (typeof toast === "function") toast("复制失败"); } });
     const cl = $("pwClear"); if (cl) cl.addEventListener("click", function () { const i = $("pwInput"); if (i) i.value = ""; const u = $("pwUser"); if (u) u.value = ""; pwLastGood = ""; pwRender(); });
   }
   function pwdcheckBind() { pwBind(); }
@@ -27121,7 +27177,7 @@ splitbill:"tools",
       wcCtx.fillText(wd.text, p.x + p.w / 2, p.y + p.h / 2);
     }
     wcCtx.globalAlpha = 1;
-    const empty = $("wcEmpty");
+    const empty = $("wcloudEmpty");
     if (empty) empty.style.display = wcState.placed.length ? "none" : "block";
   }
 
@@ -49475,12 +49531,12 @@ splitbill:"tools",
 
   function ensureInit() {
     if (inited) return;
-    cav = $id("skCav");
+    cav = $id("skiCav");
     if (!cav) return;
     ctx = cav.getContext("2d");
-    els = { score: $id("skScore"), dist: $id("skDist"), gates: $id("skGates"),
-      combo: $id("skCombo"), best: $id("skBest") };
-    $id("skStart").addEventListener("click", function () { start(); });
+    els = { score: $id("skiScore"), dist: $id("skiDist"), gates: $id("skiGates"),
+      combo: $id("skiCombo"), best: $id("skiBest") };
+    $id("skiStart").addEventListener("click", function () { start(); });
     cav.addEventListener("pointerdown", function (ev) {
       if (!g || g.dead) { start(); return; }
       var rect = cav.getBoundingClientRect();
@@ -53403,7 +53459,7 @@ splitbill:"tools",
       el = document.getElementById("pgProg"); if (el) el.textContent = Math.min(100, Math.floor(g.x / D * 100)) + "%";
       el = document.getElementById("pgAlt"); if (el) el.textContent = Math.round(g.alt) + "m";
       el = document.getElementById("pgTime"); if (el) el.textContent = g.phase === "result" ? fmtT(g.timeMs) : fmtT(timeMsOf(g.frames));
-      el = document.getElementById("pgBest"); if (el) el.textContent = fmtBest(rec);
+      el = document.getElementById("gldBest"); if (el) el.textContent = fmtBest(rec);
     } catch (e) {}
   }
 
@@ -53795,10 +53851,10 @@ splitbill:"tools",
   function skSync() {
     try {
       var el;
-      el = document.getElementById("skScore"); if (el) el.textContent = g.score;
-      el = document.getElementById("skCombo"); if (el) el.textContent = g.combo > 0 ? ("×" + comboMult(g.combo).toFixed(1)) : "—";
-      el = document.getElementById("skBest"); if (el) el.textContent = rec.best > 0 ? String(rec.best) : "—";
-      el = document.getElementById("skProg"); if (el) el.textContent = (g.prog.length ? (Math.min(g.idx + 1, g.prog.length) + "/" + g.prog.length) : "—");
+      el = document.getElementById("fskScore"); if (el) el.textContent = g.score;
+      el = document.getElementById("fskCombo"); if (el) el.textContent = g.combo > 0 ? ("×" + comboMult(g.combo).toFixed(1)) : "—";
+      el = document.getElementById("fskBest"); if (el) el.textContent = rec.best > 0 ? String(rec.best) : "—";
+      el = document.getElementById("fskProg"); if (el) el.textContent = (g.prog.length ? (Math.min(g.idx + 1, g.prog.length) + "/" + g.prog.length) : "—");
     } catch (e) {}
   }
 
@@ -53940,7 +53996,7 @@ splitbill:"tools",
 
   function ensureInit() {
     if (inited) return;
-    cav = document.getElementById("skCav");
+    cav = document.getElementById("fskCav");
     if (!cav || !cav.getContext) return;
     ctx = cav.getContext("2d");
     cav.addEventListener("pointerdown", function (e) { e.preventDefault(); onDown(g); });
@@ -53992,6 +54048,257 @@ splitbill:"tools",
       "连击断了不可怕，下一个动作重新来过就好。",
       "冰面会记住你每一次认真的起跳。",
       "节目比的不是单个动作，是十二个动作连起来的底气。"
+    );
+  }
+})();
+/* ===== 🕵️ 随便密码破译 crack ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_crack";
+  var CODE_LEN = 4;
+  var MAX_TRIES = 10;
+  var ACE_TRIES = 4;      // ≤4 次破解 = 神探
+  var STREAK_N = 3;       // 连胜 3 局 = 连环解密
+  var rnd = Math.random;
+  var now = function () { return Date.now(); };
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { bw: 0, bms: 0, wins: 0, games: 0, streak: 0, aA: 0, aS: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.bw = nInt(o.bw); if (d.bw > MAX_TRIES) d.bw = 0;
+      d.bms = nInt(o.bms);
+      d.wins = nInt(o.wins); d.games = nInt(o.games); d.streak = nInt(o.streak);
+      d.aA = o.aA ? 1 : 0; d.aS = o.aS ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function makeSecret(r) {
+    var pool = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], i, j, t;
+    for (i = pool.length - 1; i > 0; i--) {
+      j = Math.floor(r() * (i + 1));
+      if (j < 0) j = 0; if (j > i) j = i;
+      t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+    }
+    return pool.slice(0, CODE_LEN).join("");
+  }
+  function validGuess(s) {
+    if (typeof s !== "string" || s.length !== CODE_LEN) return false;
+    var seen = {}, i, ch;
+    for (i = 0; i < s.length; i++) {
+      ch = s.charAt(i);
+      if (ch < "0" || ch > "9") return false;
+      if (seen[ch]) return false;
+      seen[ch] = 1;
+    }
+    return true;
+  }
+  function judge(secret, guess) {
+    var a = 0, b = 0, i;
+    for (i = 0; i < CODE_LEN; i++) {
+      if (guess.charAt(i) === secret.charAt(i)) a++;
+      else if (secret.indexOf(guess.charAt(i)) >= 0) b++;
+    }
+    return { a: a, b: b };
+  }
+  function fmtMs(ms) {
+    if (!ms || ms <= 0) return "—";
+    return (ms / 1000).toFixed(1) + "s";
+  }
+
+  function newGame() {
+    return { secret: makeSecret(rnd), guesses: [], cur: "", done: 0, t0: 0, ms: 0 };
+  }
+  var g = null;
+  var started = false; // 是否已 bumpUsage
+
+  /* ---- 核心流转 ---- */
+  function pushDigit(gg, d) {
+    if (!gg || gg.done) return false;
+    if (typeof d !== "string" || d.length !== 1 || d < "0" || d > "9") return false;
+    if (gg.cur.length >= CODE_LEN) return false;
+    if (gg.cur.indexOf(d) >= 0) return false; // 不重复数字
+    if (!gg.t0) gg.t0 = now();
+    gg.cur += d;
+    return true;
+  }
+  function popDigit(gg) {
+    if (!gg || gg.done || !gg.cur.length) return false;
+    gg.cur = gg.cur.slice(0, -1);
+    return true;
+  }
+  function submitGuess(gg) {
+    if (!gg || gg.done) return null;
+    if (!validGuess(gg.cur)) return null;
+    var res = judge(gg.secret, gg.cur);
+    gg.guesses.push({ g: gg.cur, a: res.a, b: res.b });
+    gg.cur = "";
+    if (res.a === CODE_LEN) {
+      gg.done = 1;
+      gg.ms = gg.t0 ? Math.max(1, now() - gg.t0) : 1;
+      onWin(gg);
+    } else if (gg.guesses.length >= MAX_TRIES) {
+      gg.done = 2;
+      gg.ms = gg.t0 ? Math.max(1, now() - gg.t0) : 1;
+      onLose(gg);
+    }
+    return res;
+  }
+  function onWin(gg) {
+    var tries = gg.guesses.length;
+    rec.games += 1; rec.wins += 1; rec.streak += 1;
+    if (!rec.bw || tries < rec.bw) rec.bw = tries;
+    if (!rec.bms || gg.ms < rec.bms) rec.bms = gg.ms;
+    if (tries <= ACE_TRIES && !rec.aA) { rec.aA = 1; try { bumpUsage("ckace"); } catch (e1) {} }
+    if (rec.streak >= STREAK_N && !rec.aS) { rec.aS = 1; try { bumpUsage("cksleuth"); } catch (e2) {} }
+    saveRec();
+  }
+  function onLose(gg) {
+    rec.games += 1; rec.streak = 0;
+    saveRec();
+  }
+  function startNew() {
+    g = newGame();
+    if (!started) { started = true; try { bumpUsage("crack"); } catch (e) {} }
+  }
+
+  /* ---- DOM ---- */
+  var inited = false;
+  function $ck(id) { return document.getElementById(id); }
+  function isActive() {
+    var sec = $ck("crack");
+    return !!(sec && sec.classList && sec.classList.contains("active"));
+  }
+  function esc(s) {
+    try { return escapeHtml(s); }
+    catch (e) { return String(s).replace(/[&<>"']/g, function (m) { return "&#" + m.charCodeAt(0) + ";"; }); }
+  }
+  function ckSync() {
+    try {
+      var el, i, html;
+      el = $ck("ckTries"); if (el) el.textContent = (g ? g.guesses.length : 0) + "/" + MAX_TRIES;
+      el = $ck("ckStreak"); if (el) el.textContent = rec.streak > 0 ? ("连胜" + rec.streak) : "—";
+      el = $ck("ckBestT"); if (el) el.textContent = rec.bw > 0 ? (rec.bw + "次") : "—";
+      el = $ck("ckBestM"); if (el) el.textContent = fmtMs(rec.bms);
+      // 当前输入格
+      el = $ck("ckCur");
+      if (el && g) {
+        html = "";
+        for (i = 0; i < CODE_LEN; i++) {
+          var ch = g.cur.charAt(i);
+          html += '<span class="ck-slot' + (ch ? " on" : "") + '">' + (ch ? esc(ch) : "·") + "</span>";
+        }
+        el.innerHTML = html;
+      }
+      // 历史行（倒序，最新在上）
+      el = $ck("ckRows");
+      if (el && g) {
+        html = "";
+        for (i = g.guesses.length - 1; i >= 0; i--) {
+          var it = g.guesses[i];
+          html += '<div class="ck-row"><span class="ck-no">#' + (i + 1) + "</span><span class=\"ck-g\">" + esc(it.g) +
+            '</span><span class="ck-ab"><b>' + it.a + "A</b>" + it.b + "B</span></div>";
+        }
+        if (g.done === 1) {
+          html = '<div class="ck-row ck-win">🎉 破译成功！密码 ' + esc(g.secret) + " · " + g.guesses.length + " 次 · " + fmtMs(g.ms) + "</div>" + html;
+        } else if (g.done === 2) {
+          html = '<div class="ck-row ck-lose">💥 电路烧毁…密码其实是 ' + esc(g.secret) + "，点「新开一局」再战</div>" + html;
+        }
+        el.innerHTML = html || '<div class="ck-row ck-hint">还没有猜过，输入 4 个不重复数字开始推理</div>';
+      }
+      // 状态文案
+      el = $ck("ckMsg");
+      if (el && g) {
+        if (g.done === 1) el.textContent = "🔓 保险箱开了！";
+        else if (g.done === 2) el.textContent = "尝试次数用尽";
+        else el.textContent = "A=数字位置全对 · B=数字对位置不对";
+      }
+    } catch (e) {}
+  }
+  function doDigit(d) { if (g && !g.done) { if (pushDigit(g, d)) ckSync(); } }
+  function doDel() { if (g && popDigit(g)) ckSync(); }
+  function doGo() {
+    if (!g || g.done) return;
+    if (!validGuess(g.cur)) {
+      try { toast("要 4 个互不重复的数字哦"); } catch (e) {}
+      return;
+    }
+    submitGuess(g);
+    ckSync();
+  }
+  function doNew() {
+    startNew();
+    ckSync();
+  }
+  function onKey(e) {
+    if (!isActive() || !inited) return;
+    var tg = e.target;
+    if (tg && (tg.tagName === "INPUT" || tg.tagName === "TEXTAREA" || tg.tagName === "SELECT" || tg.isContentEditable)) return;
+    var k = e.key;
+    if (k >= "0" && k <= "9") { e.preventDefault(); if (!e.repeat) doDigit(k); }
+    else if (k === "Backspace") { e.preventDefault(); if (!e.repeat) doDel(); }
+    else if (k === "Enter") { e.preventDefault(); if (!e.repeat) { if (g && g.done) doNew(); else doGo(); } }
+  }
+  function bind() {
+    if (inited) return;
+    var pad = $ck("ckPad");
+    if (!pad) return;
+    pad.addEventListener("click", function (e) {
+      var t = e.target;
+      while (t && t !== pad && !(t.getAttribute && t.getAttribute("data-ck"))) t = t.parentNode;
+      if (!t || t === pad) return;
+      var v = t.getAttribute("data-ck");
+      if (v === "del") doDel();
+      else if (v === "go") doGo();
+      else if (v >= "0" && v <= "9") doDigit(v);
+    });
+    var nb = $ck("ckAgain");
+    if (nb) nb.addEventListener("click", function () { doNew(); });
+    document.addEventListener("keydown", onKey);
+    inited = true;
+    if (!g) g = newGame();
+    ckSync();
+  }
+  try { setTimeout(bind, 0); } catch (e) { }
+
+  window.__crackTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; }, setNow: function (fn) { now = fn; },
+    setStarted: function (v) { started = !!v; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    makeSecret: makeSecret, validGuess: validGuess, judge: judge, fmtMs: fmtMs,
+    newGame: newGame, pushDigit: pushDigit, popDigit: popDigit,
+    submitGuess: submitGuess, onWin: onWin, onLose: onLose, startNew: startNew,
+    ckSync: ckSync, doDigit: doDigit, doDel: doDel, doGo: doGo, doNew: doNew,
+    onKey: onKey, bind: bind, isActive: isActive,
+    consts: { KEY: KEY, CODE_LEN: CODE_LEN, MAX_TRIES: MAX_TRIES, ACE_TRIES: ACE_TRIES, STREAK_N: STREAK_N }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🕵️", name: "神探本探", desc: "在随便密码破译里 4 次以内破解密码", test: function (u) { return (u.ckace || 0) >= 1; } },
+      { emoji: "🔓", name: "连环解密", desc: "在随便密码破译里连续赢下 3 局", test: function (u) { return (u.cksleuth || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "密码不是猜出来的，是一步步排除出来的。",
+      "每个 1A2B 都在悄悄告诉你真相的形状。",
+      "好侦探不怕线索少，只怕不做笔记。",
+      "第一猜是试探，第二猜是推理，第三猜是收网。",
+      "推理的乐趣，在于错误的答案也有用。"
     );
   }
 })();
