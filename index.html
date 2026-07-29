@@ -1572,6 +1572,7 @@
         <button data-tab="pusher">🪙 随便推币机</button>
         <button data-tab="curl">🥌 随便冰壶</button>
         <button data-tab="balloon">🎈 随便热气球</button>
+        <button data-tab="dive">🤿 随便跳水</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8169,6 +8170,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="dive">
+    <h2>🤿 随便跳水</h2>
+    <p class="sub">十米跳台压水花：蓄力起跳、抱膝翻腾、展体开身，让三位裁判心服口服</p>
+    <style>
+      #dive .dv-wrap { max-width:420px; margin:0 auto; }
+      #dive .dv-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #dive .dv-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #dive .dv-hud b { font-weight:700; color:#81d4fa; }
+      #dive canvas { width:100%; max-width:380px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#0d2b52; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #dive .dv-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="dv-wrap">
+      <div class="dv-hud">
+        <span>本跳 <b id="dvNo">1/5</b></span>
+        <span>本场 <b id="dvTotal">0</b></span>
+        <span>最佳场分 <b id="dvBest">0</b></span>
+        <span>场次 <b id="dvMeets">0</b></span>
+      </div>
+      <canvas id="dvCav" width="380" height="560"></canvas>
+      <p class="dv-help">
+        点击 / 空格开始蓄力，松开起跳（蓄力条越满跳得越高、滞空越久）。<br>
+        空中按住 = 抱膝翻腾（转得飞快），松开 = 展体减速，调整姿态争取垂直入水。<br>
+        三位裁判按入水角度打分（0~10），乘以难度系数（翻腾越多难度越高，封顶 4.8）；横着拍水上 = 大水花超低分。<br>
+        一场 5 跳计总分。单跳 80 分解锁「水花消失术」、单场 320 分解锁「十米台大满贯」。战绩本地存档（suibian_dive）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -8794,6 +8822,7 @@
     if (id === "pusher") pusherRender();
     if (id === "curl") curlRender();
     if (id === "balloon") balloonRender();
+    if (id === "dive") diveRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8849,6 +8878,7 @@
     if (id !== "pusher" && typeof pusherStop === "function") pusherStop();
     if (id !== "curl" && typeof curlStop === "function") curlStop();
     if (id !== "balloon" && typeof balloonStop === "function") balloonStop();
+    if (id !== "dive" && typeof diveStop === "function") diveStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9034,6 +9064,7 @@
     pusher: "随便推币机 pusher coin 推币 推币机 硬币 金币 宝石 街机 游戏厅 投币 推板 掉落 弹库 回币 积分 arcade 娱乐 碰撞",
     curl: "随便冰壶 curl curling 冰壶 壶 投壶 扫冰 大本营 旋转 冬奥 雪 冰 对战 ai 人机 蓄力 瞭准 瞰准 体育 竞技",
     balloon: "随便热气球 balloon hot air 热气球 气球 飞行 飞天 升空 高度 燃料 风 星星 雷暴 飞鸟 躲避 摩天 冲刺 街机",
+    dive: "随便跳水 dive diving 跳水 十米台 跳台 翻腾 抱膝 展体 压水花 入水 裁判 打分 奥运 水花 体育 竞技 满分 冠军",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9279,6 +9310,7 @@ splitbill:"tools",
     pusher:"games",
     curl:"games",
     balloon:"games",
+    dive:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -50380,6 +50412,352 @@ splitbill:"tools",
     );
   }
 })();
+})();
+/* ===== 🤿 随便跳水 dive ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_dive";
+  var W = 380, H = 560;
+  var PLAT_X = 64, PLAT_Y = 92, WATER_Y = 470, GRAV = 0.16;
+  var VA_TUCK = 0.2, VA_OPEN = 0.055;
+  var DIVES_PER_MEET = 5;
+  var BADGE_DIVE = 80, BADGE_MEET = 320;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function nNum(v) { v = Number(v); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { best: 0, bestDive: 0, meets: 0, dives: 0, flips: 0, aS: 0, aM: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.best = nNum(o.best); d.bestDive = nNum(o.bestDive);
+      d.meets = nInt(o.meets); d.dives = nInt(o.dives); d.flips = nInt(o.flips);
+      d.aS = o.aS ? 1 : 0; d.aM = o.aM ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, power: 0,
+      x: PLAT_X, y: PLAT_Y, vx: 0, vy: 0,
+      ang: 0, rotTotal: 0, tuck: false,
+      diveIdx: 0, total: 0, scores: [],
+      last: null, splashT: 0, waveT: 0, drops: []
+    };
+  }
+
+  /* 蓄力条：0~1 往返振荡 */
+  function powerAt(t) { return 0.5 + 0.5 * Math.sin(t * 0.085 - Math.PI / 2); }
+
+  function startCharge(g) {
+    if (g.phase !== "idle") return false;
+    g.phase = "charge"; g.t = 0; g.power = 0;
+    return true;
+  }
+  function releaseJump(g) {
+    if (g.phase !== "charge") return false;
+    g.phase = "air";
+    g.vx = 1.0 + g.power * 1.4;
+    g.vy = -(2.6 + g.power * 2.6);
+    g.ang = 0; g.rotTotal = 0; g.tuck = false;
+    return true;
+  }
+
+  /* 入水角偏差：距最近的竖直姿态（头入/脚入均可）多少弧度，0=完美 */
+  function entryDev(ang) {
+    var PI = Math.PI;
+    var m = ang % PI;
+    if (m < 0) m += PI;
+    return Math.min(m, PI - m);
+  }
+  /* 难度系数：每半周翻腾 +0.6，封顶 4.8 */
+  function ddOf(flips) {
+    var halves = Math.floor(flips * 2);
+    if (halves < 0) halves = 0;
+    var dd = 1.2 + 0.6 * halves;
+    return Math.min(4.8, Math.round(dd * 10) / 10);
+  }
+  /* 单个裁判打分：0~10，步进 0.5 */
+  function judgeOne(dev, r) {
+    var s = 10 - dev * 9 + (r - 0.5) * 0.7;
+    if (dev > 1.2) s = Math.min(s, 2);
+    if (s < 0) s = 0;
+    if (s > 10) s = 10;
+    return Math.round(s * 2) / 2;
+  }
+  function judgeScores(dev, rf) {
+    var f = rf || rnd;
+    return [judgeOne(dev, f()), judgeOne(dev, f()), judgeOne(dev, f())];
+  }
+
+  function enterWater(g) {
+    if (g.phase !== "air") return null;
+    var flips = g.rotTotal / (Math.PI * 2);
+    var dev = entryDev(g.ang);
+    var js = judgeScores(dev);
+    var dd = ddOf(flips);
+    var sum = js[0] + js[1] + js[2];
+    var score = Math.round(sum * dd * 10) / 10;
+    g.last = { judges: js, dd: dd, score: score, flips: Math.round(flips * 10) / 10, dev: dev, flop: dev > 1.2 };
+    g.scores.push(score);
+    g.total = Math.round((g.total + score) * 10) / 10;
+    g.diveIdx++;
+    g.phase = "splash"; g.splashT = 0;
+    /* 水花粒子：偏差越大水花越大 */
+    g.drops = [];
+    var n = 6 + Math.floor(dev * 26);
+    for (var i = 0; i < n; i++) {
+      g.drops.push({ x: g.x, y: WATER_Y, vx: (rnd() - 0.5) * (2 + dev * 5), vy: -(1.5 + rnd() * (2.5 + dev * 4)), l: 30 + rnd() * 25 });
+    }
+    /* 战绩入账 */
+    rec.dives++;
+    rec.flips += Math.floor(flips);
+    if (score > rec.bestDive) rec.bestDive = score;
+    if (!rec.aS && score >= BADGE_DIVE) { rec.aS = 1; try { bumpUsage("dvsplash"); } catch (e1) {} }
+    if (g.diveIdx >= DIVES_PER_MEET) {
+      rec.meets++;
+      if (g.total > rec.best) rec.best = g.total;
+      if (!rec.aM && g.total >= BADGE_MEET) { rec.aM = 1; try { bumpUsage("dvmeet"); } catch (e2) {} }
+    }
+    saveRec();
+    return g.last;
+  }
+
+  /* 溅完水花后：下一跳或整场收官 */
+  function nextDive(g) {
+    if (g.phase !== "splash") return false;
+    if (g.diveIdx >= DIVES_PER_MEET) { g.phase = "meetEnd"; return true; }
+    g.phase = "idle"; g.t = 0;
+    g.x = PLAT_X; g.y = PLAT_Y; g.vx = 0; g.vy = 0; g.ang = 0; g.tuck = false;
+    return true;
+  }
+  function newMeet(g) {
+    if (g.phase !== "meetEnd") return false;
+    var d = newGame();
+    for (var k in d) if (Object.prototype.hasOwnProperty.call(d, k)) g[k] = d[k];
+    return true;
+  }
+
+  function step(g, held) {
+    g.waveT++;
+    if (g.phase === "charge") {
+      g.t++;
+      g.power = powerAt(g.t);
+    } else if (g.phase === "air") {
+      g.tuck = !!held;
+      g.vy += GRAV;
+      g.x += g.vx; g.y += g.vy;
+      var va = g.tuck ? VA_TUCK : VA_OPEN;
+      g.ang += va; g.rotTotal += va;
+      if (g.x > W - 12) g.x = W - 12;
+      if (g.y >= WATER_Y) enterWater(g);
+    } else if (g.phase === "splash") {
+      g.splashT++;
+      for (var i = g.drops.length - 1; i >= 0; i--) {
+        var p = g.drops[i];
+        p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.l--;
+        if (p.l <= 0 || p.y > H) g.drops.splice(i, 1);
+      }
+    }
+  }
+
+  /* ---------- 以下为 DOM / 绘制，仅浏览器路径 ---------- */
+  var cav = null, ctx = null, inited = false, raf = 0, active = false, held = false;
+
+  function drawDiver(c, g) {
+    c.save();
+    c.translate(g.x, g.y);
+    c.rotate(g.ang);
+    c.strokeStyle = "#ffe0b2"; c.lineWidth = 3; c.lineCap = "round";
+    if (g.tuck && g.phase === "air") {
+      c.beginPath(); c.arc(0, 0, 7, 0, Math.PI * 2); c.stroke();
+      c.fillStyle = "#ffcc80";
+      c.beginPath(); c.arc(0, -9, 4.5, 0, Math.PI * 2); c.fill();
+    } else {
+      c.beginPath(); c.moveTo(0, -10); c.lineTo(0, 10); c.stroke();
+      c.beginPath(); c.moveTo(0, -2); c.lineTo(-6, 4); c.moveTo(0, -2); c.lineTo(6, 4); c.stroke();
+      c.fillStyle = "#ffcc80";
+      c.beginPath(); c.arc(0, -14, 4.5, 0, Math.PI * 2); c.fill();
+    }
+    c.restore();
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    var c = ctx;
+    /* 天空 */
+    var sky = c.createLinearGradient(0, 0, 0, WATER_Y);
+    sky.addColorStop(0, "#0d2b52"); sky.addColorStop(1, "#3b6ea8");
+    c.fillStyle = sky; c.fillRect(0, 0, W, WATER_Y);
+    /* 泳池 */
+    var wa = c.createLinearGradient(0, WATER_Y, 0, H);
+    wa.addColorStop(0, "#1e88e5"); wa.addColorStop(1, "#0d47a1");
+    c.fillStyle = wa; c.fillRect(0, WATER_Y, W, H - WATER_Y);
+    c.strokeStyle = "rgba(255,255,255,.45)"; c.lineWidth = 2;
+    c.beginPath();
+    for (var x = 0; x <= W; x += 8) {
+      var yy = WATER_Y + Math.sin((x + g.waveT * 1.6) * 0.06) * 2.2;
+      if (x === 0) c.moveTo(x, yy); else c.lineTo(x, yy);
+    }
+    c.stroke();
+    /* 跳台 */
+    c.fillStyle = "#90a4ae";
+    c.fillRect(PLAT_X - 44, PLAT_Y + 12, 62, 8);
+    c.fillRect(PLAT_X - 40, PLAT_Y + 20, 12, WATER_Y - PLAT_Y - 20);
+    c.fillStyle = "#cfd8dc"; c.font = "10px sans-serif"; c.textAlign = "left";
+    c.fillText("10m", PLAT_X - 38, PLAT_Y + 6);
+    /* 蓄力条 */
+    if (g.phase === "charge") {
+      c.fillStyle = "rgba(0,0,0,.4)"; c.fillRect(W / 2 - 70, 26, 140, 14);
+      c.fillStyle = g.power > 0.8 ? "#ffd54f" : "#4fc3f7";
+      c.fillRect(W / 2 - 68, 28, 136 * g.power, 10);
+      c.strokeStyle = "#fff"; c.lineWidth = 1; c.strokeRect(W / 2 - 70, 26, 140, 14);
+    }
+    /* 跳水员 */
+    if (g.phase !== "splash" && g.phase !== "meetEnd") drawDiver(c, g);
+    /* 水花 */
+    c.fillStyle = "#e3f2fd";
+    for (var i = 0; i < g.drops.length; i++) {
+      var p = g.drops[i];
+      c.beginPath(); c.arc(p.x, p.y, 2, 0, Math.PI * 2); c.fill();
+    }
+    /* 结果面板 */
+    c.textAlign = "center";
+    if (g.phase === "splash" && g.last) {
+      c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(40, 150, W - 80, 150);
+      c.fillStyle = "#fff"; c.font = "bold 15px sans-serif";
+      c.fillText(g.last.flop ? "💥 拍水面上了！" : "翻腾 " + g.last.flips + " 周", W / 2, 178);
+      c.font = "13px sans-serif";
+      c.fillText("裁判: " + g.last.judges.join(" / ") + "  难度 x" + g.last.dd, W / 2, 204);
+      c.font = "bold 22px sans-serif"; c.fillStyle = "#ffd54f";
+      c.fillText(g.last.score + " 分", W / 2, 236);
+      c.font = "12px sans-serif"; c.fillStyle = "#b0bec5";
+      c.fillText(g.diveIdx >= DIVES_PER_MEET ? "点击查看总成绩" : "点击进行第 " + (g.diveIdx + 1) + " 跳", W / 2, 282);
+    } else if (g.phase === "meetEnd") {
+      c.fillStyle = "rgba(0,0,0,.55)"; c.fillRect(40, 150, W - 80, 170);
+      c.fillStyle = "#fff"; c.font = "bold 16px sans-serif";
+      c.fillText("🏆 全场结束", W / 2, 180);
+      c.font = "bold 26px sans-serif"; c.fillStyle = "#ffd54f";
+      c.fillText(g.total + " 分", W / 2, 216);
+      c.font = "12px sans-serif"; c.fillStyle = "#b0bec5";
+      c.fillText("五跳: " + g.scores.join(" / "), W / 2, 244);
+      c.fillText(g.total >= BADGE_MEET ? "冠军水准！" : "点击再来一场", W / 2, 296);
+    } else if (g.phase === "idle") {
+      c.fillStyle = "rgba(255,255,255,.85)"; c.font = "13px sans-serif";
+      c.fillText("第 " + (g.diveIdx + 1) + " / " + DIVES_PER_MEET + " 跳 — 点击或按空格蓄力", W / 2, 60);
+    } else if (g.phase === "air") {
+      c.fillStyle = "rgba(255,255,255,.6)"; c.font = "12px sans-serif";
+      c.fillText("按住=抱膝翻腾  松开=展体压水花", W / 2, 40);
+    }
+  }
+
+  function dvSync() {
+    var e1 = document.getElementById("dvNo"), e2 = document.getElementById("dvTotal"),
+      e3 = document.getElementById("dvBest"), e4 = document.getElementById("dvMeets");
+    if (e1 && g) e1.textContent = Math.min(g.diveIdx + (g.phase === "splash" || g.phase === "meetEnd" ? 0 : 1), DIVES_PER_MEET) + "/" + DIVES_PER_MEET;
+    if (e2 && g) e2.textContent = String(g.total);
+    if (e3) e3.textContent = String(rec.best);
+    if (e4) e4.textContent = String(rec.meets);
+  }
+
+  var g = null;
+
+  function press() {
+    if (!g) return;
+    if (g.phase === "idle") { startCharge(g); try { bumpUsage("dive"); } catch (e) {} }
+    else if (g.phase === "air") held = true;
+  }
+  function release() {
+    if (!g) return;
+    if (g.phase === "charge") releaseJump(g);
+    else if (g.phase === "splash") { nextDive(g); dvSync(); }
+    else if (g.phase === "meetEnd") { newMeet(g); dvSync(); }
+    held = false;
+  }
+
+  function onKeyDown(e) {
+    if (!active) return;
+    if (e.code === "Space") { e.preventDefault(); if (g && g.phase === "air") { held = true; } else if (!e.repeat) press(); }
+  }
+  function onKeyUp(e) {
+    if (!active) return;
+    if (e.code === "Space") { e.preventDefault(); release(); }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g) { step(g, held); dvSync(); draw(); }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("dvCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); press(); });
+    cav.addEventListener("pointerup", function (e) { e.preventDefault(); release(); });
+    cav.addEventListener("pointercancel", function () { held = false; });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.diveRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    dvSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.diveStop = function () {
+    active = false; held = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__dvTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    setHeld: function (h) { held = h; }, getHeld: function () { return held; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    newGame: newGame, powerAt: powerAt, startCharge: startCharge, releaseJump: releaseJump,
+    entryDev: entryDev, ddOf: ddOf, judgeOne: judgeOne, judgeScores: judgeScores,
+    enterWater: enterWater, nextDive: nextDive, newMeet: newMeet, step: step,
+    draw: draw, dvSync: dvSync, press: press, release: release,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, PLAT_X: PLAT_X, PLAT_Y: PLAT_Y, WATER_Y: WATER_Y,
+      GRAV: GRAV, VA_TUCK: VA_TUCK, VA_OPEN: VA_OPEN, DIVES_PER_MEET: DIVES_PER_MEET,
+      BADGE_DIVE: BADGE_DIVE, BADGE_MEET: BADGE_MEET }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "💦", name: "水花消失术", desc: "在随便跳水单跳拿到 80 分以上", test: function (u) { return (u.dvsplash || 0) >= 1; } },
+      { emoji: "🤿", name: "十米台大满贯", desc: "在随便跳水单场五跳总分 320 以上", test: function (u) { return (u.dvmeet || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "跳水的要诀：起跳时用尽全力，入水前收敛锋芒。",
+      "翻腾多少周不重要，重要的是最后那一下入得干净。",
+      "水花越小，掌声越大——人生很多事都是这样。",
+      "站上十米台的那一刻，犹豫比失误更致命。",
+      "拍在水面上也没关系，裁判记得的永远是你下一跳。"
+    );
+  }
 })();
 </script>
 </body>
