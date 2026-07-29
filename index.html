@@ -1571,6 +1571,7 @@
         <button data-tab="ski">⛷️ 滑雪大回转</button>
         <button data-tab="pusher">🪙 随便推币机</button>
         <button data-tab="curl">🥌 随便冰壶</button>
+        <button data-tab="balloon">🎈 随便热气球</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8141,6 +8142,33 @@
       <div class="fh-tip">🎣 <b>空格 / 点画面一键三连：抛竿蓄力 → 锁定力度 → 浮漂猛沉的一瞬间起竿</b>；抛得越远水越深，湖心与深水才藏着稀有和传说级大物。中鱼后进入遛鱼：按住收线张力猛涨、松手泄力鱼往外逃，张力拉满会切线、泄力太久会脱钩，把距离磨到 0 才能抄网上岸。21 种渔获分普通 / 稀有 / 史诗 / 传说四档（还有三件湖底垃圾等你做环保），图鉴、总渔获与最大单尾纪录本地存档（suibian_fishing），钓上第一条真鱼解锁「空军毕业」、请上传说级大物解锁「湖中传说」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="balloon">
+    <h2>🎈 随便热气球</h2>
+    <p class="sub">驾驶热气球一路向上：管好燃料、借好风势，躲开飞鸟和雷暴云，顺路摘星星</p>
+    <style>
+      #balloon .hb-wrap { max-width:420px; margin:0 auto; }
+      #balloon .hb-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #balloon .hb-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #balloon .hb-hud b { font-weight:700; color:#ffcc80; }
+      #balloon canvas { width:100%; max-width:380px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#64b5f6; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #balloon .hb-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="hb-wrap">
+      <div class="hb-hud">
+        <span>高度 <b id="hbAlt">0m</b></span>
+        <span>本次 ⭐ <b id="hbStar">0</b></span>
+        <span>最佳 <b id="hbBest">0m</b></span>
+        <span>飞行次数 <b id="hbFly">0</b></span>
+      </div>
+      <canvas id="hbCav" width="380" height="560"></canvas>
+      <p class="hb-help">
+        点击 / 空格起飞；← → 或 A D 转向（有惯性，还会被风吹），手机按住气球左右两侧转向。<br>
+        按住空格 / 画布烧火 🔥：上升更快但费燃料；燃料随高度缓慢消耗，耗尽就降落收工，吃 ⛽ 补 32 格。<br>
+        撞上 🐦 或 ⛈️ 当场坠机；⭐ 顺路收集计入生涯。越飞越高：天色变深、上升变快、障碍越来越密。<br>
+        单次飞到 1500m 解锁「高空飞行员」、生涯集满 50 颗星解锁「摘星飞行家」。战绩本地存档（suibian_balloon）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -8765,6 +8793,7 @@
     if (id === "ski") skiRender();
     if (id === "pusher") pusherRender();
     if (id === "curl") curlRender();
+    if (id === "balloon") balloonRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8819,6 +8848,7 @@
     if (id !== "ski" && typeof skiStop === "function") skiStop();
     if (id !== "pusher" && typeof pusherStop === "function") pusherStop();
     if (id !== "curl" && typeof curlStop === "function") curlStop();
+    if (id !== "balloon" && typeof balloonStop === "function") balloonStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9003,6 +9033,7 @@
     ski: "滑雪大回转 ski 滑雪 回转 旗门 雪山 雪道 下坡 躲避 树 石头 连击 竞速 无尽 slalom snow 雪人 滑行 极限运动",
     pusher: "随便推币机 pusher coin 推币 推币机 硬币 金币 宝石 街机 游戏厅 投币 推板 掉落 弹库 回币 积分 arcade 娱乐 碰撞",
     curl: "随便冰壶 curl curling 冰壶 壶 投壶 扫冰 大本营 旋转 冬奥 雪 冰 对战 ai 人机 蓄力 瞭准 瞰准 体育 竞技",
+    balloon: "随便热气球 balloon hot air 热气球 气球 飞行 飞天 升空 高度 燃料 风 星星 雷暴 飞鸟 躲避 摩天 冲刺 街机",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9247,6 +9278,7 @@ splitbill:"tools",
     ski:"games",
     pusher:"games",
     curl:"games",
+    balloon:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -49984,6 +50016,367 @@ splitbill:"tools",
       "最后一壶才见真章，前面都是铺垫——工作也一样。",
       "有旋转的壶才走得又远又稳，太直的路线反而容易偏。",
       "大本营里离圆心最近的说了算，人生偶尔也要挤进核心圈。"
+    );
+  }
+})();
+/* ===== 🎈 随便热气球 balloon ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_balloon";
+  var W = 380, H = 560;
+  var BX_MIN = 26, BX_MAX = W - 26, BY = 424, BR = 17;
+  var FUEL_MAX = 100, FUEL_DRAIN = 0.055, FUEL_BURN = 0.13, FUEL_TANK = 32;
+  var PXM = 8; /* 8px = 1m */
+  var BADGE_ALT = 1500, BADGE_STAR = 50;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { bestM: 0, bestStar: 0, flights: 0, totM: 0, stars: 0, aA: 0, aS: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.bestM = nInt(o.bestM); d.bestStar = nInt(o.bestStar);
+      d.flights = nInt(o.flights); d.totM = nInt(o.totM); d.stars = nInt(o.stars);
+      d.aA = o.aA ? 1 : 0; d.aS = o.aS ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* 上升速度：越高越快，烧火再加成 */
+  function riseSpd(g) {
+    var s = 2 + Math.min(3, g.dist / 5600);
+    if (g.burn && g.fuel > 0) s *= 1.55;
+    return s;
+  }
+  /* 风：每段固定值，段间随 dist 切换 */
+  function windAt(g) {
+    var seg = Math.floor(g.dist / 1400);
+    if (seg !== g.windSeg) {
+      g.windSeg = seg;
+      g.wind = seg === 0 ? 0 : (rnd() * 1.4 - 0.7);
+    }
+    return g.wind;
+  }
+
+  function newGame() {
+    return {
+      state: "ready", x: W / 2, vx: 0, dist: 0, fuel: FUEL_MAX,
+      burn: false, stars: 0, t: 0, wind: 0, windSeg: 0,
+      obs: [], nextAt: 90, fx: [], deadBy: "", flame: 0
+    };
+  }
+
+  /* 障碍/道具类型: bird(左右飞) cloud(雷云) star fuel */
+  function spawn(g) {
+    var r = rnd();
+    var o;
+    if (r < 0.34) {
+      var dir = rnd() < 0.5 ? 1 : -1;
+      o = { k: "bird", x: dir === 1 ? -16 : W + 16, y: -24, vx: dir * (1.2 + rnd() * 1.4), r: 12 };
+    } else if (r < 0.55) {
+      o = { k: "cloud", x: 36 + rnd() * (W - 72), y: -30, vx: rnd() * 0.8 - 0.4, r: 21 };
+    } else if (r < 0.82) {
+      o = { k: "star", x: 28 + rnd() * (W - 56), y: -18, vx: 0, r: 11 };
+    } else {
+      o = { k: "fuel", x: 28 + rnd() * (W - 56), y: -18, vx: 0, r: 12 };
+    }
+    g.obs.push(o);
+  }
+
+  function endFlight(g, why) {
+    if (g.state !== "run") return;
+    g.state = "over";
+    g.deadBy = why;
+    var m = Math.floor(g.dist / PXM);
+    rec.flights++; rec.totM += m; rec.stars += g.stars;
+    if (m > rec.bestM) rec.bestM = m;
+    if (g.stars > rec.bestStar) rec.bestStar = g.stars;
+    if (!rec.aA && m >= BADGE_ALT) { rec.aA = 1; try { bumpUsage("hbalt"); } catch (e1) {} }
+    if (!rec.aS && rec.stars >= BADGE_STAR) { rec.aS = 1; try { bumpUsage("hbstar"); } catch (e2) {} }
+    saveRec();
+  }
+
+  function step(g) {
+    if (g.state !== "run") return;
+    g.t++;
+    var spd = riseSpd(g);
+    g.dist += spd;
+    /* 燃料 */
+    g.fuel -= FUEL_DRAIN + (g.burn && g.fuel > 0 ? FUEL_BURN : 0);
+    if (g.fuel <= 0) { g.fuel = 0; endFlight(g, "fuel"); return; }
+    /* 横移 + 风 */
+    g.vx *= 0.88;
+    if (g.vx > 5) g.vx = 5;
+    if (g.vx < -5) g.vx = -5;
+    g.x += g.vx + windAt(g) * 0.55;
+    if (g.x < BX_MIN) g.x = BX_MIN;
+    if (g.x > BX_MAX) g.x = BX_MAX;
+    /* 生成 */
+    g.nextAt -= spd;
+    if (g.nextAt <= 0) {
+      spawn(g);
+      var gap = 96 - Math.min(44, g.dist / 340);
+      g.nextAt = gap * (0.72 + rnd() * 0.56);
+    }
+    /* 障碍推进与碰撞 */
+    var i, o;
+    for (i = g.obs.length - 1; i >= 0; i--) {
+      o = g.obs[i];
+      o.y += spd;
+      o.x += o.vx;
+      if (o.k === "bird" && (o.x < -30 || o.x > W + 30)) { g.obs.splice(i, 1); continue; }
+      if (o.k === "cloud") {
+        if (o.x < 30) { o.x = 30; o.vx = Math.abs(o.vx); }
+        if (o.x > W - 30) { o.x = W - 30; o.vx = -Math.abs(o.vx); }
+      }
+      if (o.y > H + 40) { g.obs.splice(i, 1); continue; }
+      var dx = o.x - g.x, dy = o.y - BY;
+      var rr = o.r + BR - 3;
+      if (dx * dx + dy * dy <= rr * rr) {
+        if (o.k === "star") {
+          g.stars++;
+          g.fx.push({ x: o.x, y: o.y, s: "+1⭐", t: 26 });
+          g.obs.splice(i, 1);
+          continue;
+        }
+        if (o.k === "fuel") {
+          g.fuel = Math.min(FUEL_MAX, g.fuel + FUEL_TANK);
+          g.fx.push({ x: o.x, y: o.y, s: "+燃料", t: 26 });
+          g.obs.splice(i, 1);
+          continue;
+        }
+        endFlight(g, o.k);
+        return;
+      }
+    }
+    for (i = g.fx.length - 1; i >= 0; i--) { if (--g.fx[i].t <= 0) g.fx.splice(i, 1); }
+    g.flame = g.burn && g.fuel > 0 ? Math.min(10, g.flame + 1) : Math.max(0, g.flame - 1);
+  }
+
+  /* ---------- DOM / 渲染 ---------- */
+  var g = null, raf = 0, active = false, inited = false;
+  var cav = null, ctx = null, els = {};
+  var keyL = false, keyR = false;
+
+  function $id(x) { return document.getElementById(x); }
+  function hbSync() {
+    if (!inited || !g) return;
+    els.alt.textContent = Math.floor(g.dist / PXM) + "m";
+    els.star.textContent = g.stars;
+    els.best.textContent = rec.bestM + "m";
+    els.fly.textContent = rec.flights;
+  }
+
+  function drawBalloon() {
+    var x = g.x;
+    /* 火焰 */
+    if (g.flame > 0) {
+      ctx.globalAlpha = g.flame / 10;
+      ctx.fillStyle = "#ffb300";
+      ctx.beginPath();
+      ctx.moveTo(x - 4, BY + 6); ctx.lineTo(x + 4, BY + 6); ctx.lineTo(x, BY + 15 + g.flame * 0.6);
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    /* 球体 */
+    var grd = ctx.createRadialGradient(x - 5, BY - 14, 3, x, BY - 8, 20);
+    grd.addColorStop(0, "#ff8a80"); grd.addColorStop(1, "#d32f2f");
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(x, BY - 8, 16, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "#ffcdd2"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, BY - 24); ctx.lineTo(x, BY + 8); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, BY - 8, 16, 0, Math.PI * 2); ctx.stroke();
+    /* 吊篮 */
+    ctx.strokeStyle = "#8d6e63";
+    ctx.beginPath(); ctx.moveTo(x - 10, BY + 4); ctx.lineTo(x - 6, BY + 14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 10, BY + 4); ctx.lineTo(x + 6, BY + 14); ctx.stroke();
+    ctx.fillStyle = "#a1887f";
+    ctx.fillRect(x - 8, BY + 13, 16, 10);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var m = g ? g.dist / PXM : 0;
+    /* 天空随高度变深 */
+    var k = Math.min(1, m / 3000);
+    var top = "rgb(" + Math.round(100 - 70 * k) + "," + Math.round(170 - 110 * k) + "," + Math.round(235 - 90 * k) + ")";
+    var grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, top); grd.addColorStop(1, "#b3e5fc");
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+    var i;
+    /* 远景装饰云 */
+    ctx.fillStyle = "rgba(255,255,255,.35)";
+    for (i = 0; i < 4; i++) {
+      var cy = ((i * 173 + (g ? -g.dist * 0.35 : 0)) % (H + 80) + H + 80) % (H + 80) - 40;
+      ctx.beginPath(); ctx.ellipse((i * 97 + 60) % W, cy, 34, 12, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    if (!g) return;
+    /* 障碍与道具 */
+    ctx.textAlign = "center";
+    for (i = 0; i < g.obs.length; i++) {
+      var o = g.obs[i];
+      if (o.k === "bird") {
+        ctx.font = "20px sans-serif";
+        ctx.save(); ctx.translate(o.x, o.y);
+        if (o.vx < 0) ctx.scale(-1, 1);
+        ctx.fillText("🐦", 0, 7); ctx.restore();
+      } else if (o.k === "cloud") {
+        ctx.font = "34px sans-serif"; ctx.fillText("⛈️", o.x, o.y + 12);
+      } else if (o.k === "star") {
+        ctx.font = "20px sans-serif"; ctx.fillText("⭐", o.x, o.y + 7);
+      } else {
+        ctx.font = "20px sans-serif"; ctx.fillText("⛽", o.x, o.y + 7);
+      }
+    }
+    drawBalloon();
+    /* 特效 */
+    for (i = 0; i < g.fx.length; i++) {
+      var f = g.fx[i];
+      ctx.globalAlpha = Math.max(0, f.t / 26);
+      ctx.fillStyle = "#fff59d"; ctx.font = "14px sans-serif";
+      ctx.fillText(f.s, f.x, f.y - (26 - f.t));
+      ctx.globalAlpha = 1;
+    }
+    /* 燃料条 */
+    ctx.fillStyle = "rgba(0,0,0,.4)"; ctx.fillRect(12, 12, 120, 14);
+    ctx.fillStyle = g.fuel > 25 ? "#66bb6a" : "#ef5350";
+    ctx.fillRect(14, 14, 116 * (g.fuel / FUEL_MAX), 10);
+    ctx.fillStyle = "#fff"; ctx.font = "10px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("燃料", 138, 23);
+    /* 风向 */
+    var wv = g.wind * 0.55;
+    ctx.textAlign = "right"; ctx.font = "12px sans-serif";
+    ctx.fillText("风 " + (Math.abs(wv) < 0.05 ? "—" : (wv > 0 ? "→" : "←") + Math.abs(wv).toFixed(1)), W - 12, 23);
+    ctx.textAlign = "center";
+    if (g.state === "ready") {
+      ctx.fillStyle = "rgba(0,0,0,.5)"; ctx.fillRect(0, H / 2 - 44, W, 88);
+      ctx.fillStyle = "#fff"; ctx.font = "17px sans-serif";
+      ctx.fillText("🎈 点击 / 空格 起飞", W / 2, H / 2 - 8);
+      ctx.font = "12px sans-serif";
+      ctx.fillText("←→ 转向 · 按住空格/画布烧火加速上升(费燃料)", W / 2, H / 2 + 18);
+      ctx.fillText("躲开 🐦 和 ⛈️，吃 ⭐ 计分、⛽ 补燃料", W / 2, H / 2 + 36);
+    } else if (g.state === "over") {
+      ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(0, H / 2 - 56, W, 112);
+      ctx.fillStyle = "#fff"; ctx.font = "18px sans-serif";
+      var why = g.deadBy === "fuel" ? "燃料耗尽，缓缓降落 🪂" : (g.deadBy === "bird" ? "被鸟撞破了气球 🐦💥" : "闯进雷暴云 ⛈️⚡");
+      ctx.fillText(why, W / 2, H / 2 - 24);
+      ctx.font = "15px sans-serif";
+      ctx.fillText("高度 " + Math.floor(g.dist / PXM) + "m · ⭐×" + g.stars + " · 最佳 " + rec.bestM + "m", W / 2, H / 2 + 4);
+      ctx.font = "12px sans-serif";
+      ctx.fillText("点击 / 空格 / R 再飞一次", W / 2, H / 2 + 30);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g) {
+      if (keyL) g.vx -= 0.55;
+      if (keyR) g.vx += 0.55;
+      step(g);
+      hbSync();
+    }
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function begin() {
+    if (!g || g.state === "run") return;
+    g = newGame();
+    g.state = "run";
+    hbSync();
+  }
+
+  function onKeyDown(ev) {
+    if (!active || !g) return;
+    var k = ev.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") { keyL = true; ev.preventDefault(); }
+    else if (k === "ArrowRight" || k === "d" || k === "D") { keyR = true; ev.preventDefault(); }
+    else if (k === " ") {
+      if (g.state === "run") g.burn = true; else begin();
+      ev.preventDefault();
+    } else if ((k === "r" || k === "R") && g.state === "over") { begin(); ev.preventDefault(); }
+  }
+  function onKeyUp(ev) {
+    var k = ev.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") keyL = false;
+    else if (k === "ArrowRight" || k === "d" || k === "D") keyR = false;
+    else if (k === " " && g) g.burn = false;
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = $id("hbCav");
+    if (!cav) return;
+    ctx = cav.getContext("2d");
+    els = { alt: $id("hbAlt"), star: $id("hbStar"), best: $id("hbBest"), fly: $id("hbFly") };
+    cav.addEventListener("pointerdown", function (ev) {
+      if (!g) return;
+      if (g.state !== "run") { begin(); return; }
+      g.burn = true;
+      var rect = cav.getBoundingClientRect();
+      var px = (ev.clientX - rect.left) * (W / rect.width);
+      if (px < g.x - 14) keyL = true;
+      else if (px > g.x + 14) keyR = true;
+      ev.preventDefault();
+    });
+    cav.addEventListener("pointerup", function () { if (g) g.burn = false; keyL = false; keyR = false; });
+    cav.addEventListener("pointercancel", function () { if (g) g.burn = false; keyL = false; keyR = false; });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.balloonRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    hbSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.balloonStop = function () {
+    active = false;
+    keyL = false; keyR = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__hbTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    riseSpd: riseSpd, windAt: windAt, newGame: newGame, spawn: spawn,
+    endFlight: endFlight, step: step, draw: draw, hbSync: hbSync,
+    begin: begin, onKeyDown: onKeyDown, onKeyUp: onKeyUp, ensureInit: ensureInit,
+    setKeys: function (l, r) { keyL = l; keyR = r; },
+    consts: { KEY: KEY, W: W, H: H, BY: BY, BR: BR, FUEL_MAX: FUEL_MAX,
+      FUEL_DRAIN: FUEL_DRAIN, FUEL_BURN: FUEL_BURN, FUEL_TANK: FUEL_TANK,
+      PXM: PXM, BADGE_ALT: BADGE_ALT, BADGE_STAR: BADGE_STAR }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🎈", name: "高空飞行员", desc: "在随便热气球单次飞行达到 1500m 高度", test: function (u) { return (u.hbalt || 0) >= 1; } },
+      { emoji: "🌠", name: "摘星飞行家", desc: "在随便热气球累计收集 50 颗星星", test: function (u) { return (u.hbstar || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "热气球的秘密：想升得高，就得舍得烧掉一点储备。",
+      "风不由你选，但去哪儿由你掰。",
+      "雷暴云看着吓人，绕过去就只是一团湿棉花。",
+      "星星挂在那儿不是让你仰望的，是让你顺路摘的。",
+      "燃料表见底之前，每一米高度都是白赚的。"
     );
   }
 })();
