@@ -1582,6 +1582,7 @@
         <button data-tab="glide">🪂 随便滑翔伞</button>
         <button data-tab="skate">🎀 随便花样滑冰</button>
         <button data-tab="crack">🕵️ 随便密码破译</button>
+        <button data-tab="triathlon">🏊 随便铁人三项</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8474,6 +8475,32 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="triathlon">
+    <h2>🏊 随便铁人三项</h2>
+    <p class="sub">体力管理竞速：游泳 300m → 骑行 600m → 跑步 400m，按住发力、松手回体力，干过三位 AI 对手冲上领奖台</p>
+    <style>
+      #triathlon .tth-wrap { max-width:420px; margin:0 auto; }
+      #triathlon canvas { width:100%; max-width:380px; border-radius:14px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.35); }
+      #triathlon .tth-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #triathlon .tth-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #triathlon .tth-hud b { font-weight:700; color:#ffd54f; }
+      #triathlon .tth-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="tth-wrap">
+      <div class="tth-hud">
+        <span>用时 <b id="tthTime">—</b></span>
+        <span>赛段 <b id="tthLeg">—</b></span>
+        <span>最佳 <b id="tthBest">—</b></span>
+        <span>夺冠 <b id="tthGold">—</b></span>
+      </div>
+      <canvas id="tthCav" width="380" height="480"></canvas>
+      <p class="tth-help">
+        按住画布 / 按住空格 = 发力加速（消耗体力），松开 = 巡航恢复体力；体力见底会「力竭」被迫龟速，恢复到 30 才缓过来；<br>
+        游泳 / 骑行 / 跑步三段的速度与耗体各不相同，换项区 T1/T2 强制停留 1 秒顺便回血——把力气花在刀刃上；<br>
+        三位 AI 对手实力每场随机，完成首场比赛解锁「🏊 铁人首铸」、夺冠解锁「🥇 领奖台之巅」，战绩本地存档（suibian_tri）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -9108,6 +9135,7 @@
     if (id === "sail") sailRender();
     if (id === "glide") glideRender();
     if (id === "skate") skateRender();
+    if (id === "triathlon" && typeof tthRender === "function") tthRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9172,6 +9200,7 @@
     if (id !== "sail" && typeof sailStop === "function") sailStop();
     if (id !== "glide" && typeof glideStop === "function") glideStop();
     if (id !== "skate" && typeof skateStop === "function") skateStop();
+    if (id !== "triathlon" && typeof tthStop === "function") tthStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9367,6 +9396,7 @@
     glide: "随便滑翔伞 glide paraglider paragliding 滑翔 滑翔伞 热气流 上升气流 越野 飞行 云底 加速杆 高度 天空 翱翔 体育 竞技",
     skate: "随便花样滑冰 skate figure skating 花样 滑冰 冰舞 四周跳 节目 连击 节奏 体育 竞技 动作 游戏 休闲",
     crack: "随便密码破译 crack 1A2B 猜密码 破译 密码 保险箱 推理 侦探 数字 逻辑 bulls cows 益智 烧脑 解谜 游戏",
+    triathlon: "随便铁人三项 triathlon 铁人三项 铁人 游泳 骑行 跑步 耐力 体力 竞速 比赛 运动 奥运 swim bike run 游戏",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9622,6 +9652,7 @@ splitbill:"tools",
     glide:"games",
     skate:"games",
     crack:"games",
+    triathlon:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -54299,6 +54330,391 @@ splitbill:"tools",
       "好侦探不怕线索少，只怕不做笔记。",
       "第一猜是试探，第二猜是推理，第三猜是收网。",
       "推理的乐趣，在于错误的答案也有用。"
+    );
+  }
+})();
+/* ===== 🏊 随便铁人三项 triathlon ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_tri";
+  var W = 380, H = 480;
+  var READY_T = 45;
+  var FPS = 60;
+  var TRANS_T = 60;        // 换项区 T1/T2 停留帧数
+  var TIRED_EXIT = 30;     // 力竭后体力恢复到 30 才解除
+  var LEGS = [
+    { name: "游泳", emoji: "🏊", dist: 300, base: 1.6, boost: 2.6, drain: 0.55, regen: 0.35 },
+    { name: "骑行", emoji: "🚴", dist: 600, base: 3.2, boost: 5.0, drain: 0.45, regen: 0.40 },
+    { name: "跑步", emoji: "🏃", dist: 400, base: 1.9, boost: 3.1, drain: 0.65, regen: 0.30 }
+  ];
+  var TOTAL = LEGS[0].dist + LEGS[1].dist + LEGS[2].dist; // 1300
+  var RIVALS = [
+    { name: "老铁", color: "#ef5350", lo: 1.04, hi: 1.16 },
+    { name: "阿隼", color: "#ab47bc", lo: 0.96, hi: 1.10 },
+    { name: "小满", color: "#26a69a", lo: 0.88, hi: 1.02 }
+  ];
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() { return { bms: 0, races: 0, golds: 0, aF: 0, aG: 0 }; }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.bms = nInt(o.bms); d.races = nInt(o.races); d.golds = nInt(o.golds);
+      d.aF = o.aF ? 1 : 0; d.aG = o.aG ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function clampSta(v) { return v < 0 ? 0 : (v > 100 ? 100 : v); }
+  function legAt(d) {
+    if (d < LEGS[0].dist) return { i: 0, in_: d };
+    if (d < LEGS[0].dist + LEGS[1].dist) return { i: 1, in_: d - LEGS[0].dist };
+    return { i: 2, in_: d - LEGS[0].dist - LEGS[1].dist };
+  }
+  function speedOf(legIdx, boosting, tired) {
+    var L = LEGS[legIdx];
+    if (tired) return L.base * 0.5;
+    return boosting ? L.boost : L.base;
+  }
+  function staDelta(legIdx, boosting, tired) {
+    var L = LEGS[legIdx];
+    if (tired || !boosting) return L.regen;
+    return -L.drain;
+  }
+  function makeRivals(r) {
+    var out = [], i;
+    for (i = 0; i < RIVALS.length; i++) {
+      var R = RIVALS[i];
+      var m = R.lo + r() * (R.hi - R.lo);
+      if (m < R.lo) m = R.lo; if (m > R.hi) m = R.hi;
+      out.push({ name: R.name, color: R.color, m: m, d: 0, trans: 0, fin: 0 });
+    }
+    return out;
+  }
+  function stepRival(rv, t) {
+    if (rv.fin) return;
+    if (rv.trans > 0) { rv.trans--; return; }
+    var la = legAt(rv.d);
+    var before = la.i;
+    rv.d += LEGS[la.i].base * rv.m;
+    if (rv.d >= TOTAL) { rv.d = TOTAL; rv.fin = t; return; }
+    var after = legAt(rv.d).i;
+    if (after !== before) rv.trans = TRANS_T;
+  }
+  function fmtMs(ms) {
+    if (!ms || ms <= 0) return "—";
+    var s = ms / 1000;
+    var m = Math.floor(s / 60);
+    var r2 = (s - m * 60).toFixed(1);
+    return m > 0 ? (m + "'" + (Number(r2) < 10 ? "0" : "") + r2 + '"') : (r2 + '"');
+  }
+  function rankOf(playerT, rivals) {
+    var r = 1, i;
+    for (i = 0; i < rivals.length; i++) {
+      if (rivals[i].fin && rivals[i].fin < playerT) r++;
+    }
+    return r;
+  }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, d: 0, sta: 100, tired: false, boost: false,
+      trans: 0, rivals: [], fin: 0, rank: 0, msg: "", msgT: 0
+    };
+  }
+  var g = null;
+
+  function startRace(gg) {
+    var ng = newGame();
+    for (var k in ng) if (Object.prototype.hasOwnProperty.call(ng, k)) gg[k] = ng[k];
+    gg.phase = "ready";
+    gg.rivals = makeRivals(rnd);
+  }
+
+  function finishRace(gg) {
+    gg.phase = "done";
+    gg.fin = gg.t;
+    gg.rank = rankOf(gg.t, gg.rivals);
+    var ms = Math.round(gg.t * 1000 / FPS);
+    rec.races += 1;
+    if (rec.bms === 0 || ms < rec.bms) rec.bms = ms;
+    if (gg.rank === 1) rec.golds += 1;
+    if (!rec.aF) { rec.aF = 1; try { bumpUsage("tthfin"); } catch (e1) {} }
+    if (gg.rank === 1 && !rec.aG) { rec.aG = 1; try { bumpUsage("tthgold"); } catch (e2) {} }
+    saveRec();
+    try {
+      if (gg.rank === 1) { toast("🥇 冠军冲线！用时 " + fmtMs(ms)); confetti(); }
+      else toast("完赛！第 " + gg.rank + " 名 · 用时 " + fmtMs(ms));
+    } catch (e3) {}
+  }
+
+  function step(gg) {
+    if (!gg) return;
+    if (gg.phase === "ready") {
+      gg.t++;
+      if (gg.t >= READY_T) { gg.phase = "race"; gg.t = 0; }
+      return;
+    }
+    if (gg.phase !== "race") return;
+    gg.t++;
+    var i;
+    for (i = 0; i < gg.rivals.length; i++) stepRival(gg.rivals[i], gg.t);
+    if (gg.trans > 0) {
+      gg.trans--;
+      gg.sta = clampSta(gg.sta + 0.5); // 换项区顺便回体力
+      return;
+    }
+    var la = legAt(gg.d);
+    var before = la.i;
+    var sp = speedOf(la.i, gg.boost, gg.tired);
+    gg.d += sp;
+    gg.sta = clampSta(gg.sta + staDelta(la.i, gg.boost, gg.tired));
+    if (!gg.tired && gg.sta <= 0) { gg.tired = true; gg.msg = "力竭了！松手喘口气…"; gg.msgT = 90; }
+    if (gg.tired && gg.sta >= TIRED_EXIT) { gg.tired = false; gg.msg = "缓过来了，继续！"; gg.msgT = 60; }
+    if (gg.d >= TOTAL) { gg.d = TOTAL; finishRace(gg); return; }
+    var after = legAt(gg.d).i;
+    if (after !== before) {
+      gg.trans = TRANS_T;
+      gg.msg = after === 1 ? "T1 换项：上车骑行！" : "T2 换项：下车开跑！";
+      gg.msgT = 90;
+    }
+  }
+
+  /* ---- 输入 ---- */
+  function onPress(gg) {
+    if (!gg) return;
+    if (gg.phase === "idle" || gg.phase === "done") { startRace(gg); return; }
+    gg.boost = true;
+  }
+  function onRelease(gg) {
+    if (!gg) return;
+    gg.boost = false;
+  }
+  var spaceHeld = false;
+  function onKeyDown(e) {
+    if (!active) return;
+    if (e.key === " " || e.key === "Spacebar") {
+      var tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      e.preventDefault();
+      if (e.repeat || spaceHeld) return;
+      spaceHeld = true;
+      onPress(g);
+    }
+  }
+  function onKeyUp(e) {
+    if (e.key === " " || e.key === "Spacebar") { spaceHeld = false; if (active) onRelease(g); }
+  }
+
+  /* ---- 绘制 ---- */
+  var cav = null, ctx = null, raf = 0, active = false, inited = false;
+  var BANDS = [
+    { y: 96, c1: "#0d47a1", c2: "#1976d2" },   // 游泳
+    { y: 216, c1: "#37474f", c2: "#546e7a" },  // 骑行
+    { y: 336, c1: "#b71c1c", c2: "#e53935" }   // 跑步
+  ];
+  var TX0 = 34, TX1 = 346;
+
+  function xyOf(d) {
+    var la = legAt(d);
+    var f = LEGS[la.i].dist > 0 ? la.in_ / LEGS[la.i].dist : 0;
+    if (f > 1) f = 1;
+    return { x: TX0 + (TX1 - TX0) * f, y: BANDS[la.i].y, i: la.i };
+  }
+
+  function tthSync() {
+    try {
+      var el;
+      el = document.getElementById("tthTime");
+      if (el) el.textContent = g && g.phase !== "idle" ? fmtMs(Math.round(g.t * 1000 / FPS)) : "—";
+      el = document.getElementById("tthLeg");
+      if (el) {
+        if (!g || g.phase === "idle") el.textContent = "—";
+        else if (g.phase === "done") el.textContent = "完赛 🏁";
+        else { var la = legAt(g.d); el.textContent = LEGS[la.i].emoji + " " + LEGS[la.i].name; }
+      }
+      el = document.getElementById("tthBest");
+      if (el) el.textContent = fmtMs(rec.bms);
+      el = document.getElementById("tthGold");
+      if (el) el.textContent = rec.golds > 0 ? String(rec.golds) : "—";
+    } catch (e) {}
+  }
+
+  function drawBand(c, b, label, emoji) {
+    var grd = c.createLinearGradient(0, b.y - 26, 0, b.y + 26);
+    grd.addColorStop(0, b.c1); grd.addColorStop(1, b.c2);
+    c.fillStyle = grd;
+    c.fillRect(TX0 - 14, b.y - 26, TX1 - TX0 + 28, 52);
+    c.fillStyle = "rgba(255,255,255,.85)";
+    c.font = "bold 12px system-ui"; c.textAlign = "left";
+    c.fillText(emoji + " " + label, TX0 - 10, b.y - 32);
+    c.strokeStyle = "rgba(255,255,255,.35)"; c.setLineDash([6, 6]);
+    c.beginPath(); c.moveTo(TX1, b.y - 26); c.lineTo(TX1, b.y + 26); c.stroke();
+    c.setLineDash([]);
+  }
+
+  function drawDot(c, x, y, color, up, label) {
+    c.fillStyle = color;
+    c.beginPath(); c.arc(x, y, 7, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 1.5; c.stroke();
+    if (label) {
+      c.fillStyle = "rgba(255,255,255,.9)"; c.font = "10px system-ui"; c.textAlign = "center";
+      c.fillText(label, x, y + (up ? -12 : 20));
+    }
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    var c = ctx;
+    var bg = c.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#101728"); bg.addColorStop(1, "#1b2a44");
+    c.fillStyle = bg; c.fillRect(0, 0, W, H);
+
+    drawBand(c, BANDS[0], "游泳 300m", "🏊");
+    drawBand(c, BANDS[1], "骑行 600m", "🚴");
+    drawBand(c, BANDS[2], "跑步 400m", "🏃");
+
+    // 终点旗
+    c.font = "16px system-ui"; c.textAlign = "left";
+    c.fillText("🏁", TX1 + 6, BANDS[2].y + 6);
+
+    var i;
+    for (i = 0; i < g.rivals.length; i++) {
+      var rv = g.rivals[i];
+      var p = xyOf(rv.d);
+      drawDot(c, p.x, p.y - 8 + i * 5, rv.color, true, i === 0 ? rv.name : "");
+    }
+    var pp = xyOf(g.d);
+    drawDot(c, pp.x, pp.y + 10, "#ffd54f", false, "你");
+
+    // 体力条
+    var bx = 30, bw = W - 60, by = 408;
+    c.fillStyle = "rgba(255,255,255,.12)"; c.fillRect(bx, by, bw, 14);
+    var f = g.sta / 100;
+    c.fillStyle = g.tired ? "#ef5350" : (g.sta < 30 ? "#ffb300" : "#66bb6a");
+    c.fillRect(bx, by, bw * f, 14);
+    c.strokeStyle = "rgba(255,255,255,.4)"; c.lineWidth = 1; c.strokeRect(bx, by, bw, 14);
+    c.fillStyle = "rgba(255,255,255,.85)"; c.font = "11px system-ui"; c.textAlign = "center";
+    c.fillText("体力 " + Math.round(g.sta) + (g.tired ? " · 力竭恢复中" : (g.boost ? " · 发力!" : " · 巡航")), W / 2, by + 30);
+
+    // HUD 顶栏
+    c.fillStyle = "rgba(10,14,26,.85)"; c.fillRect(0, 0, W, 34);
+    c.fillStyle = "#fff"; c.font = "bold 13px system-ui"; c.textAlign = "left";
+    c.fillText("⏱ " + (g.phase !== "idle" ? fmtMs(Math.round(g.t * 1000 / FPS)) : "—"), 12, 22);
+    c.textAlign = "right";
+    c.fillText("最佳 " + fmtMs(rec.bms), W - 12, 22);
+
+    if (g.trans > 0 && g.phase === "race") {
+      c.fillStyle = "#ffd54f"; c.font = "bold 20px system-ui"; c.textAlign = "center";
+      c.fillText("🔁 换项区 " + Math.ceil(g.trans / FPS * 10) / 10 + "s", W / 2, 62);
+    }
+    if (g.msgT > 0) {
+      c.fillStyle = g.tired ? "#ef9a9a" : "#ffe082";
+      c.font = "bold 16px system-ui"; c.textAlign = "center";
+      c.fillText(g.msg, W / 2, 452);
+    }
+
+    if (g.phase === "idle") {
+      c.fillStyle = "rgba(10,14,26,.78)"; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#fff"; c.font = "bold 20px system-ui"; c.textAlign = "center";
+      c.fillText("🏊🚴🏃 随便铁人三项", W / 2, 190);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.8)";
+      c.fillText("按住画布 / 空格 = 发力加速（耗体力）", W / 2, 222);
+      c.fillText("松开 = 巡航回体力，体力见底会力竭变慢", W / 2, 244);
+      c.fillText("游泳 300m → 骑行 600m → 跑步 400m", W / 2, 266);
+      c.fillText("点击开赛，干过三位对手拿 🥇", W / 2, 288);
+    } else if (g.phase === "ready") {
+      c.fillStyle = "#ff7a59"; c.font = "bold 42px system-ui"; c.textAlign = "center";
+      c.fillText(g.t < READY_T / 2 ? "各就位…" : "出发!", W / 2, 200);
+    } else if (g.phase === "done") {
+      c.fillStyle = "rgba(10,14,26,.9)"; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#fff"; c.font = "bold 22px system-ui"; c.textAlign = "center";
+      var medal = g.rank === 1 ? "🥇" : (g.rank === 2 ? "🥈" : (g.rank === 3 ? "🥉" : "🏅"));
+      c.fillText(medal + " 第 " + g.rank + " 名", W / 2, 168);
+      c.font = "bold 30px system-ui"; c.fillStyle = "#ffd54f";
+      c.fillText(fmtMs(Math.round(g.fin * 1000 / FPS)), W / 2, 208);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.85)";
+      var done = 0;
+      for (i = 0; i < g.rivals.length; i++) if (g.rivals[i].fin && g.rivals[i].fin < g.fin) done++;
+      c.fillText(done > 0 ? (done + " 位对手先你冲线") : "你第一个冲线，全场最靓", W / 2, 240);
+      c.fillStyle = "rgba(255,255,255,.7)";
+      c.fillText("历史最佳 " + fmtMs(rec.bms) + " · 点击再来一场", W / 2, 268);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g && g.msgT > 0) g.msgT--;
+    step(g);
+    if (g && g.phase !== "idle") tthSync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("tthCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); onPress(g); });
+    cav.addEventListener("pointerup", function (e) { e.preventDefault(); onRelease(g); });
+    cav.addEventListener("pointercancel", function () { onRelease(g); });
+    cav.addEventListener("pointerleave", function () { onRelease(g); });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.tthRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    tthSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.tthStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__tthTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    clampSta: clampSta, legAt: legAt, speedOf: speedOf, staDelta: staDelta,
+    makeRivals: makeRivals, stepRival: stepRival, fmtMs: fmtMs, rankOf: rankOf,
+    newGame: newGame, startRace: startRace, finishRace: finishRace, step: step,
+    onPress: onPress, onRelease: onRelease, onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    xyOf: xyOf, draw: draw, tthSync: tthSync, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, READY_T: READY_T, FPS: FPS, TRANS_T: TRANS_T,
+      TIRED_EXIT: TIRED_EXIT, LEGS: LEGS, TOTAL: TOTAL, RIVALS: RIVALS }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🏊", name: "铁人首铸", desc: "在随便铁人三项里完成一场完整比赛", test: function (u) { return (u.tthfin || 0) >= 1; } },
+      { emoji: "🥇", name: "领奖台之巅", desc: "在随便铁人三项里力压三位对手夺冠", test: function (u) { return (u.tthgold || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "铁人三项的秘诀：不是每段都拼命，是知道哪段该拼命。",
+      "体力条见底之前松手，是成年人最高级的自律。",
+      "游泳靠节奏，骑行靠分配，跑步靠意志。",
+      "换项区不是休息区，是下一场战斗的更衣室。",
+      "冲线那一刻你会明白，对手从来只有一个：想放弃的自己。"
     );
   }
 })();
