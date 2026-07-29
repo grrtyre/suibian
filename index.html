@@ -1583,6 +1583,7 @@
         <button data-tab="skate">🎀 随便花样滑冰</button>
         <button data-tab="crack">🕵️ 随便密码破译</button>
         <button data-tab="triathlon">🏊 随便铁人三项</button>
+        <button data-tab="skydive">🪂 随便跳伞</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8501,6 +8502,32 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="skydive">
+    <h2>🪂 随便跳伞</h2>
+    <p class="sub">3000 米高空一跃而下：看准时机跳机、穿过三层随机风场、择时开伞，稳稳落进靶心</p>
+    <style>
+      #skydive .sky-wrap { max-width:420px; margin:0 auto; }
+      #skydive canvas { width:100%; max-width:380px; border-radius:14px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.35); }
+      #skydive .sky-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #skydive .sky-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #skydive .sky-hud b { font-weight:700; color:#81d4fa; }
+      #skydive .sky-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="sky-wrap">
+      <div class="sky-hud">
+        <span>高度 <b id="skyAlt">—</b></span>
+        <span>风向 <b id="skyWind">—</b></span>
+        <span>最近 <b id="skyBest">—</b></span>
+        <span>靶心 <b id="skyBull">—</b></span>
+      </div>
+      <canvas id="skyCav" width="380" height="520"></canvas>
+      <p class="sky-help">
+        点画布 / 空格 = 依次「起飞 → 跳机 → 开伞」，跳机时机决定起始落点；开伞后按住画布左右拖 / 方向键 ←→ 顶风调位置；<br>
+        高 / 中 / 低三层风场每局随机（左右侧箭头标注风向风力），开伞太晚（低于 150m）会摔进草垛，敢在 500m 以下开伞是高手的浪漫；<br>
+        落点距靶心 ≤12m 算靶心：首次安全着陆解锁「🪂 天降神兵」、靶心着陆解锁「🎯 靶心着陆」，战绩本地存档（suibian_sky）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -9136,6 +9163,7 @@
     if (id === "glide") glideRender();
     if (id === "skate") skateRender();
     if (id === "triathlon" && typeof tthRender === "function") tthRender();
+    if (id === "skydive" && typeof skyRender === "function") skyRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9201,6 +9229,7 @@
     if (id !== "glide" && typeof glideStop === "function") glideStop();
     if (id !== "skate" && typeof skateStop === "function") skateStop();
     if (id !== "triathlon" && typeof tthStop === "function") tthStop();
+    if (id !== "skydive" && typeof skyStop === "function") skyStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9397,6 +9426,7 @@
     skate: "随便花样滑冰 skate figure skating 花样 滑冰 冰舞 四周跳 节目 连击 节奏 体育 竞技 动作 游戏 休闲",
     crack: "随便密码破译 crack 1A2B 猜密码 破译 密码 保险箱 推理 侦探 数字 逻辑 bulls cows 益智 烧脑 解谜 游戏",
     triathlon: "随便铁人三项 triathlon 铁人三项 铁人 游泳 骑行 跑步 耐力 体力 竞速 比赛 运动 奥运 swim bike run 游戏",
+    skydive: "随便跳伞 skydive parachute 跳伞 降落伞 自由落体 开伞 风场 着陆 靶心 高空 极限运动 天空 翼装 游戏 竞技",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9653,6 +9683,7 @@ splitbill:"tools",
     skate:"games",
     crack:"games",
     triathlon:"games",
+    skydive:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -54715,6 +54746,464 @@ splitbill:"tools",
       "游泳靠节奏，骑行靠分配，跑步靠意志。",
       "换项区不是休息区，是下一场战斗的更衣室。",
       "冲线那一刻你会明白，对手从来只有一个：想放弃的自己。"
+    );
+  }
+})();
+/* ===== 🪂 随便跳伞 skydive ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_sky";
+  var W = 380, H = 520;
+  var FPS = 60;
+  var ALT0 = 3000;         // 跳伞高度（米）
+  var VT_FALL = 11;        // 自由落体终端速度（米/帧）
+  var VT_CHUTE = 2.0;      // 开伞后下降速度（米/帧）
+  var SAFE_OPEN = 150;     // 低于此高度开伞 = 开伞太晚（摔）
+  var LOW_BONUS = 500;     // 低于此高度开伞 = 低开高手
+  var DEPLOY_T = 36;       // 伞衣展开帧数
+  var PLANE_SP = 2.4;      // 飞机横移速度
+  var BULL_R = 12, PAD_R = 55;
+  var LAYERS_DEF = [
+    { top: 3000, bot: 1800 },
+    { top: 1800, bot: 700 },
+    { top: 700, bot: 0 }
+  ];
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() { return { jumps: 0, safe: 0, bulls: 0, bestD: -1, aJ: 0, aB: 0 }; }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.jumps = nInt(o.jumps); d.safe = nInt(o.safe); d.bulls = nInt(o.bulls);
+      var b = Math.floor(Number(o.bestD));
+      d.bestD = isFinite(b) && b >= 0 ? b : -1;
+      d.aJ = o.aJ ? 1 : 0; d.aB = o.aB ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function clampX(x) { return x < 8 ? 8 : (x > W - 8 ? W - 8 : x); }
+  function makeWinds(r) {
+    var out = [], i;
+    for (i = 0; i < LAYERS_DEF.length; i++) {
+      var wx = (r() * 2 - 1) * 1.5;
+      if (wx < -1.5) wx = -1.5; if (wx > 1.5) wx = 1.5;
+      out.push({ top: LAYERS_DEF[i].top, bot: LAYERS_DEF[i].bot, wx: wx });
+    }
+    return out;
+  }
+  function windAt(winds, alt) {
+    if (!winds || !winds.length) return 0;
+    for (var i = 0; i < winds.length; i++) {
+      if (alt <= winds[i].top && alt > winds[i].bot) return winds[i].wx;
+    }
+    return winds[winds.length - 1].wx;
+  }
+  function makeTarget(r) {
+    return Math.round(clampX(90 + r() * 200));
+  }
+  function landVerdict(opened, openAlt, x, tx) {
+    var safe = !!opened && openAlt >= SAFE_OPEN;
+    var dist = Math.round(Math.abs(x - tx));
+    return {
+      safe: safe, dist: dist,
+      bull: safe && dist <= BULL_R,
+      pad: safe && dist <= PAD_R,
+      low: safe && openAlt <= LOW_BONUS,
+      why: opened ? (safe ? "" : "开伞太晚") : "没开伞"
+    };
+  }
+  function windLabel(wx) {
+    var a = Math.abs(wx);
+    var lv = a < 0.35 ? "微" : (a < 0.85 ? "和" : "烈");
+    if (a < 0.05) return "无风";
+    return (wx < 0 ? "←" : "→") + " " + lv + "风";
+  }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, planeX: -30,
+      x: 190, alt: ALT0, vy: 0,
+      winds: [], tx: 190,
+      opened: false, openAlt: 0, deploy: 0,
+      steer: 0, res: null, msg: "", msgT: 0
+    };
+  }
+  var g = null;
+
+  function startFly(gg) {
+    var ng = newGame();
+    for (var k in ng) if (Object.prototype.hasOwnProperty.call(ng, k)) gg[k] = ng[k];
+    gg.phase = "fly";
+    gg.winds = makeWinds(rnd);
+    gg.tx = makeTarget(rnd);
+  }
+  function jumpOut(gg) {
+    if (gg.phase !== "fly") return;
+    gg.phase = "fall";
+    gg.x = clampX(gg.planeX);
+    gg.alt = ALT0; gg.vy = 0; gg.t = 0;
+    gg.msg = "自由落体！再点一下开伞"; gg.msgT = 100;
+  }
+  function openChute(gg) {
+    if (gg.phase !== "fall" || gg.opened) return;
+    gg.opened = true;
+    gg.openAlt = gg.alt;
+    gg.deploy = DEPLOY_T;
+    gg.phase = "chute";
+    if (gg.alt < SAFE_OPEN) { gg.msg = "开伞太晚了！！"; gg.msgT = 120; }
+    else if (gg.alt <= LOW_BONUS) { gg.msg = "低开高手！稳住着陆"; gg.msgT = 90; }
+    else { gg.msg = "伞开了，顶风调位置"; gg.msgT = 90; }
+  }
+  function land(gg) {
+    gg.alt = 0;
+    gg.phase = "done";
+    var v = landVerdict(gg.opened, gg.openAlt, gg.x, gg.tx);
+    gg.res = v;
+    rec.jumps += 1;
+    if (v.safe) {
+      rec.safe += 1;
+      if (rec.bestD < 0 || v.dist < rec.bestD) rec.bestD = v.dist;
+      if (v.bull) rec.bulls += 1;
+      if (!rec.aJ) { rec.aJ = 1; try { bumpUsage("skyland"); } catch (e1) {} }
+      if (v.bull && !rec.aB) { rec.aB = 1; try { bumpUsage("skybull"); } catch (e2) {} }
+    }
+    saveRec();
+    try {
+      if (!v.safe) toast("💥 " + v.why + "，摔进了草垛…再来一跳！");
+      else if (v.bull) { toast("🎯 靶心着陆！距靶心仅 " + v.dist + "m"); confetti(); }
+      else if (v.pad) toast("🪂 精准着陆！距靶心 " + v.dist + "m");
+      else toast("🪂 安全着陆，距靶心 " + v.dist + "m，下次飘准点");
+    } catch (e3) {}
+  }
+  function primary(gg) {
+    if (!gg) return;
+    if (gg.phase === "idle" || gg.phase === "done") { startFly(gg); return; }
+    if (gg.phase === "fly") { jumpOut(gg); return; }
+    if (gg.phase === "fall") { openChute(gg); return; }
+  }
+
+  function step(gg) {
+    if (!gg) return;
+    if (gg.msgT > 0) gg.msgT--;
+    if (gg.phase === "fly") {
+      gg.planeX += PLANE_SP;
+      if (gg.planeX > W + 30) gg.planeX = -30;
+      gg.t++;
+      return;
+    }
+    if (gg.phase === "fall") {
+      gg.t++;
+      gg.vy += (VT_FALL - gg.vy) * 0.06;
+      gg.alt -= gg.vy;
+      gg.x = clampX(gg.x + windAt(gg.winds, gg.alt) * 0.3 + gg.steer * 1.5);
+      if (gg.alt <= 0) land(gg);
+      return;
+    }
+    if (gg.phase === "chute") {
+      gg.t++;
+      if (gg.deploy > 0) gg.deploy--;
+      var vt = gg.openAlt < SAFE_OPEN ? 7 : VT_CHUTE;
+      gg.vy += (vt - gg.vy) * 0.1;
+      gg.alt -= gg.vy;
+      var wf = gg.deploy > 0 ? 0.6 : 1.0;
+      gg.x = clampX(gg.x + windAt(gg.winds, gg.alt) * wf + gg.steer * 1.8);
+      if (gg.alt <= 0) land(gg);
+      return;
+    }
+  }
+
+  /* ---- 输入 ---- */
+  var keySteer = 0, holdX = -1;
+  function steerFrom(gg) {
+    if (!gg) return;
+    var s = 0;
+    if (holdX >= 0 && (gg.phase === "fall" || gg.phase === "chute")) {
+      if (holdX < gg.x - 6) s = -1;
+      else if (holdX > gg.x + 6) s = 1;
+    }
+    if (keySteer !== 0) s = keySteer;
+    gg.steer = s;
+  }
+  function canvasX(e) {
+    if (!cav) return -1;
+    var r = cav.getBoundingClientRect();
+    if (!r || !r.width) return -1;
+    return (e.clientX - r.left) * (W / r.width);
+  }
+  function onKeyDown(e) {
+    if (!active) return;
+    var tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { e.preventDefault(); keySteer = -1; return; }
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { e.preventDefault(); keySteer = 1; return; }
+    if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
+      e.preventDefault();
+      if (e.repeat) return;
+      primary(g);
+    }
+  }
+  function onKeyUp(e) {
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { if (keySteer === -1) keySteer = 0; return; }
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { if (keySteer === 1) keySteer = 0; return; }
+  }
+
+  /* ---- 绘制 ---- */
+  var cav = null, ctx = null, raf = 0, active = false, inited = false;
+  var CLOUDS = [
+    { x: 60, y: 120, r: 26 }, { x: 300, y: 90, r: 20 }, { x: 210, y: 200, r: 30 },
+    { x: 90, y: 300, r: 22 }, { x: 320, y: 260, r: 24 }, { x: 160, y: 380, r: 18 }
+  ];
+  var SKY_TOP = 64, SKY_BOT = 448;
+
+  function yOf(alt) {
+    var f = 1 - alt / ALT0;
+    if (f < 0) f = 0; if (f > 1) f = 1;
+    return SKY_TOP + f * (SKY_BOT - SKY_TOP);
+  }
+  function layerBandY(l) {
+    return { y0: yOf(l.top), y1: yOf(l.bot) };
+  }
+
+  function skySync() {
+    try {
+      var el;
+      el = document.getElementById("skyAlt");
+      if (el) {
+        if (!g || g.phase === "idle") el.textContent = "—";
+        else if (g.phase === "fly") el.textContent = "3000m ✈️";
+        else if (g.phase === "done") el.textContent = "落地";
+        else el.textContent = Math.max(0, Math.round(g.alt)) + "m";
+      }
+      el = document.getElementById("skyWind");
+      if (el) el.textContent = g && g.winds.length && g.phase !== "idle" && g.phase !== "fly"
+        ? windLabel(windAt(g.winds, g.alt)) : "—";
+      el = document.getElementById("skyBest");
+      if (el) el.textContent = rec.bestD >= 0 ? rec.bestD + "m" : "—";
+      el = document.getElementById("skyBull");
+      if (el) el.textContent = rec.bulls > 0 ? String(rec.bulls) : "—";
+    } catch (e) {}
+  }
+
+  function drawScene(c) {
+    var bg = c.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#0b1a33"); bg.addColorStop(0.55, "#16345c"); bg.addColorStop(1, "#2b567f");
+    c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    // 云
+    var i;
+    c.fillStyle = "rgba(255,255,255,.10)";
+    for (i = 0; i < CLOUDS.length; i++) {
+      var cl = CLOUDS[i];
+      c.beginPath(); c.arc(cl.x, cl.y, cl.r, 0, Math.PI * 2);
+      c.arc(cl.x + cl.r * 0.9, cl.y + 4, cl.r * 0.7, 0, Math.PI * 2);
+      c.arc(cl.x - cl.r * 0.8, cl.y + 6, cl.r * 0.6, 0, Math.PI * 2); c.fill();
+    }
+    // 风层分界与箭头
+    if (g && g.winds.length) {
+      for (i = 0; i < g.winds.length; i++) {
+        var L = g.winds[i], b = layerBandY(L);
+        var cur = g.alt <= L.top && g.alt > L.bot && (g.phase === "fall" || g.phase === "chute");
+        if (i > 0) {
+          c.strokeStyle = "rgba(255,255,255,.14)"; c.setLineDash([5, 7]);
+          c.beginPath(); c.moveTo(0, b.y0); c.lineTo(W, b.y0); c.stroke(); c.setLineDash([]);
+        }
+        var my = (b.y0 + b.y1) / 2;
+        var a = Math.abs(L.wx), n = a < 0.35 ? 1 : (a < 0.85 ? 2 : 3), k;
+        c.fillStyle = cur ? "#81d4fa" : "rgba(255,255,255,.35)";
+        c.font = "12px system-ui"; c.textAlign = "left";
+        var arrow = L.wx < 0 ? "◀" : "▶";
+        var lab = "";
+        for (k = 0; k < n; k++) lab += arrow;
+        if (a < 0.05) lab = "·";
+        c.fillText(lab, L.wx < 0 ? 8 : W - 8 - n * 12, my);
+      }
+    }
+    // 地面与靶
+    var gg2 = c.createLinearGradient(0, SKY_BOT, 0, H);
+    gg2.addColorStop(0, "#33691e"); gg2.addColorStop(1, "#1b3512");
+    c.fillStyle = gg2; c.fillRect(0, SKY_BOT, W, H - SKY_BOT);
+    if (g && (g.phase !== "idle")) {
+      var tx = g.tx;
+      c.fillStyle = "rgba(255,213,79,.25)";
+      c.beginPath(); c.ellipse(tx, SKY_BOT + 4, PAD_R, 9, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "rgba(239,83,80,.55)";
+      c.beginPath(); c.ellipse(tx, SKY_BOT + 4, BULL_R + 14, 6, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#ffeb3b";
+      c.beginPath(); c.ellipse(tx, SKY_BOT + 4, BULL_R, 4, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "rgba(255,255,255,.9)"; c.font = "11px system-ui"; c.textAlign = "center";
+      c.fillText("🎯", tx, SKY_BOT + 24);
+    }
+  }
+
+  function drawPlayer(c) {
+    if (!g) return;
+    var x = g.x, y = yOf(g.alt);
+    if (g.phase === "fly") {
+      c.font = "22px system-ui"; c.textAlign = "center";
+      c.fillText("✈️", g.planeX, 46);
+      return;
+    }
+    if (g.phase === "idle") return;
+    // 已跳出后仍画一架远去的飞机
+    c.font = "16px system-ui"; c.textAlign = "center"; c.globalAlpha = 0.5;
+    c.fillText("✈️", g.planeX, 46); c.globalAlpha = 1;
+    if (g.phase === "chute" || (g.phase === "done" && g.res && g.res.safe)) {
+      // 伞衣
+      var dep = g.phase === "chute" ? 1 - g.deploy / DEPLOY_T : 1;
+      if (dep < 0.2) dep = 0.2;
+      var rw = 26 * dep;
+      c.fillStyle = "#ff7043";
+      c.beginPath(); c.arc(x, y - 16, rw, Math.PI, 0); c.fill();
+      c.strokeStyle = "rgba(255,255,255,.6)"; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x - rw, y - 16); c.lineTo(x, y - 2); c.lineTo(x + rw, y - 16); c.stroke();
+      c.font = "18px system-ui"; c.textAlign = "center";
+      c.fillText(g.phase === "done" ? "🧍" : "🪂", x, y + 6);
+    } else if (g.phase === "fall") {
+      c.font = "20px system-ui"; c.textAlign = "center";
+      c.fillText("🤸", x, y + 4);
+      // 速度线
+      c.strokeStyle = "rgba(255,255,255,.25)"; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x - 8, y - 18); c.lineTo(x - 8, y - 26); c.moveTo(x + 8, y - 18); c.lineTo(x + 8, y - 26); c.stroke();
+    } else if (g.phase === "done") {
+      c.font = "20px system-ui"; c.textAlign = "center";
+      c.fillText(g.res && g.res.safe ? "🧍" : "💥", x, SKY_BOT - 2);
+    }
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    var c = ctx;
+    drawScene(c);
+    drawPlayer(c);
+    // 高度表
+    if (g.phase === "fall" || g.phase === "chute") {
+      var f = g.alt / ALT0; if (f < 0) f = 0;
+      c.fillStyle = "rgba(255,255,255,.12)"; c.fillRect(W - 16, SKY_TOP, 6, SKY_BOT - SKY_TOP);
+      c.fillStyle = g.alt < SAFE_OPEN ? "#ef5350" : (g.alt < LOW_BONUS ? "#ffb300" : "#81d4fa");
+      c.fillRect(W - 16, SKY_TOP + (1 - f) * (SKY_BOT - SKY_TOP), 6, f * (SKY_BOT - SKY_TOP));
+    }
+    // HUD 顶栏
+    c.fillStyle = "rgba(8,14,28,.85)"; c.fillRect(0, 0, W, 30);
+    c.fillStyle = "#fff"; c.font = "bold 12px system-ui"; c.textAlign = "left";
+    var altTxt = g.phase === "fall" || g.phase === "chute" ? Math.max(0, Math.round(g.alt)) + "m" : (g.phase === "fly" ? "3000m" : "—");
+    c.fillText("🪂 " + altTxt, 10, 20);
+    c.textAlign = "right";
+    c.fillText("最近 " + (rec.bestD >= 0 ? rec.bestD + "m" : "—") + " · 🎯×" + rec.bulls, W - 10, 20);
+    if (g.msgT > 0 && g.msg) {
+      c.fillStyle = "#ffe082"; c.font = "bold 15px system-ui"; c.textAlign = "center";
+      c.fillText(g.msg, W / 2, 490);
+    }
+    if (g.phase === "idle") {
+      c.fillStyle = "rgba(8,14,28,.78)"; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#fff"; c.font = "bold 20px system-ui"; c.textAlign = "center";
+      c.fillText("🪂 随便跳伞", W / 2, 176);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.8)";
+      c.fillText("点画布 / 空格：起飞 → 跳机 → 开伞", W / 2, 210);
+      c.fillText("跳机时机决定起点，三层风场每局随机", W / 2, 232);
+      c.fillText("开伞后 ←→ / 按住画布左右 顶风调位置", W / 2, 254);
+      c.fillText("低于 150m 开伞会摔；落进 🎯 ≤12m 算靶心", W / 2, 276);
+      c.fillText("点击起飞！", W / 2, 308);
+    } else if (g.phase === "done" && g.res) {
+      var v = g.res;
+      c.fillStyle = "rgba(8,14,28,.82)"; c.fillRect(0, 60, W, 200);
+      c.textAlign = "center";
+      c.font = "bold 22px system-ui";
+      c.fillStyle = v.safe ? (v.bull ? "#ffd54f" : "#a5d6a7") : "#ef9a9a";
+      c.fillText(v.safe ? (v.bull ? "🎯 靶心着陆！" : (v.pad ? "🪂 精准着陆" : "🪂 安全着陆")) : "💥 " + v.why, W / 2, 118);
+      c.font = "bold 28px system-ui"; c.fillStyle = "#fff";
+      c.fillText(v.safe ? "距靶心 " + v.dist + "m" : "摔进草垛", W / 2, 158);
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.8)";
+      if (v.safe && v.low) c.fillText("低开高手 +1 装逼成功 😎", W / 2, 186);
+      c.fillText("开伞高度 " + (g.opened ? Math.round(g.openAlt) + "m" : "未开伞") + " · 点击再跳一次", W / 2, 212);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    steerFrom(g);
+    step(g);
+    skySync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("skyCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      primary(g);
+      var cx = canvasX(e);
+      if (cx >= 0) holdX = cx;
+    });
+    cav.addEventListener("pointermove", function (e) {
+      if (holdX < 0) return;
+      var cx = canvasX(e);
+      if (cx >= 0) holdX = cx;
+    });
+    cav.addEventListener("pointerup", function () { holdX = -1; });
+    cav.addEventListener("pointercancel", function () { holdX = -1; });
+    cav.addEventListener("pointerleave", function () { holdX = -1; });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.skyRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    skySync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.skyStop = function () {
+    active = false;
+    keySteer = 0; holdX = -1;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__skyTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    clampX: clampX, makeWinds: makeWinds, windAt: windAt, makeTarget: makeTarget,
+    landVerdict: landVerdict, windLabel: windLabel,
+    newGame: newGame, startFly: startFly, jumpOut: jumpOut, openChute: openChute,
+    land: land, primary: primary, step: step, steerFrom: steerFrom,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    yOf: yOf, draw: draw, skySync: skySync, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, FPS: FPS, ALT0: ALT0, VT_FALL: VT_FALL, VT_CHUTE: VT_CHUTE,
+      SAFE_OPEN: SAFE_OPEN, LOW_BONUS: LOW_BONUS, DEPLOY_T: DEPLOY_T, PLANE_SP: PLANE_SP,
+      BULL_R: BULL_R, PAD_R: PAD_R, LAYERS_DEF: LAYERS_DEF }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🪂", name: "天降神兵", desc: "在随便跳伞里完成一次安全着陆", test: function (u) { return (u.skyland || 0) >= 1; } },
+      { emoji: "🎯", name: "靶心着陆", desc: "在随便跳伞里落在距靶心 12m 之内", test: function (u) { return (u.skybull || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "跳伞教会人的第一课：犹豫的成本，是用高度支付的。",
+      "风不会听你的，但你可以借它的力。",
+      "开伞太早是保守，开伞太晚是鲁莽，高手都在两者之间。",
+      "从三千米往下看，大部分烦恼都只有一个像素大。",
+      "落点偏了没关系，安全落地本身就是满分。"
     );
   }
 })();
