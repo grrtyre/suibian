@@ -1569,6 +1569,7 @@
         <button data-tab="farm">🌾 随便农场</button>
         <button data-tab="mon">🐲 随便兽</button>
         <button data-tab="ski">⛷️ 滑雪大回转</button>
+        <button data-tab="pusher">🪙 随便推币机</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8139,6 +8140,40 @@
       <div class="fh-tip">🎣 <b>空格 / 点画面一键三连：抛竿蓄力 → 锁定力度 → 浮漂猛沉的一瞬间起竿</b>；抛得越远水越深，湖心与深水才藏着稀有和传说级大物。中鱼后进入遛鱼：按住收线张力猛涨、松手泄力鱼往外逃，张力拉满会切线、泄力太久会脱钩，把距离磨到 0 才能抄网上岸。21 种渔获分普通 / 稀有 / 史诗 / 传说四档（还有三件湖底垃圾等你做环保），图鉴、总渔获与最大单尾纪录本地存档（suibian_fishing），钓上第一条真鱼解锁「空军毕业」、请上传说级大物解锁「湖中传说」徽章。纯前端零依赖。</div>
     </div>
   </section>
+  <section class="panel" id="pusher">
+    <h2>🪙 随便推币机</h2>
+    <p class="sub">街机厅经典推币机：瞄准投币，让推板替你把整片硬币推下桌沿</p>
+    <style>
+      #pusher .pu-wrap { max-width:460px; margin:0 auto; }
+      #pusher .pu-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #pusher .pu-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #pusher .pu-hud b { font-weight:700; color:#ffd54f; }
+      #pusher canvas { width:100%; max-width:420px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#1b5e20; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #pusher .pu-acts { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #pusher .pu-acts button { padding:9px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.24); background:rgba(0,0,0,.3); color:inherit; font-size:.95rem; cursor:pointer; }
+      #pusher .pu-acts button.big { background:#f9a825; border-color:#ffd54f; color:#3e2b00; font-weight:700; }
+      #pusher .pu-acts button:hover { transform:translateY(-1px); }
+      #pusher .pu-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="pu-wrap">
+      <div class="pu-hud">
+        <span>币仓 <b id="puBank">20/30</b></span>
+        <span>回币 <b id="puNext">0s</b></span>
+        <span>总分 <b id="puScore">0</b></span>
+        <span>推落 <b id="puFalls">0</b></span>
+        <span>宝石 <b id="puGems">0</b></span>
+      </div>
+      <canvas id="puCav" width="420" height="560"></canvas>
+      <div class="pu-acts">
+        <button class="big" id="puDrop">🪙 投一枚</button>
+      </div>
+      <p class="pu-help">
+        点击 / 触摸桌面任意位置投币到那一列，← → 移动准星、空格投币。<br>
+        推板来回推动，硬币掉过前沿就归你：普通币 +10 分回 1 枚、金币 +50 分、💎 宝石 +200 分；掉进两侧「漏」槽就打水漂。<br>
+        币仓每 5 秒自动回 1 枚（上限 30，关页面也照回）。累计推落 100 枚解锁「推币师傅」、集齐 3 颗宝石解锁「宝石猎人」。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="ski">
     <h2>⛷️ 滑雪大回转</h2>
     <p class="sub">无尽下坡竞速：左右回转穿旗门攒连击，避开树和石头，越滑越快</p>
@@ -8693,6 +8728,7 @@
     if (id === "farm") farmRender();
     if (id === "mon") monRender();
     if (id === "ski") skiRender();
+    if (id === "pusher") pusherRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8745,6 +8781,7 @@
     if (id !== "farm" && typeof farmStop === "function") farmStop();
     if (id !== "mon" && typeof monStop === "function") monStop();
     if (id !== "ski" && typeof skiStop === "function") skiStop();
+    if (id !== "pusher" && typeof pusherStop === "function") pusherStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -8927,6 +8964,7 @@
     farm: "随便农场 farm 农场 种田 种菜 播种 浇水 收获 庄稼 作物 萝卜 麦子 玉米 南瓜 西瓜 灵芝 图鉴 金币 开垦 挂机 放置 idle 种植 harvest garden",
     mon: "随便兽 mon monster 宝可梦 口袋妖怪 精灵 收服 抓宠 捕捉 对战 战斗 进化 图鉴 训练师 草丛 随便球 精灵球 宠物 收集 pokemon collect battle",
     ski: "滑雪大回转 ski 滑雪 回转 旗门 雪山 雪道 下坡 躲避 树 石头 连击 竞速 无尽 slalom snow 雪人 滑行 极限运动",
+    pusher: "随便推币机 pusher coin 推币 推币机 硬币 金币 宝石 街机 游戏厅 投币 推板 掉落 弹库 回币 积分 arcade 娱乐 碰撞",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9169,6 +9207,7 @@ splitbill:"tools",
     farm:"games",
     mon:"games",
     ski:"games",
+    pusher:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -49105,6 +49144,318 @@ splitbill:"tools",
       "摔进雪堆不算输，不敢下坡才算。",
       "连击断了就断了，下一个旗门照样张开着。",
       "山顶的风景是站着看的，山腰的风景是冲下去看的。"
+    );
+  }
+})();
+/* ===== 🪙 随便推币机 pusher ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_pusher";
+  var W = 420, H = 560;
+  var FRONT = 478, GUT_TOP = 300, GUT_W = 28;
+  var PUSH_MID = 88, PUSH_AMP = 42, PUSH_SPD = 0.024;
+  var REGEN_MS = 5000, CAP = 30, BANK_MAX = 99;
+  var BADGE_FALL = 100, BADGE_GEM = 3;
+  var rnd = Math.random;
+  var nowFn = function () { return Date.now(); };
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defState() {
+    return { coins: 20, last: nowFn(), score: 0, drops: 0, falls: 0, gems: 0, lost: 0, aF: 0, aG: 0 };
+  }
+  function loadRec() {
+    var d = defState();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      if ("coins" in o) d.coins = Math.min(BANK_MAX, nInt(o.coins));
+      if ("last" in o) d.last = nInt(o.last);
+      var now = nowFn();
+      if (!d.last || d.last > now) d.last = now;
+      d.score = nInt(o.score); d.drops = nInt(o.drops); d.falls = nInt(o.falls);
+      d.gems = nInt(o.gems); d.lost = nInt(o.lost);
+      d.aF = o.aF ? 1 : 0; d.aG = o.aG ? 1 : 0;
+    } catch (e) { return defState(); }
+    return d;
+  }
+  var st = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+
+  function regen() {
+    var now = nowFn();
+    if (st.last > now) st.last = now;
+    if (st.coins >= CAP) { st.last = now; return 0; }
+    var n = Math.floor((now - st.last) / REGEN_MS);
+    if (n <= 0) return 0;
+    var add = Math.min(n, CAP - st.coins);
+    st.coins += add;
+    st.last = st.coins >= CAP ? now : st.last + n * REGEN_MS;
+    saveRec();
+    return add;
+  }
+  function nextIn() {
+    if (st.coins >= CAP) return 0;
+    var left = REGEN_MS - (nowFn() - st.last);
+    return Math.max(0, Math.ceil(left / 1000));
+  }
+
+  function pushY(t) { return PUSH_MID + PUSH_AMP * Math.sin(t * PUSH_SPD); }
+
+  function newGame() {
+    var g = { t: 0, coins: [], aim: W / 2, fx: [] };
+    for (var i = 0; i < 26; i++) {
+      var gold = i % 9 === 4;
+      g.coins.push({
+        x: 34 + rnd() * (W - 68),
+        y: 165 + rnd() * (FRONT - 210),
+        vx: 0, vy: 0, r: gold ? 13 : 13, k: gold ? "gold" : "coin"
+      });
+    }
+    for (var p = 0; p < 6; p++) collide(g);
+    return g;
+  }
+
+  function kindOf(r) { return r < 0.03 ? "gem" : (r < 0.16 ? "gold" : "coin"); }
+
+  function drop(g) {
+    regen();
+    if (st.coins <= 0) return false;
+    st.coins--; st.drops++;
+    if (st.coins < CAP && st.coins + 1 >= CAP) st.last = nowFn();
+    var k = kindOf(rnd());
+    g.coins.push({
+      x: Math.max(24, Math.min(W - 24, g.aim + (rnd() - 0.5) * 6)),
+      y: 24, vx: 0, vy: 1.6, r: k === "gem" ? 11 : 13, k: k
+    });
+    saveRec();
+    return true;
+  }
+
+  function collect(g, c) {
+    st.falls++;
+    if (c.k === "coin") { st.coins = Math.min(BANK_MAX, st.coins + 1); st.score += 10; }
+    else if (c.k === "gold") { st.coins = Math.min(BANK_MAX, st.coins + 1); st.score += 50; }
+    else { st.gems++; st.score += 200; }
+    if (!st.aF && st.falls >= BADGE_FALL) { st.aF = 1; try { bumpUsage("pushfall"); } catch (e1) {} }
+    if (!st.aG && st.gems >= BADGE_GEM) { st.aG = 1; try { bumpUsage("pushgem"); } catch (e2) {} }
+    g.fx.push({ x: c.x, y: FRONT + 18, k: c.k, t: 26 });
+    saveRec();
+  }
+
+  function collide(g) {
+    var cs = g.coins, i, j;
+    for (i = 0; i < cs.length; i++) {
+      for (j = i + 1; j < cs.length; j++) {
+        var a = cs[i], b = cs[j];
+        var dx = b.x - a.x, dy = b.y - a.y;
+        var min = a.r + b.r;
+        var d2 = dx * dx + dy * dy;
+        if (d2 >= min * min || d2 === 0) continue;
+        var d = Math.sqrt(d2), ov = (min - d) / 2;
+        var nx = dx / d, ny = dy / d;
+        a.x -= nx * ov; a.y -= ny * ov;
+        b.x += nx * ov; b.y += ny * ov;
+        b.vx += nx * ov * 0.35; b.vy += ny * ov * 0.35;
+        a.vx -= nx * ov * 0.35; a.vy -= ny * ov * 0.35;
+      }
+    }
+  }
+
+  function step(g) {
+    g.t++;
+    var py = pushY(g.t);
+    var i, c;
+    for (i = 0; i < g.coins.length; i++) {
+      c = g.coins[i];
+      c.x += c.vx; c.y += c.vy;
+      c.vx *= 0.9; c.vy *= 0.9;
+      if (Math.abs(c.vx) < 0.02) c.vx = 0;
+      if (Math.abs(c.vy) < 0.02) c.vy = 0;
+      if (c.y - c.r < py) { c.y = py + c.r; if (c.vy < 0) c.vy = 0; c.vy += 0.5; }
+    }
+    collide(g);
+    for (i = g.coins.length - 1; i >= 0; i--) {
+      c = g.coins[i];
+      if (c.y - c.r > FRONT) { collect(g, c); g.coins.splice(i, 1); continue; }
+      if (c.y > GUT_TOP && (c.x < GUT_W - 4 || c.x > W - GUT_W + 4)) {
+        st.lost++; saveRec();
+        g.fx.push({ x: c.x < W / 2 ? 14 : W - 14, y: c.y, k: "lost", t: 22 });
+        g.coins.splice(i, 1);
+        continue;
+      }
+      if (c.y <= GUT_TOP) {
+        if (c.x - c.r < 12) { c.x = 12 + c.r; c.vx = Math.abs(c.vx) * 0.4; }
+        if (c.x + c.r > W - 12) { c.x = W - 12 - c.r; c.vx = -Math.abs(c.vx) * 0.4; }
+      }
+    }
+    for (i = g.fx.length - 1; i >= 0; i--) { if (--g.fx[i].t <= 0) g.fx.splice(i, 1); }
+    regen();
+  }
+
+  /* ---------- DOM / 渲染 ---------- */
+  var g = null, raf = 0, active = false, inited = false;
+  var cav = null, ctx = null, els = {};
+
+  function $id(x) { return document.getElementById(x); }
+  function puSync() {
+    if (!inited) return;
+    els.bank.textContent = st.coins + "/" + CAP;
+    els.score.textContent = st.score;
+    els.falls.textContent = st.falls;
+    els.gems.textContent = st.gems;
+    var s = nextIn();
+    els.next.textContent = st.coins >= CAP ? "满仓" : s + "s";
+  }
+
+  function drawCoin(c) {
+    if (c.k === "gem") {
+      ctx.font = "20px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("💎", c.x, c.y + 7);
+      return;
+    }
+    ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+    ctx.fillStyle = c.k === "gold" ? "#ffca28" : "#ffe082";
+    ctx.fill();
+    ctx.strokeStyle = c.k === "gold" ? "#b8860b" : "#c9a227";
+    ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = c.k === "gold" ? "#7a5901" : "#8d6e12";
+    ctx.font = "bold " + (c.k === "gold" ? 13 : 12) + "px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(c.k === "gold" ? "金" : "¥", c.x, c.y + 4.5);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#2e7d32"); grd.addColorStop(1, "#1b5e20");
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+    var i;
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+    ctx.fillRect(0, GUT_TOP, GUT_W - 4, FRONT - GUT_TOP);
+    ctx.fillRect(W - GUT_W + 4, GUT_TOP, GUT_W - 4, FRONT - GUT_TOP);
+    ctx.fillStyle = "rgba(255,255,255,.5)";
+    ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("漏", (GUT_W - 4) / 2, (GUT_TOP + FRONT) / 2);
+    ctx.fillText("漏", W - (GUT_W - 4) / 2, (GUT_TOP + FRONT) / 2);
+    ctx.fillStyle = "#12400f";
+    ctx.fillRect(0, FRONT, W, H - FRONT);
+    ctx.fillStyle = "rgba(255,213,79,.25)";
+    ctx.fillRect(0, FRONT, W, 5);
+    ctx.fillStyle = "rgba(255,255,255,.75)";
+    ctx.font = "13px sans-serif";
+    ctx.fillText("⬇ 掉进这里就是你的 ⬇", W / 2, FRONT + 32);
+    if (!g) return;
+    var py = pushY(g.t);
+    var pg = ctx.createLinearGradient(0, 0, 0, py);
+    pg.addColorStop(0, "#455a64"); pg.addColorStop(1, "#78909c");
+    ctx.fillStyle = pg;
+    ctx.fillRect(8, 0, W - 16, py);
+    ctx.fillStyle = "#b0bec5";
+    ctx.fillRect(8, py - 4, W - 16, 4);
+    for (i = 0; i < g.coins.length; i++) drawCoin(g.coins[i]);
+    for (i = 0; i < g.fx.length; i++) {
+      var f = g.fx[i];
+      ctx.globalAlpha = Math.max(0, f.t / 26);
+      ctx.font = "15px sans-serif"; ctx.textAlign = "center";
+      if (f.k === "lost") { ctx.fillStyle = "#ef9a9a"; ctx.fillText("漏了", f.x, f.y - (22 - f.t)); }
+      else {
+        ctx.fillStyle = f.k === "gem" ? "#80d8ff" : "#fff59d";
+        ctx.fillText(f.k === "gem" ? "+200" : (f.k === "gold" ? "+50" : "+10"), f.x, f.y - (26 - f.t));
+      }
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = st.coins > 0 ? "#ffee58" : "rgba(255,255,255,.35)";
+    ctx.beginPath();
+    ctx.moveTo(g.aim - 8, 4); ctx.lineTo(g.aim + 8, 4); ctx.lineTo(g.aim, 16);
+    ctx.closePath(); ctx.fill();
+    if (st.coins <= 0) {
+      ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(0, H / 2 - 34, W, 68);
+      ctx.fillStyle = "#fff"; ctx.font = "16px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("币仓空了，" + nextIn() + "s 后回 1 枚（每 5s 回币，上限 " + CAP + "）", W / 2, H / 2 + 5);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g) { step(g); puSync(); }
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function onKeyDown(ev) {
+    if (!active || !g) return;
+    var k = ev.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") { g.aim = Math.max(24, g.aim - 14); ev.preventDefault(); }
+    else if (k === "ArrowRight" || k === "d" || k === "D") { g.aim = Math.min(W - 24, g.aim + 14); ev.preventDefault(); }
+    else if (k === " ") { drop(g); ev.preventDefault(); }
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = $id("puCav");
+    if (!cav) return;
+    ctx = cav.getContext("2d");
+    els = { bank: $id("puBank"), score: $id("puScore"), falls: $id("puFalls"),
+      gems: $id("puGems"), next: $id("puNext") };
+    $id("puDrop").addEventListener("click", function () { if (g) drop(g); });
+    cav.addEventListener("pointermove", function (ev) {
+      if (!g) return;
+      var rect = cav.getBoundingClientRect();
+      g.aim = Math.max(24, Math.min(W - 24, (ev.clientX - rect.left) * (W / rect.width)));
+    });
+    cav.addEventListener("pointerdown", function (ev) {
+      if (!g) return;
+      var rect = cav.getBoundingClientRect();
+      g.aim = Math.max(24, Math.min(W - 24, (ev.clientX - rect.left) * (W / rect.width)));
+      drop(g);
+    });
+    document.addEventListener("keydown", onKeyDown);
+    inited = true;
+  }
+
+  window.pusherRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    st = loadRec();
+    regen();
+    if (!g) g = newGame();
+    puSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.pusherStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__puTest = {
+    getSt: function () { return st; }, setSt: function (s) { st = s; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; }, setNow: function (fn) { nowFn = fn; },
+    defState: defState, loadRec: loadRec, saveRec: saveRec, regen: regen, nextIn: nextIn,
+    pushY: pushY, newGame: newGame, kindOf: kindOf, drop: drop, collect: collect,
+    collide: collide, step: step, draw: draw, puSync: puSync,
+    onKeyDown: onKeyDown, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, FRONT: FRONT, GUT_TOP: GUT_TOP, GUT_W: GUT_W,
+      REGEN_MS: REGEN_MS, CAP: CAP, BANK_MAX: BANK_MAX, BADGE_FALL: BADGE_FALL, BADGE_GEM: BADGE_GEM }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🪙", name: "推币师傅", desc: "在随便推币机累计推落 100 枚硬币", test: function (u) { return (u.pushfall || 0) >= 1; } },
+      { emoji: "💠", name: "宝石猎人", desc: "在随便推币机累计收集 3 颗宝石", test: function (u) { return (u.pushgem || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "推币机的哲学：你永远差一枚就能推下一大片。",
+      "看起来摇摇欲坠的，往往还能稳很久；比如桌沿的硬币，比如周一的你。",
+      "有些硬币注定要漏进侧槽，就当是给机器的小费。",
+      "别盯着快掉的那枚，多投几枚，整片都会是你的。",
+      "宝石不会天天有，但币仓每五秒都在偷偷帮你攒。"
     );
   }
 })();
