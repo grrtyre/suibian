@@ -1580,6 +1580,7 @@
         <button data-tab="horse">🏇 随便马术</button>
         <button data-tab="sail">⛵ 随便帆船</button>
         <button data-tab="glide">🪂 随便滑翔伞</button>
+        <button data-tab="skate">🎀 随便花样滑冰</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8393,6 +8394,32 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="skate">
+    <h2>🎀 随便花样滑冰</h2>
+    <p class="sub">节奏动作游戏：跟着时机条在绿区出手，按对应数字键 / 方向键完成 1~4 周跳，连击越多分越高</p>
+    <style>
+      #skate .sk-wrap { max-width:420px; margin:0 auto; }
+      #skate canvas { width:100%; max-width:380px; border-radius:14px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.35); }
+      #skate .sk-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #skate .sk-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #skate .sk-hud b { font-weight:700; color:#ffd54f; }
+      #skate .sk-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="sk-wrap">
+      <div class="sk-hud">
+        <span>得分 <b id="skScore">0</b></span>
+        <span>连击 <b id="skCombo">—</b></span>
+        <span>进度 <b id="skProg">—</b></span>
+        <span>最佳 <b id="skBest">—</b></span>
+      </div>
+      <canvas id="skCav" width="380" height="480"></canvas>
+      <p class="sk-help">
+        点击 / 空格 开始一套 12 个动作的节目；黄球滑入绿区时，按动作要求的数字键（1/2/3/4）或对应方向键（←↑→↓）出手，<br>
+        时机越准（完美 / 很好 / 不错）分越高，连续命中叠加连击倍率（最高 ×2.0）；按错键或错过则连击断掉；<br>
+        成功完成一次四周跳（4 周）解锁「⛸️ 四周跳」、单套节目总分 ≥120 解锁「🎀 完美节目」徽章，战绩本地存档（suibian_skate）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -9026,6 +9053,7 @@
     if (id === "horse") horseRender();
     if (id === "sail") sailRender();
     if (id === "glide") glideRender();
+    if (id === "skate") skateRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9089,6 +9117,7 @@
     if (id !== "horse" && typeof horseStop === "function") horseStop();
     if (id !== "sail" && typeof sailStop === "function") sailStop();
     if (id !== "glide" && typeof glideStop === "function") glideStop();
+    if (id !== "skate" && typeof skateStop === "function") skateStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9282,6 +9311,7 @@
     horse: "随便马术 horse equestrian 马术 骑马 障碍赛 跳马 骏马 骑手 横杆 罚分 独角兽 赛马 体育 竞技 奥运",
     sail: "随便帆船 sail sailing regatta 帆船 帆船赛 航海 抢风 换舷 顺移风 阵风 浮标 水手 风帆 起航 体育 竞技 奥运",
     glide: "随便滑翔伞 glide paraglider paragliding 滑翔 滑翔伞 热气流 上升气流 越野 飞行 云底 加速杆 高度 天空 翱翔 体育 竞技",
+    skate: "随便花样滑冰 skate figure skating 花样 滑冰 冰舞 四周跳 节目 连击 节奏 体育 竞技 动作 游戏 休闲",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9535,6 +9565,7 @@ splitbill:"tools",
     horse:"games",
     sail:"games",
     glide:"games",
+    skate:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -53579,6 +53610,388 @@ splitbill:"tools",
       "看不见风，但看得见风把你托起来的样子。",
       "着急赶路的人，往往最先掉下来。",
       "云底不是终点，是提醒你该出发的地方。"
+    );
+  }
+})();
+/* ===== 🎀 随便花样滑冰 skate ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_skate";
+  var W = 380, H = 480;
+  var READY_T = 45;
+  var N = 12;            // 一套节目 12 个动作
+  var START = 90;        // 第一个动作命中帧
+  var SPACING = 120;     // 动作间隔帧
+  var APPROACH = 90;     // 时机条提前量（帧）
+  var PERFECT = 6;       // |误差| ≤ 6 帧 = 完美
+  var GREAT = 12;        // ≤ 12 = 很好
+  var GOOD = 20;         // ≤ 20 = 不错；否则错过
+  var PROG_THRESHOLD = 120; // 节目总分 ≥ 120 解锁「完美节目」
+  var TAU = Math.PI * 2;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { best: 0, games: 0, quads: 0, aQ: 0, aP: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.best = nInt(o.best); d.games = nInt(o.games); d.quads = nInt(o.quads);
+      d.aQ = o.aQ ? 1 : 0; d.aP = o.aP ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function gradeOf(err) {
+    if (err <= PERFECT) return "perfect";
+    if (err <= GREAT) return "great";
+    if (err <= GOOD) return "good";
+    return "miss";
+  }
+  function gradeMult(g) {
+    if (g === "perfect") return 1.5;
+    if (g === "great") return 1.2;
+    if (g === "good") return 1.0;
+    return 0;
+  }
+  function comboMult(c) {
+    if (c >= 10) return 2.0;
+    if (c >= 6) return 1.6;
+    if (c >= 3) return 1.3;
+    if (c >= 1) return 1.1;
+    return 1.0;
+  }
+  function basePoints(rot) { return rot * 10; }
+  function pointsFor(rot, grade, combo) {
+    if (grade === "miss") return 0;
+    return Math.round(basePoints(rot) * gradeMult(grade) * comboMult(combo));
+  }
+  function makeProgram(n, r) {
+    var arr = [], i;
+    for (i = 0; i < n; i++) {
+      var rot = 1 + Math.floor(r() * 4); // 1..4 周
+      if (rot < 1) rot = 1; if (rot > 4) rot = 4;
+      arr.push({ rot: rot, hit: START + i * SPACING });
+    }
+    return arr;
+  }
+  function keyToRot(k) {
+    if (k === "1" || k === "ArrowLeft") return 1;
+    if (k === "2" || k === "ArrowUp") return 2;
+    if (k === "3" || k === "ArrowRight") return 3;
+    if (k === "4" || k === "ArrowDown") return 4;
+    return 0; // 0 = 自动用当前要求动作
+  }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, prog: [], idx: 0, score: 0, combo: 0, maxCombo: 0,
+      quads: 0, quadLanded: false, judged: false, msg: "", msgT: 0
+    };
+  }
+  var g = null;
+
+  function startRound(gg) {
+    var ng = newGame();
+    for (var k in ng) if (Object.prototype.hasOwnProperty.call(ng, k)) gg[k] = ng[k];
+    gg.prog = makeProgram(N, rnd);
+    gg.phase = "ready"; gg.t = 0;
+  }
+
+  function afterJudge(gg) {
+    if (gg.idx >= gg.prog.length) finishProgram(gg);
+  }
+  function autoMiss(gg) {
+    gg.judged = true; gg.combo = 0; gg.msg = "错过!"; gg.msgT = 40; gg.idx += 1;
+    if (gg.idx < gg.prog.length) gg.judged = false;
+    afterJudge(gg);
+  }
+  function judgePress(gg, rot) {
+    if (gg.phase !== "skate" || gg.judged) return false;
+    var el = gg.prog[gg.idx];
+    var err = Math.abs(gg.t - el.hit);
+    var grade = gradeOf(err);
+    var correct = (rot === el.rot);
+    gg.judged = true;
+    if (grade !== "miss" && correct) {
+      var pts = pointsFor(el.rot, grade, gg.combo);
+      gg.score += pts;
+      gg.combo += 1;
+      if (gg.combo > gg.maxCombo) gg.maxCombo = gg.combo;
+      if (el.rot === 4) { gg.quadLanded = true; gg.quads += 1; }
+      gg.msg = (grade === "perfect" ? "完美! " : "很好! ") + "+" + pts;
+      gg.msgT = 40;
+    } else {
+      gg.combo = 0;
+      gg.msg = (grade === "miss") ? "错过!" : "动作错了!";
+      gg.msgT = 40;
+    }
+    gg.idx += 1;
+    if (gg.idx < gg.prog.length) gg.judged = false;
+    afterJudge(gg);
+    return true;
+  }
+
+  function finishProgram(gg) {
+    gg.phase = "result"; gg.t = 0;
+    rec.games += 1;
+    rec.quads += gg.quads;
+    if (gg.score > rec.best) rec.best = gg.score;
+    if (gg.quadLanded && !rec.aQ) { rec.aQ = 1; try { bumpUsage("skquad"); } catch (e1) {} }
+    if (gg.score >= PROG_THRESHOLD && !rec.aP) { rec.aP = 1; try { bumpUsage("skprog"); } catch (e2) {} }
+    saveRec();
+  }
+
+  function step(gg) {
+    gg.t++;
+    if (gg.phase === "ready") {
+      if (gg.t >= READY_T) { gg.phase = "skate"; gg.t = 0; }
+      return;
+    }
+    if (gg.phase !== "skate") return;
+    if (!gg.judged && gg.t > gg.prog[gg.idx].hit + GOOD) autoMiss(gg);
+  }
+
+  /* ---- 输入 ---- */
+  var cav = null, ctx = null, raf = 0, inited = false, active = false;
+
+  function onDown(gg, rotOpt) {
+    gg = gg || g;
+    if (gg.phase === "idle") {
+      if (gg.t < 2) { try { bumpUsage("skate"); } catch (e) {} }
+      startRound(gg);
+    } else if (gg.phase === "result") {
+      g = newGame(); startRound(g);
+    } else if (gg.phase === "skate") {
+      var rot = (rotOpt != null && rotOpt !== 0) ? rotOpt : (gg.prog[gg.idx] ? gg.prog[gg.idx].rot : 1);
+      judgePress(gg, rot);
+    }
+  }
+
+  function onKeyDown(e) {
+    if (!active) return;
+    var k = e.key;
+    var mapped = keyToRot(k);
+    if (mapped) {
+      e.preventDefault();
+      if (e.repeat) return;
+      onDown(g, mapped);
+    } else if (k === " " || k === "Enter" || k === "w" || k === "W") {
+      e.preventDefault();
+      if (e.repeat) return;
+      onDown(g);
+    }
+  }
+  function onKeyUp(e) { /* 无长按机制 */ }
+
+  function skSync() {
+    try {
+      var el;
+      el = document.getElementById("skScore"); if (el) el.textContent = g.score;
+      el = document.getElementById("skCombo"); if (el) el.textContent = g.combo > 0 ? ("×" + comboMult(g.combo).toFixed(1)) : "—";
+      el = document.getElementById("skBest"); if (el) el.textContent = rec.best > 0 ? String(rec.best) : "—";
+      el = document.getElementById("skProg"); if (el) el.textContent = (g.prog.length ? (Math.min(g.idx + 1, g.prog.length) + "/" + g.prog.length) : "—");
+    } catch (e) {}
+  }
+
+  /* ---- 绘制 ---- */
+  function drawRoutine(c) {
+    if (!g.prog.length) return;
+    var n = g.prog.length, cw = (W - 30) / n, y = 250;
+    for (var i = 0; i < n; i++) {
+      var x = 15 + cw * i + cw / 2;
+      var cur = (i === g.idx && g.phase === "skate");
+      var done = i < g.idx;
+      c.beginPath();
+      c.arc(x, y, 9, 0, TAU);
+      c.fillStyle = cur ? "#ff7a59" : (done ? "rgba(255,255,255,.22)" : "rgba(255,255,255,.12)");
+      c.fill();
+      c.fillStyle = cur ? "#1a1030" : "rgba(255,255,255,.8)";
+      c.font = "bold 11px system-ui"; c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillText(String(g.prog[i].rot), x, y);
+    }
+    c.textBaseline = "alphabetic";
+  }
+
+  function drawBar(c) {
+    if (g.phase !== "skate" || g.idx >= g.prog.length) return;
+    var el = g.prog[g.idx];
+    var bx = 30, bw = W - 60, by = 300, bh = 16;
+    c.fillStyle = "rgba(0,0,0,.28)"; c.fillRect(bx, by, bw, bh);
+    // 命中区（中心 ± GOOD 帧）
+    var zone = (GOOD / (2 * APPROACH)) * bw;
+    c.fillStyle = "rgba(16,185,129,.45)";
+    c.fillRect(bx + bw / 2 - zone, by, zone * 2, bh);
+    // 标记
+    var pos = (g.t - (el.hit - APPROACH)) / (2 * APPROACH);
+    if (pos < 0) pos = 0; if (pos > 1) pos = 1;
+    var mx = bx + bw * pos;
+    c.fillStyle = "#ffd54f"; c.beginPath(); c.arc(mx, by + bh / 2, 10, 0, TAU); c.fill();
+    c.strokeStyle = "rgba(0,0,0,.4)"; c.lineWidth = 1.5; c.stroke();
+    // 提示
+    c.fillStyle = "rgba(255,255,255,.85)"; c.font = "12px system-ui"; c.textAlign = "center";
+    c.fillText("当黄球进入绿区时，按 " + el.rot + " / ↑↓←→ 或空格出手", W / 2, by + bh + 18);
+  }
+
+  function drawSkater(c, x, y, s) {
+    c.save(); c.translate(x, y); c.scale(s, s);
+    // 身体
+    c.strokeStyle = "#2b2b3a"; c.lineWidth = 3; c.lineCap = "round";
+    c.beginPath(); c.moveTo(0, -22); c.lineTo(0, 6); c.stroke();
+    // 手臂（张开）
+    c.beginPath(); c.moveTo(0, -12); c.lineTo(-14, -2); c.moveTo(0, -12); c.lineTo(14, -2); c.stroke();
+    // 腿
+    c.beginPath(); c.moveTo(0, 6); c.lineTo(-9, 22); c.moveTo(0, 6); c.lineTo(9, 22); c.stroke();
+    // 头
+    c.fillStyle = "#ffd9b3"; c.beginPath(); c.arc(0, -28, 7, 0, TAU); c.fill();
+    // 冰刀
+    c.strokeStyle = "#9fd3ff"; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(-13, 24); c.lineTo(-5, 24); c.moveTo(5, 24); c.lineTo(13, 24); c.stroke();
+    c.restore();
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var c = ctx;
+    var grad = c.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#eaf6ff"); grad.addColorStop(0.6, "#cfe9ff"); grad.addColorStop(1, "#bcdcff");
+    c.fillStyle = grad; c.fillRect(0, 0, W, H);
+    // 冰面反光
+    c.strokeStyle = "rgba(255,255,255,.5)"; c.lineWidth = 1;
+    for (var i = 0; i < 6; i++) {
+      c.beginPath(); c.moveTo(0, 60 + i * 70); c.lineTo(W, 50 + i * 70); c.stroke();
+    }
+    // 冰花点缀
+    c.fillStyle = "rgba(255,255,255,.55)";
+    for (i = 0; i < 10; i++) {
+      var fx = ((i * 83 + 20) % W), fy = ((i * 137 + 40) % H);
+      c.beginPath(); c.arc(fx, fy, 2.2, 0, TAU); c.fill();
+    }
+
+    drawSkater(c, W / 2, 150, 1.5);
+    drawRoutine(c);
+    drawBar(c);
+
+    // HUD
+    c.fillStyle = "rgba(20,16,48,.85)"; c.fillRect(0, 0, W, 38);
+    c.fillStyle = "#fff"; c.font = "bold 14px system-ui"; c.textAlign = "left";
+    c.fillText("得分 " + g.score, 12, 24);
+    c.textAlign = "center";
+    c.fillText("连击 " + (g.combo > 0 ? ("×" + comboMult(g.combo).toFixed(1)) : "—"), W / 2, 24);
+    c.textAlign = "right";
+    c.fillText("最佳 " + (rec.best > 0 ? rec.best : "—"), W - 12, 24);
+
+    // 当前动作大字
+    if (g.phase === "skate" && g.idx < g.prog.length) {
+      c.fillStyle = "rgba(20,16,48,.9)"; c.font = "bold 30px system-ui"; c.textAlign = "center";
+      c.fillText(g.prog[g.idx].rot + " 周跳", W / 2, 110);
+    }
+
+    // 文案
+    if (g.msgT > 0) {
+      c.fillStyle = g.msg.indexOf("完美") >= 0 ? "#0a8f4f" : (g.msg.indexOf("错过") >= 0 || g.msg.indexOf("错") >= 0 ? "#c0392b" : "#b9770e");
+      c.font = "bold 22px system-ui"; c.textAlign = "center";
+      c.fillText(g.msg, W / 2, 200);
+    }
+
+    if (g.phase === "idle") {
+      c.fillStyle = "rgba(20,16,48,.9)"; c.font = "bold 18px system-ui"; c.textAlign = "center";
+      c.fillText("🎀 随便花样滑冰", W / 2, 210);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(20,16,48,.75)";
+      c.fillText("点击 / 空格 开始一套 12 个动作的节目", W / 2, 234);
+      c.fillText("黄球进绿区时按对应数字键或方向键出手", W / 2, 254);
+    } else if (g.phase === "ready") {
+      c.fillStyle = "#ff7a59"; c.font = "bold 40px system-ui"; c.textAlign = "center";
+      c.fillText(g.t < READY_T / 2 ? "准备…" : "开滑!", W / 2, 200);
+    } else if (g.phase === "result") {
+      c.fillStyle = "rgba(20,16,48,.92)"; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#fff"; c.font = "bold 22px system-ui"; c.textAlign = "center";
+      c.fillText("节目结束！", W / 2, 170);
+      c.font = "bold 30px system-ui"; c.fillStyle = "#ffd54f";
+      c.fillText("总分 " + g.score, W / 2, 210);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.85)";
+      var note = [];
+      if (g.quadLanded) note.push("⛸️ 完成了四周跳！");
+      if (g.score >= PROG_THRESHOLD) note.push("🎀 完美节目达成");
+      if (g.maxCombo >= 3) note.push("最高连击 ×" + comboMult(g.maxCombo).toFixed(1));
+      c.fillText(note.join("  "), W / 2, 240);
+      c.fillStyle = "rgba(255,255,255,.7)";
+      c.fillText("历史最佳 " + rec.best + " · 点击再滑一套", W / 2, 270);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g && g.msgT > 0) g.msgT--;
+    step(g);
+    if (g.phase !== "idle") skSync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("skCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); onDown(g); });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.skateRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    skSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.skateStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__skateTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    gradeOf: gradeOf, gradeMult: gradeMult, comboMult: comboMult,
+    basePoints: basePoints, pointsFor: pointsFor, makeProgram: makeProgram,
+    keyToRot: keyToRot, newGame: newGame, startRound: startRound,
+    afterJudge: afterJudge, autoMiss: autoMiss, judgePress: judgePress,
+    finishProgram: finishProgram, step: step, draw: draw, skSync: skSync,
+    onDown: onDown, onKeyDown: onKeyDown, onKeyUp: onKeyUp, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, READY_T: READY_T, N: N, START: START,
+      SPACING: SPACING, APPROACH: APPROACH, PERFECT: PERFECT, GREAT: GREAT,
+      GOOD: GOOD, PROG_THRESHOLD: PROG_THRESHOLD, TAU: TAU }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "⛸️", name: "四周跳", desc: "在随便花样滑冰里成功完成一次四周跳", test: function (u) { return (u.skquad || 0) >= 1; } },
+      { emoji: "🎀", name: "完美节目", desc: "在随便花样滑冰里完成一套总分 ≥120 的节目", test: function (u) { return (u.skprog || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "花样滑冰的优雅，来自千万次摔在冰上的练习。",
+      "四周跳不是赌一把，是把动作拆到肌肉里。",
+      "连击断了不可怕，下一个动作重新来过就好。",
+      "冰面会记住你每一次认真的起跳。",
+      "节目比的不是单个动作，是十二个动作连起来的底气。"
     );
   }
 })();
