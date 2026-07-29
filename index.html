@@ -1579,6 +1579,7 @@
         <button data-tab="tramp">🤸 随便蹦床</button>
         <button data-tab="horse">🏇 随便马术</button>
         <button data-tab="sail">⛵ 随便帆船</button>
+        <button data-tab="glide">🪂 随便滑翔伞</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8365,6 +8366,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="glide">
+    <h2>🪂 随便滑翔伞</h2>
+    <p class="sub">热气流越野赛：按住踩加速杆用高度换速度，橙色气流柱里松手爬升，高度耗尽就迫降</p>
+    <style>
+      #glide .pg-wrap { max-width:420px; margin:0 auto; }
+      #glide .pg-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #glide .pg-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #glide .pg-hud b { font-weight:700; color:#ffb74d; }
+      #glide canvas { width:100%; max-width:380px; border-radius:14px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #glide .pg-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="pg-wrap">
+      <div class="pg-hud">
+        <span>进度 <b id="pgProg">0%</b></span>
+        <span>高度 <b id="pgAlt">260m</b></span>
+        <span>用时 <b id="pgTime">0.0s</b></span>
+        <span>最快 <b id="pgBest">—</b></span>
+      </div>
+      <canvas id="pgCav" width="380" height="480"></canvas>
+      <p class="pg-help">
+        点击 / 空格起飞；按住画布（或按住空格 / ↑ / W）＝踩加速杆，飞得快但高度掉得凶；松开＝巡航省高度；<br>
+        橙色热气流柱是加油站：在里面松开加速杆就能一路爬升，摸到云底 380m 封顶；<br>
+        高度掉到地面就提前迫降，稳住高度飞完 7000 米才算完赛，成绩纯比用时；<br>
+        21 秒内完赛解锁「疾速越野」、摸到云底并完赛解锁「云端漫步」。战绩本地存档（suibian_glide）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -8997,6 +9025,7 @@
     if (id === "tramp") trampRender();
     if (id === "horse") horseRender();
     if (id === "sail") sailRender();
+    if (id === "glide") glideRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9059,6 +9088,7 @@
     if (id !== "tramp" && typeof trampStop === "function") trampStop();
     if (id !== "horse" && typeof horseStop === "function") horseStop();
     if (id !== "sail" && typeof sailStop === "function") sailStop();
+    if (id !== "glide" && typeof glideStop === "function") glideStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9251,6 +9281,7 @@
     tramp: "随便蹦床 tramp trampoline 蹦床 弹床 空翻 翻腾 抱膝 展体 落床 套路 十跳 弹跳 空中飞人 体育 竞技 奥运",
     horse: "随便马术 horse equestrian 马术 骑马 障碍赛 跳马 骏马 骑手 横杆 罚分 独角兽 赛马 体育 竞技 奥运",
     sail: "随便帆船 sail sailing regatta 帆船 帆船赛 航海 抢风 换舷 顺移风 阵风 浮标 水手 风帆 起航 体育 竞技 奥运",
+    glide: "随便滑翔伞 glide paraglider paragliding 滑翔 滑翔伞 热气流 上升气流 越野 飞行 云底 加速杆 高度 天空 翱翔 体育 竞技",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9503,6 +9534,7 @@ splitbill:"tools",
     tramp:"games",
     horse:"games",
     sail:"games",
+    glide:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -18124,6 +18156,33 @@ splitbill:"tools",
     calcRender();
   }
 
+  /* ---- 作用域桥接：把共享核心挂到 window，修复主 IIFE 提前闭合导致后续模块失联的问题 ---- */
+  try {
+    window.$ = $;
+    if (typeof escapeHtml !== "undefined") window.escapeHtml = escapeHtml;
+    if (typeof clamp !== "undefined") window.clamp = clamp;
+    if (typeof fmtNum !== "undefined") window.fmtNum = fmtNum;
+    if (typeof uid !== "undefined") window.uid = uid;
+    if (typeof todayStr !== "undefined") window.todayStr = todayStr;
+    if (typeof copyText !== "undefined") window.copyText = copyText;
+    if (typeof downloadText !== "undefined") window.downloadText = downloadText;
+    if (typeof debounce !== "undefined") window.debounce = debounce;
+    if (typeof QUOTES !== "undefined") window.QUOTES = QUOTES;
+    if (typeof BADGES !== "undefined") window.BADGES = BADGES;
+    if (typeof bumpUsage !== "undefined") window.bumpUsage = bumpUsage;
+    if (typeof toast !== "undefined") window.toast = toast;
+    if (typeof activateTab !== "undefined") window.activateTab = activateTab;
+    if (typeof confetti !== "undefined") window.confetti = confetti;
+    if (typeof pop !== "undefined") window.pop = pop;
+    if (typeof pick !== "undefined") window.pick = pick;
+    if (typeof rnd !== "undefined") window.rnd = rnd;
+    if (typeof shuffle !== "undefined") window.shuffle = shuffle;
+    if (typeof randInt !== "undefined") window.randInt = randInt;
+    if (typeof vibrate !== "undefined") window.vibrate = vibrate;
+    if (typeof playTone !== "undefined") window.playTone = playTone;
+    if (typeof sfx !== "undefined") window.sfx = sfx;
+  } catch (e) {}
+
 })();
 
   QUOTES.push(
@@ -19919,16 +19978,19 @@ splitbill:"tools",
     const cl = $("pwClear"); if (cl) cl.addEventListener("click", function () { const i = $("pwInput"); if (i) i.value = ""; const u = $("pwUser"); if (u) u.value = ""; pwLastGood = ""; pwRender(); });
   }
   function pwdcheckBind() { pwBind(); }
-  rxBind();
-  mxBind();
-  ledgerBind();
-  chartBind();
-  huangliBind();
-  codecBind();
-  baseBind();
-  asciiBind();
-  diffBind();
-  pwdcheckBind();
+  /* 延迟到全脚本解析完成后再绑定，避免 const 声明的 TDZ 崩溃 */
+  setTimeout(function () {
+    try { rxBind(); } catch (e) {}
+    try { mxBind(); } catch (e) {}
+    try { ledgerBind(); } catch (e) {}
+    try { chartBind(); } catch (e) {}
+    try { huangliBind(); } catch (e) {}
+    try { codecBind(); } catch (e) {}
+    try { baseBind(); } catch (e) {}
+    try { asciiBind(); } catch (e) {}
+    try { diffBind(); } catch (e) {}
+    try { pwdcheckBind(); } catch (e) {}
+  }, 0);
 
   // ===== 快速投票 vote =====
   const VOTE_KEY = "suibian_vote";
@@ -53149,6 +53211,374 @@ splitbill:"tools",
       "抢风不是运气，是每三秒做一次的小决定。",
       "航线歪一点没关系，方向对就行。",
       "风大风小都得出海，这就是水手。"
+    );
+  }
+})();
+/* ===== 🪂 随便滑翔伞 glide ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_glide";
+  var W = 380, H = 480;
+  var PX = 110;
+  var GY = 430;
+  var SC = 0.95;
+  var D = 7000;
+  var VX_TRIM = 4.5;
+  var VX_BAR = 7.2;
+  var SINK_TRIM = 0.3;
+  var SINK_BAR = 0.9;
+  var LIFT = 2.2;
+  var A0 = 260;
+  var CEIL = 380;
+  var READY_T = 45;
+  var FASTMS = 21000;
+  var TAU = Math.PI * 2;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { best: 0, flights: 0, fins: 0, falls: 0, aF: 0, aC: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.best = nInt(o.best); d.flights = nInt(o.flights);
+      d.fins = nInt(o.fins); d.falls = nInt(o.falls);
+      d.aF = o.aF ? 1 : 0; d.aC = o.aC ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function vxOf(bar) { return bar ? VX_BAR : VX_TRIM; }
+  function sinkOf(bar) { return bar ? SINK_BAR : SINK_TRIM; }
+  function inThermal(x, ths) {
+    for (var i = 0; i < ths.length; i++) {
+      if (x >= ths[i].x && x < ths[i].x + ths[i].w) return true;
+    }
+    return false;
+  }
+  function climbOf(bar, inTh) { return (inTh ? LIFT : 0) - sinkOf(bar); }
+  function altClamp(a) { return a > CEIL ? CEIL : a; }
+  function timeMsOf(frames) { return Math.round(frames * 1000 / 60); }
+  function betterThan(t, r) { return r.best === 0 || t < r.best; }
+  function fmtT(ms) { return (Math.round(ms / 100) / 10).toFixed(1) + "s"; }
+  function fmtBest(r) { return r.best > 0 ? fmtT(r.best) : "—"; }
+  function makeThermals() {
+    var arr = [], i;
+    for (i = 0; i < 5; i++) {
+      arr.push({ x: 700 + i * 1150 + Math.floor(rnd() * 300), w: 240 + Math.floor(rnd() * 80) });
+    }
+    return arr;
+  }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, x: 0, alt: A0, bar: 0,
+      frames: 0, hiCloud: 0, ths: makeThermals(),
+      msg: "", msgT: 0, wasTh: false,
+      done: 0, timeMs: 0
+    };
+  }
+  var g = null;
+
+  function startRound(gg) {
+    var ng = newGame();
+    for (var k in ng) if (Object.prototype.hasOwnProperty.call(ng, k)) gg[k] = ng[k];
+    gg.phase = "ready"; gg.t = 0;
+  }
+
+  function endRound(gg, finished) {
+    gg.done = finished ? 1 : 0;
+    gg.timeMs = timeMsOf(gg.frames);
+    rec.flights++;
+    if (finished) {
+      rec.fins++;
+      if (gg.timeMs <= FASTMS && !rec.aF) { rec.aF = 1; try { bumpUsage("pgfast"); } catch (e1) {} }
+      if (gg.hiCloud && !rec.aC) { rec.aC = 1; try { bumpUsage("pgcloud"); } catch (e2) {} }
+      if (betterThan(gg.timeMs, rec)) rec.best = gg.timeMs;
+    } else {
+      rec.falls++;
+    }
+    gg.phase = "result"; gg.t = 0;
+    saveRec();
+  }
+
+  function step(gg) {
+    gg.t++;
+    if (gg.phase === "ready") {
+      if (gg.t >= READY_T) { gg.phase = "fly"; gg.t = 0; }
+      return;
+    }
+    if (gg.phase !== "fly") return;
+    gg.frames++;
+    if (gg.msgT > 0) gg.msgT--;
+    var th = inThermal(gg.x, gg.ths);
+    if (th && !gg.wasTh) { gg.msg = "上升气流！松开加速杆爬升"; gg.msgT = 55; }
+    gg.wasTh = th;
+    gg.x += vxOf(gg.bar);
+    gg.alt = altClamp(gg.alt + climbOf(gg.bar, th));
+    if (gg.alt >= CEIL) gg.hiCloud = 1;
+    if (gg.x >= D) { endRound(gg, true); return; }
+    if (gg.alt <= 0) { gg.alt = 0; endRound(gg, false); }
+  }
+
+  /* ---- 输入 ---- */
+  var cav = null, ctx = null, raf = 0, inited = false, active = false;
+
+  function onDown(gg) {
+    gg = gg || g;
+    if (gg.phase === "idle") {
+      if (gg.t < 2) { try { bumpUsage("glide"); } catch (e) {} }
+      startRound(gg);
+    } else if (gg.phase === "fly") {
+      gg.bar = 1;
+    } else if (gg.phase === "result") {
+      g = newGame();
+      startRound(g);
+    }
+    pgSync();
+  }
+  function onUp(gg) {
+    gg = gg || g;
+    if (gg.phase === "fly") gg.bar = 0;
+  }
+
+  function isKey(k) {
+    return k === " " || k === "Spacebar" || k === "ArrowUp" || k === "w" || k === "W";
+  }
+  function onKeyDown(e) {
+    if (!active) return;
+    if (isKey(e.key)) {
+      e.preventDefault();
+      if (e.repeat) return;
+      onDown(g);
+    }
+  }
+  function onKeyUp(e) {
+    if (!active) return;
+    if (isKey(e.key)) { e.preventDefault(); onUp(g); }
+  }
+
+  function pgSync() {
+    try {
+      var el;
+      el = document.getElementById("pgProg"); if (el) el.textContent = Math.min(100, Math.floor(g.x / D * 100)) + "%";
+      el = document.getElementById("pgAlt"); if (el) el.textContent = Math.round(g.alt) + "m";
+      el = document.getElementById("pgTime"); if (el) el.textContent = g.phase === "result" ? fmtT(g.timeMs) : fmtT(timeMsOf(g.frames));
+      el = document.getElementById("pgBest"); if (el) el.textContent = fmtBest(rec);
+    } catch (e) {}
+  }
+
+  /* ---- 绘制 ---- */
+  function yOf(alt) { return GY - alt * SC; }
+
+  function drawGlider(c, x, y, bar) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(bar ? 0.16 : 0.02);
+    c.strokeStyle = "rgba(255,255,255,.8)"; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(-14, 0); c.lineTo(0, 16); c.stroke();
+    c.beginPath(); c.moveTo(14, 0); c.lineTo(0, 16); c.stroke();
+    var grad = c.createLinearGradient(-20, -8, 20, -8);
+    grad.addColorStop(0, "#ff7043"); grad.addColorStop(0.5, "#ffd54f"); grad.addColorStop(1, "#ff7043");
+    c.fillStyle = grad;
+    c.beginPath();
+    c.moveTo(-20, 0);
+    c.quadraticCurveTo(0, -14, 20, 0);
+    c.quadraticCurveTo(0, -6, -20, 0);
+    c.closePath(); c.fill();
+    c.strokeStyle = "rgba(0,0,0,.3)"; c.stroke();
+    c.fillStyle = "#37474f";
+    c.beginPath(); c.arc(0, 18, 4, 0, TAU); c.fill();
+    c.restore();
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var c = ctx, i;
+    var grad = c.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#1a3a6b"); grad.addColorStop(0.7, "#2b5f9e"); grad.addColorStop(1, "#3d78b8");
+    c.fillStyle = grad; c.fillRect(0, 0, W, H);
+
+    /* 云底虚线 */
+    var cy = yOf(CEIL);
+    c.strokeStyle = "rgba(255,255,255,.4)"; c.lineWidth = 1.5;
+    c.setLineDash([8, 8]);
+    c.beginPath(); c.moveTo(0, cy); c.lineTo(W, cy); c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = "rgba(255,255,255,.55)"; c.font = "10px system-ui"; c.textAlign = "left";
+    c.fillText("云底 380m", 6, cy - 5);
+    c.fillStyle = "rgba(255,255,255,.28)";
+    for (i = 0; i < 6; i++) {
+      var cx2 = ((i * 90 - g.x * 0.12) % (W + 80) + W + 80) % (W + 80) - 40;
+      c.beginPath();
+      c.arc(cx2, cy - 16, 14, 0, TAU); c.arc(cx2 + 16, cy - 12, 11, 0, TAU); c.arc(cx2 - 16, cy - 12, 11, 0, TAU);
+      c.fill();
+    }
+
+    /* 热气流柱 */
+    for (i = 0; i < g.ths.length; i++) {
+      var t = g.ths[i];
+      var sx = PX + (t.x - g.x) * 0.35;
+      var ex = PX + (t.x + t.w - g.x) * 0.35;
+      if (ex < -20 || sx > W + 20) continue;
+      var tg = c.createLinearGradient(0, cy, 0, GY);
+      tg.addColorStop(0, "rgba(255,183,77,.05)"); tg.addColorStop(1, "rgba(255,138,101,.4)");
+      c.fillStyle = tg;
+      c.fillRect(sx, cy, ex - sx, GY - cy);
+      c.strokeStyle = "rgba(255,183,77,.6)"; c.lineWidth = 1.5;
+      var fl = Math.floor(g.frames / 4);
+      for (var a = 0; a < 3; a++) {
+        var ax = sx + (ex - sx) * (0.25 + a * 0.25);
+        var ay = GY - ((fl * 3 + a * 40) % (GY - cy));
+        c.beginPath();
+        c.moveTo(ax, ay); c.lineTo(ax, ay - 14);
+        c.moveTo(ax - 4, ay - 9); c.lineTo(ax, ay - 14); c.lineTo(ax + 4, ay - 9);
+        c.stroke();
+      }
+    }
+
+    /* 地面 */
+    c.fillStyle = "#264d33";
+    c.fillRect(0, GY, W, H - GY);
+    c.strokeStyle = "rgba(255,255,255,.25)"; c.lineWidth = 1;
+    for (i = 0; i < 10; i++) {
+      var lx = ((i * 46 - g.x * 0.35) % (W + 46) + W + 46) % (W + 46) - 23;
+      c.beginPath(); c.moveTo(lx, GY); c.lineTo(lx + 10, GY + 8); c.stroke();
+    }
+
+    /* 终点旗 */
+    var fx = PX + (D - g.x) * 0.35;
+    if (fx > -30 && fx < W + 30) {
+      c.strokeStyle = "#eceff1"; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(fx, GY); c.lineTo(fx, GY - 60); c.stroke();
+      c.fillStyle = "#ffd54f";
+      c.beginPath(); c.moveTo(fx, GY - 60); c.lineTo(fx + 26, GY - 52); c.lineTo(fx, GY - 44); c.closePath(); c.fill();
+      c.fillStyle = "rgba(255,255,255,.9)"; c.font = "bold 12px system-ui"; c.textAlign = "center";
+      c.fillText("着陆场", fx, GY - 68);
+    }
+
+    drawGlider(c, PX, yOf(g.alt), g.bar);
+
+    /* 状态条 */
+    var th = g.phase === "fly" && inThermal(g.x, g.ths);
+    c.fillStyle = "rgba(0,0,0,.4)";
+    c.fillRect(40, 8, W - 80, 34);
+    c.strokeStyle = "rgba(255,255,255,.25)"; c.lineWidth = 1;
+    c.strokeRect(40, 8, W - 80, 34);
+    c.fillStyle = th ? "#69f0ae" : (g.bar ? "#ffb74d" : "rgba(255,255,255,.7)");
+    c.font = "11px system-ui"; c.textAlign = "center";
+    c.fillText(
+      g.phase === "fly"
+        ? (th ? (g.bar ? "气流里！松手能爬更快" : "正在爬升 ↑↑") : (g.bar ? "加速杆全开，高度换速度" : "巡航中，找下一个气流"))
+        : "飞行状态",
+      W / 2, 22
+    );
+    c.fillStyle = "rgba(255,255,255,.85)";
+    c.fillText("高度 " + Math.round(g.alt) + "m / 进度 " + Math.min(100, Math.floor(g.x / D * 100)) + "%", W / 2, 37);
+
+    /* 文案 */
+    c.fillStyle = "rgba(255,255,255,.92)"; c.font = "bold 15px system-ui"; c.textAlign = "center";
+    if (g.phase === "idle") {
+      c.fillText("热气流越野赛：点击 / 空格起飞", W / 2, 70);
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.7)";
+      c.fillText("按住＝踩加速杆（快但掉高度），松开＝巡航省高度", W / 2, 92);
+      c.fillText("橙色热气流柱里松手可以爬升，掉到地面就出局", W / 2, 110);
+    } else if (g.phase === "ready") {
+      c.fillStyle = "#ffd54f"; c.font = "bold 26px system-ui";
+      c.fillText(g.t < READY_T / 2 ? "Ready…" : "起飞！", W / 2, 76);
+    } else if (g.phase === "fly") {
+      if (g.msgT > 0 && g.msg) {
+        c.fillStyle = "#ffe082"; c.fillText(g.msg, W / 2, 66);
+      }
+    } else if (g.phase === "result") {
+      if (g.done) {
+        c.fillStyle = "#ffd54f";
+        c.fillText("安全着陆！用时 " + fmtT(g.timeMs), W / 2, 66);
+        c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.75)";
+        c.fillText(g.hiCloud ? "还摸到了云底，云端漫步！点击再飞一趟" : "点击再飞一趟", W / 2, 90);
+      } else {
+        c.fillStyle = "#ef9a9a";
+        c.fillText("高度耗尽，提前迫降… 飞了 " + Math.floor(g.x) + "m", W / 2, 66);
+        c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.75)";
+        c.fillText("多在气流里松手爬升攒高度，点击再飞一趟", W / 2, 90);
+      }
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(g);
+    if (g.phase !== "idle") pgSync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("pgCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); onDown(g); });
+    cav.addEventListener("pointerup", function (e) { e.preventDefault(); onUp(g); });
+    cav.addEventListener("pointercancel", function () { onUp(g); });
+    cav.addEventListener("pointerleave", function () { onUp(g); });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.glideRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    pgSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.glideStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__pgTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    vxOf: vxOf, sinkOf: sinkOf, inThermal: inThermal, climbOf: climbOf,
+    altClamp: altClamp, timeMsOf: timeMsOf, betterThan: betterThan,
+    fmtT: fmtT, fmtBest: fmtBest, makeThermals: makeThermals,
+    newGame: newGame, startRound: startRound, endRound: endRound,
+    step: step, draw: draw, pgSync: pgSync, onDown: onDown, onUp: onUp,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp, ensureInit: ensureInit, yOf: yOf,
+    consts: { KEY: KEY, W: W, H: H, D: D, VX_TRIM: VX_TRIM, VX_BAR: VX_BAR,
+      SINK_TRIM: SINK_TRIM, SINK_BAR: SINK_BAR, LIFT: LIFT, A0: A0,
+      CEIL: CEIL, READY_T: READY_T, FASTMS: FASTMS, PX: PX, GY: GY, SC: SC, TAU: TAU }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🪂", name: "云端漫步", desc: "在随便滑翔伞摸到云底并完成 7000 米越野", test: function (u) { return (u.pgcloud || 0) >= 1; } },
+      { emoji: "⚡", name: "疾速越野", desc: "在随便滑翔伞 21 秒内完成越野航线", test: function (u) { return (u.pgfast || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "滑翔伞的哲学：想飞得远，先学会借上升气流。",
+      "高度就是本钱，别在没气流的地方挥霍。",
+      "看不见风，但看得见风把你托起来的样子。",
+      "着急赶路的人，往往最先掉下来。",
+      "云底不是终点，是提醒你该出发的地方。"
     );
   }
 })();
