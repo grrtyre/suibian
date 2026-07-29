@@ -1574,6 +1574,7 @@
         <button data-tab="balloon">🎈 随便热气球</button>
         <button data-tab="dive">🤿 随便跳水</button>
         <button data-tab="archery">🏹 随便射箭</button>
+        <button data-tab="lift">🏋️ 随便举重</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8225,6 +8226,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="lift">
+    <h2>🏋️ 随便举重</h2>
+    <p class="sub">举重馆开杆：掐准握杠时机、顶起杠铃、左右微调撑满三秒，六把试举冲总成绩</p>
+    <style>
+      #lift .lf-wrap { max-width:420px; margin:0 auto; }
+      #lift .lf-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #lift .lf-hud span { padding:5px 10px; border-radius:999px; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #lift .lf-hud b { font-weight:700; color:#ce93d8; }
+      #lift canvas { width:100%; max-width:380px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#1a1035; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; }
+      #lift .lf-help { font-size:.78rem; opacity:.75; line-height:1.7; }
+    </style>
+    <div class="lf-wrap">
+      <div class="lf-hud">
+        <span>试举 <b id="lfNo">1/6</b></span>
+        <span>杠铃 <b id="lfWgt">60kg</b></span>
+        <span>本场 <b id="lfTotal">0</b></span>
+        <span>最佳 <b id="lfBest">0</b></span>
+      </div>
+      <canvas id="lfCav" width="380" height="420"></canvas>
+      <p class="lf-help">
+        一把三步：点击 / 空格开始握杠（滑块来回摆），到正中再点一下锁定——握得越正杠铃越稳，握太偏直接脱手；<br>
+        顶起后进入支撑：杠铃会随机晃动，←→ / AD / 按住画布左右半边施加修正，把平衡球稳在中间撑满 3 秒；<br>
+        撑满按最大晃幅亮灯（三白灯最体面），成功加重 10kg 再来一把，失败重量不变白扣一把；一场 6 把计总成绩。<br>
+        举起 100kg 解锁「百公斤俱乐部」、单场六把全成解锁「全白灯之夜」。战绩本地存档（suibian_lift）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -8852,6 +8880,7 @@
     if (id === "balloon") balloonRender();
     if (id === "dive") diveRender();
     if (id === "archery") archeryRender();
+    if (id === "lift") liftRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -8909,6 +8938,7 @@
     if (id !== "balloon" && typeof balloonStop === "function") balloonStop();
     if (id !== "dive" && typeof diveStop === "function") diveStop();
     if (id !== "archery" && typeof archeryStop === "function") archeryStop();
+    if (id !== "lift" && typeof liftStop === "function") liftStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9096,6 +9126,7 @@
     balloon: "随便热气球 balloon hot air 热气球 气球 飞行 飞天 升空 高度 燃料 风 星星 雷暴 飞鸟 躲避 摩天 冲刺 街机",
     dive: "随便跳水 dive diving 跳水 十米台 跳台 翻腾 抱膝 展体 压水花 入水 裁判 打分 奥运 水花 体育 竞技 满分 冠军",
     archery: "随便射箭 archery 射箭 弓箭 弓 箭 靶 十环 靶心 奥运 拉弓 瞄准 风 气流 抛物线 体育 竞技 神射手 百步穿杨",
+    lift: "随便举重 lift 举重 杠铃 挺举 抓举 大力士 健身 撸铁 平衡 白灯 裁判 公斤 力量 体育 竞技 奥运 试举",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9343,6 +9374,7 @@ splitbill:"tools",
     balloon:"games",
     dive:"games",
     archery:"games",
+    lift:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -51147,6 +51179,390 @@ splitbill:"tools",
       "十环靠的不是运气，是把同一件事重复一万遍。",
       "瞄得太久手会抖，人生有时候要敢于撒手。",
       "脱靶不可怕，可怕的是不敢再搭下一支箭。"
+    );
+  }
+})();
+/* ===== 🏋️ 随便举重 lift ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_lift";
+  var W = 380, H = 420;
+  var GROUND = 352;
+  var ATTEMPTS = 6;
+  var W0 = 60, WSTEP = 10;
+  var HOLD_NEED = 150;
+  var TILT_MAX = 0.5;
+  var SLIP_Q = 0.06;
+  var CORR = 0.0028;
+  var BADGE_KG = 100;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { best: 0, bestKg: 0, meets: 0, lifts: 0, tries: 0, whites: 0, aH: 0, aP: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.best = nInt(o.best); d.bestKg = nInt(o.bestKg); d.meets = nInt(o.meets);
+      d.lifts = nInt(o.lifts); d.tries = nInt(o.tries); d.whites = nInt(o.whites);
+      d.aH = o.aH ? 1 : 0; d.aP = o.aP ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  function gripAt(t) { return 0.5 + 0.5 * Math.sin(t * 0.07 - Math.PI / 2); }
+  function gripQ(p) { var q = 1 - Math.min(1, Math.abs(p - 0.5) * 2.2); return q < 0 ? 0 : q; }
+  function noiseOf(wgt, q) { return 0.0016 + (wgt - W0) * 0.000045 + (1 - q) * 0.0012; }
+  function lightsOf(maxTilt) { return maxTilt < 0.22 ? 3 : (maxTilt < 0.34 ? 2 : 1); }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, attemptIdx: 0, wgt: W0, total: 0, ok: 0,
+      q: 0, th: 0, w: 0, holdT: 0, maxTilt: 0, liftT: 0, failT: 0,
+      lights: 0, keyL: false, keyR: false, last: null, msg: ""
+    };
+  }
+  var g = newGame();
+
+  function startGrip(gg) {
+    if (gg.phase !== "idle" && gg.phase !== "result") return false;
+    if (gg.phase === "result") {
+      if (gg.attemptIdx >= ATTEMPTS) { gg.phase = "meetOver"; return false; }
+    }
+    gg.phase = "grip"; gg.t = 0; gg.msg = "";
+    return true;
+  }
+
+  function lockGrip(gg) {
+    if (gg.phase !== "grip") return false;
+    var p = gripAt(gg.t);
+    gg.q = gripQ(p);
+    if (gg.q < SLIP_Q) {
+      gg.phase = "fail"; gg.failT = 0; gg.lights = 0; gg.msg = "脱手！握杠太偏";
+      endAttempt(gg, false);
+      return true;
+    }
+    gg.phase = "lift"; gg.liftT = 0;
+    return true;
+  }
+
+  function startHold(gg) {
+    if (gg.phase !== "lift" || gg.liftT < 36) return false;
+    gg.phase = "hold"; gg.holdT = 0; gg.th = (rnd() - 0.5) * 0.08; gg.w = 0; gg.maxTilt = 0;
+    return true;
+  }
+
+  function stepHold(gg) {
+    if (gg.phase !== "hold") return;
+    var n = noiseOf(gg.wgt, gg.q);
+    gg.w += (rnd() - 0.5) * 2 * n;
+    gg.w += gg.th * 0.0009;
+    if (gg.keyL && !gg.keyR) gg.w -= CORR;
+    if (gg.keyR && !gg.keyL) gg.w += CORR;
+    gg.w *= 0.985;
+    gg.th += gg.w;
+    var a = Math.abs(gg.th);
+    if (a > gg.maxTilt) gg.maxTilt = a;
+    if (a > TILT_MAX) {
+      gg.phase = "fail"; gg.failT = 0; gg.lights = 0; gg.msg = "重心失守，杠铃砸地！";
+      endAttempt(gg, false);
+      return;
+    }
+    gg.holdT++;
+    if (gg.holdT >= HOLD_NEED) {
+      gg.lights = lightsOf(gg.maxTilt);
+      gg.phase = "result"; gg.t = 0;
+      gg.msg = gg.lights === 3 ? "三盏白灯！干净利落" : (gg.lights === 2 ? "两白一红，判举成功" : "晃是晃了点，算你成功");
+      endAttempt(gg, true);
+    }
+  }
+
+  function endAttempt(gg, ok) {
+    gg.attemptIdx++;
+    rec.tries++;
+    gg.last = { wgt: gg.wgt, ok: ok ? 1 : 0, lights: gg.lights };
+    if (ok) {
+      gg.ok++;
+      gg.total += gg.wgt;
+      rec.lifts++;
+      rec.whites += gg.lights;
+      if (gg.wgt > rec.bestKg) rec.bestKg = gg.wgt;
+      if (!rec.aH && gg.wgt >= BADGE_KG) { rec.aH = 1; try { bumpUsage("lfton"); } catch (e1) {} }
+      gg.wgt += WSTEP;
+    }
+    if (gg.attemptIdx >= ATTEMPTS) {
+      rec.meets++;
+      if (gg.total > rec.best) rec.best = gg.total;
+      if (!rec.aP && gg.ok >= ATTEMPTS) { rec.aP = 1; try { bumpUsage("lfwhite"); } catch (e2) {} }
+    }
+    saveRec();
+  }
+
+  function nextAttempt(gg) {
+    if (gg.phase === "fail" && gg.failT >= 30) {
+      gg.phase = gg.attemptIdx >= ATTEMPTS ? "meetOver" : "idle";
+      gg.t = 0;
+      return true;
+    }
+    if (gg.phase === "result") {
+      gg.phase = gg.attemptIdx >= ATTEMPTS ? "meetOver" : "idle";
+      gg.t = 0;
+      return true;
+    }
+    return false;
+  }
+
+  function newMeet() { g = newGame(); lfSync(); return g; }
+
+  function step(gg) {
+    gg.t++;
+    if (gg.phase === "lift") { gg.liftT++; if (gg.liftT >= 36) startHold(gg); }
+    else if (gg.phase === "hold") stepHold(gg);
+    else if (gg.phase === "fail") gg.failT++;
+  }
+
+  /* ---- 交互 ---- */
+  var cav = null, ctx = null, raf = 0, active = false, inited = false;
+  var pressSide = 0;
+
+  function press(side) {
+    if (g.phase === "idle" || g.phase === "result") {
+      if (g.phase === "idle" && g.attemptIdx === 0 && g.t < 2) { try { bumpUsage("lift"); } catch (e) {} }
+      startGrip(g);
+      return;
+    }
+    if (g.phase === "grip") { lockGrip(g); lfSync(); return; }
+    if (g.phase === "hold") {
+      pressSide = side || 0;
+      if (side < 0) g.keyL = true;
+      if (side > 0) g.keyR = true;
+      return;
+    }
+    if (g.phase === "fail") { if (g.failT >= 30) { nextAttempt(g); lfSync(); } return; }
+    if (g.phase === "meetOver") { newMeet(); return; }
+  }
+  function release() {
+    if (pressSide < 0) g.keyL = false;
+    if (pressSide > 0) g.keyR = false;
+    pressSide = 0;
+  }
+  function onKeyDown(e) {
+    if (!active) return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar") {
+      e.preventDefault();
+      if (g.phase === "hold") return;
+      press(0);
+    } else if (k === "ArrowLeft" || k === "a" || k === "A") {
+      if (g.phase === "hold") { e.preventDefault(); g.keyL = true; }
+    } else if (k === "ArrowRight" || k === "d" || k === "D") {
+      if (g.phase === "hold") { e.preventDefault(); g.keyR = true; }
+    }
+  }
+  function onKeyUp(e) {
+    var k = e.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") g.keyL = false;
+    if (k === "ArrowRight" || k === "d" || k === "D") g.keyR = false;
+  }
+
+  function lfSync() {
+    try {
+      var el;
+      el = document.getElementById("lfNo"); if (el) el.textContent = Math.min(g.attemptIdx + (g.phase === "meetOver" ? 0 : 1), ATTEMPTS) + "/" + ATTEMPTS;
+      el = document.getElementById("lfWgt"); if (el) el.textContent = g.wgt + "kg";
+      el = document.getElementById("lfTotal"); if (el) el.textContent = g.total;
+      el = document.getElementById("lfBest"); if (el) el.textContent = rec.best;
+    } catch (e) {}
+  }
+
+  /* ---- 绘制 ---- */
+  function roundedBar(c, x, y, w2, h2, r) {
+    c.beginPath();
+    c.moveTo(x + r, y); c.arcTo(x + w2, y, x + w2, y + h2, r);
+    c.arcTo(x + w2, y + h2, x, y + h2, r); c.arcTo(x, y + h2, x, y, r);
+    c.arcTo(x, y, x + w2, y, r); c.closePath();
+  }
+
+  function drawBarbell(c, cx, cy, tilt, wgt) {
+    c.save();
+    c.translate(cx, cy);
+    c.rotate(tilt * 0.55);
+    c.strokeStyle = "#cfd8dc"; c.lineWidth = 5;
+    c.beginPath(); c.moveTo(-130, 0); c.lineTo(130, 0); c.stroke();
+    var plates = Math.min(4, 1 + Math.floor((wgt - W0) / 25));
+    var pw = 12, i;
+    for (i = 0; i < plates; i++) {
+      var px = 96 + i * (pw + 2);
+      c.fillStyle = i % 2 ? "#ef5350" : "#42a5f5";
+      c.fillRect(-px - pw, -26 + i * 2, pw, 52 - i * 4);
+      c.fillRect(px, -26 + i * 2, pw, 52 - i * 4);
+    }
+    c.restore();
+  }
+
+  function drawLifter(c, x, y, pose, tilt) {
+    c.save();
+    c.translate(x, y);
+    c.strokeStyle = "#ffe0b2"; c.fillStyle = "#ffe0b2"; c.lineWidth = 4;
+    var headY = pose === "stand" ? -74 : (pose === "squat" ? -46 : -88);
+    c.beginPath(); c.arc(tilt * 8, headY, 9, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.moveTo(tilt * 6, headY + 9); c.lineTo(0, -18); c.stroke();
+    c.beginPath(); c.moveTo(0, -18); c.lineTo(-10, 0); c.moveTo(0, -18); c.lineTo(10, 0); c.stroke();
+    if (pose === "over") {
+      c.beginPath(); c.moveTo(tilt * 6, headY + 12); c.lineTo(-24 + tilt * 10, headY - 8);
+      c.moveTo(tilt * 6, headY + 12); c.lineTo(24 + tilt * 10, headY - 8); c.stroke();
+    } else {
+      c.beginPath(); c.moveTo(0, headY + 16); c.lineTo(-22, headY + 30);
+      c.moveTo(0, headY + 16); c.lineTo(22, headY + 30); c.stroke();
+    }
+    c.restore();
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var c = ctx;
+    var grd = c.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#1a1035"); grd.addColorStop(1, "#31215c");
+    c.fillStyle = grd; c.fillRect(0, 0, W, H);
+    c.fillStyle = "rgba(255,255,255,.05)";
+    var i;
+    for (i = 0; i < 5; i++) c.fillRect(20 + i * 72, 30, 44, 60);
+    c.fillStyle = "#4e3d7a"; c.fillRect(0, GROUND, W, H - GROUND);
+    c.fillStyle = "#6a548f"; c.fillRect(70, GROUND - 8, 240, 8);
+
+    var cx = W / 2;
+    if (g.phase === "idle" || g.phase === "grip") {
+      drawLifter(c, cx, GROUND - 8, "squat", 0);
+      drawBarbell(c, cx, GROUND - 20, 0, g.wgt);
+    } else if (g.phase === "lift") {
+      var k = Math.min(1, g.liftT / 36);
+      drawLifter(c, cx, GROUND - 8, k > 0.6 ? "over" : "stand", 0);
+      drawBarbell(c, cx, GROUND - 20 - k * 130, 0, g.wgt);
+    } else if (g.phase === "hold") {
+      drawLifter(c, cx, GROUND - 8, "over", g.th);
+      drawBarbell(c, cx + g.th * 40, GROUND - 150, g.th, g.wgt);
+      c.fillStyle = "rgba(0,0,0,.35)"; roundedBar(c, 60, 386, 260, 12, 6); c.fill();
+      c.fillStyle = Math.abs(g.th) > 0.34 ? "#ef5350" : "#66bb6a";
+      c.beginPath(); c.arc(190 + g.th / TILT_MAX * 124, 392, 8, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "rgba(255,255,255,.8)"; c.font = "12px system-ui";
+      c.textAlign = "center";
+      c.fillText("撑住 " + Math.ceil((HOLD_NEED - g.holdT) / 60 * 10) / 10 + "s", cx, 378);
+    } else if (g.phase === "fail") {
+      drawLifter(c, cx, GROUND - 8, "squat", 0);
+      drawBarbell(c, cx, GROUND - 16, (g.failT % 6 < 3 ? 1 : -1) * 0.04, g.wgt);
+    } else if (g.phase === "result" || g.phase === "meetOver") {
+      drawLifter(c, cx, GROUND - 8, "over", 0);
+      drawBarbell(c, cx, GROUND - 150, 0, g.wgt - (g.last && g.last.ok ? WSTEP : 0));
+    }
+
+    if (g.phase === "grip") {
+      var p = gripAt(g.t);
+      c.fillStyle = "rgba(0,0,0,.4)"; roundedBar(c, 60, 96, 260, 16, 8); c.fill();
+      c.fillStyle = "rgba(255,213,79,.25)"; c.fillRect(60 + 260 * 0.4, 96, 260 * 0.2, 16);
+      c.fillStyle = "#ffd54f";
+      c.beginPath(); c.arc(60 + 260 * p, 104, 9, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "rgba(255,255,255,.85)"; c.font = "13px system-ui"; c.textAlign = "center";
+      c.fillText("握杠时机：滑块到中间再点！", W / 2, 84);
+    }
+    if (g.phase === "result" && g.lights > 0) {
+      for (i = 0; i < 3; i++) {
+        c.fillStyle = i < g.lights ? "#fafafa" : "#c62828";
+        c.beginPath(); c.arc(W / 2 - 34 + i * 34, 110, 12, 0, Math.PI * 2); c.fill();
+      }
+    }
+    c.fillStyle = "rgba(255,255,255,.9)"; c.font = "bold 15px system-ui"; c.textAlign = "center";
+    if (g.phase === "idle") c.fillText("点击 / 空格：试举 " + g.wgt + "kg（第 " + Math.min(g.attemptIdx + 1, ATTEMPTS) + " 把）", W / 2, 60);
+    else if (g.phase === "fail" && g.failT >= 30) c.fillText(g.msg + "（点击继续）", W / 2, 60);
+    else if (g.phase === "fail") c.fillText(g.msg, W / 2, 60);
+    else if (g.phase === "result") c.fillText(g.msg + "（点击继续）", W / 2, 60);
+    else if (g.phase === "meetOver") {
+      c.fillText("全场结束！总成绩 " + g.total + "kg（" + g.ok + "/6 把成功）", W / 2, 60);
+      c.font = "13px system-ui";
+      c.fillText(g.total >= rec.best && g.total > 0 ? "生涯最佳！点击再来一场" : "点击再来一场", W / 2, 84);
+    }
+    if (g.phase === "hold") {
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.7)";
+      c.fillText("←→ / AD / 按住画布左右半边 保持平衡", W / 2, 26);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(g);
+    if (g.phase === "hold" || g.phase === "grip" || g.phase === "lift" || g.phase === "fail") lfSync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("lfCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      var r = cav.getBoundingClientRect();
+      var side = (e.clientX - r.left) < r.width / 2 ? -1 : 1;
+      press(g.phase === "hold" ? side : 0);
+    });
+    cav.addEventListener("pointerup", function (e) { e.preventDefault(); release(); });
+    cav.addEventListener("pointercancel", function () { release(); });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.liftRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    lfSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.liftStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__lfTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    newGame: newGame, newMeet: newMeet, gripAt: gripAt, gripQ: gripQ,
+    noiseOf: noiseOf, lightsOf: lightsOf,
+    startGrip: startGrip, lockGrip: lockGrip, startHold: startHold, stepHold: stepHold,
+    endAttempt: endAttempt, nextAttempt: nextAttempt, step: step, draw: draw,
+    lfSync: lfSync, press: press, release: release,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, GROUND: GROUND, ATTEMPTS: ATTEMPTS, W0: W0,
+      WSTEP: WSTEP, HOLD_NEED: HOLD_NEED, TILT_MAX: TILT_MAX, SLIP_Q: SLIP_Q,
+      CORR: CORR, BADGE_KG: BADGE_KG }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🏋️", name: "百公斤俱乐部", desc: "在随便举重成功举起 100kg 以上", test: function (u) { return (u.lfton || 0) >= 1; } },
+      { emoji: "🏅", name: "全白灯之夜", desc: "在随便举重单场六把全部成功", test: function (u) { return (u.lfwhite || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "杠铃不会骗人，你练没练它一举便知。",
+      "重量压肩的那一刻，别想别的，撑住就是全部。",
+      "人生和挺举一样：先蹲下去，是为了站起来。",
+      "失败的试举也算数，它告诉你极限在哪里。",
+      "别人眼里你在举铁，其实你在举自己的日子。"
     );
   }
 })();
