@@ -1588,6 +1588,7 @@
         <button data-tab="bungee">🪢 随便蹦极</button>
         <button data-tab="boomerang">🪃 随便回旋镖</button>
         <button data-tab="epee">🤺 随便击剑</button>
+        <button data-tab="bartend">🍸 随便调酒</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8611,6 +8612,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="bartend">
+    <h2>🍸 随便调酒</h2>
+    <p class="sub">接单、注酒、摇壶、出杯——分寸感才是这张吧台上真正的手艺</p>
+    <style>
+      #bartend .btd-wrap { max-width:420px; margin:0 auto; }
+      #bartend canvas { width:100%; max-width:380px; border-radius:16px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 14px 34px rgba(0,0,0,.4); }
+      #bartend .btd-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #bartend .btd-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #bartend .btd-hud b { font-weight:700; color:#ffd54f; }
+      #bartend .btd-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="btd-wrap">
+      <div class="btd-hud">
+        <span>当前订单 <b id="btdOrder">—</b></span>
+        <span>最高分 <b id="btdBest">—</b></span>
+        <span>连击 <b id="btdStreak">0 杯（最佳 0）</b></span>
+        <span>出杯 <b id="btdRec">—</b></span>
+      </div>
+      <canvas id="btdCav" width="380" height="520"></canvas>
+      <p class="btd-help">
+        每一单都是一张三味配方（合计 300ml）：<b>按住画布 / 空格</b> 开始注酒，<b>松手</b> 就是这一味到此为止、自动换下一味；<br>
+        三味倒完进入摇壶，跟着节拍环点满 6 下，偏差 5 帧内算完美、12 帧内算还行，漏拍归零；<br>
+        总分 = 配比 70% + 摇壶 30%，每多或少 1ml 扣 2.4 分；倒过 345ml 会溢出，再扣 12 分；<br>
+        单杯 95 分以上解锁「🍸 完美一杯」，连续三杯 85 分以上解锁「🥃 金牌调酒师」，战绩本地存档（suibian_bartend）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="epee">
     <h2>🤺 随便击剑</h2>
     <p class="sub">重剑五剑制对决：控距、突刺、招架、反击——距离才是这条剑道上真正的武器</p>
@@ -9287,6 +9315,7 @@
     if (id === "bungee" && typeof bgyRender === "function") bgyRender();
     if (id === "boomerang" && typeof bmrRender === "function") bmrRender();
     if (id === "epee" && typeof epeRender === "function") epeRender();
+    if (id === "bartend" && typeof btdRender === "function") btdRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9357,6 +9386,7 @@
     if (id !== "bungee" && typeof bgyStop === "function") bgyStop();
     if (id !== "boomerang" && typeof bmrStop === "function") bmrStop();
     if (id !== "epee" && typeof epeStop === "function") epeStop();
+    if (id !== "bartend" && typeof btdStop === "function") btdStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9558,6 +9588,7 @@
     bungee: "随便蹦极 bungee jump 蹦极 跳跃 峡谷 绳索 弹性 俯冲 贴水 落水 反弹 高空 极限运动 勇气 游戏 挑战",
     boomerang: "随便回旋镖 boomerang 回旋镖 飞去来器 投掷 掷镖 接镖 风向 集星 弧线 轨迹 草原 狩猎 游戏 挑战 极限运动",
     epee: "随便击剑 epee fencing 击剑 重剑 剑术 对决 决斗 突刺 弓步 招架 反击 控距 剑道 五剑 互中 假动作 游戏 挑战 体育",
+    bartend: "随便调酒 bartend cocktail 调酒 鸡尾酒 酒保 吧台 摇壶 注酒 配方 量杯 节拍 精准 手感 酒馆 混酒 游戏 挑战 休闲",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9819,6 +9850,7 @@ splitbill:"tools",
     bungee:"games",
     boomerang:"games",
     epee:"games",
+    bartend:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -57145,6 +57177,560 @@ splitbill:"tools",
       "对手露出破绽的那一瞬，犹豫就是最贵的代价。",
       "挡得住的人才配进攻——招架也是一种表态。",
       "互中一剑也算得分，人生的很多局面都是两败俱伤地前进。"
+    );
+  }
+})();
+/* ===== 🍸 随便调酒 bartend ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_bartend";
+  var W = 380, H = 520;
+  var GLASS_ML = 300;        // 一杯的标准总量
+  var CAP_ML = 345;          // 杯口容量，超过就溢出
+  var POUR = 2.4;            // 每帧注入毫升
+  var BEATS = 6;             // 摇壶节拍数
+  var BEAT_GAP = 40;         // 节拍间隔帧
+  var BEAT_LEAD = 54;        // 第一拍前摇
+  var PERFECT_W = 5;         // 完美判定窗口（帧）
+  var GOOD_W = 12;           // 良好判定窗口
+  var LATE_W = 20;           // 超过这个提前量算空摇（不消耗节拍）
+  var ERR_K = 2.4;           // 每毫升误差扣的分
+  var POUR_W = 0.7, SHAKE_W = 0.3;
+  var SPILL_PEN = 12;        // 溢出罚分
+  var END_WAIT = 26;         // 最后一拍后的收势帧
+  var MSG_FR = 46;
+  var rnd = Math.random;
+
+  var RECIPES = [
+    { name: "夕阳特调", emoji: "🌇", tip: "先烈后柔，最后一点糖浆压住锋芒",
+      parts: [{ n: "龙舌兰", c: "#f5d76e", ml: 150 }, { n: "橙汁", c: "#ff9f43", ml: 100 }, { n: "石榴糖浆", c: "#e0416a", ml: 50 }] },
+    { name: "深海蓝调", emoji: "🌊", tip: "蓝橙别多，多了就腻成糖水",
+      parts: [{ n: "金酒", c: "#dfe6e9", ml: 120 }, { n: "蓝橙利口酒", c: "#2e86de", ml: 90 }, { n: "汤力水", c: "#a8e6ff", ml: 90 }] },
+    { name: "热带风暴", emoji: "🍹", tip: "椰浆最后一点点，风味就立住了",
+      parts: [{ n: "朗姆酒", c: "#ffeaa7", ml: 140 }, { n: "菠萝汁", c: "#fdcb6e", ml: 110 }, { n: "椰浆", c: "#fff3d6", ml: 50 }] },
+    { name: "青苹奇迹", emoji: "🍏", tip: "青柠是灵魂，宁少勿多",
+      parts: [{ n: "伏特加", c: "#eef7ff", ml: 130 }, { n: "苹果汁", c: "#b8e994", ml: 120 }, { n: "青柠汁", c: "#78e08f", ml: 50 }] },
+    { name: "午夜浓情", emoji: "🌙", tip: "奶油要够厚，才托得住那股苦",
+      parts: [{ n: "咖啡利口酒", c: "#6b4429", ml: 110 }, { n: "浓缩咖啡", c: "#3b2318", ml: 100 }, { n: "厚奶油", c: "#f7e8d0", ml: 90 }] },
+    { name: "蜜桃初恋", emoji: "🍑", tip: "苏打只是收尾，别抢了桃子的戏",
+      parts: [{ n: "白兰地", c: "#e58e26", ml: 120 }, { n: "蜜桃汁", c: "#ffb8b8", ml: 130 }, { n: "苏打水", c: "#dff9fb", ml: 50 }] }
+  ];
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { serves: 0, best: -1, perfects: 0, spills: 0, streak: 0, bestStreak: 0, aP: 0, aM: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.serves = nInt(o.serves); d.perfects = nInt(o.perfects); d.spills = nInt(o.spills);
+      d.streak = nInt(o.streak); d.bestStreak = nInt(o.bestStreak);
+      var b = Math.floor(Number(o.best));
+      d.best = isFinite(b) && b >= 0 ? Math.min(100, b) : -1;
+      d.aP = o.aP ? 1 : 0; d.aM = o.aM ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 纯函数：评分体系 ---------- */
+  function beatAt(i) { return BEAT_LEAD + i * BEAT_GAP; }
+  function qualityOf(dt) {
+    dt = Math.abs(Number(dt) || 0);
+    if (dt <= PERFECT_W) return 1;
+    if (dt <= GOOD_W) return 0.6;
+    return 0;
+  }
+  function totalMl(amt) {
+    if (!amt || !amt.length) return 0;
+    var s = 0;
+    for (var i = 0; i < amt.length; i++) s += Number(amt[i]) || 0;
+    return s;
+  }
+  function errsOf(amt, parts) {
+    var out = [];
+    for (var i = 0; i < 3; i++) {
+      var a = amt && isFinite(Number(amt[i])) ? Number(amt[i]) : 0;
+      var t = parts && parts[i] ? parts[i].ml : 0;
+      out.push(Math.abs(a - t));
+    }
+    return out;
+  }
+  function pourScoreOf(amt, parts) {
+    var e = errsOf(amt, parts), s = 0;
+    for (var i = 0; i < 3; i++) s += Math.max(0, 100 - e[i] * ERR_K);
+    return s / 3;
+  }
+  function shakeScoreOf(hits) {
+    var s = 0;
+    for (var i = 0; i < BEATS; i++) s += Number(hits && hits[i]) || 0;
+    return s / BEATS * 100;
+  }
+  function totalOf(ps, ss, spill) {
+    var t = (Number(ps) || 0) * POUR_W + (Number(ss) || 0) * SHAKE_W;
+    if (spill) t -= SPILL_PEN;
+    t = Math.round(t);
+    if (!(t > 0)) t = 0;
+    return t > 100 ? 100 : t;
+  }
+  function gradeOf(t) {
+    t = Number(t) || 0;
+    if (t >= 95) return "传世佳酿";
+    if (t >= 85) return "上乘之作";
+    if (t >= 70) return "还算像样";
+    if (t >= 50) return "勉强能喝";
+    return "灾难现场";
+  }
+  function tipOf(t) {
+    t = Number(t) || 0;
+    var v = Math.round((t - 40) / 6);
+    return v > 0 ? v : 0;
+  }
+  function pickRecipe(r) {
+    var i = Math.floor((isFinite(r) ? r : 0) * RECIPES.length);
+    if (!(i >= 0)) i = 0;
+    if (i >= RECIPES.length) i = RECIPES.length - 1;
+    return i;
+  }
+
+  /* ---------- 状态 ---------- */
+  var g = null, ctx = null, cav = null, raf = 0, inited = false, active = false;
+  var keyHold = false, held = false;
+
+  function newOrder(forceIdx) {
+    var ri = typeof forceIdx === "number" ? pickRecipe(forceIdx / RECIPES.length) : pickRecipe(rnd());
+    return {
+      phase: "idle", f: 0, ri: ri,
+      amt: [0, 0, 0], idx: 0, pouring: false, spill: false,
+      sf: 0, bi: 0, hits: [], wild: 0, doneF: 0,
+      msg: "", msgF: 0, res: null, shake: 0
+    };
+  }
+  function setMsg(s) { if (g) { g.msg = s; g.msgF = MSG_FR; } }
+  function recipe() { return RECIPES[g && g.ri >= 0 && g.ri < RECIPES.length ? g.ri : 0]; }
+
+  function startOrder() {
+    if (!g) return;
+    g.phase = "pour"; g.f = 0; g.amt = [0, 0, 0]; g.idx = 0;
+    g.pouring = false; g.spill = false; g.sf = 0; g.bi = 0; g.hits = [];
+    g.wild = 0; g.doneF = 0; g.res = null;
+    setMsg("第 1 味：" + recipe().parts[0].n);
+    btdSync();
+  }
+  function nextOrder() {
+    var keep = g ? g.ri : 0;
+    g = newOrder();
+    if (RECIPES.length > 1 && g.ri === keep) g.ri = (g.ri + 1) % RECIPES.length;
+    startOrder();
+  }
+
+  function nextPart() {
+    if (!g) return;
+    g.idx++;
+    if (g.idx >= 3) {
+      g.phase = "shake"; g.sf = 0; g.bi = 0; g.hits = [];
+      setMsg("摇起来！跟上节拍");
+    } else {
+      setMsg("第 " + (g.idx + 1) + " 味：" + recipe().parts[g.idx].n);
+    }
+  }
+
+  function setPour(on) {
+    if (!g || g.phase !== "pour") return;
+    if (on) { g.pouring = true; }
+    else if (g.pouring) { g.pouring = false; nextPart(); }
+  }
+
+  function tapBeat() {
+    if (!g || g.phase !== "shake") return;
+    if (g.bi >= BEATS) return;
+    var target = beatAt(g.bi);
+    var dt = g.sf - target;
+    if (dt < -LATE_W) { g.wild++; setMsg("空摇了一下"); g.shake = 4; return; }
+    var q = qualityOf(dt);
+    g.hits[g.bi] = q; g.bi++;
+    g.shake = q >= 1 ? 9 : 5;
+    setMsg(q >= 1 ? "完美！" : q > 0 ? "还行" : "手滑了");
+    if (g.bi >= BEATS) g.doneF = END_WAIT;
+  }
+
+  function finish() {
+    if (!g || g.phase === "serve") return;
+    var parts = recipe().parts;
+    var ps = pourScoreOf(g.amt, parts);
+    var ss = shakeScoreOf(g.hits);
+    var tot = totalOf(ps, ss, g.spill);
+    g.res = {
+      ps: Math.round(ps), ss: Math.round(ss), tot: tot,
+      grade: gradeOf(tot), tip: tipOf(tot), errs: errsOf(g.amt, parts)
+    };
+    g.phase = "serve";
+    rec.serves++;
+    if (g.spill) rec.spills++;
+    if (tot > rec.best) rec.best = tot;
+    if (tot >= 95) rec.perfects++;
+    if (tot >= 85) {
+      rec.streak++;
+      if (rec.streak > rec.bestStreak) rec.bestStreak = rec.streak;
+    } else { rec.streak = 0; }
+    if (tot >= 95 && !rec.aP) { rec.aP = 1; try { bumpUsage("btdperfect"); } catch (e1) {} }
+    if (rec.streak >= 3 && !rec.aM) { rec.aM = 1; try { bumpUsage("btdmaster"); } catch (e2) {} }
+    saveRec();
+    setMsg(g.res.grade);
+    btdSync();
+  }
+
+  function step() {
+    if (!g) return;
+    g.f++;
+    if (g.msgF > 0) g.msgF--;
+    if (g.shake > 0) g.shake--;
+    if (g.phase === "pour") {
+      if (g.pouring && g.idx < 3) {
+        g.amt[g.idx] = (Number(g.amt[g.idx]) || 0) + POUR;
+        if (totalMl(g.amt) >= CAP_ML) {
+          var others = totalMl(g.amt) - g.amt[g.idx];
+          g.amt[g.idx] = Math.max(0, CAP_ML - others);
+          g.spill = true; g.pouring = false;
+          setMsg("溢出来了！");
+          nextPart();
+        }
+      }
+    } else if (g.phase === "shake") {
+      g.sf++;
+      while (g.bi < BEATS && g.sf > beatAt(g.bi) + GOOD_W) {
+        g.hits[g.bi] = 0; g.bi++;
+        setMsg("漏了一拍");
+        if (g.bi >= BEATS) g.doneF = END_WAIT;
+      }
+      if (g.bi >= BEATS) {
+        if (g.doneF > 0) g.doneF--;
+        if (g.doneF <= 0) finish();
+      }
+    }
+  }
+
+  function primary(down) {
+    if (!g) return;
+    if (g.phase === "idle") { if (down) startOrder(); return; }
+    if (g.phase === "pour") { setPour(!!down); return; }
+    if (g.phase === "shake") { if (down) tapBeat(); return; }
+    if (g.phase === "serve") { if (down) nextOrder(); }
+  }
+
+  /* ---------- 绘制 ---------- */
+  function rrect(x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawOrderCard() {
+    var r = recipe();
+    ctx.fillStyle = "rgba(255,255,255,.06)";
+    rrect(14, 12, W - 28, 108, 14); ctx.fill();
+    ctx.strokeStyle = "rgba(255,213,79,.35)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = "#ffd54f"; ctx.font = "bold 17px system-ui,sans-serif"; ctx.textAlign = "left";
+    ctx.fillText(r.emoji + " " + r.name, 26, 36);
+    ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.font = "11px system-ui,sans-serif";
+    ctx.fillText(r.tip, 26, 53);
+    for (var i = 0; i < 3; i++) {
+      var p = r.parts[i], y = 64 + i * 17;
+      var got = Number(g.amt[i]) || 0;
+      var doing = g.phase === "pour" && g.idx === i;
+      ctx.fillStyle = doing ? "#fff" : "rgba(255,255,255,.62)";
+      ctx.font = (doing ? "bold " : "") + "12px system-ui,sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText((doing ? "▶ " : "   ") + p.n, 26, y + 4);
+      var bx = 150, bw = 150;
+      ctx.fillStyle = "rgba(255,255,255,.10)";
+      rrect(bx, y - 6, bw, 10, 5); ctx.fill();
+      var frac = Math.min(1.35, got / Math.max(1, p.ml));
+      ctx.fillStyle = p.c;
+      rrect(bx, y - 6, Math.max(2, Math.min(bw, bw * frac / 1.35)), 10, 5); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.30)";
+      ctx.fillRect(bx + bw / 1.35 - 1, y - 8, 2, 14);
+      ctx.textAlign = "right";
+      ctx.fillStyle = g.phase === "serve" ? "#ffd54f" : "rgba(255,255,255,.7)";
+      ctx.font = "11px system-ui,sans-serif";
+      ctx.fillText(Math.round(got) + "/" + p.ml, W - 26, y + 4);
+    }
+  }
+
+  function drawGlass() {
+    var cx = W / 2, top = 214, bot = 430, gw = 108;
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,.30)"; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx - gw / 2, top);
+    ctx.lineTo(cx - gw / 2 + 8, bot - 16);
+    ctx.quadraticCurveTo(cx, bot + 6, cx + gw / 2 - 8, bot - 16);
+    ctx.lineTo(cx + gw / 2, top);
+    ctx.stroke();
+    var parts = recipe().parts;
+    var maxH = bot - top - 22;
+    var acc = 0;
+    for (var i = 0; i < 3; i++) {
+      var v = Number(g.amt[i]) || 0;
+      if (v <= 0) continue;
+      var h0 = maxH * (acc / CAP_ML), h1 = maxH * ((acc + v) / CAP_ML);
+      var y0 = bot - 16 - h1, y1 = bot - 16 - h0;
+      var wTop = gw - 14, wBot = gw - 20;
+      ctx.fillStyle = parts[i].c;
+      ctx.globalAlpha = 0.86;
+      ctx.beginPath();
+      ctx.moveTo(cx - wTop / 2, y0); ctx.lineTo(cx + wTop / 2, y0);
+      ctx.lineTo(cx + wBot / 2, y1); ctx.lineTo(cx - wBot / 2, y1);
+      ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+      acc += v;
+    }
+    // 杯口刻度：标准 300ml 线
+    var ly = bot - 16 - maxH * (GLASS_ML / CAP_ML);
+    ctx.strokeStyle = "rgba(255,213,79,.55)"; ctx.setLineDash([5, 4]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - gw / 2 - 12, ly); ctx.lineTo(cx + gw / 2 + 12, ly); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(255,213,79,.75)"; ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("300ml", cx + gw / 2 + 15, ly + 3);
+    ctx.restore();
+    // 倒酒水流
+    if (g.phase === "pour" && g.pouring && g.idx < 3) {
+      ctx.fillStyle = parts[g.idx].c;
+      ctx.globalAlpha = 0.8;
+      ctx.fillRect(cx - 3, 150, 6, top - 148 + 6);
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(cx, 150, 9, 0, Math.PI * 2); ctx.fill();
+    }
+    // 总量
+    ctx.textAlign = "center"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillStyle = totalMl(g.amt) > GLASS_ML + 20 ? "#ff7675" : "rgba(255,255,255,.75)";
+    ctx.fillText("杯中 " + Math.round(totalMl(g.amt)) + " ml", cx, bot + 26);
+  }
+
+  function drawShaker() {
+    var cx = W / 2, cy = 300;
+    var jit = g.shake > 0 ? (g.shake % 2 ? g.shake : -g.shake) : 0;
+    ctx.save();
+    ctx.translate(cx + jit, cy);
+    ctx.rotate(jit * 0.012);
+    ctx.fillStyle = "#c9d1d9";
+    rrect(-34, -70, 68, 120, 12); ctx.fill();
+    ctx.fillStyle = "#8f9aa6";
+    rrect(-28, -88, 56, 22, 8); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.45)";
+    ctx.fillRect(-24, -54, 8, 90);
+    ctx.restore();
+    // 节拍环
+    var ring = 152;
+    for (var i = 0; i < BEATS; i++) {
+      var a = -Math.PI / 2 + i * (Math.PI * 2 / BEATS);
+      var px = cx + Math.cos(a) * ring * 0.62, py = cy + Math.sin(a) * ring * 0.62;
+      var hit = g.hits[i];
+      ctx.beginPath(); ctx.arc(px, py, 11, 0, Math.PI * 2);
+      ctx.fillStyle = hit === undefined ? "rgba(255,255,255,.12)"
+        : hit >= 1 ? "#5ddc8b" : hit > 0 ? "#ffd54f" : "#ff6b6b";
+      ctx.fill();
+      if (i === g.bi) {
+        var d = beatAt(i) - g.sf;
+        var pr = Math.max(0, Math.min(1, 1 - Math.abs(d) / 46));
+        ctx.strokeStyle = "rgba(255,255,255," + (0.25 + 0.6 * pr) + ")";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(px, py, 11 + 16 * (1 - pr), 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.72)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("节拍 " + Math.min(BEATS, g.bi) + " / " + BEATS, cx, 430);
+  }
+
+  function drawResult() {
+    var r = g.res; if (!r) return;
+    ctx.fillStyle = "rgba(8,5,14,.82)";
+    rrect(30, 176, W - 60, 268, 16); ctx.fill();
+    ctx.strokeStyle = "rgba(255,213,79,.4)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffd54f"; ctx.font = "bold 30px system-ui,sans-serif";
+    ctx.fillText(r.tot + " 分", W / 2, 224);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 16px system-ui,sans-serif";
+    ctx.fillText(r.grade, W / 2, 250);
+    ctx.font = "12px system-ui,sans-serif"; ctx.fillStyle = "rgba(255,255,255,.75)";
+    ctx.fillText("配比 " + r.ps + " 分 ／ 摇壶 " + r.ss + " 分", W / 2, 274);
+    var parts = recipe().parts;
+    for (var i = 0; i < 3; i++) {
+      ctx.textAlign = "left"; ctx.fillStyle = parts[i].c;
+      ctx.fillText("● " + parts[i].n, 56, 302 + i * 20);
+      ctx.textAlign = "right"; ctx.fillStyle = r.errs[i] <= 8 ? "#5ddc8b" : r.errs[i] <= 22 ? "#ffd54f" : "#ff6b6b";
+      ctx.fillText("误差 " + Math.round(r.errs[i]) + " ml", W - 56, 302 + i * 20);
+    }
+    ctx.textAlign = "center";
+    ctx.fillStyle = g.spill ? "#ff6b6b" : "rgba(255,255,255,.6)";
+    ctx.fillText(g.spill ? "溢出扣 " + SPILL_PEN + " 分" : "干净利落，没洒一滴", W / 2, 386);
+    ctx.fillStyle = "#5ddc8b"; ctx.font = "bold 14px system-ui,sans-serif";
+    ctx.fillText("小费 +" + r.tip + " 元", W / 2, 410);
+    ctx.fillStyle = "rgba(255,255,255,.62)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("点击接下一单", W / 2, 432);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#1b1026"); bg.addColorStop(0.55, "#241733"); bg.addColorStop(1, "#100a18");
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "rgba(255,255,255,.04)";
+    ctx.fillRect(0, 440, W, H - 440);
+    ctx.fillStyle = "rgba(255,213,79,.08)";
+    ctx.beginPath(); ctx.arc(W / 2, 150, 120, 0, Math.PI * 2); ctx.fill();
+    if (!g) return;
+    drawOrderCard();
+    if (g.phase === "idle") {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#fff"; ctx.font = "bold 19px system-ui,sans-serif";
+      ctx.fillText("🍸 今晚你是这儿的调酒师", W / 2, 268);
+      ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.font = "13px system-ui,sans-serif";
+      ctx.fillText("按住画布 / 空格 倒酒，松手换下一味", W / 2, 300);
+      ctx.fillText("三味倒完进入摇壶，跟着节拍点六下", W / 2, 322);
+      ctx.fillStyle = "#ffd54f"; ctx.font = "bold 15px system-ui,sans-serif";
+      ctx.fillText("点击开始接单", W / 2, 366);
+    } else if (g.phase === "pour") {
+      drawGlass();
+    } else if (g.phase === "shake") {
+      drawShaker();
+    } else if (g.phase === "serve") {
+      drawGlass();
+      drawResult();
+    }
+    if (g.msgF > 0 && g.phase !== "serve") {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255," + Math.min(1, g.msgF / 18) + ")";
+      ctx.font = "bold 15px system-ui,sans-serif";
+      ctx.fillText(g.msg, W / 2, 176);
+    }
+    if (g.phase === "pour") {
+      ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.font = "11px system-ui,sans-serif";
+      ctx.fillText("松手 = 这一味到此为止，倒满 " + CAP_ML + "ml 会溢出", W / 2, 476);
+    }
+  }
+
+  /* ---------- HUD ---------- */
+  function btdSync() {
+    var eO = document.getElementById("btdOrder");
+    var eB = document.getElementById("btdBest");
+    var eS = document.getElementById("btdStreak");
+    var eR = document.getElementById("btdRec");
+    if (eO) eO.textContent = g ? (recipe().emoji + " " + recipe().name) : "—";
+    if (eB) eB.textContent = rec.best >= 0 ? rec.best + " 分" : "—";
+    if (eS) eS.textContent = rec.streak + " 杯（最佳 " + rec.bestStreak + "）";
+    if (eR) eR.textContent = rec.serves + " 杯 / 满分 " + rec.perfects + " 杯";
+  }
+
+  /* ---------- 生命周期 ---------- */
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(); draw();
+    if (g && (g.f % 12 === 0)) btdSync();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function onKeyDown(e) {
+    if (!active || !g) return;
+    var tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "Enter") {
+      if (e.repeat) { if (e.preventDefault) e.preventDefault(); return; }
+      if (e.preventDefault) e.preventDefault();
+      keyHold = true;
+      primary(true);
+    }
+  }
+  function onKeyUp(e) {
+    if (!active || !g) return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "Enter") {
+      if (!keyHold) return;
+      keyHold = false;
+      primary(false);
+    }
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("btdCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+    g = newOrder();
+    cav.addEventListener("pointerdown", function (e) {
+      if (e.preventDefault) e.preventDefault();
+      held = true; primary(true);
+    });
+    cav.addEventListener("pointerup", function () { if (held) { held = false; primary(false); } });
+    cav.addEventListener("pointerleave", function () { if (held) { held = false; primary(false); } });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.btdRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newOrder();
+    btdSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.btdStop = function () {
+    active = false;
+    keyHold = false; held = false;
+    if (g && g.phase === "pour") g.pouring = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__btdTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; }, setActive: function (v) { active = !!v; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    beatAt: beatAt, qualityOf: qualityOf, totalMl: totalMl, errsOf: errsOf,
+    pourScoreOf: pourScoreOf, shakeScoreOf: shakeScoreOf, totalOf: totalOf,
+    gradeOf: gradeOf, tipOf: tipOf, pickRecipe: pickRecipe,
+    newOrder: newOrder, startOrder: startOrder, nextOrder: nextOrder, nextPart: nextPart,
+    setPour: setPour, tapBeat: tapBeat, finish: finish, step: step, primary: primary,
+    draw: draw, btdSync: btdSync, ensureInit: ensureInit, setMsg: setMsg, recipe: recipe,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    RECIPES: RECIPES,
+    consts: { KEY: KEY, W: W, H: H, GLASS_ML: GLASS_ML, CAP_ML: CAP_ML, POUR: POUR,
+      BEATS: BEATS, BEAT_GAP: BEAT_GAP, BEAT_LEAD: BEAT_LEAD, PERFECT_W: PERFECT_W,
+      GOOD_W: GOOD_W, LATE_W: LATE_W, ERR_K: ERR_K, POUR_W: POUR_W, SHAKE_W: SHAKE_W,
+      SPILL_PEN: SPILL_PEN, END_WAIT: END_WAIT, MSG_FR: MSG_FR }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🍸", name: "完美一杯", desc: "在随便调酒里调出一杯 95 分以上的酒", test: function (u) { return (u.btdperfect || 0) >= 1; } },
+      { emoji: "🥃", name: "金牌调酒师", desc: "在随便调酒里连续三杯拿到 85 分以上", test: function (u) { return (u.btdmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "调酒的分寸感，和做人的分寸感是同一种能力。",
+      "多倒的那一点点，往往就是把好酒毁掉的那一点点。",
+      "松手也是一门手艺——知道什么时候停，比知道怎么开始更难。",
+      "节拍不会等你，摇壶也不会；踩准当下这一下就够了。",
+      "配方写得再准，最后决定味道的还是你手上的犹豫。"
     );
   }
 })();
