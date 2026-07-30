@@ -1590,6 +1590,7 @@
         <button data-tab="epee">🤺 随便击剑</button>
         <button data-tab="bartend">🍸 随便调酒</button>
         <button data-tab="alchemy">⚗️ 随便炼金</button>
+        <button data-tab="sushi">🍣 随便寿司</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8613,6 +8614,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="sushi">
+    <h2>🍣 随便寿司</h2>
+    <p class="sub">切鱼、捏饭、上桌——三刀两手一瞬间，板前见真章</p>
+    <style>
+      #sushi .szs-wrap { max-width:420px; margin:0 auto; }
+      #sushi canvas { width:100%; max-width:380px; border-radius:16px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 14px 34px rgba(0,0,0,.4); }
+      #sushi .szs-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #sushi .szs-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #sushi .szs-hud b { font-weight:700; color:#ffb46e; }
+      #sushi .szs-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="szs-wrap">
+      <div class="szs-hud">
+        <span>当前订单 <b id="szsLab">—</b></span>
+        <span>最高分 <b id="szsBest">—</b></span>
+        <span>连神 <b id="szsStreak">0 盘（最佳 0）</b></span>
+        <span>战绩 <b id="szsRec">—</b></span>
+      </div>
+      <canvas id="szsCav" width="380" height="520"></canvas>
+      <p class="szs-help">
+        每盘三关：<b>① 切鱼</b> — 刀光在鱼坯上左右往返，扫到金色虚线的一瞬点击下刀，三刀越准刀工分越高；<br>
+        <b>② 捏饭</b> — 按住长饭、松手定型，越贴近 90g 越香，压到 120g 直接捏爆还要颍外扣总分；<br>
+        <b>③ 上桌</b> — 盘子随传送带滑行，滑进客人面前金框的一瞬按下，滑过头就端到隔壁桌了；总分 = 刀工 40% + 捏饭 40% + 上桌 20%。<br>
+        单盘 95 分以上解锁「🍣 一贯入魂」，连续三盘 85 分以上解锁「🥢 板前宗师」，战绩本地存档（suibian_sushi）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="alchemy">
     <h2>⚗️ 随便炼金</h2>
     <p class="sub">抓料、控火、凝晶——三关过后，这锅灵药才配叫作品</p>
@@ -9345,6 +9373,7 @@
     if (id === "epee" && typeof epeRender === "function") epeRender();
     if (id === "bartend" && typeof btdRender === "function") btdRender();
     if (id === "alchemy" && typeof alchRender === "function") alchRender();
+    if (id === "sushi" && typeof szsRender === "function") szsRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9417,6 +9446,7 @@
     if (id !== "epee" && typeof epeStop === "function") epeStop();
     if (id !== "bartend" && typeof btdStop === "function") btdStop();
     if (id !== "alchemy" && typeof alchStop === "function") alchStop();
+    if (id !== "sushi" && typeof szsStop === "function") szsStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9620,6 +9650,7 @@
     epee: "随便击剑 epee fencing 击剑 重剑 剑术 对决 决斗 突刺 弓步 招架 反击 控距 剑道 五剑 互中 假动作 游戏 挑战 体育",
     bartend: "随便调酒 bartend cocktail 调酒 鸡尾酒 酒保 吧台 摇壶 注酒 配方 量杯 节拍 精准 手感 酒馆 混酒 游戏 挑战 休闲",
     alchemy: "随便炼金 alchemy potion 炼金 药水 魔药 坩埚 火候 控温 结晶 材料 转轮 抓取 贤者之石 炼成 灵药 游戏 挑战 休闲",
+    sushi: "随便寿司 sushi 寿司 切鱼 刀工 捏饭 醋饭 上桌 传送带 板前 师傅 三文鱼 金枪鱼 日料 料理 手感 游戏 挑战 休闲",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9883,6 +9914,7 @@ splitbill:"tools",
     epee:"games",
     bartend:"games",
     alchemy:"games",
+    sushi:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -58367,6 +58399,595 @@ splitbill:"tools",
       "绿带很窄，但稳得住的人从来不觉得它窄。",
       "结晶只有一瞬——犹豫的成本，就是整锅药。",
       "炸过炉的人才懂什么叫火候，黑锅也是学费。"
+    );
+  }
+})();
+/* ===== 🍣 随便寿司 sushi ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_sushi";
+  var W = 380, H = 520;
+  var CUT_MIN = 70, CUT_MAX = 310;   // 刀光往返区间
+  var CUT_SPD = 3.4;                 // 刀光每帧位移
+  var GL_MIN = 120, GL_MAX = 260;    // 金线随机落点区间
+  var PERF_C = 4, GOOD_C = 12;       // 切鱼完美 / 良好偏差(px)
+  var RICE_UP = 1.7;                 // 捏饭按住每帧克数
+  var RICE_TGT = 90;                 // 目标饭量(g)
+  var RICE_MAX = 120;                // 捏爆上限
+  var RICE_K = 6;                    // 每克误差扣分
+  var BURST_PEN = 8;                 // 捏爆一颗的总分罚
+  var SRV_X0 = -40, SRV_SPD = 3.0;   // 上桌传送带起点与速度
+  var SRV_GOLD = 190;                // 客人面前的金位
+  var SRV_END = 400;                 // 滑过头判失手
+  var SLICE_W = 0.4, RICE_W = 0.4, SRV_W = 0.2;
+  var MSG_FR = 46;
+  var rnd = Math.random;
+
+  var FISH = [
+    { n: "三文鱼", e: "🧡", c: "#ff8a75" },
+    { n: "金枪鱼", e: "❤️", c: "#e05a6d" },
+    { n: "甜虾", e: "🦐", c: "#ffb3a0" },
+    { n: "玉子烧", e: "🍳", c: "#ffd76e" },
+    { n: "星鳗", e: "🐍", c: "#c9a06e" },
+    { n: "北极贝", e: "🌸", c: "#ff9fc0" }
+  ];
+
+  var ORDERS = [
+    { name: "元气晨市套餐", emoji: "🌅", c: "#ffb46e", fish: [0, 3, 2], tip: "早市客人赶时间，但嘴一点不含糊" },
+    { name: "深夜治愈套餐", emoji: "🌙", c: "#9fa8ff", fish: [1, 4, 0], tip: "深夜的胃，只认真材实料" },
+    { name: "大将脾气套餐", emoji: "🔪", c: "#ff7a7a", fish: [1, 0, 4], tip: "大将盯着呢，刀歪一毫米都算事故" },
+    { name: "海风微醺套餐", emoji: "🌊", c: "#5fc9d8", fish: [5, 2, 1], tip: "配清酒的贯，饭要松、鱼要润" },
+    { name: "豪华船长套餐", emoji: "⛵", c: "#ffd76e", fish: [4, 5, 3], tip: "船长出手阔绰，翻车也传得快" },
+    { name: "初雪限定套餐", emoji: "❄️", c: "#bfe8ff", fish: [2, 5, 0], tip: "限定款，捏坏一颗就绝版了" }
+  ];
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { plates: 0, best: -1, souls: 0, flops: 0, streak: 0, bestStreak: 0, aP: 0, aM: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.plates = nInt(o.plates); d.souls = nInt(o.souls); d.flops = nInt(o.flops);
+      d.streak = nInt(o.streak); d.bestStreak = nInt(o.bestStreak);
+      var b = Math.floor(Number(o.best));
+      d.best = isFinite(b) && b >= 0 ? Math.min(100, b) : -1;
+      d.aP = o.aP ? 1 : 0; d.aM = o.aM ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 纯函数：评分 ---------- */
+  function cutQualityOf(off) {
+    off = Math.abs(Number(off) || 0);
+    if (off <= PERF_C) return 1;
+    if (off <= GOOD_C) return 0.6;
+    return 0.3;
+  }
+  function sliceScoreOf(quals) {
+    var s = 0;
+    for (var i = 0; i < 3; i++) s += Number(quals && quals[i]) || 0;
+    s = s / 3 * 100;
+    return s > 100 ? 100 : (s > 0 ? s : 0);
+  }
+  function riceBallScoreOf(w) {
+    w = Number(w) || 0;
+    if (w >= RICE_MAX) return 0;
+    var s = 100 - Math.abs(w - RICE_TGT) * RICE_K;
+    return s > 0 ? s : 0;
+  }
+  function riceScoreOf(ws) {
+    var s = 0;
+    for (var i = 0; i < 3; i++) s += riceBallScoreOf(ws && ws[i]);
+    return s / 3;
+  }
+  function serveScoreOf(dx, missed) {
+    if (missed) return 0;
+    dx = Math.abs(Number(dx) || 0);
+    if (dx <= 5) return 100;
+    if (dx <= 12) return 80;
+    if (dx <= 24) return 55;
+    if (dx <= 40) return 30;
+    return 10;
+  }
+  function burstsOf(ws) {
+    var n = 0;
+    for (var i = 0; i < 3; i++) if ((Number(ws && ws[i]) || 0) >= RICE_MAX) n++;
+    return n;
+  }
+  function totalOf(sl, ri, se, bursts) {
+    var t = (Number(sl) || 0) * SLICE_W + (Number(ri) || 0) * RICE_W + (Number(se) || 0) * SRV_W;
+    t -= nInt(bursts) * BURST_PEN;
+    t = Math.round(t);
+    if (!(t > 0)) t = 0;
+    return t > 100 ? 100 : t;
+  }
+  function gradeOf(t) {
+    t = Number(t) || 0;
+    if (t >= 95) return "寿司之神";
+    if (t >= 85) return "板前老手";
+    if (t >= 70) return "像模像样";
+    if (t >= 50) return "家常水平";
+    return "黑暗料理";
+  }
+  function pickOrder(r) {
+    var i = Math.floor((isFinite(r) ? r : 0) * ORDERS.length);
+    if (!(i >= 0)) i = 0;
+    if (i >= ORDERS.length) i = ORDERS.length - 1;
+    return i;
+  }
+  function goldLineOf(r) {
+    var x = GL_MIN + (isFinite(r) ? r : 0) * (GL_MAX - GL_MIN);
+    if (x < GL_MIN) x = GL_MIN;
+    if (x > GL_MAX) x = GL_MAX;
+    return x;
+  }
+
+  /* ---------- 状态 ---------- */
+  var g = null, ctx = null, cav = null, raf = 0, inited = false, active = false;
+  var keyHold = false, held = false;
+
+  function newPlate(forceIdx) {
+    var oi = typeof forceIdx === "number" ? pickOrder(forceIdx / ORDERS.length) : pickOrder(rnd());
+    return {
+      phase: "idle", f: 0, oi: oi,
+      blade: CUT_MIN, dir: 1, gold: goldLineOf(rnd()), ci: 0, quals: [],
+      wi: 0, ws: [], pressing: false,
+      px: SRV_X0, lock: -1, missed: false,
+      msg: "", msgF: 0, res: null, fx: 0
+    };
+  }
+  function setMsg(s) { if (g) { g.msg = s; g.msgF = MSG_FR; } }
+  function order() { return ORDERS[g && g.oi >= 0 && g.oi < ORDERS.length ? g.oi : 0]; }
+
+  function startPlate() {
+    if (!g) return;
+    g.phase = "slice"; g.f = 0;
+    g.blade = CUT_MIN; g.dir = 1; g.gold = goldLineOf(rnd()); g.ci = 0; g.quals = [];
+    g.wi = 0; g.ws = []; g.pressing = false;
+    g.px = SRV_X0; g.lock = -1; g.missed = false; g.res = null;
+    setMsg("下刀切：" + FISH[order().fish[0]].n);
+    szsSync();
+  }
+  function nextPlate() {
+    var keep = g ? g.oi : 0;
+    g = newPlate();
+    if (ORDERS.length > 1 && g.oi === keep) g.oi = (g.oi + 1) % ORDERS.length;
+    startPlate();
+  }
+
+  function cut() {
+    if (!g || g.phase !== "slice" || g.ci >= 3) return;
+    var off = Math.abs(g.blade - g.gold);
+    var q = cutQualityOf(off);
+    g.quals[g.ci] = q; g.ci++;
+    g.fx = q >= 1 ? 9 : 5;
+    setMsg(q >= 1 ? "一刀入魂！" : q > 0.5 ? "切得还行" : "切歪了……");
+    if (g.ci >= 3) {
+      g.phase = "rice"; g.wi = 0; g.ws = []; g.pressing = false;
+      setMsg("捏醋饭：按住长饭，松手定型");
+    } else {
+      g.gold = goldLineOf(rnd());
+      g.blade = CUT_MIN; g.dir = 1;
+      setMsg("下一刀：" + FISH[order().fish[g.ci]].n);
+    }
+  }
+
+  function pressRice(on) {
+    if (!g || g.phase !== "rice" || g.wi >= 3) return;
+    on = !!on;
+    if (on && !g.pressing) {
+      g.pressing = true;
+      if (g.ws[g.wi] === undefined) g.ws[g.wi] = 0;
+    } else if (!on && g.pressing) {
+      g.pressing = false;
+      lockBall();
+    }
+  }
+  function lockBall() {
+    if (!g || g.phase !== "rice" || g.wi >= 3) return;
+    var w = Number(g.ws[g.wi]) || 0;
+    g.ws[g.wi] = w;
+    var burst = w >= RICE_MAX;
+    g.fx = burst ? 6 : Math.abs(w - RICE_TGT) <= 2 ? 9 : 4;
+    setMsg(burst ? "捏爆了！米粒糊一手" : Math.abs(w - RICE_TGT) <= 2 ? "手感完美！" : Math.round(w) + "g，" + (w > RICE_TGT ? "偏大" : "偏小"));
+    g.wi++;
+    if (g.wi >= 3) {
+      g.phase = "serve"; g.px = SRV_X0; g.lock = -1; g.missed = false;
+      setMsg("上桌！滑到客人面前时按下");
+    }
+  }
+
+  function lockServe() {
+    if (!g || g.phase !== "serve" || g.lock >= 0 || g.missed) return;
+    g.lock = g.px;
+    finish();
+  }
+
+  function finish() {
+    if (!g || g.phase === "done") return;
+    var sl = sliceScoreOf(g.quals);
+    var ri = riceScoreOf(g.ws);
+    var se = serveScoreOf((g.lock >= 0 ? g.lock : g.px) - SRV_GOLD, g.missed);
+    var bursts = burstsOf(g.ws);
+    var tot = totalOf(sl, ri, se, bursts);
+    g.res = {
+      sl: Math.round(sl), ri: Math.round(ri), se: Math.round(se),
+      bursts: bursts, tot: tot, grade: gradeOf(tot)
+    };
+    g.phase = "done";
+    rec.plates++;
+    if (tot > rec.best) rec.best = tot;
+    if (tot >= 95) rec.souls++;
+    if (tot < 50) rec.flops++;
+    if (tot >= 85) {
+      rec.streak++;
+      if (rec.streak > rec.bestStreak) rec.bestStreak = rec.streak;
+    } else { rec.streak = 0; }
+    if (tot >= 95 && !rec.aP) { rec.aP = 1; try { bumpUsage("szssoul"); } catch (e1) {} }
+    if (rec.streak >= 3 && !rec.aM) { rec.aM = 1; try { bumpUsage("szsmaster"); } catch (e2) {} }
+    saveRec();
+    setMsg(g.res.grade);
+    szsSync();
+  }
+
+  function step() {
+    if (!g) return;
+    g.f++;
+    if (g.msgF > 0) g.msgF--;
+    if (g.fx > 0) g.fx--;
+    if (g.phase === "slice") {
+      g.blade += CUT_SPD * g.dir;
+      if (g.blade >= CUT_MAX) { g.blade = CUT_MAX; g.dir = -1; }
+      else if (g.blade <= CUT_MIN) { g.blade = CUT_MIN; g.dir = 1; }
+    } else if (g.phase === "rice") {
+      if (g.pressing && g.wi < 3) {
+        g.ws[g.wi] = (Number(g.ws[g.wi]) || 0) + RICE_UP;
+        if (g.ws[g.wi] >= RICE_MAX) {
+          g.ws[g.wi] = RICE_MAX;
+          g.pressing = false;
+          lockBall();
+        }
+      }
+    } else if (g.phase === "serve") {
+      if (g.lock < 0 && !g.missed) {
+        g.px += SRV_SPD;
+        if (g.px > SRV_END) {
+          g.px = SRV_END; g.missed = true;
+          setMsg("滑过头了，端到隔壁桌去了……");
+          finish();
+        }
+      }
+    }
+  }
+
+  function primary(down) {
+    if (!g) return;
+    if (g.phase === "idle") { if (down) startPlate(); return; }
+    if (g.phase === "slice") { if (down) cut(); return; }
+    if (g.phase === "rice") { pressRice(!!down); return; }
+    if (g.phase === "serve") { if (down) lockServe(); return; }
+    if (g.phase === "done") { if (down) nextPlate(); }
+  }
+
+  /* ---------- 绘制 ---------- */
+  function rrect(x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawOrderCard() {
+    var o = order();
+    ctx.fillStyle = "rgba(255,255,255,.06)";
+    rrect(14, 12, W - 28, 96, 14); ctx.fill();
+    ctx.strokeStyle = "rgba(255,180,110,.4)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = "#ffb46e"; ctx.font = "bold 17px system-ui,sans-serif"; ctx.textAlign = "left";
+    ctx.fillText(o.emoji + " " + o.name, 26, 36);
+    ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.font = "11px system-ui,sans-serif";
+    ctx.fillText(o.tip, 26, 53);
+    for (var i = 0; i < 3; i++) {
+      var f = FISH[o.fish[i]];
+      var x = 26 + i * 118, y = 78;
+      var done = g.phase !== "slice" ? true : i < g.ci;
+      var doing = g.phase === "slice" && g.ci === i;
+      if (g.phase === "idle") { done = false; doing = false; }
+      ctx.fillStyle = done ? "rgba(93,220,139,.16)" : doing ? "rgba(255,213,79,.16)" : "rgba(255,255,255,.07)";
+      rrect(x, y - 14, 108, 26, 13); ctx.fill();
+      ctx.fillStyle = done ? "#5ddc8b" : doing ? "#ffd54f" : "rgba(255,255,255,.6)";
+      ctx.font = (doing ? "bold " : "") + "12px system-ui,sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText((done ? "✓ " : (i + 1) + ". ") + f.e + " " + f.n, x + 10, y + 4);
+    }
+    ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "right";
+    ctx.fillText("目标饭量 " + RICE_TGT + "g", W - 26, 36);
+  }
+
+  function drawSlice() {
+    var f = FISH[order().fish[Math.min(g.ci, 2)]];
+    var y = 250, fh = 96;
+    // 案板
+    ctx.fillStyle = "#3a2c22";
+    rrect(40, y - fh / 2 - 20, W - 80, fh + 40, 14); ctx.fill();
+    // 鱼块
+    ctx.fillStyle = f.c;
+    rrect(CUT_MIN - 10, y - fh / 2, CUT_MAX - CUT_MIN + 20, fh, 18); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.25)";
+    for (var i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.ellipse(110 + i * 55, y, 4, fh / 2 - 10, 0.25, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // 金线
+    ctx.strokeStyle = "#ffd54f"; ctx.lineWidth = 3;
+    ctx.setLineDash([7, 5]);
+    ctx.beginPath(); ctx.moveTo(g.gold, y - fh / 2 - 14); ctx.lineTo(g.gold, y + fh / 2 + 14); ctx.stroke();
+    ctx.setLineDash([]);
+    // 刀光
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(g.blade, y - fh / 2 - 26); ctx.lineTo(g.blade, y + fh / 2 + 26); ctx.stroke();
+    ctx.font = "22px system-ui,sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("🔪", g.blade, y - fh / 2 - 34);
+    ctx.fillStyle = "rgba(255,255,255,.65)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("第 " + (g.ci + 1) + " / 3 刀 · " + f.e + " " + f.n, W / 2, 392);
+    ctx.fillStyle = "rgba(255,255,255,.6)";
+    ctx.fillText("刀光扫到金色虚线的一瞬点击下刀", W / 2, 486);
+  }
+
+  function drawRice() {
+    var w = Number(g.ws[g.wi]) || 0;
+    var cx = W / 2, cy = 288;
+    // 手掌
+    ctx.fillStyle = "rgba(255,214,170,.9)";
+    ctx.beginPath(); ctx.ellipse(cx, cy + 46, 92, 34, 0, 0, Math.PI * 2); ctx.fill();
+    // 饭团（随克数长大）
+    var rr = 16 + w * 0.5;
+    ctx.fillStyle = "#f5f0e6";
+    ctx.beginPath(); ctx.ellipse(cx, cy - 6, rr, rr * 0.72, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(0,0,0,.08)";
+    ctx.beginPath(); ctx.ellipse(cx, cy + 4, rr * 0.8, rr * 0.4, 0, 0, Math.PI * 2); ctx.fill();
+    // 刻度条
+    var bx = 50, by = 402, bw = W - 100, bh = 16;
+    ctx.fillStyle = "rgba(255,255,255,.10)";
+    rrect(bx, by, bw, bh, 8); ctx.fill();
+    function xOf(v) { return bx + bw * v / RICE_MAX; }
+    ctx.fillStyle = "rgba(93,220,139,.35)";
+    ctx.fillRect(xOf(RICE_TGT - 5), by, xOf(RICE_TGT + 5) - xOf(RICE_TGT - 5), bh);
+    ctx.strokeStyle = "#5ddc8b"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(xOf(RICE_TGT), by - 4); ctx.lineTo(xOf(RICE_TGT), by + bh + 4); ctx.stroke();
+    ctx.fillStyle = w > RICE_TGT + 5 ? "#ff9070" : "#ffd76e";
+    rrect(bx, by, Math.max(2, bw * w / RICE_MAX), bh, 8); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 14px system-ui,sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(Math.round(w) + " g", cx, by - 12);
+    ctx.fillStyle = "rgba(255,255,255,.65)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("第 " + (g.wi + 1) + " / 3 颗 · 松手定型，压到 " + RICE_MAX + "g 直接捏爆", cx, 452);
+    ctx.fillStyle = "rgba(255,255,255,.6)";
+    ctx.fillText("按住长饭，越贴近 " + RICE_TGT + "g 分越高", cx, 486);
+  }
+
+  function drawServe() {
+    var y = 320;
+    // 传送带
+    ctx.fillStyle = "#2b2620";
+    ctx.fillRect(0, y - 26, W, 78);
+    ctx.strokeStyle = "rgba(255,255,255,.14)"; ctx.lineWidth = 1;
+    for (var i = 0; i < 10; i++) {
+      var lx = ((g.f * SRV_SPD + i * 44) % (W + 44)) - 22;
+      ctx.beginPath(); ctx.moveTo(lx, y - 26); ctx.lineTo(lx - 14, y + 52); ctx.stroke();
+    }
+    // 客人与金位
+    ctx.font = "30px system-ui,sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("🤤", SRV_GOLD, y - 48);
+    ctx.strokeStyle = "#ffd54f"; ctx.lineWidth = 2; ctx.setLineDash([6, 5]);
+    ctx.strokeRect(SRV_GOLD - 34, y - 18, 68, 58);
+    ctx.setLineDash([]);
+    // 盘子
+    var px = g.lock >= 0 ? g.lock : g.px;
+    ctx.fillStyle = "#e8e2d6";
+    ctx.beginPath(); ctx.ellipse(px, y + 26, 44, 13, 0, 0, Math.PI * 2); ctx.fill();
+    var o = order();
+    for (var j = 0; j < 3; j++) {
+      var f = FISH[o.fish[j]];
+      var sx = px - 26 + j * 26;
+      ctx.fillStyle = "#f5f0e6";
+      ctx.beginPath(); ctx.ellipse(sx, y + 16, 11, 7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = f.c;
+      ctx.beginPath(); ctx.ellipse(sx, y + 10, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("盘子滑进金框的一瞬按下，稳稳落在客人面前", W / 2, 486);
+  }
+
+  function drawResult() {
+    var r = g.res; if (!r) return;
+    ctx.fillStyle = "rgba(14,8,4,.86)";
+    rrect(30, 150, W - 60, 270, 16); ctx.fill();
+    ctx.strokeStyle = "rgba(255,180,110,.45)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.textAlign = "center";
+    ctx.font = "34px system-ui,sans-serif";
+    ctx.fillText(r.tot >= 95 ? "🍣" : r.tot < 50 ? "🫠" : order().emoji, W / 2, 196);
+    ctx.fillStyle = "#ffd54f"; ctx.font = "bold 30px system-ui,sans-serif";
+    ctx.fillText(r.tot + " 分", W / 2, 236);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 16px system-ui,sans-serif";
+    ctx.fillText(r.grade, W / 2, 262);
+    ctx.font = "12px system-ui,sans-serif";
+    var rows = [["刀工", r.sl, SLICE_W], ["捏饭", r.ri, RICE_W], ["上桌", r.se, SRV_W]];
+    for (var i = 0; i < 3; i++) {
+      var y = 292 + i * 22;
+      ctx.textAlign = "left"; ctx.fillStyle = "rgba(255,255,255,.7)";
+      ctx.fillText(rows[i][0] + "（" + Math.round(rows[i][2] * 100) + "%）", 60, y);
+      ctx.textAlign = "right";
+      ctx.fillStyle = rows[i][1] >= 85 ? "#5ddc8b" : rows[i][1] >= 55 ? "#ffd54f" : "#ff6b6b";
+      ctx.fillText(rows[i][1] + " 分", W - 60, y);
+    }
+    ctx.textAlign = "center";
+    ctx.fillStyle = r.bursts > 0 ? "#ff6b6b" : g.missed ? "#ffd54f" : "rgba(255,255,255,.6)";
+    ctx.fillText(r.bursts > 0 ? "捏爆 " + r.bursts + " 颗，各罚 " + BURST_PEN + " 分" : g.missed ? "盘子滑过头，上桌 0 分" : "手法干净，客人吃得眯眼", W / 2, 372);
+    ctx.fillStyle = "rgba(255,255,255,.62)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("点击接下一单", W / 2, 400);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#241408"); bg.addColorStop(0.55, "#2e1c0d"); bg.addColorStop(1, "#140a04");
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "rgba(255,180,110,.06)";
+    ctx.beginPath(); ctx.arc(W / 2, 140, 110, 0, Math.PI * 2); ctx.fill();
+    if (!g) return;
+    drawOrderCard();
+    if (g.phase === "idle") {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#fff"; ctx.font = "bold 19px system-ui,sans-serif";
+      ctx.fillText("🍣 今晚板前归你站", W / 2, 258);
+      ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.font = "13px system-ui,sans-serif";
+      ctx.fillText("① 刀光扫到金线的一瞬下刀（3 刀）", W / 2, 292);
+      ctx.fillText("② 按住捏醋饭，越贴近 90g 越香", W / 2, 314);
+      ctx.fillText("③ 盘子滑到客人面前的一瞬上桌", W / 2, 336);
+      ctx.fillStyle = "#ffd54f"; ctx.font = "bold 15px system-ui,sans-serif";
+      ctx.fillText("点击开张", W / 2, 380);
+    } else if (g.phase === "slice") {
+      drawSlice();
+    } else if (g.phase === "rice") {
+      drawRice();
+    } else if (g.phase === "serve") {
+      drawServe();
+    } else if (g.phase === "done") {
+      drawResult();
+    }
+    if (g.msgF > 0 && g.phase !== "done") {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255," + Math.min(1, g.msgF / 18) + ")";
+      ctx.font = "bold 15px system-ui,sans-serif";
+      ctx.fillText(g.msg, W / 2, 136);
+    }
+  }
+
+  /* ---------- HUD ---------- */
+  function szsSync() {
+    var eL = document.getElementById("szsLab");
+    var eB = document.getElementById("szsBest");
+    var eS = document.getElementById("szsStreak");
+    var eR = document.getElementById("szsRec");
+    if (eL) eL.textContent = g ? (order().emoji + " " + order().name) : "—";
+    if (eB) eB.textContent = rec.best >= 0 ? rec.best + " 分" : "—";
+    if (eS) eS.textContent = rec.streak + " 盘（最佳 " + rec.bestStreak + "）";
+    if (eR) eR.textContent = rec.plates + " 盘 / 神级 " + rec.souls + " / 翻车 " + rec.flops;
+  }
+
+  /* ---------- 生命周期 ---------- */
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(); draw();
+    if (g && (g.f % 12 === 0)) szsSync();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function onKeyDown(e) {
+    if (!active || !g) return;
+    var tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "Enter") {
+      if (e.repeat) { if (e.preventDefault) e.preventDefault(); return; }
+      if (e.preventDefault) e.preventDefault();
+      keyHold = true;
+      primary(true);
+    }
+  }
+  function onKeyUp(e) {
+    if (!active || !g) return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "Enter") {
+      if (!keyHold) return;
+      keyHold = false;
+      primary(false);
+    }
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("szsCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+    g = newPlate();
+    cav.addEventListener("pointerdown", function (e) {
+      if (e.preventDefault) e.preventDefault();
+      held = true; primary(true);
+    });
+    cav.addEventListener("pointerup", function () { if (held) { held = false; primary(false); } });
+    cav.addEventListener("pointerleave", function () { if (held) { held = false; primary(false); } });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.szsRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newPlate();
+    szsSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.szsStop = function () {
+    active = false;
+    keyHold = false; held = false;
+    if (g && g.phase === "rice") g.pressing = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__szsTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; }, setActive: function (v) { active = !!v; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    cutQualityOf: cutQualityOf, sliceScoreOf: sliceScoreOf,
+    riceBallScoreOf: riceBallScoreOf, riceScoreOf: riceScoreOf,
+    serveScoreOf: serveScoreOf, burstsOf: burstsOf,
+    totalOf: totalOf, gradeOf: gradeOf, pickOrder: pickOrder, goldLineOf: goldLineOf,
+    newPlate: newPlate, startPlate: startPlate, nextPlate: nextPlate,
+    cut: cut, pressRice: pressRice, lockBall: lockBall, lockServe: lockServe,
+    finish: finish, step: step, primary: primary,
+    draw: draw, szsSync: szsSync, ensureInit: ensureInit, setMsg: setMsg, order: order,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    FISH: FISH, ORDERS: ORDERS,
+    consts: { KEY: KEY, W: W, H: H, CUT_MIN: CUT_MIN, CUT_MAX: CUT_MAX, CUT_SPD: CUT_SPD,
+      GL_MIN: GL_MIN, GL_MAX: GL_MAX, PERF_C: PERF_C, GOOD_C: GOOD_C,
+      RICE_UP: RICE_UP, RICE_TGT: RICE_TGT, RICE_MAX: RICE_MAX, RICE_K: RICE_K, BURST_PEN: BURST_PEN,
+      SRV_X0: SRV_X0, SRV_SPD: SRV_SPD, SRV_GOLD: SRV_GOLD, SRV_END: SRV_END,
+      SLICE_W: SLICE_W, RICE_W: RICE_W, SRV_W: SRV_W, MSG_FR: MSG_FR }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🍣", name: "一贯入魂", desc: "在随便寿司里端出一盘 95 分以上的神级寿司", test: function (u) { return (u.szssoul || 0) >= 1; } },
+      { emoji: "🥢", name: "板前宗师", desc: "在随便寿司里连续三盘拿到 85 分以上", test: function (u) { return (u.szsmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "寿司的第一课：刀快不如心稳。",
+      "醋饭差一克，客人未必尝得出，但你自己知道。",
+      "金线只亮一瞬——好机会从来不等第二刀。",
+      "捏爆过饭团的手，才捏得出真正松而不散的那一颗。",
+      "盘子滑过头别追，下一单永远在路上。"
     );
   }
 })();
