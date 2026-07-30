@@ -1587,6 +1587,7 @@
         <button data-tab="kayak">🛶 随便激流回旋</button>
         <button data-tab="bungee">🪢 随便蹦极</button>
         <button data-tab="boomerang">🪃 随便回旋镖</button>
+        <button data-tab="epee">🤺 随便击剑</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8610,6 +8611,42 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="epee">
+    <h2>🤺 随便击剑</h2>
+    <p class="sub">重剑五剑制对决：控距、突刺、招架、反击——距离才是这条剑道上真正的武器</p>
+    <style>
+      #epee .epe-wrap { max-width:420px; margin:0 auto; }
+      #epee canvas { width:100%; max-width:380px; border-radius:14px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.35); }
+      #epee .epe-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #epee .epe-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #epee .epe-hud b { font-weight:700; color:#ffd54f; }
+      #epee .epe-pad { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; max-width:380px; margin:0 auto 10px; }
+      #epee .epe-pad button { padding:11px 4px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.07); color:inherit; font-size:.86rem; font-weight:600; cursor:pointer; touch-action:none; }
+      #epee .epe-pad button:active { background:rgba(255,213,79,.24); transform:translateY(1px); }
+      #epee .epe-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="epe-wrap">
+      <div class="epe-hud">
+        <span>比分 <b id="epeScore">0 : 0</b></span>
+        <span>本场招架 <b id="epeParry">0 次</b></span>
+        <span>最快取胜 <b id="epeBest">—</b></span>
+        <span>战绩 <b id="epeRec">—</b></span>
+      </div>
+      <canvas id="epeCav" width="380" height="420"></canvas>
+      <div class="epe-pad" id="epePad">
+        <button type="button" data-ep="back">◀ 后退</button>
+        <button type="button" data-ep="fwd">前进 ▶</button>
+        <button type="button" data-ep="lunge">🗡️ 突刺</button>
+        <button type="button" data-ep="parry">🛡️ 招架</button>
+      </div>
+      <p class="epe-help">
+        ←→ / A D 控距，空格 / 点画布 突刺，↓ / S 招架（手机用下方四键）；先得 5 剑者胜；<br>
+        突刺出剑有 14 帧伸展过程，看准对手起手的瞬间按招架，挡下后对手僵直、你获得「反击窗口」——上前一步补刀最稳；<br>
+        招架落空会有长硬直，而对手会虚晃一剑（🎭）骗你的招架，别乱按；两人同时刺中算互中，各得一分；<br>
+        赢下一场解锁「🤺 剑指苍穹」，单场靠反击拿下 3 分解锁「🛡️ 铁壁反击」，战绩本地存档（suibian_epee）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -9249,6 +9286,7 @@
     if (id === "kayak" && typeof kayRender === "function") kayRender();
     if (id === "bungee" && typeof bgyRender === "function") bgyRender();
     if (id === "boomerang" && typeof bmrRender === "function") bmrRender();
+    if (id === "epee" && typeof epeRender === "function") epeRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9318,6 +9356,7 @@
     if (id !== "kayak" && typeof kayStop === "function") kayStop();
     if (id !== "bungee" && typeof bgyStop === "function") bgyStop();
     if (id !== "boomerang" && typeof bmrStop === "function") bmrStop();
+    if (id !== "epee" && typeof epeStop === "function") epeStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9518,6 +9557,7 @@
     kayak: "随便激流回旋 kayak canoe slalom 皮划艇 激流 回旋 水门 划艇 划桨 竞速 白浪 河流 礁石 罚时 计时 奥运 游戏 极限运动",
     bungee: "随便蹦极 bungee jump 蹦极 跳跃 峡谷 绳索 弹性 俯冲 贴水 落水 反弹 高空 极限运动 勇气 游戏 挑战",
     boomerang: "随便回旋镖 boomerang 回旋镖 飞去来器 投掷 掷镖 接镖 风向 集星 弧线 轨迹 草原 狩猎 游戏 挑战 极限运动",
+    epee: "随便击剑 epee fencing 击剑 重剑 剑术 对决 决斗 突刺 弓步 招架 反击 控距 剑道 五剑 互中 假动作 游戏 挑战 体育",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9778,6 +9818,7 @@ splitbill:"tools",
     kayak:"games",
     bungee:"games",
     boomerang:"games",
+    epee:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -56541,6 +56582,569 @@ splitbill:"tools",
       "风越大，越要算准提前量——生活也是。",
       "别怕东西飞远，怕的是你没站在原地接它。",
       "回旋镖不问终点，它只忠于出发的那只手。"
+    );
+  }
+})();
+/* ===== 🤺 随便击剑 epee ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_epee";
+  var W = 380, H = 420;
+  var GY = 286;                 // 剑道地面 y
+  var XMIN = 34, XMAX = W - 34; // 站位边界
+  var MIN_GAP = 46;             // 两人最近间距（贴身分开）
+  var MOVE = 2.6;               // 每帧步幅
+  var TORSO = 34;               // 躯干判定：剑尖 + TORSO >= 间距 即刺中
+  var REACH = 78;               // 弓步伸展最大射程
+  var OUT = 14, HOLD = 5, BACK = 18;    // 出剑 / 定格 / 收剑（出剑够慢才有招架空间）
+  var RIP_OUT = 8, RIP_BONUS = 12;      // 反击刺更快更远
+  var PARRY_T = 26, PARRY_IN = 2, PARRY_OUT = 12; // 招架总时长 / 有效窗口
+  var STUN_T = 26;              // 被招架后僵直
+  var RIP_FR = 26;              // 招架成功后的反击窗口
+  var PUSH = 22;                // 被招架后向后踉跄
+  var AI_COOL = 24;             // AI 两次动作之间的最短脚步周旋
+  var AI_SPD = 0.92;            // AI 步幅系数（略慢于玩家，逼得进退有度）
+  var FEINT_T = 7;              // 假动作抽剑的时机
+  var MAX_FR = 60 * 90;         // 一场最长 90 秒，到点按比分判定
+  var MSG_FR = 72;              // 提示文字停留帧数
+  var RDY_T = 45, TOUCH_T = 52; // 预备 / 得分停顿
+  var TARGET = 5;               // 五剑制
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { bouts: 0, wins: 0, touches: 0, taken: 0, parries: 0, rips: 0, doubles: 0, bestF: -1, aW: 0, aR: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.bouts = nInt(o.bouts); d.wins = nInt(o.wins);
+      d.touches = nInt(o.touches); d.taken = nInt(o.taken);
+      d.parries = nInt(o.parries); d.rips = nInt(o.rips); d.doubles = nInt(o.doubles);
+      var b = Math.floor(Number(o.bestF));
+      d.bestF = isFinite(b) && b > 0 ? b : -1;
+      d.aW = o.aW ? 1 : 0; d.aR = o.aR ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数：出剑射程曲线 ---- */
+  function tipAt(t, out, reach) {
+    out = out || OUT; reach = reach || REACH;
+    if (!(t >= 0)) return 0;
+    if (t < out) return reach * (t / out);
+    if (t < out + HOLD) return reach;
+    if (t < out + HOLD + BACK) return reach * (1 - (t - out - HOLD) / BACK);
+    return 0;
+  }
+  function lungeTotal(out) { return (out || OUT) + HOLD + BACK; }
+  function parryActive(t) { return t >= PARRY_IN && t <= PARRY_OUT; }
+  function fmtT(fr) {
+    if (!isFinite(fr) || fr <= 0) return "—";
+    var s = fr / 60;
+    return s.toFixed(1) + "s";
+  }
+  function winRate(r) {
+    if (!r || !r.bouts) return "—";
+    return Math.round(r.wins * 100 / r.bouts) + "%";
+  }
+
+  /* ---- 剑手 ---- */
+  function mkFighter(x, side) {
+    return { x: x, side: side, st: "idle", t: 0, rip: 0, out: OUT, reach: REACH, move: 0 };
+  }
+  function startLunge(f) {
+    if (f.st !== "idle") return false;
+    if (f.rip > 0) { f.out = RIP_OUT; f.reach = REACH + RIP_BONUS; f.wasRip = 1; }
+    else { f.out = OUT; f.reach = REACH; f.wasRip = 0; }
+    f.st = "lunge"; f.t = 0; f.move = 0;
+    return true;
+  }
+  function startParry(f) {
+    if (f.st !== "idle") return false;
+    f.st = "parry"; f.t = 0; f.move = 0;
+    return true;
+  }
+  function tipOf(f) { return f.st === "lunge" ? tipAt(f.t, f.out, f.reach) : 0; }
+
+  function setMsg(g, text, tier) { g.msg = text; g.msgTier = tier; g.msgFr = MSG_FR; }
+
+  /* ---- 对局 ---- */
+  function newBout() {
+    return {
+      phase: "ready",              // ready → fight → touch → (fight | over)
+      fr: 0, total: 0,
+      p: mkFighter(92, 1), a: mkFighter(288, -1),
+      sp: 0, sa: 0,
+      parries: 0, rips: 0, doubles: 0, lastRip: 0,
+      msg: "", msgTier: "", msgFr: 0,
+      ai: {
+        pref: 104 + Math.round(rnd() * 22),   // 偏好距离（就在剑距边缘上博弈）
+        aggr: 0.06 + rnd() * 0.05,            // 每帧主动出剑概率
+        react: 0.26 + rnd() * 0.2,            // 见招拆招的招架概率
+        feint: 0.22 + rnd() * 0.22            // 假动作（识破你的招架就抽剑）概率
+      },
+      over: null
+    };
+  }
+  function enGarde(g) {
+    g.p = mkFighter(92, 1);
+    g.a = mkFighter(288, -1);
+    g.a.cool = AI_COOL;
+    g.phase = "fight"; g.fr = 0;
+    g.msg = ""; g.msgTier = ""; g.msgFr = 0;
+  }
+
+  /* ---- AI ---- */
+  function aiDecide(g) {
+    var a = g.a, p = g.p, gap = a.x - p.x;
+    a.move = 0;
+    if (a.st !== "idle") return;
+    if (a.cool > 0) a.cool -= 1;
+    var range = REACH + TORSO;
+    var busy = a.cool > 0;
+    // 见招拆招：对手起手且在威胁距离内，按反应概率招架
+    if (!busy && p.st === "lunge" && p.t >= 3 && p.t <= 8 && gap <= range + 16 && rnd() < g.ai.react) {
+      startParry(a); a.cool = AI_COOL; return;
+    }
+    // 抓破绽：对手僵直或收剑中
+    var pVuln = p.st === "stun" || (p.st === "lunge" && p.t > OUT + HOLD);
+    if (pVuln && gap <= range + (a.rip > 0 ? RIP_BONUS : 0)) { startLunge(a); a.cool = AI_COOL; return; }
+    if (a.rip > 0) {
+      if (gap <= range + RIP_BONUS) { startLunge(a); a.cool = AI_COOL; return; }
+      a.move = -1; return;
+    }
+    if (gap > g.ai.pref + 14) { a.move = -1; return; }
+    if (gap < g.ai.pref - 22) { a.move = 1; return; }
+    if (!busy && gap <= range && rnd() < g.ai.aggr) {
+      startLunge(a); a.feint = rnd() < g.ai.feint ? 1 : 0;
+      a.cool = AI_COOL + Math.round(rnd() * 20); return;
+    }
+    if (rnd() < 0.05) { a.move = rnd() < 0.5 ? -1 : 1; }
+  }
+
+  /* ---- 假动作：出剑到一半发现对手在招架就抽剑 ---- */
+  function aiFeint(g) {
+    var a = g.a, p = g.p;
+    if (a.st !== "lunge" || a.t !== FEINT_T) return;
+    var read = p.st === "parry" && rnd() < g.ai.react + 0.25;
+    if (read || a.feint) {
+      a.st = "idle"; a.t = 0; a.feint = 0; a.cool = 10;
+      setMsg(g, "🎭 对手虚晃一剑！", "warn");
+      return true;
+    }
+    return false;
+  }
+
+  /* ---- 位置推进 ---- */
+  function applyMove(g) {
+    var p = g.p, a = g.a;
+    if (p.st === "idle" && p.move) p.x += p.move * MOVE;
+    if (a.st === "idle" && a.move) a.x += a.move * MOVE * AI_SPD;
+    if (p.x < XMIN) p.x = XMIN;
+    if (a.x > XMAX) a.x = XMAX;
+    if (a.x - p.x < MIN_GAP) {
+      var mid = (a.x + p.x) / 2;
+      p.x = mid - MIN_GAP / 2; a.x = mid + MIN_GAP / 2;
+      if (p.x < XMIN) { p.x = XMIN; a.x = XMIN + MIN_GAP; }
+      if (a.x > XMAX) { a.x = XMAX; p.x = XMAX - MIN_GAP; }
+    }
+    if (p.x > XMAX - MIN_GAP) p.x = XMAX - MIN_GAP;
+    if (a.x < XMIN + MIN_GAP) a.x = XMIN + MIN_GAP;
+  }
+
+  /* ---- 时间线推进 ---- */
+  function tickFighter(f) {
+    if (f.rip > 0) f.rip -= 1;
+    if (f.st === "idle") return;
+    f.t += 1;
+    if (f.st === "lunge" && f.t >= lungeTotal(f.out)) { f.st = "idle"; f.t = 0; }
+    else if (f.st === "parry" && f.t >= PARRY_T) { f.st = "idle"; f.t = 0; }
+    else if (f.st === "stun" && f.t >= STUN_T) { f.st = "idle"; f.t = 0; }
+  }
+
+  /* ---- 判定：返回 "none" | "parryP" | "parryA" | "p" | "a" | "double" ---- */
+  function judge(g) {
+    var p = g.p, a = g.a, gap = a.x - p.x;
+    var pTip = tipOf(p), aTip = tipOf(a);
+    var pReach = pTip > 0 && pTip + TORSO >= gap;
+    var aReach = aTip > 0 && aTip + TORSO >= gap;
+    var pParried = pReach && a.st === "parry" && parryActive(a.t);
+    var aParried = aReach && p.st === "parry" && parryActive(p.t);
+    if (pParried && aParried) return "none";
+    if (aParried) return "parryP";
+    if (pParried) return "parryA";
+    if (pReach && aReach) return "double";
+    if (pReach) return "p";
+    if (aReach) return "a";
+    return "none";
+  }
+
+  function doParry(g, who) {
+    if (who === "p") {           // 玩家招架成功
+      g.parries += 1;
+      g.p.st = "idle"; g.p.t = 0; g.p.rip = RIP_FR;
+      g.a.st = "stun"; g.a.t = 0; g.a.rip = 0;
+      g.a.x = Math.min(XMAX, g.a.x + PUSH);
+      setMsg(g, "🛡️ 招架成功！上前反击", "parry");
+    } else {
+      g.a.st = "idle"; g.a.t = 0; g.a.rip = RIP_FR;
+      g.p.st = "stun"; g.p.t = 0; g.p.rip = 0;
+      g.p.x = Math.max(XMIN, g.p.x - PUSH);
+      setMsg(g, "⚔️ 被对手挡下了…", "bad");
+    }
+  }
+
+  function scoreTouch(g, who) {
+    g.phase = "touch"; g.fr = 0;
+    if (who === "double") {
+      g.sp += 1; g.sa += 1; g.doubles += 1;
+      setMsg(g, "⚡ 互中一剑！双方各得一分", "double");
+    } else if (who === "p") {
+      g.sp += 1;
+      if (g.p.wasRip) { g.rips += 1; g.lastRip = 1; setMsg(g, "🗡️ 招架反击命中！漂亮", "good"); }
+      else { g.lastRip = 0; setMsg(g, "🗡️ 刺中！这一剑干净利落", "good"); }
+    } else {
+      g.sa += 1;
+      setMsg(g, "💢 被刺中一剑，稳住别慌", "bad");
+    }
+    g.p.st = "idle"; g.p.t = 0; g.a.st = "idle"; g.a.t = 0;
+  }
+
+  function finish(g) {
+    g.phase = "over";
+    var win = g.sp > g.sa;
+    g.over = {
+      win: win,
+      text: win
+        ? "🏆 " + g.sp + " : " + g.sa + (g.timeup ? " 时间到，你笑到最后！" : " 你赢下这场对决！用时 " + fmtT(g.total))
+        : (g.sp === g.sa ? "🤝 " + g.sp + " : " + g.sa + " 打成平手，再战一场"
+                         : "😤 " + g.sp + " : " + g.sa + " 惜败，剑道上见真章")
+    };
+    rec.bouts += 1;
+    rec.touches += g.sp; rec.taken += g.sa;
+    rec.parries += g.parries; rec.rips += g.rips; rec.doubles += g.doubles;
+    if (win) {
+      rec.wins += 1;
+      if (!g.timeup && (rec.bestF < 0 || g.total < rec.bestF)) rec.bestF = g.total;
+      if (!rec.aW) { rec.aW = 1; try { bumpUsage("epwin"); } catch (e1) {} }
+    }
+    if (g.rips >= 3 && !rec.aR) { rec.aR = 1; try { bumpUsage("eprip"); } catch (e2) {} }
+    saveRec();
+  }
+
+  /* ---- 单帧推进 ---- */
+  function step(g) {
+    if (!g) return;
+    if (g.phase === "ready") {
+      g.fr += 1;
+      if (g.fr >= RDY_T) { g.phase = "fight"; g.fr = 0; }
+      return;
+    }
+    if (g.phase === "touch") {
+      g.fr += 1;
+      if (g.fr >= TOUCH_T) {
+        if (g.sp >= TARGET || g.sa >= TARGET) finish(g);
+        else enGarde(g);
+      }
+      return;
+    }
+    if (g.phase !== "fight") return;
+    g.total += 1;
+    if (g.msgFr > 0) { g.msgFr -= 1; if (!g.msgFr) { g.msg = ""; g.msgTier = ""; } }
+    aiDecide(g);
+    aiFeint(g);
+    applyMove(g);
+    tickFighter(g.p); tickFighter(g.a);
+    var r = judge(g);
+    if (r === "parryP" || r === "parryA") { doParry(g, r === "parryP" ? "p" : "a"); return; }
+    if (r === "p" || r === "a" || r === "double") { scoreTouch(g, r); return; }
+    if (g.total >= MAX_FR) { g.timeup = 1; finish(g); }
+  }
+
+  /* ---- 玩家动作 ---- */
+  function playerAct(g, act) {
+    if (!g) return false;
+    if (g.phase === "over") return false;
+    if (g.phase !== "fight") return false;
+    if (act === "lunge") return startLunge(g.p);
+    if (act === "parry") return startParry(g.p);
+    return false;
+  }
+  function setMove(g, dir) {
+    if (!g || g.phase !== "fight") return;
+    g.p.move = dir === "fwd" ? 1 : (dir === "back" ? -1 : 0);
+  }
+
+  /* ---- DOM / 渲染 ---- */
+  var cav = null, ctx = null, inited = false, active = false, raf = 0;
+  var g = null, keyHold = {}, held = 0;
+
+  function epeSync() {
+    var eS = document.getElementById("epeScore");
+    var eB = document.getElementById("epeBest");
+    var eR = document.getElementById("epeRec");
+    var eP = document.getElementById("epeParry");
+    if (eS && g) eS.textContent = g.sp + " : " + g.sa;
+    if (eB) eB.textContent = rec.bestF > 0 ? fmtT(rec.bestF) : "—";
+    if (eR) eR.textContent = rec.wins + "胜/" + rec.bouts + "场 " + winRate(rec);
+    if (eP && g) eP.textContent = g.parries + " 次";
+  }
+
+  function drawFighter(f, color, tip) {
+    var dir = f.side;                      // 1 = 面朝右, -1 = 面朝左
+    var x = f.x, y = GY;
+    var lunging = f.st === "lunge" && tip > 0;
+    var lean = lunging ? Math.min(16, tip * 0.22) : 0;
+    ctx.strokeStyle = color; ctx.fillStyle = color;
+    ctx.lineWidth = 3; ctx.lineCap = "round";
+    // 腿
+    ctx.beginPath();
+    ctx.moveTo(x, y - 30);
+    ctx.lineTo(x + dir * (10 + lean), y);
+    ctx.moveTo(x, y - 30);
+    ctx.lineTo(x - dir * (12 + lean * 0.6), y);
+    ctx.stroke();
+    // 躯干
+    ctx.beginPath();
+    ctx.moveTo(x, y - 30);
+    ctx.lineTo(x + dir * lean * 0.35, y - 58);
+    ctx.stroke();
+    // 头（面罩）
+    ctx.beginPath();
+    ctx.arc(x + dir * (lean * 0.35 + 2), y - 68, 9, 0, Math.PI * 2);
+    ctx.fill();
+    // 持剑臂 + 剑
+    var sx = x + dir * (lean * 0.35 + 6), sy = y - 50;
+    var ex = sx + dir * (18 + tip), ey = sy - (f.st === "parry" ? 14 : 4);
+    ctx.strokeStyle = f.st === "parry" ? "#ffd54f" : color;
+    ctx.lineWidth = f.st === "parry" ? 4 : 2.5;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+    if (f.st === "stun") {
+      ctx.fillStyle = "#ef5350";
+      ctx.font = "15px serif"; ctx.textAlign = "center";
+      ctx.fillText("💫", x, y - 86);
+    }
+    if (f.rip > 0 && f.st !== "stun") {
+      ctx.fillStyle = "rgba(255,213,79,.9)";
+      ctx.font = "13px serif"; ctx.textAlign = "center";
+      ctx.fillText("⚡", x, y - 86);
+    }
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    var grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#10131f");
+    grd.addColorStop(0.6, "#1a2036");
+    grd.addColorStop(1, "#0d1120");
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+    // 剑道
+    ctx.fillStyle = "rgba(255,255,255,.05)";
+    ctx.fillRect(20, GY, W - 40, 8);
+    ctx.strokeStyle = "rgba(255,255,255,.12)";
+    ctx.lineWidth = 1;
+    for (var i = 1; i < 6; i++) {
+      var lx = 20 + (W - 40) * i / 6;
+      ctx.beginPath(); ctx.moveTo(lx, GY - 6); ctx.lineTo(lx, GY + 8); ctx.stroke();
+    }
+    ctx.setLineDash([3, 5]);
+    ctx.beginPath(); ctx.moveTo(W / 2, GY - 60); ctx.lineTo(W / 2, GY + 8); ctx.stroke();
+    ctx.setLineDash([]);
+    // 比分灯
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    for (var s = 0; s < TARGET; s++) {
+      ctx.fillStyle = s < g.sp ? "#4dd0a7" : "rgba(255,255,255,.14)";
+      ctx.beginPath(); ctx.arc(34 + s * 20, 28, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = s < g.sa ? "#ef5350" : "rgba(255,255,255,.14)";
+      ctx.beginPath(); ctx.arc(W - 34 - s * 20, 28, 7, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = "rgba(255,255,255,.6)";
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.fillText("你", 34 + (TARGET - 1) * 10, 48);
+    ctx.fillText("对手", W - 34 - (TARGET - 1) * 10, 48);
+    // 距离尺
+    var gap = Math.round(g.a.x - g.p.x);
+    var inRange = gap <= REACH + TORSO;
+    ctx.fillStyle = inRange ? "rgba(255,213,79,.9)" : "rgba(255,255,255,.4)";
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.fillText(inRange ? "⚔ 进入剑距 " + gap : "距离 " + gap, W / 2, 74);
+    // 剑手
+    drawFighter(g.p, "#4dd0a7", tipOf(g.p));
+    drawFighter(g.a, "#ef5350", tipOf(g.a));
+    // 文案
+    ctx.textAlign = "center";
+    if (g.phase === "ready") {
+      ctx.fillStyle = "rgba(255,255,255,.9)";
+      ctx.font = "22px system-ui, sans-serif";
+      ctx.fillText("预备 —— 开始！", W / 2, 150);
+      ctx.font = "13px system-ui, sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,.6)";
+      ctx.fillText("← → 控距　空格 突刺　↓ 招架", W / 2, 176);
+    } else if (g.phase === "touch" || (g.msg && g.phase === "fight")) {
+      ctx.fillStyle = "rgba(0,0,0,.5)";
+      ctx.fillRect(24, 118, W - 48, 40);
+      ctx.fillStyle = g.msgTier === "good" ? "#4dd0a7"
+        : (g.msgTier === "bad" ? "#ef5350" : (g.msgTier === "double" ? "#ffd54f" : "#90caf9"));
+      ctx.font = "15px system-ui, sans-serif";
+      ctx.fillText(g.msg, W / 2, 140);
+    }
+    if (g.phase === "over" && g.over) {
+      ctx.fillStyle = "rgba(0,0,0,.62)";
+      ctx.fillRect(18, H / 2 - 58, W - 36, 104);
+      ctx.fillStyle = g.over.win ? "#4dd0a7" : "#ffd54f";
+      ctx.font = "16px system-ui, sans-serif";
+      ctx.fillText(g.over.text, W / 2, H / 2 - 22);
+      ctx.fillStyle = "rgba(255,255,255,.85)";
+      ctx.font = "13px system-ui, sans-serif";
+      ctx.fillText("招架 " + g.parries + " 次 · 反击得分 " + g.rips + " · 互中 " + g.doubles, W / 2, H / 2 + 2);
+      ctx.fillStyle = "#ffd54f";
+      ctx.fillText("点画布 / 回车 再来一场", W / 2, H / 2 + 28);
+    }
+    // 状态条
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(255,255,255,.55)";
+    ctx.font = "11px system-ui, sans-serif";
+    var st = g.p.st === "lunge" ? "突刺中" : (g.p.st === "parry" ? "招架中" : (g.p.st === "stun" ? "僵直" : "架势"));
+    ctx.fillText("状态：" + st + (g.p.rip > 0 ? " · 反击窗口" : ""), 16, H - 14);
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g) { step(g); epeSync(); draw(); }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function restart() {
+    g = newBout();
+    epeSync();
+  }
+  function primary() {
+    if (!g) return;
+    if (g.phase === "over") { restart(); return; }
+    playerAct(g, "lunge");
+  }
+
+  function onKeyDown(e) {
+    if (!active || !g) return;
+    var k = e.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A") { setMove(g, "back"); e.preventDefault(); return; }
+    if (k === "ArrowRight" || k === "d" || k === "D") { setMove(g, "fwd"); e.preventDefault(); return; }
+    if (k === "ArrowDown" || k === "s" || k === "S") {
+      if (!keyHold.p) { keyHold.p = 1; playerAct(g, "parry"); }
+      e.preventDefault(); return;
+    }
+    if (k === " " || e.code === "Space") {
+      e.preventDefault();
+      if (!keyHold.sp) { keyHold.sp = 1; primary(); }
+      return;
+    }
+    if (k === "Enter") { if (g.phase === "over") { restart(); e.preventDefault(); } }
+  }
+  function onKeyUp(e) {
+    var k = e.key;
+    if (k === "ArrowLeft" || k === "a" || k === "A" || k === "ArrowRight" || k === "d" || k === "D") {
+      if (g) setMove(g, "stop");
+      return;
+    }
+    if (k === "ArrowDown" || k === "s" || k === "S") { keyHold.p = 0; return; }
+    if (k === " " || e.code === "Space") { keyHold.sp = 0; }
+  }
+
+  function padAct(act, down) {
+    if (!g) return;
+    if (act === "back" || act === "fwd") { setMove(g, down ? act : "stop"); return; }
+    if (!down) return;
+    if (act === "lunge") { primary(); return; }
+    if (act === "parry") { playerAct(g, "parry"); return; }
+    if (act === "again") { restart(); }
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("epeCav");
+    if (!cav) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) { e.preventDefault(); held = 1; primary(); });
+    cav.addEventListener("pointerup", function () { held = 0; });
+    var pad = document.getElementById("epePad");
+    if (pad) {
+      pad.addEventListener("pointerdown", function (e) {
+        var b = e.target && e.target.closest ? e.target.closest("[data-ep]") : null;
+        if (!b) return;
+        e.preventDefault();
+        padAct(b.getAttribute("data-ep"), true);
+      });
+      pad.addEventListener("pointerup", function (e) {
+        var b = e.target && e.target.closest ? e.target.closest("[data-ep]") : null;
+        if (!b) return;
+        padAct(b.getAttribute("data-ep"), false);
+      });
+      pad.addEventListener("pointerleave", function () { if (g) setMove(g, "stop"); });
+    }
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.epeRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newBout();
+    epeSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.epeStop = function () {
+    active = false;
+    keyHold = {}; held = 0;
+    if (g) setMove(g, "stop");
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__epeTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    setActive: function (v) { active = !!v; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    tipAt: tipAt, lungeTotal: lungeTotal, parryActive: parryActive,
+    fmtT: fmtT, winRate: winRate,
+    mkFighter: mkFighter, startLunge: startLunge, startParry: startParry, tipOf: tipOf,
+    newBout: newBout, enGarde: enGarde, aiDecide: aiDecide, applyMove: applyMove,
+    tickFighter: tickFighter, judge: judge, doParry: doParry, scoreTouch: scoreTouch, aiFeint: aiFeint,
+    finish: finish, step: step, playerAct: playerAct, setMove: setMove, setMsg: setMsg,
+    primary: primary, restart: restart, padAct: padAct,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    draw: draw, epeSync: epeSync, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, GY: GY, XMIN: XMIN, XMAX: XMAX, MIN_GAP: MIN_GAP,
+      MOVE: MOVE, TORSO: TORSO, REACH: REACH, OUT: OUT, HOLD: HOLD, BACK: BACK,
+      RIP_OUT: RIP_OUT, RIP_BONUS: RIP_BONUS, PARRY_T: PARRY_T, PARRY_IN: PARRY_IN,
+      PARRY_OUT: PARRY_OUT, STUN_T: STUN_T, RIP_FR: RIP_FR, RDY_T: RDY_T,
+      TOUCH_T: TOUCH_T, TARGET: TARGET, PUSH: PUSH, MSG_FR: MSG_FR, MAX_FR: MAX_FR, AI_COOL: AI_COOL, AI_SPD: AI_SPD, FEINT_T: FEINT_T }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🤺", name: "剑指苍穹", desc: "在随便击剑里赢下一整场五剑对决", test: function (u) { return (u.epwin || 0) >= 1; } },
+      { emoji: "🛡️", name: "铁壁反击", desc: "在随便击剑单场里靠招架反击拿下 3 分", test: function (u) { return (u.eprip || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "击剑教会人的第一件事：距离比速度更重要。",
+      "先退半步，不是怯懦，是为了刺得更准。",
+      "对手露出破绽的那一瞬，犹豫就是最贵的代价。",
+      "挡得住的人才配进攻——招架也是一种表态。",
+      "互中一剑也算得分，人生的很多局面都是两败俱伤地前进。"
     );
   }
 })();
