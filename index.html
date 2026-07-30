@@ -1591,6 +1591,7 @@
         <button data-tab="bartend">🍸 随便调酒</button>
         <button data-tab="alchemy">⚗️ 随便炼金</button>
         <button data-tab="sushi">🍣 随便寿司</button>
+        <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8614,6 +8615,116 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="pack">
+    <h2>🎒 随便打包</h2>
+    <p class="sub">出门前最后一道保险：选好行程点一下，自动生成分好类的行李清单，逐条打勾直到万无一失</p>
+    <style>
+      #pack .pack-wrap { max-width:520px; margin:0 auto; }
+      #pack .pack-form { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:10px; }
+      #pack .pack-form label { display:flex; flex-direction:column; gap:4px; font-size:.78rem; opacity:.85; text-align:left; }
+      #pack .pack-form select, #pack .pack-form input { padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(0,0,0,.28); color:inherit; font-size:.92rem; }
+      #pack .pack-opts { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:12px; }
+      #pack .pack-opts label { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); font-size:.8rem; cursor:pointer; }
+      #pack .pack-opts input { accent-color:#ffb46e; }
+      #pack .pack-btns { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:12px; }
+      #pack .pack-btns button { padding:9px 18px; border-radius:999px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.07); color:inherit; font-size:.88rem; cursor:pointer; }
+      #pack .pack-btns button:hover { transform:translateY(-1px); background:rgba(255,255,255,.13); }
+      #pack .pack-btns .pack-main { background:linear-gradient(135deg,#ff9a44,#ff6a88); border-color:rgba(255,255,255,.3); font-weight:700; }
+      #pack .pack-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #pack .pack-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #pack .pack-hud b { font-weight:700; color:#ffb46e; }
+      #pack .pack-prog { display:flex; align-items:center; gap:10px; max-width:460px; margin:0 auto 6px; }
+      #pack .pack-track { flex:1; height:10px; border-radius:999px; background:rgba(255,255,255,.09); overflow:hidden; }
+      #pack .pack-bar { height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,#ffb46e,#66bb6a); transition:width .25s ease; }
+      #pack .pack-prog span { font-size:.82rem; font-weight:700; min-width:44px; text-align:right; }
+      #pack .pack-stat { font-size:.8rem; opacity:.72; margin-bottom:10px; }
+      #pack .pack-add { display:flex; gap:8px; max-width:460px; margin:0 auto 12px; }
+      #pack .pack-add input { flex:1; padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.2); background:rgba(0,0,0,.28); color:inherit; font-size:.88rem; }
+      #pack .pack-add button { padding:8px 16px; border-radius:999px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.07); color:inherit; font-size:.85rem; cursor:pointer; white-space:nowrap; }
+      #pack .pack-list { max-width:460px; margin:0 auto 12px; text-align:left; max-height:460px; overflow:auto; }
+      #pack .pack-cat { display:flex; align-items:center; justify-content:space-between; margin:12px 2px 6px; font-size:.85rem; font-weight:700; opacity:.9; }
+      #pack .pack-cc { font-size:.75rem; font-weight:400; opacity:.55; }
+      #pack .pack-item { display:flex; align-items:center; gap:9px; flex-wrap:wrap; padding:8px 12px; margin-bottom:6px; border-radius:11px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); font-size:.9rem; cursor:pointer; }
+      #pack .pack-item:hover { background:rgba(255,255,255,.09); }
+      #pack .pack-item.on { background:rgba(102,187,106,.13); border-color:rgba(102,187,106,.38); }
+      #pack .pack-item.on .pack-n { opacity:.6; text-decoration:line-through; }
+      #pack .pack-item input { accent-color:#66bb6a; pointer-events:none; }
+      #pack .pack-n { flex:1; }
+      #pack .pack-mine { font-style:normal; font-size:.68rem; padding:1px 6px; border-radius:999px; background:rgba(255,180,110,.18); color:#ffb46e; margin-left:4px; }
+      #pack .pack-q { font-size:.8rem; opacity:.65; font-variant-numeric:tabular-nums; }
+      #pack .pack-note { width:100%; font-size:.73rem; opacity:.55; padding-left:26px; }
+      #pack .pack-del { border:none; background:transparent; color:rgba(255,255,255,.45); font-size:.85rem; cursor:pointer; padding:0 2px; }
+      #pack .pack-del:hover { color:#ef5350; }
+      #pack .pack-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:460px; margin:0 auto; }
+      @media (max-width:420px) { #pack .pack-form { grid-template-columns:1fr; } }
+    </style>
+    <div class="pack-wrap">
+      <div class="pack-form">
+        <label>出行类型
+          <select id="packType">
+            <option value="beach">🏝️ 海岛度假</option>
+            <option value="snow">🎿 雪山滑雪</option>
+            <option value="city" selected>🏙️ 城市漫游</option>
+            <option value="camp">⛺ 野外露营</option>
+            <option value="biz">💼 商务出差</option>
+            <option value="home">🏠 回家探亲</option>
+          </select>
+        </label>
+        <label>出行天数
+          <input id="packDays" type="number" min="1" max="30" step="1" value="3">
+        </label>
+        <label>天气情况
+          <select id="packSeason">
+            <option value="warm" selected>🌤️ 温和</option>
+            <option value="hot">🔥 炎热</option>
+            <option value="cold">❄️ 寒冷</option>
+            <option value="rain">🌧️ 多雨</option>
+          </select>
+        </label>
+        <label>交通方式
+          <select id="packTrans">
+            <option value="air">✈️ 飞机</option>
+            <option value="rail" selected>🚄 高铁</option>
+            <option value="car">🚗 自驾</option>
+          </select>
+        </label>
+      </div>
+      <div class="pack-opts" id="packOpts">
+        <label><input type="checkbox" value="kid">🧒 带娃</label>
+        <label><input type="checkbox" value="pet">🐶 带宠物</label>
+        <label><input type="checkbox" value="photo">📷 摄影</label>
+        <label><input type="checkbox" value="gym">🏋️ 健身</label>
+        <label><input type="checkbox" value="swim">🏊 游泳</label>
+        <label><input type="checkbox" value="work">💻 要办公</label>
+        <label><input type="checkbox" value="abroad">🛂 出境</label>
+      </div>
+      <div class="pack-btns">
+        <button id="packGen" class="pack-main">🧳 生成清单</button>
+        <button id="packDice">🎲 随便安排一趟</button>
+        <button id="packCopy">📋 复制清单</button>
+        <button id="packClear">🔄 清空勾选</button>
+      </div>
+      <div class="pack-hud">
+        <span>当前行程 <b id="packLab">—</b></span>
+        <span>战绩 <b id="packRec">—</b></span>
+      </div>
+      <div class="pack-prog">
+        <div class="pack-track"><div class="pack-bar" id="packBar"></div></div>
+        <span id="packPct">0%</span>
+      </div>
+      <div class="pack-stat" id="packStat">—</div>
+      <div class="pack-add">
+        <input id="packAddI" type="text" maxlength="24" placeholder="还想带点啥？自己加一条">
+        <button id="packAddB">➕ 加进清单</button>
+      </div>
+      <div class="pack-list" id="packList"></div>
+      <p class="pack-help">
+        选好「类型 / 天数 / 天气 / 交通」再勾上附加场景，点<b>生成清单</b>，系统按 7 大类（证件财物 / 衣物鞋帽 / 洗漱护理 / 电子设备 / 药品应急 / 场景装备 / 零碎杂项）算出该带的东西和数量——内衣袜子按天数走、暖宝宝按天算、尿裤按每天 6 片估，遇到冲突的规则一律取更保险的那个。<br>
+        点条目即可打勾，进度条实时更新；想加东西就在输入框里写（回车也行），自定义条目带「自加」标记、可随时删除；<b>复制清单</b>把整份带勾选状态的文本丢进备忘录，换设备也能对着办。<br>
+        生成第一份清单解锁「🎒 说走就走」，把一整份清单从头勾到尾解锁「✅ 万无一失」，行程配置与勾选进度都存在本地浏览器（suibian_pack），下次打开原样还在。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="sushi">
     <h2>🍣 随便寿司</h2>
     <p class="sub">切鱼、捏饭、上桌——三刀两手一瞬间，板前见真章</p>
@@ -9374,6 +9485,7 @@
     if (id === "bartend" && typeof btdRender === "function") btdRender();
     if (id === "alchemy" && typeof alchRender === "function") alchRender();
     if (id === "sushi" && typeof szsRender === "function") szsRender();
+    if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9651,6 +9763,7 @@
     bartend: "随便调酒 bartend cocktail 调酒 鸡尾酒 酒保 吧台 摇壶 注酒 配方 量杯 节拍 精准 手感 酒馆 混酒 游戏 挑战 休闲",
     alchemy: "随便炼金 alchemy potion 炼金 药水 魔药 坩埚 火候 控温 结晶 材料 转轮 抓取 贤者之石 炼成 灵药 游戏 挑战 休闲",
     sushi: "随便寿司 sushi 寿司 切鱼 刀工 捏饭 醋饭 上桌 传送带 板前 师傅 三文鱼 金枪鱼 日料 料理 手感 游戏 挑战 休闲",
+    pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9915,6 +10028,7 @@ splitbill:"tools",
     bartend:"games",
     alchemy:"games",
     sushi:"games",
+    pack:"tools",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -58988,6 +59102,651 @@ splitbill:"tools",
       "金线只亮一瞬——好机会从来不等第二刀。",
       "捏爆过饭团的手，才捏得出真正松而不散的那一颗。",
       "盘子滑过头别追，下一单永远在路上。"
+    );
+  }
+})();
+/* ===== 🎒 随便打包 pack ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_pack";
+  var MIN_DAYS = 1, MAX_DAYS = 30;
+  var ALL_MIN = 10;            // 至少这么多件，全勾完才算「万无一失」
+  var CUSTOM_MAX = 30;
+  var rnd = Math.random;
+
+  var TRIPS = [
+    { k: "beach", n: "海岛度假", e: "🏝️" },
+    { k: "snow", n: "雪山滑雪", e: "🎿" },
+    { k: "city", n: "城市漫游", e: "🏙️" },
+    { k: "camp", n: "野外露营", e: "⛺" },
+    { k: "biz", n: "商务出差", e: "💼" },
+    { k: "home", n: "回家探亲", e: "🏠" }
+  ];
+  var SEASONS = [
+    { k: "warm", n: "温和", e: "🌤️" },
+    { k: "hot", n: "炎热", e: "🔥" },
+    { k: "cold", n: "寒冷", e: "❄️" },
+    { k: "rain", n: "多雨", e: "🌧️" }
+  ];
+  var TRANS = [
+    { k: "air", n: "飞机", e: "✈️" },
+    { k: "rail", n: "高铁", e: "🚄" },
+    { k: "car", n: "自驾", e: "🚗" }
+  ];
+  var OPTS = [
+    { k: "kid", n: "带娃", e: "🧒" },
+    { k: "pet", n: "带宠物", e: "🐶" },
+    { k: "photo", n: "摄影", e: "📷" },
+    { k: "gym", n: "健身", e: "🏋️" },
+    { k: "swim", n: "游泳", e: "🏊" },
+    { k: "work", n: "要办公", e: "💻" },
+    { k: "abroad", n: "出境", e: "🛂" }
+  ];
+  var CATS = [
+    { k: "doc", n: "证件财物", e: "🛂" },
+    { k: "cloth", n: "衣物鞋帽", e: "👕" },
+    { k: "wash", n: "洗漱护理", e: "🧴" },
+    { k: "tech", n: "电子设备", e: "🔌" },
+    { k: "med", n: "药品应急", e: "💊" },
+    { k: "gear", n: "场景装备", e: "🎒" },
+    { k: "misc", n: "零碎杂项", e: "🧩" }
+  ];
+
+  function byKey(list, k) {
+    for (var i = 0; i < list.length; i++) if (list[i].k === k) return list[i];
+    return null;
+  }
+  function nameOf(list, k) { var o = byKey(list, k); return o ? o.n : "—"; }
+  function emojiOf(list, k) { var o = byKey(list, k); return o ? o.e : ""; }
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defCfg() { return { type: "city", days: 3, season: "warm", trans: "rail", opts: [] }; }
+  function defRec() {
+    return { cfg: defCfg(), checked: [], custom: [], gens: 0, dones: 0, aG: 0, aD: 0 };
+  }
+  function normCfg(c) {
+    var d = defCfg();
+    if (!c || typeof c !== "object") return d;
+    if (byKey(TRIPS, c.type)) d.type = c.type;
+    if (byKey(SEASONS, c.season)) d.season = c.season;
+    if (byKey(TRANS, c.trans)) d.trans = c.trans;
+    var days = Math.floor(Number(c.days));
+    if (!isFinite(days)) days = 3;
+    if (days < MIN_DAYS) days = MIN_DAYS;
+    if (days > MAX_DAYS) days = MAX_DAYS;
+    d.days = days;
+    var out = [], seen = {}, i, k;
+    if (Object.prototype.toString.call(c.opts) === "[object Array]") {
+      for (i = 0; i < c.opts.length; i++) {
+        k = c.opts[i];
+        if (typeof k === "string" && byKey(OPTS, k) && !seen[k]) { seen[k] = 1; out.push(k); }
+      }
+    }
+    d.opts = out;
+    return d;
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.cfg = normCfg(o.cfg);
+      d.gens = nInt(o.gens); d.dones = nInt(o.dones);
+      d.aG = o.aG ? 1 : 0; d.aD = o.aD ? 1 : 0;
+      var i, v;
+      if (Object.prototype.toString.call(o.checked) === "[object Array]") {
+        for (i = 0; i < o.checked.length && d.checked.length < 400; i++) {
+          v = o.checked[i];
+          if (typeof v === "string" && v.length <= 80) d.checked.push(v);
+        }
+      }
+      if (Object.prototype.toString.call(o.custom) === "[object Array]") {
+        for (i = 0; i < o.custom.length && d.custom.length < CUSTOM_MAX; i++) {
+          v = o.custom[i];
+          if (v && typeof v === "object" && typeof v.n === "string" && v.n) {
+            d.custom.push({ n: String(v.n).slice(0, 24), q: nInt(v.q) || 1 });
+          }
+        }
+      }
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) { } }
+
+  /* ---------- 纯函数：清单生成 ---------- */
+  function capped(v, cap) { v = Math.floor(v); if (v < 1) v = 1; return v > cap ? cap : v; }
+  function sigOf(cfg) {
+    var c = normCfg(cfg);
+    return [c.type, c.days, c.season, c.trans, c.opts.slice().sort().join("+")].join("|");
+  }
+
+  function buildList(cfgIn) {
+    var cfg = normCfg(cfgIn);
+    var d = cfg.days, out = [], map = {};
+    function add(k, n, c, q, note) {
+      q = Math.floor(q);
+      if (!isFinite(q) || q < 1) q = 1;
+      if (map[k]) {
+        if (q > map[k].q) map[k].q = q;
+        if (note && !map[k].note) map[k].note = note;
+        return;
+      }
+      var it = { k: k, n: n, c: c, q: q, note: note || "" };
+      map[k] = it; out.push(it);
+    }
+    function has(o) { return cfg.opts.indexOf(o) >= 0; }
+
+    /* 通用：证件财物 */
+    add("id", "身份证", "doc", 1, "出门第一件，放最好拿的口袋");
+    add("wallet", "钱包", "doc", 1);
+    add("bankcard", "银行卡 / 信用卡", "doc", 1);
+    add("cash", "少量现金", "doc", 1, "总有扫码失灵的时候");
+    add("keys", "家门钥匙", "doc", 1);
+    /* 通用：电子设备 */
+    add("phone", "手机", "tech", 1);
+    add("charger", "手机充电器", "tech", 1);
+    add("powerbank", "充电宝", "tech", 1, "只能随身，不可托运");
+    add("cable", "数据线", "tech", has("abroad") || has("photo") ? 2 : 1);
+    add("earbuds", "耳机", "tech", 1);
+    /* 通用：衣物 */
+    add("underwear", "内裤", "cloth", capped(d + 1, 12));
+    add("socks", "袜子", "cloth", capped(d + 1, 12));
+    add("tops", "上衣", "cloth", capped(Math.ceil(d * 0.7) + 1, 10));
+    add("pants", "裤子", "cloth", capped(Math.ceil(d / 3) + 1, 6));
+    add("sleepwear", "睡衣", "cloth", d >= 5 ? 2 : 1);
+    add("outer", "外套", "cloth", 1);
+    if (d >= 4) add("shoes2", "换洗鞋", "cloth", 1);
+    /* 通用：洗漱 */
+    add("tooth", "牙刷牙膏", "wash", 1);
+    add("facewash", "洗面奶", "wash", 1);
+    add("towel", "毛巾", "wash", 1);
+    add("skincare", "护肤品", "wash", 1);
+    add("comb", "梳子", "wash", 1);
+    if (d >= 4 || cfg.type === "camp" || cfg.trans === "car") add("shampoo", "洗发水 / 沐浴露", "wash", 1, "分装小瓶更省地方");
+    if (d >= 7) add("nailclip", "指甲刀", "wash", 1);
+    /* 通用：药品 */
+    add("bandaid", "创可贴", "med", 5);
+    add("commonmed", "常用药", "med", 1, "感冒 / 退烧 / 肠胃各备一点");
+    add("mask", "口罩", "med", capped(d, 10));
+    /* 通用：杂项 */
+    add("bag", "折叠购物袋", "misc", 1);
+    add("wetwipe", "湿巾", "misc", 2);
+    add("tissue", "纸巾", "misc", 2);
+    add("pouch", "收纳袋", "misc", 2, "脏衣服和干净衣服要分开");
+
+    /* 出行类型 */
+    if (cfg.type === "beach") {
+      add("swimsuit", "泳衣", "gear", d >= 4 ? 2 : 1);
+      add("flipflop", "沙滩拖鞋", "gear", 1);
+      add("quicktowel", "速干浴巾", "gear", 1);
+      add("sunglass", "墨镜", "gear", 1);
+      add("suncap", "遮阳帽", "gear", 1);
+      add("sunscreen", "防晒霜", "wash", 1, "SPF50+，每两小时补一次");
+      add("aftersun", "晒后修复", "wash", 1);
+      add("phonebag", "防水手机袋", "gear", 1);
+      add("waterbag", "防水收纳袋", "gear", 2);
+      add("beachmat", "沙滩垫", "gear", 1);
+    } else if (cfg.type === "snow") {
+      add("skijacket", "滑雪服 / 冲锋衣", "gear", 1);
+      add("fleece", "抓绒中层", "cloth", 1);
+      add("thermal", "保暖内衣", "cloth", d >= 4 ? 2 : 1);
+      add("skiglove", "滑雪手套", "gear", 1);
+      add("goggle", "雪镜", "gear", 1);
+      add("neckwarm", "围脖面罩", "gear", 1);
+      add("thicksock", "厚袜子", "cloth", capped(d, 8));
+      add("heatpad", "暖宝宝", "gear", capped(d * 2, 20));
+      add("sunscreen", "防晒霜", "wash", 1, "雪地反光比海边还狠");
+      add("lipbalm", "润唇膏", "wash", 1);
+      add("helmet", "头盔", "gear", 1, "租不到就自己带");
+    } else if (cfg.type === "city") {
+      add("walkshoes", "舒适步行鞋", "cloth", 1, "一天两万步全靠它");
+      add("daypack", "轻便双肩包", "gear", 1);
+      add("umbrella", "折叠伞", "gear", 1);
+      add("transcard", "交通卡 / 乘车码", "doc", 1);
+      add("itinerary", "行程单", "doc", 1);
+      add("bottle", "保温杯", "misc", 1);
+    } else if (cfg.type === "camp") {
+      add("tent", "帐篷", "gear", 1);
+      add("sleepbag", "睡袋", "gear", 1);
+      add("mat", "防潮垫", "gear", 1);
+      add("headlamp", "头灯", "gear", 1, "多带一组电池");
+      add("stove", "便携炉具 + 气罐", "gear", 1);
+      add("lighter", "打火机 / 防风火柴", "gear", 2);
+      add("chair", "折叠桌椅", "gear", 1);
+      add("cookset", "户外锅具餐具", "gear", 1);
+      add("trashbag", "垃圾袋", "misc", capped(d * 2, 10), "无痕露营，带走每一片垃圾");
+      add("repellent", "驱蚊液", "med", 1);
+      add("firstaid", "户外急救包", "med", 1);
+      add("knife", "多功能刀", "gear", 1);
+      add("rope", "绳索 / 扎带", "gear", 1);
+      add("water", "饮用水", "gear", capped(d * 2, 12), "每人每天按 2L 估");
+    } else if (cfg.type === "biz") {
+      add("suit", "正装 / 衬衫", "cloth", capped(Math.ceil(d / 2) + 1, 6));
+      add("leather", "皮鞋", "cloth", 1);
+      add("namecard", "名片", "doc", 1);
+      add("laptop", "笔记本电脑", "tech", 1);
+      add("laptopchg", "电脑充电器", "tech", 1);
+      add("papers", "会议资料 / 合同", "doc", 1);
+      add("notebook", "便签本 + 笔", "misc", 1);
+      add("tie", "领带 / 丝巾", "cloth", 1);
+      add("steamer", "挂烫喷雾", "wash", 1, "衬衫褶皱救星");
+    } else if (cfg.type === "home") {
+      add("gift", "伴手礼", "gear", 1, "给家里人的那份别落下");
+      add("homewear", "家居服", "cloth", 1);
+      add("slippers", "拖鞋", "cloth", 1);
+      add("healthgift", "长辈保健品 / 药", "med", 1);
+      add("photoprint", "打印的全家福", "misc", 1, "比什么礼物都管用");
+    }
+
+    /* 季节 */
+    if (cfg.season === "hot") {
+      add("suncap", "遮阳帽", "gear", 1);
+      add("fan", "便携小风扇", "tech", 1);
+      add("mist", "补水喷雾", "wash", 1);
+      add("sunscreen", "防晒霜", "wash", 1, "SPF50+，每两小时补一次");
+      add("tops", "上衣", "cloth", capped(Math.ceil(d * 0.7) + 2, 12), "天热一天一件都不够");
+    } else if (cfg.season === "cold") {
+      add("downjacket", "羽绒服 / 厚外套", "cloth", 1);
+      add("scarf", "围巾手套", "cloth", 1);
+      add("thermal", "保暖内衣", "cloth", d >= 4 ? 2 : 1);
+      add("lipbalm", "润唇膏", "wash", 1);
+      add("handcream", "护手霜", "wash", 1);
+      add("thicksock", "厚袜子", "cloth", capped(d, 6));
+    } else if (cfg.season === "rain") {
+      add("umbrella", "折叠伞", "gear", 1);
+      add("raincoat", "一次性雨衣", "gear", 2);
+      add("shoecover", "防水鞋套", "gear", 2);
+      add("waterbag", "防水收纳袋", "gear", 2);
+      add("spareshoes", "备用鞋", "cloth", 1, "湿了一双还有一双");
+      add("quickdry", "速干衣", "cloth", 1);
+    } else {
+      add("thinjacket", "薄外套", "cloth", 1, "早晚温差比天气预报大");
+    }
+
+    /* 交通方式 */
+    if (cfg.trans === "air") {
+      add("boarding", "登机牌 / 电子客票", "doc", 1);
+      add("neckpillow", "颈枕", "gear", 1);
+      add("eyemask", "眼罩 + 耳塞", "gear", 1);
+      add("bottles", "分装瓶", "wash", 3, "随身液体单瓶 ≤100ml");
+      add("luggagelock", "行李锁", "misc", 1);
+      add("tag", "行李牌", "misc", 1);
+    } else if (cfg.trans === "rail") {
+      add("ticket", "车票 / 购票码", "doc", 1);
+      add("bottle", "保温杯", "misc", 1);
+      add("snack", "路上零食", "misc", 1);
+      add("eyemask", "眼罩 + 耳塞", "gear", 1);
+    } else if (cfg.trans === "car") {
+      add("license", "驾驶证 + 行驶证", "doc", 1);
+      add("carcharger", "车载充电器", "tech", 1);
+      add("phoneholder", "手机支架", "tech", 1);
+      add("sparekey", "备用车钥匙", "doc", 1);
+      add("etc", "ETC / 高速卡", "doc", 1);
+      add("warntri", "三角警示牌", "gear", 1);
+      add("cartrash", "车载垃圾袋", "misc", 2);
+      add("carsickmed", "晕车药", "med", 1);
+    }
+
+    /* 附加选项 */
+    if (has("kid")) {
+      add("kidcloth", "儿童换洗衣物", "cloth", capped(d + 2, 14));
+      add("diaper", "尿裤", "misc", capped(d * 6, 40), "按每天 6 片估，宁多勿少");
+      add("wetwipe", "湿巾", "misc", 4);
+      add("kidfood", "奶粉 / 辅食", "misc", 1);
+      add("kidmed", "儿童常用药", "med", 1);
+      add("toy", "安抚玩具", "misc", 1, "路上崩溃的唯一解药");
+      add("kidcup", "儿童水杯", "misc", 1);
+      if (cfg.trans === "car") add("carseat", "儿童安全座椅", "gear", 1);
+    }
+    if (has("pet")) {
+      add("leash", "牵引绳", "gear", 1);
+      add("petfood", "宠物粮", "misc", 1, "按天数带足，再多备一天");
+      add("petbowl", "便携水碗", "misc", 1);
+      add("poopbag", "拾便袋", "misc", capped(d * 3, 20));
+      add("petcert", "宠物证明 / 疫苗本", "doc", 1);
+      add("petpad", "宠物垫", "misc", 2);
+      if (cfg.trans === "air") add("petbox", "航空箱", "gear", 1, "尺寸提前跟航司确认");
+    }
+    if (has("photo")) {
+      add("camera", "相机", "tech", 1);
+      add("battery", "备用电池", "tech", 2);
+      add("sdcard", "存储卡", "tech", 2);
+      add("tripod", "三脚架", "gear", 1);
+      add("lenscloth", "镜头布 + 气吹", "gear", 1);
+      add("camchg", "相机充电器", "tech", 1);
+    }
+    if (has("gym")) {
+      add("sportshoes", "运动鞋", "cloth", 1);
+      add("sportwear", "运动服", "cloth", capped(Math.ceil(d / 2), 5));
+      add("band", "阻力带 / 跳绳", "gear", 1);
+      add("sporttowel", "运动毛巾", "gear", 1);
+      add("shaker", "运动水壶", "misc", 1);
+    }
+    if (has("swim")) {
+      add("swimsuit", "泳衣", "gear", d >= 4 ? 2 : 1);
+      add("goggles", "泳镜", "gear", 1);
+      add("swimcap", "泳帽", "gear", 1);
+      add("waterbag", "防水收纳袋", "gear", 2);
+    }
+    if (has("work")) {
+      add("laptop", "笔记本电脑", "tech", 1);
+      add("laptopchg", "电脑充电器", "tech", 1);
+      add("mouse", "鼠标", "tech", 1);
+      add("hub", "多口转接头", "tech", 1);
+      add("anc", "降噪耳机", "tech", 1);
+    }
+    if (has("abroad")) {
+      add("passport", "护照", "doc", 1, "有效期至少还剩 6 个月");
+      add("visa", "签证 / 入境材料", "doc", 1);
+      add("adapter", "转换插头", "tech", 1);
+      add("forex", "少量外币", "doc", 1);
+      add("esim", "国际漫游卡 / eSIM", "tech", 1);
+      add("insurance", "旅行保险单", "doc", 1);
+      add("offline", "离线地图 / 翻译包", "tech", 1, "落地没网时最救命");
+    }
+    return out;
+  }
+
+  function customItems() {
+    var out = [], i, c;
+    for (i = 0; i < rec.custom.length; i++) {
+      c = rec.custom[i];
+      out.push({ k: "c:" + c.n, n: c.n, c: "misc", q: c.q || 1, note: "", mine: true });
+    }
+    return out;
+  }
+  function fullList(cfg) { return buildList(cfg).concat(customItems()); }
+
+  function groupOf(list) {
+    var g = [], i, j, cat, bucket;
+    for (i = 0; i < CATS.length; i++) {
+      cat = CATS[i]; bucket = [];
+      for (j = 0; j < list.length; j++) if (list[j].c === cat.k) bucket.push(list[j]);
+      if (bucket.length) g.push({ cat: cat, items: bucket });
+    }
+    return g;
+  }
+  function checkedMap() {
+    var m = {}, i;
+    for (i = 0; i < rec.checked.length; i++) m[rec.checked[i]] = 1;
+    return m;
+  }
+  function statOf(list, m) {
+    var total = list.length, done = 0, i;
+    for (i = 0; i < list.length; i++) if (m[list[i].k]) done++;
+    return { total: total, done: done, pct: total ? Math.round(done * 100 / total) : 0 };
+  }
+  function countOf(list) {
+    var n = 0, i;
+    for (i = 0; i < list.length; i++) n += list[i].q;
+    return n;
+  }
+  function cfgLabel(cfg) {
+    var c = normCfg(cfg);
+    return emojiOf(TRIPS, c.type) + " " + nameOf(TRIPS, c.type) + " · " + c.days + " 天 · " +
+      nameOf(SEASONS, c.season) + " · " + nameOf(TRANS, c.trans) +
+      (c.opts.length ? " · " + c.opts.map(function (k) { return nameOf(OPTS, k); }).join("/") : "");
+  }
+  function textOf(cfg) {
+    var list = fullList(cfg), m = checkedMap(), g = groupOf(list), s = statOf(list, m);
+    var lines = ["🎒 随便打包 · " + cfgLabel(cfg), ""];
+    for (var i = 0; i < g.length; i++) {
+      lines.push("【" + g[i].cat.e + " " + g[i].cat.n + "】");
+      for (var j = 0; j < g[i].items.length; j++) {
+        var it = g[i].items[j];
+        lines.push("  " + (m[it.k] ? "[x] " : "[ ] ") + it.n + " ×" + it.q + (it.note ? "（" + it.note + "）" : ""));
+      }
+      lines.push("");
+    }
+    lines.push("共 " + s.total + " 项 / " + countOf(list) + " 件，已备 " + s.done + " 项（" + s.pct + "%）");
+    return lines.join("\n");
+  }
+  function randomCfg(r) {
+    r = r || rnd;
+    var pickOne = function (arr) { var i = Math.floor(r() * arr.length); if (i < 0) i = 0; if (i >= arr.length) i = arr.length - 1; return arr[i].k; };
+    var opts = [], i;
+    for (i = 0; i < OPTS.length; i++) if (r() < 0.28) opts.push(OPTS[i].k);
+    var days = 1 + Math.floor(r() * 10);
+    if (days > MAX_DAYS) days = MAX_DAYS;
+    return normCfg({ type: pickOne(TRIPS), days: days, season: pickOne(SEASONS), trans: pickOne(TRANS), opts: opts });
+  }
+
+  /* ---------- 状态变更 ---------- */
+  function bump(id) { try { if (typeof bumpUsage === "function") bumpUsage(id); } catch (e) { } }
+  function say(m) { try { if (typeof toast === "function") toast(m); } catch (e) { } }
+
+  function generate(cfgIn) {
+    var cfg = normCfg(cfgIn);
+    var changed = sigOf(cfg) !== sigOf(rec.cfg);
+    rec.cfg = cfg;
+    if (changed) rec.checked = [];
+    rec.gens += 1;
+    if (!rec.aG) { rec.aG = 1; bump("packgo"); }
+    bump("pack");
+    saveRec();
+    return fullList(cfg);
+  }
+  function toggleItem(k) {
+    if (!k) return false;
+    var i = rec.checked.indexOf(k);
+    if (i >= 0) rec.checked.splice(i, 1);
+    else rec.checked.push(k);
+    saveRec();
+    afterCheck();
+    return i < 0;
+  }
+  function afterCheck() {
+    var list = fullList(rec.cfg), s = statOf(list, checkedMap());
+    if (s.total >= ALL_MIN && s.done === s.total) {
+      rec.dones += 1;
+      if (!rec.aD) { rec.aD = 1; bump("packall"); }
+      saveRec();
+      say("🎉 全部打勾！这趟旅程你万无一失");
+      try { if (typeof confetti === "function") confetti(); } catch (e) { }
+    }
+    return s;
+  }
+  function clearChecks() { rec.checked = []; saveRec(); }
+  function addCustom(name, q) {
+    name = String(name == null ? "" : name).replace(/\s+/g, " ").trim().slice(0, 24);
+    if (!name) return false;
+    if (rec.custom.length >= CUSTOM_MAX) return false;
+    for (var i = 0; i < rec.custom.length; i++) if (rec.custom[i].n === name) return false;
+    q = Math.floor(Number(q)); if (!isFinite(q) || q < 1) q = 1; if (q > 99) q = 99;
+    rec.custom.push({ n: name, q: q });
+    saveRec();
+    return true;
+  }
+  function delCustom(name) {
+    for (var i = 0; i < rec.custom.length; i++) {
+      if (rec.custom[i].n === name) {
+        rec.custom.splice(i, 1);
+        var j = rec.checked.indexOf("c:" + name);
+        if (j >= 0) rec.checked.splice(j, 1);
+        saveRec();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /* ---------- DOM ---------- */
+  var inited = false, els = {};
+  function $p(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function readForm() {
+    var opts = [], i, box;
+    if (els.opts) {
+      var bs = els.opts.querySelectorAll ? els.opts.querySelectorAll("input[type=checkbox]") : [];
+      for (i = 0; i < bs.length; i++) { box = bs[i]; if (box.checked) opts.push(box.value); }
+    }
+    return normCfg({
+      type: els.type ? els.type.value : rec.cfg.type,
+      days: els.days ? els.days.value : rec.cfg.days,
+      season: els.season ? els.season.value : rec.cfg.season,
+      trans: els.trans ? els.trans.value : rec.cfg.trans,
+      opts: opts
+    });
+  }
+  function writeForm(cfg) {
+    var c = normCfg(cfg), i;
+    if (els.type) els.type.value = c.type;
+    if (els.days) els.days.value = String(c.days);
+    if (els.season) els.season.value = c.season;
+    if (els.trans) els.trans.value = c.trans;
+    if (els.opts && els.opts.querySelectorAll) {
+      var bs = els.opts.querySelectorAll("input[type=checkbox]");
+      for (i = 0; i < bs.length; i++) bs[i].checked = c.opts.indexOf(bs[i].value) >= 0;
+    }
+  }
+  function renderList() {
+    if (!els.list) return;
+    var list = fullList(rec.cfg), m = checkedMap(), g = groupOf(list), s = statOf(list, m);
+    var html = [], i, j, it;
+    for (i = 0; i < g.length; i++) {
+      html.push('<div class="pack-cat"><span class="pack-cn">' + g[i].cat.e + " " + esc(g[i].cat.n) +
+        '</span><span class="pack-cc">' + g[i].items.length + " 项</span></div>");
+      for (j = 0; j < g[i].items.length; j++) {
+        it = g[i].items[j];
+        html.push('<label class="pack-item' + (m[it.k] ? " on" : "") + '" data-pk="' + esc(it.k) + '">' +
+          '<input type="checkbox" ' + (m[it.k] ? "checked" : "") + ">" +
+          '<span class="pack-n">' + esc(it.n) + (it.mine ? ' <em class="pack-mine">自加</em>' : "") + "</span>" +
+          '<span class="pack-q">×' + it.q + "</span>" +
+          (it.note ? '<span class="pack-note">' + esc(it.note) + "</span>" : "") +
+          (it.mine ? '<button type="button" class="pack-del" data-pdel="' + esc(it.n) + '">✕</button>' : "") +
+          "</label>");
+      }
+    }
+    els.list.innerHTML = html.join("");
+    if (els.bar) els.bar.style.width = s.pct + "%";
+    if (els.pct) els.pct.textContent = s.pct + "%";
+    if (els.stat) els.stat.textContent = "已备 " + s.done + " / " + s.total + " 项（合计 " + countOf(list) + " 件）";
+    if (els.lab) els.lab.textContent = cfgLabel(rec.cfg);
+    if (els.rec) els.rec.textContent = "生成 " + rec.gens + " 次 · 全清 " + rec.dones + " 次";
+  }
+  function packSync() { writeForm(rec.cfg); renderList(); }
+
+  function doGen() {
+    var cfg = readForm();
+    generate(cfg);
+    renderList();
+    var n = fullList(cfg).length;
+    say("🎒 清单生成：" + n + " 项，按分类逐条打勾吧");
+  }
+  function doDice() {
+    var cfg = randomCfg(rnd);
+    writeForm(cfg);
+    generate(cfg);
+    renderList();
+    say("🎲 随便给你安排了一趟：" + cfgLabel(cfg));
+  }
+  function doCopy() {
+    var txt = textOf(rec.cfg);
+    var ok = false;
+    try {
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt); ok = true;
+      }
+    } catch (e) { }
+    if (!ok) {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta); ok = true;
+      } catch (e2) { }
+    }
+    say(ok ? "📋 清单已复制，粘到备忘录里带走" : "复制失败，手动长按选中吧");
+    return ok;
+  }
+  function doClear() { clearChecks(); renderList(); say("🔄 勾选已清空，重新检查一遍"); }
+  function doAdd() {
+    if (!els.addi) return false;
+    var v = els.addi.value;
+    var ok = addCustom(v, 1);
+    if (ok) { els.addi.value = ""; renderList(); say("➕ 已加入清单：" + String(v).trim()); }
+    else say("加不进去：空的、重复了，或者自定义已经满了");
+    return ok;
+  }
+  function onListClick(e) {
+    var t = e.target;
+    while (t && t !== els.list && !(t.getAttribute && (t.getAttribute("data-pdel") || t.getAttribute("data-pk")))) t = t.parentNode;
+    if (!t || t === els.list) return;
+    var del = t.getAttribute("data-pdel");
+    if (del) {
+      if (e.preventDefault) e.preventDefault();
+      delCustom(del); renderList(); say("已移除：" + del);
+      return;
+    }
+    var k = t.getAttribute("data-pk");
+    if (!k) return;
+    if (e.preventDefault) e.preventDefault();
+    toggleItem(k);
+    renderList();
+  }
+  function onAddKey(e) { if (e && e.key === "Enter") { if (e.preventDefault) e.preventDefault(); doAdd(); } }
+
+  function bind() {
+    if (inited) return;
+    els.type = $p("packType"); els.days = $p("packDays"); els.season = $p("packSeason");
+    els.trans = $p("packTrans"); els.opts = $p("packOpts"); els.list = $p("packList");
+    els.bar = $p("packBar"); els.pct = $p("packPct"); els.stat = $p("packStat");
+    els.lab = $p("packLab"); els.rec = $p("packRec"); els.addi = $p("packAddI");
+    if (!els.list) return;
+    var b;
+    if ((b = $p("packGen"))) b.addEventListener("click", doGen);
+    if ((b = $p("packDice"))) b.addEventListener("click", doDice);
+    if ((b = $p("packCopy"))) b.addEventListener("click", doCopy);
+    if ((b = $p("packClear"))) b.addEventListener("click", doClear);
+    if ((b = $p("packAddB"))) b.addEventListener("click", doAdd);
+    if (els.addi) els.addi.addEventListener("keydown", onAddKey);
+    els.list.addEventListener("click", onListClick);
+    inited = true;
+    packSync();
+  }
+  try { setTimeout(bind, 0); } catch (e) { }
+
+  window.packRender = function () {
+    bind();
+    rec = loadRec();
+    packSync();
+  };
+
+  window.__packTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    setRnd: function (fn) { rnd = fn; }, getEls: function () { return els; },
+    defRec: defRec, defCfg: defCfg, loadRec: loadRec, saveRec: saveRec, normCfg: normCfg,
+    sigOf: sigOf, buildList: buildList, fullList: fullList, customItems: customItems,
+    groupOf: groupOf, statOf: statOf, countOf: countOf, checkedMap: checkedMap,
+    capped: capped, cfgLabel: cfgLabel, textOf: textOf, randomCfg: randomCfg,
+    generate: generate, toggleItem: toggleItem, afterCheck: afterCheck, clearChecks: clearChecks,
+    addCustom: addCustom, delCustom: delCustom,
+    readForm: readForm, writeForm: writeForm, renderList: renderList, packSync: packSync,
+    doGen: doGen, doDice: doDice, doCopy: doCopy, doClear: doClear, doAdd: doAdd,
+    onListClick: onListClick, onAddKey: onAddKey, bind: bind, esc: esc,
+    TRIPS: TRIPS, SEASONS: SEASONS, TRANS: TRANS, OPTS: OPTS, CATS: CATS,
+    consts: { KEY: KEY, MIN_DAYS: MIN_DAYS, MAX_DAYS: MAX_DAYS, ALL_MIN: ALL_MIN, CUSTOM_MAX: CUSTOM_MAX }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🎒", name: "说走就走", desc: "在随便打包里生成过一份行李清单", test: function (u) { return (u.packgo || 0) >= 1; } },
+      { emoji: "✅", name: "万无一失", desc: "在随便打包里把一整份清单全部打勾", test: function (u) { return (u.packall || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "出发前的焦虑，一大半是因为没写清单。",
+      "行李箱越轻，旅程越自由——但充电宝除外。",
+      "忘带的东西，目的地基本都买得到；忘带的证件不行。",
+      "打包的本质是取舍：想带的很多，扛得动的有限。",
+      "清单全打勾的那一刻，旅行才算真正开始。"
     );
   }
 })();
