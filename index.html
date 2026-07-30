@@ -1584,6 +1584,7 @@
         <button data-tab="crack">🕵️ 随便密码破译</button>
         <button data-tab="triathlon">🏊 随便铁人三项</button>
         <button data-tab="skydive">🪂 随便跳伞</button>
+        <button data-tab="kayak">🛶 随便激流回旋</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8528,6 +8529,32 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="kayak">
+    <h2>🛶 随便激流回旋</h2>
+    <p class="sub">顺流而下穿过 12 道水门：划桨冲刺、躲开礁石、顶住横流——漏门罚 5 秒，撞礁罚 2 秒，零罚秒才是大师</p>
+    <style>
+      #kayak .kay-wrap { max-width:420px; margin:0 auto; }
+      #kayak canvas { width:100%; max-width:380px; border-radius:14px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.35); }
+      #kayak .kay-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #kayak .kay-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #kayak .kay-hud b { font-weight:700; color:#4dd0e1; }
+      #kayak .kay-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="kay-wrap">
+      <div class="kay-hud">
+        <span>用时 <b id="kayTime">—</b></span>
+        <span>水门 <b id="kayGate">—</b></span>
+        <span>水流 <b id="kayFlow">—</b></span>
+        <span>最快 <b id="kayBest">—</b></span>
+      </div>
+      <canvas id="kayCav" width="380" height="520"></canvas>
+      <p class="kay-help">
+        点画布出发；按住画布 / 空格 = 划桨冲刺，←→ / 按住画布左右拖 = 操舵；<br>
+        全程三段水流每局随机（缓流 / 斜流 / 急流，虚线为分段线），穿过 12 道绿色水门，漏门罚 5 秒、撞 🪨 礁石罚 2 秒并减速；<br>
+        计时 = 实际用时 + 罚时：首次冲线解锁「🛶 激流首航」、零罚秒完赛解锁「🌊 白浪大师」，战绩本地存档（suibian_kay）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -9164,6 +9191,7 @@
     if (id === "skate") skateRender();
     if (id === "triathlon" && typeof tthRender === "function") tthRender();
     if (id === "skydive" && typeof skyRender === "function") skyRender();
+    if (id === "kayak" && typeof kayRender === "function") kayRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9230,6 +9258,7 @@
     if (id !== "skate" && typeof skateStop === "function") skateStop();
     if (id !== "triathlon" && typeof tthStop === "function") tthStop();
     if (id !== "skydive" && typeof skyStop === "function") skyStop();
+    if (id !== "kayak" && typeof kayStop === "function") kayStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9427,6 +9456,7 @@
     crack: "随便密码破译 crack 1A2B 猜密码 破译 密码 保险箱 推理 侦探 数字 逻辑 bulls cows 益智 烧脑 解谜 游戏",
     triathlon: "随便铁人三项 triathlon 铁人三项 铁人 游泳 骑行 跑步 耐力 体力 竞速 比赛 运动 奥运 swim bike run 游戏",
     skydive: "随便跳伞 skydive parachute 跳伞 降落伞 自由落体 开伞 风场 着陆 靶心 高空 极限运动 天空 翼装 游戏 竞技",
+    kayak: "随便激流回旋 kayak canoe slalom 皮划艇 激流 回旋 水门 划艇 划桨 竞速 白浪 河流 礁石 罚时 计时 奥运 游戏 极限运动",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9684,6 +9714,7 @@ splitbill:"tools",
     crack:"games",
     triathlon:"games",
     skydive:"games",
+    kayak:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -55204,6 +55235,438 @@ splitbill:"tools",
       "开伞太早是保守，开伞太晚是鲁莽，高手都在两者之间。",
       "从三千米往下看，大部分烦恼都只有一个像素大。",
       "落点偏了没关系，安全落地本身就是满分。"
+    );
+  }
+})();
+/* ===== 🛶 随便激流回旋 kayak ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_kay";
+  var W = 380, H = 520, PY = 430;
+  var BASE_SP = 4.2;       // 顺流基础速度（单位/帧）
+  var PADDLE_SP = 6.6;     // 划桨冲刺速度
+  var STEER_V = 3.2;       // 横向操舵速度
+  var GATE_N = 12, GATE_HALF = 30, GATE0 = 500, GATE_GAP = 450;
+  var FINISH = GATE0 + (GATE_N - 1) * GATE_GAP + 400; // 5850
+  var ROCK_N = 14;
+  var MISS_PEN = 5000, HIT_PEN = 2000, INV_T = 40;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() { return { runs: 0, bestMs: -1, cleans: 0, aF: 0, aC: 0 }; }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.runs = nInt(o.runs); d.cleans = nInt(o.cleans);
+      var b = Math.floor(Number(o.bestMs));
+      d.bestMs = isFinite(b) && b > 0 ? b : -1;
+      d.aF = o.aF ? 1 : 0; d.aC = o.aC ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯函数 ---- */
+  function clampX(x) { return x < 26 ? 26 : (x > W - 26 ? W - 26 : x); }
+  function makeGates(r) {
+    var out = [], i;
+    for (i = 0; i < GATE_N; i++) {
+      out.push({ d: GATE0 + i * GATE_GAP, gx: Math.round(70 + r() * 240), judged: false, passed: false });
+    }
+    return out;
+  }
+  function makeRocks(r, gates) {
+    var out = [], i;
+    for (i = 0; i < ROCK_N; i++) {
+      var d = Math.round(380 + i * 390 + r() * 160);
+      var x = Math.round(50 + r() * 280);
+      var j;
+      for (j = 0; j < gates.length; j++) {
+        if (Math.abs(gates[j].d - d) < 90) { d += 130; break; }
+      }
+      out.push({ d: d, x: x, hit: false });
+    }
+    return out;
+  }
+  function makeFlows(r) {
+    var seg = FINISH / 3, out = [], i;
+    for (i = 0; i < 3; i++) {
+      var cx = (r() * 2 - 1) * 1.2;
+      if (cx < -1.2) cx = -1.2; if (cx > 1.2) cx = 1.2;
+      out.push({ from: seg * i, to: i === 2 ? FINISH + 1 : seg * (i + 1), cx: cx });
+    }
+    return out;
+  }
+  function flowAt(flows, d) {
+    if (!flows || !flows.length) return 0;
+    for (var i = 0; i < flows.length; i++) {
+      if (d >= flows[i].from && d < flows[i].to) return flows[i].cx;
+    }
+    return flows[flows.length - 1].cx;
+  }
+  function flowLabel(cx) {
+    var a = Math.abs(cx);
+    if (a < 0.05) return "平稳";
+    var lv = a < 0.3 ? "缓" : (a < 0.75 ? "斜" : "急");
+    return (cx < 0 ? "←" : "→") + " " + lv + "流";
+  }
+  function gateJudge(x, gx) { return Math.abs(x - gx) <= GATE_HALF; }
+  function rockHit(px, pd, rock) {
+    return !rock.hit && Math.abs(rock.d - pd) < 26 && Math.abs(rock.x - px) < 26;
+  }
+  function speedOf(paddle) { return paddle ? PADDLE_SP : BASE_SP; }
+  function fmtMs(ms) {
+    ms = Math.max(0, Math.round(Number(ms) || 0));
+    var s = ms / 1000, m = Math.floor(s / 60);
+    var r = (s - m * 60).toFixed(1);
+    if (m > 0 && Number(r) < 10) r = "0" + r;
+    return m > 0 ? m + ":" + r : r + "s";
+  }
+  function verdict(t, pen, passed, hits) {
+    var raw = Math.round(t * 1000 / 60);
+    return {
+      raw: raw, pen: pen, ms: raw + pen,
+      gates: passed, hits: hits,
+      clean: passed === GATE_N && hits === 0
+    };
+  }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, d: 0, x: 190, sp: BASE_SP,
+      gates: [], rocks: [], flows: [],
+      nextGate: 0, passed: 0, hits: 0, pen: 0, inv: 0,
+      paddle: false, steer: 0, res: null, msg: "", msgT: 0
+    };
+  }
+  var g = null;
+
+  function startRun(gg) {
+    var ng = newGame();
+    for (var k in ng) if (Object.prototype.hasOwnProperty.call(ng, k)) gg[k] = ng[k];
+    gg.phase = "run";
+    gg.gates = makeGates(rnd);
+    gg.rocks = makeRocks(rnd, gg.gates);
+    gg.flows = makeFlows(rnd);
+    gg.msg = "出发！穿过绿色水门"; gg.msgT = 80;
+  }
+  function finish(gg) {
+    gg.phase = "done";
+    var v = verdict(gg.t, gg.pen, gg.passed, gg.hits);
+    gg.res = v;
+    rec.runs += 1;
+    if (rec.bestMs < 0 || v.ms < rec.bestMs) rec.bestMs = v.ms;
+    if (v.clean) rec.cleans += 1;
+    if (!rec.aF) { rec.aF = 1; try { bumpUsage("kayfin"); } catch (e1) {} }
+    if (v.clean && !rec.aC) { rec.aC = 1; try { bumpUsage("kayclean"); } catch (e2) {} }
+    saveRec();
+    try {
+      if (v.clean) { toast("🌊 零罚秒完赛！" + fmtMs(v.ms) + "，白浪也服你"); confetti(); }
+      else toast("🛶 冲线！" + fmtMs(v.ms) + "（罚 " + Math.round(v.pen / 1000) + "s）");
+    } catch (e3) {}
+  }
+  function primary(gg) {
+    if (!gg) return;
+    if (gg.phase === "idle" || gg.phase === "done") { startRun(gg); return; }
+  }
+
+  function step(gg) {
+    if (!gg) return;
+    if (gg.msgT > 0) gg.msgT--;
+    if (gg.phase !== "run") return;
+    gg.t++;
+    if (gg.inv > 0) gg.inv--;
+    var target = speedOf(gg.paddle);
+    gg.sp += (target - gg.sp) * 0.08;
+    gg.d += gg.sp;
+    gg.x = clampX(gg.x + flowAt(gg.flows, gg.d) * 0.6 + gg.steer * STEER_V);
+    // 水门判定
+    while (gg.nextGate < gg.gates.length && gg.d >= gg.gates[gg.nextGate].d) {
+      var gate = gg.gates[gg.nextGate];
+      gate.judged = true;
+      gate.passed = gateJudge(gg.x, gate.gx);
+      if (gate.passed) { gg.passed++; gg.msg = "水门 " + gg.passed + "/" + GATE_N + " ✔"; gg.msgT = 40; }
+      else { gg.pen += MISS_PEN; gg.msg = "漏门！罚 5 秒"; gg.msgT = 70; }
+      gg.nextGate++;
+    }
+    // 礁石碰撞
+    if (gg.inv <= 0) {
+      for (var i = 0; i < gg.rocks.length; i++) {
+        var rk = gg.rocks[i];
+        if (rockHit(gg.x, gg.d, rk)) {
+          rk.hit = true;
+          gg.hits++; gg.pen += HIT_PEN; gg.inv = INV_T;
+          gg.sp = BASE_SP * 0.5;
+          gg.x = clampX(gg.x + (gg.x < rk.x ? -22 : 22));
+          gg.msg = "撞上礁石！罚 2 秒"; gg.msgT = 70;
+          break;
+        }
+      }
+    }
+    if (gg.d >= FINISH) finish(gg);
+  }
+
+  /* ---- 输入 ---- */
+  var keySteer = 0, keyPaddle = false, holdX = -1, holding = false;
+  function steerFrom(gg) {
+    if (!gg) return;
+    var s = 0;
+    if (holdX >= 0 && gg.phase === "run") {
+      if (holdX < gg.x - 8) s = -1;
+      else if (holdX > gg.x + 8) s = 1;
+    }
+    if (keySteer !== 0) s = keySteer;
+    gg.steer = s;
+    gg.paddle = gg.phase === "run" && (holding || keyPaddle);
+  }
+  function canvasX(e) {
+    if (!cav) return -1;
+    var r = cav.getBoundingClientRect();
+    if (!r || !r.width) return -1;
+    return (e.clientX - r.left) * (W / r.width);
+  }
+  function onKeyDown(e) {
+    if (!active) return;
+    var tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { e.preventDefault(); keySteer = -1; return; }
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { e.preventDefault(); keySteer = 1; return; }
+    if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
+      e.preventDefault();
+      if (g && g.phase === "run") { keyPaddle = true; return; }
+      if (e.repeat) return;
+      primary(g);
+    }
+  }
+  function onKeyUp(e) {
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { if (keySteer === -1) keySteer = 0; return; }
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { if (keySteer === 1) keySteer = 0; return; }
+    if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") { keyPaddle = false; }
+  }
+
+  /* ---- 绘制 ---- */
+  var cav = null, ctx = null, raf = 0, active = false, inited = false;
+  function syOf(od) { return PY - (od - g.d); }
+
+  function kaySync() {
+    try {
+      var el;
+      el = document.getElementById("kayTime");
+      if (el) {
+        if (!g || g.phase === "idle") el.textContent = "—";
+        else if (g.phase === "done" && g.res) el.textContent = fmtMs(g.res.ms);
+        else el.textContent = fmtMs(g.t * 1000 / 60 + g.pen);
+      }
+      el = document.getElementById("kayGate");
+      if (el) el.textContent = g && g.phase !== "idle" ? g.passed + "/" + GATE_N : "—";
+      el = document.getElementById("kayFlow");
+      if (el) el.textContent = g && g.phase === "run" ? flowLabel(flowAt(g.flows, g.d)) : "—";
+      el = document.getElementById("kayBest");
+      if (el) el.textContent = rec.bestMs > 0 ? fmtMs(rec.bestMs) : "—";
+    } catch (e) {}
+  }
+
+  function drawScene(c) {
+    var bg = c.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#062c3e"); bg.addColorStop(0.6, "#0b4f6c"); bg.addColorStop(1, "#0e6a8a");
+    c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    // 两岸
+    c.fillStyle = "#123d1e"; c.fillRect(0, 0, 18, H); c.fillRect(W - 18, 0, 18, H);
+    c.fillStyle = "rgba(255,255,255,.05)";
+    var i, ph = g ? g.d : 0;
+    for (i = 0; i < 9; i++) {
+      var wy = ((i * 64 + ph * 0.9) % (H + 40)) - 20;
+      c.fillRect(30, wy, W - 60, 2);
+    }
+    if (!g || g.phase === "idle") return;
+    // 水流分段虚线
+    for (i = 1; i < g.flows.length; i++) {
+      var by = syOf(g.flows[i].from);
+      if (by > -20 && by < H + 20) {
+        c.strokeStyle = "rgba(255,255,255,.18)"; c.setLineDash([5, 7]);
+        c.beginPath(); c.moveTo(18, by); c.lineTo(W - 18, by); c.stroke(); c.setLineDash([]);
+      }
+    }
+    // 终点线
+    var fy = syOf(FINISH);
+    if (fy > -20 && fy < H + 20) {
+      c.fillStyle = "rgba(255,255,255,.85)";
+      for (i = 0; i < 12; i++) c.fillRect(18 + i * 29, fy - 4, 15, 8);
+      c.font = "12px system-ui"; c.textAlign = "center"; c.fillStyle = "#ffe082";
+      c.fillText("FINISH", W / 2, fy - 12);
+    }
+    // 水门
+    for (i = 0; i < g.gates.length; i++) {
+      var gt = g.gates[i], gy = syOf(gt.d);
+      if (gy < -30 || gy > H + 30) continue;
+      var col = gt.judged ? (gt.passed ? "rgba(129,199,132,.5)" : "rgba(239,83,80,.6)") : "#4caf50";
+      c.strokeStyle = col; c.lineWidth = 3;
+      c.beginPath(); c.moveTo(gt.gx - GATE_HALF, gy); c.lineTo(gt.gx - GATE_HALF, gy - 26); c.stroke();
+      c.beginPath(); c.moveTo(gt.gx + GATE_HALF, gy); c.lineTo(gt.gx + GATE_HALF, gy - 26); c.stroke();
+      c.fillStyle = col;
+      c.fillRect(gt.gx - GATE_HALF - 1, gy - 26, 10, 7);
+      c.fillRect(gt.gx + GATE_HALF - 9, gy - 26, 10, 7);
+      c.fillStyle = "rgba(255,255,255,.55)"; c.font = "10px system-ui"; c.textAlign = "center";
+      c.fillText(String(i + 1), gt.gx, gy - 32);
+    }
+    // 礁石
+    c.font = "18px system-ui"; c.textAlign = "center";
+    for (i = 0; i < g.rocks.length; i++) {
+      var rk = g.rocks[i], ry = syOf(rk.d);
+      if (ry < -30 || ry > H + 30) continue;
+      c.globalAlpha = rk.hit ? 0.35 : 1;
+      c.fillText("🪨", rk.x, ry + 6);
+      c.globalAlpha = 1;
+    }
+  }
+
+  function drawPlayer(c) {
+    if (!g || g.phase === "idle") return;
+    var x = g.x, y = PY;
+    if (g.inv > 0 && (g.inv % 10) < 5) c.globalAlpha = 0.35;
+    // 尾流
+    c.strokeStyle = "rgba(255,255,255,.30)"; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(x - 7, y + 12); c.lineTo(x - 10 - (g.paddle ? 6 : 2), y + 26);
+    c.moveTo(x + 7, y + 12); c.lineTo(x + 10 + (g.paddle ? 6 : 2), y + 26); c.stroke();
+    c.font = "24px system-ui"; c.textAlign = "center";
+    c.fillText("🛶", x, y + 8);
+    c.globalAlpha = 1;
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    var c = ctx;
+    drawScene(c);
+    drawPlayer(c);
+    // 进度条
+    if (g.phase === "run" || g.phase === "done") {
+      var f = g.d / FINISH; if (f > 1) f = 1; if (f < 0) f = 0;
+      c.fillStyle = "rgba(255,255,255,.12)"; c.fillRect(W - 12, 60, 5, H - 140);
+      c.fillStyle = "#4dd0e1"; c.fillRect(W - 12, 60 + (1 - f) * (H - 140), 5, f * (H - 140));
+    }
+    // HUD 顶栏
+    c.fillStyle = "rgba(4,16,24,.85)"; c.fillRect(0, 0, W, 30);
+    c.fillStyle = "#fff"; c.font = "bold 12px system-ui"; c.textAlign = "left";
+    var tTxt = g.phase === "run" ? fmtMs(g.t * 1000 / 60 + g.pen) : (g.phase === "done" && g.res ? fmtMs(g.res.ms) : "—");
+    c.fillText("🛶 " + tTxt + (g.pen > 0 ? " (罚" + Math.round(g.pen / 1000) + "s)" : ""), 10, 20);
+    c.textAlign = "right";
+    c.fillText("门 " + (g.phase !== "idle" ? g.passed + "/" + GATE_N : "—") + " · 最快 " + (rec.bestMs > 0 ? fmtMs(rec.bestMs) : "—"), W - 10, 20);
+    if (g.msgT > 0 && g.msg) {
+      c.fillStyle = "#ffe082"; c.font = "bold 15px system-ui"; c.textAlign = "center";
+      c.fillText(g.msg, W / 2, 486);
+    }
+    if (g.phase === "idle") {
+      c.fillStyle = "rgba(4,16,24,.78)"; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#fff"; c.font = "bold 20px system-ui"; c.textAlign = "center";
+      c.fillText("🛶 随便激流回旋", W / 2, 176);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.8)";
+      c.fillText("按住画布 / 空格 = 划桨冲刺", W / 2, 210);
+      c.fillText("←→ / 按住画布左右拖 = 操舵", W / 2, 232);
+      c.fillText("穿过 12 道绿色水门，漏门罚 5 秒", W / 2, 254);
+      c.fillText("躲开 🪨 礁石，撞上罚 2 秒", W / 2, 276);
+      c.fillText("点击出发！", W / 2, 308);
+    } else if (g.phase === "done" && g.res) {
+      var v = g.res;
+      c.fillStyle = "rgba(4,16,24,.82)"; c.fillRect(0, 60, W, 210);
+      c.textAlign = "center";
+      c.font = "bold 22px system-ui";
+      c.fillStyle = v.clean ? "#ffd54f" : "#a5d6a7";
+      c.fillText(v.clean ? "🌊 零罚秒完美冲线！" : "🛶 冲线！", W / 2, 118);
+      c.font = "bold 30px system-ui"; c.fillStyle = "#fff";
+      c.fillText(fmtMs(v.ms), W / 2, 160);
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.8)";
+      c.fillText("水门 " + v.gates + "/" + GATE_N + " · 撞礁 " + v.hits + " 次 · 罚时 " + Math.round(v.pen / 1000) + "s", W / 2, 190);
+      c.fillText(v.ms <= rec.bestMs ? "🏆 个人最好成绩！" : "最快 " + fmtMs(rec.bestMs), W / 2, 214);
+      c.fillText("点击再来一轮", W / 2, 240);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    steerFrom(g);
+    step(g);
+    kaySync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("kayCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      if (g && (g.phase === "idle" || g.phase === "done")) { primary(g); return; }
+      holding = true;
+      var cx = canvasX(e);
+      if (cx >= 0) holdX = cx;
+    });
+    cav.addEventListener("pointermove", function (e) {
+      if (holdX < 0) return;
+      var cx = canvasX(e);
+      if (cx >= 0) holdX = cx;
+    });
+    cav.addEventListener("pointerup", function () { holding = false; holdX = -1; });
+    cav.addEventListener("pointercancel", function () { holding = false; holdX = -1; });
+    cav.addEventListener("pointerleave", function () { holding = false; holdX = -1; });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.kayRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    kaySync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.kayStop = function () {
+    active = false;
+    keySteer = 0; keyPaddle = false; holdX = -1; holding = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__kayTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    clampX: clampX, makeGates: makeGates, makeRocks: makeRocks,
+    makeFlows: makeFlows, flowAt: flowAt, flowLabel: flowLabel,
+    gateJudge: gateJudge, rockHit: rockHit, speedOf: speedOf,
+    fmtMs: fmtMs, verdict: verdict,
+    newGame: newGame, startRun: startRun, finish: finish, primary: primary,
+    step: step, steerFrom: steerFrom,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    draw: draw, kaySync: kaySync, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, PY: PY, BASE_SP: BASE_SP, PADDLE_SP: PADDLE_SP,
+      STEER_V: STEER_V, GATE_N: GATE_N, GATE_HALF: GATE_HALF, GATE0: GATE0, GATE_GAP: GATE_GAP,
+      FINISH: FINISH, ROCK_N: ROCK_N, MISS_PEN: MISS_PEN, HIT_PEN: HIT_PEN, INV_T: INV_T }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🛶", name: "激流首航", desc: "在随便激流回旋里完成一次全程冲线", test: function (u) { return (u.kayfin || 0) >= 1; } },
+      { emoji: "🌊", name: "白浪大师", desc: "在随便激流回旋里零罚秒完赛（12 门全过且不撞礁）", test: function (u) { return (u.kayclean || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "激流不会给你第二次看清水门的机会，所以第一眼就要认真。",
+      "船桨插进水里的那一刻，犹豫就输了半秒。",
+      "撞上礁石不可怕，可怕的是从此只敢在岸边划。",
+      "真正的高手不是躲开所有浪，而是借着浪走得更快。",
+      "罚时五秒教会你的事：绕远路有时比走错门便宜。"
     );
   }
 })();
