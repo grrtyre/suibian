@@ -1591,6 +1591,7 @@
         <button data-tab="bartend">🍸 随便调酒</button>
         <button data-tab="alchemy">⚗️ 随便炼金</button>
         <button data-tab="sushi">🍣 随便寿司</button>
+        <button data-tab="parcel">📦 随便分拣</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8725,6 +8726,42 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="parcel">
+    <h2>📦 随便分拣</h2>
+    <p class="sub">传送带越转越快，包裹越堆越多——手快眼准，才配站在分拣线上</p>
+    <style>
+      #parcel .pcl-wrap { max-width:420px; margin:0 auto; }
+      #parcel canvas { width:100%; max-width:380px; border-radius:16px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 14px 34px rgba(0,0,0,.4); }
+      #parcel .pcl-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #parcel .pcl-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #parcel .pcl-hud b { font-weight:700; color:#4aa3ff; }
+      #parcel .pcl-pad { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; max-width:380px; margin:0 auto 10px; }
+      #parcel .pcl-pad button { padding:10px 4px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #parcel .pcl-pad button:active { transform:translateY(1px); background:rgba(255,255,255,.14); }
+      #parcel .pcl-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="pcl-wrap">
+      <div class="pcl-hud">
+        <span>本班 <b id="pclScore">—</b></span>
+        <span>最高分 <b id="pclBest">—</b></span>
+        <span>连击 <b id="pclCombo">0（历史最佳 0）</b></span>
+        <span>工龄 <b id="pclRec">—</b></span>
+      </div>
+      <canvas id="pclCav" width="380" height="520"></canvas>
+      <div class="pcl-pad" id="pclPad">
+        <button type="button" data-pcl="0">🌇 东区<br>1</button>
+        <button type="button" data-pcl="1">🏜️ 西区<br>2</button>
+        <button type="button" data-pcl="2">🌴 南区<br>3</button>
+        <button type="button" data-pcl="3">🏔️ 北区<br>4</button>
+      </div>
+      <p class="pcl-help">
+        包裹顺着传送带滑下来，面单上写着目的地：<b>按 1/2/3/4</b>（或 A/S/D/F、方向键、点画布底部滑道、点上面四个按钮）把最靠前的那件推进对应区口。<br>
+        <b>⚡ 加急件</b>双倍基础分；<b>☠️ 违禁件</b>千万别碰，让它流过扫描线才是正解，还倒送 15 分；连击每多一层就多 1 分（封顶 +10）。<br>
+        <b>分错口</b>或<b>漏件</b>各扣一条命，三条命用完这班就下了；每处理 10 件传送带提速一档，最高 Lv.12。<br>
+        单班正确分拣 20 件解锁「📦 分拣上岗」，单班 15 连击解锁「⚡ 手快眼准」，工龄战绩本地存档（suibian_parcel）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="sushi">
     <h2>🍣 随便寿司</h2>
     <p class="sub">切鱼、捏饭、上桌——三刀两手一瞬间，板前见真章</p>
@@ -9485,6 +9522,7 @@
     if (id === "bartend" && typeof btdRender === "function") btdRender();
     if (id === "alchemy" && typeof alchRender === "function") alchRender();
     if (id === "sushi" && typeof szsRender === "function") szsRender();
+    if (id === "parcel" && typeof pclRender === "function") pclRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -9559,6 +9597,7 @@
     if (id !== "bartend" && typeof btdStop === "function") btdStop();
     if (id !== "alchemy" && typeof alchStop === "function") alchStop();
     if (id !== "sushi" && typeof szsStop === "function") szsStop();
+    if (id !== "parcel" && typeof pclStop === "function") pclStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9763,6 +9802,7 @@
     bartend: "随便调酒 bartend cocktail 调酒 鸡尾酒 酒保 吧台 摇壶 注酒 配方 量杯 节拍 精准 手感 酒馆 混酒 游戏 挑战 休闲",
     alchemy: "随便炼金 alchemy potion 炼金 药水 魔药 坩埚 火候 控温 结晶 材料 转轮 抓取 贤者之石 炼成 灵药 游戏 挑战 休闲",
     sushi: "随便寿司 sushi 寿司 切鱼 刀工 捏饭 醋饭 上桌 传送带 板前 师傅 三文鱼 金枪鱼 日料 料理 手感 游戏 挑战 休闲",
+    parcel: "随便分拣 parcel 分拣 快递 包裹 驿站 物流 传送带 流水线 面单 加急件 违禁品 反应 手速 连击 街机 游戏 挑战 休闲",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10028,6 +10068,7 @@ splitbill:"tools",
     bartend:"games",
     alchemy:"games",
     sushi:"games",
+    parcel:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -59747,6 +59788,590 @@ splitbill:"tools",
       "忘带的东西，目的地基本都买得到；忘带的证件不行。",
       "打包的本质是取舍：想带的很多，扛得动的有限。",
       "清单全打勾的那一刻，旅行才算真正开始。"
+    );
+  }
+})();
+/* ===== 📦 随便分拣 parcel ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_parcel";
+  var W = 380, H = 520;
+  var LANES = 4;
+  var LANE_W = W / LANES;            // 95
+  var CHUTE_TOP = 438;               // 滑道区顶部
+  var BELT_END = 424;                // 过了这条线就算流走
+  var ARM_Y = 46;                    // 低于此高度的包裹还没进扫描区
+  var BASE_SPD = 1.5, SPD_STEP = 0.22, SPD_MAX = 4.2;
+  var BASE_GAP = 78, GAP_STEP = 5, MIN_GAP = 30;
+  var CLEAR_PER = 10;                // 每处理这么多件升一级
+  var LEVEL_MAX = 12;
+  var LIVES = 3;
+  var BASE_PT = 10;                  // 分拣正确基础分
+  var COMBO_CAP = 10;                // 连击加成上限
+  var BAN_BONUS = 15;                // 放行违禁件奖励
+  var EXP_P = 0.15, BAN_P = 0.12;    // 加急件 / 违禁件概率
+  var FLY_FR = 16;                   // 飞入滑道动画帧数
+  var MSG_FR = 46;
+  var ACH_SORT = 20;                 // 单班分拣件数徽章门槛
+  var ACH_COMBO = 15;                // 单班连击徽章门槛
+  var rnd = Math.random;
+
+  var ZONES = [
+    { n: "东区", e: "🌇", c: "#4aa3ff" },
+    { n: "西区", e: "🏜️", c: "#ff9f4a" },
+    { n: "南区", e: "🌴", c: "#3fcf8e" },
+    { n: "北区", e: "🏔️", c: "#b07cff" }
+  ];
+
+  var GRADES = [
+    { min: 600, t: "分拣之神", e: "🏆", d: "整条流水线都在等你上班" },
+    { min: 380, t: "金牌快手", e: "🥇", d: "这手速，站长要给你加鸡腿" },
+    { min: 200, t: "熟练工", e: "👍", d: "稳，就是偶尔手抖" },
+    { min: 80, t: "新人上道", e: "🙂", d: "别慌，包裹比你更慌" },
+    { min: -1, t: "爆仓现场", e: "💥", d: "站长已经在赶来的路上了" }
+  ];
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { shifts: 0, best: -1, sorted: 0, bans: 0, maxCombo: 0, aS: 0, aC: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.shifts = nInt(o.shifts); d.sorted = nInt(o.sorted);
+      d.bans = nInt(o.bans); d.maxCombo = nInt(o.maxCombo);
+      var b = Math.floor(Number(o.best));
+      d.best = isFinite(b) && b >= 0 ? b : -1;
+      d.aS = o.aS ? 1 : 0; d.aC = o.aC ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 纯函数 ---------- */
+  function spdOf(level) {
+    var lv = Math.floor(Number(level) || 1);
+    if (lv < 1) lv = 1;
+    var s = BASE_SPD + (lv - 1) * SPD_STEP;
+    return s > SPD_MAX ? SPD_MAX : s;
+  }
+  function gapOf(level) {
+    var lv = Math.floor(Number(level) || 1);
+    if (lv < 1) lv = 1;
+    var gp = BASE_GAP - (lv - 1) * GAP_STEP;
+    return gp < MIN_GAP ? MIN_GAP : gp;
+  }
+  function laneX(i) { return LANE_W * i + LANE_W / 2; }
+  function laneOfX(x) {
+    var i = Math.floor((Number(x) || 0) / LANE_W);
+    if (i < 0) i = 0;
+    if (i > LANES - 1) i = LANES - 1;
+    return i;
+  }
+  function pickKind(r, level) {
+    r = Number(r) || 0;
+    var lv = Math.floor(Number(level) || 1);
+    if (lv >= 2) {
+      if (r < BAN_P) return "ban";
+      if (r < BAN_P + EXP_P) return "exp";
+      return "nor";
+    }
+    if (r < EXP_P) return "exp";
+    return "nor";
+  }
+  function gainOf(combo, kind) {
+    var c = Math.floor(Number(combo) || 0);
+    if (c < 0) c = 0;
+    if (c > COMBO_CAP) c = COMBO_CAP;
+    var base = BASE_PT * (kind === "exp" ? 2 : 1);
+    return base + c;
+  }
+  function levelOf(handled) {
+    var h = Math.floor(Number(handled) || 0);
+    if (h < 0) h = 0;
+    var lv = 1 + Math.floor(h / CLEAR_PER);
+    return lv > LEVEL_MAX ? LEVEL_MAX : lv;
+  }
+  function gradeOf(score) {
+    var s = Number(score) || 0;
+    for (var i = 0; i < GRADES.length; i++) if (s >= GRADES[i].min) return GRADES[i];
+    return GRADES[GRADES.length - 1];
+  }
+
+  /* ---------- 局面 ---------- */
+  var g = null, cav = null, ctx = null, ctxOk = false;
+  var raf = 0, active = false, inited = false;
+
+  function newShift() {
+    return {
+      phase: "idle",        // idle / run / over
+      f: 0,
+      score: 0, lives: LIVES, combo: 0, maxCombo: 0,
+      handled: 0, ok: 0, bans: 0, miss: 0, wrong: 0,
+      level: 1, lastSpawn: -999, seq: 0,
+      list: [],
+      msg: "", msgF: 0,
+      grade: null
+    };
+  }
+
+  function setMsg(t) { if (!g) return; g.msg = String(t || ""); g.msgF = MSG_FR; }
+
+  function makeParcel() {
+    var kind = pickKind(rnd(), g.level);
+    var dest = kind === "ban" ? -1 : Math.min(LANES - 1, Math.floor(rnd() * LANES));
+    g.seq++;
+    return {
+      id: g.seq, kind: kind, dest: dest,
+      x: W / 2, y: -34, st: "belt",
+      vx: 0, vy: 0, life: FLY_FR, bad: false,
+      wob: rnd() * 6.28
+    };
+  }
+
+  function frontParcel() {
+    var best = null;
+    for (var i = 0; i < g.list.length; i++) {
+      var p = g.list[i];
+      if (p.st !== "belt" || p.y < ARM_Y) continue;
+      if (!best || p.y > best.y) best = p;
+    }
+    return best;
+  }
+
+  function bumpLevel() {
+    var lv = levelOf(g.handled);
+    if (lv > g.level) { g.level = lv; setMsg("⏩ 传送带提速！Lv." + lv); }
+  }
+
+  function award() {
+    if (g.ok >= ACH_SORT && !rec.aS) {
+      rec.aS = 1; saveRec();
+      try { bumpUsage("pclshift"); } catch (e1) {}
+    }
+    if (g.maxCombo >= ACH_COMBO && !rec.aC) {
+      rec.aC = 1; saveRec();
+      try { bumpUsage("pclace"); } catch (e2) {}
+    }
+  }
+
+  function flyOut(p, lane, bad) {
+    p.st = "fly"; p.bad = !!bad; p.life = FLY_FR;
+    p.vx = (laneX(lane) - p.x) / FLY_FR;
+    p.vy = (CHUTE_TOP + 26 - p.y) / FLY_FR;
+  }
+
+  function loseLife(reason) {
+    g.combo = 0;
+    g.lives--;
+    setMsg(reason);
+    if (g.lives <= 0) finish();
+  }
+
+  /* 玩家把当前最靠前的包裹推进 lane 号滑道 */
+  function sortTo(lane) {
+    if (!g || g.phase !== "run") return "idle";
+    lane = Math.floor(Number(lane) || 0);
+    if (lane < 0 || lane > LANES - 1) return "idle";
+    var p = frontParcel();
+    if (!p) { setMsg("🫧 手滑了，带上没件"); return "empty"; }
+    g.handled++;
+    if (p.kind === "ban") {
+      g.wrong++;
+      flyOut(p, lane, true);
+      bumpLevel();
+      loseLife("☠️ 违禁件不能上车！");
+      return "banned";
+    }
+    if (p.dest === lane) {
+      var gain = gainOf(g.combo, p.kind);
+      g.score += gain;
+      g.combo++;
+      if (g.combo > g.maxCombo) g.maxCombo = g.combo;
+      g.ok++;
+      flyOut(p, lane, false);
+      setMsg((p.kind === "exp" ? "⚡ 加急件 +" : "✅ +") + gain + (g.combo > 1 ? "（连击 " + g.combo + "）" : ""));
+      bumpLevel();
+      award();
+      return "ok";
+    }
+    g.wrong++;
+    flyOut(p, lane, true);
+    bumpLevel();
+    loseLife("❌ 分错口了：应去 " + ZONES[p.dest].n);
+    return "wrong";
+  }
+
+  function passOff(p) {
+    g.handled++;
+    if (p.kind === "ban") {
+      g.score += BAN_BONUS;
+      g.combo++;
+      if (g.combo > g.maxCombo) g.maxCombo = g.combo;
+      g.bans++;
+      setMsg("🛡️ 违禁件放行 +" + BAN_BONUS);
+      bumpLevel();
+      award();
+    } else {
+      g.miss++;
+      bumpLevel();
+      loseLife("📭 漏件了！");
+    }
+    p.st = "gone";
+  }
+
+  function finish() {
+    if (!g || g.phase === "over") return;
+    g.phase = "over";
+    g.grade = gradeOf(g.score);
+    rec.shifts++;
+    rec.sorted += g.ok;
+    rec.bans += g.bans;
+    if (g.score > rec.best) rec.best = g.score;
+    if (g.maxCombo > rec.maxCombo) rec.maxCombo = g.maxCombo;
+    saveRec();
+    award();
+    pclSync();
+  }
+
+  function startShift() {
+    g = newShift();
+    g.phase = "run";
+    g.lastSpawn = -9999;
+    setMsg("🚚 开工！包裹来了");
+    pclSync();
+  }
+
+  /* ---------- 帧推进 ---------- */
+  function step() {
+    if (!g) return;
+    g.f++;
+    if (g.msgF > 0) g.msgF--;
+    var i, p;
+    if (g.phase === "run") {
+      if (g.f - g.lastSpawn >= gapOf(g.level)) {
+        g.lastSpawn = g.f;
+        g.list.push(makeParcel());
+      }
+      var spd = spdOf(g.level);
+      for (i = 0; i < g.list.length; i++) {
+        p = g.list[i];
+        if (p.st === "belt") {
+          p.y += spd;
+          if (p.y > BELT_END) passOff(p);
+        }
+      }
+    }
+    for (i = 0; i < g.list.length; i++) {
+      p = g.list[i];
+      if (p.st === "fly") {
+        p.x += p.vx; p.y += p.vy; p.life--;
+        if (p.life <= 0) p.st = "gone";
+      }
+    }
+    var keep = [];
+    for (i = 0; i < g.list.length; i++) if (g.list[i].st !== "gone") keep.push(g.list[i]);
+    g.list = keep;
+  }
+
+  /* ---------- 输入 ---------- */
+  function primary(x, y) {
+    if (!g) return "none";
+    if (g.phase === "idle" || g.phase === "over") { startShift(); return "start"; }
+    if (typeof y === "number" && y >= CHUTE_TOP) return sortTo(laneOfX(x));
+    return "none";
+  }
+
+  function onKeyDown(e) {
+    if (!active || !g) return;
+    var tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    var k = e.key;
+    if (e.repeat) { if (e.preventDefault) e.preventDefault(); return; }
+    if (k === "1" || k === "2" || k === "3" || k === "4") {
+      if (e.preventDefault) e.preventDefault();
+      if (g.phase === "run") sortTo(parseInt(k, 10) - 1); else startShift();
+      return;
+    }
+    if (k === "a" || k === "A" || k === "ArrowLeft") { if (e.preventDefault) e.preventDefault(); if (g.phase === "run") sortTo(0); return; }
+    if (k === "s" || k === "S" || k === "ArrowDown") { if (e.preventDefault) e.preventDefault(); if (g.phase === "run") sortTo(1); return; }
+    if (k === "d" || k === "D" || k === "ArrowUp") { if (e.preventDefault) e.preventDefault(); if (g.phase === "run") sortTo(2); return; }
+    if (k === "f" || k === "F" || k === "ArrowRight") { if (e.preventDefault) e.preventDefault(); if (g.phase === "run") sortTo(3); return; }
+    if (k === " " || k === "Spacebar" || k === "Enter") {
+      if (e.preventDefault) e.preventDefault();
+      if (g.phase !== "run") startShift();
+    }
+  }
+
+  /* ---------- 绘制 ---------- */
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function drawParcel(p) {
+    var s = p.kind === "exp" ? 46 : 42;
+    var col = p.kind === "ban" ? "#5a5f6d" : (p.kind === "exp" ? "#ffd76e" : "#c98f4e");
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    if (p.st === "fly") ctx.globalAlpha = Math.max(0.15, p.life / FLY_FR);
+    ctx.fillStyle = "rgba(0,0,0,.28)";
+    rr(-s / 2 + 3, -s / 2 + 5, s, s, 7); ctx.fill();
+    ctx.fillStyle = col;
+    rr(-s / 2, -s / 2, s, s, 7); ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,.32)"; ctx.lineWidth = 1.5;
+    rr(-s / 2, -s / 2, s, s, 7); ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,.22)";
+    ctx.fillRect(-s / 2, -4, s, 8);
+    if (p.kind === "ban") {
+      ctx.font = "20px system-ui,sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ff8b8b";
+      ctx.fillText("☠️", 0, 1);
+    } else {
+      var z = ZONES[p.dest];
+      ctx.fillStyle = z.c;
+      rr(-16, -17, 32, 15, 4); ctx.fill();
+      ctx.fillStyle = "#0d1016";
+      ctx.font = "bold 11px system-ui,sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(z.n, 0, -9);
+      ctx.font = "15px system-ui,sans-serif";
+      ctx.fillStyle = "#2b1c0c";
+      ctx.fillText(p.kind === "exp" ? "⚡" : z.e, 0, 10);
+    }
+    if (p.st === "fly" && p.bad) {
+      ctx.strokeStyle = "#ff6b6b"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(-12, -12); ctx.lineTo(12, 12);
+      ctx.moveTo(12, -12); ctx.lineTo(-12, 12); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function draw() {
+    if (!ctxOk || !ctx || !g) return;
+    var i;
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#141a24");
+    bg.addColorStop(1, "#0c1017");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    /* 传送带 */
+    ctx.fillStyle = "#232b38";
+    ctx.fillRect(96, 0, 188, CHUTE_TOP);
+    ctx.strokeStyle = "rgba(255,255,255,.08)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(96, 0); ctx.lineTo(96, CHUTE_TOP);
+    ctx.moveTo(284, 0); ctx.lineTo(284, CHUTE_TOP); ctx.stroke();
+    var off = g.phase === "run" ? (g.f * spdOf(g.level)) % 28 : 0;
+    ctx.strokeStyle = "rgba(255,255,255,.06)"; ctx.lineWidth = 6;
+    for (i = -1; i < 17; i++) {
+      var yy = i * 28 + off;
+      ctx.beginPath(); ctx.moveTo(100, yy); ctx.lineTo(280, yy); ctx.stroke();
+    }
+    /* 扫描线 */
+    ctx.strokeStyle = "rgba(90,200,255,.35)"; ctx.lineWidth = 2;
+    ctx.setLineDash([7, 6]);
+    ctx.beginPath(); ctx.moveTo(96, BELT_END); ctx.lineTo(284, BELT_END); ctx.stroke();
+    ctx.setLineDash([]);
+
+    for (i = 0; i < g.list.length; i++) drawParcel(g.list[i]);
+
+    /* 滑道 */
+    for (i = 0; i < LANES; i++) {
+      var z = ZONES[i];
+      var x0 = i * LANE_W;
+      ctx.fillStyle = "rgba(255,255,255,.05)";
+      rr(x0 + 4, CHUTE_TOP, LANE_W - 8, H - CHUTE_TOP - 6, 10); ctx.fill();
+      ctx.strokeStyle = z.c; ctx.lineWidth = 2;
+      rr(x0 + 4, CHUTE_TOP, LANE_W - 8, H - CHUTE_TOP - 6, 10); ctx.stroke();
+      ctx.fillStyle = z.c;
+      ctx.font = "bold 15px system-ui,sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(z.e + " " + z.n, x0 + LANE_W / 2, CHUTE_TOP + 26);
+      ctx.fillStyle = "rgba(255,255,255,.45)";
+      ctx.font = "11px system-ui,sans-serif";
+      ctx.fillText("键 " + (i + 1), x0 + LANE_W / 2, CHUTE_TOP + 48);
+    }
+
+    /* HUD */
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillStyle = "#e8eef8";
+    ctx.font = "bold 17px system-ui,sans-serif";
+    ctx.fillText("得分 " + g.score, 10, 10);
+    ctx.font = "12px system-ui,sans-serif";
+    ctx.fillStyle = "rgba(232,238,248,.72)";
+    ctx.fillText("Lv." + g.level + " · 已处理 " + g.handled, 10, 32);
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#ff8b8b";
+    ctx.font = "15px system-ui,sans-serif";
+    var hearts = "";
+    for (i = 0; i < Math.max(0, g.lives); i++) hearts += "❤";
+    ctx.fillText(hearts || "—", W - 10, 11);
+    ctx.fillStyle = g.combo >= 5 ? "#ffd76e" : "rgba(232,238,248,.72)";
+    ctx.font = "bold 13px system-ui,sans-serif";
+    ctx.fillText("连击 x" + g.combo, W - 10, 32);
+
+    if (g.msgF > 0 && g.msg) {
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillStyle = "rgba(0,0,0,.5)";
+      rr(60, 384, 260, 30, 12); ctx.fill();
+      ctx.fillStyle = "#ffe9b8";
+      ctx.font = "bold 13px system-ui,sans-serif";
+      ctx.fillText(g.msg, 190, 399);
+    }
+
+    if (g.phase === "idle" || g.phase === "over") {
+      ctx.fillStyle = "rgba(8,11,16,.78)";
+      ctx.fillRect(0, 0, W, CHUTE_TOP);
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      if (g.phase === "idle") {
+        ctx.fillStyle = "#ffd76e";
+        ctx.font = "bold 24px system-ui,sans-serif";
+        ctx.fillText("📦 分拣中心", W / 2, 150);
+        ctx.fillStyle = "#e8eef8";
+        ctx.font = "13px system-ui,sans-serif";
+        ctx.fillText("按 1/2/3/4 或点下方滑道，把包裹送对区", W / 2, 192);
+        ctx.fillText("⚡ 加急件双倍分 · ☠️ 违禁件千万别碰，放它流走", W / 2, 214);
+        ctx.fillText("分错 / 漏件各扣一条命，三条命用完下班", W / 2, 236);
+        ctx.fillStyle = "#7fe3b0";
+        ctx.font = "bold 15px system-ui,sans-serif";
+        ctx.fillText("点这里 / 按空格开工", W / 2, 286);
+      } else {
+        var gr = g.grade || gradeOf(g.score);
+        ctx.fillStyle = "#ffd76e";
+        ctx.font = "bold 26px system-ui,sans-serif";
+        ctx.fillText(gr.e + " " + gr.t, W / 2, 132);
+        ctx.fillStyle = "#e8eef8";
+        ctx.font = "bold 20px system-ui,sans-serif";
+        ctx.fillText("本班 " + g.score + " 分", W / 2, 172);
+        ctx.font = "13px system-ui,sans-serif";
+        ctx.fillStyle = "rgba(232,238,248,.8)";
+        ctx.fillText(gr.d, W / 2, 200);
+        ctx.fillText("分对 " + g.ok + " · 放行违禁 " + g.bans + " · 分错 " + g.wrong + " · 漏件 " + g.miss, W / 2, 228);
+        ctx.fillText("最高连击 x" + g.maxCombo + " · 历史最佳 " + (rec.best >= 0 ? rec.best : 0) + " 分", W / 2, 250);
+        ctx.fillStyle = "#7fe3b0";
+        ctx.font = "bold 15px system-ui,sans-serif";
+        ctx.fillText("点这里 / 按空格再来一班", W / 2, 300);
+      }
+    }
+  }
+
+  /* ---------- HUD 同步 ---------- */
+  function pclSync() {
+    var eS = document.getElementById("pclScore");
+    var eB = document.getElementById("pclBest");
+    var eC = document.getElementById("pclCombo");
+    var eR = document.getElementById("pclRec");
+    if (eS) eS.textContent = g ? (g.score + " 分（Lv." + g.level + "）") : "—";
+    if (eB) eB.textContent = rec.best >= 0 ? rec.best + " 分" : "—";
+    if (eC) eC.textContent = (g ? g.combo : 0) + "（历史最佳 " + rec.maxCombo + "）";
+    if (eR) eR.textContent = rec.shifts + " 班 / 分拣 " + rec.sorted + " 件 / 放行 " + rec.bans;
+  }
+
+  /* ---------- 生命周期 ---------- */
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(); draw();
+    if (g && (g.f % 12 === 0)) pclSync();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("pclCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+    ctxOk = true;
+    g = newShift();
+    cav.addEventListener("pointerdown", function (e) {
+      if (e.preventDefault) e.preventDefault();
+      var r = cav.getBoundingClientRect ? cav.getBoundingClientRect() : null;
+      var x = W / 2, y = 0;
+      if (r && r.width) {
+        x = (e.clientX - r.left) * (W / r.width);
+        y = (e.clientY - r.top) * (H / (r.height || H));
+      }
+      primary(x, y);
+    });
+    var pad = document.getElementById("pclPad");
+    if (pad) {
+      pad.addEventListener("click", function (e) {
+        var t = e.target;
+        while (t && t !== pad && !(t.getAttribute && t.getAttribute("data-pcl"))) t = t.parentNode;
+        if (!t || t === pad) return;
+        var v = parseInt(t.getAttribute("data-pcl"), 10);
+        if (!isFinite(v)) return;
+        if (!g || g.phase !== "run") startShift(); else sortTo(v);
+      });
+    }
+    document.addEventListener("keydown", onKeyDown);
+    inited = true;
+  }
+
+  window.pclRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newShift();
+    pclSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.pclStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__pclTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; }, setActive: function (v) { active = !!v; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    spdOf: spdOf, gapOf: gapOf, laneX: laneX, laneOfX: laneOfX,
+    pickKind: pickKind, gainOf: gainOf, levelOf: levelOf, gradeOf: gradeOf,
+    newShift: newShift, startShift: startShift, makeParcel: makeParcel,
+    frontParcel: frontParcel, sortTo: sortTo, passOff: passOff,
+    finish: finish, step: step, primary: primary, draw: draw,
+    pclSync: pclSync, ensureInit: ensureInit, setMsg: setMsg,
+    onKeyDown: onKeyDown, award: award,
+    ZONES: ZONES, GRADES: GRADES,
+    consts: { KEY: KEY, W: W, H: H, LANES: LANES, LANE_W: LANE_W,
+      CHUTE_TOP: CHUTE_TOP, BELT_END: BELT_END, ARM_Y: ARM_Y,
+      BASE_SPD: BASE_SPD, SPD_STEP: SPD_STEP, SPD_MAX: SPD_MAX,
+      BASE_GAP: BASE_GAP, GAP_STEP: GAP_STEP, MIN_GAP: MIN_GAP,
+      CLEAR_PER: CLEAR_PER, LEVEL_MAX: LEVEL_MAX, LIVES: LIVES,
+      BASE_PT: BASE_PT, COMBO_CAP: COMBO_CAP, BAN_BONUS: BAN_BONUS,
+      EXP_P: EXP_P, BAN_P: BAN_P, FLY_FR: FLY_FR, MSG_FR: MSG_FR,
+      ACH_SORT: ACH_SORT, ACH_COMBO: ACH_COMBO }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "📦", name: "分拣上岗", desc: "在随便分拣里单班正确分拣 20 件包裹", test: function (u) { return (u.pclshift || 0) >= 1; } },
+      { emoji: "⚡", name: "手快眼准", desc: "在随便分拣里单班打出 15 连击", test: function (u) { return (u.pclace || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "传送带不会等你想清楚，它只会越转越快。",
+      "分错一件的代价，是让一个人多等三天。",
+      "有些包裹注定不属于你，让它流走也是一种正确。",
+      "连击断了别懊恼，下一件马上就到眼前。",
+      "所谓熟练，就是把慌张练成了肌肉记忆。"
     );
   }
 })();
