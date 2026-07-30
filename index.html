@@ -1592,6 +1592,7 @@
         <button data-tab="alchemy">⚗️ 随便炼金</button>
         <button data-tab="sushi">🍣 随便寿司</button>
         <button data-tab="parcel">📦 随便分拣</button>
+        <button data-tab="uttt">⭕ 随便井字·终极版</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8726,6 +8727,56 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="uttt">
+    <h2>⭕ 随便井字·终极版</h2>
+    <p class="sub">九宫套九宫——你在哪格落子，就把对手送进哪块棋盘</p>
+    <style>
+      #uttt .ox-wrap { max-width:420px; margin:0 auto; }
+      #uttt .ox-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #uttt .ox-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #uttt .ox-hud b { font-weight:700; color:#4aa3ff; }
+      #uttt .ox-bar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #uttt .ox-bar select, #uttt .ox-bar button { padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #uttt .ox-bar button:active { transform:translateY(1px); background:rgba(255,255,255,.14); }
+      #uttt .ox-msg { text-align:center; min-height:1.5em; font-size:.88rem; margin-bottom:10px; font-weight:700; }
+      #uttt .ox-macro { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; max-width:380px; margin:0 auto 10px; }
+      #uttt .ox-board { position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:3px; padding:4px; border-radius:10px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); transition:border-color .18s, box-shadow .18s; }
+      #uttt .ox-board.on { border-color:#4aa3ff; box-shadow:0 0 0 1px rgba(74,163,255,.6) inset, 0 0 14px rgba(74,163,255,.25); }
+      #uttt .ox-cell { aspect-ratio:1/1; border-radius:6px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.05); color:inherit; font-size:clamp(.7rem,4vw,1.05rem); line-height:1; padding:0; cursor:pointer; }
+      #uttt .ox-cell:disabled { cursor:default; opacity:.9; }
+      #uttt .ox-cell.last { background:rgba(74,163,255,.28); }
+      #uttt .ox-cover { position:absolute; inset:0; display:none; align-items:center; justify-content:center; border-radius:10px; font-size:2.2rem; background:rgba(10,14,24,.72); }
+      #uttt .ox-board.done .ox-cover { display:flex; }
+      #uttt .ox-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="ox-wrap">
+      <div class="ox-hud">
+        <span>战绩 <b id="utttRec">—</b></span>
+        <span>连胜 <b id="utttStreak">0（历史最佳 0）</b></span>
+      </div>
+      <div class="ox-bar">
+        <select id="utttLevel" aria-label="AI 难度">
+          <option value="1">🐣 新手 AI</option>
+          <option value="2" selected>🧢 老手 AI</option>
+          <option value="3">🧙 宗师 AI</option>
+        </select>
+        <select id="utttFirst" aria-label="先后手">
+          <option value="me" selected>我先手 ❌</option>
+          <option value="ai">AI 先手 ⭕</option>
+        </select>
+        <button type="button" id="utttNew">🆕 新开一局</button>
+        <button type="button" id="utttUndo">↩️ 悔棋</button>
+      </div>
+      <div class="ox-msg" id="utttMsg">点「新开一局」开战</div>
+      <div class="ox-macro" id="utttBoard"></div>
+      <p class="ox-help">
+        终极井字棋（Ultimate Tic-Tac-Toe）：9 块小棋盘拼成大九宫，<b>你在小棋盘的哪一格落子，对手下一步就被送进对应位置的那块小棋盘</b>；目标棋盘已分出胜负或下满时对手才能自由选盘。<br>
+        赢下一块小棋盘就占住大九宫的那一格，<b>大九宫三连即获全局胜利</b>；蓝框标出的是当前允许落子的棋盘，高亮格是对手刚落的那手。<br>
+        三档 AI：🐣 新手随缘乱下，🧢 老手会抢盘会堵棋，🧙 宗师带 α-β 剪枝搜索、专在你最想去的那格等你。悔棋一次撤回你和 AI 各一手。<br>
+        击败宗师 AI 解锁「⭕ 以子之矛」，任意难度三连胜解锁「👑 九宫之王」，战绩本地存档（suibian_uttt）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="parcel">
     <h2>📦 随便分拣</h2>
     <p class="sub">传送带越转越快，包裹越堆越多——手快眼准，才配站在分拣线上</p>
@@ -9523,6 +9574,7 @@
     if (id === "alchemy" && typeof alchRender === "function") alchRender();
     if (id === "sushi" && typeof szsRender === "function") szsRender();
     if (id === "parcel" && typeof pclRender === "function") pclRender();
+    if (id === "uttt" && typeof utttRender === "function") utttRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -9598,6 +9650,7 @@
     if (id !== "alchemy" && typeof alchStop === "function") alchStop();
     if (id !== "sushi" && typeof szsStop === "function") szsStop();
     if (id !== "parcel" && typeof pclStop === "function") pclStop();
+    if (id !== "uttt" && typeof utttStop === "function") utttStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9803,6 +9856,7 @@
     alchemy: "随便炼金 alchemy potion 炼金 药水 魔药 坩埚 火候 控温 结晶 材料 转轮 抓取 贤者之石 炼成 灵药 游戏 挑战 休闲",
     sushi: "随便寿司 sushi 寿司 切鱼 刀工 捏饭 醋饭 上桌 传送带 板前 师傅 三文鱼 金枪鱼 日料 料理 手感 游戏 挑战 休闲",
     parcel: "随便分拣 parcel 分拣 快递 包裹 驿站 物流 传送带 流水线 面单 加急件 违禁品 反应 手速 连击 街机 游戏 挑战 休闲",
+    uttt: "随便井字 uttt ultimate tictactoe 井字棋 终极井字 九宫 大局观 下棋 棋盘 对弈 人机 ai 对战 策略 悔棋 游戏 挑战 休闲",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10069,6 +10123,7 @@ splitbill:"tools",
     alchemy:"games",
     sushi:"games",
     parcel:"games",
+    uttt:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -60372,6 +60427,436 @@ splitbill:"tools",
       "有些包裹注定不属于你，让它流走也是一种正确。",
       "连击断了别懊恼，下一件马上就到眼前。",
       "所谓熟练，就是把慌张练成了肌肉记忆。"
+    );
+  }
+})();
+/* ===== ⭕ 随便井字·终极版 uttt ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_uttt";
+  var LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+  ];
+  var CELL_W = [4, 2, 4, 2, 6, 2, 4, 2, 4];   // 落子位置权重（中 > 角 > 边）
+  var MACRO_W = [20, 12, 20, 12, 32, 12, 20, 12, 20]; // 大九宫棋盘权重
+  var BOARD_PT = 100;                          // 占下一块小棋盘的基础分
+  var WIN_PT = 10000;                          // 全局胜利分
+  var LINE1_PT = 15, LINE2_PT = 120;           // 大九宫潜在连线分
+  var NEAR_PT = 6, CENTER_PT = 3;              // 小棋盘两连 / 中心分
+  var AI_DELAY = 260;                          // AI 出手延迟（毫秒）
+  var STREAK_ACH = 3;                          // 连胜徽章门槛
+  var NAMES = ["左上", "上路", "右上", "左路", "中路", "右路", "左下", "下路", "右下"];
+  var rnd = Math.random;
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { games: 0, w: 0, l: 0, d: 0, streak: 0, bestStreak: 0, aM: 0, aK: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.games = nInt(o.games); d.w = nInt(o.w); d.l = nInt(o.l); d.d = nInt(o.d);
+      d.streak = nInt(o.streak); d.bestStreak = nInt(o.bestStreak);
+      d.aM = o.aM ? 1 : 0; d.aK = o.aK ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 纯函数：棋盘规则 ---------- */
+  function lineWin(cells) {
+    for (var i = 0; i < LINES.length; i++) {
+      var a = cells[LINES[i][0]];
+      if (a && (a === "X" || a === "O") &&
+          a === cells[LINES[i][1]] && a === cells[LINES[i][2]]) return a;
+    }
+    return "";
+  }
+  function boardFull(cells) {
+    for (var i = 0; i < 9; i++) if (!cells[i]) return false;
+    return true;
+  }
+  function boardStatus(cells) {
+    var w = lineWin(cells);
+    if (w) return w;
+    return boardFull(cells) ? "D" : "";
+  }
+  function newGame() {
+    var boards = [];
+    for (var b = 0; b < 9; b++) {
+      var cs = [];
+      for (var c = 0; c < 9; c++) cs.push("");
+      boards.push(cs);
+    }
+    return {
+      boards: boards,
+      macro: ["", "", "", "", "", "", "", "", ""],
+      turn: "X", forced: -1, hist: [],
+      phase: "run", winner: ""
+    };
+  }
+  function legalMoves(st) {
+    var out = [];
+    if (!st || st.phase !== "run") return out;
+    var b, c;
+    if (st.forced >= 0 && st.forced <= 8 && st.macro[st.forced] === "") {
+      b = st.forced;
+      for (c = 0; c < 9; c++) if (!st.boards[b][c]) out.push([b, c]);
+      return out;
+    }
+    for (b = 0; b < 9; b++) {
+      if (st.macro[b] !== "") continue;
+      for (c = 0; c < 9; c++) if (!st.boards[b][c]) out.push([b, c]);
+    }
+    return out;
+  }
+  function gameStatus(st) {
+    var w = lineWin(st.macro);
+    if (w) return w;
+    for (var i = 0; i < 9; i++) if (st.macro[i] === "") return "";
+    return "D";
+  }
+  function applyMove(st, b, c, who) {
+    st.hist.push({ b: b, c: c, who: who, pm: st.macro[b], pf: st.forced });
+    st.boards[b][c] = who;
+    st.macro[b] = boardStatus(st.boards[b]);
+    st.forced = st.macro[c] === "" ? c : -1;
+    st.turn = who === "X" ? "O" : "X";
+    st.winner = gameStatus(st);
+    if (st.winner) st.phase = "over";
+  }
+  function undoMove(st) {
+    var h = st.hist.pop();
+    if (!h) return;
+    st.boards[h.b][h.c] = "";
+    st.macro[h.b] = h.pm;
+    st.forced = h.pf;
+    st.turn = h.who;
+    st.winner = "";
+    st.phase = "run";
+  }
+
+  /* ---------- 纯函数：评估与搜索 ---------- */
+  function evalSmall(cells, ai) {
+    var op = ai === "X" ? "O" : "X", s = 0, i, j;
+    for (i = 0; i < LINES.length; i++) {
+      var a = 0, o = 0, e = 0;
+      for (j = 0; j < 3; j++) {
+        var v = cells[LINES[i][j]];
+        if (v === ai) a++; else if (v === op) o++; else e++;
+      }
+      if (a === 2 && e === 1) s += NEAR_PT;
+      if (o === 2 && e === 1) s -= NEAR_PT;
+    }
+    if (cells[4] === ai) s += CENTER_PT;
+    else if (cells[4] === op) s -= CENTER_PT;
+    return s;
+  }
+  function evaluate(st, ai) {
+    var op = ai === "X" ? "O" : "X", s = 0, i, j;
+    for (i = 0; i < 9; i++) {
+      if (st.macro[i] === ai) s += BOARD_PT + MACRO_W[i];
+      else if (st.macro[i] === op) s -= BOARD_PT + MACRO_W[i];
+      else if (st.macro[i] === "") s += evalSmall(st.boards[i], ai);
+    }
+    for (i = 0; i < LINES.length; i++) {
+      var a = 0, o = 0;
+      for (j = 0; j < 3; j++) {
+        var v = st.macro[LINES[i][j]];
+        if (v === ai) a++; else if (v === op) o++;
+      }
+      if (a && !o) s += a === 2 ? LINE2_PT : LINE1_PT;
+      if (o && !a) s -= o === 2 ? LINE2_PT : LINE1_PT;
+    }
+    return s;
+  }
+  function orderMoves(moves) {
+    return moves.slice().sort(function (m, n) {
+      return (CELL_W[n[1]] + MACRO_W[n[0]] / 10) - (CELL_W[m[1]] + MACRO_W[m[0]] / 10);
+    });
+  }
+  function search(st, depth, alpha, beta, ai) {
+    if (st.winner) {
+      if (st.winner === ai) return WIN_PT + depth;
+      if (st.winner === "D") return 0;
+      return -WIN_PT - depth;
+    }
+    if (depth <= 0) return evaluate(st, ai);
+    var moves = orderMoves(legalMoves(st));
+    if (!moves.length) return 0;
+    var maxing = st.turn === ai;
+    var best = maxing ? -Infinity : Infinity;
+    for (var i = 0; i < moves.length; i++) {
+      applyMove(st, moves[i][0], moves[i][1], st.turn);
+      var v = search(st, depth - 1, alpha, beta, ai);
+      undoMove(st);
+      if (maxing) {
+        if (v > best) best = v;
+        if (best > alpha) alpha = best;
+      } else {
+        if (v < best) best = v;
+        if (best < beta) beta = best;
+      }
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+  function depthFor(n) {
+    if (n > 24) return 3;
+    if (n > 9) return 4;
+    return 5;
+  }
+  function aiPick(st, level) {
+    var moves = legalMoves(st);
+    if (!moves.length) return null;
+    var lv = Math.floor(Number(level) || 1);
+    if (lv <= 1) return moves[Math.floor(rnd() * moves.length) % moves.length];
+    var ai = st.turn;
+    var depth = lv === 2 ? 2 : depthFor(moves.length);
+    var ordered = orderMoves(moves);
+    var best = null, bestV = -Infinity;
+    for (var i = 0; i < ordered.length; i++) {
+      applyMove(st, ordered[i][0], ordered[i][1], ai);
+      var v = search(st, depth - 1, -Infinity, Infinity, ai);
+      undoMove(st);
+      if (lv === 2) v += rnd() * 8; // 老手带一点手抖
+      if (v > bestV) { bestV = v; best = ordered[i]; }
+    }
+    return best;
+  }
+
+  /* ---------- 局面与 DOM ---------- */
+  var g = null, meSym = "X", aiSym = "O", level = 2;
+  var aiTmr = 0, active = false, inited = false;
+  var elBoard = null, elMsg = null, elRec = null, elStreak = null;
+  var cellEls = null, boardEls = null, coverEls = null;
+
+  function symTxt(v) { return v === "X" ? "\u274C" : v === "O" ? "\u2B55" : ""; }
+
+  function setMsg(t) { if (elMsg) elMsg.textContent = t; }
+
+  function award(won) {
+    if (won) {
+      rec.streak += 1;
+      if (rec.streak > rec.bestStreak) rec.bestStreak = rec.streak;
+      if (level === 3 && !rec.aM) {
+        rec.aM = 1;
+        try { bumpUsage("utttmaster"); } catch (e1) {}
+      }
+      if (rec.streak >= STREAK_ACH && !rec.aK) {
+        rec.aK = 1;
+        try { bumpUsage("utttstreak"); } catch (e2) {}
+      }
+    } else {
+      rec.streak = 0;
+    }
+  }
+
+  function finish() {
+    rec.games += 1;
+    if (g.winner === meSym) {
+      rec.w += 1; award(true);
+      setMsg(level === 3 ? "\uD83C\uDFC6 你赢了宗师！这局值得截图" : "\uD83C\uDF89 你赢了！大九宫三连达成");
+    } else if (g.winner === aiSym) {
+      rec.l += 1; award(false);
+      setMsg("\uD83D\uDCA5 AI 获胜——它早就在那格等你了");
+    } else {
+      rec.d += 1;
+      setMsg("\uD83E\uDD1D 平局，九宫全满难分高下");
+    }
+    saveRec();
+    syncHud();
+  }
+
+  function whoseMsg() {
+    if (!g || g.phase !== "run") return;
+    var mine = g.turn === meSym;
+    var zone = g.forced >= 0 && g.macro[g.forced] === "" ? "\u9650\u5B9A\u5728\u3010" + NAMES[g.forced] + "\u3011\u68CB\u76D8" : "\u4EFB\u9009\u68CB\u76D8";
+    setMsg(mine ? "\u8F6E\u5230\u4F60\uFF0C" + zone : "\u2026 AI \u601D\u8003\u4E2D");
+  }
+
+  function syncHud() {
+    if (elRec) elRec.textContent = rec.w + "\u80DC " + rec.l + "\u8D1F " + rec.d + "\u5E73";
+    if (elStreak) elStreak.textContent = rec.streak + "\uFF08\u5386\u53F2\u6700\u4F73 " + rec.bestStreak + "\uFF09";
+  }
+
+  function syncBoard() {
+    if (!cellEls || !g) return;
+    var legal = {};
+    var mine = g.phase === "run" && g.turn === meSym && !aiTmr;
+    if (mine) {
+      var mv = legalMoves(g);
+      for (var i = 0; i < mv.length; i++) legal[mv[i][0] * 9 + mv[i][1]] = 1;
+    }
+    var last = g.hist.length ? g.hist[g.hist.length - 1] : null;
+    for (var b = 0; b < 9; b++) {
+      var st = g.macro[b];
+      boardEls[b].className = "ox-board" +
+        (st !== "" ? " done" : "") +
+        (mine && g.phase === "run" && st === "" && (g.forced === b || g.forced < 0 || g.macro[g.forced] !== "") ? " on" : "");
+      coverEls[b].textContent = st === "D" ? "\uD83E\uDD1D" : symTxt(st);
+      for (var c = 0; c < 9; c++) {
+        var el = cellEls[b * 9 + c];
+        var v = g.boards[b][c];
+        el.textContent = symTxt(v);
+        el.disabled = !legal[b * 9 + c];
+        el.className = "ox-cell" + (last && last.b === b && last.c === c ? " last" : "");
+      }
+    }
+  }
+
+  function scheduleAi() {
+    if (!g || g.phase !== "run" || g.turn !== aiSym || aiTmr) return;
+    aiTmr = setTimeout(function () {
+      aiTmr = 0;
+      if (!g || g.phase !== "run" || g.turn !== aiSym) return;
+      var mv = aiPick(g, level);
+      if (mv) applyMove(g, mv[0], mv[1], aiSym);
+      if (g.phase === "over") finish(); else whoseMsg();
+      syncBoard();
+    }, AI_DELAY);
+  }
+
+  function playerMove(b, c) {
+    if (!g || g.phase !== "run" || g.turn !== meSym || aiTmr) return;
+    var mv = legalMoves(g), ok = false;
+    for (var i = 0; i < mv.length; i++) if (mv[i][0] === b && mv[i][1] === c) { ok = true; break; }
+    if (!ok) return;
+    applyMove(g, b, c, meSym);
+    if (g.phase === "over") finish(); else { whoseMsg(); scheduleAi(); }
+    syncBoard();
+  }
+
+  function undoTurn() {
+    if (!g || !g.hist.length || aiTmr) return;
+    var undone = g.phase === "over"; // 终局悔棋也算重开残局
+    undoMove(g);
+    // 再撤到轮到玩家为止（撤掉 AI 那手）
+    while (g.hist.length && g.turn !== meSym) undoMove(g);
+    if (g.turn !== meSym && !g.hist.length && meSym !== "X") {
+      // AI 先手的开局：把 AI 第一手也撤没了，重新让 AI 走
+      scheduleAi();
+    }
+    if (undone) setMsg("\u21A9\uFE0F \u6094\u68CB\u6210\u529F\uFF0C\u6B8B\u5C40\u91CD\u5F00");
+    else whoseMsg();
+    syncBoard();
+  }
+
+  function startGame() {
+    if (aiTmr) { clearTimeout(aiTmr); aiTmr = 0; }
+    var lvEl = document.getElementById("utttLevel");
+    var fsEl = document.getElementById("utttFirst");
+    level = lvEl ? Math.floor(Number(lvEl.value) || 2) : 2;
+    var meFirst = !fsEl || fsEl.value !== "ai";
+    meSym = meFirst ? "X" : "O";
+    aiSym = meFirst ? "O" : "X";
+    g = newGame();
+    whoseMsg();
+    if (!meFirst) scheduleAi();
+    syncBoard();
+    syncHud();
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    elBoard = document.getElementById("utttBoard");
+    elMsg = document.getElementById("utttMsg");
+    elRec = document.getElementById("utttRec");
+    elStreak = document.getElementById("utttStreak");
+    if (!elBoard || !elMsg || !elRec || !elStreak) return;
+    cellEls = []; boardEls = []; coverEls = [];
+    for (var b = 0; b < 9; b++) {
+      var bd = document.createElement("div");
+      bd.className = "ox-board";
+      for (var c = 0; c < 9; c++) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "ox-cell";
+        btn.disabled = true;
+        btn.setAttribute("data-ox", b * 9 + c);
+        bd.appendChild(btn);
+        cellEls.push(btn);
+      }
+      var cv = document.createElement("div");
+      cv.className = "ox-cover";
+      bd.appendChild(cv);
+      coverEls.push(cv);
+      elBoard.appendChild(bd);
+      boardEls.push(bd);
+    }
+    elBoard.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (!t || !t.getAttribute) return;
+      var k = t.getAttribute("data-ox");
+      if (k === null) return;
+      k = Number(k);
+      playerMove(Math.floor(k / 9), k % 9);
+    });
+    var bNew = document.getElementById("utttNew");
+    var bUndo = document.getElementById("utttUndo");
+    if (bNew) bNew.addEventListener("click", startGame);
+    if (bUndo) bUndo.addEventListener("click", undoTurn);
+    inited = true;
+  }
+
+  window.utttRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    syncHud();
+    if (!g) setMsg("\u70B9\u300C\u65B0\u5F00\u4E00\u5C40\u300D\u5F00\u6218");
+    syncBoard();
+  };
+  window.utttStop = function () {
+    active = false;
+    if (aiTmr) { clearTimeout(aiTmr); aiTmr = 0; }
+  };
+
+  window.__utttTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    setSides: function (me, ai) { meSym = me; aiSym = ai; },
+    setLevel: function (v) { level = v; },
+    getSides: function () { return { me: meSym, ai: aiSym, level: level }; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    lineWin: lineWin, boardFull: boardFull, boardStatus: boardStatus,
+    newGame: newGame, legalMoves: legalMoves, gameStatus: gameStatus,
+    applyMove: applyMove, undoMove: undoMove,
+    evalSmall: evalSmall, evaluate: evaluate, orderMoves: orderMoves,
+    search: search, depthFor: depthFor, aiPick: aiPick,
+    award: award, finish: finish, playerMove: playerMove,
+    undoTurn: undoTurn, startGame: startGame, ensureInit: ensureInit,
+    syncBoard: syncBoard, syncHud: syncHud, whoseMsg: whoseMsg, setMsg: setMsg,
+    scheduleAi: scheduleAi,
+    consts: { KEY: KEY, LINES: LINES, CELL_W: CELL_W, MACRO_W: MACRO_W,
+      BOARD_PT: BOARD_PT, WIN_PT: WIN_PT, LINE1_PT: LINE1_PT, LINE2_PT: LINE2_PT,
+      NEAR_PT: NEAR_PT, CENTER_PT: CENTER_PT,
+      AI_DELAY: AI_DELAY, STREAK_ACH: STREAK_ACH, NAMES: NAMES }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "\u2B55", name: "\u4EE5\u5B50\u4E4B\u77DB", desc: "\u5728\u968F\u4FBF\u4E95\u5B57\u91CC\u51FB\u8D25\u5B97\u5E08 AI", test: function (u) { return (u.utttmaster || 0) >= 1; } },
+      { emoji: "\uD83D\uDC51", name: "\u4E5D\u5BAB\u4E4B\u738B", desc: "\u5728\u968F\u4FBF\u4E95\u5B57\u91CC\u4EFB\u610F\u96BE\u5EA6\u4E09\u8FDE\u80DC", test: function (u) { return (u.utttstreak || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "\u4E95\u5B57\u68CB\u7684\u6B8B\u9177\u5728\u4E8E\uFF1A\u4F60\u7684\u6BCF\u4E00\u6B65\uFF0C\u90FD\u5728\u66FF\u5BF9\u624B\u9009\u6218\u573A\u3002",
+      "\u5927\u5C40\u89C2\u4E0D\u662F\u770B\u5F97\u8FDC\uFF0C\u800C\u662F\u820D\u5F97\u628A\u5C0F\u68CB\u76D8\u8BA9\u51FA\u53BB\u3002",
+      "\u5148\u624B\u8D62\u4E00\u534A\uFF1F\u5728\u4E5D\u5BAB\u5957\u4E5D\u5BAB\u91CC\uFF0C\u5148\u624B\u53EA\u8D62\u4E00\u4E2A\u5F00\u59CB\u3002",
+      "\u6094\u68CB\u4E0D\u53EF\u803B\uFF0C\u53EF\u803B\u7684\u662F\u4E0B\u4E00\u6B65\u8FD8\u8D70\u8001\u8DEF\u3002",
+      "\u771F\u6B63\u7684\u9AD8\u624B\uFF0C\u4F1A\u5728\u4F60\u6700\u60F3\u53BB\u7684\u90A3\u683C\u91CC\uFF0C\u7B49\u4F60\u3002"
     );
   }
 })();
