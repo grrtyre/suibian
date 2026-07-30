@@ -1586,6 +1586,7 @@
         <button data-tab="skydive">🪂 随便跳伞</button>
         <button data-tab="kayak">🛶 随便激流回旋</button>
         <button data-tab="bungee">🪢 随便蹦极</button>
+        <button data-tab="boomerang">🪃 随便回旋镖</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8582,6 +8583,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="boomerang">
+    <h2>🪃 随便回旋镖</h2>
+    <p class="sub">草原掷镖大赛：瞄准、蓄力、掷出，回旋镖乘风画弧沿途摘星，算准风向让它稳稳回到你手里</p>
+    <style>
+      #boomerang .bmr-wrap { max-width:420px; margin:0 auto; }
+      #boomerang canvas { width:100%; max-width:380px; border-radius:14px; display:block; margin:0 auto 10px; touch-action:none; cursor:crosshair; box-shadow:0 12px 30px rgba(0,0,0,.35); }
+      #boomerang .bmr-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #boomerang .bmr-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #boomerang .bmr-hud b { font-weight:700; color:#ffd54f; }
+      #boomerang .bmr-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="bmr-wrap">
+      <div class="bmr-hud">
+        <span>风 <b id="bmrWind">—</b></span>
+        <span>集星 <b id="bmrStar">—</b></span>
+        <span>最远接回 <b id="bmrBest">—</b></span>
+        <span>战绩 <b id="bmrRec">—</b></span>
+      </div>
+      <canvas id="bmrCav" width="380" height="520"></canvas>
+      <p class="bmr-help">
+        移动指针 / ←→ 调整瞄准线，按住画布 / 空格蓄力（力度条来回摆动），松手掷镖；<br>
+        回旋镖会画弧回旋，侧风（顶部风条）会把弧线吹偏——逆风修正角度才能让它转回身边的接镖圈；<br>
+        沿途碰到 ⭐ 自动收集，一掷收齐 3 星并接住解锁「✨ 摘星回旋」，首次接镖解锁「🪃 去而复返」；<br>
+        飞太远脱手不归、转速耗尽会坠地；最远接回距离进入存档（suibian_bmr）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -9220,6 +9248,7 @@
     if (id === "skydive" && typeof skyRender === "function") skyRender();
     if (id === "kayak" && typeof kayRender === "function") kayRender();
     if (id === "bungee" && typeof bgyRender === "function") bgyRender();
+    if (id === "boomerang" && typeof bmrRender === "function") bmrRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9288,6 +9317,7 @@
     if (id !== "skydive" && typeof skyStop === "function") skyStop();
     if (id !== "kayak" && typeof kayStop === "function") kayStop();
     if (id !== "bungee" && typeof bgyStop === "function") bgyStop();
+    if (id !== "boomerang" && typeof bmrStop === "function") bmrStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9487,6 +9517,7 @@
     skydive: "随便跳伞 skydive parachute 跳伞 降落伞 自由落体 开伞 风场 着陆 靶心 高空 极限运动 天空 翼装 游戏 竞技",
     kayak: "随便激流回旋 kayak canoe slalom 皮划艇 激流 回旋 水门 划艇 划桨 竞速 白浪 河流 礁石 罚时 计时 奥运 游戏 极限运动",
     bungee: "随便蹦极 bungee jump 蹦极 跳跃 峡谷 绳索 弹性 俯冲 贴水 落水 反弹 高空 极限运动 勇气 游戏 挑战",
+    boomerang: "随便回旋镖 boomerang 回旋镖 飞去来器 投掷 掷镖 接镖 风向 集星 弧线 轨迹 草原 狩猎 游戏 挑战 极限运动",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9746,6 +9777,7 @@ splitbill:"tools",
     skydive:"games",
     kayak:"games",
     bungee:"games",
+    boomerang:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -56084,6 +56116,431 @@ splitbill:"tools",
       "贴着水面掠过的那一厘米，才是勇气的计量单位。",
       "别在最低点松劲，那正是反弹开始的地方。",
       "怕高不丢人，绑好绳子还敢跳才是本事。"
+    );
+  }
+})();
+/* ===== 🪃 随便回旋镖 boomerang ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_bmr";
+  var W = 380, H = 520;
+  var PX = 190, PY = 468;      // 投掷者位置
+  var OMEGA = 0.034;           // 每帧偏转角（回旋力）
+  var DAMP = 0.9962;           // 空气阻尼
+  var HOME = 0.11;            // 回程气动归航（fr>HOME_FR 后生效）
+  var HOME_FR = 60;
+  var CATCH_R = 30;            // 接镖半径
+  var STAR_R = 18;             // 集星半径
+  var MIN_V = 1.05;            // 低于此速度坠地
+  var FLY_MAX = 900;           // 飞出此距离视为脱手不归
+  var MAX_FR = 2400;
+  var PXM = 5;                 // 5px = 1m
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() { return { throws: 0, catches: 0, drops: 0, stars: 0, bestD: -1, aC: 0, aA: 0 }; }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.throws = nInt(o.throws); d.catches = nInt(o.catches);
+      d.drops = nInt(o.drops); d.stars = nInt(o.stars);
+      var b = Math.floor(Number(o.bestD));
+      d.bestD = isFinite(b) && b >= 0 ? b : -1;
+      d.aC = o.aC ? 1 : 0; d.aA = o.aA ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 回合生成 ---- */
+  function makeRound() {
+    var wx = (rnd() * 2 - 1) * 0.028;           // 侧风加速度
+    var stars = [], tries = 0;
+    while (stars.length < 3 && tries < 200) {
+      tries++;
+      var sx = 46 + rnd() * (W - 92);
+      var sy = 66 + rnd() * 240;
+      var ok = true;
+      for (var i = 0; i < stars.length; i++) {
+        var dx = stars[i].x - sx, dy = stars[i].y - sy;
+        if (dx * dx + dy * dy < 60 * 60) { ok = false; break; }
+      }
+      if (ok) stars.push({ x: sx, y: sy, got: 0 });
+    }
+    while (stars.length < 3) stars.push({ x: 60 + stars.length * 120, y: 120, got: 0 });
+    return { wx: wx, stars: stars };
+  }
+  function windLabel(wx) {
+    var a = Math.abs(wx);
+    var dir = wx > 0.004 ? "→" : (wx < -0.004 ? "←" : "·");
+    var lv = a < 0.004 ? "无风" : (a < 0.013 ? "微风" : (a < 0.021 ? "劲风" : "狂风"));
+    return lv + " " + dir;
+  }
+
+  /* ---- 纯物理：单帧（fr 用于回程归航）---- */
+  function flightStep(b, wx, fr) {
+    b.vx += wx;
+    var c = Math.cos(OMEGA), s = Math.sin(OMEGA);
+    var nvx = b.vx * c - b.vy * s;
+    var nvy = b.vx * s + b.vy * c;
+    b.vx = nvx * DAMP; b.vy = nvy * DAMP;
+    if (fr > HOME_FR) {
+      var hx = PX - b.x, hy = PY - b.y;
+      var hd = Math.sqrt(hx * hx + hy * hy);
+      if (hd > 1) { b.vx += (hx / hd) * HOME; b.vy += (hy / hd) * HOME; }
+    }
+    b.x += b.vx; b.y += b.vy;
+    return b;
+  }
+  /* 整轮离线模拟（测试/AI 用）：返回结局 */
+  function simThrow(ang, pow, round) {
+    var v0 = 5 + 9 * Math.max(0, Math.min(1, pow));
+    var b = { x: PX, y: PY, vx: Math.sin(ang) * v0, vy: -Math.cos(ang) * v0 };
+    var st = { fr: 0, maxD: 0, got: [0, 0, 0], out: "drop", x: PX, y: PY };
+    for (var fr = 1; fr <= MAX_FR; fr++) {
+      flightStep(b, round.wx, fr);
+      var dx = b.x - PX, dy = b.y - PY;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d > st.maxD) st.maxD = d;
+      for (var i = 0; i < 3; i++) {
+        if (!st.got[i]) {
+          var sx = round.stars[i].x - b.x, sy = round.stars[i].y - b.y;
+          if (sx * sx + sy * sy <= STAR_R * STAR_R) st.got[i] = 1;
+        }
+      }
+      st.fr = fr; st.x = b.x; st.y = b.y;
+      if (fr > 40 && d <= CATCH_R) { st.out = "catch"; break; }
+      if (d > FLY_MAX) { st.out = "away"; break; }
+      if (Math.sqrt(b.vx * b.vx + b.vy * b.vy) < MIN_V) { st.out = "drop"; break; }
+    }
+    return st;
+  }
+
+  function fmtDist(px) {
+    if (!isFinite(px) || px < 0) return "—";
+    return (px / PXM).toFixed(1) + "m";
+  }
+  function verdict(out, starsGot, maxD) {
+    if (out === "catch" && starsGot >= 3) return { tier: "all", text: "🌟 摘星回旋！三星全收还稳稳入手，" + fmtDist(maxD) + " 神级一掷" };
+    if (out === "catch") return { tier: "catch", text: "🪃 去而复返！最远 " + fmtDist(maxD) + "，完美回收" };
+    if (out === "away") return { tier: "away", text: "💨 脱手不归…镖飞出了 " + fmtDist(maxD) + " 再也没回来" };
+    return { tier: "drop", text: "😅 镖落尘埃，最远 " + fmtDist(maxD) + "，再练练手腕" };
+  }
+
+  /* ---- 游戏状态 ---- */
+  function newGame() {
+    return {
+      phase: "idle",            // idle → charge → flight → done
+      round: makeRound(),
+      ang: 0,                   // 相对正上方的偏角，± 1.1 rad
+      pow: 0, powDir: 1,
+      b: null, trail: [],
+      fr: 0, maxD: 0, starsGot: 0,
+      v: null, spin: 0
+    };
+  }
+  function startCharge(g) {
+    if (g.phase !== "idle") return;
+    g.phase = "charge"; g.pow = 0; g.powDir = 1;
+  }
+  function throwNow(g) {
+    if (g.phase !== "charge") return;
+    var v0 = 5 + 9 * Math.max(0, Math.min(1, g.pow));
+    g.b = { x: PX, y: PY, vx: Math.sin(g.ang) * v0, vy: -Math.cos(g.ang) * v0 };
+    g.trail = []; g.fr = 0; g.maxD = 0; g.starsGot = 0;
+    g.phase = "flight";
+  }
+  function finish(g, out) {
+    g.phase = "done";
+    g.v = verdict(out, g.starsGot, Math.round(g.maxD));
+    rec.throws += 1;
+    rec.stars += g.starsGot;
+    if (out === "catch") {
+      rec.catches += 1;
+      var d = Math.round(g.maxD);
+      if (d > rec.bestD) rec.bestD = d;
+      if (!rec.aC) { rec.aC = 1; try { bumpUsage("bmrcatch"); } catch (e1) {} }
+      if (g.starsGot >= 3 && !rec.aA) { rec.aA = 1; try { bumpUsage("bmrall"); } catch (e2) {} }
+    } else {
+      rec.drops += 1;
+    }
+    saveRec();
+  }
+  function step(g) {
+    if (g.phase === "charge") {
+      g.pow += g.powDir / 45;
+      if (g.pow >= 1) { g.pow = 1; g.powDir = -1; }
+      if (g.pow <= 0) { g.pow = 0; g.powDir = 1; }
+      return;
+    }
+    if (g.phase !== "flight" || !g.b) return;
+    g.fr += 1;
+    flightStep(g.b, g.round.wx, g.fr);
+    g.spin += 0.45;
+    g.trail.push({ x: g.b.x, y: g.b.y });
+    if (g.trail.length > 26) g.trail.shift();
+    var dx = g.b.x - PX, dy = g.b.y - PY;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    if (d > g.maxD) g.maxD = d;
+    for (var i = 0; i < 3; i++) {
+      var st = g.round.stars[i];
+      if (!st.got) {
+        var sx = st.x - g.b.x, sy = st.y - g.b.y;
+        if (sx * sx + sy * sy <= STAR_R * STAR_R) { st.got = 1; g.starsGot += 1; }
+      }
+    }
+    if (g.fr > 40 && d <= CATCH_R) { finish(g, "catch"); return; }
+    if (d > FLY_MAX) { finish(g, "away"); return; }
+    if (g.fr >= MAX_FR || Math.sqrt(g.b.vx * g.b.vx + g.b.vy * g.b.vy) < MIN_V) { finish(g, "drop"); return; }
+  }
+  /* 主操作：idle 按下开始蓄力（松开投出）；done 点击开新局 */
+  function primary(g) {
+    if (g.phase === "done") {
+      var ang = g.ang;
+      var ng = newGame();
+      ng.ang = ang;
+      return ng;
+    }
+    return null;
+  }
+
+  /* ---- DOM / 渲染 ---- */
+  var cav = null, ctx = null, inited = false, active = false, raf = 0;
+  var g = null, keyHold = false, ptrHold = false;
+
+  function bmrSync() {
+    var eW = document.getElementById("bmrWind");
+    var eS = document.getElementById("bmrStar");
+    var eB = document.getElementById("bmrBest");
+    var eR = document.getElementById("bmrRec");
+    if (eW && g) eW.textContent = windLabel(g.round.wx);
+    if (eS && g) eS.textContent = g.starsGot + "/3";
+    if (eB) eB.textContent = rec.bestD >= 0 ? fmtDist(rec.bestD) : "—";
+    if (eR) eR.textContent = rec.catches + "接/" + rec.throws + "投";
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    var grd = ctx.createLinearGradient(0, 0, 0, H);
+    grd.addColorStop(0, "#0b2a16");
+    grd.addColorStop(0.62, "#14401f");
+    grd.addColorStop(1, "#1d5a2a");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "rgba(255,255,255,.05)";
+    ctx.lineWidth = 1;
+    for (var yy = 90; yy < H - 40; yy += 90) {
+      ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(W, yy); ctx.stroke();
+    }
+    /* 风向条 */
+    ctx.fillStyle = "rgba(255,255,255,.12)";
+    ctx.fillRect(W / 2 - 60, 14, 120, 6);
+    ctx.fillStyle = "#ffd54f";
+    var wlen = Math.max(-58, Math.min(58, g.round.wx * 2100));
+    ctx.fillRect(W / 2, 14, wlen, 6);
+    /* 星星 */
+    for (var i = 0; i < 3; i++) {
+      var st = g.round.stars[i];
+      ctx.save();
+      ctx.translate(st.x, st.y);
+      ctx.globalAlpha = st.got ? 0.22 : 1;
+      ctx.font = "22px serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("⭐", 0, 0);
+      ctx.restore();
+    }
+    /* 接镖圈 */
+    if (g.phase === "flight") {
+      ctx.strokeStyle = "rgba(255,213,79,.5)";
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.arc(PX, PY, CATCH_R, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    /* 投掷者 */
+    ctx.font = "26px serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("🧍", PX, PY + 6);
+    /* 瞄准线与力度 */
+    if (g.phase === "idle" || g.phase === "charge") {
+      var len = 60 + g.pow * 90;
+      var tx = PX + Math.sin(g.ang) * len, ty = PY - Math.cos(g.ang) * len;
+      ctx.strokeStyle = g.phase === "charge" ? "#ffd54f" : "rgba(255,255,255,.45)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath(); ctx.moveTo(PX, PY - 14); ctx.lineTo(tx, ty); ctx.stroke();
+      ctx.setLineDash([]);
+      if (g.phase === "charge") {
+        ctx.fillStyle = "rgba(0,0,0,.45)";
+        ctx.fillRect(W / 2 - 70, H - 26, 140, 12);
+        ctx.fillStyle = g.pow > 0.8 ? "#ef5350" : "#66bb6a";
+        ctx.fillRect(W / 2 - 68, H - 24, 136 * g.pow, 8);
+      }
+    }
+    /* 轨迹 */
+    if (g.trail.length > 1) {
+      ctx.strokeStyle = "rgba(255,213,79,.35)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(g.trail[0].x, g.trail[0].y);
+      for (var t = 1; t < g.trail.length; t++) ctx.lineTo(g.trail[t].x, g.trail[t].y);
+      ctx.stroke();
+    }
+    /* 回旋镖 */
+    if (g.b && (g.phase === "flight" || g.phase === "done")) {
+      ctx.save();
+      ctx.translate(g.b.x, g.b.y);
+      ctx.rotate(g.spin);
+      ctx.font = "22px serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("🪃", 0, 0);
+      ctx.restore();
+    }
+    /* 文案 */
+    ctx.textAlign = "center";
+    if (g.phase === "idle") {
+      ctx.fillStyle = "rgba(255,255,255,.85)";
+      ctx.font = "15px system-ui, sans-serif";
+      ctx.fillText("移动指针 / ←→ 瞄准，按住画布或空格蓄力，松手掷镖", W / 2, H - 44);
+    } else if (g.phase === "done" && g.v) {
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      ctx.fillRect(20, H / 2 - 44, W - 40, 88);
+      ctx.fillStyle = "#fff";
+      ctx.font = "15px system-ui, sans-serif";
+      var txt = g.v.text;
+      if (txt.length > 22) {
+        ctx.fillText(txt.slice(0, 22), W / 2, H / 2 - 12);
+        ctx.fillText(txt.slice(22), W / 2, H / 2 + 10);
+      } else {
+        ctx.fillText(txt, W / 2, H / 2 - 2);
+      }
+      ctx.fillStyle = "#ffd54f";
+      ctx.font = "13px system-ui, sans-serif";
+      ctx.fillText("点画布 / 空格 再来一镖", W / 2, H / 2 + 32);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    if (g) { step(g); bmrSync(); draw(); }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function pressStart() {
+    if (!g) return;
+    if (g.phase === "done") { var ng = primary(g); if (ng) { g = ng; bmrSync(); } return; }
+    if (g.phase === "idle") startCharge(g);
+  }
+  function pressEnd() {
+    if (g && g.phase === "charge") throwNow(g);
+  }
+  function onKeyDown(e) {
+    if (!active) return;
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      if (g && (g.phase === "idle" || g.phase === "charge")) {
+        g.ang += (e.key === "ArrowLeft" ? -1 : 1) * 0.07;
+        g.ang = Math.max(-1.1, Math.min(1.1, g.ang));
+        e.preventDefault();
+      }
+      return;
+    }
+    if (e.key === " " || e.code === "Space") {
+      e.preventDefault();
+      if (!keyHold) { keyHold = true; pressStart(); }
+    }
+  }
+  function onKeyUp(e) {
+    if (e.key === " " || e.code === "Space") {
+      if (keyHold) { keyHold = false; if (!ptrHold) pressEnd(); }
+    }
+  }
+
+  function aimFrom(clientX, clientY) {
+    if (!cav || !g || (g.phase !== "idle" && g.phase !== "charge")) return;
+    var r = cav.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    var mx = (clientX - r.left) * (W / r.width);
+    var my = (clientY - r.top) * (H / r.height);
+    var a = Math.atan2(mx - PX, PY - my);
+    g.ang = Math.max(-1.1, Math.min(1.1, a));
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("bmrCav");
+    if (!cav) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      aimFrom(e.clientX, e.clientY);
+      ptrHold = true;
+      pressStart();
+    });
+    cav.addEventListener("pointermove", function (e) {
+      aimFrom(e.clientX, e.clientY);
+    });
+    cav.addEventListener("pointerup", function () {
+      if (ptrHold) { ptrHold = false; if (!keyHold) pressEnd(); }
+    });
+    cav.addEventListener("pointercancel", function () {
+      if (ptrHold) { ptrHold = false; if (!keyHold) pressEnd(); }
+    });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.bmrRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    bmrSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.bmrStop = function () {
+    active = false;
+    keyHold = false; ptrHold = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__bmrTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    makeRound: makeRound, windLabel: windLabel,
+    flightStep: flightStep, simThrow: simThrow,
+    fmtDist: fmtDist, verdict: verdict,
+    newGame: newGame, startCharge: startCharge, throwNow: throwNow,
+    finish: finish, step: step, primary: primary,
+    pressStart: pressStart, pressEnd: pressEnd,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    draw: draw, bmrSync: bmrSync, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, PX: PX, PY: PY, OMEGA: OMEGA, DAMP: DAMP,
+      CATCH_R: CATCH_R, STAR_R: STAR_R, MIN_V: MIN_V, FLY_MAX: FLY_MAX,
+      MAX_FR: MAX_FR, PXM: PXM }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🪃", name: "去而复返", desc: "在随便回旋镖里完成一次干净利落的接镖", test: function (u) { return (u.bmrcatch || 0) >= 1; } },
+      { emoji: "✨", name: "摘星回旋", desc: "在随便回旋镖里一掷收齐 3 颗星并稳稳接住", test: function (u) { return (u.bmrall || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "回旋镖的浪漫在于：真正属于你的，转一大圈还会回来。",
+      "掷出去的话和回旋镖一样，都会原路找回你。",
+      "风越大，越要算准提前量——生活也是。",
+      "别怕东西飞远，怕的是你没站在原地接它。",
+      "回旋镖不问终点，它只忠于出发的那只手。"
     );
   }
 })();
