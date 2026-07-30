@@ -1585,6 +1585,7 @@
         <button data-tab="triathlon">🏊 随便铁人三项</button>
         <button data-tab="skydive">🪂 随便跳伞</button>
         <button data-tab="kayak">🛶 随便激流回旋</button>
+        <button data-tab="bungee">🪢 随便蹦极</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8555,6 +8556,32 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="bungee">
+    <h2>🪢 随便蹦极</h2>
+    <p class="sub">纵身跃下峡谷：每局绳长与弹性随机，下落中按住俯冲加深，最低点越贴水面越牛——但碰到水就湿透重来</p>
+    <style>
+      #bungee .bgy-wrap { max-width:420px; margin:0 auto; }
+      #bungee canvas { width:100%; max-width:380px; border-radius:14px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 12px 30px rgba(0,0,0,.35); }
+      #bungee .bgy-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #bungee .bgy-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #bungee .bgy-hud b { font-weight:700; color:#ffd54f; }
+      #bungee .bgy-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="bgy-wrap">
+      <div class="bgy-hud">
+        <span>离水 <b id="bgyAlt">—</b></span>
+        <span>速度 <b id="bgySpd">—</b></span>
+        <span>最佳 <b id="bgyBest">—</b></span>
+        <span>累计 <b id="bgyJump">—</b></span>
+      </div>
+      <canvas id="bgyCav" width="380" height="520"></canvas>
+      <p class="bgy-help">
+        点画布 / 空格 = 纵身一跃；下落中按住画布 / 空格 = 俯冲加速下潜，松手即恢复自然下落；<br>
+        每局绳长（顶栏显示）与绳子弹性（软弹 / 中等 / 硬弹）随机，盯紧「离水」高度：最低点离水面越近成绩越好；<br>
+        贴水 80cm 内解锁「💦 毫厘贴水」，首次安全弹回解锁「🪢 纵身一跃」，碰水记一次落水，战绩本地存档（suibian_bgy）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="curl">
     <h2>🥌 随便冰壶</h2>
     <p class="sub">人机对战桌上冰壶：瞄准、蓄力、旋转、扫冰，把红壶送进大本营圆心</p>
@@ -9192,6 +9219,7 @@
     if (id === "triathlon" && typeof tthRender === "function") tthRender();
     if (id === "skydive" && typeof skyRender === "function") skyRender();
     if (id === "kayak" && typeof kayRender === "function") kayRender();
+    if (id === "bungee" && typeof bgyRender === "function") bgyRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9259,6 +9287,7 @@
     if (id !== "triathlon" && typeof tthStop === "function") tthStop();
     if (id !== "skydive" && typeof skyStop === "function") skyStop();
     if (id !== "kayak" && typeof kayStop === "function") kayStop();
+    if (id !== "bungee" && typeof bgyStop === "function") bgyStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9457,6 +9486,7 @@
     triathlon: "随便铁人三项 triathlon 铁人三项 铁人 游泳 骑行 跑步 耐力 体力 竞速 比赛 运动 奥运 swim bike run 游戏",
     skydive: "随便跳伞 skydive parachute 跳伞 降落伞 自由落体 开伞 风场 着陆 靶心 高空 极限运动 天空 翼装 游戏 竞技",
     kayak: "随便激流回旋 kayak canoe slalom 皮划艇 激流 回旋 水门 划艇 划桨 竞速 白浪 河流 礁石 罚时 计时 奥运 游戏 极限运动",
+    bungee: "随便蹦极 bungee jump 蹦极 跳跃 峡谷 绳索 弹性 俯冲 贴水 落水 反弹 高空 极限运动 勇气 游戏 挑战",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9715,6 +9745,7 @@ splitbill:"tools",
     triathlon:"games",
     skydive:"games",
     kayak:"games",
+    bungee:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -10256,6 +10287,16 @@ splitbill:"tools",
 
   /* ---------- 句子 ---------- */
   const QUOTES = [
+    "蹦极的绳索会拉住你，犹豫的念头不会。",
+    "站上跳台那一刻，答案已经比问题先落地。",
+    "自由落体三秒钟，胜过左右为难三小时。",
+    "别在桥上数风速，风只回答跳下去的人。",
+    "反弹的高度，取决于你敢俯冲多深。",
+    "决定这件事，闭眼三秒比睁眼三天管用。",
+    "峡谷不评价你的姿势，它只记得你跳了。",
+    "把害怕系在脚踝上，它就成了安全绳。",
+    "所有的悬而未决，都欠一次纵身一跃。",
+    "今天的勇气用不完可以存着，但过期很快。",
     "油门踩到底之前，先想清楚下一个弯往哪拐。",
     "人生没有倒车挡，飙起来就只管看前方。",
     "超车的机会只有一瞬间，犹豫的人永远跟在车尾。",
@@ -55667,6 +55708,382 @@ splitbill:"tools",
       "撞上礁石不可怕，可怕的是从此只敢在岸边划。",
       "真正的高手不是躲开所有浪，而是借着浪走得更快。",
       "罚时五秒教会你的事：绕远路有时比走错门便宜。"
+    );
+  }
+})();
+/* ===== 🪢 随便蹦极 bungee ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_bgy";
+  var W = 380, H = 520;
+  var G = 0.62;          // 重力加速度（单位/帧²）
+  var HOLD_A = 0.55;     // 俯冲加速度（按住时叠加）
+  var DAMP = 0.995;      // 绳索拉伸阶段阻尼
+  var GRAZE_D = 40;      // 贴水判定（≤80cm）
+  var GREAT_D = 120;     // 精彩判定（≤2.4m）
+  var MAX_FR = 5000;
+  var rnd = Math.random;
+
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() { return { jumps: 0, splashes: 0, grazes: 0, bestD: -1, aF: 0, aG: 0 }; }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return d;
+      d.jumps = nInt(o.jumps); d.splashes = nInt(o.splashes); d.grazes = nInt(o.grazes);
+      var b = Math.floor(Number(o.bestD));
+      d.bestD = isFinite(b) && b >= 0 ? b : -1;
+      d.aF = o.aF ? 1 : 0; d.aG = o.aG ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---- 纯物理 ---- */
+  function physStep(st, hold, L0, K) {
+    var a = G + (hold ? HOLD_A : 0);
+    var stretch = st.h - L0;
+    if (stretch > 0) {
+      a -= K * stretch;
+      st.v = (st.v + a) * DAMP;
+    } else {
+      st.v = st.v + a;
+    }
+    st.h += st.v;
+    if (st.h < 0) { st.h = 0; if (st.v < 0) st.v = 0; }
+    return st;
+  }
+  function simDepth(L0, K, hold) {
+    var st = { h: 0, v: 0 }, max = 0, i;
+    for (i = 0; i < MAX_FR; i++) {
+      physStep(st, hold, L0, K);
+      if (st.h > max) max = st.h;
+      if (st.v < 0 && st.h < max) break;
+    }
+    return max;
+  }
+  function makeRound(r) {
+    var L0 = Math.round(520 + r() * 220);
+    var K = 0.0038 + r() * 0.0028;
+    var dN = simDepth(L0, K, false);
+    var dF = simDepth(L0, K, true);
+    var water = Math.round(dN + (0.42 + r() * 0.36) * (dF - dN));
+    return { L0: L0, K: K, dN: dN, dF: dF, water: water };
+  }
+  function fmtDist(u) {
+    var cm = Math.round(Number(u) * 2);
+    if (!isFinite(cm)) cm = 0;
+    if (cm < 0) cm = 0;
+    return cm < 100 ? cm + " cm" : (cm / 100).toFixed(1) + " m";
+  }
+  function fmtSpd(v) {
+    var s = Number(v) * 1.2;
+    if (!isFinite(s)) s = 0;
+    return Math.abs(s).toFixed(1) + " m/s";
+  }
+  function ropeLabel(K) {
+    return K < 0.0047 ? "软弹" : (K < 0.0057 ? "中等" : "硬弹");
+  }
+  function verdict(maxH, water) {
+    if (maxH >= water) return { splash: true, dist: 0, tier: "splash" };
+    var dist = Math.round(water - maxH);
+    return {
+      splash: false, dist: dist,
+      tier: dist <= GRAZE_D ? "graze" : (dist <= GREAT_D ? "great" : "ok")
+    };
+  }
+
+  function newGame() {
+    return {
+      phase: "idle", t: 0, h: 0, v: 0, maxH: 0,
+      L0: 0, K: 0, dN: 0, dF: 0, water: 0,
+      hold: false, res: null, msg: "", msgT: 0
+    };
+  }
+  var g = null;
+
+  function startRun(gg) {
+    var ng = newGame();
+    for (var k in ng) if (Object.prototype.hasOwnProperty.call(ng, k)) gg[k] = ng[k];
+    var rd = makeRound(rnd);
+    gg.L0 = rd.L0; gg.K = rd.K; gg.dN = rd.dN; gg.dF = rd.dF; gg.water = rd.water;
+    gg.phase = "run";
+    gg.msg = "跳！按住俯冲，越贴水越牛"; gg.msgT = 90;
+  }
+  function finish(gg) {
+    gg.phase = "done";
+    var v = verdict(gg.maxH, gg.water);
+    gg.res = v;
+    rec.jumps += 1;
+    if (v.splash) {
+      rec.splashes += 1;
+    } else {
+      if (rec.bestD < 0 || v.dist < rec.bestD) rec.bestD = v.dist;
+      if (v.tier === "graze") rec.grazes += 1;
+      if (!rec.aF) { rec.aF = 1; try { bumpUsage("bgyfin"); } catch (e1) {} }
+      if (v.tier === "graze" && !rec.aG) { rec.aG = 1; try { bumpUsage("bgygraze"); } catch (e2) {} }
+    }
+    saveRec();
+    try {
+      if (v.splash) toast("💦 落水了！俯冲收手要趁早");
+      else if (v.tier === "graze") { toast("🪢 毫厘贴水！离水面只有 " + fmtDist(v.dist)); confetti(); }
+      else if (v.tier === "great") toast("🤸 漂亮！离水面 " + fmtDist(v.dist));
+      else toast("🪢 完成蹦极，离水面 " + fmtDist(v.dist));
+    } catch (e3) {}
+  }
+  function primary(gg) {
+    if (!gg) return;
+    if (gg.phase === "idle" || gg.phase === "done") { startRun(gg); return; }
+  }
+
+  function step(gg) {
+    if (!gg) return;
+    if (gg.msgT > 0) gg.msgT--;
+    if (gg.phase !== "run") return;
+    gg.t++;
+    physStep(gg, gg.hold, gg.L0, gg.K);
+    if (gg.h > gg.maxH) gg.maxH = gg.h;
+    if (gg.h >= gg.water) { gg.h = gg.water; gg.maxH = gg.water; finish(gg); return; }
+    if (gg.v < 0 && gg.h < gg.maxH - 1 && gg.maxH > gg.L0) { finish(gg); return; }
+    if (gg.t > MAX_FR) finish(gg);
+  }
+
+  /* ---- 输入 ---- */
+  var keyHold = false, ptrHold = false;
+  function holdFrom(gg) {
+    if (!gg) return;
+    gg.hold = gg.phase === "run" && (keyHold || ptrHold);
+  }
+  function onKeyDown(e) {
+    if (!active) return;
+    var tag = (e.target && e.target.tagName) || "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
+      e.preventDefault();
+      if (g && g.phase === "run") { keyHold = true; return; }
+      if (e.repeat) return;
+      primary(g);
+    }
+  }
+  function onKeyUp(e) {
+    if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") keyHold = false;
+  }
+
+  /* ---- 绘制 ---- */
+  var cav = null, ctx = null, raf = 0, active = false, inited = false;
+  function camOf(gg) {
+    if (!gg || gg.phase === "idle") return 0;
+    var c = gg.h - 180;
+    var maxC = gg.water + 120 - H;
+    if (c > maxC) c = maxC;
+    if (c < 0) c = 0;
+    return c;
+  }
+
+  function bgySync() {
+    try {
+      var el;
+      el = document.getElementById("bgyAlt");
+      if (el) el.textContent = g && g.phase !== "idle" ? fmtDist(g.water - g.h) : "—";
+      el = document.getElementById("bgySpd");
+      if (el) el.textContent = g && g.phase === "run" ? fmtSpd(g.v) : "—";
+      el = document.getElementById("bgyBest");
+      if (el) el.textContent = rec.bestD >= 0 ? fmtDist(rec.bestD) : "—";
+      el = document.getElementById("bgyJump");
+      if (el) el.textContent = rec.jumps > 0 ? rec.jumps + " 跳" : "—";
+    } catch (e) {}
+  }
+
+  function drawScene(c, cam) {
+    var bg = c.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#1a2c4e"); bg.addColorStop(0.55, "#28486e"); bg.addColorStop(1, "#0f5e74");
+    c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    var i, sy;
+    // 峡谷两壁
+    c.fillStyle = "#232733";
+    for (i = -1; i < 8; i++) {
+      var wy = i * 90 - (cam % 90);
+      c.fillRect(0, wy, 26 + ((i * 37) % 12), 88);
+      c.fillRect(W - 26 - ((i * 53) % 12), wy, 26 + ((i * 53) % 12), 88);
+    }
+    // 跳台（世界坐标 0）
+    sy = 0 - cam + 60;
+    if (sy > -60 && sy < H + 40) {
+      c.fillStyle = "#3e2f23"; c.fillRect(90, sy - 14, 200, 14);
+      c.fillStyle = "#5d4632"; c.fillRect(90, sy - 20, 200, 6);
+      c.fillStyle = "rgba(255,255,255,.6)"; c.font = "11px system-ui"; c.textAlign = "center";
+      c.fillText("跳台", W / 2, sy - 26);
+    }
+    if (!g || g.phase === "idle") return;
+    // 水面
+    sy = g.water - cam + 60;
+    if (sy > -40 && sy < H + 60) {
+      var wg = c.createLinearGradient(0, sy, 0, sy + 80);
+      wg.addColorStop(0, "rgba(64,196,255,.85)"); wg.addColorStop(1, "rgba(2,62,86,.95)");
+      c.fillStyle = wg; c.fillRect(0, sy, W, H - sy + 20);
+      c.strokeStyle = "rgba(255,255,255,.75)"; c.lineWidth = 2;
+      c.beginPath();
+      for (i = 0; i <= W; i += 20) {
+        var yy = sy + Math.sin((i + g.t * 2) * 0.08) * 3;
+        if (i === 0) c.moveTo(i, yy); else c.lineTo(i, yy);
+      }
+      c.stroke();
+    }
+    // 高度刻度
+    c.fillStyle = "rgba(255,255,255,.35)"; c.font = "10px system-ui"; c.textAlign = "right";
+    for (i = 200; i < g.water; i += 200) {
+      sy = i - cam + 60;
+      if (sy > 40 && sy < H - 10) {
+        c.fillRect(W - 46, sy, 12, 1);
+        c.fillText(fmtDist(g.water - i), W - 50, sy + 3);
+      }
+    }
+  }
+
+  function drawPlayer(c, cam) {
+    if (!g) return;
+    var px = W / 2, py;
+    if (g.phase === "idle") {
+      c.font = "26px system-ui"; c.textAlign = "center";
+      c.fillText("🧍", px, 60 - 24);
+      return;
+    }
+    px = W / 2 + Math.sin(g.t * 0.05) * 8;
+    py = g.h - cam + 60;
+    // 绳索
+    var ay = 0 - cam + 60;
+    var slack = g.h < g.L0;
+    c.strokeStyle = slack ? "rgba(255,213,79,.55)" : "#ffd54f";
+    c.lineWidth = slack ? 2 : 3;
+    c.beginPath(); c.moveTo(W / 2, ay);
+    if (slack) c.quadraticCurveTo(W / 2 + 26, (ay + py) / 2, px, py - 14);
+    else c.lineTo(px, py - 14);
+    c.stroke();
+    c.font = "26px system-ui"; c.textAlign = "center";
+    if (g.phase === "done" && g.res && g.res.splash) c.fillText("💦", px, py + 8);
+    else c.fillText(g.hold ? "🤸" : "🙃", px, py + 8);
+  }
+
+  function draw() {
+    if (!ctx || !g) return;
+    var c = ctx, cam = camOf(g);
+    drawScene(c, cam);
+    drawPlayer(c, cam);
+    // 顶栏
+    c.fillStyle = "rgba(8,14,26,.85)"; c.fillRect(0, 0, W, 30);
+    c.fillStyle = "#fff"; c.font = "bold 12px system-ui"; c.textAlign = "left";
+    var lTxt = g.phase !== "idle" ? "离水 " + fmtDist(g.water - g.h) : "🪢 随便蹦极";
+    c.fillText(lTxt, 10, 20);
+    c.textAlign = "right";
+    var rTxt = g.phase !== "idle"
+      ? "绳 " + fmtDist(g.L0) + " · " + ropeLabel(g.K)
+      : "最佳 " + (rec.bestD >= 0 ? fmtDist(rec.bestD) : "—");
+    c.fillText(rTxt, W - 10, 20);
+    if (g.msgT > 0 && g.msg) {
+      c.fillStyle = "#ffe082"; c.font = "bold 15px system-ui"; c.textAlign = "center";
+      c.fillText(g.msg, W / 2, 486);
+    }
+    if (g.phase === "idle") {
+      c.fillStyle = "rgba(8,14,26,.78)"; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#fff"; c.font = "bold 20px system-ui"; c.textAlign = "center";
+      c.fillText("🪢 随便蹦极", W / 2, 176);
+      c.font = "13px system-ui"; c.fillStyle = "rgba(255,255,255,.8)";
+      c.fillText("点击 / 空格 = 纵身一跃", W / 2, 210);
+      c.fillText("下落中按住画布 / 空格 = 俯冲加速", W / 2, 232);
+      c.fillText("每局绳长与弹性随机，看准离水高度", W / 2, 254);
+      c.fillText("最低点越贴水面分越高，碰水就湿透", W / 2, 276);
+      c.fillText("点击起跳！", W / 2, 308);
+    } else if (g.phase === "done" && g.res) {
+      var v = g.res;
+      c.fillStyle = "rgba(8,14,26,.82)"; c.fillRect(0, 60, W, 210);
+      c.textAlign = "center";
+      c.font = "bold 22px system-ui";
+      c.fillStyle = v.splash ? "#4fc3f7" : (v.tier === "graze" ? "#ffd54f" : "#a5d6a7");
+      c.fillText(v.splash ? "💦 落水了！" : (v.tier === "graze" ? "🪢 毫厘贴水！" : "🤸 稳稳弹回！"), W / 2, 118);
+      c.font = "bold 30px system-ui"; c.fillStyle = "#fff";
+      c.fillText(v.splash ? "湿身套餐" : fmtDist(v.dist), W / 2, 160);
+      c.font = "12px system-ui"; c.fillStyle = "rgba(255,255,255,.8)";
+      c.fillText(v.splash ? "俯冲太贪，早点松手就好了" : "最低点离水面的距离", W / 2, 190);
+      c.fillText("最佳 " + (rec.bestD >= 0 ? fmtDist(rec.bestD) : "—") + " · 累计 " + rec.jumps + " 跳", W / 2, 214);
+      c.fillText("点击再跳一次", W / 2, 240);
+    }
+  }
+
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    holdFrom(g);
+    step(g);
+    bgySync();
+    draw();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("bgyCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    cav.addEventListener("pointerdown", function (e) {
+      e.preventDefault();
+      if (g && (g.phase === "idle" || g.phase === "done")) { primary(g); return; }
+      ptrHold = true;
+    });
+    cav.addEventListener("pointerup", function () { ptrHold = false; });
+    cav.addEventListener("pointercancel", function () { ptrHold = false; });
+    cav.addEventListener("pointerleave", function () { ptrHold = false; });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.bgyRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newGame();
+    bgySync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.bgyStop = function () {
+    active = false;
+    keyHold = false; ptrHold = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__bgyTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    physStep: physStep, simDepth: simDepth, makeRound: makeRound,
+    fmtDist: fmtDist, fmtSpd: fmtSpd, ropeLabel: ropeLabel, verdict: verdict,
+    newGame: newGame, startRun: startRun, finish: finish, primary: primary,
+    step: step, holdFrom: holdFrom,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    draw: draw, bgySync: bgySync, ensureInit: ensureInit,
+    consts: { KEY: KEY, W: W, H: H, G: G, HOLD_A: HOLD_A, DAMP: DAMP,
+      GRAZE_D: GRAZE_D, GREAT_D: GREAT_D, MAX_FR: MAX_FR }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🪢", name: "纵身一跃", desc: "在随便蹦极里完成一次蹦极且没有落水", test: function (u) { return (u.bgyfin || 0) >= 1; } },
+      { emoji: "💦", name: "毫厘贴水", desc: "在随便蹦极里最低点距水面不超过 80cm 且不落水", test: function (u) { return (u.bgygraze || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "蹦极教会人的第一课：迈出去之前，谁的腿都在抖。",
+      "绳子会把你拉回来的，人生里大多数下坠也一样。",
+      "贴着水面掠过的那一厘米，才是勇气的计量单位。",
+      "别在最低点松劲，那正是反弹开始的地方。",
+      "怕高不丢人，绑好绳子还敢跳才是本事。"
     );
   }
 })();
