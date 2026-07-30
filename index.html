@@ -1593,6 +1593,7 @@
         <button data-tab="sushi">🍣 随便寿司</button>
         <button data-tab="parcel">📦 随便分拣</button>
         <button data-tab="uttt">⭕ 随便井字·终极版</button>
+        <button data-tab="shufa">🖌️ 随便书法</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8727,6 +8728,51 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="shufa">
+    <h2>🖌️ 随便书法</h2>
+    <p class="sub">米字格描红——从红点起笔沿虚线走，AI 给你的字打分</p>
+    <style>
+      #shufa .shf-wrap { max-width:400px; margin:0 auto; }
+      #shufa .shf-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #shufa .shf-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #shufa .shf-hud b { font-weight:700; color:#e0b34d; }
+      #shufa .shf-bar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #shufa .shf-bar select, #shufa .shf-bar button { padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #shufa .shf-bar button:active { transform:translateY(1px); background:rgba(255,255,255,.14); }
+      #shufa .shf-msg { text-align:center; min-height:1.5em; font-size:.88rem; margin-bottom:10px; font-weight:700; }
+      #shufa .shf-cavbox { display:flex; justify-content:center; margin-bottom:10px; }
+      #shufa canvas { width:min(320px,88vw); height:auto; border-radius:14px; box-shadow:0 6px 24px rgba(0,0,0,.35); touch-action:none; cursor:crosshair; }
+      #shufa .shf-scores { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; min-height:1.6em; }
+      #shufa .shf-sc { padding:4px 9px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.78rem; }
+      #shufa .shf-sc.good { color:#7ddc8f; border-color:rgba(125,220,143,.45); }
+      #shufa .shf-sc.bad { color:#ff8a80; border-color:rgba(255,138,128,.45); }
+      #shufa .shf-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:380px; margin:0 auto; }
+    </style>
+    <div class="shf-wrap">
+      <div class="shf-hud">
+        <span>已写 <b id="shfChars">0</b> 字</span>
+        <span>最高 <b id="shfBest">—</b></span>
+        <span>平均 <b id="shfAvg">—</b></span>
+      </div>
+      <div class="shf-bar">
+        <select id="shfSel" aria-label="选一个字"></select>
+        <button type="button" id="shfRand">🎲 换一字</button>
+        <button type="button" id="shfRedo">🧽 重写</button>
+      </div>
+      <div class="shf-msg" id="shfMsg">从红点起笔，沿虚线描完这一笔</div>
+      <div class="shf-cavbox">
+        <canvas id="shfCav" width="320" height="320" aria-label="书法描红画布"></canvas>
+      </div>
+      <div class="shf-scores" id="shfScores"></div>
+      <div class="shf-help">
+        🖌️ 玩法：按当前高亮的红色虚线笔画，从红点起笔、一笔描到尾，松手即评分。<br>
+        评分看三样：描没描全（覆盖率）、有没有画出格（跑偏率）、起笔位置对不对（倒着写要扣分）。<br>
+        写得慢笔画粗、写得快笔画细，和真毛笔一个脾气。<br>
+        🏆 95+ 入木三分 · ✒️ 85+ 笔走龙蛇 · 👍 70+ 有模有样 · 🌀 50+ 歪歪扭扭 · 👻 50 以下鬼画符<br>
+        单字 90 分解锁「✒️ 笔走龙蛇」，累计写完 10 个字解锁「🖌️ 入木三分」。战绩本地保存。
+      </div>
+    </div>
+  </section>
   <section class="panel" id="uttt">
     <h2>⭕ 随便井字·终极版</h2>
     <p class="sub">九宫套九宫——你在哪格落子，就把对手送进哪块棋盘</p>
@@ -9575,6 +9621,7 @@
     if (id === "sushi" && typeof szsRender === "function") szsRender();
     if (id === "parcel" && typeof pclRender === "function") pclRender();
     if (id === "uttt" && typeof utttRender === "function") utttRender();
+    if (id === "shufa" && typeof shfRender === "function") shfRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -9651,6 +9698,7 @@
     if (id !== "sushi" && typeof szsStop === "function") szsStop();
     if (id !== "parcel" && typeof pclStop === "function") pclStop();
     if (id !== "uttt" && typeof utttStop === "function") utttStop();
+    if (id !== "shufa" && typeof shfStop === "function") shfStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9857,6 +9905,7 @@
     sushi: "随便寿司 sushi 寿司 切鱼 刀工 捏饭 醋饭 上桌 传送带 板前 师傅 三文鱼 金枪鱼 日料 料理 手感 游戏 挑战 休闲",
     parcel: "随便分拣 parcel 分拣 快递 包裹 驿站 物流 传送带 流水线 面单 加急件 违禁品 反应 手速 连击 街机 游戏 挑战 休闲",
     uttt: "随便井字 uttt ultimate tictactoe 井字棋 终极井字 九宫 大局观 下棋 棋盘 对弈 人机 ai 对战 策略 悔棋 游戏 挑战 休闲",
+    shufa: "随便书法 shufa calligraphy 书法 描红 毛笔 写字 米字格 临帖 笔顺 笔画 汉字 水墨 誊写 游戏 挑战 休闲 手写",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10124,6 +10173,7 @@ splitbill:"tools",
     sushi:"games",
     parcel:"games",
     uttt:"games",
+    shufa:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -60857,6 +60907,432 @@ splitbill:"tools",
       "\u5148\u624B\u8D62\u4E00\u534A\uFF1F\u5728\u4E5D\u5BAB\u5957\u4E5D\u5BAB\u91CC\uFF0C\u5148\u624B\u53EA\u8D62\u4E00\u4E2A\u5F00\u59CB\u3002",
       "\u6094\u68CB\u4E0D\u53EF\u803B\uFF0C\u53EF\u803B\u7684\u662F\u4E0B\u4E00\u6B65\u8FD8\u8D70\u8001\u8DEF\u3002",
       "\u771F\u6B63\u7684\u9AD8\u624B\uFF0C\u4F1A\u5728\u4F60\u6700\u60F3\u53BB\u7684\u90A3\u683C\u91CC\uFF0C\u7B49\u4F60\u3002"
+    );
+  }
+})();
+/* ===== 🖌️ 随便书法 shufa ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_shufa";
+  var W = 320, H = 320;
+  var TOL = 30;           // 目标采样点命中容差 px
+  var STRAY_TOL = 42;     // 用户点跑偏阈值 px
+  var SAMPLE_N = 24;      // 每笔目标路径采样点数
+  var START_TOL = 52;     // 起笔位置容差 px
+  var START_PEN = 12;     // 起笔跑偏 / 倒写惩罚分
+  var STRAY_PEN = 45;     // 跑偏比例惩罚系数
+  var MIN_LEN = 14;       // 短于此长度的轨迹视为误触 px
+  var ACE = 90;           // 「笔走龙蛇」单字分数门槛
+  var VET = 10;           // 「入木三分」累计完成字数门槛
+  var MOVE_EPS = 2;       // 采点最小间距 px
+
+  /* 字库：归一化坐标 (0..1)，y 向下，按规范笔顺 */
+  var CHARS = [
+    { ch: "一", lv: 1, strokes: [[[.12, .5], [.88, .5]]] },
+    { ch: "二", lv: 1, strokes: [[[.15, .35], [.85, .35]], [[.1, .7], [.9, .7]]] },
+    { ch: "十", lv: 1, strokes: [[[.12, .42], [.88, .42]], [[.5, .1], [.5, .9]]] },
+    { ch: "人", lv: 1, strokes: [[[.5, .12], [.42, .4], [.18, .85]], [[.47, .35], [.62, .6], [.85, .85]]] },
+    { ch: "三", lv: 2, strokes: [[[.15, .22], [.85, .22]], [[.2, .5], [.8, .5]], [[.1, .8], [.9, .8]]] },
+    { ch: "山", lv: 2, strokes: [[[.5, .1], [.5, .68]], [[.15, .3], [.15, .8], [.85, .8]], [[.85, .32], [.85, .8]]] },
+    { ch: "口", lv: 2, strokes: [[[.2, .2], [.2, .8]], [[.2, .2], [.8, .2], [.8, .8]], [[.2, .8], [.8, .8]]] },
+    { ch: "王", lv: 3, strokes: [[[.15, .18], [.85, .18]], [[.2, .5], [.8, .5]], [[.5, .18], [.5, .82]], [[.1, .85], [.9, .85]]] },
+    { ch: "中", lv: 3, strokes: [[[.22, .25], [.22, .6]], [[.22, .25], [.78, .25], [.78, .6]], [[.22, .6], [.78, .6]], [[.5, .08], [.5, .92]]] },
+    { ch: "木", lv: 3, strokes: [[[.12, .35], [.88, .35]], [[.5, .08], [.5, .9]], [[.48, .4], [.3, .62], [.12, .85]], [[.52, .4], [.7, .62], [.88, .85]]] },
+    { ch: "日", lv: 3, strokes: [[[.25, .15], [.25, .85]], [[.25, .15], [.75, .15], [.75, .85]], [[.25, .5], [.75, .5]], [[.25, .85], [.75, .85]]] },
+    { ch: "火", lv: 3, strokes: [[[.3, .25], [.38, .42]], [[.7, .25], [.62, .42]], [[.5, .1], [.42, .5], [.15, .9]], [[.52, .45], [.68, .65], [.88, .9]]] }
+  ];
+  var LV_TXT = ["", "入门", "进阶", "高手"];
+  var rnd = Math.random;
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() { return { chars: 0, best: 0, sum: 0, cnt: 0, aA: 0, aB: 0 }; }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.chars = nInt(o.chars); d.best = Math.min(nInt(o.best), 100);
+      d.sum = nInt(o.sum); d.cnt = nInt(o.cnt);
+      d.aA = o.aA ? 1 : 0; d.aB = o.aB ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 纯函数：几何 ---------- */
+  function dist(a, b) { var dx = a[0] - b[0], dy = a[1] - b[1]; return Math.sqrt(dx * dx + dy * dy); }
+  function pathLen(pts) {
+    var s = 0;
+    for (var i = 1; i < pts.length; i++) s += dist(pts[i - 1], pts[i]);
+    return s;
+  }
+  function distPtSeg(p, a, b) {
+    var vx = b[0] - a[0], vy = b[1] - a[1];
+    var wx = p[0] - a[0], wy = p[1] - a[1];
+    var vv = vx * vx + vy * vy;
+    if (vv <= 0) return dist(p, a);
+    var t = (wx * vx + wy * vy) / vv;
+    if (t < 0) t = 0; else if (t > 1) t = 1;
+    return dist(p, [a[0] + vx * t, a[1] + vy * t]);
+  }
+  function minDistToPath(p, pts) {
+    if (!pts.length) return Infinity;
+    if (pts.length === 1) return dist(p, pts[0]);
+    var m = Infinity;
+    for (var i = 1; i < pts.length; i++) {
+      var d = distPtSeg(p, pts[i - 1], pts[i]);
+      if (d < m) m = d;
+    }
+    return m;
+  }
+  function resample(pts, n) {
+    if (n < 2 || pts.length === 0) return pts.slice();
+    if (pts.length === 1) {
+      var one = [];
+      for (var k = 0; k < n; k++) one.push([pts[0][0], pts[0][1]]);
+      return one;
+    }
+    var total = pathLen(pts);
+    if (total <= 0) {
+      var same = [];
+      for (var q = 0; q < n; q++) same.push([pts[0][0], pts[0][1]]);
+      return same;
+    }
+    var step = total / (n - 1);
+    var out = [[pts[0][0], pts[0][1]]];
+    var acc = 0, i = 1, prev = pts[0];
+    while (out.length < n - 1 && i < pts.length) {
+      var segL = dist(prev, pts[i]);
+      if (acc + segL >= step - 1e-9) {
+        var t = (step - acc) / segL;
+        var np = [prev[0] + (pts[i][0] - prev[0]) * t, prev[1] + (pts[i][1] - prev[1]) * t];
+        out.push(np);
+        prev = np; acc = 0;
+      } else {
+        acc += segL; prev = pts[i]; i++;
+      }
+    }
+    while (out.length < n) out.push([pts[pts.length - 1][0], pts[pts.length - 1][1]]);
+    return out;
+  }
+  function toPx(stroke) {
+    var out = [];
+    for (var i = 0; i < stroke.length; i++) out.push([stroke[i][0] * W, stroke[i][1] * H]);
+    return out;
+  }
+  function clamp01k(v) { return v < 0 ? 0 : (v > 100 ? 100 : v); }
+
+  /* ---------- 纯函数：评分 ---------- */
+  function scoreStroke(user, target) {
+    if (!user || user.length < 2) return { score: 0, cov: 0, stray: 1 };
+    var samp = resample(target, SAMPLE_N);
+    var hit = 0, i;
+    for (i = 0; i < samp.length; i++) if (minDistToPath(samp[i], user) <= TOL) hit++;
+    var cov = hit / samp.length;
+    var strayN = 0;
+    for (i = 0; i < user.length; i++) if (minDistToPath(user[i], target) > STRAY_TOL) strayN++;
+    var stray = strayN / user.length;
+    var pen = 0;
+    if (dist(user[0], samp[0]) > START_TOL) pen += START_PEN;
+    var sc = Math.round(cov * 100 - stray * STRAY_PEN - pen);
+    return { score: clamp01k(sc), cov: cov, stray: stray };
+  }
+  function gradeOf(avg) {
+    if (avg >= 95) return { t: "入木三分", e: "🏆" };
+    if (avg >= 85) return { t: "笔走龙蛇", e: "✒️" };
+    if (avg >= 70) return { t: "有模有样", e: "👍" };
+    if (avg >= 50) return { t: "歪歪扭扭", e: "🌀" };
+    return { t: "鬼画符", e: "👻" };
+  }
+  function avgOf(scores) {
+    if (!scores.length) return 0;
+    var s = 0;
+    for (var i = 0; i < scores.length; i++) s += scores[i];
+    return Math.round(s / scores.length);
+  }
+
+  /* ---------- 局面状态 ---------- */
+  var g = null, active = false, inited = false;
+  var cav = null, ctx = null;
+  function newChar(ci) {
+    return { ci: ci, si: 0, scores: [], inks: [], cur: null, done: false, grade: null };
+  }
+
+  /* ---------- 交互纯逻辑（可测） ---------- */
+  function downAt(x, y) {
+    if (!g || g.done) return false;
+    if (g.si >= CHARS[g.ci].strokes.length) return false;
+    g.cur = [[x, y]];
+    return true;
+  }
+  function moveAt(x, y) {
+    if (!g || !g.cur) return false;
+    var last = g.cur[g.cur.length - 1];
+    if (dist(last, [x, y]) < MOVE_EPS) return false;
+    g.cur.push([x, y]);
+    return true;
+  }
+  function upAt() {
+    if (!g || !g.cur) return "";
+    var user = g.cur;
+    g.cur = null;
+    if (pathLen(user) < MIN_LEN) return "short";
+    var target = toPx(CHARS[g.ci].strokes[g.si]);
+    var r = scoreStroke(user, target);
+    g.scores.push(r.score);
+    g.inks.push(user);
+    g.si++;
+    if (g.si >= CHARS[g.ci].strokes.length) { finishChar(); return "done"; }
+    return "stroke";
+  }
+  function finishChar() {
+    g.done = true;
+    var avg = avgOf(g.scores);
+    g.grade = gradeOf(avg);
+    g.avg = avg;
+    rec.chars += 1;
+    rec.sum += avg; rec.cnt += 1;
+    if (avg > rec.best) rec.best = avg;
+    if (avg >= ACE && !rec.aA) {
+      rec.aA = 1;
+      try { bumpUsage("shufaace"); } catch (e1) {}
+    }
+    if (rec.chars >= VET && !rec.aB) {
+      rec.aB = 1;
+      try { bumpUsage("shufavet"); } catch (e2) {}
+    }
+    saveRec();
+  }
+  function pickChar(ci) {
+    if (ci < 0 || ci >= CHARS.length) ci = 0;
+    g = newChar(ci);
+  }
+  function randChar() {
+    var ci = Math.floor(rnd() * CHARS.length);
+    if (ci >= CHARS.length) ci = CHARS.length - 1;
+    if (g && CHARS.length > 1 && ci === g.ci) ci = (ci + 1) % CHARS.length;
+    pickChar(ci);
+  }
+
+  /* ---------- 渲染 ---------- */
+  function el(id) { return document.getElementById(id); }
+  function drawGrid() {
+    ctx.fillStyle = "#f5efdd";
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "rgba(196,84,66,.75)";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(3, 3, W - 6, H - 6);
+    ctx.strokeStyle = "rgba(196,84,66,.28)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([7, 6]);
+    ctx.beginPath();
+    ctx.moveTo(W / 2, 4); ctx.lineTo(W / 2, H - 4);
+    ctx.moveTo(4, H / 2); ctx.lineTo(W - 4, H / 2);
+    ctx.moveTo(4, 4); ctx.lineTo(W - 4, H - 4);
+    ctx.moveTo(W - 4, 4); ctx.lineTo(4, H - 4);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  function drawPath(pts, width, color, dash) {
+    if (pts.length < 1) return;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    if (pts.length === 1) ctx.lineTo(pts[0][0] + 0.1, pts[0][1]);
+    for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.stroke();
+    if (dash) ctx.setLineDash([]);
+  }
+  function drawInk(pts) {
+    /* 毛笔感：慢笔粗、快笔细，逐段变宽 */
+    if (pts.length < 2) { drawPath(pts, 11, "rgba(28,30,36,.92)"); return; }
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(28,30,36,.92)";
+    for (var i = 1; i < pts.length; i++) {
+      var seg = dist(pts[i - 1], pts[i]);
+      var w = 14 - Math.min(seg, 24) * 0.25;
+      if (w < 7) w = 7;
+      ctx.lineWidth = w;
+      ctx.beginPath();
+      ctx.moveTo(pts[i - 1][0], pts[i - 1][1]);
+      ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.stroke();
+    }
+  }
+  function draw() {
+    if (!ctx || !g) return;
+    drawGrid();
+    var c = CHARS[g.ci], i;
+    for (i = 0; i < c.strokes.length; i++) {
+      drawPath(toPx(c.strokes[i]), 20, i < g.si ? "rgba(140,144,152,.18)" : "rgba(140,144,152,.34)");
+    }
+    if (!g.done && g.si < c.strokes.length) {
+      var tgt = toPx(c.strokes[g.si]);
+      drawPath(tgt, 4, "rgba(196,84,66,.8)", [9, 7]);
+      ctx.fillStyle = "rgba(196,84,66,.95)";
+      ctx.beginPath();
+      ctx.arc(tgt[0][0], tgt[0][1], 7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    for (i = 0; i < g.inks.length; i++) drawInk(g.inks[i]);
+    if (g.cur) drawInk(g.cur);
+  }
+  function syncHud() {
+    var eC = el("shfChars"), eB = el("shfBest"), eA = el("shfAvg");
+    if (eC) eC.textContent = String(rec.chars);
+    if (eB) eB.textContent = rec.best > 0 ? rec.best + " 分" : "—";
+    if (eA) eA.textContent = rec.cnt > 0 ? Math.round(rec.sum / rec.cnt) + " 分" : "—";
+  }
+  function syncScores() {
+    var box = el("shfScores");
+    if (!box || !g) return;
+    var c = CHARS[g.ci], html = "", i;
+    for (i = 0; i < c.strokes.length; i++) {
+      var v = i < g.scores.length ? g.scores[i] + "" : "·";
+      var cls = i < g.scores.length ? (g.scores[i] >= 85 ? " good" : (g.scores[i] < 50 ? " bad" : "")) : "";
+      html += '<span class="shf-sc' + cls + '">第' + (i + 1) + "笔 " + v + "</span>";
+    }
+    box.innerHTML = html;
+  }
+  function setMsg(t) {
+    var m = el("shfMsg");
+    if (m) m.textContent = t;
+  }
+  function syncMsg(kind) {
+    if (!g) return;
+    var c = CHARS[g.ci];
+    if (g.done) {
+      setMsg(g.grade.e + " 「" + c.ch + "」" + g.avg + " 分 · " + g.grade.t + "！点「换一字」继续练");
+    } else if (kind === "short") {
+      setMsg("笔画太短啦，从红点起笔，沿虚线一笔写完～");
+    } else {
+      var last = g.scores.length ? "上一笔 " + g.scores[g.scores.length - 1] + " 分 · " : "";
+      setMsg(last + "写「" + c.ch + "」第 " + (g.si + 1) + "/" + c.strokes.length + " 笔（从红点沿虚线描）");
+    }
+  }
+  function syncAll(kind) { draw(); syncHud(); syncScores(); syncMsg(kind); }
+
+  /* ---------- 事件 ---------- */
+  function cavXY(ev) {
+    var r = cav.getBoundingClientRect();
+    var sx = r.width > 0 ? W / r.width : 1;
+    var sy = r.height > 0 ? H / r.height : 1;
+    return [(ev.clientX - r.left) * sx, (ev.clientY - r.top) * sy];
+  }
+  function onDown(ev) {
+    if (!active) return;
+    ev.preventDefault();
+    var p = cavXY(ev);
+    if (downAt(p[0], p[1])) draw();
+  }
+  function onMove(ev) {
+    if (!active || !g || !g.cur) return;
+    ev.preventDefault();
+    var p = cavXY(ev);
+    if (moveAt(p[0], p[1])) draw();
+  }
+  function onUp() {
+    if (!g || !g.cur) return;
+    var kind = upAt();
+    syncAll(kind);
+  }
+  function fillSel() {
+    var sel = el("shfSel");
+    if (!sel) return;
+    var html = "";
+    for (var i = 0; i < CHARS.length; i++) {
+      html += '<option value="' + i + '">' + CHARS[i].ch + " · " + CHARS[i].strokes.length + " 笔 · " + LV_TXT[CHARS[i].lv] + "</option>";
+    }
+    sel.innerHTML = html;
+  }
+  function startFromSel() {
+    var sel = el("shfSel");
+    var ci = sel ? nInt(sel.value) : 0;
+    if (ci >= CHARS.length) ci = 0;
+    pickChar(ci);
+    syncAll();
+  }
+  function ensureInit() {
+    if (inited) return;
+    inited = true;
+    cav = el("shfCav");
+    if (cav && cav.getContext) ctx = cav.getContext("2d");
+    fillSel();
+    if (cav) {
+      cav.addEventListener("pointerdown", onDown);
+      cav.addEventListener("pointermove", onMove);
+      cav.addEventListener("pointerup", onUp);
+      cav.addEventListener("pointerleave", onUp);
+    }
+    var sel = el("shfSel");
+    if (sel) sel.addEventListener("change", startFromSel);
+    var bR = el("shfRand");
+    if (bR) bR.addEventListener("click", function () {
+      randChar();
+      var s = el("shfSel");
+      if (s) s.value = String(g.ci);
+      syncAll();
+    });
+    var bRe = el("shfRedo");
+    if (bRe) bRe.addEventListener("click", function () {
+      if (g) { pickChar(g.ci); syncAll(); }
+    });
+    pickChar(0);
+  }
+
+  /* ---------- 对外钩子 ---------- */
+  window.shfRender = function () {
+    ensureInit();
+    active = true;
+    syncAll();
+  };
+  window.shfStop = function () {
+    active = false;
+    if (g) g.cur = null;
+  };
+
+  window.__shfTest = {
+    loadRec: loadRec, defRec: defRec, saveRec: saveRec,
+    getRec: function () { return rec; },
+    setRec: function (r) { rec = r; },
+    dist: dist, pathLen: pathLen, distPtSeg: distPtSeg,
+    minDistToPath: minDistToPath, resample: resample, toPx: toPx,
+    scoreStroke: scoreStroke, gradeOf: gradeOf, avgOf: avgOf,
+    newChar: newChar, pickChar: pickChar, randChar: randChar,
+    downAt: downAt, moveAt: moveAt, upAt: upAt, finishChar: finishChar,
+    getG: function () { return g; },
+    setG: function (v) { g = v; },
+    setRnd: function (f) { rnd = f; },
+    setActive: function (v) { active = v; },
+    ensureInit: ensureInit, draw: draw, syncAll: syncAll,
+    startFromSel: startFromSel,
+    consts: { KEY: KEY, W: W, H: H, TOL: TOL, STRAY_TOL: STRAY_TOL, SAMPLE_N: SAMPLE_N,
+      START_TOL: START_TOL, START_PEN: START_PEN, STRAY_PEN: STRAY_PEN,
+      MIN_LEN: MIN_LEN, ACE: ACE, VET: VET, MOVE_EPS: MOVE_EPS, CHARS: CHARS }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "✒️", name: "笔走龙蛇", desc: "在随便书法里单字拿到 90 分以上", test: function (u) { return (u.shufaace || 0) >= 1; } },
+      { emoji: "🖌️", name: "入木三分", desc: "在随便书法里累计写完 10 个字", test: function (u) { return (u.shufavet || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "字如其人？那就趁现在，把自己写端正一点。",
+      "毛笔不问你写得好不好，只问你敢不敢落笔。",
+      "描红的意义：先承认别人的好，再练出自己的样。",
+      "写歪的每一笔都算数，它们是下一笔变直的理由。",
+      "心静自然字正，字正未必心静——但至少手稳了。"
     );
   }
 })();
