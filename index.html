@@ -1589,6 +1589,7 @@
         <button data-tab="boomerang">🪃 随便回旋镖</button>
         <button data-tab="epee">🤺 随便击剑</button>
         <button data-tab="bartend">🍸 随便调酒</button>
+        <button data-tab="alchemy">⚗️ 随便炼金</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -8612,6 +8613,33 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="alchemy">
+    <h2>⚗️ 随便炼金</h2>
+    <p class="sub">抓料、控火、凝晶——三关过后，这锅灵药才配叫作品</p>
+    <style>
+      #alchemy .alch-wrap { max-width:420px; margin:0 auto; }
+      #alchemy canvas { width:100%; max-width:380px; border-radius:16px; display:block; margin:0 auto 10px; touch-action:none; cursor:pointer; box-shadow:0 14px 34px rgba(0,0,0,.4); }
+      #alchemy .alch-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #alchemy .alch-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #alchemy .alch-hud b { font-weight:700; color:#b39ddb; }
+      #alchemy .alch-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="alch-wrap">
+      <div class="alch-hud">
+        <span>当前配方 <b id="alchLab">—</b></span>
+        <span>最高分 <b id="alchBest">—</b></span>
+        <span>连炼 <b id="alchStreak">0 锅（最佳 0）</b></span>
+        <span>战绩 <b id="alchRec">—</b></span>
+      </div>
+      <canvas id="alchCav" width="380" height="520"></canvas>
+      <p class="alch-help">
+        每锅药三关：<b>① 抓料</b> — 转轮上 8 味材料转个不停，目标材料转到指针下时点击抓取，越准分越高，抓错一次扣 8 分；<br>
+        <b>② 控火</b> — 按住画布 / 空格加火、松手退火，把温度稳在绿带里熬够时间，碰到 96° 红线直接炸炉；<br>
+        <b>③ 凝晶</b> — 光环收缩到金圈的一瞬点击，差一点都折分；总分 = 投料 40% + 火候 40% + 结晶 20%。<br>
+        单锅 95 分以上解锁「⚗️ 点石成金」，连续三锅 85 分以上解锁「🔮 大炼金术师」，战绩本地存档（suibian_alchemy）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="bartend">
     <h2>🍸 随便调酒</h2>
     <p class="sub">接单、注酒、摇壶、出杯——分寸感才是这张吧台上真正的手艺</p>
@@ -9316,6 +9344,7 @@
     if (id === "boomerang" && typeof bmrRender === "function") bmrRender();
     if (id === "epee" && typeof epeRender === "function") epeRender();
     if (id === "bartend" && typeof btdRender === "function") btdRender();
+    if (id === "alchemy" && typeof alchRender === "function") alchRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -9387,6 +9416,7 @@
     if (id !== "boomerang" && typeof bmrStop === "function") bmrStop();
     if (id !== "epee" && typeof epeStop === "function") epeStop();
     if (id !== "bartend" && typeof btdStop === "function") btdStop();
+    if (id !== "alchemy" && typeof alchStop === "function") alchStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9589,6 +9619,7 @@
     boomerang: "随便回旋镖 boomerang 回旋镖 飞去来器 投掷 掷镖 接镖 风向 集星 弧线 轨迹 草原 狩猎 游戏 挑战 极限运动",
     epee: "随便击剑 epee fencing 击剑 重剑 剑术 对决 决斗 突刺 弓步 招架 反击 控距 剑道 五剑 互中 假动作 游戏 挑战 体育",
     bartend: "随便调酒 bartend cocktail 调酒 鸡尾酒 酒保 吧台 摇壶 注酒 配方 量杯 节拍 精准 手感 酒馆 混酒 游戏 挑战 休闲",
+    alchemy: "随便炼金 alchemy potion 炼金 药水 魔药 坩埚 火候 控温 结晶 材料 转轮 抓取 贤者之石 炼成 灵药 游戏 挑战 休闲",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -9851,6 +9882,7 @@ splitbill:"tools",
     boomerang:"games",
     epee:"games",
     bartend:"games",
+    alchemy:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -57731,6 +57763,610 @@ splitbill:"tools",
       "松手也是一门手艺——知道什么时候停，比知道怎么开始更难。",
       "节拍不会等你，摇壶也不会；踩准当下这一下就够了。",
       "配方写得再准，最后决定味道的还是你手上的犹豫。"
+    );
+  }
+})();
+/* ===== ⚗️ 随便炼金 alchemy ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_alchemy";
+  var W = 380, H = 520;
+  var SLOTS = 8;                 // 材料转轮槽位数
+  var STEP_A = Math.PI * 2 / SLOTS;
+  var SPIN = 0.026;              // 转轮每帧转速（弧度）
+  var PTR_A = -Math.PI / 2;      // 指针位置（正上方）
+  var PERF_A = 0.13;             // 抓取完美角窗
+  var GOOD_A = 0.32;             // 抓取良好角窗
+  var WRONG_PEN = 8;             // 抓错一次扣的投料分
+  var AMBIENT = 20;              // 常温
+  var HEAT_UP = 0.9;             // 按住每帧升温
+  var COOL = 0.55;               // 松手每帧降温
+  var HEAT_TIME = 300;           // 熬煮总帧数
+  var HEAT_NEED = 210;           // 达标所需带内帧数
+  var BOOM_T = 96;               // 炸炉温度
+  var R0 = 150;                  // 结晶环初始半径
+  var RT = 56;                   // 结晶目标半径
+  var SHRINK = 1.6;              // 结晶环每帧收缩
+  var PICK_W = 0.4, HEAT_W = 0.4, CRYST_W = 0.2;
+  var BOOM_PEN = 10;             // 炸炉额外罚分
+  var MSG_FR = 46;
+  var rnd = Math.random;
+
+  var ING = [
+    { n: "月光菇", e: "🍄", c: "#b39ddb" },
+    { n: "龙涎草", e: "🌿", c: "#66bb6a" },
+    { n: "星尘砂", e: "✨", c: "#ffe082" },
+    { n: "蜥蜴泪", e: "💧", c: "#4fc3f7" },
+    { n: "凤凰羽", e: "🪶", c: "#ff8a65" },
+    { n: "深海螺", e: "🐚", c: "#4dd0e1" },
+    { n: "雷橡果", e: "🌰", c: "#a1887f" },
+    { n: "霜之花", e: "❄️", c: "#e1f5fe" }
+  ];
+
+  var RECIPES = [
+    { name: "晨曦回春露", emoji: "🌅", c: "#8bd48b", ings: [1, 0, 7], lo: 58, hi: 74,
+      tip: "草药打底的方子，火一猛药性就散" },
+    { name: "星屑迷梦剂", emoji: "🌌", c: "#9fa8ff", ings: [2, 0, 3], lo: 64, hi: 80,
+      tip: "星尘砂要第一个下锅，梦才立得住" },
+    { name: "烈焰强心液", emoji: "🔥", c: "#ff9070", ings: [4, 6, 2], lo: 74, hi: 90,
+      tip: "凤凰羽扛得住高温，大胆熬" },
+    { name: "深渊静谧汤", emoji: "🌊", c: "#5fc9d8", ings: [5, 3, 1], lo: 52, hi: 68,
+      tip: "海货娇气，温吞火才出鲜" },
+    { name: "霜语凝神膏", emoji: "🧊", c: "#bfe8ff", ings: [7, 5, 0], lo: 46, hi: 62,
+      tip: "霜之花见热就化，全程压着火" },
+    { name: "雷鸣觉醒散", emoji: "⚡", c: "#ffd76e", ings: [6, 2, 4], lo: 68, hi: 84,
+      tip: "雷橡果不炸不香，但别真把锅炸了" }
+  ];
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { brews: 0, best: -1, stones: 0, booms: 0, streak: 0, bestStreak: 0, aP: 0, aM: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.brews = nInt(o.brews); d.stones = nInt(o.stones); d.booms = nInt(o.booms);
+      d.streak = nInt(o.streak); d.bestStreak = nInt(o.bestStreak);
+      var b = Math.floor(Number(o.best));
+      d.best = isFinite(b) && b >= 0 ? Math.min(100, b) : -1;
+      d.aP = o.aP ? 1 : 0; d.aM = o.aM ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 纯函数：几何与评分 ---------- */
+  function angDiff(a, b) {
+    var d = (Number(a) || 0) - (Number(b) || 0);
+    while (d > Math.PI) d -= Math.PI * 2;
+    while (d < -Math.PI) d += Math.PI * 2;
+    return Math.abs(d);
+  }
+  function slotAngle(i, ang) { return (Number(ang) || 0) + i * STEP_A; }
+  function nearestSlot(ang) {
+    var bi = 0, bd = Infinity;
+    for (var i = 0; i < SLOTS; i++) {
+      var d = angDiff(slotAngle(i, ang), PTR_A);
+      if (d < bd) { bd = d; bi = i; }
+    }
+    return { i: bi, off: bd };
+  }
+  function pickQualityOf(off) {
+    off = Math.abs(Number(off) || 0);
+    if (off <= PERF_A) return 1;
+    if (off <= GOOD_A) return 0.6;
+    return 0.3;
+  }
+  function pickScoreOf(quals, wrongs) {
+    var s = 0;
+    for (var i = 0; i < 3; i++) s += Number(quals && quals[i]) || 0;
+    s = s / 3 * 100 - nInt(wrongs) * WRONG_PEN;
+    return s > 0 ? s : 0;
+  }
+  function tempStep(t, hold) {
+    t = Number(t); if (!isFinite(t)) t = AMBIENT;
+    t = hold ? t + HEAT_UP : t - COOL;
+    return t < AMBIENT ? AMBIENT : t;
+  }
+  function heatScoreOf(inBand, boom) {
+    if (boom) return 0;
+    var s = nInt(inBand) / HEAT_NEED * 100;
+    return s > 100 ? 100 : s;
+  }
+  function crystalScoreOf(dr, missed) {
+    if (missed) return 0;
+    dr = Math.abs(Number(dr) || 0);
+    if (dr <= 4) return 100;
+    if (dr <= 10) return 80;
+    if (dr <= 20) return 55;
+    if (dr <= 35) return 30;
+    return 10;
+  }
+  function totalOf(pk, ht, cr, boom) {
+    var t = (Number(pk) || 0) * PICK_W + (Number(ht) || 0) * HEAT_W + (Number(cr) || 0) * CRYST_W;
+    if (boom) t -= BOOM_PEN;
+    t = Math.round(t);
+    if (!(t > 0)) t = 0;
+    return t > 100 ? 100 : t;
+  }
+  function gradeOf(t) {
+    t = Number(t) || 0;
+    if (t >= 95) return "贤者之石";
+    if (t >= 85) return "传世灵药";
+    if (t >= 70) return "合格出品";
+    if (t >= 50) return "汤汤水水";
+    return "炸炉黑历史";
+  }
+  function pickRecipe(r) {
+    var i = Math.floor((isFinite(r) ? r : 0) * RECIPES.length);
+    if (!(i >= 0)) i = 0;
+    if (i >= RECIPES.length) i = RECIPES.length - 1;
+    return i;
+  }
+
+  /* ---------- 状态 ---------- */
+  var g = null, ctx = null, cav = null, raf = 0, inited = false, active = false;
+  var keyHold = false, held = false;
+
+  function newBrew(forceIdx) {
+    var ri = typeof forceIdx === "number" ? pickRecipe(forceIdx / RECIPES.length) : pickRecipe(rnd());
+    return {
+      phase: "idle", f: 0, ri: ri,
+      ang: 0, idx: 0, quals: [], wrongs: 0,
+      temp: AMBIENT, hf: 0, inBand: 0, heating: false, boom: false,
+      cr: R0, crLock: -1, crMiss: false,
+      msg: "", msgF: 0, res: null, fx: 0
+    };
+  }
+  function setMsg(s) { if (g) { g.msg = s; g.msgF = MSG_FR; } }
+  function recipe() { return RECIPES[g && g.ri >= 0 && g.ri < RECIPES.length ? g.ri : 0]; }
+
+  function startBrew() {
+    if (!g) return;
+    g.phase = "pick"; g.f = 0; g.ang = 0; g.idx = 0; g.quals = []; g.wrongs = 0;
+    g.temp = AMBIENT; g.hf = 0; g.inBand = 0; g.heating = false; g.boom = false;
+    g.cr = R0; g.crLock = -1; g.crMiss = false; g.res = null;
+    setMsg("先抓：" + ING[recipe().ings[0]].n);
+    alchSync();
+  }
+  function nextBrew() {
+    var keep = g ? g.ri : 0;
+    g = newBrew();
+    if (RECIPES.length > 1 && g.ri === keep) g.ri = (g.ri + 1) % RECIPES.length;
+    startBrew();
+  }
+
+  function grab() {
+    if (!g || g.phase !== "pick" || g.idx >= 3) return;
+    var ns = nearestSlot(g.ang);
+    var need = recipe().ings[g.idx];
+    if (ns.i !== need) {
+      g.wrongs++; g.fx = 6;
+      setMsg("抓错了！那是" + ING[ns.i].n);
+      return;
+    }
+    var q = pickQualityOf(ns.off);
+    g.quals[g.idx] = q; g.idx++;
+    g.fx = q >= 1 ? 9 : 5;
+    setMsg(q >= 1 ? "稳准狠！" : q > 0.5 ? "抓到了" : "擦边抓到");
+    if (g.idx >= 3) {
+      g.phase = "heat"; g.hf = 0; g.temp = AMBIENT; g.inBand = 0; g.heating = false;
+      setMsg("开火！把温度稳在绿带里");
+    } else {
+      setMsg("下一味：" + ING[recipe().ings[g.idx]].n);
+    }
+  }
+
+  function setHeat(on) {
+    if (!g || g.phase !== "heat") return;
+    g.heating = !!on;
+  }
+
+  function lockCrystal() {
+    if (!g || g.phase !== "crystal" || g.crLock >= 0 || g.crMiss) return;
+    g.crLock = g.cr;
+    finish();
+  }
+
+  function finish() {
+    if (!g || g.phase === "done") return;
+    var pk = pickScoreOf(g.quals, g.wrongs);
+    var ht = heatScoreOf(g.inBand, g.boom);
+    var cr = g.boom ? 0 : crystalScoreOf(g.crLock - RT, g.crMiss);
+    var tot = totalOf(pk, ht, cr, g.boom);
+    g.res = {
+      pk: Math.round(pk), ht: Math.round(ht), cr: Math.round(cr),
+      tot: tot, grade: gradeOf(tot)
+    };
+    g.phase = "done";
+    rec.brews++;
+    if (g.boom) rec.booms++;
+    if (tot > rec.best) rec.best = tot;
+    if (tot >= 95) rec.stones++;
+    if (tot >= 85) {
+      rec.streak++;
+      if (rec.streak > rec.bestStreak) rec.bestStreak = rec.streak;
+    } else { rec.streak = 0; }
+    if (tot >= 95 && !rec.aP) { rec.aP = 1; try { bumpUsage("alchgold"); } catch (e1) {} }
+    if (rec.streak >= 3 && !rec.aM) { rec.aM = 1; try { bumpUsage("alchmaster"); } catch (e2) {} }
+    saveRec();
+    setMsg(g.res.grade);
+    alchSync();
+  }
+
+  function step() {
+    if (!g) return;
+    g.f++;
+    if (g.msgF > 0) g.msgF--;
+    if (g.fx > 0) g.fx--;
+    if (g.phase === "pick") {
+      g.ang += SPIN;
+      if (g.ang > Math.PI * 2) g.ang -= Math.PI * 2;
+    } else if (g.phase === "heat") {
+      g.hf++;
+      g.temp = tempStep(g.temp, g.heating);
+      var r = recipe();
+      if (g.temp >= r.lo && g.temp <= r.hi) g.inBand++;
+      if (g.temp >= BOOM_T) {
+        g.boom = true; g.heating = false;
+        setMsg("轰！炸炉了！");
+        finish();
+        return;
+      }
+      if (g.hf >= HEAT_TIME) {
+        g.phase = "crystal"; g.cr = R0; g.crLock = -1; g.crMiss = false;
+        setMsg("凝晶！光环缩到金圈时点下去");
+      }
+    } else if (g.phase === "crystal") {
+      if (g.crLock < 0 && !g.crMiss) {
+        g.cr -= SHRINK;
+        if (g.cr <= 0) {
+          g.cr = 0; g.crMiss = true;
+          setMsg("晶核散了……");
+          finish();
+        }
+      }
+    }
+  }
+
+  function primary(down) {
+    if (!g) return;
+    if (g.phase === "idle") { if (down) startBrew(); return; }
+    if (g.phase === "pick") { if (down) grab(); return; }
+    if (g.phase === "heat") { setHeat(!!down); return; }
+    if (g.phase === "crystal") { if (down) lockCrystal(); return; }
+    if (g.phase === "done") { if (down) nextBrew(); }
+  }
+
+  /* ---------- 绘制 ---------- */
+  function rrect(x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawOrderCard() {
+    var r = recipe();
+    ctx.fillStyle = "rgba(255,255,255,.06)";
+    rrect(14, 12, W - 28, 96, 14); ctx.fill();
+    ctx.strokeStyle = "rgba(179,157,219,.4)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = "#b39ddb"; ctx.font = "bold 17px system-ui,sans-serif"; ctx.textAlign = "left";
+    ctx.fillText(r.emoji + " " + r.name, 26, 36);
+    ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.font = "11px system-ui,sans-serif";
+    ctx.fillText(r.tip, 26, 53);
+    for (var i = 0; i < 3; i++) {
+      var ing = ING[r.ings[i]];
+      var x = 26 + i * 118, y = 78;
+      var done = i < g.idx, doing = g.phase === "pick" && g.idx === i;
+      ctx.fillStyle = done ? "rgba(93,220,139,.16)" : doing ? "rgba(255,213,79,.16)" : "rgba(255,255,255,.07)";
+      rrect(x, y - 14, 108, 26, 13); ctx.fill();
+      ctx.fillStyle = done ? "#5ddc8b" : doing ? "#ffd54f" : "rgba(255,255,255,.6)";
+      ctx.font = (doing ? "bold " : "") + "12px system-ui,sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText((done ? "✓ " : (i + 1) + ". ") + ing.e + " " + ing.n, x + 10, y + 4);
+    }
+    ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.font = "10px system-ui,sans-serif"; ctx.textAlign = "right";
+    ctx.fillText("火候 " + r.lo + "~" + r.hi + "°", W - 26, 36);
+  }
+
+  function drawWheel() {
+    var cx = W / 2, cy = 316, R = 128;
+    ctx.strokeStyle = "rgba(255,255,255,.14)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+    var need = recipe().ings[g.idx];
+    for (var i = 0; i < SLOTS; i++) {
+      var a = slotAngle(i, g.ang);
+      var px = cx + Math.cos(a) * R, py = cy + Math.sin(a) * R;
+      var isNeed = g.idx < 3 && i === need;
+      ctx.beginPath(); ctx.arc(px, py, 22, 0, Math.PI * 2);
+      ctx.fillStyle = isNeed ? "rgba(255,213,79,.22)" : "rgba(255,255,255,.08)";
+      ctx.fill();
+      if (isNeed) { ctx.strokeStyle = "#ffd54f"; ctx.lineWidth = 2; ctx.stroke(); }
+      ctx.fillStyle = ING[i].c; ctx.font = "20px system-ui,sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(ING[i].e, px, py + 7);
+    }
+    // 指针
+    ctx.fillStyle = "#ffd54f";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - R + 34); ctx.lineTo(cx - 9, cy - R + 52); ctx.lineTo(cx + 9, cy - R + 52);
+    ctx.closePath(); ctx.fill();
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("目标材料转到指针下时点击抓取（抓错扣分）", cx, 486);
+  }
+
+  function drawCauldron(small) {
+    var cx = W / 2, cy = small ? 430 : 330;
+    ctx.fillStyle = "#2e2233";
+    ctx.beginPath(); ctx.ellipse(cx, cy, 88, 56, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = recipe().c; ctx.globalAlpha = 0.75;
+    ctx.beginPath(); ctx.ellipse(cx, cy - 22, 70, 18, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    if (g.phase === "heat") {
+      var heatFrac = (g.temp - AMBIENT) / (BOOM_T - AMBIENT);
+      var nb = Math.round(2 + heatFrac * 8);
+      for (var i = 0; i < nb; i++) {
+        var bx = cx - 56 + ((g.f * 7 + i * 53) % 112);
+        var by = cy - 24 - ((g.f * (1.2 + i * 0.23) + i * 31) % 34);
+        ctx.fillStyle = "rgba(255,255,255," + (0.14 + 0.05 * (i % 3)) + ")";
+        ctx.beginPath(); ctx.arc(bx, by, 3 + (i % 3), 0, Math.PI * 2); ctx.fill();
+      }
+      // 火苗
+      ctx.fillStyle = g.heating ? "rgba(255,140,60,.85)" : "rgba(255,140,60,.22)";
+      for (var j = -2; j <= 2; j++) {
+        ctx.beginPath();
+        ctx.ellipse(cx + j * 24, cy + 46, 8, g.heating ? 16 + (g.f + j * 5) % 6 : 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawHeat() {
+    drawCauldron(false);
+    var r = recipe();
+    // 温度计
+    var bx = 40, by = 150, bw = 22, bh = 260;
+    ctx.fillStyle = "rgba(255,255,255,.08)";
+    rrect(bx, by, bw, bh, 11); ctx.fill();
+    function yOf(t) { return by + bh - bh * (t - AMBIENT) / (BOOM_T + 6 - AMBIENT); }
+    // 目标带
+    ctx.fillStyle = "rgba(93,220,139,.30)";
+    ctx.fillRect(bx, yOf(r.hi), bw, yOf(r.lo) - yOf(r.hi));
+    // 炸炉线
+    ctx.strokeStyle = "#ff6b6b"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(bx - 5, yOf(BOOM_T)); ctx.lineTo(bx + bw + 5, yOf(BOOM_T)); ctx.stroke();
+    // 水银柱
+    var ty = yOf(Math.min(g.temp, BOOM_T + 6));
+    var inB = g.temp >= r.lo && g.temp <= r.hi;
+    ctx.fillStyle = inB ? "#5ddc8b" : g.temp > r.hi ? "#ff9070" : "#4fc3f7";
+    rrect(bx + 5, ty, bw - 10, by + bh - ty - 4, 6); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 13px system-ui,sans-serif"; ctx.textAlign = "left";
+    ctx.fillText(Math.round(g.temp) + "°", bx + bw + 10, ty + 5);
+    ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.font = "10px system-ui,sans-serif";
+    ctx.fillText("💥 " + BOOM_T + "°", bx + bw + 10, yOf(BOOM_T) - 4);
+    // 进度
+    var pw = 200, px = W - pw - 30, py = 156;
+    ctx.fillStyle = "rgba(255,255,255,.10)";
+    rrect(px, py, pw, 10, 5); ctx.fill();
+    ctx.fillStyle = "#b39ddb";
+    rrect(px, py, Math.max(2, pw * g.hf / HEAT_TIME), 10, 5); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.textAlign = "right"; ctx.font = "11px system-ui,sans-serif";
+    ctx.fillText("熬煮 " + Math.min(100, Math.round(g.hf / HEAT_TIME * 100)) + "%　火候达标 " + Math.min(100, Math.round(g.inBand / HEAT_NEED * 100)) + "%", W - 30, py + 26);
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("按住 = 加火，松手 = 退火；碰到红线直接炸炉", W / 2, 486);
+  }
+
+  function drawCrystal() {
+    var cx = W / 2, cy = 300;
+    drawCauldron(true);
+    // 目标金圈
+    ctx.strokeStyle = "#ffd54f"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, RT, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,213,79,.25)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, RT - 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, RT + 8, 0, Math.PI * 2); ctx.stroke();
+    // 收缩光环
+    var rr = g.crLock >= 0 ? g.crLock : g.cr;
+    if (rr > 0) {
+      ctx.strokeStyle = recipe().c; ctx.lineWidth = 5;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = "#fff"; ctx.font = "26px system-ui,sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("💠", cx, cy + 9);
+    ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("光环缩到金圈的一瞬点击凝晶", cx, 486);
+  }
+
+  function drawResult() {
+    var r = g.res; if (!r) return;
+    ctx.fillStyle = "rgba(8,5,14,.84)";
+    rrect(30, 150, W - 60, 270, 16); ctx.fill();
+    ctx.strokeStyle = "rgba(179,157,219,.45)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.textAlign = "center";
+    ctx.font = "34px system-ui,sans-serif";
+    ctx.fillText(g.boom ? "💥" : r.tot >= 95 ? "💎" : recipe().emoji, W / 2, 196);
+    ctx.fillStyle = "#ffd54f"; ctx.font = "bold 30px system-ui,sans-serif";
+    ctx.fillText(r.tot + " 分", W / 2, 236);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 16px system-ui,sans-serif";
+    ctx.fillText(r.grade, W / 2, 262);
+    ctx.font = "12px system-ui,sans-serif";
+    var rows = [["投料", r.pk, PICK_W], ["火候", r.ht, HEAT_W], ["结晶", r.cr, CRYST_W]];
+    for (var i = 0; i < 3; i++) {
+      var y = 292 + i * 22;
+      ctx.textAlign = "left"; ctx.fillStyle = "rgba(255,255,255,.7)";
+      ctx.fillText(rows[i][0] + "（" + Math.round(rows[i][2] * 100) + "%）", 60, y);
+      ctx.textAlign = "right";
+      ctx.fillStyle = rows[i][1] >= 85 ? "#5ddc8b" : rows[i][1] >= 55 ? "#ffd54f" : "#ff6b6b";
+      ctx.fillText(rows[i][1] + " 分", W - 60, y);
+    }
+    ctx.textAlign = "center";
+    ctx.fillStyle = g.boom ? "#ff6b6b" : g.wrongs > 0 ? "#ffd54f" : "rgba(255,255,255,.6)";
+    ctx.fillText(g.boom ? "炸炉再扣 " + BOOM_PEN + " 分，锅都黑了" : g.wrongs > 0 ? "抓错 " + g.wrongs + " 次，各扣 " + WRONG_PEN + " 分" : "手法干净，一次没抓错", W / 2, 372);
+    ctx.fillStyle = "rgba(255,255,255,.62)"; ctx.font = "12px system-ui,sans-serif";
+    ctx.fillText("点击熬下一锅", W / 2, 400);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#170f26"); bg.addColorStop(0.55, "#221336"); bg.addColorStop(1, "#0d0816");
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "rgba(179,157,219,.07)";
+    ctx.beginPath(); ctx.arc(W / 2, 140, 110, 0, Math.PI * 2); ctx.fill();
+    if (!g) return;
+    drawOrderCard();
+    if (g.phase === "idle") {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#fff"; ctx.font = "bold 19px system-ui,sans-serif";
+      ctx.fillText("⚗️ 今晚炉子归你管", W / 2, 258);
+      ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.font = "13px system-ui,sans-serif";
+      ctx.fillText("① 转轮抓 3 味材料（讲究时机）", W / 2, 292);
+      ctx.fillText("② 按住加火，把温度稳在绿带", W / 2, 314);
+      ctx.fillText("③ 光环缩到金圈的一瞬凝晶", W / 2, 336);
+      ctx.fillStyle = "#ffd54f"; ctx.font = "bold 15px system-ui,sans-serif";
+      ctx.fillText("点击开炉", W / 2, 380);
+    } else if (g.phase === "pick") {
+      drawWheel();
+    } else if (g.phase === "heat") {
+      drawHeat();
+    } else if (g.phase === "crystal") {
+      drawCrystal();
+    } else if (g.phase === "done") {
+      drawResult();
+    }
+    if (g.msgF > 0 && g.phase !== "done") {
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255," + Math.min(1, g.msgF / 18) + ")";
+      ctx.font = "bold 15px system-ui,sans-serif";
+      ctx.fillText(g.msg, W / 2, 136);
+    }
+  }
+
+  /* ---------- HUD ---------- */
+  function alchSync() {
+    var eL = document.getElementById("alchLab");
+    var eB = document.getElementById("alchBest");
+    var eS = document.getElementById("alchStreak");
+    var eR = document.getElementById("alchRec");
+    if (eL) eL.textContent = g ? (recipe().emoji + " " + recipe().name) : "—";
+    if (eB) eB.textContent = rec.best >= 0 ? rec.best + " 分" : "—";
+    if (eS) eS.textContent = rec.streak + " 锅（最佳 " + rec.bestStreak + "）";
+    if (eR) eR.textContent = rec.brews + " 锅 / 贤者级 " + rec.stones + " / 炸炉 " + rec.booms;
+  }
+
+  /* ---------- 生命周期 ---------- */
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step(); draw();
+    if (g && (g.f % 12 === 0)) alchSync();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function onKeyDown(e) {
+    if (!active || !g) return;
+    var tag = e.target && e.target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "Enter") {
+      if (e.repeat) { if (e.preventDefault) e.preventDefault(); return; }
+      if (e.preventDefault) e.preventDefault();
+      keyHold = true;
+      primary(true);
+    }
+  }
+  function onKeyUp(e) {
+    if (!active || !g) return;
+    var k = e.key;
+    if (k === " " || k === "Spacebar" || k === "Enter") {
+      if (!keyHold) return;
+      keyHold = false;
+      primary(false);
+    }
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = document.getElementById("alchCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+    g = newBrew();
+    cav.addEventListener("pointerdown", function (e) {
+      if (e.preventDefault) e.preventDefault();
+      held = true; primary(true);
+    });
+    cav.addEventListener("pointerup", function () { if (held) { held = false; primary(false); } });
+    cav.addEventListener("pointerleave", function () { if (held) { held = false; primary(false); } });
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.alchRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newBrew();
+    alchSync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.alchStop = function () {
+    active = false;
+    keyHold = false; held = false;
+    if (g && g.phase === "heat") g.heating = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__alchTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    setRnd: function (fn) { rnd = fn; }, setActive: function (v) { active = !!v; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    angDiff: angDiff, slotAngle: slotAngle, nearestSlot: nearestSlot,
+    pickQualityOf: pickQualityOf, pickScoreOf: pickScoreOf,
+    tempStep: tempStep, heatScoreOf: heatScoreOf, crystalScoreOf: crystalScoreOf,
+    totalOf: totalOf, gradeOf: gradeOf, pickRecipe: pickRecipe,
+    newBrew: newBrew, startBrew: startBrew, nextBrew: nextBrew,
+    grab: grab, setHeat: setHeat, lockCrystal: lockCrystal,
+    finish: finish, step: step, primary: primary,
+    draw: draw, alchSync: alchSync, ensureInit: ensureInit, setMsg: setMsg, recipe: recipe,
+    onKeyDown: onKeyDown, onKeyUp: onKeyUp,
+    ING: ING, RECIPES: RECIPES,
+    consts: { KEY: KEY, W: W, H: H, SLOTS: SLOTS, STEP_A: STEP_A, SPIN: SPIN, PTR_A: PTR_A,
+      PERF_A: PERF_A, GOOD_A: GOOD_A, WRONG_PEN: WRONG_PEN, AMBIENT: AMBIENT,
+      HEAT_UP: HEAT_UP, COOL: COOL, HEAT_TIME: HEAT_TIME, HEAT_NEED: HEAT_NEED,
+      BOOM_T: BOOM_T, R0: R0, RT: RT, SHRINK: SHRINK,
+      PICK_W: PICK_W, HEAT_W: HEAT_W, CRYST_W: CRYST_W, BOOM_PEN: BOOM_PEN, MSG_FR: MSG_FR }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "⚗️", name: "点石成金", desc: "在随便炼金里熬出一锅 95 分以上的灵药", test: function (u) { return (u.alchgold || 0) >= 1; } },
+      { emoji: "🔮", name: "大炼金术师", desc: "在随便炼金里连续三锅拿到 85 分以上", test: function (u) { return (u.alchmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "炼金的第一课：火大了不是热情，是事故。",
+      "材料转到眼前才出手，人生里大多数机会也是这么抓的。",
+      "绿带很窄，但稳得住的人从来不觉得它窄。",
+      "结晶只有一瞬——犹豫的成本，就是整锅药。",
+      "炸过炉的人才懂什么叫火候，黑锅也是学费。"
     );
   }
 })();
