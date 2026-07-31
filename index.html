@@ -1596,6 +1596,7 @@
         <button data-tab="shufa">🖌️ 随便书法</button>
         <button data-tab="dungeon">🏰 随便地牢</button>
         <button data-tab="whodunit">🕵️ 随便断案</button>
+        <button data-tab="parking">🅿️ 随便泊车</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8730,6 +8731,61 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="parking">
+    <h2>🅿️ 随便泊车</h2>
+    <p class="sub">侧方、倒库、斜列三种车位——阿克曼转向物理模拟，慢一点不丢人，蹭一下才丢人</p>
+    <style>
+      #parking .prk-wrap { max-width:420px; margin:0 auto; }
+      #parking canvas { width:100%; max-width:380px; border-radius:16px; display:block; margin:0 auto 10px; touch-action:none; box-shadow:0 14px 34px rgba(0,0,0,.4); }
+      #parking .prk-bar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+      #parking .prk-bar button { padding:8px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #parking .prk-bar button:active { transform:translateY(1px); background:rgba(255,255,255,.16); }
+      #parking .prk-bar select { padding:7px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; }
+      #parking .prk-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #parking .prk-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.82rem; }
+      #parking .prk-hud b { font-weight:700; color:#e0b34d; }
+      #parking .prk-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; max-width:380px; margin:0 auto 10px; }
+      #parking .prk-pad button { padding:12px 4px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.86rem; font-weight:700; cursor:pointer; touch-action:none; user-select:none; }
+      #parking .prk-pad button:active { transform:translateY(1px); background:rgba(255,255,255,.16); }
+      #parking .prk-rec { font-size:.78rem; opacity:.8; text-align:center; margin:0 0 10px; }
+      #parking .prk-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="prk-wrap">
+      <div class="prk-bar">
+        <select id="prkLevel">
+          <option value="0">↔️ 侧方停车</option>
+          <option value="1">⬆️ 倒车入库</option>
+          <option value="2">↗️ 斜列式</option>
+        </select>
+        <button type="button" id="prkStart">🚦 开始练车</button>
+        <button type="button" id="prkSubmit">🔑 熄火交卷</button>
+      </div>
+      <div class="prk-hud">
+        <span>本次 <b id="prkScore">--</b></span>
+        <span>最佳 <b id="prkBest">--</b></span>
+        <span>挡位 <b id="prkGear">P</b></span>
+        <span>剐蹭 <b id="prkBump">0</b></span>
+        <span>用时 <b id="prkTime">0.0s</b></span>
+      </div>
+      <canvas id="prkCav" width="380" height="520"></canvas>
+      <div class="prk-pad" id="prkPad">
+        <button type="button" data-prk="left">⬅️ 左打</button>
+        <button type="button" data-prk="fwd">⬆️ 前进</button>
+        <button type="button" data-prk="right">➡️ 右打</button>
+        <button type="button" data-prk="brake">🛑 刹车</button>
+        <button type="button" data-prk="back">⬇️ 倒车</button>
+        <button type="button" data-prk="brake">🛑 刹车</button>
+      </div>
+      <p class="prk-rec" id="prkRec">还没上过车</p>
+      <p class="prk-help">
+        真实的<b>自行车模型转向</b>：车头方向随车速与方向盘角度积分变化，倒车时打方向的效果和前进时正好相反——这就是倒库比前进难的原因。<br>
+        <b>↑/W 前进 · ↓/S 倒车 · ←→/A、D 打方向 · 空格 刹车 · 回车 发车 · Esc 强制交卷</b>，手机用下方六键（按住持续生效）。<br>
+        把四个轮子<b>全停进金色框里</b>并静止半秒即自动交卷：位置 40 分 + 角度 30 分 + 效率 20 分（30 秒内免罚）+ 车况 10 分（每蹭一次扣 3.5）。没进框判 0 分。<br>
+        底部 <b>📡 倒车雷达</b>实时显示车身到最近障碍的距离，越红越危险；轮胎印会记录你的走位。<br>
+        单次 95 分以上且零剐蹭解锁「🅿️ 一把入库」，连续三次 85 分以上解锁「🚗 老司机」，战绩本地存档（suibian_parking）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="whodunit">
     <h2>🕵️ 随便断案</h2>
     <p class="sub">程序生成的逻辑推理案件——靠线索排除法，锁定唯一真凶</p>
@@ -9764,6 +9820,7 @@
     if (id === "shufa" && typeof shfRender === "function") shfRender();
     if (id === "dungeon" && typeof dunRender === "function") dunRender();
     if (id === "whodunit" && typeof dtvRender === "function") dtvRender();
+    if (id === "parking" && typeof prkRender === "function") prkRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -9843,6 +9900,7 @@
     if (id !== "shufa" && typeof shfStop === "function") shfStop();
     if (id !== "dungeon" && typeof dunStop === "function") dunStop();
     if (id !== "whodunit" && typeof dtvStop === "function") dtvStop();
+    if (id !== "parking" && typeof prkStop === "function") prkStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10051,7 +10109,8 @@
     uttt: "随便井字 uttt ultimate tictactoe 井字棋 终极井字 九宫 大局观 下棋 棋盘 对弈 人机 ai 对战 策略 悔棋 游戏 挑战 休闲",
     shufa: "随便书法 shufa calligraphy 书法 描红 毛笔 写字 米字格 临帖 笔顺 笔画 汉字 水墨 誊写 游戏 挑战 休闲 手写",
     dungeon: "随便地牢 dungeon roguelike 地牢 地下城 冒险 探险 回合制 肉鸽 刷怪 升级 楼层 深渊 领主 boss 药水 装备 宝箱 迷雾 探索 rpg 游戏 挑战 休闲",
-    whodunit: "随便断案 whodunit 断案 推理 侦探 守侦 案件 凶手 嫌疑人 线索 逻辑 排除法 斑马谜题 爱因斯坦谜题 谜题 烧脑 解谜 推定 指控 真相 益智 游戏 挑战",
+    whodunit: "随便断案 whodunit 断案 推理 侦探 悬疑 案件 凶手 嫌疑人 线索 逻辑 排除法 斑马谜题 爱因斯坦谜题 谜题 烧脑 解谜 推定 指控 真相 益智 游戏 挑战",
+    parking: "随便泊车 parking 泊车 停车 倒车 入库 侧方 斜列 车位 科目二 驾校 练车 方向盘 泊车入位 车辆 物理 模拟 雷达 老司机 技巧 游戏 挑战",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10322,6 +10381,7 @@ splitbill:"tools",
     shufa:"games",
     dungeon:"games",
     whodunit:"games",
+    parking:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -62801,6 +62861,712 @@ splitbill:"tools",
       "先别急着找凶手，先把「谁一定不是」划干净。",
       "真相往往就卡在你懒得验证的那一格里。",
       "指控之前，问自己一句：我是推出来的，还是猜出来的？"
+    );
+  }
+})();
+/* ===== 🅿️ 随便泊车 parking ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_parking";
+
+  /* ---------- 常量 ---------- */
+  var W = 380, H = 520;
+  var CAR_L = 44, CAR_W = 22, WB = 30;      // 车长 / 车宽 / 轴距
+  var ACC = 0.075;                          // 每帧加速度
+  var V_MAX = 1.55, V_REV = 1.15;           // 前进 / 倒车限速
+  var FRIC = 0.968, BRAKE = 0.86;           // 自然滑行 / 刹车衰减
+  var ST_MAX = 0.58, ST_RATE = 0.05, ST_BACK = 0.032;  // 方向盘极限 / 打方向速度 / 回正速度
+  var STOP_V = 0.02;                        // 视为静止的速度阈值
+  var STILL_FR = 32;                        // 在车位里静止这么多帧自动交卷
+  var BUMP_CD = 22;                         // 两次剐蹭之间的冷却帧
+  var MSG_FR = 48;
+  var LIMIT_FR = 5400;                      // 单次限时 90 秒（60fps）
+  var FREE_SEC = 30;                        // 效率满分的免罚秒数
+  var TRAIL_MAX = 96;                       // 轮胎印保留点数
+  var TH = 12;                              // 场地围墙厚度
+  var ACH_ACE = 95;                         // 「一把入库」分数门槛
+  var ACH_STREAK = 3;                       // 「老司机」连续达标次数
+  var PASS_LINE = 70, GOOD_LINE = 85;
+
+  var rnd = Math.random;
+
+  /* ---------- 关卡 ---------- */
+  var LEVELS = [
+    {
+      k: "parallel", nm: "侧方停车", em: "↔️",
+      tip: "路边两车之间的空档，先前溜到位再倒方向",
+      slot: { x: 298, y: 264, ang: -Math.PI / 2, len: 70, wid: 34 },
+      obsAxis: "long", gap: 10,
+      start: { x: 150, y: 432, ang: -Math.PI / 2 },
+      walls: [{ x: 356, y: 260, ang: 0, len: 48, wid: 452 }]
+    },
+    {
+      k: "bay", nm: "倒车入库", em: "⬆️",
+      tip: "经典科目二：倒进去，别压线，别蹭邻车",
+      slot: { x: 190, y: 120, ang: -Math.PI / 2, len: 70, wid: 36 },
+      obsAxis: "side", gap: 15,
+      start: { x: 108, y: 420, ang: 0 },
+      walls: [{ x: 190, y: 52, ang: 0, len: 300, wid: 36 }]
+    },
+    {
+      k: "angled", nm: "斜列式", em: "↗️",
+      tip: "45 度斜车位，角度对了就成功一半",
+      slot: { x: 250, y: 172, ang: -Math.PI * 0.75, len: 68, wid: 34 },
+      obsAxis: "side", gap: 14,
+      start: { x: 122, y: 430, ang: -Math.PI / 2 },
+      walls: [{ x: 60, y: 60, ang: 0, len: 96, wid: 36 }]
+    }
+  ];
+
+  var GRADES = [
+    { min: 95, t: "神乎其技", e: "🏆", d: "教练看完沉默三秒，然后鼓了掌" },
+    { min: 85, t: "老手风范", e: "🥇", d: "一把到位，后面排队的车都松了口气" },
+    { min: 70, t: "稳稳当当", e: "👍", d: "多打了两把方向，但结果不丢人" },
+    { min: 50, t: "勉强算停", e: "🙂", d: "车是进去了，门还能不能开另说" },
+    { min: -1, t: "回炉重造", e: "💥", d: "建议把驾照压枕头底下再练三天" }
+  ];
+
+  var OBS_COLOR = ["#5b6c8a", "#7a5b8a", "#8a6b5b", "#5b8a7a"];
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { tries: 0, best: -1, passes: 0, perfects: 0, bumps: 0, streak: 0, bestStreak: 0, aA: 0, aB: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.tries = nInt(o.tries); d.passes = nInt(o.passes); d.perfects = nInt(o.perfects);
+      d.bumps = nInt(o.bumps); d.streak = nInt(o.streak); d.bestStreak = nInt(o.bestStreak);
+      var b = Math.floor(Number(o.best));
+      d.best = isFinite(b) && b >= 0 ? (b > 100 ? 100 : b) : -1;
+      d.aA = o.aA ? 1 : 0; d.aB = o.aB ? 1 : 0;
+      if (d.streak > d.bestStreak) d.bestStreak = d.streak;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 纯几何 ---------- */
+  function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+  function normAng(a) {
+    while (a > Math.PI) a -= Math.PI * 2;
+    while (a < -Math.PI) a += Math.PI * 2;
+    return a;
+  }
+  function angErrDeg(a, b) {
+    var d = Math.abs(normAng(a - b));
+    if (d > Math.PI / 2) d = Math.PI - d;   // 车头朝里朝外都算停正
+    return d * 180 / Math.PI;
+  }
+  function boxOf(x, y, ang, len, wid) { return { x: x, y: y, ang: ang, len: len, wid: wid }; }
+  function carBox(c) { return boxOf(c.x, c.y, c.ang, CAR_L, CAR_W); }
+  function corners(b) {
+    var ca = Math.cos(b.ang), sa = Math.sin(b.ang);
+    var hl = b.len / 2, hw = b.wid / 2, out = [], i;
+    var sx = [1, 1, -1, -1], sy = [-1, 1, 1, -1];
+    for (i = 0; i < 4; i++) {
+      out.push({
+        x: b.x + ca * hl * sx[i] - sa * hw * sy[i],
+        y: b.y + sa * hl * sx[i] + ca * hw * sy[i]
+      });
+    }
+    return out;
+  }
+  function projRange(pts, ax, ay) {
+    var mn = Infinity, mx = -Infinity, i, p;
+    for (i = 0; i < pts.length; i++) {
+      p = pts[i].x * ax + pts[i].y * ay;
+      if (p < mn) mn = p;
+      if (p > mx) mx = p;
+    }
+    return [mn, mx];
+  }
+  /* 分离轴定理：两个有向矩形是否相交 */
+  function obbHit(a, b) {
+    var pa = corners(a), pb = corners(b);
+    var axes = [
+      { x: Math.cos(a.ang), y: Math.sin(a.ang) }, { x: -Math.sin(a.ang), y: Math.cos(a.ang) },
+      { x: Math.cos(b.ang), y: Math.sin(b.ang) }, { x: -Math.sin(b.ang), y: Math.cos(b.ang) }
+    ];
+    for (var i = 0; i < 4; i++) {
+      var ra = projRange(pa, axes[i].x, axes[i].y);
+      var rb = projRange(pb, axes[i].x, axes[i].y);
+      if (ra[1] <= rb[0] || rb[1] <= ra[0]) return false;
+    }
+    return true;
+  }
+  function toLocal(px, py, b) {
+    var dx = px - b.x, dy = py - b.y;
+    var ca = Math.cos(b.ang), sa = Math.sin(b.ang);
+    return { x: dx * ca + dy * sa, y: -dx * sa + dy * ca };
+  }
+  function ptToObbDist(px, py, b) {
+    var l = toLocal(px, py, b);
+    var dx = Math.abs(l.x) - b.len / 2, dy = Math.abs(l.y) - b.wid / 2;
+    if (dx < 0) dx = 0;
+    if (dy < 0) dy = 0;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  /* 车身四角是否全在车位框内 */
+  function insideSlot(c, slot) {
+    var pts = corners(carBox(c)), i, l;
+    for (i = 0; i < 4; i++) {
+      l = toLocal(pts[i].x, pts[i].y, slot);
+      if (Math.abs(l.x) > slot.len / 2 || Math.abs(l.y) > slot.wid / 2) return false;
+    }
+    return true;
+  }
+  /* 倒车雷达：车身采样点到最近障碍的距离 */
+  function radarOf(c, solids) {
+    if (!solids || !solids.length) return 999;
+    var pts = corners(carBox(c)), i, j, mid = [], best = 999, d;
+    for (i = 0; i < 4; i++) {
+      j = (i + 1) % 4;
+      mid.push({ x: (pts[i].x + pts[j].x) / 2, y: (pts[i].y + pts[j].y) / 2 });
+    }
+    pts = pts.concat(mid);
+    for (i = 0; i < pts.length; i++) {
+      for (j = 0; j < solids.length; j++) {
+        d = ptToObbDist(pts[i].x, pts[i].y, solids[j]);
+        if (d < best) best = d;
+      }
+    }
+    return best;
+  }
+
+  /* ---------- 纯函数：车辆运动学 ---------- */
+  function nextVel(v, up, down, brake) {
+    if (brake) v *= BRAKE;
+    else if (up) v += ACC;
+    else if (down) v -= ACC;
+    else v *= FRIC;
+    if (v > V_MAX) v = V_MAX;
+    if (v < -V_REV) v = -V_REV;
+    if (Math.abs(v) < 0.004) v = 0;
+    return v;
+  }
+  function nextSteer(s, left, right) {
+    if (left && !right) s -= ST_RATE;
+    else if (right && !left) s += ST_RATE;
+    else if (s > 0) { s -= ST_BACK; if (s < 0) s = 0; }
+    else if (s < 0) { s += ST_BACK; if (s > 0) s = 0; }
+    return clamp(s, -ST_MAX, ST_MAX);
+  }
+  function kinNext(c) {
+    return {
+      x: c.x + Math.cos(c.ang) * c.v,
+      y: c.y + Math.sin(c.ang) * c.v,
+      ang: normAng(c.ang + (c.v / WB) * Math.tan(c.steer))
+    };
+  }
+  function gearOf(v) { return v > STOP_V ? "D" : (v < -STOP_V ? "R" : "P"); }
+
+  /* ---------- 纯函数：评分 ---------- */
+  function posScoreOf(err) { return clamp(40 - err * 2.2, 0, 40); }
+  function angScoreOf(deg) { return clamp(30 - deg * 1.6, 0, 30); }
+  function effScoreOf(sec) { return clamp(20 - Math.max(0, sec - FREE_SEC) * 0.8, 0, 20); }
+  function intactScoreOf(bumps) { return clamp(10 - bumps * 3.5, 0, 10); }
+  function judgeOf(c, slot, sec, bumps) {
+    var ins = insideSlot(c, slot);
+    var perr = Math.sqrt((c.x - slot.x) * (c.x - slot.x) + (c.y - slot.y) * (c.y - slot.y));
+    var aerr = angErrDeg(c.ang, slot.ang);
+    var pos = posScoreOf(perr), an = angScoreOf(aerr);
+    var ef = effScoreOf(sec), it = intactScoreOf(bumps);
+    return {
+      ins: ins, perr: perr, aerr: aerr, pos: pos, ang: an, eff: ef, intact: it,
+      total: ins ? Math.round(clamp(pos + an + ef + it, 0, 100)) : 0
+    };
+  }
+  function gradeOf(score) {
+    for (var i = 0; i < GRADES.length; i++) if (score >= GRADES[i].min) return GRADES[i];
+    return GRADES[GRADES.length - 1];
+  }
+  function secOf(fr) { return Math.round(fr / 60 * 10) / 10; }
+
+  /* ---------- 关卡装配 ---------- */
+  function borderWalls() {
+    return [
+      boxOf(W / 2, TH / 2, 0, W, TH),
+      boxOf(W / 2, H - TH / 2, 0, W, TH),
+      boxOf(TH / 2, H / 2, 0, TH, H),
+      boxOf(W - TH / 2, H / 2, 0, TH, H)
+    ];
+  }
+  function buildLevel(k) {
+    k = Math.floor(Number(k));
+    if (!isFinite(k) || k < 0 || k >= LEVELS.length) k = 0;
+    var L = LEVELS[k];
+    var s = L.slot;
+    var slot = boxOf(s.x, s.y, s.ang, s.len, s.wid);
+    var ux = Math.cos(s.ang), uy = Math.sin(s.ang);
+    var px = -uy, py = ux;
+    var along = L.obsAxis === "long";
+    var d = (along ? s.len / 2 : s.wid / 2) + (along ? CAR_L / 2 : CAR_W / 2) + L.gap;
+    var ax = along ? ux : px, ay = along ? uy : py;
+    var obs = [], i, sg;
+    for (i = 0; i < 2; i++) {
+      sg = i === 0 ? -1 : 1;
+      obs.push(boxOf(s.x + ax * d * sg, s.y + ay * d * sg, s.ang, CAR_L, CAR_W));
+    }
+    var walls = borderWalls(), j;
+    for (j = 0; j < L.walls.length; j++) {
+      walls.push(boxOf(L.walls[j].x, L.walls[j].y, L.walls[j].ang, L.walls[j].len, L.walls[j].wid));
+    }
+    return { idx: k, def: L, slot: slot, obs: obs, walls: walls, solids: obs.concat(walls) };
+  }
+
+  /* ---------- 局面 ---------- */
+  var g = null, level = 0, active = false, raf = 0, inited = false;
+  var cav = null, ctx = null, ctxOk = false;
+  var keys = { up: false, down: false, left: false, right: false, brake: false };
+
+  function clearKeys() { keys.up = keys.down = keys.left = keys.right = keys.brake = false; }
+
+  function newRun(k) {
+    var L = buildLevel(k);
+    var st = L.def.start;
+    return {
+      L: L, phase: "idle",
+      car: { x: st.x, y: st.y, ang: st.ang, v: 0, steer: 0 },
+      f: 0, t: 0, moved: false, bumps: 0, cd: 0, still: 0,
+      shifts: 0, lastGear: "P", trail: [], msg: "", msgF: 0, res: null
+    };
+  }
+  function setMsg(s) { if (g) { g.msg = s; g.msgF = MSG_FR; } }
+
+  function startRun() {
+    g = newRun(level);
+    g.phase = "run";
+    setMsg("🚦 出发！" + g.L.def.em + " " + g.L.def.nm);
+    sync();
+  }
+
+  /* ---------- 单帧推进 ---------- */
+  function step() {
+    if (!g || g.phase !== "run") return;
+    var c = g.car;
+    c.v = nextVel(c.v, keys.up, keys.down, keys.brake);
+    c.steer = nextSteer(c.steer, keys.left, keys.right);
+    var gr = gearOf(c.v);
+    if (gr !== "P" && g.lastGear !== "P" && gr !== g.lastGear) g.shifts++;
+    if (gr !== "P") g.lastGear = gr;
+    var px = c.x, py = c.y, pa = c.ang;
+    var nx = kinNext(c);
+    c.x = nx.x; c.y = nx.y; c.ang = nx.ang;
+    if (hitAny(c)) {
+      c.x = px; c.y = py; c.ang = pa;
+      c.v = -c.v * 0.22;
+      if (g.cd <= 0) { g.bumps++; g.cd = BUMP_CD; setMsg("💥 剐蹭！扣分了"); }
+    }
+    if (g.cd > 0) g.cd--;
+    if (g.msgF > 0) g.msgF--;
+    g.f++;
+    if (Math.abs(c.v) > STOP_V) {
+      g.moved = true;
+      if (g.trail.length === 0 || g.f % 4 === 0) {
+        g.trail.push({ x: c.x, y: c.y, ang: c.ang });
+        if (g.trail.length > TRAIL_MAX) g.trail.shift();
+      }
+    }
+    if (g.moved) g.t++;
+    /* 停稳在车位里 → 自动交卷 */
+    if (g.moved && Math.abs(c.v) <= STOP_V && insideSlot(c, g.L.slot)) {
+      g.still++;
+      if (g.still >= STILL_FR) { finish("auto"); return; }
+    } else g.still = 0;
+    if (g.t >= LIMIT_FR) finish("timeout");
+  }
+  function hitAny(c) {
+    var b = carBox(c), i, sd = g.L.solids;
+    for (i = 0; i < sd.length; i++) if (obbHit(b, sd[i])) return true;
+    return false;
+  }
+
+  /* ---------- 结算 ---------- */
+  function finish(how) {
+    if (!g || g.phase !== "run") return null;
+    var sec = secOf(g.t);
+    var j = judgeOf(g.car, g.L.slot, sec, g.bumps);
+    j.how = how; j.sec = sec; j.shifts = g.shifts; j.bumps = g.bumps;
+    j.grade = j.ins ? gradeOf(j.total) : { t: "没停进去", e: "🚧", d: "四个轮子得全在框里才算数" };
+    g.res = j; g.phase = "done"; g.car.v = 0;
+    rec.tries++;
+    rec.bumps += g.bumps;
+    if (j.total > rec.best) rec.best = j.total;
+    if (j.total >= PASS_LINE) rec.passes++;
+    if (j.total >= ACH_ACE) rec.perfects++;
+    if (j.total >= GOOD_LINE) { rec.streak++; if (rec.streak > rec.bestStreak) rec.bestStreak = rec.streak; }
+    else rec.streak = 0;
+    saveRec();
+    award(j);
+    sync();
+    return j;
+  }
+  function award(j) {
+    if (j.total >= ACH_ACE && j.bumps === 0 && !rec.aA) {
+      rec.aA = 1; saveRec();
+      try { bumpUsage("prkace"); } catch (e1) {}
+    }
+    if (rec.streak >= ACH_STREAK && !rec.aB) {
+      rec.aB = 1; saveRec();
+      try { bumpUsage("prkvet"); } catch (e2) {}
+    }
+  }
+
+  /* ---------- 绘制 ---------- */
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+  function drawBox(b, fill, stroke) {
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(b.ang);
+    if (fill) { ctx.fillStyle = fill; ctx.fillRect(-b.len / 2, -b.wid / 2, b.len, b.wid); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.strokeRect(-b.len / 2, -b.wid / 2, b.len, b.wid); }
+    ctx.restore();
+  }
+  function drawCarShape(x, y, ang, body, glass, light) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(ang);
+    ctx.fillStyle = body;
+    rr(-CAR_L / 2, -CAR_W / 2, CAR_L, CAR_W, 5); ctx.fill();
+    ctx.fillStyle = glass;
+    rr(-2, -CAR_W / 2 + 3, 15, CAR_W - 6, 3); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.16)";
+    rr(-CAR_L / 2 + 5, -CAR_W / 2 + 3, 10, CAR_W - 6, 3); ctx.fill();
+    if (light) {
+      ctx.fillStyle = light;
+      ctx.fillRect(CAR_L / 2 - 3, -CAR_W / 2 + 2, 3, 5);
+      ctx.fillRect(CAR_L / 2 - 3, CAR_W / 2 - 7, 3, 5);
+    }
+    ctx.restore();
+  }
+  function draw() {
+    if (!ctxOk || !g) return;
+    var L = g.L, i;
+    ctx.fillStyle = "#26292f";
+    ctx.fillRect(0, 0, W, H);
+    /* 地面纹理 */
+    ctx.strokeStyle = "rgba(255,255,255,.03)";
+    ctx.lineWidth = 1;
+    for (i = 0; i < H; i += 26) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke(); }
+    /* 围墙 */
+    for (i = 0; i < L.walls.length; i++) {
+      drawBox(L.walls[i], "#3a3f49", "rgba(255,255,255,.10)");
+    }
+    /* 轮胎印 */
+    ctx.strokeStyle = "rgba(255,255,255,.07)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (i = 0; i < g.trail.length; i++) {
+      if (i === 0) ctx.moveTo(g.trail[i].x, g.trail[i].y);
+      else ctx.lineTo(g.trail[i].x, g.trail[i].y);
+    }
+    ctx.stroke();
+    /* 车位框 */
+    var ok = insideSlot(g.car, L.slot);
+    ctx.save();
+    ctx.translate(L.slot.x, L.slot.y);
+    ctx.rotate(L.slot.ang);
+    ctx.fillStyle = ok ? "rgba(88,208,140,.18)" : "rgba(224,179,77,.10)";
+    ctx.fillRect(-L.slot.len / 2, -L.slot.wid / 2, L.slot.len, L.slot.wid);
+    ctx.setLineDash([7, 5]);
+    ctx.strokeStyle = ok ? "#58d08c" : "#e0b34d";
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(-L.slot.len / 2, -L.slot.wid / 2, L.slot.len, L.slot.wid);
+    ctx.setLineDash([]);
+    ctx.fillStyle = ok ? "rgba(88,208,140,.55)" : "rgba(224,179,77,.4)";
+    ctx.font = "bold 15px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("P", 0, 0);
+    ctx.restore();
+    /* 邻车 */
+    for (i = 0; i < L.obs.length; i++) {
+      drawCarShape(L.obs[i].x, L.obs[i].y, L.obs[i].ang, OBS_COLOR[i % OBS_COLOR.length], "rgba(0,0,0,.35)", "");
+    }
+    /* 主车 */
+    drawCarShape(g.car.x, g.car.y, g.car.ang, "#e0b34d", "rgba(20,24,32,.75)",
+      g.car.v < -STOP_V ? "#ff8f6b" : "#fff3c4");
+    /* 方向盘朝向指示 */
+    ctx.save();
+    ctx.translate(g.car.x, g.car.y);
+    ctx.rotate(g.car.ang);
+    ctx.strokeStyle = "rgba(255,255,255,.5)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(WB / 2, 0);
+    ctx.lineTo(WB / 2 + Math.cos(g.car.steer) * 13, Math.sin(g.car.steer) * 13);
+    ctx.stroke();
+    ctx.restore();
+    /* 顶部 HUD */
+    ctx.fillStyle = "rgba(12,14,18,.72)";
+    ctx.fillRect(0, 0, W, 30);
+    ctx.fillStyle = "#f2f4f8";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(L.def.em + " " + L.def.nm + "  挡位 " + gearOf(g.car.v), 10, 15);
+    ctx.textAlign = "right";
+    ctx.fillText("⏱ " + secOf(g.t).toFixed(1) + "s   💥 " + g.bumps, W - 10, 15);
+    /* 倒车雷达 */
+    var d = radarOf(g.car, L.solids);
+    var pct = clamp(1 - d / 60, 0, 1);
+    ctx.fillStyle = "rgba(12,14,18,.72)";
+    ctx.fillRect(0, H - 26, W, 26);
+    ctx.fillStyle = "rgba(255,255,255,.14)";
+    ctx.fillRect(78, H - 18, 220, 10);
+    ctx.fillStyle = pct > 0.82 ? "#ff6b6b" : (pct > 0.55 ? "#e0b34d" : "#58d08c");
+    ctx.fillRect(78, H - 18, 220 * pct, 10);
+    ctx.fillStyle = "#c9cfdb";
+    ctx.font = "11px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("📡 雷达", 10, H - 13);
+    ctx.textAlign = "right";
+    ctx.fillText(d >= 99 ? "空旷" : d.toFixed(0) + "px", W - 10, H - 13);
+    /* 浮字 */
+    if (g.msg && g.msgF > 0) {
+      ctx.textAlign = "center";
+      ctx.font = "bold 15px sans-serif";
+      ctx.fillStyle = "rgba(12,14,18,.8)";
+      ctx.fillRect(0, 36, W, 30);
+      ctx.fillStyle = "#ffe6a6";
+      ctx.fillText(g.msg, W / 2, 51);
+    }
+    if (g.phase === "idle") overlayIdle();
+    if (g.phase === "done") overlayDone();
+  }
+  function overlayIdle() {
+    ctx.fillStyle = "rgba(10,12,16,.72)";
+    ctx.fillRect(0, H / 2 - 78, W, 156);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffd86b";
+    ctx.font = "bold 21px sans-serif";
+    ctx.fillText("🅿️ 随便泊车", W / 2, H / 2 - 44);
+    ctx.fillStyle = "#e6e9ef";
+    ctx.font = "13px sans-serif";
+    ctx.fillText(g.L.def.em + " " + g.L.def.nm + " · " + g.L.def.tip, W / 2, H / 2 - 16);
+    ctx.fillStyle = "#aab2c0";
+    ctx.font = "12px sans-serif";
+    ctx.fillText("↑ 前进 · ↓ 倒车 · ←→ 打方向 · 空格 刹车", W / 2, H / 2 + 10);
+    ctx.fillText("停进框里静止一下就自动交卷", W / 2, H / 2 + 30);
+    ctx.fillStyle = "#ffd86b";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText("按「开始练车」或回车发车", W / 2, H / 2 + 56);
+  }
+  function overlayDone() {
+    var j = g.res;
+    if (!j) return;
+    ctx.fillStyle = "rgba(10,12,16,.82)";
+    ctx.fillRect(0, H / 2 - 108, W, 216);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffd86b";
+    ctx.font = "bold 30px sans-serif";
+    ctx.fillText(j.grade.e + " " + j.total + " 分", W / 2, H / 2 - 70);
+    ctx.fillStyle = "#f2f4f8";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText(j.grade.t, W / 2, H / 2 - 42);
+    ctx.fillStyle = "#aab2c0";
+    ctx.font = "12px sans-serif";
+    ctx.fillText(j.grade.d, W / 2, H / 2 - 20);
+    if (j.ins) {
+      ctx.fillStyle = "#c9cfdb";
+      ctx.fillText("位置 " + j.pos.toFixed(1) + " / 角度 " + j.ang.toFixed(1) +
+        " / 效率 " + j.eff.toFixed(1) + " / 完好 " + j.intact.toFixed(1), W / 2, H / 2 + 6);
+      ctx.fillText("偏心 " + j.perr.toFixed(1) + "px · 歪 " + j.aerr.toFixed(1) + "°", W / 2, H / 2 + 26);
+    } else {
+      ctx.fillStyle = "#ff9d9d";
+      ctx.fillText("车身没有完全进框，本次不计分", W / 2, H / 2 + 12);
+    }
+    ctx.fillStyle = "#c9cfdb";
+    ctx.font = "12px sans-serif";
+    ctx.fillText("用时 " + j.sec.toFixed(1) + "s · 换挡 " + j.shifts + " 次 · 剐蹭 " + j.bumps + " 次", W / 2, H / 2 + 50);
+    ctx.fillStyle = "#ffd86b";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText("按「开始练车」或回车再来一把", W / 2, H / 2 + 80);
+  }
+
+  /* ---------- DOM ---------- */
+  function el(id) { return document.getElementById(id); }
+  function sync() {
+    var e;
+    if (!g) return;
+    e = el("prkScore");
+    if (e) e.textContent = g.res ? String(g.res.total) : "--";
+    e = el("prkBest");
+    if (e) e.textContent = rec.best < 0 ? "--" : String(rec.best);
+    e = el("prkGear");
+    if (e) e.textContent = g.phase === "run" ? gearOf(g.car.v) : "P";
+    e = el("prkBump");
+    if (e) e.textContent = String(g.bumps);
+    e = el("prkTime");
+    if (e) e.textContent = secOf(g.t).toFixed(1) + "s";
+    e = el("prkRec");
+    if (e) {
+      e.textContent = "练车 " + rec.tries + " 次 · 合格 " + rec.passes + " · 满分级 " + rec.perfects +
+        " · 当前连胜 " + rec.streak + " · 最高连胜 " + rec.bestStreak + " · 累计剐蹭 " + rec.bumps;
+    }
+  }
+  function onKeyDown(e) {
+    if (!active || !g) return;
+    var t = e.target, tn = t && t.tagName ? String(t.tagName).toUpperCase() : "";
+    if (tn === "INPUT" || tn === "TEXTAREA" || tn === "SELECT") return;
+    var k = e.key, used = true;
+    if (k === "ArrowUp" || k === "w" || k === "W") keys.up = true;
+    else if (k === "ArrowDown" || k === "s" || k === "S") keys.down = true;
+    else if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = true;
+    else if (k === "ArrowRight" || k === "d" || k === "D") keys.right = true;
+    else if (k === " " || k === "Spacebar") keys.brake = true;
+    else if (k === "Enter") { if (g.phase !== "run") startRun(); }
+    else if (k === "Escape") { if (g.phase === "run") finish("manual"); }
+    else used = false;
+    if (used && e.preventDefault) e.preventDefault();
+  }
+  function onKeyUp(e) {
+    if (!active) return;
+    var k = e.key;
+    if (k === "ArrowUp" || k === "w" || k === "W") keys.up = false;
+    else if (k === "ArrowDown" || k === "s" || k === "S") keys.down = false;
+    else if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = false;
+    else if (k === "ArrowRight" || k === "d" || k === "D") keys.right = false;
+    else if (k === " " || k === "Spacebar") keys.brake = false;
+  }
+  function padSet(name, on) {
+    if (name === "fwd") keys.up = on;
+    else if (name === "back") keys.down = on;
+    else if (name === "left") keys.left = on;
+    else if (name === "right") keys.right = on;
+    else if (name === "brake") keys.brake = on;
+  }
+  function frame() {
+    raf = 0;
+    if (!active) return;
+    step();
+    draw();
+    if (g && g.f % 10 === 0) sync();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = el("prkCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+    ctxOk = true;
+    g = newRun(level);
+    var pad = el("prkPad");
+    if (pad) {
+      var hit = function (e) {
+        var t = e.target;
+        while (t && t !== pad && !(t.getAttribute && t.getAttribute("data-prk"))) t = t.parentNode;
+        return t && t !== pad ? t.getAttribute("data-prk") : "";
+      };
+      pad.addEventListener("pointerdown", function (e) {
+        var n = hit(e);
+        if (!n) return;
+        if (e.preventDefault) e.preventDefault();
+        padSet(n, true);
+      });
+      pad.addEventListener("pointerup", function (e) { var n = hit(e); if (n) padSet(n, false); });
+      pad.addEventListener("pointerleave", function () { clearKeys(); });
+      pad.addEventListener("pointercancel", function () { clearKeys(); });
+    }
+    var btn = el("prkStart");
+    if (btn) btn.addEventListener("click", function () { startRun(); });
+    btn = el("prkSubmit");
+    if (btn) {
+      btn.addEventListener("click", function () {
+        if (g && g.phase === "run") finish("manual");
+        else startRun();
+      });
+    }
+    var sel = el("prkLevel");
+    if (sel) {
+      sel.addEventListener("change", function () {
+        var v = parseInt(sel.value, 10);
+        level = isFinite(v) && v >= 0 && v < LEVELS.length ? v : 0;
+        g = newRun(level);
+        clearKeys();
+        sync();
+        draw();
+      });
+    }
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
+    inited = true;
+  }
+
+  window.prkRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newRun(level);
+    clearKeys();
+    sync();
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.prkStop = function () {
+    active = false;
+    clearKeys();
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__prkTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    getKeys: function () { return keys; }, clearKeys: clearKeys,
+    setLevel: function (v) { level = v; }, getLevel: function () { return level; },
+    setActive: function (v) { active = !!v; },
+    setRnd: function (f) { rnd = f; }, resetRnd: function () { rnd = Math.random; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    clamp: clamp, normAng: normAng, angErrDeg: angErrDeg, boxOf: boxOf, carBox: carBox,
+    corners: corners, obbHit: obbHit, toLocal: toLocal, ptToObbDist: ptToObbDist,
+    insideSlot: insideSlot, radarOf: radarOf,
+    nextVel: nextVel, nextSteer: nextSteer, kinNext: kinNext, gearOf: gearOf,
+    posScoreOf: posScoreOf, angScoreOf: angScoreOf, effScoreOf: effScoreOf,
+    intactScoreOf: intactScoreOf, judgeOf: judgeOf, gradeOf: gradeOf, secOf: secOf,
+    borderWalls: borderWalls, buildLevel: buildLevel, newRun: newRun,
+    startRun: startRun, step: step, hitAny: hitAny, finish: finish, award: award,
+    padSet: padSet, onKeyDown: onKeyDown, onKeyUp: onKeyUp, draw: draw,
+    sync: sync, ensureInit: ensureInit, setMsg: setMsg, frame: frame,
+    consts: {
+      KEY: KEY, W: W, H: H, CAR_L: CAR_L, CAR_W: CAR_W, WB: WB, ACC: ACC,
+      V_MAX: V_MAX, V_REV: V_REV, FRIC: FRIC, BRAKE: BRAKE, ST_MAX: ST_MAX,
+      ST_RATE: ST_RATE, ST_BACK: ST_BACK, STOP_V: STOP_V, STILL_FR: STILL_FR,
+      BUMP_CD: BUMP_CD, LIMIT_FR: LIMIT_FR, FREE_SEC: FREE_SEC, TH: TH,
+      TRAIL_MAX: TRAIL_MAX, ACH_ACE: ACH_ACE, ACH_STREAK: ACH_STREAK,
+      PASS_LINE: PASS_LINE, GOOD_LINE: GOOD_LINE, LEVELS: LEVELS, GRADES: GRADES
+    }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🅿️", name: "一把入库", desc: "在随便泊车里打出 95 分以上，且全程零剐蹭", test: function (u) { return (u.prkace || 0) >= 1; } },
+      { emoji: "🚗", name: "老司机", desc: "在随便泊车里连续三次拿到 85 分以上", test: function (u) { return (u.prkvet || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "倒车入库的秘诀不是快，是敢停下来重新打一把方向。",
+      "车位永远比你想象的宽，胆子永远比你想象的小。",
+      "会开车的人看后视镜，会停车的人看两边的缝。",
+      "慢一点不丢人，蹭一下才丢人。",
+      "人生和倒车一样：方向对了，慢慢来也能到位。"
     );
   }
 })();
