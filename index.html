@@ -1594,6 +1594,7 @@
         <button data-tab="parcel">📦 随便分拣</button>
         <button data-tab="uttt">⭕ 随便井字·终极版</button>
         <button data-tab="shufa">🖌️ 随便书法</button>
+        <button data-tab="dungeon">🏰 随便地牢</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8728,6 +8729,60 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="dungeon">
+    <h2>🏰 随便地牢</h2>
+    <p class="sub">回合制 Roguelike——每层随机生成，一路砍到第 10 层的深渊领主</p>
+    <style>
+      #dungeon .dun-wrap { max-width:420px; margin:0 auto; }
+      #dungeon .dun-hud { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #dungeon .dun-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #dungeon .dun-hud b { font-weight:700; color:#e0b34d; }
+      #dungeon .dun-hpwrap { height:8px; border-radius:999px; background:rgba(255,255,255,.09); overflow:hidden; margin:0 auto 10px; max-width:364px; }
+      #dungeon .dun-hpbar { height:100%; width:100%; background:linear-gradient(90deg,#ff6b6b,#ffb36b); transition:width .18s ease; }
+      #dungeon .dun-cavbox { display:flex; justify-content:center; margin-bottom:10px; }
+      #dungeon canvas { width:min(364px,92vw); height:auto; border-radius:14px; background:#0b0e16; box-shadow:0 6px 26px rgba(0,0,0,.45); touch-action:manipulation; cursor:pointer; image-rendering:auto; }
+      #dungeon .dun-pad { display:grid; grid-template-columns:repeat(3,52px); grid-template-rows:repeat(3,44px); gap:6px; justify-content:center; margin-bottom:10px; }
+      #dungeon .dun-pad button { border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:1rem; font-weight:700; cursor:pointer; }
+      #dungeon .dun-pad button:active { transform:translateY(1px); background:rgba(255,255,255,.16); }
+      #dungeon .dun-bar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #dungeon .dun-bar button { padding:8px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #dungeon .dun-log { max-width:380px; margin:0 auto 10px; min-height:5.6em; max-height:8em; overflow-y:auto; text-align:left; font-size:.8rem; line-height:1.6; padding:8px 12px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); }
+      #dungeon .dun-line { opacity:.9; }
+      #dungeon .dun-rec { text-align:center; font-size:.78rem; opacity:.72; margin-bottom:8px; }
+      #dungeon .dun-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:390px; margin:0 auto; }
+    </style>
+    <div class="dun-wrap">
+      <div class="dun-hud">
+        <span>层数 <b id="dunFloor">B1</b></span>
+        <span>体力 <b id="dunHp">30/30</b></span>
+        <span><b id="dunLv">Lv.1</b></span>
+        <span>攻 <b id="dunAtk">6</b></span>
+        <span>防 <b id="dunDef">2</b></span>
+        <span>金币 <b id="dunGold">0</b></span>
+      </div>
+      <div class="dun-hpwrap"><div class="dun-hpbar" id="dunHpBar"></div></div>
+      <div class="dun-cavbox">
+        <canvas id="dunCav" width="364" height="364" aria-label="地牢地图"></canvas>
+      </div>
+      <div class="dun-pad" id="dunPad">
+        <span></span><button type="button" data-dun="up">⬆️</button><span></span>
+        <button type="button" data-dun="left">⬅️</button><button type="button" data-dun="wait">⏳</button><button type="button" data-dun="right">➡️</button>
+        <span></span><button type="button" data-dun="down">⬇️</button><span></span>
+      </div>
+      <div class="dun-bar">
+        <button type="button" id="dunNew">🔄 重新下地牢</button>
+      </div>
+      <div class="dun-log" id="dunLog"></div>
+      <div class="dun-rec" id="dunRec">闯荡 0 次 · 最深 B0 · 累计击杀 0 · 通关 0 次</div>
+      <div class="dun-help">
+        🏰 玩法：方向键 / WASD 走一步，撞向怪物就是攻击，空格或 ⏳ 原地等一回合；手机直接点地图格子往那边走。<br>
+        🔽 楼梯把你送到更深一层，越深怪越凶，但经验和战利品也越好。<br>
+        🧪 药水回血 · ⚔️ 短剑加攻 · 🛡️ 护符加防 · 🍖 口粮涨上限 · 💰 金币算分。<br>
+        ⚔️ 攻防差决定伤害，升级会回满体力——打不过就先绕路找补给。<br>
+        🏆 走到第 3 层解锁「🏰 初入地牢」，砍翻第 10 层的 👹 深渊领主解锁「👹 深渊终结者」。战绩本地保存。
+      </div>
+    </div>
+  </section>
   <section class="panel" id="shufa">
     <h2>🖌️ 随便书法</h2>
     <p class="sub">米字格描红——从红点起笔沿虚线走，AI 给你的字打分</p>
@@ -9622,6 +9677,7 @@
     if (id === "parcel" && typeof pclRender === "function") pclRender();
     if (id === "uttt" && typeof utttRender === "function") utttRender();
     if (id === "shufa" && typeof shfRender === "function") shfRender();
+    if (id === "dungeon" && typeof dunRender === "function") dunRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -9699,6 +9755,7 @@
     if (id !== "parcel" && typeof pclStop === "function") pclStop();
     if (id !== "uttt" && typeof utttStop === "function") utttStop();
     if (id !== "shufa" && typeof shfStop === "function") shfStop();
+    if (id !== "dungeon" && typeof dunStop === "function") dunStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9906,6 +9963,7 @@
     parcel: "随便分拣 parcel 分拣 快递 包裹 驿站 物流 传送带 流水线 面单 加急件 违禁品 反应 手速 连击 街机 游戏 挑战 休闲",
     uttt: "随便井字 uttt ultimate tictactoe 井字棋 终极井字 九宫 大局观 下棋 棋盘 对弈 人机 ai 对战 策略 悔棋 游戏 挑战 休闲",
     shufa: "随便书法 shufa calligraphy 书法 描红 毛笔 写字 米字格 临帖 笔顺 笔画 汉字 水墨 誊写 游戏 挑战 休闲 手写",
+    dungeon: "随便地牢 dungeon roguelike 地牢 地下城 冒险 探险 回合制 肉鸽 刷怪 升级 楼层 深渊 领主 boss 药水 装备 宝箱 迷雾 探索 rpg 游戏 挑战 休闲",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10174,6 +10232,7 @@ splitbill:"tools",
     parcel:"games",
     uttt:"games",
     shufa:"games",
+    dungeon:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -61333,6 +61392,632 @@ splitbill:"tools",
       "描红的意义：先承认别人的好，再练出自己的样。",
       "写歪的每一笔都算数，它们是下一笔变直的理由。",
       "心静自然字正，字正未必心静——但至少手稳了。"
+    );
+  }
+})();
+/* ===== 🏰 随便地牢 dungeon ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_dungeon";
+  var GW = 13, GH = 13, TILE = 28;
+  var W = GW * TILE, H = GH * TILE;
+  var SIGHT = 4.6;          // 视野半径（格）
+  var MAX_FLOOR = 10;       // 最深层，深渊领主所在
+  var LOG_MAX = 6;          // 战报保留条数
+  var CHASE_R = 7;          // 怪物追击的曼哈顿半径
+  var BADGE_FLOOR = 3;      // 「初入地牢」门槛层数
+  var HEAL_POTION = 14, MEAL_HP = 5, SWORD_ATK = 2, SHIELD_DEF = 1;
+  var P0 = { hp: 30, maxhp: 30, atk: 6, def: 2, lv: 1, exp: 0, gold: 0 };
+
+  /* 怪物图鉴：minF 为最低出现层 */
+  var MONS = [
+    { k: "rat", nm: "沟鼠", em: "🐀", hp: 6, atk: 3, def: 0, exp: 3, minF: 1 },
+    { k: "bat", nm: "洞蝠", em: "🦇", hp: 9, atk: 4, def: 1, exp: 4, minF: 1 },
+    { k: "slime", nm: "史莱姆", em: "🟢", hp: 13, atk: 5, def: 2, exp: 6, minF: 2 },
+    { k: "spider", nm: "毒蛛", em: "🕷️", hp: 15, atk: 7, def: 2, exp: 8, minF: 3 },
+    { k: "skel", nm: "骷髅兵", em: "💀", hp: 21, atk: 9, def: 4, exp: 12, minF: 4 },
+    { k: "ghost", nm: "怨灵", em: "👻", hp: 19, atk: 12, def: 3, exp: 16, minF: 6 },
+    { k: "golem", nm: "石魔像", em: "🗿", hp: 34, atk: 13, def: 7, exp: 22, minF: 7 },
+    { k: "drake", nm: "火蜥龙", em: "🐉", hp: 40, atk: 17, def: 6, exp: 30, minF: 8 }
+  ];
+  var BOSS = { k: "lord", nm: "深渊领主", em: "👹", hp: 72, atk: 20, def: 8, exp: 90, minF: 10, boss: 1 };
+  var ITEMS = [
+    { k: "potion", nm: "治疗药水", em: "🧪" },
+    { k: "sword", nm: "锋利短剑", em: "⚔️" },
+    { k: "shield", nm: "铁护符", em: "🛡️" },
+    { k: "gold", nm: "金币袋", em: "💰" },
+    { k: "meal", nm: "风干口粮", em: "🍖" }
+  ];
+
+  var rnd = Math.random;
+  function irnd(n) { return Math.floor(rnd() * n); }
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() { return { runs: 0, bestFloor: 0, bestGold: 0, kills: 0, wins: 0, aD: 0, aW: 0 }; }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.runs = nInt(o.runs);
+      d.bestFloor = Math.min(nInt(o.bestFloor), MAX_FLOOR);
+      d.bestGold = nInt(o.bestGold);
+      d.kills = nInt(o.kills);
+      d.wins = nInt(o.wins);
+      d.aD = o.aD ? 1 : 0; d.aW = o.aW ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 纯函数：地图生成 ---------- */
+  function inb(x, y) { return x >= 0 && y >= 0 && x < GW && y < GH; }
+  function blankGrid() {
+    var g = [], y, x;
+    for (y = 0; y < GH; y++) { var row = []; for (x = 0; x < GW; x++) row.push(1); g.push(row); }
+    return g;
+  }
+  function carveRect(g, x, y, w, h) {
+    for (var j = y; j < y + h; j++) for (var i = x; i < x + w; i++) if (inb(i, j)) g[j][i] = 0;
+  }
+  function center(r) { return { x: r.x + (r.w >> 1), y: r.y + (r.h >> 1) }; }
+  function overlaps(r, rooms) {
+    for (var i = 0; i < rooms.length; i++) {
+      var o = rooms[i];
+      if (!(r.x + r.w + 1 <= o.x || o.x + o.w + 1 <= r.x || r.y + r.h + 1 <= o.y || o.y + o.h + 1 <= r.y)) return true;
+    }
+    return false;
+  }
+  function hline(g, x1, x2, y) {
+    var a = Math.min(x1, x2), b = Math.max(x1, x2);
+    for (var x = a; x <= b; x++) if (inb(x, y)) g[y][x] = 0;
+  }
+  function vline(g, y1, y2, x) {
+    var a = Math.min(y1, y2), b = Math.max(y1, y2);
+    for (var y = a; y <= b; y++) if (inb(x, y)) g[y][x] = 0;
+  }
+  function corridor(g, a, b, horizFirst) {
+    if (horizFirst) { hline(g, a.x, b.x, a.y); vline(g, a.y, b.y, b.x); }
+    else { vline(g, a.y, b.y, a.x); hline(g, a.x, b.x, b.y); }
+  }
+  function roomsWanted(floor) { return 5 + Math.min(4, Math.max(1, floor)); }
+  function genMap(floor) {
+    var g = blankGrid(), rooms = [], want = roomsWanted(floor), t;
+    for (t = 0; t < 90 && rooms.length < want; t++) {
+      var w = 3 + irnd(4), h = 3 + irnd(3);
+      var x = 1 + irnd(Math.max(1, GW - w - 2)), y = 1 + irnd(Math.max(1, GH - h - 2));
+      var r = { x: x, y: y, w: w, h: h };
+      if (r.x + r.w > GW - 1 || r.y + r.h > GH - 1) continue;
+      if (overlaps(r, rooms)) continue;
+      carveRect(g, r.x, r.y, r.w, r.h);
+      rooms.push(r);
+    }
+    if (!rooms.length) { var r0 = { x: 4, y: 4, w: 5, h: 5 }; carveRect(g, r0.x, r0.y, r0.w, r0.h); rooms.push(r0); }
+    for (var i = 1; i < rooms.length; i++) corridor(g, center(rooms[i - 1]), center(rooms[i]), irnd(2) === 0);
+    return { grid: g, rooms: rooms };
+  }
+  function floorCells(g) {
+    var out = [], y, x;
+    for (y = 0; y < GH; y++) for (x = 0; x < GW; x++) if (g[y][x] === 0) out.push({ x: x, y: y });
+    return out;
+  }
+  function manh(a, b) { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }
+  function farthest(cells, from) {
+    var best = null, bd = -1;
+    for (var i = 0; i < cells.length; i++) {
+      var d = manh(cells[i], from);
+      if (d > bd) { bd = d; best = cells[i]; }
+    }
+    return best || { x: from.x, y: from.y };
+  }
+  function monPool(floor) {
+    var out = [];
+    for (var i = 0; i < MONS.length; i++) if (MONS[i].minF <= floor) out.push(MONS[i]);
+    if (!out.length) out.push(MONS[0]);
+    return out;
+  }
+  function scaleMon(base, floor) {
+    var mf = isFinite(base.minF) ? base.minF : 1;
+    var f = isFinite(floor) ? floor : 1;
+    var over = Math.max(0, f - mf);
+    var k = 1 + over * 0.15;
+    var hp = Math.max(1, Math.round(base.hp * k));
+    return {
+      k: base.k, nm: base.nm, em: base.em, boss: base.boss ? 1 : 0,
+      hp: hp, maxhp: hp,
+      atk: base.atk + Math.floor(over / 3),
+      def: base.def, exp: base.exp, x: 0, y: 0
+    };
+  }
+  function monCount(floor) { return 3 + Math.min(6, floor); }
+  function itemCount(floor) { return 2 + (floor % 2 === 0 ? 1 : 0); }
+
+  /* ---------- 状态 ---------- */
+  var st = null, active = false, cav = null, ctx = null, inited = false;
+
+  function key(x, y) { return x + "," + y; }
+  function buildFloor(floor) {
+    var m = genMap(floor);
+    var cells = floorCells(m.grid);
+    var pc = center(m.rooms[0]);
+    if (m.grid[pc.y][pc.x] === 1) pc = cells[0] || { x: 1, y: 1 };
+    var used = {}; used[key(pc.x, pc.y)] = 1;
+    var stairs = null;
+    if (floor < MAX_FLOOR) {
+      stairs = farthest(cells, pc);
+      used[key(stairs.x, stairs.y)] = 1;
+    }
+    var free = [];
+    for (var i = 0; i < cells.length; i++) if (!used[key(cells[i].x, cells[i].y)]) free.push(cells[i]);
+
+    var mons = [], j, c;
+    if (floor >= MAX_FLOOR) {
+      var bcell = farthest(cells, pc);
+      var b = scaleMon(BOSS, floor);
+      b.x = bcell.x; b.y = bcell.y;
+      mons.push(b);
+      used[key(bcell.x, bcell.y)] = 1;
+    }
+    var pool = monPool(floor), n = monCount(floor);
+    for (j = 0; j < n && free.length; j++) {
+      var tries = 0, pick = -1;
+      while (tries < 24) {
+        var idx = irnd(free.length);
+        c = free[idx];
+        if (!used[key(c.x, c.y)] && manh(c, pc) >= 4) { pick = idx; break; }
+        tries++;
+      }
+      if (pick < 0) break;
+      c = free[pick];
+      used[key(c.x, c.y)] = 1;
+      var mm = scaleMon(pool[irnd(pool.length)], floor);
+      mm.x = c.x; mm.y = c.y;
+      mons.push(mm);
+    }
+    var items = [], ic = itemCount(floor);
+    for (j = 0; j < ic && free.length; j++) {
+      var t2 = 0, p2 = -1;
+      while (t2 < 24) {
+        var id2 = irnd(free.length);
+        c = free[id2];
+        if (!used[key(c.x, c.y)]) { p2 = id2; break; }
+        t2++;
+      }
+      if (p2 < 0) break;
+      c = free[p2];
+      used[key(c.x, c.y)] = 1;
+      var it = ITEMS[irnd(ITEMS.length)];
+      items.push({ k: it.k, nm: it.nm, em: it.em, x: c.x, y: c.y });
+    }
+    st.grid = m.grid;
+    st.rooms = m.rooms;
+    st.mons = mons;
+    st.items = items;
+    st.stairs = stairs;
+    st.p.x = pc.x; st.p.y = pc.y;
+    st.known = [];
+    for (var yy = 0; yy < GH; yy++) { var rw = []; for (var xx = 0; xx < GW; xx++) rw.push(0); st.known.push(rw); }
+    computeVis();
+  }
+  function newState() {
+    return {
+      floor: 1, turns: 0, over: 0, won: 0, log: [],
+      p: { x: 1, y: 1, hp: P0.hp, maxhp: P0.maxhp, atk: P0.atk, def: P0.def, lv: P0.lv, exp: P0.exp, gold: P0.gold },
+      grid: blankGrid(), rooms: [], mons: [], items: [], stairs: null, known: [], vis: []
+    };
+  }
+  function startRun() {
+    st = newState();
+    rec.runs++;
+    if (rec.bestFloor < 1) rec.bestFloor = 1;
+    saveRec();
+    buildFloor(1);
+    pushLog("🏰 你推开锈死的铁门，踏入第 1 层。");
+    return st;
+  }
+  function pushLog(s) {
+    if (!st) return;
+    st.log.push(s);
+    while (st.log.length > LOG_MAX) st.log.shift();
+  }
+  function computeVis() {
+    var v = [], y, x;
+    for (y = 0; y < GH; y++) {
+      var row = [];
+      for (x = 0; x < GW; x++) {
+        var dx = x - st.p.x, dy = y - st.p.y;
+        var see = Math.sqrt(dx * dx + dy * dy) <= SIGHT ? 1 : 0;
+        row.push(see);
+        if (see && st.known[y]) st.known[y][x] = 1;
+      }
+      v.push(row);
+    }
+    st.vis = v;
+  }
+  function monAt(x, y) {
+    for (var i = 0; i < st.mons.length; i++) if (st.mons[i].x === x && st.mons[i].y === y) return st.mons[i];
+    return null;
+  }
+  function itemAt(x, y) {
+    for (var i = 0; i < st.items.length; i++) if (st.items[i].x === x && st.items[i].y === y) return st.items[i];
+    return null;
+  }
+  function walkable(x, y) {
+    if (!inb(x, y)) return false;
+    if (st.grid[y][x] === 1) return false;
+    return true;
+  }
+
+  /* ---------- 战斗 ---------- */
+  function dmgOf(atk, def) { var v = atk - def + irnd(3); return v < 1 ? 1 : v; }
+  function expNeed(lv) { return lv * 10; }
+  function levelUp() {
+    var up = 0;
+    while (st.p.exp >= expNeed(st.p.lv)) {
+      st.p.exp -= expNeed(st.p.lv);
+      st.p.lv++;
+      st.p.maxhp += 8;
+      st.p.hp = st.p.maxhp;
+      st.p.atk += 2;
+      st.p.def += 1;
+      up++;
+    }
+    if (up) pushLog("✨ 升到 " + st.p.lv + " 级！体力全满，攻防各涨一截。");
+    return up;
+  }
+  function killMon(m) {
+    for (var i = 0; i < st.mons.length; i++) if (st.mons[i] === m) { st.mons.splice(i, 1); break; }
+    rec.kills++;
+    st.p.exp += m.exp;
+    pushLog("💥 " + m.em + " " + m.nm + " 倒下了（+" + m.exp + " 经验）。");
+    levelUp();
+    if (m.boss) winRun();
+    saveRec();
+  }
+  function playerAttack(m) {
+    var d = dmgOf(st.p.atk, m.def);
+    m.hp -= d;
+    pushLog("🗡️ 你砍中 " + m.em + " " + m.nm + "，造成 " + d + " 点伤害。");
+    if (m.hp <= 0) killMon(m);
+    return d;
+  }
+  function monAttack(m) {
+    var d = dmgOf(m.atk, st.p.def);
+    st.p.hp -= d;
+    pushLog("🩸 " + m.em + " " + m.nm + " 咬了你一口，-" + d + " 体力。");
+    return d;
+  }
+  function stepToward(m) {
+    var dx = st.p.x - m.x, dy = st.p.y - m.y;
+    var order = [];
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      order.push([dx > 0 ? 1 : -1, 0]); order.push([0, dy > 0 ? 1 : (dy < 0 ? -1 : 0)]);
+    } else {
+      order.push([0, dy > 0 ? 1 : -1]); order.push([dx > 0 ? 1 : (dx < 0 ? -1 : 0), 0]);
+    }
+    for (var i = 0; i < order.length; i++) {
+      var ox = order[i][0], oy = order[i][1];
+      if (!ox && !oy) continue;
+      var nx = m.x + ox, ny = m.y + oy;
+      if (!walkable(nx, ny)) continue;
+      if (nx === st.p.x && ny === st.p.y) continue;
+      if (monAt(nx, ny)) continue;
+      m.x = nx; m.y = ny;
+      return true;
+    }
+    return false;
+  }
+  function wander(m) {
+    var dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    var d = dirs[irnd(4)];
+    var nx = m.x + d[0], ny = m.y + d[1];
+    if (!walkable(nx, ny)) return false;
+    if (nx === st.p.x && ny === st.p.y) return false;
+    if (monAt(nx, ny)) return false;
+    m.x = nx; m.y = ny;
+    return true;
+  }
+  function monsterTurn() {
+    var list = st.mons.slice();
+    for (var i = 0; i < list.length; i++) {
+      var m = list[i];
+      if (st.over) break;
+      if (st.mons.indexOf(m) < 0) continue;
+      var d = manh(m, st.p);
+      if (d === 1) { monAttack(m); if (st.p.hp <= 0) { dieRun(); break; } continue; }
+      if (d <= (m.boss ? 99 : CHASE_R)) { stepToward(m); continue; }
+      if (irnd(4) === 0) wander(m);
+    }
+  }
+
+  /* ---------- 物品 / 楼层 ---------- */
+  function applyItem(it) {
+    if (it.k === "potion") {
+      var h = Math.min(HEAL_POTION, st.p.maxhp - st.p.hp);
+      st.p.hp += h;
+      pushLog("🧪 喝下治疗药水，回复 " + h + " 点体力。");
+    } else if (it.k === "sword") {
+      st.p.atk += SWORD_ATK;
+      pushLog("⚔️ 捡到锋利短剑，攻击 +" + SWORD_ATK + "。");
+    } else if (it.k === "shield") {
+      st.p.def += SHIELD_DEF;
+      pushLog("🛡️ 戴上铁护符，防御 +" + SHIELD_DEF + "。");
+    } else if (it.k === "gold") {
+      var g = 8 + irnd(13);
+      st.p.gold += g;
+      pushLog("💰 摸到一袋金币，+" + g + "。");
+    } else if (it.k === "meal") {
+      st.p.maxhp += MEAL_HP;
+      st.p.hp = Math.min(st.p.maxhp, st.p.hp + MEAL_HP);
+      pushLog("🍖 啃完风干口粮，体力上限 +" + MEAL_HP + "。");
+    }
+  }
+  function pickupAt(x, y) {
+    var it = itemAt(x, y);
+    if (!it) return null;
+    for (var i = 0; i < st.items.length; i++) if (st.items[i] === it) { st.items.splice(i, 1); break; }
+    applyItem(it);
+    return it;
+  }
+  function descend() {
+    st.floor++;
+    if (st.floor > MAX_FLOOR) st.floor = MAX_FLOOR;
+    buildFloor(st.floor);
+    if (st.floor > rec.bestFloor) rec.bestFloor = st.floor;
+    if (st.floor >= BADGE_FLOOR && !rec.aD) {
+      rec.aD = 1;
+      if (typeof bumpUsage === "function") bumpUsage("dunfloor");
+    }
+    saveRec();
+    if (st.floor >= MAX_FLOOR) pushLog("🔥 第 " + st.floor + " 层——空气发烫，深渊领主就在下面等你。");
+    else pushLog("🪜 你顺着石阶滑下，来到第 " + st.floor + " 层。");
+  }
+  function winRun() {
+    st.over = 1; st.won = 1;
+    rec.wins++;
+    if (st.p.gold > rec.bestGold) rec.bestGold = st.p.gold;
+    if (!rec.aW) {
+      rec.aW = 1;
+      if (typeof bumpUsage === "function") bumpUsage("dunwin");
+    }
+    saveRec();
+    pushLog("👑 深渊领主轰然倒地，地牢通关！你带着 " + st.p.gold + " 枚金币走出铁门。");
+  }
+  function dieRun() {
+    st.over = 1; st.won = 0;
+    st.p.hp = 0;
+    if (st.p.gold > rec.bestGold) rec.bestGold = st.p.gold;
+    saveRec();
+    pushLog("💀 你倒在第 " + st.floor + " 层的石板上……（Lv." + st.p.lv + "，" + st.p.gold + " 金币）");
+  }
+  function postTurn() {
+    st.turns++;
+    computeVis();
+    if (st.p.hp <= 0 && !st.over) dieRun();
+  }
+
+  /* ---------- 回合入口 ---------- */
+  function tryMove(dx, dy) {
+    if (!st || st.over) return "none";
+    var nx = st.p.x + dx, ny = st.p.y + dy;
+    if (!inb(nx, ny) || st.grid[ny][nx] === 1) { return "wall"; }
+    var m = monAt(nx, ny);
+    if (m) { playerAttack(m); if (!st.over) monsterTurn(); postTurn(); return "attack"; }
+    st.p.x = nx; st.p.y = ny;
+    pickupAt(nx, ny);
+    if (st.stairs && nx === st.stairs.x && ny === st.stairs.y) { descend(); st.turns++; return "descend"; }
+    monsterTurn();
+    postTurn();
+    return "move";
+  }
+  function waitTurn() {
+    if (!st || st.over) return "none";
+    pushLog("⏳ 你屏住呼吸，原地听了一会儿动静。");
+    monsterTurn();
+    postTurn();
+    return "wait";
+  }
+  function tapCell(cx, cy) {
+    if (!st || st.over) return "none";
+    var dx = cx - st.p.x, dy = cy - st.p.y;
+    if (!dx && !dy) return waitTurn();
+    var first, second;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      first = [dx > 0 ? 1 : -1, 0];
+      second = dy ? [0, dy > 0 ? 1 : -1] : null;
+    } else {
+      first = [0, dy > 0 ? 1 : -1];
+      second = dx ? [dx > 0 ? 1 : -1, 0] : null;
+    }
+    var r = tryMove(first[0], first[1]);
+    if (r === "wall" && second) r = tryMove(second[0], second[1]);
+    return r;
+  }
+
+  /* ---------- 渲染 ---------- */
+  function el(id) { return typeof document !== "undefined" ? document.getElementById(id) : null; }
+  function draw() {
+    if (!ctx || !st) return;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#0b0e16";
+    ctx.fillRect(0, 0, W, H);
+    var x, y;
+    for (y = 0; y < GH; y++) {
+      for (x = 0; x < GW; x++) {
+        var known = st.known[y] && st.known[y][x];
+        if (!known) continue;
+        var vis = st.vis[y] && st.vis[y][x];
+        var wall = st.grid[y][x] === 1;
+        if (wall) ctx.fillStyle = vis ? "#3a3f55" : "#222534";
+        else ctx.fillStyle = vis ? "#1b2233" : "#141824";
+        ctx.fillRect(x * TILE, y * TILE, TILE - 1, TILE - 1);
+      }
+    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "17px system-ui, 'Segoe UI Emoji', serif";
+    function glyph(gx, gy, s) {
+      ctx.fillText(s, gx * TILE + TILE / 2, gy * TILE + TILE / 2 + 1);
+    }
+    if (st.stairs && st.known[st.stairs.y] && st.known[st.stairs.y][st.stairs.x]) glyph(st.stairs.x, st.stairs.y, "🔽");
+    for (var i = 0; i < st.items.length; i++) {
+      var it = st.items[i];
+      if (st.vis[it.y] && st.vis[it.y][it.x]) glyph(it.x, it.y, it.em);
+    }
+    for (var j = 0; j < st.mons.length; j++) {
+      var m = st.mons[j];
+      if (!(st.vis[m.y] && st.vis[m.y][m.x])) continue;
+      glyph(m.x, m.y, m.em);
+      var w = Math.max(2, Math.round((TILE - 8) * Math.max(0, m.hp) / Math.max(1, m.maxhp)));
+      ctx.fillStyle = m.boss ? "#ff6b6b" : "#e0655f";
+      ctx.fillRect(m.x * TILE + 4, m.y * TILE + TILE - 5, w, 2);
+    }
+    glyph(st.p.x, st.p.y, st.over ? (st.won ? "🏆" : "💀") : "🧙");
+    if (st.over) {
+      ctx.fillStyle = "rgba(6,8,14,.62)";
+      ctx.fillRect(0, H / 2 - 34, W, 68);
+      ctx.fillStyle = st.won ? "#ffd479" : "#ff8a80";
+      ctx.font = "bold 20px system-ui, sans-serif";
+      ctx.fillText(st.won ? "👑 通关！深渊领主已伏诛" : "💀 探险结束", W / 2, H / 2 - 10);
+      ctx.fillStyle = "#cdd3e0";
+      ctx.font = "13px system-ui, sans-serif";
+      ctx.fillText("第 " + st.floor + " 层 · Lv." + st.p.lv + " · " + st.p.gold + " 金币", W / 2, H / 2 + 14);
+    }
+    return true;
+  }
+  function txt(id, s) { var e = el(id); if (e) e.textContent = s; }
+  function syncAll() {
+    if (!st) return;
+    txt("dunFloor", "B" + st.floor);
+    txt("dunHp", st.p.hp + "/" + st.p.maxhp);
+    txt("dunLv", "Lv." + st.p.lv);
+    txt("dunAtk", String(st.p.atk));
+    txt("dunDef", String(st.p.def));
+    txt("dunGold", String(st.p.gold));
+    var bar = el("dunHpBar");
+    if (bar) bar.style.width = Math.max(0, Math.min(100, Math.round(st.p.hp * 100 / Math.max(1, st.p.maxhp)))) + "%";
+    var lg = el("dunLog");
+    if (lg) {
+      lg.innerHTML = "";
+      for (var i = 0; i < st.log.length; i++) {
+        var d = document.createElement("div");
+        d.className = "dun-line";
+        d.textContent = st.log[i];
+        lg.appendChild(d);
+      }
+      lg.scrollTop = lg.scrollHeight;
+    }
+    txt("dunRec", "闯荡 " + rec.runs + " 次 · 最深 B" + rec.bestFloor + " · 累计击杀 " + rec.kills + " · 通关 " + rec.wins + " 次");
+    draw();
+  }
+
+  /* ---------- 绑定 ---------- */
+  function cavCell(e) {
+    var r = cav.getBoundingClientRect();
+    var sx = W / (r.width || W), sy = H / (r.height || H);
+    var px = (e.clientX - r.left) * sx, py = (e.clientY - r.top) * sy;
+    return { x: Math.floor(px / TILE), y: Math.floor(py / TILE) };
+  }
+  function act(fn) { fn(); syncAll(); }
+  function ensureInit() {
+    if (inited) return;
+    if (typeof document === "undefined") return;
+    cav = el("dunCav");
+    if (!cav) return;
+    ctx = cav.getContext ? cav.getContext("2d") : null;
+    inited = true;
+    cav.addEventListener("click", function (e) {
+      if (!st || st.over) return;
+      var c = cavCell(e);
+      if (!inb(c.x, c.y)) return;
+      act(function () { tapCell(c.x, c.y); });
+    });
+    var pad = el("dunPad");
+    if (pad) pad.addEventListener("click", function (e) {
+      var b = e.target && e.target.getAttribute ? e.target.getAttribute("data-dun") : null;
+      if (!b) return;
+      act(function () {
+        if (b === "up") tryMove(0, -1);
+        else if (b === "down") tryMove(0, 1);
+        else if (b === "left") tryMove(-1, 0);
+        else if (b === "right") tryMove(1, 0);
+        else if (b === "wait") waitTurn();
+      });
+    });
+    var nb = el("dunNew");
+    if (nb) nb.addEventListener("click", function () { act(function () { startRun(); }); });
+    document.addEventListener("keydown", function (e) {
+      if (!active || !st || st.over) return;
+      var t = e.target && e.target.tagName ? e.target.tagName : "";
+      if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT") return;
+      var k = e.key, d = null;
+      if (k === "ArrowUp" || k === "w" || k === "W") d = [0, -1];
+      else if (k === "ArrowDown" || k === "s" || k === "S") d = [0, 1];
+      else if (k === "ArrowLeft" || k === "a" || k === "A") d = [-1, 0];
+      else if (k === "ArrowRight" || k === "d" || k === "D") d = [1, 0];
+      else if (k === " " || k === "." || k === "Enter") d = "wait";
+      if (!d) return;
+      e.preventDefault();
+      act(function () { if (d === "wait") waitTurn(); else tryMove(d[0], d[1]); });
+    });
+    if (!st) startRun();
+  }
+
+  /* ---------- 对外钩子 ---------- */
+  window.dunRender = function () {
+    ensureInit();
+    active = true;
+    if (!st) startRun();
+    syncAll();
+  };
+  window.dunStop = function () { active = false; };
+
+  window.__dunTest = {
+    loadRec: loadRec, defRec: defRec, saveRec: saveRec,
+    getRec: function () { return rec; },
+    setRec: function (r) { rec = r; },
+    getSt: function () { return st; },
+    setSt: function (v) { st = v; },
+    setRnd: function (f) { rnd = f; },
+    setActive: function (v) { active = v; },
+    inb: inb, blankGrid: blankGrid, carveRect: carveRect, center: center,
+    overlaps: overlaps, corridor: corridor, genMap: genMap, floorCells: floorCells,
+    manh: manh, farthest: farthest, monPool: monPool, scaleMon: scaleMon,
+    monCount: monCount, itemCount: itemCount, roomsWanted: roomsWanted,
+    newState: newState, buildFloor: buildFloor, startRun: startRun,
+    computeVis: computeVis, monAt: monAt, itemAt: itemAt, walkable: walkable,
+    dmgOf: dmgOf, expNeed: expNeed, levelUp: levelUp, killMon: killMon,
+    playerAttack: playerAttack, monAttack: monAttack, stepToward: stepToward,
+    wander: wander, monsterTurn: monsterTurn, applyItem: applyItem,
+    pickupAt: pickupAt, descend: descend, winRun: winRun, dieRun: dieRun,
+    postTurn: postTurn, tryMove: tryMove, waitTurn: waitTurn, tapCell: tapCell,
+    draw: draw, syncAll: syncAll, ensureInit: ensureInit, pushLog: pushLog,
+    consts: {
+      KEY: KEY, GW: GW, GH: GH, TILE: TILE, W: W, H: H, SIGHT: SIGHT,
+      MAX_FLOOR: MAX_FLOOR, LOG_MAX: LOG_MAX, CHASE_R: CHASE_R,
+      BADGE_FLOOR: BADGE_FLOOR, HEAL_POTION: HEAL_POTION, MEAL_HP: MEAL_HP,
+      SWORD_ATK: SWORD_ATK, SHIELD_DEF: SHIELD_DEF, P0: P0,
+      MONS: MONS, BOSS: BOSS, ITEMS: ITEMS
+    }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🏰", name: "初入地牢", desc: "在随便地牢里活着走到第 3 层", test: function (u) { return (u.dunfloor || 0) >= 1; } },
+      { emoji: "👹", name: "深渊终结者", desc: "在随便地牢里击败第 10 层的深渊领主", test: function (u) { return (u.dunwin || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "地牢的规矩很简单：往下走，或者留下。",
+      "血条见底的时候，你才知道刚才那瓶药水该省着喝。",
+      "打不过就绕路——这不叫怂，这叫资源管理。",
+      "每一层都比上一层难，可你也比上一层强了。",
+      "最深的那层不一定有宝藏，但一定有答案。"
     );
   }
 })();
