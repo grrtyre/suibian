@@ -1597,6 +1597,7 @@
         <button data-tab="dungeon">🏰 随便地牢</button>
         <button data-tab="whodunit">🕵️ 随便断案</button>
         <button data-tab="parking">🅿️ 随便泊车</button>
+        <button data-tab="logic">🔌 随便电路</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8731,6 +8732,76 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="logic">
+    <h2>🔌 随便电路</h2>
+    <p class="sub">从一根导线搭到全加器——十道逻辑关卡，用与、或、非亲手拼出计算机的第一块砖</p>
+    <style>
+      #logic .lgc-wrap { max-width:420px; margin:0 auto; }
+      #logic canvas { width:100%; max-width:380px; border-radius:16px; display:block; margin:0 auto 10px; touch-action:none; box-shadow:0 14px 34px rgba(0,0,0,.42); cursor:pointer; }
+      #logic .lgc-bar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+      #logic .lgc-bar button { padding:8px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #logic .lgc-bar button:active { transform:translateY(1px); background:rgba(255,255,255,.16); }
+      #logic .lgc-bar select { padding:7px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; max-width:210px; }
+      #logic .lgc-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #logic .lgc-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #logic .lgc-hud b { font-weight:700; color:#e0b34d; }
+      #logic .lgc-pal { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; max-width:380px; margin:0 auto 10px; }
+      #logic .lgc-pal button { padding:10px 2px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.8rem; font-weight:700; cursor:pointer; line-height:1.25; }
+      #logic .lgc-pal button small { display:block; font-size:.62rem; opacity:.55; font-weight:500; }
+      #logic .lgc-pal button.on { background:rgba(224,179,77,.22); border-color:rgba(224,179,77,.6); color:#ffd98a; }
+      #logic .lgc-pal button:disabled { opacity:.28; cursor:not-allowed; }
+      #logic .lgc-st { text-align:center; font-size:.85rem; font-weight:700; margin:0 0 8px; }
+      #logic .lgc-st.pass { color:#6ddba0; }
+      #logic .lgc-st.wrong { color:#ff8b7a; }
+      #logic .lgc-st.open { color:#e0b34d; }
+      #logic .lgc-tip { font-size:.79rem; opacity:.82; text-align:center; line-height:1.6; margin:0 auto 10px; max-width:380px; }
+      #logic .lgc-tt { border-collapse:collapse; margin:0 auto 10px; font-size:.78rem; font-variant-numeric:tabular-nums; }
+      #logic .lgc-tt th, #logic .lgc-tt td { border:1px solid rgba(255,255,255,.12); padding:3px 9px; text-align:center; }
+      #logic .lgc-tt th { background:rgba(255,255,255,.07); font-weight:700; }
+      #logic .lgc-tt th.want, #logic .lgc-tt td.want { color:#e0b34d; background:rgba(224,179,77,.07); }
+      #logic .lgc-tt tr.ok td { color:inherit; }
+      #logic .lgc-tt tr.bad td { background:rgba(255,110,90,.09); }
+      #logic .lgc-rec { font-size:.78rem; opacity:.8; text-align:center; margin:0 0 10px; }
+      #logic .lgc-help { font-size:.78rem; opacity:.75; line-height:1.75; text-align:left; max-width:400px; margin:0 auto; }
+    </style>
+    <div class="lgc-wrap">
+      <div class="lgc-bar">
+        <select id="lgcLevel"></select>
+        <button type="button" id="lgcNext">⏭️ 下一关</button>
+        <button type="button" id="lgcReset">🧹 清空重搭</button>
+        <button type="button" id="lgcCheck">🔍 验收</button>
+      </div>
+      <div class="lgc-hud">
+        <span>门数 <b id="lgcGates">0 / 0</b></span>
+        <span>标准 <b id="lgcPar">0</b></span>
+        <span>本关 <b id="lgcStars">未通关</b></span>
+        <span>进度 <b id="lgcSolved">0 / 10</b></span>
+      </div>
+      <p class="lgc-st open" id="lgcStatus">摆好电路再看这里</p>
+      <canvas id="lgcCav" width="380" height="430"></canvas>
+      <div class="lgc-pal" id="lgcPal">
+        <button type="button" data-lgc="wire">🔗 连线<small>接圆点</small></button>
+        <button type="button" data-lgc="AND">与门<small>AND</small></button>
+        <button type="button" data-lgc="OR">或门<small>OR</small></button>
+        <button type="button" data-lgc="NOT">非门<small>NOT</small></button>
+        <button type="button" data-lgc="XOR">异或<small>XOR</small></button>
+        <button type="button" data-lgc="NAND">与非<small>NAND</small></button>
+        <button type="button" data-lgc="NOR">或非<small>NOR</small></button>
+        <button type="button" data-lgc="erase">🗑️ 拆除<small>门 / 线</small></button>
+      </div>
+      <p class="lgc-tip" id="lgcTip">选一关开始</p>
+      <div id="lgcTable"></div>
+      <p class="lgc-rec" id="lgcRec">还没通过任何一关</p>
+      <p class="lgc-help">
+        左边是<b>输入开关</b>（点方块切换 0/1），右边是<b>输出灯泡</b>，中间十二个虚线格子随便你摆门。<br>
+        <b>连线</b>：选「🔗 连线」，先点一个<b>输出圆点</b>（开关右侧或门的右侧），再点一个<b>输入圆点</b>（门的左侧或灯泡左侧）；一个输入口只能接一根线，重复接会自动替换。空手点已接线的输入口 = 剪断它。<br>
+        <b>放门</b>：点调色板里的门类型，再点空格子。<b>拆除</b>：选「🗑️ 拆除」后点门拆门、点输入口剪线。本关不提供的门会自动置灰——第 7 关不给异或门，就是要你用与或非手搓出来。<br>
+        真值表里 <b class="want">带 * 的列是目标</b>，右边是你电路的实际输出，全部打勾即通关。用门数 ≤ 标准得 ⭐⭐⭐，多一个门 ⭐⭐，再多 ⭐。<br>
+        高电平的导线会发橙光并有电流点跑动，随手拨开关就能看信号一路点亮。<br>
+        通过第一关解锁「🔌 初通电流」，十关全通解锁「🧮 数电宗师」，星级战绩本地存档（suibian_logic）。
+      </p>
+    </div>
+  </section>
   <section class="panel" id="parking">
     <h2>🅿️ 随便泊车</h2>
     <p class="sub">侧方、倒库、斜列三种车位——阿克曼转向物理模拟，慢一点不丢人，蹭一下才丢人</p>
@@ -9821,6 +9892,7 @@
     if (id === "dungeon" && typeof dunRender === "function") dunRender();
     if (id === "whodunit" && typeof dtvRender === "function") dtvRender();
     if (id === "parking" && typeof prkRender === "function") prkRender();
+    if (id === "logic" && typeof lgcRender === "function") lgcRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -9901,6 +9973,7 @@
     if (id !== "dungeon" && typeof dunStop === "function") dunStop();
     if (id !== "whodunit" && typeof dtvStop === "function") dtvStop();
     if (id !== "parking" && typeof prkStop === "function") prkStop();
+    if (id !== "logic" && typeof lgcStop === "function") lgcStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10111,6 +10184,7 @@
     dungeon: "随便地牢 dungeon roguelike 地牢 地下城 冒险 探险 回合制 肉鸽 刷怪 升级 楼层 深渊 领主 boss 药水 装备 宝箱 迷雾 探索 rpg 游戏 挑战 休闲",
     whodunit: "随便断案 whodunit 断案 推理 侦探 悬疑 案件 凶手 嫌疑人 线索 逻辑 排除法 斑马谜题 爱因斯坦谜题 谜题 烧脑 解谜 推定 指控 真相 益智 游戏 挑战",
     parking: "随便泊车 parking 泊车 停车 倒车 入库 侧方 斜列 车位 科目二 驾校 练车 方向盘 泊车入位 车辆 物理 模拟 雷达 老司机 技巧 游戏 挑战",
+    logic: "随便电路 logic circuit 电路 逻辑 逻辑门 门电路 与门 或门 非门 异或 与非 或非 真值表 半加器 全加器 数电 布尔 二进制 接线 搭电路 解谜 关卡 游戏",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10382,6 +10456,7 @@ splitbill:"tools",
     dungeon:"games",
     whodunit:"games",
     parking:"games",
+    logic:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -63567,6 +63642,886 @@ splitbill:"tools",
       "会开车的人看后视镜，会停车的人看两边的缝。",
       "慢一点不丢人，蹭一下才丢人。",
       "人生和倒车一样：方向对了，慢慢来也能到位。"
+    );
+  }
+})();
+/* ===== 🔌 随便电路 logic ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_logic";
+
+  /* ---------- 画布几何 ---------- */
+  var W = 380, H = 430;
+  var COLX = [110, 190, 270];
+  var ROWY = [64, 156, 248, 340];
+  var GW = 64, GH = 44;
+  var IN_X = 52, SW_X = 26, SW_W = 30, SW_H = 26;
+  var OUT_X = 330, LED_X = 356, LED_R = 14;
+  var HIT_R = 16;
+  var MAX_CELL = COLX.length * ROWY.length;
+  var SPARE = 4;                 /* 允许比标准答案多放几个门 */
+  var MSG_FR = 150;
+
+  /* ---------- 门类型 ---------- */
+  var GATES = {
+    AND: { nm: "与", en: "AND", ar: 2, col: "#4c9dff" },
+    OR: { nm: "或", en: "OR", ar: 2, col: "#4dc98a" },
+    NOT: { nm: "非", en: "NOT", ar: 1, col: "#ff8a5c" },
+    XOR: { nm: "异或", en: "XOR", ar: 2, col: "#b189ff" },
+    NAND: { nm: "与非", en: "NAND", ar: 2, col: "#3f7ac9" },
+    NOR: { nm: "或非", en: "NOR", ar: 2, col: "#3d9e6b" }
+  };
+  var ORDER = ["AND", "OR", "NOT", "XOR", "NAND", "NOR"];
+  var BASIC = ["AND", "OR", "NOT"];
+  var ALL6 = ["AND", "OR", "NOT", "XOR", "NAND", "NOR"];
+
+  function arity(t) { return GATES[t] ? GATES[t].ar : 0; }
+
+  function applyGate(t, a, b) {
+    a = a ? 1 : 0; b = b ? 1 : 0;
+    if (t === "AND") return a && b ? 1 : 0;
+    if (t === "OR") return a || b ? 1 : 0;
+    if (t === "NOT") return a ? 0 : 1;
+    if (t === "XOR") return a !== b ? 1 : 0;
+    if (t === "NAND") return a && b ? 0 : 1;
+    if (t === "NOR") return a || b ? 0 : 1;
+    return 0;
+  }
+
+  /* ---------- 关卡 ---------- */
+  var LEVELS = [
+    {
+      k: "wire", nm: "接通电源", em: "🔗", ins: ["A"], outs: ["Y"], par: 0, allow: [],
+      tip: "热身：一个门都不用放，把开关 A 右边的小圆点连到灯泡 Y 左边的小圆点。",
+      fn: function (v) { return [v[0]]; }
+    },
+    {
+      k: "inv", nm: "唱反调", em: "🚫", ins: ["A"], outs: ["Y"], par: 1, allow: ["NOT"],
+      tip: "反相器：A 开着灯就灭，A 关着灯就亮。一个非门搞定。",
+      fn: function (v) { return [v[0] ? 0 : 1]; }
+    },
+    {
+      k: "and", nm: "都同意才行", em: "🤝", ins: ["A", "B"], outs: ["Y"], par: 1, allow: BASIC,
+      tip: "两个人都点头，事情才办：A 与 B 同时为 1 时输出 1。",
+      fn: function (v) { return [v[0] && v[1] ? 1 : 0]; }
+    },
+    {
+      k: "nand", nm: "别都同意", em: "🙅", ins: ["A", "B"], outs: ["Y"], par: 2, allow: BASIC,
+      tip: "与非：只要不是「两个都为 1」，灯就亮。手头没有与非门，用与门 + 非门拼。",
+      fn: function (v) { return [v[0] && v[1] ? 0 : 1]; }
+    },
+    {
+      k: "nor", nm: "都别吭声", em: "🤫", ins: ["A", "B"], outs: ["Y"], par: 2, allow: BASIC,
+      tip: "或非：两个都为 0 时灯才亮，任何一个抬手都灭灯。",
+      fn: function (v) { return [v[0] || v[1] ? 0 : 1]; }
+    },
+    {
+      k: "imply", nm: "如果…那么…", em: "➡️", ins: ["A", "B"], outs: ["Y"], par: 2, allow: BASIC,
+      tip: "蕴含式：只有「A 成立但 B 不成立」时才判假，其余情况都为真。",
+      fn: function (v) { return [v[0] && !v[1] ? 0 : 1]; }
+    },
+    {
+      k: "xor", nm: "手搓异或", em: "⚡", ins: ["A", "B"], outs: ["Y"], par: 4, allow: BASIC,
+      tip: "经典难题：不给异或门，用与、或、非拼出「不一样才亮」。提示：(A 或 B) 且 非(A 且 B)。",
+      fn: function (v) { return [v[0] !== v[1] ? 1 : 0]; }
+    },
+    {
+      k: "half", nm: "半加器", em: "➕", ins: ["A", "B"], outs: ["S", "C"], par: 2, allow: ALL6,
+      tip: "两位二进制相加：S 是本位的和，C 是进位。这是所有 CPU 的第一块砖。",
+      fn: function (v) { return [v[0] !== v[1] ? 1 : 0, v[0] && v[1] ? 1 : 0]; }
+    },
+    {
+      k: "major", nm: "少数服从多数", em: "🗳️", ins: ["A", "B", "C"], outs: ["Y"], par: 4, allow: ALL6,
+      tip: "三人表决：至少两票赞成就通过。四个门能搞定，想想 (A 且 B) 或 (C 且 (A 或 B))。",
+      fn: function (v) { return [v[0] + v[1] + v[2] >= 2 ? 1 : 0]; }
+    },
+    {
+      k: "full", nm: "全加器", em: "🧮", ins: ["A", "B", "C"], outs: ["S", "C"], par: 5, allow: ALL6,
+      tip: "终极关：带进位输入的加法器，S 是和，C 是进位。五个门是标准答案，串起来就是一台加法机。",
+      fn: function (v) {
+        var s = v[0] + v[1] + v[2];
+        return [s % 2, s >= 2 ? 1 : 0];
+      }
+    }
+  ];
+
+  var STAR_TXT = ["", "⭐", "⭐⭐", "⭐⭐⭐"];
+
+  /* ---------- 状态 ---------- */
+  var cav = null, ctx = null, inited = false, ctxOk = false;
+  var g = null, rec = null, raf = 0, active = false, frame = 0;
+  var msg = "", msgFr = 0, uid = 1;
+  var els = {};
+
+  function el(id) { return typeof document !== "undefined" ? document.getElementById(id) : null; }
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+  /* ---------- 存档 ---------- */
+  function defRec() { return { stars: {}, solves: 0, builds: 0, aF: 0, aM: 0 }; }
+
+  function loadRec() {
+    var r = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return r;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return r;
+      if (o.stars && typeof o.stars === "object") {
+        for (var i = 0; i < LEVELS.length; i++) {
+          var k = LEVELS[i].k, v = o.stars[k];
+          if (typeof v === "number" && isFinite(v)) {
+            v = clamp(Math.floor(v), 0, 3);
+            if (v > 0) r.stars[k] = v;
+          }
+        }
+      }
+      r.solves = clamp(Math.floor(+o.solves || 0), 0, 999999);
+      r.builds = clamp(Math.floor(+o.builds || 0), 0, 999999);
+      r.aF = o.aF ? 1 : 0;
+      r.aM = o.aM ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return r;
+  }
+
+  function saveRec() {
+    try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {}
+  }
+
+  function solvedCount() {
+    var n = 0;
+    for (var i = 0; i < LEVELS.length; i++) if (rec && rec.stars[LEVELS[i].k] > 0) n++;
+    return n;
+  }
+
+  function threeStarCount() {
+    var n = 0;
+    for (var i = 0; i < LEVELS.length; i++) if (rec && rec.stars[LEVELS[i].k] === 3) n++;
+    return n;
+  }
+
+  /* ---------- 关卡工具 ---------- */
+  function levelAt(i) { return LEVELS[clamp(Math.floor(i || 0), 0, LEVELS.length - 1)]; }
+  function maxGatesOf(lv) { return lv.allow.length ? Math.min(MAX_CELL, lv.par + SPARE) : 0; }
+
+  function inYs(n) {
+    if (n <= 1) return [215];
+    if (n === 2) return [130, 300];
+    return [70, 215, 360];
+  }
+  function outYs(n) { return n <= 1 ? [215] : [140, 290]; }
+
+  function starsOf(lv, used) {
+    if (used <= lv.par) return 3;
+    if (used <= lv.par + 1) return 2;
+    return 1;
+  }
+
+  /* ---------- 电路模型 ---------- */
+  function newBoard(li) {
+    var lv = levelAt(li);
+    return {
+      li: clamp(Math.floor(li || 0), 0, LEVELS.length - 1),
+      gates: [],
+      wires: [],
+      vals: lv.ins.map(function () { return 0; }),
+      sel: null,
+      mode: lv.allow.length ? lv.allow[0] : "wire",
+      pass: false,
+      shown: false,
+      flash: 0
+    };
+  }
+
+  function gateById(gates, id) {
+    for (var i = 0; i < gates.length; i++) if (gates[i].id === id) return gates[i];
+    return null;
+  }
+
+  function gateAtCell(gates, c, r) {
+    for (var i = 0; i < gates.length; i++) if (gates[i].c === c && gates[i].r === r) return gates[i];
+    return null;
+  }
+
+  function sameDst(b, t, i, p) {
+    if (b.t !== t) return false;
+    if (t === "out") return b.i === i;
+    return b.id === i && b.p === p;
+  }
+
+  function wireTo(wires, t, i, p) {
+    for (var w = 0; w < wires.length; w++) if (sameDst(wires[w].b, t, i, p)) return w;
+    return -1;
+  }
+
+  /* 端口列表：src = 可作为起点，dst = 可作为终点 */
+  function portsOf(lv, gates) {
+    var out = [], ys, i;
+    ys = inYs(lv.ins.length);
+    for (i = 0; i < lv.ins.length; i++) out.push({ kind: "src", t: "in", i: i, x: IN_X, y: ys[i] });
+    for (i = 0; i < gates.length; i++) {
+      var gt = gates[i], cx = COLX[gt.c], cy = ROWY[gt.r], ar = arity(gt.type);
+      out.push({ kind: "src", t: "g", id: gt.id, x: cx + GW / 2, y: cy });
+      if (ar === 1) {
+        out.push({ kind: "dst", t: "g", id: gt.id, p: 0, x: cx - GW / 2, y: cy });
+      } else {
+        out.push({ kind: "dst", t: "g", id: gt.id, p: 0, x: cx - GW / 2, y: cy - 11 });
+        out.push({ kind: "dst", t: "g", id: gt.id, p: 1, x: cx - GW / 2, y: cy + 11 });
+      }
+    }
+    ys = outYs(lv.outs.length);
+    for (i = 0; i < lv.outs.length; i++) out.push({ kind: "dst", t: "out", i: i, x: OUT_X, y: ys[i] });
+    return out;
+  }
+
+  function hitPort(x, y, lv, gates) {
+    var ps = portsOf(lv, gates), best = null, bd = HIT_R * HIT_R;
+    for (var i = 0; i < ps.length; i++) {
+      var dx = x - ps[i].x, dy = y - ps[i].y, d = dx * dx + dy * dy;
+      if (d <= bd) { bd = d; best = ps[i]; }
+    }
+    return best;
+  }
+
+  function hitCell(x, y) {
+    for (var c = 0; c < COLX.length; c++) {
+      for (var r = 0; r < ROWY.length; r++) {
+        if (Math.abs(x - COLX[c]) <= GW / 2 + 3 && Math.abs(y - ROWY[r]) <= GH / 2 + 5) return { c: c, r: r };
+      }
+    }
+    return null;
+  }
+
+  function hitSwitch(x, y, lv) {
+    var ys = inYs(lv.ins.length);
+    for (var i = 0; i < ys.length; i++) {
+      if (Math.abs(x - SW_X) <= SW_W / 2 + 6 && Math.abs(y - ys[i]) <= SW_H / 2 + 6) return i;
+    }
+    return -1;
+  }
+
+  /* ---------- 求值 ---------- */
+  function evalOnce(lv, gates, wires, vals) {
+    var gv = {}, i;
+    for (i = 0; i < gates.length; i++) gv[gates[i].id] = null;
+    function srcVal(a) {
+      if (a.t === "in") return vals[a.i] ? 1 : 0;
+      var v = gv[a.id];
+      return v === undefined ? null : v;
+    }
+    for (var pass = 0; pass < gates.length + 2; pass++) {
+      var changed = false;
+      for (i = 0; i < gates.length; i++) {
+        var gt = gates[i];
+        if (gv[gt.id] !== null) continue;
+        var ar = arity(gt.type);
+        var w0 = wireTo(wires, "g", gt.id, 0);
+        if (w0 < 0) continue;
+        var a = srcVal(wires[w0].a);
+        if (a === null) continue;
+        var b = 0;
+        if (ar === 2) {
+          var w1 = wireTo(wires, "g", gt.id, 1);
+          if (w1 < 0) continue;
+          b = srcVal(wires[w1].a);
+          if (b === null) continue;
+        }
+        gv[gt.id] = applyGate(gt.type, a, b);
+        changed = true;
+      }
+      if (!changed) break;
+    }
+    var outs = [];
+    for (i = 0; i < lv.outs.length; i++) {
+      var wi = wireTo(wires, "out", i, 0);
+      outs.push(wi < 0 ? null : srcVal(wires[wi].a));
+    }
+    return { gv: gv, outs: outs };
+  }
+
+  function truthCheck(lv, gates, wires) {
+    var n = lv.ins.length, rows = [], pass = true;
+    for (var m = 0; m < (1 << n); m++) {
+      var vals = [], i;
+      for (i = 0; i < n; i++) vals.push((m >> (n - 1 - i)) & 1);
+      var r = evalOnce(lv, gates, wires, vals);
+      var want = lv.fn(vals), ok = true;
+      for (i = 0; i < lv.outs.length; i++) if (r.outs[i] !== want[i]) ok = false;
+      if (!ok) pass = false;
+      rows.push({ vals: vals, got: r.outs.slice(), want: want, ok: ok });
+    }
+    return { pass: pass, rows: rows };
+  }
+
+  function statusOf(lv, gates, wires) {
+    var tc = truthCheck(lv, gates, wires);
+    if (tc.pass) return { tc: tc, code: "pass", txt: "✅ 全部对上了！" };
+    var anyNull = false;
+    for (var i = 0; i < tc.rows.length; i++) {
+      for (var k = 0; k < tc.rows[i].got.length; k++) if (tc.rows[i].got[k] === null) anyNull = true;
+    }
+    if (anyNull) return { tc: tc, code: "open", txt: "⚠️ 还有输出悬空（或存在环路）" };
+    var bad = 0;
+    for (i = 0; i < tc.rows.length; i++) if (!tc.rows[i].ok) bad++;
+    return { tc: tc, code: "wrong", txt: "❌ 有 " + bad + " 行对不上" };
+  }
+
+  /* ---------- 编辑操作 ---------- */
+  function setMsg(t) { msg = t; msgFr = MSG_FR; }
+
+  function placeGate(type, c, r) {
+    var lv = levelAt(g.li);
+    if (lv.allow.indexOf(type) < 0) { setMsg("本关不提供「" + (GATES[type] ? GATES[type].nm : type) + "门」"); return false; }
+    if (gateAtCell(g.gates, c, r)) { setMsg("这个格子已经有门了"); return false; }
+    if (g.gates.length >= maxGatesOf(lv)) { setMsg("最多只能放 " + maxGatesOf(lv) + " 个门，先拆一个"); return false; }
+    g.gates.push({ id: uid++, type: type, c: c, r: r });
+    if (rec) { rec.builds++; saveRec(); }
+    setMsg("放下一个「" + GATES[type].nm + "门」");
+    return true;
+  }
+
+  function removeGate(id) {
+    var out = [], i, hit = false;
+    for (i = 0; i < g.gates.length; i++) {
+      if (g.gates[i].id === id) { hit = true; continue; }
+      out.push(g.gates[i]);
+    }
+    if (!hit) return false;
+    g.gates = out;
+    var ws = [];
+    for (i = 0; i < g.wires.length; i++) {
+      var w = g.wires[i];
+      if (w.a.t === "g" && w.a.id === id) continue;
+      if (w.b.t === "g" && w.b.id === id) continue;
+      ws.push(w);
+    }
+    g.wires = ws;
+    if (g.sel && g.sel.t === "g" && g.sel.id === id) g.sel = null;
+    setMsg("拆掉了一个门");
+    return true;
+  }
+
+  function connect(src, dst) {
+    if (!src || !dst || src.kind !== "src" || dst.kind !== "dst") return false;
+    if (src.t === "g" && dst.t === "g" && src.id === dst.id) { setMsg("门不能接自己"); return false; }
+    var old = wireTo(g.wires, dst.t, dst.t === "out" ? dst.i : dst.id, dst.p || 0);
+    if (old >= 0) g.wires.splice(old, 1);
+    var a = src.t === "in" ? { t: "in", i: src.i } : { t: "g", id: src.id };
+    var b = dst.t === "out" ? { t: "out", i: dst.i } : { t: "g", id: dst.id, p: dst.p || 0 };
+    g.wires.push({ a: a, b: b });
+    setMsg("接好一根线");
+    return true;
+  }
+
+  function cutWireAt(dst) {
+    var i = wireTo(g.wires, dst.t, dst.t === "out" ? dst.i : dst.id, dst.p || 0);
+    if (i < 0) return false;
+    g.wires.splice(i, 1);
+    setMsg("剪断一根线");
+    return true;
+  }
+
+  function resetBoard(keepLevel) {
+    var li = keepLevel ? g.li : 0;
+    g = newBoard(li);
+    setMsg("电路板已清空");
+  }
+
+  function loadLevel(li) {
+    g = newBoard(li);
+    setMsg(levelAt(li).em + " " + levelAt(li).nm);
+  }
+
+  /* ---------- 通关判定 ---------- */
+  function checkSolve() {
+    if (!g) return null;
+    var lv = levelAt(g.li);
+    var st = statusOf(lv, g.gates, g.wires);
+    g.pass = st.code === "pass";
+    if (g.pass && !g.shown) {
+      g.shown = true;
+      g.flash = 90;
+      var stars = starsOf(lv, g.gates.length);
+      if (!rec.stars[lv.k] || rec.stars[lv.k] < stars) rec.stars[lv.k] = stars;
+      rec.solves++;
+      saveRec();
+      award();
+      setMsg("🎉 " + lv.nm + " 通关！" + STAR_TXT[stars] + "（用了 " + g.gates.length + " 个门，标准 " + lv.par + "）");
+    }
+    sync();
+    return st;
+  }
+
+  function award() {
+    if (solvedCount() >= 1 && !rec.aF) {
+      rec.aF = 1; saveRec();
+      try { bumpUsage("lgcfirst"); } catch (e1) {}
+    }
+    if (solvedCount() >= LEVELS.length && !rec.aM) {
+      rec.aM = 1; saveRec();
+      try { bumpUsage("lgcmaster"); } catch (e2) {}
+    }
+  }
+
+  /* ---------- 绘制 ---------- */
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function bez(x1, y1, x2, y2, t) {
+    var dx = Math.max(30, Math.abs(x2 - x1) * 0.5);
+    var cx1 = x1 + dx, cy1 = y1, cx2 = x2 - dx, cy2 = y2;
+    var u = 1 - t;
+    return {
+      x: u * u * u * x1 + 3 * u * u * t * cx1 + 3 * u * t * t * cx2 + t * t * t * x2,
+      y: u * u * u * y1 + 3 * u * u * t * cy1 + 3 * u * t * t * cy2 + t * t * t * y2
+    };
+  }
+
+  function wirePath(x1, y1, x2, y2) {
+    var dx = Math.max(30, Math.abs(x2 - x1) * 0.5);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.bezierCurveTo(x1 + dx, y1, x2 - dx, y2, x2, y2);
+  }
+
+  function portXY(lv, gates, ref, isDst) {
+    var ps = portsOf(lv, gates);
+    for (var i = 0; i < ps.length; i++) {
+      var p = ps[i];
+      if (isDst) {
+        if (p.kind !== "dst") continue;
+        if (ref.t === "out" && p.t === "out" && p.i === ref.i) return p;
+        if (ref.t === "g" && p.t === "g" && p.id === ref.id && p.p === (ref.p || 0)) return p;
+      } else {
+        if (p.kind !== "src") continue;
+        if (ref.t === "in" && p.t === "in" && p.i === ref.i) return p;
+        if (ref.t === "g" && p.t === "g" && p.id === ref.id) return p;
+      }
+    }
+    return null;
+  }
+
+  function draw() {
+    if (!ctxOk || !g) return;
+    var lv = levelAt(g.li);
+    var res = evalOnce(lv, g.gates, g.wires, g.vals);
+    var i;
+
+    /* 背板 */
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#101a24");
+    bg.addColorStop(1, "#0a1119");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    /* PCB 网点 */
+    ctx.fillStyle = "rgba(90,190,150,.10)";
+    for (var gx = 14; gx < W; gx += 18) {
+      for (var gy = 14; gy < H; gy += 18) { ctx.fillRect(gx, gy, 2, 2); }
+    }
+
+    /* 空格子 */
+    ctx.lineWidth = 1;
+    for (var c = 0; c < COLX.length; c++) {
+      for (var r = 0; r < ROWY.length; r++) {
+        if (gateAtCell(g.gates, c, r)) continue;
+        ctx.strokeStyle = "rgba(255,255,255,.07)";
+        ctx.setLineDash([4, 5]);
+        rr(COLX[c] - GW / 2, ROWY[r] - GH / 2, GW, GH, 9);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    /* 连线 */
+    for (i = 0; i < g.wires.length; i++) {
+      var w = g.wires[i];
+      var pa = portXY(lv, g.gates, w.a, false), pb = portXY(lv, g.gates, w.b, true);
+      if (!pa || !pb) continue;
+      var v = w.a.t === "in" ? (g.vals[w.a.i] ? 1 : 0) : res.gv[w.a.id];
+      var col = v === 1 ? "#ff8f4d" : v === 0 ? "#4b6076" : "#77839a";
+      ctx.strokeStyle = col;
+      ctx.lineWidth = v === 1 ? 3.2 : 2.4;
+      if (v === null || v === undefined) ctx.setLineDash([6, 5]);
+      wirePath(pa.x, pa.y, pb.x, pb.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (v === 1) {
+        ctx.fillStyle = "#ffd8a8";
+        for (var d = 0; d < 3; d++) {
+          var t = ((frame * 0.011) + d / 3) % 1;
+          var pt = bez(pa.x, pa.y, pb.x, pb.y, t);
+          ctx.beginPath(); ctx.arc(pt.x, pt.y, 2.6, 0, 6.284); ctx.fill();
+        }
+      }
+    }
+
+    /* 门 */
+    for (i = 0; i < g.gates.length; i++) {
+      var gt = g.gates[i], mx = COLX[gt.c], my = ROWY[gt.r], meta = GATES[gt.type];
+      var val = res.gv[gt.id];
+      ctx.fillStyle = "rgba(12,20,28,.92)";
+      rr(mx - GW / 2, my - GH / 2, GW, GH, 10); ctx.fill();
+      ctx.strokeStyle = val === 1 ? "#ffb066" : meta.col;
+      ctx.lineWidth = val === 1 ? 2.4 : 1.6;
+      rr(mx - GW / 2, my - GH / 2, GW, GH, 10); ctx.stroke();
+      ctx.fillStyle = meta.col;
+      ctx.font = "bold 17px system-ui,sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(meta.nm, mx, my - 6);
+      ctx.fillStyle = "rgba(255,255,255,.45)";
+      ctx.font = "9px system-ui,sans-serif";
+      ctx.fillText(meta.en, mx, my + 12);
+      var ports = portsOf(lv, g.gates);
+      for (var q = 0; q < ports.length; q++) {
+        var p = ports[q];
+        if (!(p.t === "g" && p.id === gt.id)) continue;
+        var pv = p.kind === "src" ? val : null;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 6.284);
+        ctx.fillStyle = pv === 1 ? "#ff8f4d" : "#5b6b80";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 1; ctx.stroke();
+      }
+    }
+
+    /* 输入开关 */
+    var iys = inYs(lv.ins.length);
+    for (i = 0; i < lv.ins.length; i++) {
+      var on = g.vals[i] === 1;
+      ctx.fillStyle = on ? "#e0533d" : "#2b3646";
+      rr(SW_X - SW_W / 2, iys[i] - SW_H / 2, SW_W, SW_H, 8); ctx.fill();
+      ctx.strokeStyle = on ? "#ff9f80" : "rgba(255,255,255,.22)";
+      ctx.lineWidth = 1.6;
+      rr(SW_X - SW_W / 2, iys[i] - SW_H / 2, SW_W, SW_H, 8); ctx.stroke();
+      ctx.fillStyle = on ? "#fff" : "rgba(255,255,255,.7)";
+      ctx.font = "bold 14px system-ui,sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(lv.ins[i], SW_X, iys[i] - 1);
+      ctx.fillStyle = "rgba(255,255,255,.4)";
+      ctx.font = "9px system-ui,sans-serif";
+      ctx.fillText(on ? "1" : "0", SW_X, iys[i] + 16);
+      ctx.beginPath(); ctx.arc(IN_X, iys[i], 5.5, 0, 6.284);
+      ctx.fillStyle = on ? "#ff8f4d" : "#5b6b80"; ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(SW_X + SW_W / 2, iys[i]); ctx.lineTo(IN_X - 5, iys[i]);
+      ctx.strokeStyle = on ? "#ff8f4d" : "#4b6076"; ctx.lineWidth = 2.4; ctx.stroke();
+    }
+
+    /* 输出灯 */
+    var oys = outYs(lv.outs.length);
+    for (i = 0; i < lv.outs.length; i++) {
+      var ov = res.outs[i];
+      ctx.beginPath(); ctx.arc(OUT_X, oys[i], 5.5, 0, 6.284);
+      ctx.fillStyle = ov === 1 ? "#ff8f4d" : "#5b6b80"; ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(OUT_X + 5, oys[i]); ctx.lineTo(LED_X - LED_R + 2, oys[i]);
+      ctx.strokeStyle = ov === 1 ? "#ff8f4d" : "#4b6076"; ctx.lineWidth = 2.4; ctx.stroke();
+      if (ov === 1) {
+        var gl = ctx.createRadialGradient(LED_X, oys[i], 2, LED_X, oys[i], 26);
+        gl.addColorStop(0, "rgba(255,196,86,.55)");
+        gl.addColorStop(1, "rgba(255,196,86,0)");
+        ctx.fillStyle = gl;
+        ctx.beginPath(); ctx.arc(LED_X, oys[i], 26, 0, 6.284); ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(LED_X, oys[i], LED_R, 0, 6.284);
+      ctx.fillStyle = ov === 1 ? "#ffc456" : ov === 0 ? "#2b3646" : "#242c38";
+      ctx.fill();
+      ctx.strokeStyle = ov === 1 ? "#fff0c9" : "rgba(255,255,255,.22)";
+      ctx.lineWidth = 1.6; ctx.stroke();
+      ctx.fillStyle = ov === 1 ? "#3a2200" : "rgba(255,255,255,.65)";
+      ctx.font = "bold 12px system-ui,sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(lv.outs[i], LED_X, oys[i]);
+    }
+
+    /* 待接的起点 */
+    if (g.sel) {
+      var sp = portXY(lv, g.gates, g.sel, false);
+      if (sp) {
+        var pr = 8 + Math.sin(frame * 0.16) * 2.4;
+        ctx.strokeStyle = "#7ee0b0"; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(sp.x, sp.y, pr, 0, 6.284); ctx.stroke();
+      }
+    }
+
+    /* 通关闪光 */
+    if (g.flash > 0) {
+      ctx.fillStyle = "rgba(255,196,86," + (g.flash / 90 * 0.16).toFixed(3) + ")";
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    /* 底部提示条 */
+    if (msgFr > 0 && msg) {
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      rr(10, H - 32, W - 20, 24, 10); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.9)";
+      ctx.font = "12px system-ui,sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(msg, W / 2, H - 20);
+    }
+  }
+
+  /* ---------- HUD / 真值表 ---------- */
+  function tableHTML(lv, tc) {
+    var h = '<table class="lgc-tt"><thead><tr>';
+    var i, k;
+    for (i = 0; i < lv.ins.length; i++) h += "<th>" + lv.ins[i] + "</th>";
+    for (i = 0; i < lv.outs.length; i++) h += '<th class="want">' + lv.outs[i] + "*</th>";
+    for (i = 0; i < lv.outs.length; i++) h += "<th>" + lv.outs[i] + "</th>";
+    h += "<th></th></tr></thead><tbody>";
+    for (i = 0; i < tc.rows.length; i++) {
+      var row = tc.rows[i];
+      h += '<tr class="' + (row.ok ? "ok" : "bad") + '">';
+      for (k = 0; k < row.vals.length; k++) h += "<td>" + row.vals[k] + "</td>";
+      for (k = 0; k < row.want.length; k++) h += '<td class="want">' + row.want[k] + "</td>";
+      for (k = 0; k < row.got.length; k++) h += "<td>" + (row.got[k] === null ? "–" : row.got[k]) + "</td>";
+      h += "<td>" + (row.ok ? "✓" : "✗") + "</td></tr>";
+    }
+    h += "</tbody></table>";
+    return h;
+  }
+
+  function sync() {
+    if (!g) return;
+    var lv = levelAt(g.li);
+    var st = statusOf(lv, g.gates, g.wires);
+    var mx = maxGatesOf(lv);
+    if (els.gates) els.gates.textContent = g.gates.length + " / " + mx;
+    if (els.par) els.par.textContent = String(lv.par);
+    if (els.status) {
+      els.status.textContent = st.txt;
+      els.status.className = "lgc-st " + st.code;
+    }
+    if (els.stars) {
+      var s = rec && rec.stars[lv.k] ? rec.stars[lv.k] : 0;
+      els.stars.textContent = s ? STAR_TXT[s] : "未通关";
+    }
+    if (els.solved) els.solved.textContent = solvedCount() + " / " + LEVELS.length;
+    if (els.table) els.table.innerHTML = tableHTML(lv, st.tc);
+    if (els.tip) els.tip.textContent = lv.tip;
+    if (els.rec) {
+      els.rec.textContent = rec && rec.solves
+        ? "已通关 " + solvedCount() + "/" + LEVELS.length + " 关 · 三星 " + threeStarCount() + " 关 · 累计通关 " + rec.solves + " 次"
+        : "还没通过任何一关";
+    }
+    if (els.sel && els.sel.querySelectorAll) {
+      var bs = els.sel.querySelectorAll("[data-lgc]");
+      for (var i = 0; i < bs.length; i++) {
+        var m = bs[i].getAttribute("data-lgc");
+        var okMode = m === "wire" || m === "erase" || lv.allow.indexOf(m) >= 0;
+        bs[i].disabled = !okMode;
+        bs[i].className = g.mode === m ? "on" : "";
+      }
+    }
+    if (els.lv && els.lv.value !== String(g.li)) els.lv.value = String(g.li);
+  }
+
+  /* ---------- 交互 ---------- */
+  function cavXY(e) {
+    var rect = cav.getBoundingClientRect();
+    var sx = rect.width ? cav.width / rect.width : 1;
+    var sy = rect.height ? cav.height / rect.height : 1;
+    return { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy };
+  }
+
+  function tapAt(x, y) {
+    if (!g) return;
+    var lv = levelAt(g.li);
+    var sw = hitSwitch(x, y, lv);
+    if (sw >= 0) {
+      g.vals[sw] = g.vals[sw] ? 0 : 1;
+      setMsg("开关 " + lv.ins[sw] + " → " + g.vals[sw]);
+      sync();
+      return;
+    }
+    var port = hitPort(x, y, lv, g.gates);
+    if (g.mode === "erase") {
+      if (port && port.kind === "dst") { cutWireAt(port); afterEdit(); return; }
+      var cellE = hitCell(x, y);
+      if (cellE) {
+        var gt = gateAtCell(g.gates, cellE.c, cellE.r);
+        if (gt) { removeGate(gt.id); afterEdit(); return; }
+      }
+      setMsg("点门可以拆门，点输入口可以剪线");
+      return;
+    }
+    if (g.mode === "wire") {
+      if (port && port.kind === "src") {
+        g.sel = port.t === "in" ? { t: "in", i: port.i } : { t: "g", id: port.id };
+        setMsg("起点已选中，再点一个输入口");
+        sync();
+        return;
+      }
+      if (port && port.kind === "dst") {
+        if (g.sel) {
+          var src = portXY(lv, g.gates, g.sel, false);
+          if (src) connect(src, port);
+          g.sel = null;
+          afterEdit();
+        } else {
+          if (!cutWireAt(port)) setMsg("先点一个输出圆点当起点");
+          afterEdit();
+        }
+        return;
+      }
+      g.sel = null;
+      setMsg("点圆点连线：先输出口，后输入口");
+      sync();
+      return;
+    }
+    /* 放门模式 */
+    var cell = hitCell(x, y);
+    if (cell) { placeGate(g.mode, cell.c, cell.r); afterEdit(); return; }
+    setMsg("点中间的虚线格子放门");
+  }
+
+  function afterEdit() {
+    checkSolve();
+    sync();
+  }
+
+  function setMode(m) {
+    if (!g) return;
+    var lv = levelAt(g.li);
+    if (m !== "wire" && m !== "erase" && lv.allow.indexOf(m) < 0) { setMsg("本关不提供这种门"); sync(); return; }
+    g.mode = m;
+    g.sel = null;
+    setMsg(m === "wire" ? "连线模式：先点输出圆点，再点输入圆点" : m === "erase" ? "拆除模式：点门拆门，点输入口剪线" : "已选中「" + GATES[m].nm + "门」，点格子放置");
+    sync();
+  }
+
+  /* ---------- 主循环 ---------- */
+  function tick() {
+    frame++;
+    if (msgFr > 0) msgFr--;
+    if (g && g.flash > 0) g.flash--;
+    draw();
+    if (active) raf = requestAnimationFrame(tick);
+    else raf = 0;
+  }
+
+  /* ---------- 初始化 ---------- */
+  function ensureInit() {
+    if (inited) return;
+    cav = el("lgcCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+    ctxOk = true;
+    rec = loadRec();
+    g = newBoard(0);
+    els = {
+      lv: el("lgcLevel"), gates: el("lgcGates"), par: el("lgcPar"), status: el("lgcStatus"),
+      stars: el("lgcStars"), solved: el("lgcSolved"), table: el("lgcTable"),
+      tip: el("lgcTip"), rec: el("lgcRec"), sel: el("lgcPal")
+    };
+    cav.addEventListener("pointerdown", function (e) {
+      if (e.preventDefault) e.preventDefault();
+      var p = cavXY(e);
+      tapAt(p.x, p.y);
+    });
+    if (els.sel) {
+      els.sel.addEventListener("click", function (e) {
+        var t = e.target;
+        while (t && t !== els.sel && !(t.getAttribute && t.getAttribute("data-lgc"))) t = t.parentNode;
+        if (!t || t === els.sel) return;
+        setMode(t.getAttribute("data-lgc"));
+      });
+    }
+    if (els.lv) {
+      els.lv.addEventListener("change", function () {
+        loadLevel(parseInt(els.lv.value, 10) || 0);
+        sync();
+      });
+    }
+    var b = el("lgcReset");
+    if (b) b.addEventListener("click", function () { resetBoard(true); sync(); });
+    b = el("lgcCheck");
+    if (b) b.addEventListener("click", function () {
+      var st = checkSolve();
+      if (st && st.code !== "pass") setMsg(st.txt + "（拨开关可以逐行验证）");
+      sync();
+    });
+    b = el("lgcNext");
+    if (b) b.addEventListener("click", function () {
+      loadLevel((g.li + 1) % LEVELS.length);
+      sync();
+    });
+    inited = true;
+  }
+
+  function fillLevelSelect() {
+    var s = el("lgcLevel");
+    if (!s || s.options.length) return;
+    for (var i = 0; i < LEVELS.length; i++) {
+      var o = document.createElement("option");
+      o.value = String(i);
+      o.textContent = "第 " + (i + 1) + " 关 · " + LEVELS[i].em + " " + LEVELS[i].nm;
+      s.appendChild(o);
+    }
+  }
+
+  window.lgcRender = function () {
+    fillLevelSelect();
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!g) g = newBoard(0);
+    sync();
+    if (!raf) raf = requestAnimationFrame(tick);
+  };
+
+  window.lgcStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__lgcTest = {
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getG: function () { return g; }, setG: function (x) { g = x; },
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec, clamp: clamp,
+    arity: arity, applyGate: applyGate, levelAt: levelAt, maxGatesOf: maxGatesOf,
+    inYs: inYs, outYs: outYs, starsOf: starsOf, newBoard: newBoard,
+    gateById: gateById, gateAtCell: gateAtCell, wireTo: wireTo, portsOf: portsOf,
+    hitPort: hitPort, hitCell: hitCell, hitSwitch: hitSwitch,
+    evalOnce: evalOnce, truthCheck: truthCheck, statusOf: statusOf,
+    placeGate: placeGate, removeGate: removeGate, connect: connect, cutWireAt: cutWireAt,
+    resetBoard: resetBoard, loadLevel: loadLevel, checkSolve: checkSolve, award: award,
+    solvedCount: solvedCount, threeStarCount: threeStarCount,
+    tapAt: tapAt, setMode: setMode, sync: sync, draw: draw, tick: tick,
+    ensureInit: ensureInit, fillLevelSelect: fillLevelSelect,
+    tableHTML: tableHTML, setMsg: setMsg, portXY: portXY, bez: bez,
+    getMsg: function () { return msg; }, setActive: function (v) { active = !!v; },
+    setEls: function (o) { els = o; }, getEls: function () { return els; },
+    setInited: function (v) { inited = !!v; },
+    consts: {
+      KEY: KEY, W: W, H: H, COLX: COLX, ROWY: ROWY, GW: GW, GH: GH,
+      IN_X: IN_X, SW_X: SW_X, SW_W: SW_W, SW_H: SW_H, OUT_X: OUT_X, LED_X: LED_X,
+      HIT_R: HIT_R, MAX_CELL: MAX_CELL, SPARE: SPARE,
+      GATES: GATES, ORDER: ORDER, LEVELS: LEVELS, STAR_TXT: STAR_TXT
+    }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🔌", name: "初通电流", desc: "在随便电路里搭出第一个正确的逻辑电路", test: function (u) { return (u.lgcfirst || 0) >= 1; } },
+      { emoji: "🧮", name: "数电宗师", desc: "在随便电路里通关全部十道逻辑题，含全加器", test: function (u) { return (u.lgcmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "一切复杂的计算机，拆到底都是几个开关在轮流说「是」和「不是」。",
+      "接线之前先想清楚真值表，比接完了再猜快十倍。",
+      "与门是苛刻的老板，或门是好说话的同事，非门是永远唱反调的那个人。",
+      "异或的意思是：我们俩必须有一个人不同意，事情才成。",
+      "全加器只有五个门，人类却用它算出了整个数字世界。"
     );
   }
 })();
