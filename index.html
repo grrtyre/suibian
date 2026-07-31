@@ -1595,6 +1595,7 @@
         <button data-tab="uttt">⭕ 随便井字·终极版</button>
         <button data-tab="shufa">🖌️ 随便书法</button>
         <button data-tab="dungeon">🏰 随便地牢</button>
+        <button data-tab="whodunit">🕵️ 随便断案</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8729,6 +8730,90 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="whodunit">
+    <h2>🕵️ 随便断案</h2>
+    <p class="sub">程序生成的逻辑推理案件——靠线索排除法，锁定唯一真凶</p>
+    <style>
+      #whodunit .dtv-wrap { max-width:430px; margin:0 auto; }
+      #whodunit .dtv-bar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+      #whodunit .dtv-bar button { padding:8px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #whodunit .dtv-bar button:active { transform:translateY(1px); background:rgba(255,255,255,.16); }
+      #whodunit .dtv-bar select { padding:7px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; }
+      #whodunit .dtv-hud { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #whodunit .dtv-hud span { padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.78rem; }
+      #whodunit .dtv-hud b { font-weight:700; color:#e0b34d; }
+      #whodunit .dtv-case { text-align:left; font-size:.84rem; line-height:1.75; padding:11px 13px; border-radius:13px; background:linear-gradient(160deg,rgba(224,179,77,.11),rgba(255,255,255,.03)); border:1px solid rgba(224,179,77,.28); margin-bottom:10px; }
+      #whodunit .dtv-sus { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:12px; }
+      #whodunit .dtv-sus span { padding:5px 10px; border-radius:10px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); font-size:.78rem; }
+      #whodunit .dtv-sec { font-size:.82rem; font-weight:700; opacity:.85; text-align:left; margin:12px 0 6px; }
+      #whodunit .dtv-clues { text-align:left; margin:0; padding-left:1.35em; font-size:.82rem; line-height:1.8; }
+      #whodunit .dtv-clues li { cursor:pointer; padding:1px 0; }
+      #whodunit .dtv-clues li.on { opacity:.4; text-decoration:line-through; }
+      #whodunit .dtv-grid { margin-bottom:12px; }
+      #whodunit .dtv-gtitle { font-size:.8rem; font-weight:700; opacity:.85; text-align:left; margin-bottom:4px; }
+      #whodunit table.dtv-tb { border-collapse:separate; border-spacing:3px; margin:0 auto; }
+      #whodunit table.dtv-tb th { font-size:.7rem; font-weight:600; opacity:.8; padding:2px 3px; }
+      #whodunit table.dtv-tb th.dtv-rh { text-align:right; white-space:nowrap; font-size:.72rem; }
+      #whodunit table.dtv-tb td { padding:0; }
+      #whodunit table.dtv-tb td button { width:42px; height:34px; border-radius:9px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; font-size:.95rem; font-weight:700; cursor:pointer; line-height:1; }
+      #whodunit table.dtv-tb td button.yes { background:rgba(88,208,140,.24); border-color:rgba(88,208,140,.55); color:#8ff0bb; }
+      #whodunit table.dtv-tb td button.no { background:rgba(255,110,110,.16); border-color:rgba(255,110,110,.4); color:#ff9d9d; opacity:.85; }
+      #whodunit .dtv-legend { font-size:.72rem; opacity:.65; text-align:center; margin-top:3px; line-height:1.6; }
+      #whodunit .dtv-accuse { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; align-items:center; margin:10px 0; }
+      #whodunit .dtv-accuse select { padding:7px 9px; border-radius:10px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.8rem; max-width:150px; }
+      #whodunit .dtv-go { padding:9px 20px !important; background:linear-gradient(135deg,#e0b34d,#d1873a) !important; border-color:transparent !important; color:#20160a !important; }
+      #whodunit .dtv-result { min-height:1.6em; text-align:center; font-size:.86rem; line-height:1.7; font-weight:700; margin:8px 0; }
+      #whodunit .dtv-result.ok { color:#8ff0bb; }
+      #whodunit .dtv-result.bad { color:#ff9d9d; }
+      #whodunit .dtv-truth { text-align:left; font-size:.8rem; line-height:1.7; padding:9px 12px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); margin-bottom:10px; }
+      #whodunit .dtv-rec { text-align:center; font-size:.78rem; opacity:.72; margin-bottom:8px; }
+      #whodunit .dtv-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; margin:0 auto; }
+      #whodunit .dtv-chk { font-size:.78rem; opacity:.8; display:inline-flex; align-items:center; gap:5px; cursor:pointer; }
+    </style>
+    <div class="dtv-wrap">
+      <div class="dtv-bar">
+        <select id="dtvLevel" aria-label="难度">
+          <option value="0">简单 · 4 人 3 线</option>
+          <option value="1" selected>普通 · 5 人 3 线</option>
+          <option value="2">困难 · 5 人 4 线</option>
+        </select>
+        <button type="button" id="dtvNew">🗂️ 换个案子</button>
+        <label class="dtv-chk"><input type="checkbox" id="dtvAuto" checked> 自动划叉</label>
+      </div>
+      <div class="dtv-hud">
+        <span>用时 <b id="dtvTimer">0:00</b></span>
+        <span>指控 <b id="dtvTries">0</b> 次</span>
+        <span>提示 <b id="dtvHints">0</b></span>
+      </div>
+      <div class="dtv-case" id="dtvCase">案情加载中……</div>
+      <div class="dtv-sus" id="dtvSuspects"></div>
+      <div class="dtv-sec">🔍 现场线索（点一下可划掉已用过的）</div>
+      <ol class="dtv-clues" id="dtvClues"></ol>
+      <div class="dtv-sec">🧮 推理表（点格子切换 空 → ✓ → ✗）</div>
+      <div id="dtvGrids"></div>
+      <div class="dtv-sec">⚖️ 提出指控</div>
+      <div class="dtv-accuse">
+        <select id="dtvWho" aria-label="指认凶手"></select>
+        <select id="dtvWeapon" aria-label="指认凶器"></select>
+        <select id="dtvMotive" aria-label="指认动机" style="display:none"></select>
+      </div>
+      <div class="dtv-bar">
+        <button type="button" id="dtvAccuse" class="dtv-go">🔨 就是他！</button>
+        <button type="button" id="dtvHint">💡 给条提示</button>
+        <button type="button" id="dtvReveal">📜 揭晓真相</button>
+      </div>
+      <div class="dtv-result" id="dtvResult"></div>
+      <div class="dtv-truth" id="dtvTruth" style="display:none"></div>
+      <div class="dtv-rec" id="dtvRec">受理 0 案 · 破获 0 案 · 连破 0</div>
+      <div class="dtv-help">
+        🕵️ 玩法：每桩案子都是现场随机生成的逻辑谜题，所有线索合起来<b>有且只有一个解</b>，不用猜。<br>
+        🧮 用推理表做排除法：确定某人对应某项就点成 ✓（开着「自动划叉」会替你把同行同列打 ✗），排除就点成 ✗。<br>
+        📌 案情里已经告诉你<b>案发地点</b>和<b>案发时间</b>——那一刻在那个地方的人，就是凶手。<br>
+        💡 提示会直接替你填对一格，但会让「铁证如山」失效；📜 揭晓真相则本案不计入破案。<br>
+        🏆 首次成功破案解锁「🕵️ 初显锋芒」；困难难度下零提示、一次指控命中解锁「🧠 铁证如山」。战绩本地保存。
+      </div>
+    </div>
+  </section>
   <section class="panel" id="dungeon">
     <h2>🏰 随便地牢</h2>
     <p class="sub">回合制 Roguelike——每层随机生成，一路砍到第 10 层的深渊领主</p>
@@ -9678,6 +9763,7 @@
     if (id === "uttt" && typeof utttRender === "function") utttRender();
     if (id === "shufa" && typeof shfRender === "function") shfRender();
     if (id === "dungeon" && typeof dunRender === "function") dunRender();
+    if (id === "whodunit" && typeof dtvRender === "function") dtvRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -9756,6 +9842,7 @@
     if (id !== "uttt" && typeof utttStop === "function") utttStop();
     if (id !== "shufa" && typeof shfStop === "function") shfStop();
     if (id !== "dungeon" && typeof dunStop === "function") dunStop();
+    if (id !== "whodunit" && typeof dtvStop === "function") dtvStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -9964,6 +10051,7 @@
     uttt: "随便井字 uttt ultimate tictactoe 井字棋 终极井字 九宫 大局观 下棋 棋盘 对弈 人机 ai 对战 策略 悔棋 游戏 挑战 休闲",
     shufa: "随便书法 shufa calligraphy 书法 描红 毛笔 写字 米字格 临帖 笔顺 笔画 汉字 水墨 誊写 游戏 挑战 休闲 手写",
     dungeon: "随便地牢 dungeon roguelike 地牢 地下城 冒险 探险 回合制 肉鸽 刷怪 升级 楼层 深渊 领主 boss 药水 装备 宝箱 迷雾 探索 rpg 游戏 挑战 休闲",
+    whodunit: "随便断案 whodunit 断案 推理 侦探 守侦 案件 凶手 嫌疑人 线索 逻辑 排除法 斑马谜题 爱因斯坦谜题 谜题 烧脑 解谜 推定 指控 真相 益智 游戏 挑战",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10233,6 +10321,7 @@ splitbill:"tools",
     uttt:"games",
     shufa:"games",
     dungeon:"games",
+    whodunit:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -62018,6 +62107,700 @@ splitbill:"tools",
       "打不过就绕路——这不叫怂，这叫资源管理。",
       "每一层都比上一层难，可你也比上一层强了。",
       "最深的那层不一定有宝藏，但一定有答案。"
+    );
+  }
+})();
+/* ===== 🕵️ 随便断案 whodunit ===== */
+(function () {
+  "use strict";
+  var KEY = "suibian_whodunit";
+
+  /* ---------- 静态素材 ---------- */
+  var PERSONS = [
+    { nm: "管家 老陈", em: "🤵" },
+    { nm: "女佣 阿蓉", em: "🧹" },
+    { nm: "园丁 老周", em: "🌾" },
+    { nm: "医生 白霖", em: "🩺" },
+    { nm: "司机 大刘", em: "🧢" },
+    { nm: "外甥 小顾", em: "🕶️" },
+    { nm: "作家 沈青", em: "✒️" },
+    { nm: "厨娘 秦姨", em: "🍲" }
+  ];
+  var WEAPONS = [
+    { nm: "匕首", em: "🔪" }, { nm: "麻绳", em: "🪢" }, { nm: "扳手", em: "🔧" },
+    { nm: "烛台", em: "🕯️" }, { nm: "毒酒", em: "🍷" }, { nm: "左轮", em: "🔫" },
+    { nm: "铁锹", em: "🛠️" }
+  ];
+  var PLACES = [
+    { nm: "书房", em: "📚" }, { nm: "温室", em: "🪴" }, { nm: "厨房", em: "🍳" },
+    { nm: "地窖", em: "🛢️" }, { nm: "舞厅", em: "🪩" }, { nm: "车库", em: "🚗" },
+    { nm: "钟楼", em: "🔔" }
+  ];
+  var TIMES = [
+    { nm: "18:00", em: "18" }, { nm: "19:00", em: "19" }, { nm: "20:00", em: "20" },
+    { nm: "21:00", em: "21" }, { nm: "22:00", em: "22" }, { nm: "23:00", em: "23" }
+  ];
+  var MOTIVES = [
+    { nm: "争遗产", em: "💰" }, { nm: "情与恨", em: "💔" }, { nm: "还赌债", em: "📉" },
+    { nm: "守秘密", em: "🤫" }, { nm: "嫉妒心", em: "🐍" }, { nm: "报旧仇", em: "⚔️" }
+  ];
+
+  /* act：把某个属性值嵌进一句「谓语」里，用于生成中文线索 */
+  var CATS = [
+    { k: "w", nm: "凶器", em: "🔪", vals: WEAPONS, act: "拿着【%s】" },
+    { k: "p", nm: "地点", em: "🏚️", vals: PLACES, act: "待在【%s】" },
+    { k: "t", nm: "时间", em: "🕰️", vals: TIMES, act: "在【%s】行动", ord: 1 },
+    { k: "m", nm: "动机", em: "💔", vals: MOTIVES, act: "怀着【%s】的念头" }
+  ];
+  var LEVELS = [
+    { k: "easy", nm: "简单", n: 4, cats: [0, 1, 2] },
+    { k: "normal", nm: "普通", n: 5, cats: [0, 1, 2] },
+    { k: "hard", nm: "困难", n: 5, cats: [0, 1, 2, 3] }
+  ];
+  var DAYS = ["初春的雨夜", "盛夏的闷夜", "深秋的雾夜", "隆冬的雪夜", "台风过境的那晚", "停电的那个晚上"];
+  var HOUSES = ["半山庄园", "临湖别墅", "老宅东厢", "钟塔旅馆", "海角灯塔屋", "废弃疗养院"];
+
+  /* 线索类型 */
+  var T_LINK = 1, T_NOT = 2, T_EARLY = 3, T_NEIGH = 4, T_EITHER = 5;
+
+  var rnd = Math.random;
+  function irnd(n) { return Math.floor(rnd() * n); }
+  function range(n) { var r = [], i; for (i = 0; i < n; i++) r.push(i); return r; }
+  function shuffle(a) {
+    var i, j, t;
+    for (i = a.length - 1; i > 0; i--) { j = irnd(i + 1); t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  /* ---------- 存档 ---------- */
+  function nInt(v) { v = Math.floor(Number(v)); return isFinite(v) && v > 0 ? v : 0; }
+  function defRec() {
+    return { cases: 0, solved: 0, fails: 0, streak: 0, bestStreak: 0, bestMs: -1, aS: 0, aA: 0 };
+  }
+  function loadRec() {
+    var d = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return d;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object" || Object.prototype.toString.call(o) === "[object Array]") return d;
+      d.cases = nInt(o.cases);
+      d.solved = nInt(o.solved);
+      d.fails = nInt(o.fails);
+      d.streak = nInt(o.streak);
+      d.bestStreak = nInt(o.bestStreak);
+      var b = Math.floor(Number(o.bestMs));
+      d.bestMs = isFinite(b) && b > 0 ? b : -1;
+      d.aS = o.aS ? 1 : 0; d.aA = o.aA ? 1 : 0;
+      if (d.bestStreak < d.streak) d.bestStreak = d.streak;
+      if (d.solved > d.cases) d.cases = d.solved;
+    } catch (e) { return defRec(); }
+    return d;
+  }
+  var rec = loadRec();
+  function saveRec() { try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {} }
+
+  /* ---------- 排列表 ---------- */
+  var permCache = {};
+  function permsOf(n) {
+    if (permCache[n]) return permCache[n];
+    var out = [];
+    (function go(cur, rest) {
+      if (!rest.length) { out.push(cur.slice()); return; }
+      for (var i = 0; i < rest.length; i++) {
+        var r = rest.slice(), v = r.splice(i, 1)[0];
+        cur.push(v); go(cur, r); cur.pop();
+      }
+    })([], range(n));
+    permCache[n] = out;
+    return out;
+  }
+
+  /* ---------- 谜题骨架 ---------- */
+  function mkPuzzle(lvIdx) {
+    var L = LEVELS[lvIdx], n = L.n, a;
+    var ps = shuffle(PERSONS.slice()).slice(0, n);
+    var cats = [];
+    for (a = 0; a < L.cats.length; a++) {
+      var C = CATS[L.cats[a]], vals;
+      if (C.ord) {
+        var start = irnd(C.vals.length - n + 1);
+        vals = C.vals.slice(start, start + n);      // 连续时段，索引即先后
+      } else {
+        vals = shuffle(C.vals.slice()).slice(0, n);
+      }
+      cats.push({ k: C.k, nm: C.nm, em: C.em, act: C.act, ord: C.ord ? 1 : 0, vals: vals });
+    }
+    var sol = [];
+    for (a = 0; a < cats.length; a++) sol.push(shuffle(range(n)));
+    var pz = {
+      lv: lvIdx, lvName: L.nm, n: n, persons: ps, cats: cats, sol: sol,
+      wAc: -1, pAc: -1, tAc: -1, mAc: -1,
+      day: DAYS[irnd(DAYS.length)], house: HOUSES[irnd(HOUSES.length)]
+    };
+    for (a = 0; a < cats.length; a++) {
+      if (cats[a].k === "w") pz.wAc = a;
+      if (cats[a].k === "p") pz.pAc = a;
+      if (cats[a].k === "t") pz.tAc = a;
+      if (cats[a].k === "m") pz.mAc = a;
+    }
+    pz.culprit = irnd(n);
+    pz.scenePlace = sol[pz.pAc][pz.culprit];
+    pz.sceneTime = sol[pz.tAc][pz.culprit];
+    pz.base = { t: T_LINK, a: { c: pz.pAc, v: pz.scenePlace }, b: { c: pz.tAc, v: pz.sceneTime } };
+    return pz;
+  }
+
+  /* ---------- 线索求值 ---------- */
+  /* desc: {c:-1 表示直接指人, v:人序号} 或 {c:属性序号, v:属性值序号} */
+  function resolveP(d, assign) {
+    if (d.c < 0) return d.v;
+    var a = assign[d.c];
+    if (!a) return -1;
+    for (var i = 0; i < a.length; i++) if (a[i] === d.v) return i;
+    return -1;
+  }
+  /* 返回 1=成立 0=尚不可判 -1=违背 */
+  function evalClue(cl, assign, pz) {
+    var pa = resolveP(cl.a, assign);
+    if (pa < 0) return 0;
+    if (cl.t === T_EITHER) {
+      var av = assign[cl.ac];
+      if (!av) return 0;
+      var got = av[pa];
+      return (got === cl.v1 || got === cl.v2) ? 1 : -1;
+    }
+    var pb = resolveP(cl.b, assign);
+    if (pb < 0) return 0;
+    if (cl.t === T_LINK) return pa === pb ? 1 : -1;
+    if (cl.t === T_NOT) return pa !== pb ? 1 : -1;
+    var ta = assign[pz.tAc];
+    if (!ta) return 0;
+    var x = ta[pa], y = ta[pb];
+    if (cl.t === T_EARLY) return x < y ? 1 : -1;
+    if (cl.t === T_NEIGH) return Math.abs(x - y) === 1 ? 1 : -1;
+    return 0;
+  }
+  function clueHolds(cl, pz) { return evalClue(cl, pz.sol, pz) === 1; }
+
+  /* ---------- 求解器：数到 limit 个解就停 ---------- */
+  function solveCount(pz, clues, limit) {
+    var K = pz.cats.length, perms = permsOf(pz.n);
+    var assign = new Array(K), i, found = 0, nodes = 0;
+    for (i = 0; i < K; i++) assign[i] = null;
+    function alive() {
+      for (var q = 0; q < clues.length; q++) if (evalClue(clues[q], assign, pz) === -1) return false;
+      return true;
+    }
+    function rec(ac) {
+      if (found >= limit) return;
+      if (ac >= K) { found++; return; }
+      for (var pi = 0; pi < perms.length; pi++) {
+        nodes++;
+        assign[ac] = perms[pi];
+        if (alive()) rec(ac + 1);
+        assign[ac] = null;
+        if (found >= limit) return;
+      }
+    }
+    rec(0);
+    solveCount.nodes = nodes;
+    return found;
+  }
+
+  /* ---------- 候选线索池（全部在真解下成立） ---------- */
+  function clueSig(cl) {
+    if (cl.t === T_EITHER) {
+      var lo = Math.min(cl.v1, cl.v2), hi = Math.max(cl.v1, cl.v2);
+      return "5|" + cl.a.c + "," + cl.a.v + "|" + cl.ac + "|" + lo + "," + hi;
+    }
+    var s1 = cl.a.c + "," + cl.a.v, s2 = cl.b.c + "," + cl.b.v;
+    if (cl.t === T_LINK || cl.t === T_NOT || cl.t === T_NEIGH) {
+      if (s1 > s2) { var t = s1; s1 = s2; s2 = t; }
+    }
+    return cl.t + "|" + s1 + "|" + s2;
+  }
+  function descOf(ac, i, pz) {
+    return ac < 0 ? { c: -1, v: i } : { c: ac, v: pz.sol[ac][i] };
+  }
+  function genPool(pz) {
+    var K = pz.cats.length, n = pz.n, out = [], seen = {}, i, j, a, b, k;
+    function add(cl) {
+      var s = clueSig(cl);
+      if (seen[s]) return;
+      if (!clueHolds(cl, pz)) return;
+      seen[s] = 1; out.push(cl);
+    }
+    /* 同一人的两条属性互相印证 */
+    for (i = 0; i < n; i++) {
+      for (a = -1; a < K; a++) {
+        for (b = a + 1; b < K; b++) {
+          if (b < 0) continue;
+          add({ t: T_LINK, a: descOf(a, i, pz), b: descOf(b, i, pz) });
+        }
+      }
+    }
+    /* 二选一 */
+    for (i = 0; i < n; i++) {
+      for (a = -1; a < K; a++) {
+        for (b = 0; b < K; b++) {
+          if (b === a) continue;
+          var real = pz.sol[b][i], other = irnd(n);
+          if (other === real) other = (real + 1 + irnd(n - 1)) % n;
+          add({ t: T_EITHER, a: descOf(a, i, pz), ac: b, v1: real, v2: other });
+        }
+      }
+    }
+    /* 时间先后 & 相邻 */
+    var tA = pz.sol[pz.tAc];
+    for (i = 0; i < n; i++) {
+      for (j = 0; j < n; j++) {
+        if (i === j) continue;
+        if (tA[i] < tA[j]) {
+          for (k = 0; k < 4; k++) {
+            a = irnd(K + 1) - 1; b = irnd(K + 1) - 1;
+            if (a === pz.tAc || b === pz.tAc) continue;
+            add({ t: T_EARLY, a: descOf(a, i, pz), b: descOf(b, j, pz) });
+          }
+        }
+        if (Math.abs(tA[i] - tA[j]) === 1) {
+          for (k = 0; k < 3; k++) {
+            a = irnd(K + 1) - 1; b = irnd(K + 1) - 1;
+            if (a === pz.tAc || b === pz.tAc) continue;
+            add({ t: T_NEIGH, a: descOf(a, i, pz), b: descOf(b, j, pz) });
+          }
+        }
+      }
+    }
+    shuffle(out);
+    /* 兜底：把「某人不是某属性值」全量排在池尾，保证一定能收敛到唯一解 */
+    var tail = [];
+    for (i = 0; i < n; i++) {
+      for (a = 0; a < K; a++) {
+        for (var v = 0; v < n; v++) {
+          if (v === pz.sol[a][i]) continue;
+          var cl = { t: T_NOT, a: { c: -1, v: i }, b: { c: a, v: v } };
+          var s = clueSig(cl);
+          if (seen[s]) continue;
+          seen[s] = 1; tail.push(cl);
+        }
+      }
+    }
+    shuffle(tail);
+    return out.concat(tail);
+  }
+
+  /* ---------- 组装一桩唯一解案件 ---------- */
+  function buildCase(lvIdx) {
+    var pz = mkPuzzle(lvIdx);
+    var pool = genPool(pz);
+    var clues = [pz.base], i;
+    for (i = 0; i < pool.length; i++) {
+      if (solveCount(pz, clues, 2) === 1) break;
+      clues.push(pool[i]);
+    }
+    /* 精简：能删就删，只保留必要线索（base 永远保留） */
+    var cand = shuffle(clues.slice(1));
+    for (i = 0; i < cand.length; i++) {
+      var drop = cand[i], trial = [], q;
+      for (q = 0; q < clues.length; q++) if (clues[q] !== drop) trial.push(clues[q]);
+      if (trial.length === clues.length) continue;
+      if (solveCount(pz, trial, 2) === 1) clues = trial;
+    }
+    var shown = clues.slice(1);
+    shuffle(shown);
+    pz.clues = shown;
+    pz.allClues = [pz.base].concat(shown);
+    pz.unique = solveCount(pz, pz.allClues, 2) === 1;
+    return pz;
+  }
+
+  /* ---------- 中文文案 ---------- */
+  function valLabel(ac, v, pz) {
+    var c = pz.cats[ac], o = c.vals[v];
+    /* 时段这类「图标就是名字前缀」的，不重复拼，避免出现「21 21:00」 */
+    if (o.nm.indexOf(o.em) === 0) return o.nm;
+    return o.em + " " + o.nm;
+  }
+  function personLabel(i, pz) { var p = pz.persons[i]; return p.em + " " + p.nm; }
+  function actText(d, pz) {
+    if (d.c < 0) return "【" + personLabel(d.v, pz) + "】";
+    return pz.cats[d.c].act.replace("%s", valLabel(d.c, d.v, pz));
+  }
+  function descText(d, pz) {
+    if (d.c < 0) return "【" + personLabel(d.v, pz) + "】";
+    return pz.cats[d.c].act.replace("%s", valLabel(d.c, d.v, pz)) + "的人";
+  }
+  function clueText(cl, pz) {
+    var A = descText(cl.a, pz);
+    if (cl.t === T_EITHER) {
+      var c = pz.cats[cl.ac];
+      var x = cl.v1, y = cl.v2;
+      if (c.ord && x > y) { var sw = x; x = y; y = sw; }   // 时段按先后顺读，更自然
+      var o1 = c.act.replace("%s", valLabel(cl.ac, x, pz));
+      var o2 = c.act.replace("%s", valLabel(cl.ac, y, pz));
+      return A + "，要么" + o1 + "，要么" + o2 + "。";
+    }
+    var B = descText(cl.b, pz);
+    if (cl.t === T_LINK) return A + "，正是" + B + "。";
+    if (cl.t === T_NOT) return A + "，绝不是" + B + "。";
+    if (cl.t === T_EARLY) return A + "，比" + B + "更早动身。";
+    if (cl.t === T_NEIGH) return A + "和" + B + "，行动时间正好前后脚（只差一个时段）。";
+    return "";
+  }
+  function caseText(pz) {
+    return "🌧️ " + pz.day + "，" + pz.house + "。老主人被发现倒在【" + valLabel(pz.pAc, pz.scenePlace, pz) +
+      "】，法医判定案发时刻是【" + valLabel(pz.tAc, pz.sceneTime, pz) + "】。<br>" +
+      "当晚屋里只有下面 " + pz.n + " 个人，每人各在<b>不同</b>的地点、<b>不同</b>的时刻活动，手里也各拿着<b>不同</b>的一样东西" +
+      (pz.mAc >= 0 ? "，心里还各揣着<b>不同</b>的一份心思" : "") + "。<br>" +
+      "👉 那一刻待在案发地点的人，就是凶手。";
+  }
+  function fmtMs(ms) {
+    var s = Math.max(0, Math.floor(ms / 1000));
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return m + ":" + (r < 10 ? "0" : "") + r;
+  }
+
+  /* ---------- 局面状态 ---------- */
+  var st = null, active = false, timer = null, els = null;
+
+  function newState(pz) {
+    var marks = [], a, i, r;
+    for (a = 0; a < pz.cats.length; a++) {
+      var g = [];
+      for (i = 0; i < pz.n; i++) { r = []; for (var v = 0; v < pz.n; v++) r.push(0); g.push(r); }
+      marks.push(g);
+    }
+    return { pz: pz, marks: marks, used: [], hints: 0, tries: 0, t0: Date.now(), ms: 0, done: 0, revealed: 0 };
+  }
+
+  function cycleMark(s, ac, i, v, auto) {
+    var m = s.marks[ac], cur = m[i][v], nx = (cur + 1) % 3, k;
+    m[i][v] = nx;
+    if (nx === 1 && auto) {
+      for (k = 0; k < s.pz.n; k++) {
+        if (k !== v && m[i][k] === 0) m[i][k] = 2;
+        if (k !== i && m[k][v] === 0) m[k][v] = 2;
+      }
+    }
+    return nx;
+  }
+
+  function hintCell(s) {
+    var pz = s.pz, cand = [], a, i;
+    for (a = 0; a < pz.cats.length; a++) {
+      for (i = 0; i < pz.n; i++) {
+        if (s.marks[a][i][pz.sol[a][i]] !== 1) cand.push([a, i]);
+      }
+    }
+    if (!cand.length) return null;
+    var pick = cand[irnd(cand.length)];
+    var ac = pick[0], pi = pick[1], v = pz.sol[ac][pi];
+    s.marks[ac][pi][v] = 0;
+    cycleMark(s, ac, pi, v, true);
+    s.hints++;
+    return { ac: ac, i: pi, v: v };
+  }
+
+  function answerOf(pz) {
+    var o = { who: pz.culprit, w: pz.sol[pz.wAc][pz.culprit] };
+    if (pz.mAc >= 0) o.m = pz.sol[pz.mAc][pz.culprit];
+    return o;
+  }
+  function judge(pz, guess) {
+    var ans = answerOf(pz);
+    var okWho = guess.who === ans.who, okW = guess.w === ans.w;
+    var okM = pz.mAc < 0 ? true : guess.m === ans.m;
+    var hit = 0;
+    if (okWho) hit++;
+    if (okW) hit++;
+    if (pz.mAc >= 0 && okM) hit++;
+    return { win: okWho && okW && okM, who: okWho, w: okW, m: okM, hit: hit, total: pz.mAc >= 0 ? 3 : 2 };
+  }
+
+  function finishWin(s) {
+    var pz = s.pz;
+    s.ms = Date.now() - s.t0;
+    s.done = 1;
+    rec.solved++;
+    rec.streak++;
+    if (rec.streak > rec.bestStreak) rec.bestStreak = rec.streak;
+    if (rec.bestMs < 0 || s.ms < rec.bestMs) rec.bestMs = s.ms;
+    if (!rec.aS) { rec.aS = 1; if (typeof bumpUsage === "function") bumpUsage("dtvsolve"); }
+    if (pz.lv === 2 && s.hints === 0 && s.tries === 1 && !s.revealed) {
+      if (!rec.aA) { rec.aA = 1; if (typeof bumpUsage === "function") bumpUsage("dtvace"); }
+    }
+    saveRec();
+  }
+  function finishFail(s) {
+    rec.fails++;
+    rec.streak = 0;
+    saveRec();
+  }
+
+  function accuse(s, guess) {
+    if (!s || s.done) return null;
+    s.tries++;
+    var v = judge(s.pz, guess);
+    if (v.win) finishWin(s); else finishFail(s);
+    return v;
+  }
+  function reveal(s) {
+    if (!s || s.done) return;
+    s.revealed = 1;
+    s.done = 2;
+    s.ms = Date.now() - s.t0;
+    rec.streak = 0;
+    saveRec();
+  }
+
+  function truthText(pz) {
+    var out = ["📜 <b>案件真相</b>"], i, a;
+    for (i = 0; i < pz.n; i++) {
+      var parts = [];
+      for (a = 0; a < pz.cats.length; a++) parts.push(valLabel(a, pz.sol[a][i], pz));
+      out.push((i === pz.culprit ? "🔴 " : "· ") + personLabel(i, pz) + "：" + parts.join(" / ") +
+        (i === pz.culprit ? "　←凶手" : ""));
+    }
+    return out.join("<br>");
+  }
+
+  /* ---------- DOM ---------- */
+  function ensureInit() {
+    if (els) return els;
+    var d = document;
+    els = {
+      level: d.getElementById("dtvLevel"), nw: d.getElementById("dtvNew"),
+      auto: d.getElementById("dtvAuto"), timer: d.getElementById("dtvTimer"),
+      tries: d.getElementById("dtvTries"), hints: d.getElementById("dtvHints"),
+      cas: d.getElementById("dtvCase"), sus: d.getElementById("dtvSuspects"),
+      clues: d.getElementById("dtvClues"), grids: d.getElementById("dtvGrids"),
+      who: d.getElementById("dtvWho"), weapon: d.getElementById("dtvWeapon"),
+      motive: d.getElementById("dtvMotive"), accuse: d.getElementById("dtvAccuse"),
+      hint: d.getElementById("dtvHint"), reveal: d.getElementById("dtvReveal"),
+      result: d.getElementById("dtvResult"), truth: d.getElementById("dtvTruth"),
+      rec: d.getElementById("dtvRec")
+    };
+    return els;
+  }
+
+  function fillSelect(sel, list, labeller) {
+    if (!sel) return;
+    var html = "", i;
+    for (i = 0; i < list.length; i++) html += '<option value="' + i + '">' + labeller(i) + "</option>";
+    sel.innerHTML = html;
+  }
+
+  function renderCase() {
+    var e = ensureInit(), pz = st && st.pz;
+    if (!e.cas || !pz) return;
+    e.cas.innerHTML = caseText(pz);
+    var h = "", i;
+    for (i = 0; i < pz.n; i++) h += "<span>" + personLabel(i, pz) + "</span>";
+    if (e.sus) e.sus.innerHTML = h;
+    h = "";
+    for (i = 0; i < pz.clues.length; i++) {
+      h += '<li data-dtvclue="' + i + '"' + (st.used[i] ? ' class="on"' : "") + ">" + clueText(pz.clues[i], pz) + "</li>";
+    }
+    if (e.clues) e.clues.innerHTML = h;
+    fillSelect(e.who, pz.persons, function (i) { return "凶手：" + personLabel(i, pz); });
+    fillSelect(e.weapon, pz.cats[pz.wAc].vals, function (i) { return "凶器：" + valLabel(pz.wAc, i, pz); });
+    if (e.motive) {
+      if (pz.mAc >= 0) {
+        e.motive.style.display = "";
+        fillSelect(e.motive, pz.cats[pz.mAc].vals, function (i) { return "动机：" + valLabel(pz.mAc, i, pz); });
+      } else { e.motive.style.display = "none"; e.motive.innerHTML = ""; }
+    }
+  }
+
+  function renderGrids() {
+    var e = ensureInit(), pz = st && st.pz;
+    if (!e.grids || !pz) return;
+    var h = "", a, i, v;
+    for (a = 0; a < pz.cats.length; a++) {
+      var c = pz.cats[a];
+      h += '<div class="dtv-grid"><div class="dtv-gtitle">' + c.em + " " + c.nm + '</div><table class="dtv-tb"><thead><tr><th></th>';
+      for (v = 0; v < pz.n; v++) h += '<th title="' + c.vals[v].nm + '">' + c.vals[v].em + "</th>";
+      h += "</tr></thead><tbody>";
+      for (i = 0; i < pz.n; i++) {
+        h += '<tr><th class="dtv-rh" title="' + pz.persons[i].nm + '">' + pz.persons[i].em + "</th>";
+        for (v = 0; v < pz.n; v++) {
+          var m = st.marks[a][i][v];
+          h += '<td><button type="button" class="' + (m === 1 ? "yes" : m === 2 ? "no" : "") +
+            '" data-dtvc="' + a + '" data-dtvi="' + i + '" data-dtvv="' + v + '">' +
+            (m === 1 ? "✓" : m === 2 ? "✗" : "") + "</button></td>";
+        }
+        h += "</tr>";
+      }
+      h += "</tbody></table><div class=\"dtv-legend\">";
+      var leg = [];
+      for (v = 0; v < pz.n; v++) leg.push(c.vals[v].em + " " + c.vals[v].nm);
+      h += leg.join(" · ") + "</div></div>";
+    }
+    e.grids.innerHTML = h;
+  }
+
+  function syncHud() {
+    var e = ensureInit();
+    if (!st) return;
+    if (e.timer) e.timer.textContent = fmtMs(st.done ? st.ms : Date.now() - st.t0);
+    if (e.tries) e.tries.textContent = String(st.tries);
+    if (e.hints) e.hints.textContent = String(st.hints);
+    if (e.rec) {
+      e.rec.textContent = "受理 " + rec.cases + " 案 · 破获 " + rec.solved + " 案 · 连破 " + rec.streak +
+        "（最高 " + rec.bestStreak + "）· 最快 " + (rec.bestMs < 0 ? "—" : fmtMs(rec.bestMs));
+    }
+  }
+
+  function setResult(txt, cls) {
+    var e = ensureInit();
+    if (!e.result) return;
+    e.result.innerHTML = txt;
+    e.result.className = "dtv-result" + (cls ? " " + cls : "");
+  }
+
+  function showTruth(on) {
+    var e = ensureInit();
+    if (!e.truth) return;
+    if (on && st) { e.truth.style.display = ""; e.truth.innerHTML = truthText(st.pz); }
+    else { e.truth.style.display = "none"; e.truth.innerHTML = ""; }
+  }
+
+  function startCase(lvIdx) {
+    var pz = buildCase(lvIdx);
+    st = newState(pz);
+    rec.cases++;
+    saveRec();
+    renderCase();
+    renderGrids();
+    showTruth(false);
+    setResult("案子摆上桌了——线索都在上面，慢慢排。", "");
+    syncHud();
+  }
+
+  function doAccuse() {
+    var e = ensureInit();
+    if (!st || st.done) { setResult("这桩案子已经结了，换个案子再来。", ""); return; }
+    var guess = {
+      who: parseInt(e.who && e.who.value, 10) || 0,
+      w: parseInt(e.weapon && e.weapon.value, 10) || 0
+    };
+    if (st.pz.mAc >= 0) guess.m = parseInt(e.motive && e.motive.value, 10) || 0;
+    var v = accuse(st, guess);
+    if (!v) return;
+    if (v.win) {
+      setResult("🎉 铐上了！<b>" + personLabel(st.pz.culprit, st.pz) + "</b> 就是凶手，用时 " +
+        fmtMs(st.ms) + "，第 " + st.tries + " 次指控命中。", "ok");
+      showTruth(true);
+    } else {
+      var tip = [];
+      tip.push(v.who ? "凶手✔" : "凶手✘");
+      tip.push(v.w ? "凶器✔" : "凶器✘");
+      if (st.pz.mAc >= 0) tip.push(v.m ? "动机✔" : "动机✘");
+      setResult("😖 指控被驳回：" + tip.join(" · ") + "。回去再看看线索。", "bad");
+    }
+    syncHud();
+  }
+
+  function doHint() {
+    if (!st || st.done) return;
+    var r = hintCell(st);
+    if (!r) { setResult("表格已经填满了正确答案，直接指控吧。", ""); return; }
+    renderGrids();
+    setResult("💡 提示：" + personLabel(r.i, st.pz) + " 对应 " + valLabel(r.ac, r.v, st.pz) + "。", "");
+    syncHud();
+  }
+
+  function doReveal() {
+    if (!st) return;
+    if (!st.done) reveal(st);
+    showTruth(true);
+    setResult("📜 真相已揭晓——本案不计入破案记录。", "bad");
+    syncHud();
+  }
+
+  function bindOnce() {
+    var e = ensureInit();
+    if (e.bound) return;
+    e.bound = 1;
+    if (e.nw) e.nw.addEventListener("click", function () { startCase(parseInt(e.level && e.level.value, 10) || 0); });
+    if (e.level) e.level.addEventListener("change", function () { startCase(parseInt(e.level.value, 10) || 0); });
+    if (e.accuse) e.accuse.addEventListener("click", doAccuse);
+    if (e.hint) e.hint.addEventListener("click", doHint);
+    if (e.reveal) e.reveal.addEventListener("click", doReveal);
+    if (e.grids) e.grids.addEventListener("click", function (ev) {
+      var b = ev.target && ev.target.closest ? ev.target.closest("button[data-dtvc]") : null;
+      if (!b || !st) return;
+      var a = parseInt(b.getAttribute("data-dtvc"), 10);
+      var i = parseInt(b.getAttribute("data-dtvi"), 10);
+      var v = parseInt(b.getAttribute("data-dtvv"), 10);
+      cycleMark(st, a, i, v, !!(e.auto && e.auto.checked));
+      renderGrids();
+    });
+    if (e.clues) e.clues.addEventListener("click", function (ev) {
+      var li = ev.target && ev.target.closest ? ev.target.closest("li[data-dtvclue]") : null;
+      if (!li || !st) return;
+      var k = parseInt(li.getAttribute("data-dtvclue"), 10);
+      st.used[k] = st.used[k] ? 0 : 1;
+      li.className = st.used[k] ? "on" : "";
+    });
+  }
+
+  /* ---------- 对外钩子 ---------- */
+  window.dtvRender = function () {
+    ensureInit();
+    bindOnce();
+    active = true;
+    if (!st) startCase(parseInt((els && els.level && els.level.value) || 1, 10));
+    else { renderCase(); renderGrids(); }
+    syncHud();
+    if (timer) clearInterval(timer);
+    timer = setInterval(function () { if (active) syncHud(); }, 400);
+  };
+  window.dtvStop = function () {
+    active = false;
+    if (timer) { clearInterval(timer); timer = null; }
+  };
+
+  window.__dtvTest = {
+    loadRec: loadRec, defRec: defRec, saveRec: saveRec,
+    getRec: function () { return rec; }, setRec: function (r) { rec = r; },
+    getSt: function () { return st; }, setSt: function (v) { st = v; },
+    setRnd: function (f) { rnd = f; }, resetRnd: function () { rnd = Math.random; },
+    setActive: function (v) { active = v; },
+    getTimer: function () { return timer; },
+    shuffle: shuffle, range: range, permsOf: permsOf,
+    mkPuzzle: mkPuzzle, resolveP: resolveP, evalClue: evalClue, clueHolds: clueHolds,
+    solveCount: solveCount, clueSig: clueSig, descOf: descOf, genPool: genPool,
+    buildCase: buildCase, clueText: clueText, caseText: caseText, descText: descText,
+    actText: actText, valLabel: valLabel, personLabel: personLabel, fmtMs: fmtMs,
+    newState: newState, cycleMark: cycleMark, hintCell: hintCell,
+    answerOf: answerOf, judge: judge, accuse: accuse, reveal: reveal,
+    finishWin: finishWin, finishFail: finishFail, truthText: truthText,
+    startCase: startCase, doAccuse: doAccuse, doHint: doHint, doReveal: doReveal,
+    renderCase: renderCase, renderGrids: renderGrids, syncHud: syncHud,
+    setResult: setResult, showTruth: showTruth, ensureInit: ensureInit, bindOnce: bindOnce,
+    consts: {
+      KEY: KEY, PERSONS: PERSONS, WEAPONS: WEAPONS, PLACES: PLACES, TIMES: TIMES,
+      MOTIVES: MOTIVES, CATS: CATS, LEVELS: LEVELS, DAYS: DAYS, HOUSES: HOUSES,
+      T_LINK: T_LINK, T_NOT: T_NOT, T_EARLY: T_EARLY, T_NEIGH: T_NEIGH, T_EITHER: T_EITHER
+    }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🕵️", name: "初显锋芒", desc: "在随便断案里第一次成功指认真凶", test: function (u) { return (u.dtvsolve || 0) >= 1; } },
+      { emoji: "🧠", name: "铁证如山", desc: "困难难度下零提示、一次指控就锁定真凶", test: function (u) { return (u.dtvace || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "排除掉所有不可能的，剩下的哪怕再离谱，也是答案。",
+      "线索从不说谎，说谎的是你急着下的结论。",
+      "先别急着找凶手，先把「谁一定不是」划干净。",
+      "真相往往就卡在你懒得验证的那一格里。",
+      "指控之前，问自己一句：我是推出来的，还是猜出来的？"
     );
   }
 })();
