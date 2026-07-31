@@ -1599,6 +1599,7 @@
         <button data-tab="parking">🅿️ 随便泊车</button>
         <button data-tab="logic">🔌 随便电路</button>
         <button data-tab="sql">🗄️ 随便查库</button>
+        <button data-tab="orbit">🪐 随便星轨</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8873,6 +8874,116 @@
     </div>
   </section>
 
+  <section class="panel" id="orbit">
+    <h2>🪐 随便星轨</h2>
+    <p class="sub">一台真的在算引力的太阳系——看八颗行星各走各的，或者亲手挑一个发射窗口，把探测器扔向火星</p>
+    <style>
+      #orbit .sxg-wrap { max-width: 420px; margin: 0 auto; }
+      #orbit canvas#sxgCav { width: 100%; max-width: 380px; border-radius: 18px; display: block; margin: 0 auto 10px; background: #05070f; box-shadow: 0 16px 40px rgba(0,0,0,.5); cursor: pointer; touch-action: manipulation; }
+      #orbit .sxg-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+      #orbit .sxg-tab { padding: 8px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: inherit; font-size: .84rem; font-weight: 700; cursor: pointer; }
+      #orbit .sxg-tab.on { background: linear-gradient(135deg,#7c5cff,#3ea8ff); border-color: transparent; color: #fff; box-shadow: 0 6px 18px rgba(90,120,255,.32); }
+      #orbit .sxg-bar { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+      #orbit .sxg-bar button { padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
+      #orbit .sxg-bar button:active { transform: translateY(1px); background: rgba(255,255,255,.16); }
+      #orbit .sxg-bar button#sxgLaunch { background: linear-gradient(135deg,#ff8a5c,#ff4f7b); color: #2a0713; border-color: transparent; }
+      #orbit .sxg-bar select { padding: 8px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: inherit; font-size: .82rem; font-weight: 700; }
+      #orbit .sxg-brief { border-radius: 14px; padding: 11px 13px; margin-bottom: 10px; background: linear-gradient(135deg,rgba(124,92,255,.14),rgba(62,168,255,.10)); border: 1px solid rgba(255,255,255,.12); font-size: .86rem; }
+      #orbit .sxg-brief-b { font-size: .81rem; line-height: 1.65; opacity: .86; margin-top: 4px; }
+      #orbit .sxg-sl { margin-bottom: 9px; }
+      #orbit .sxg-sl label { display: flex; justify-content: space-between; align-items: center; font-size: .8rem; opacity: .85; margin-bottom: 4px; }
+      #orbit .sxg-sl label b { font-family: ui-monospace,Menlo,Consolas,monospace; font-weight: 800; color: #ffd27a; }
+      #orbit .sxg-sl input[type=range] { width: 100%; accent-color: #7c5cff; }
+      #orbit .sxg-pred { border-radius: 12px; padding: 9px 12px; font-size: .84rem; line-height: 1.55; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); margin-bottom: 8px; }
+      #orbit .sxg-pred.good { background: rgba(61,220,151,.14); border-color: rgba(61,220,151,.36); }
+      #orbit .sxg-pred.warn { background: rgba(255,196,84,.12); border-color: rgba(255,196,84,.32); }
+      #orbit .sxg-pred.bad { background: rgba(255,102,102,.12); border-color: rgba(255,102,102,.30); }
+      #orbit .sxg-pred-sub { font-size: .75rem; opacity: .74; margin-top: 3px; line-height: 1.6; }
+      #orbit .sxg-res { border-radius: 12px; padding: 10px 13px; font-size: .86rem; margin-bottom: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); }
+      #orbit .sxg-res b { display: block; font-size: 1rem; margin-bottom: 3px; }
+      #orbit .sxg-res span { font-size: .78rem; opacity: .82; }
+      #orbit .sxg-res.good { background: linear-gradient(135deg,rgba(61,220,151,.18),rgba(90,160,255,.12)); border-color: rgba(61,220,151,.34); }
+      #orbit .sxg-res.bad { background: rgba(255,102,102,.13); border-color: rgba(255,102,102,.30); }
+      #orbit .sxg-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 12px 0 10px; }
+      #orbit .sxg-chip { padding: 5px 11px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); color: inherit; font-size: .78rem; cursor: pointer; }
+      #orbit .sxg-chip.on { background: rgba(124,92,255,.26); border-color: rgba(124,92,255,.6); font-weight: 700; }
+      #orbit .sxg-card { border-radius: 14px; padding: 11px 13px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+      #orbit .sxg-card-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 7px; font-size: .98rem; }
+      #orbit .sxg-tag { font-size: .72rem; padding: 2px 9px; border-radius: 999px; background: rgba(124,92,255,.22); border: 1px solid rgba(124,92,255,.4); }
+      #orbit .sxg-kv { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 5px 10px; font-size: .76rem; opacity: .84; }
+      #orbit .sxg-kv span { display: flex; justify-content: space-between; gap: 6px; border-bottom: 1px dashed rgba(255,255,255,.09); padding-bottom: 3px; }
+      #orbit .sxg-kv b { font-weight: 700; opacity: .95; }
+      #orbit .sxg-note { font-size: .79rem; line-height: 1.7; opacity: .78; margin-top: 8px; }
+      #orbit .sxg-rec { margin-top: 12px; }
+      #orbit .sxg-prog { display: flex; align-items: center; gap: 10px; font-size: .8rem; font-weight: 700; }
+      #orbit .sxg-bar-i, #orbit .sxg-prog i.sxg-bar { flex: 1; height: 8px; border-radius: 99px; background: rgba(255,255,255,.1); overflow: hidden; display: block; }
+      #orbit .sxg-prog i.sxg-bar b { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg,#7c5cff,#3ea8ff); transition: width .35s ease; }
+      #orbit .sxg-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+      #orbit .sxg-mb { font-size: .73rem; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); opacity: .55; }
+      #orbit .sxg-mb.on { opacity: 1; background: rgba(61,220,151,.18); border-color: rgba(61,220,151,.4); }
+      #orbit .sxg-stats { font-size: .75rem; opacity: .6; margin-top: 6px; }
+      #orbit .sxg-help { font-size: .78rem; line-height: 1.75; opacity: .68; margin-top: 14px; text-align: left; }
+      @media (max-width: 520px) { #orbit .sxg-bar button, #orbit .sxg-bar select { font-size: .76rem; padding: 7px 10px; } #orbit .sxg-kv { grid-template-columns: 1fr; } }
+    </style>
+    <div class="sxg-wrap">
+      <div class="sxg-tabs">
+        <button class="sxg-tab on" id="sxgTabTour">🔭 观星模式</button>
+        <button class="sxg-tab" id="sxgTabMis">🚀 任务模式</button>
+      </div>
+      <canvas id="sxgCav" width="380" height="380" aria-label="太阳系轨道图"></canvas>
+      <div class="sxg-bar" id="sxgTourBar">
+        <button id="sxgPlay">⏸ 暂停</button>
+        <select id="sxgSpeed" aria-label="时间流速">
+          <option value="0.1">🐢 每秒 6 天</option>
+          <option value="0.5" selected>▶ 每秒 30 天</option>
+          <option value="2">⏩ 每秒 120 天</option>
+          <option value="8">⏩⏩ 每秒 1.3 年</option>
+          <option value="30">🚀 每秒 5 年</option>
+        </select>
+        <select id="sxgView" aria-label="视野范围">
+          <option value="1.8" selected>🔍 内太阳系</option>
+          <option value="6">到木星</option>
+          <option value="11">到土星</option>
+          <option value="32">🌌 全太阳系</option>
+        </select>
+      </div>
+      <div id="sxgMisBox" style="display:none">
+        <div class="sxg-bar">
+          <select id="sxgMission" aria-label="选择任务"></select>
+          <button id="sxgHint">💡 理论 Δv</button>
+          <button id="sxgReset">↺ 重置</button>
+          <button id="sxgLaunch">🚀 发射</button>
+        </div>
+        <div class="sxg-brief" id="sxgBrief"></div>
+        <div class="sxg-sl">
+          <label for="sxgWait">⏳ 等待发射窗口 <b id="sxgWaitV">0 天</b></label>
+          <input type="range" id="sxgWait" min="0" max="800" step="1" value="0">
+        </div>
+        <div class="sxg-sl">
+          <label for="sxgDv">🔥 速度增量 Δv <b id="sxgDvV">+0.00 km/s</b></label>
+          <input type="range" id="sxgDv" min="-2" max="9" step="0.01" value="0">
+        </div>
+        <div id="sxgPred"></div>
+        <div id="sxgResult"></div>
+      </div>
+      <div class="sxg-chips" id="sxgList"></div>
+      <div id="sxgInfo"></div>
+      <div class="sxg-rec" id="sxgRec"></div>
+      <p class="sxg-help">
+        这不是贴图动画——页面里跑的是真的引力积分：太阳加七颗行星的引力，速度 Verlet 定步长求解，
+        行星按各自的真实轨道半径与公转周期运行。<br>
+        <b>观星模式</b>：调时间流速看八颗行星拉开身位，点画布上的行星（或下面的圆角标签）看它的资料卡。<br>
+        <b>任务模式</b>：只有两个旋钮——<b>等什么时候发射</b>，和<b>加多大的速度</b>。虚线是预测弹道，
+        空心圈是探测器最接近时目标行星会在的位置，两者贴上了就说明这一发能中。<br>
+        往外飞要加速，往太阳方向去反而要减速；「💡 理论 Δv」会按霍曼转移公式算出最省的那一脚油门，
+        但<b>什么时候点火得你自己找</b>——盯住「偏 ±X°」这个读数，把它调到接近 0 就对了。
+        得分 = 命中精度 55 + 省燃料 25 + 用时短 20。<br>
+        成功飞掠任意一颗行星解锁「🚀 初次远征」，五次远征全部完成解锁「🪐 太阳系环游」，进度存在本地（suibian_orbit）。
+      </p>
+    </div>
+  </section>
+
+
   <section class="panel" id="parking">
     <h2>🅿️ 随便泊车</h2>
     <p class="sub">侧方、倒库、斜列三种车位——阿克曼转向物理模拟，慢一点不丢人，蹭一下才丢人</p>
@@ -9965,6 +10076,7 @@
     if (id === "parking" && typeof prkRender === "function") prkRender();
     if (id === "logic" && typeof lgcRender === "function") lgcRender();
     if (id === "sql" && typeof sqlRender === "function") sqlRender();
+    if (id === "orbit" && typeof sxgRender === "function") sxgRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -10047,6 +10159,7 @@
     if (id !== "parking" && typeof prkStop === "function") prkStop();
     if (id !== "logic" && typeof lgcStop === "function") lgcStop();
     if (id !== "sql" && typeof sqlStop === "function") sqlStop();
+    if (id !== "orbit" && typeof sxgStop === "function") sxgStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10259,6 +10372,7 @@
     parking: "随便泊车 parking 泊车 停车 倒车 入库 侧方 斜列 车位 科目二 驾校 练车 方向盘 泊车入位 车辆 物理 模拟 雷达 老司机 技巧 游戏 挑战",
     logic: "随便电路 logic circuit 电路 逻辑 逻辑门 门电路 与门 或门 非门 异或 与非 或非 真值表 半加器 全加器 数电 布尔 二进制 接线 搭电路 解谜 关卡 游戏",
     sql: "随便查库 sql SQL 查询 数据库 关系表 SELECT WHERE GROUP BY ORDER BY JOIN 子查询 查询引擎 关卡 学习 游戏",
+    orbit: "随便星轨 orbit 太阳系 轨道 引力 开普勒 霍曼 转移 探测器 行星 发射窗口 任务 模拟 物理 游戏 挑战",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10532,6 +10646,7 @@ splitbill:"tools",
     parking:"games",
     logic:"games",
     sql:"games",
+    orbit:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -66120,6 +66235,753 @@ splitbill:"tools",
     );
   }
 })();
+
+/* ===== 🪐 随便星轨 · 太阳系轨道实验室 ===== */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_orbit";
+  var GM = 2.9591220828e-4;      /* 太阳引力常数，单位 AU^3/day^2 */
+  var AUKMS = 1731.4568;         /* 1 AU/day 折合多少 km/s */
+  var SOFT_S = 0.004;            /* 太阳软化半径，避免奇点 */
+  var SOFT_P = 0.006;            /* 行星软化半径 */
+  var ESC_R = 60;                /* 飞出太阳系判定半径 AU */
+  var CRASH_R = 0.03;            /* 坠日判定半径 AU：径向坠日最近约 0.026，取 0.03 方能触发；远低于任何合法转移近日点(≥0.387) */
+  var CW = 380, CH = 380;
+  var TWO_PI = Math.PI * 2;
+
+  var PLANETS = [
+    { id: "me", name: "水星", emoji: "☿", a: 0.38710, T: 87.969, ph: 0.90, col: "#b9a887", rr: 2.4, mu: 4.912e-11,
+      dia: 4879, rot: "58.6 天", tmp: "-173 ~ 427℃", moons: 0,
+      note: "离太阳最近的一颗。一年只有 88 天，一个白天却长达 176 天——在水星上过生日比过一天还快。" },
+    { id: "ve", name: "金星", emoji: "♀", a: 0.72333, T: 224.701, ph: 2.40, col: "#e8c56a", rr: 3.6, mu: 7.243e-10,
+      dia: 12104, rot: "243 天（倒着转）", tmp: "约 464℃", moons: 0,
+      note: "被二氧化碳大气焖成了太阳系最热的行星，比水星还烫。而且它是唯一自转方向反着来的大行星。" },
+    { id: "ea", name: "地球", emoji: "🌍", a: 1.00000, T: 365.256, ph: 0.00, col: "#5aa0ff", rr: 3.8, mu: 8.887e-10,
+      dia: 12742, rot: "23 时 56 分", tmp: "-89 ~ 58℃", moons: 1,
+      note: "目前已知唯一会为「今晚吃什么」纠结的行星。所有任务都从这里出发。" },
+    { id: "ma", name: "火星", emoji: "♂", a: 1.52371, T: 686.980, ph: 3.60, col: "#e07a5f", rr: 3.0, mu: 9.549e-11,
+      dia: 6779, rot: "24 时 37 分", tmp: "-143 ~ 35℃", moons: 2,
+      note: "有太阳系最高的火山奥林匹斯山，约 22 公里高，是珠峰的两倍半还多。" },
+    { id: "ju", name: "木星", emoji: "♃", a: 5.20260, T: 4332.59, ph: 5.10, col: "#d9a066", rr: 8.6, mu: 2.8253e-7,
+      dia: 139820, rot: "9 时 56 分", tmp: "约 -108℃", moons: 95,
+      note: "质量是其余七颗行星加起来的两倍半。大红斑是一场至少刮了几百年的风暴，能塞下一整个地球。" },
+    { id: "sa", name: "土星", emoji: "♄", a: 9.55491, T: 10759.2, ph: 1.70, col: "#e3d6a3", rr: 7.4, mu: 8.4597e-8,
+      dia: 116460, rot: "10 时 33 分", tmp: "约 -139℃", moons: 146,
+      note: "平均密度比水还小。理论上如果有一个够大的浴缸，土星能浮在水面上。" },
+    { id: "ur", name: "天王星", emoji: "⛢", a: 19.2184, T: 30688.5, ph: 4.20, col: "#8fd3d8", rr: 5.4, mu: 1.2921e-8,
+      dia: 50724, rot: "17 时 14 分", tmp: "约 -197℃", moons: 28,
+      note: "自转轴几乎躺平了 98 度，等于是滚着走完一圈 84 年的公转，南北极各晒 42 年太阳。" },
+    { id: "ne", name: "海王星", emoji: "♆", a: 30.1104, T: 60182.0, ph: 2.90, col: "#5566e0", rr: 5.2, mu: 1.5244e-8,
+      dia: 49244, rot: "16 时 06 分", tmp: "约 -201℃", moons: 16,
+      note: "风速可达每小时 2100 公里，是太阳系里风最狂的地方。它是先用笔算出来、再被望远镜找到的行星。" }
+  ];
+  var PIDX = {};
+  for (var _i = 0; _i < PLANETS.length; _i++) PIDX[PLANETS[_i].id] = _i;
+
+  function planetById(id) { var i = PIDX[id]; return i === undefined ? null : PLANETS[i]; }
+
+  /* ---------- 轨道力学纯函数 ---------- */
+  function planetAngle(p, t) { return p.ph + TWO_PI * t / p.T; }
+  function planetPos(p, t) { var a = planetAngle(p, t); return [p.a * Math.cos(a), p.a * Math.sin(a)]; }
+  function circV(r) { return Math.sqrt(GM / r); }
+  function hohmannDv(r1, r2) { return circV(r1) * (Math.sqrt(2 * r2 / (r1 + r2)) - 1); }
+  function hohmannTime(r1, r2) { var a = (r1 + r2) / 2; return Math.PI * Math.sqrt(a * a * a / GM); }
+  function mod2pi(x) { var v = x % TWO_PI; return v < 0 ? v + TWO_PI : v; }
+  function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+  function clampNum(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+  var MISSIONS = [
+    { tgt: "ve", name: "金星快车", days: 430, dt: 0.5, hit: 0.030, waitMax: 600, dvLo: -8, dvHi: 4,
+      brief: "第一站是我们的邻居金星。它在地球轨道内侧，所以要「减速」才能掉向太阳——推进器得朝前喷。" },
+    { tgt: "ma", name: "火星漫游", days: 780, dt: 0.5, hit: 0.035, waitMax: 800, dvLo: -2, dvHi: 9,
+      brief: "教科书级的霍曼转移。往外走要加速，但更难的是等——火星每 780 天才给你一次发射窗口。" },
+    { tgt: "me", name: "水星信使", days: 400, dt: 0.5, hit: 0.040, waitMax: 130, dvLo: -13, dvHi: 0,
+      brief: "往太阳深处掉，比往外飞更费燃料。水星跑得飞快，窗口每 116 天来一次，手要稳。" },
+    { tgt: "ju", name: "木星巡航", days: 1700, dt: 1, hit: 0.140, waitMax: 420, dvLo: 4, dvHi: 15,
+      brief: "跨过小行星带的长途飞行，单程接近三年。木星引力极强，靠近时会明显把你拽弯。" },
+    { tgt: "sa", name: "土星之环", days: 3400, dt: 2, hit: 0.260, waitMax: 400, dvLo: 6, dvHi: 17,
+      brief: "全程约六年的远征。飞得久，误差就积得多，出发时半度的偏差到终点会变成上千万公里。" }
+  ];
+  for (var _m = 0; _m < MISSIONS.length; _m++) {
+    var _t = planetById(MISSIONS[_m].tgt);
+    MISSIONS[_m].par = hohmannDv(1, _t.a) * AUKMS;     /* 理论最省 Δv，km/s */
+    MISSIONS[_m].pt = hohmannTime(1, _t.a);            /* 理论转移时间，天 */
+    MISSIONS[_m].key = "m" + MISSIONS[_m].tgt;
+  }
+
+  /* 参考发射窗口：目标应领先地球的相位角 */
+  function leadAngle(mi) {
+    var m = MISSIONS[mi], tgt = planetById(m.tgt);
+    return mod2pi(Math.PI - TWO_PI * m.pt / tgt.T);
+  }
+  function windowDay(mi) {
+    var m = MISSIONS[mi], tgt = planetById(m.tgt), ea = planetById("ea");
+    var phi = leadAngle(mi);
+    var d0 = tgt.ph - ea.ph;
+    var rate = TWO_PI * (1 / tgt.T - 1 / ea.T);
+    var diff = mod2pi(phi - d0);
+    var t = rate > 0 ? diff / rate : (diff - TWO_PI) / rate;
+    if (t < 0) t = 0;
+    while (t > m.waitMax) {
+      var syn = TWO_PI / Math.abs(rate);
+      if (syn <= 0 || !isFinite(syn)) break;
+      t -= syn;
+      if (t < 0) { t = 0; break; }
+    }
+    return clampNum(t, 0, m.waitMax);
+  }
+  /* 当前时刻目标相对地球的相位差（弧度，0..2π） */
+  function phaseNow(mi, t) {
+    var m = MISSIONS[mi], tgt = planetById(m.tgt), ea = planetById("ea");
+    return mod2pi(planetAngle(tgt, t) - planetAngle(ea, t));
+  }
+
+  function accel(x, y, t, out) {
+    var r2 = x * x + y * y + SOFT_S * SOFT_S;
+    var r = Math.sqrt(r2), k = GM / (r2 * r);
+    var ax = -k * x, ay = -k * y;
+    for (var i = 0; i < PLANETS.length; i++) {
+      var p = PLANETS[i];
+      if (p.id === "ea") continue;           /* 出发星球，视为已脱离其引力范围 */
+      var an = p.ph + TWO_PI * t / p.T;
+      var dx = p.a * Math.cos(an) - x, dy = p.a * Math.sin(an) - y;
+      var d2 = dx * dx + dy * dy + SOFT_P * SOFT_P, d = Math.sqrt(d2);
+      var f = p.mu / (d2 * d);
+      ax += f * dx; ay += f * dy;
+    }
+    out[0] = ax; out[1] = ay;
+    return out;
+  }
+
+  /* 完整弹道积分（速度 Verlet）。预览与实飞用同一份结果，所见即所得 */
+  function simulate(mi, wait, dvKms) {
+    var m = MISSIONS[mi];
+    var tgt = planetById(m.tgt), ea = planetById("ea");
+    var t0 = wait, dt = m.dt;
+    var steps = Math.ceil(m.days / dt);
+    var an = planetAngle(ea, t0);
+    var x = ea.a * Math.cos(an), y = ea.a * Math.sin(an);
+    var vE = TWO_PI * ea.a / ea.T;
+    var sp = vE + dvKms / AUKMS;
+    var vx = -Math.sin(an) * sp, vy = Math.cos(an) * sp;
+    var pts = [[x, y]];
+    var a = accel(x, y, t0, [0, 0]), a2 = [0, 0];
+    var tp0 = planetPos(tgt, t0);
+    var closest = Math.sqrt((x - tp0[0]) * (x - tp0[0]) + (y - tp0[1]) * (y - tp0[1]));
+    var closeAt = 0, closeP = [tp0[0], tp0[1]], closeI = 0;
+    var crash = false, escaped = false, n = 0;
+    for (var s = 0; s < steps; s++) {
+      var t = t0 + s * dt;
+      x += vx * dt + 0.5 * a[0] * dt * dt;
+      y += vy * dt + 0.5 * a[1] * dt * dt;
+      accel(x, y, t + dt, a2);
+      vx += 0.5 * (a[0] + a2[0]) * dt; vy += 0.5 * (a[1] + a2[1]) * dt;
+      a[0] = a2[0]; a[1] = a2[1];
+      n = s + 1;
+      pts.push([x, y]);
+      var tp = planetPos(tgt, t + dt);
+      var dx = x - tp[0], dy = y - tp[1];
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d < closest) { closest = d; closeAt = n * dt; closeP = [tp[0], tp[1]]; closeI = n; }
+      var rr = Math.sqrt(x * x + y * y);
+      if (rr < CRASH_R) { crash = true; break; }
+      if (rr > ESC_R) { escaped = true; break; }
+    }
+    var hit = closest <= m.hit && !crash;
+    var endI = Math.min(n, closeI + Math.ceil(m.pt * 0.08 / dt));
+    return {
+      pts: pts, closest: closest, closeAt: closeAt, closeP: closeP, closeI: closeI, endI: endI,
+      hit: hit, hitDay: closeAt, crash: crash, escaped: escaped,
+      days: n * dt, t0: t0, dt: dt, steps: n, dv: dvKms, mi: mi
+    };
+  }
+
+  function scoreOf(mi, res, dvKms) {
+    var m = MISSIONS[mi];
+    if (!res || !res.hit) return 0;
+    var acc = clamp01(1 - res.closest / m.hit);
+    var best = Math.abs(m.par), used = Math.abs(dvKms);
+    var fuel = clamp01(1 - Math.max(0, used - best) / Math.max(0.6, best * 0.5));
+    var late = Math.max(0, res.hitDay - m.pt);
+    var time = clamp01(1 - late / Math.max(30, m.pt * 0.6));
+    var v = Math.round(55 * acc + 25 * fuel + 20 * time);
+    return v < 0 ? 0 : (v > 100 ? 100 : v);
+  }
+  function gradeOf(sc) {
+    if (sc >= 95) return "星际领航员";
+    if (sc >= 85) return "精准入轨";
+    if (sc >= 70) return "顺利抵达";
+    if (sc >= 50) return "擦肩而过";
+    return "迷失深空";
+  }
+
+  /* ---------- 存档 ---------- */
+  function clampInt(v, lo, hi) {
+    v = parseInt(v, 10);
+    if (isNaN(v)) return lo;
+    return v < lo ? lo : (v > hi ? hi : v);
+  }
+  function defRec() { return { runs: 0, hits: 0, best: {}, aF: 0, aG: 0 }; }
+  function loadRec() {
+    var r = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return r;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return r;
+      r.runs = clampInt(o.runs, 0, 999999);
+      r.hits = clampInt(o.hits, 0, 999999);
+      r.aF = clampInt(o.aF, 0, 1);
+      r.aG = clampInt(o.aG, 0, 1);
+      if (o.best && typeof o.best === "object") {
+        for (var i = 0; i < MISSIONS.length; i++) {
+          var k = MISSIONS[i].key;
+          if (o.best[k] !== undefined) r.best[k] = clampInt(o.best[k], 0, 100);
+        }
+      }
+    } catch (e) { }
+    return r;
+  }
+  function saveRec(r) { try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) { } }
+  function doneCount(r) {
+    var c = 0;
+    for (var i = 0; i < MISSIONS.length; i++) if ((r.best[MISSIONS[i].key] || 0) > 0) c++;
+    return c;
+  }
+
+  /* ---------- 状态 ---------- */
+  var inited = false, active = false, raf = 0;
+  var mode = "tour";                 /* tour | mission */
+  var simT = 0, playing = true, speed = 0.5;
+  var viewAU = 1.8;
+  var curMis = 1, wait = 0, dvKms = 0;
+  var preview = null, flight = null, flyIdx = 0, flyDone = null;
+  var sel = "ea";
+  var rec = defRec();
+  var cav = null, ctx = null;
+  var STARS = [];
+
+  function el(id) { return typeof document === "undefined" ? null : document.getElementById(id); }
+  function seedStars() {
+    STARS = [];
+    var s = 20260731;
+    for (var i = 0; i < 130; i++) {
+      s = (s * 1103515245 + 12345) & 0x7fffffff;
+      var x = (s / 0x7fffffff) * CW;
+      s = (s * 1103515245 + 12345) & 0x7fffffff;
+      var y = (s / 0x7fffffff) * CH;
+      s = (s * 1103515245 + 12345) & 0x7fffffff;
+      STARS.push([x, y, 0.25 + (s / 0x7fffffff) * 0.6]);
+    }
+  }
+
+  function maxAU() {
+    if (mode === "mission") {
+      var t = planetById(MISSIONS[curMis].tgt);
+      return Math.max(1.35, t.a * 1.24);
+    }
+    return viewAU;
+  }
+  function scale() { return (Math.min(CW, CH) / 2 - 16) / maxAU(); }
+  function sx(x) { return CW / 2 + x * scale(); }
+  function sy(y) { return CH / 2 - y * scale(); }
+
+  /* ---------- 绘制 ---------- */
+  function draw() {
+    if (!ctx) return;
+    var sc = scale(), mx = maxAU();
+    ctx.fillStyle = "#05070f";
+    ctx.fillRect(0, 0, CW, CH);
+    for (var i = 0; i < STARS.length; i++) {
+      ctx.globalAlpha = STARS[i][2];
+      ctx.fillStyle = "#cfe0ff";
+      ctx.fillRect(STARS[i][0], STARS[i][1], 1.2, 1.2);
+    }
+    ctx.globalAlpha = 1;
+
+    var t = (mode === "mission" && flight) ? (flight.t0 + flyIdx * flight.dt) : simT;
+
+    /* 轨道圈 */
+    for (var k = 0; k < PLANETS.length; k++) {
+      var p = PLANETS[k];
+      if (p.a > mx * 1.02) continue;
+      ctx.beginPath();
+      ctx.arc(CW / 2, CH / 2, p.a * sc, 0, TWO_PI);
+      ctx.strokeStyle = (mode === "mission" && p.id === MISSIONS[curMis].tgt)
+        ? "rgba(255,210,120,.55)" : "rgba(255,255,255,.13)";
+      ctx.lineWidth = (mode === "mission" && p.id === MISSIONS[curMis].tgt) ? 1.6 : 1;
+      ctx.stroke();
+    }
+
+    /* 预测弹道 */
+    if (mode === "mission" && preview && preview.pts.length > 1) {
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(sx(preview.pts[0][0]), sy(preview.pts[0][1]));
+      var plim = Math.min(preview.endI, preview.pts.length - 1);
+      for (var q = 1; q <= plim; q++) ctx.lineTo(sx(preview.pts[q][0]), sy(preview.pts[q][1]));
+      ctx.strokeStyle = preview.hit ? "rgba(110,235,170,.75)" : "rgba(255,255,255,.34)";
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+      ctx.restore();
+      /* 最近点的目标幽灵位置 */
+      var gp = preview.closeP;
+      ctx.beginPath();
+      ctx.arc(sx(gp[0]), sy(gp[1]), 7, 0, TWO_PI);
+      ctx.strokeStyle = preview.hit ? "rgba(110,235,170,.9)" : "rgba(255,196,84,.85)";
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+      var cp = preview.pts[Math.min(preview.closeI, preview.pts.length - 1)];
+      ctx.beginPath();
+      ctx.moveTo(sx(cp[0]), sy(cp[1]));
+      ctx.lineTo(sx(gp[0]), sy(gp[1]));
+      ctx.strokeStyle = "rgba(255,255,255,.3)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    /* 太阳 */
+    try {
+      var g = ctx.createRadialGradient(CW / 2, CH / 2, 1, CW / 2, CH / 2, 22);
+      g.addColorStop(0, "#fff6c8");
+      g.addColorStop(0.35, "#ffcf4d");
+      g.addColorStop(1, "rgba(255,150,20,0)");
+      ctx.fillStyle = g;
+    } catch (e) { ctx.fillStyle = "#ffcf4d"; }
+    ctx.beginPath();
+    ctx.arc(CW / 2, CH / 2, 22, 0, TWO_PI);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(CW / 2, CH / 2, 6.5, 0, TWO_PI);
+    ctx.fillStyle = "#fff3bd";
+    ctx.fill();
+
+    /* 行星 */
+    for (var j = 0; j < PLANETS.length; j++) {
+      var pl = PLANETS[j];
+      if (pl.a > mx * 1.02) continue;
+      var pp = planetPos(pl, t);
+      var px = sx(pp[0]), py = sy(pp[1]);
+      var rad = Math.max(2.4, Math.min(9, pl.rr * (sc > 60 ? 1 : 0.78)));
+      if (pl.id === sel) {
+        ctx.beginPath();
+        ctx.arc(px, py, rad + 5, 0, TWO_PI);
+        ctx.strokeStyle = "rgba(255,255,255,.6)";
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.arc(px, py, rad, 0, TWO_PI);
+      ctx.fillStyle = pl.col;
+      ctx.fill();
+      if (pl.id === "sa") {
+        ctx.beginPath();
+        ctx.ellipse ? ctx.ellipse(px, py, rad + 4.5, (rad + 4.5) * 0.34, -0.4, 0, TWO_PI)
+          : ctx.arc(px, py, rad + 4.5, 0, TWO_PI);
+        ctx.strokeStyle = "rgba(240,230,190,.85)";
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
+      }
+      if (sc * pl.a > 26) {
+        ctx.font = "11px system-ui,sans-serif";
+        ctx.fillStyle = "rgba(226,236,255,.82)";
+        ctx.textAlign = "center";
+        ctx.fillText(pl.name, px, py - rad - 6);
+      }
+    }
+
+    /* 探测器 */
+    if (mode === "mission" && flight) {
+      var from = Math.max(0, flyIdx - 220);
+      ctx.beginPath();
+      ctx.moveTo(sx(flight.pts[from][0]), sy(flight.pts[from][1]));
+      for (var w = from + 1; w <= flyIdx; w++) ctx.lineTo(sx(flight.pts[w][0]), sy(flight.pts[w][1]));
+      ctx.strokeStyle = "rgba(120,220,255,.85)";
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      var cur = flight.pts[flyIdx];
+      ctx.beginPath();
+      ctx.arc(sx(cur[0]), sy(cur[1]), 3.4, 0, TWO_PI);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(sx(cur[0]), sy(cur[1]), 7.5, 0, TWO_PI);
+      ctx.strokeStyle = "rgba(160,230,255,.45)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    /* 左上角状态 */
+    ctx.font = "12px system-ui,sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(220,232,255,.72)";
+    var lab = mode === "mission"
+      ? ("T+" + Math.round(flight ? flyIdx * flight.dt : 0) + " 天")
+      : ("第 " + Math.round(simT) + " 天 · 约 " + (simT / 365.256).toFixed(2) + " 年");
+    ctx.fillText(lab, 12, 20);
+    ctx.textAlign = "right";
+    ctx.fillText("视野 " + maxAU().toFixed(2) + " AU", CW - 12, 20);
+    ctx.textAlign = "left";
+  }
+
+  /* ---------- 文案 ---------- */
+  function fmtKm(au) {
+    var km = au * 1.495979e8;
+    if (km >= 1e7) return (km / 1e7).toFixed(2) + " 千万公里";
+    if (km >= 1e4) return (km / 1e4).toFixed(1) + " 万公里";
+    return Math.round(km) + " 公里";
+  }
+  function fmtDays(d) {
+    var y = d / 365.256;
+    return Math.round(d) + " 天" + (y >= 1 ? "（约 " + y.toFixed(2) + " 年）" : "");
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function infoHtml(id) {
+    var p = planetById(id);
+    if (!p) return "";
+    return '<div class="sxg-card"><div class="sxg-card-h"><b>' + p.emoji + " " + esc(p.name) + "</b>" +
+      '<span class="sxg-tag">轨道半径 ' + p.a.toFixed(3) + " AU</span></div>" +
+      '<div class="sxg-kv">' +
+      "<span>公转周期<b>" + (p.T >= 365 ? (p.T / 365.256).toFixed(2) + " 年" : Math.round(p.T) + " 天") + "</b></span>" +
+      "<span>自转一圈<b>" + esc(p.rot) + "</b></span>" +
+      "<span>赤道直径<b>" + p.dia.toLocaleString("en-US") + " km</b></span>" +
+      "<span>表面温度<b>" + esc(p.tmp) + "</b></span>" +
+      "<span>已知卫星<b>" + p.moons + " 颗</b></span>" +
+      "<span>轨道速度<b>" + (circV(p.a) * AUKMS).toFixed(2) + " km/s</b></span>" +
+      "</div><div class=\"sxg-note\">" + esc(p.note) + "</div></div>";
+  }
+
+  function listHtml() {
+    var h = "";
+    for (var i = 0; i < PLANETS.length; i++) {
+      var p = PLANETS[i];
+      h += '<button class="sxg-chip' + (p.id === sel ? " on" : "") + '" data-sxgp="' + p.id + '">' +
+        p.emoji + " " + esc(p.name) + "</button>";
+    }
+    return h;
+  }
+
+  function predHtml() {
+    var m = MISSIONS[curMis];
+    if (!preview) return "";
+    var need = leadAngle(curMis) * 180 / Math.PI;
+    var now = phaseNow(curMis, wait) * 180 / Math.PI;
+    var off = now - need;
+    while (off > 180) off -= 360;
+    while (off < -180) off += 360;
+    var okCls = preview.hit ? "good" : (preview.closest < m.hit * 3 ? "warn" : "bad");
+    var line = preview.hit
+      ? "✅ 预计命中：最近 " + fmtKm(preview.closest) + "，飞行 " + fmtDays(preview.hitDay)
+      : (preview.crash ? "☠️ 预计坠入太阳"
+        : (preview.escaped ? "🌌 预计飞出太阳系，一去不回"
+          : "❌ 预计擦肩而过：最近 " + fmtKm(preview.closest) + "（需 ≤ " + fmtKm(m.hit) + "）"));
+    return '<div class="sxg-pred ' + okCls + '">' + line +
+      '<div class="sxg-pred-sub">发射时相位差 ' + now.toFixed(1) + "° ／ 理论窗口 " + need.toFixed(1) +
+      "°（偏 " + (off >= 0 ? "+" : "") + off.toFixed(1) + "°）　最省 Δv " + m.par.toFixed(2) +
+      " km/s　理论航程 " + Math.round(m.pt) + " 天</div></div>";
+  }
+
+  function recHtml() {
+    var dn = doneCount(rec);
+    var h = '<div class="sxg-prog"><span>任务进度 ' + dn + "/" + MISSIONS.length + '</span>' +
+      '<i class="sxg-bar"><b style="width:' + Math.round(dn / MISSIONS.length * 100) + '%"></b></i></div>' +
+      '<div class="sxg-badges">';
+    for (var i = 0; i < MISSIONS.length; i++) {
+      var b = rec.best[MISSIONS[i].key] || 0;
+      h += '<span class="sxg-mb' + (b > 0 ? " on" : "") + '">' + planetById(MISSIONS[i].tgt).emoji + " " +
+        esc(MISSIONS[i].name) + (b > 0 ? " " + b + " 分" : " —") + "</span>";
+    }
+    h += "</div><div class=\"sxg-stats\">累计发射 " + rec.runs + " 次 · 成功抵达 " + rec.hits + " 次</div>";
+    return h;
+  }
+
+  function syncMissionUI() {
+    var m = MISSIONS[curMis];
+    var w = el("sxgWait"), d = el("sxgDv");
+    if (w) { w.min = "0"; w.max = String(m.waitMax); w.step = "1"; w.value = String(Math.round(wait)); }
+    if (d) { d.min = String(m.dvLo); d.max = String(m.dvHi); d.step = "0.01"; d.value = String(dvKms); }
+    var wv = el("sxgWaitV"), dv = el("sxgDvV");
+    if (wv) wv.textContent = Math.round(wait) + " 天";
+    if (dv) dv.textContent = (dvKms >= 0 ? "+" : "") + Number(dvKms).toFixed(2) + " km/s";
+    var bf = el("sxgBrief");
+    if (bf) {
+      bf.innerHTML = '<b>' + planetById(m.tgt).emoji + " 任务 " + (curMis + 1) + "：" + esc(m.name) + "</b>" +
+        '<div class="sxg-brief-b">' + esc(m.brief) + "</div>";
+    }
+    var pv = el("sxgPred");
+    if (pv) pv.innerHTML = predHtml();
+  }
+
+  function recalc() {
+    preview = simulate(curMis, wait, dvKms);
+    syncMissionUI();
+    draw();
+  }
+
+  function setMode(m) {
+    mode = m;
+    var a = el("sxgTabTour"), b = el("sxgTabMis");
+    if (a) a.className = "sxg-tab" + (m === "tour" ? " on" : "");
+    if (b) b.className = "sxg-tab" + (m === "mission" ? " on" : "");
+    var tp = el("sxgTourBar"), mp = el("sxgMisBox");
+    if (tp) tp.style.display = m === "tour" ? "" : "none";
+    if (mp) mp.style.display = m === "mission" ? "" : "none";
+    if (m === "mission") { flight = null; flyDone = null; recalc(); }
+    else { var r = el("sxgResult"); if (r) r.innerHTML = ""; }
+    draw();
+  }
+
+  function launch() {
+    if (mode !== "mission") return;
+    flight = preview || simulate(curMis, wait, dvKms);
+    flyIdx = 0; flyDone = null;
+    rec.runs++;
+    saveRec(rec);
+    var r = el("sxgResult");
+    if (r) r.innerHTML = '<div class="sxg-res run">🚀 已点火，探测器上路了……</div>';
+    var lb = el("sxgLaunch");
+    if (lb) lb.textContent = "🛰️ 飞行中";
+  }
+
+  function finishFlight() {
+    var m = MISSIONS[curMis];
+    var sc = scoreOf(curMis, flight, dvKms);
+    var g = gradeOf(sc);
+    if (flight.hit) {
+      rec.hits++;
+      if (sc > (rec.best[m.key] || 0)) rec.best[m.key] = sc;
+      if (!rec.aF) { rec.aF = 1; try { bumpUsage("sxgfirst"); } catch (e1) { } }
+      if (doneCount(rec) >= MISSIONS.length && !rec.aG) { rec.aG = 1; try { bumpUsage("sxggrand"); } catch (e2) { } }
+    }
+    saveRec(rec);
+    flyDone = { score: sc, grade: g, hit: flight.hit };
+    var r = el("sxgResult");
+    if (r) {
+      r.innerHTML = flight.hit
+        ? '<div class="sxg-res good"><b>' + sc + " 分 · " + g + "</b><span>最近 " + fmtKm(flight.closest) +
+        " ／ 航程 " + fmtDays(flight.hitDay) + " ／ Δv " + Number(dvKms).toFixed(2) + " km/s</span></div>"
+        : '<div class="sxg-res bad"><b>任务失败 · ' + (flight.crash ? "坠入太阳" : (flight.escaped ? "飞出太阳系" : "错过目标")) +
+        "</b><span>最近只到 " + fmtKm(flight.closest) + "，还差 " + fmtKm(Math.max(0, flight.closest - m.hit)) + "</span></div>";
+    }
+    var lb = el("sxgLaunch");
+    if (lb) lb.textContent = "🚀 发射";
+    var rr = el("sxgRec");
+    if (rr) rr.innerHTML = recHtml();
+  }
+
+  function tick() {
+    if (!active) return;
+    if (mode === "tour") {
+      if (playing) simT += speed;
+      draw();
+    } else {
+      if (flight && flyDone === null) {
+        var per = Math.max(1, Math.ceil(flight.endI / 320));
+        flyIdx += per;
+        if (flyIdx >= flight.endI) { flyIdx = flight.endI; draw(); finishFlight(); }
+        else draw();
+      }
+    }
+    raf = requestAnimationFrame(tick);
+  }
+
+  function cavXY(ev) {
+    var r = cav.getBoundingClientRect();
+    var t = (ev.touches && ev.touches[0]) ? ev.touches[0] : ev;
+    return [(t.clientX - r.left) * CW / r.width, (t.clientY - r.top) * CH / r.height];
+  }
+
+  function pickPlanet(px, py) {
+    var t = (mode === "mission" && flight) ? (flight.t0 + flyIdx * flight.dt) : simT;
+    var bi = null, bd = 20;
+    for (var i = 0; i < PLANETS.length; i++) {
+      var p = PLANETS[i];
+      if (p.a > maxAU() * 1.02) continue;
+      var pp = planetPos(p, t);
+      var d = Math.hypot(sx(pp[0]) - px, sy(pp[1]) - py);
+      if (d < bd) { bd = d; bi = p.id; }
+    }
+    return bi;
+  }
+
+  function showInfo(id) {
+    sel = id;
+    var box = el("sxgInfo");
+    if (box) box.innerHTML = infoHtml(id);
+    var lst = el("sxgList");
+    if (lst) lst.innerHTML = listHtml();
+    draw();
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = el("sxgCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+    cav.width = CW; cav.height = CH;
+    seedStars();
+
+    var tt = el("sxgTabTour"), tm = el("sxgTabMis");
+    if (tt) tt.addEventListener("click", function () { setMode("tour"); });
+    if (tm) tm.addEventListener("click", function () { setMode("mission"); });
+
+    var pb = el("sxgPlay");
+    if (pb) pb.addEventListener("click", function () {
+      playing = !playing;
+      pb.textContent = playing ? "⏸ 暂停" : "▶ 继续";
+    });
+    var sp = el("sxgSpeed");
+    if (sp) sp.addEventListener("change", function () { speed = parseFloat(sp.value) || 1; });
+    var vw = el("sxgView");
+    if (vw) vw.addEventListener("change", function () { viewAU = parseFloat(vw.value) || 1.8; draw(); });
+
+    var ms = el("sxgMission");
+    if (ms) {
+      var h = "";
+      for (var i = 0; i < MISSIONS.length; i++) {
+        h += '<option value="' + i + '">' + planetById(MISSIONS[i].tgt).emoji + " " + MISSIONS[i].name + "</option>";
+      }
+      ms.innerHTML = h;
+      ms.value = String(curMis);
+      ms.addEventListener("change", function () {
+        curMis = clampInt(ms.value, 0, MISSIONS.length - 1);
+        wait = 0; dvKms = 0; flight = null; flyDone = null;
+        var m = MISSIONS[curMis];
+        dvKms = clampNum(0, m.dvLo, m.dvHi);
+        recalc();
+      });
+    }
+    var wr = el("sxgWait");
+    if (wr) wr.addEventListener("input", function () {
+      wait = clampNum(parseFloat(wr.value) || 0, 0, MISSIONS[curMis].waitMax);
+      flight = null; flyDone = null;
+      recalc();
+    });
+    var dr = el("sxgDv");
+    if (dr) dr.addEventListener("input", function () {
+      var m = MISSIONS[curMis];
+      dvKms = clampNum(parseFloat(dr.value) || 0, m.dvLo, m.dvHi);
+      flight = null; flyDone = null;
+      recalc();
+    });
+    var lb = el("sxgLaunch");
+    if (lb) lb.addEventListener("click", launch);
+    var hb = el("sxgHint");
+    if (hb) hb.addEventListener("click", function () {
+      /* 只给出霍曼转移的理论 Δv，发射窗口仍要玩家自己找 */
+      var m = MISSIONS[curMis];
+      dvKms = clampNum(Math.round(m.par * 100) / 100, m.dvLo, m.dvHi);
+      flight = null; flyDone = null;
+      recalc();
+    });
+    var rb = el("sxgReset");
+    if (rb) rb.addEventListener("click", function () {
+      wait = 0; dvKms = 0; flight = null; flyDone = null;
+      var r = el("sxgResult"); if (r) r.innerHTML = "";
+      recalc();
+    });
+
+    if (cav.addEventListener) {
+      cav.addEventListener("click", function (ev) {
+        var p = cavXY(ev);
+        var id = pickPlanet(p[0], p[1]);
+        if (id) showInfo(id);
+      });
+    }
+    var lst = el("sxgList");
+    if (lst) lst.addEventListener("click", function (ev) {
+      var t = ev.target;
+      var id = t && t.getAttribute ? t.getAttribute("data-sxgp") : null;
+      if (id) showInfo(id);
+    });
+
+    inited = true;
+  }
+
+  window.sxgRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    var m = MISSIONS[curMis];
+    dvKms = clampNum(dvKms, m.dvLo, m.dvHi);
+    setMode(mode);
+    showInfo(sel);
+    var rr = el("sxgRec");
+    if (rr) rr.innerHTML = recHtml();
+    if (mode === "mission") recalc();
+    if (!raf) raf = requestAnimationFrame(tick);
+  };
+
+  window.sxgStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__sxgTest = {
+    PLANETS: PLANETS, MISSIONS: MISSIONS, KEY: KEY, GM: GM, AUKMS: AUKMS,
+    planetById: planetById, planetAngle: planetAngle, planetPos: planetPos,
+    circV: circV, hohmannDv: hohmannDv, hohmannTime: hohmannTime,
+    mod2pi: mod2pi, clamp01: clamp01, clampNum: clampNum, clampInt: clampInt,
+    leadAngle: leadAngle, windowDay: windowDay, phaseNow: phaseNow,
+    accel: accel, simulate: simulate, scoreOf: scoreOf, gradeOf: gradeOf,
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec, doneCount: doneCount,
+    fmtKm: fmtKm, fmtDays: fmtDays, infoHtml: infoHtml, listHtml: listHtml,
+    predHtml: predHtml, recHtml: recHtml, draw: draw, tick: tick,
+    ensureInit: ensureInit, setMode: setMode, launch: launch, showInfo: showInfo,
+    pickPlanet: pickPlanet, recalc: recalc,
+    set: function (o) {
+      if (o.mode !== undefined) mode = o.mode;
+      if (o.curMis !== undefined) curMis = o.curMis;
+      if (o.wait !== undefined) wait = o.wait;
+      if (o.dv !== undefined) dvKms = o.dv;
+      if (o.simT !== undefined) simT = o.simT;
+      if (o.viewAU !== undefined) viewAU = o.viewAU;
+      if (o.sel !== undefined) sel = o.sel;
+      if (o.rec !== undefined) rec = o.rec;
+      if (o.flight !== undefined) { flight = o.flight; flyIdx = 0; flyDone = null; }
+      if (o.flyIdx !== undefined) flyIdx = o.flyIdx;
+      if (o.active !== undefined) active = o.active;
+      if (o.playing !== undefined) playing = o.playing;
+    },
+    get: function () {
+      return {
+        mode: mode, curMis: curMis, wait: wait, dv: dvKms, simT: simT, sel: sel,
+        rec: rec, preview: preview, flight: flight, flyIdx: flyIdx, flyDone: flyDone,
+        active: active, inited: inited, playing: playing, viewAU: viewAU, maxAU: maxAU()
+      };
+    },
+    resetInit: function () { inited = false; ctx = null; cav = null; raf = 0; },
+    reset: function () {
+      mode = "tour"; simT = 0; playing = true; speed = 0.5; viewAU = 1.8;
+      curMis = 1; wait = 0; dvKms = 0; preview = null; flight = null;
+      flyIdx = 0; flyDone = null; sel = "ea"; rec = defRec();
+    }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🚀", name: "初次远征", desc: "在随便星轨里成功让探测器飞掠一颗行星", test: function (u) { return (u.sxgfirst || 0) >= 1; } },
+      { emoji: "🪐", name: "太阳系环游", desc: "在随便星轨里完成金星、火星、水星、木星、土星全部五次远征", test: function (u) { return (u.sxggrand || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "航天最难的从来不是飞过去，是算准什么时候出发。",
+      "把速度加大一点点，终点就远上千万公里——宇宙对微小的差别格外认真。",
+      "去金星要减速，去火星要加速：想往下走，先学会踩刹车。",
+      "探测器发射之后就没有方向盘了，所有的选择都必须在点火前做完。",
+      "轨道力学的浪漫在于：你瞄准的不是行星现在的位置，而是它未来会在的地方。"
+    );
+  }
+})();
+
 
 </script>
 </body>
