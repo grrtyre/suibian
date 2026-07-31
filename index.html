@@ -1601,6 +1601,7 @@
         <button data-tab="sql">🗄️ 随便查库</button>
         <button data-tab="orbit">🪐 随便星轨</button>
         <button data-tab="pack">🎒 随便打包</button>
+        <button data-tab="pottery">🏺 随便拉坯</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -9657,6 +9658,74 @@
       </div>
       <div class="lm-tip">🐹 <b>先点下方技能按钮（或数字键 1-5）选中技能，再点画面里的旅鼠下达命令</b>：旅鼠只会埋头直行、碰壁折返，掉落超高会摔成肉饼。🪜搭桥架斜坡、☂️雨伞保命、⛏️向下挖穿土层（钢板免疫）、🛑堵路把大部队兜回正途、💣倒计时引爆炸开地形；空格开闸 / F 三倍速 / R 重开。六关手工关卡逐关解锁，进度与生涯营救数本地存档（suibian_lemmings），首次带队达标解锁「旅鼠指挥官」、六关全通解锁「迁徙大师」徽章。纯前端零依赖。</div>
     </div>
+  <section class="panel" id="pottery">
+    <h2>🏺 随便拉坯</h2>
+    <p class="sub">辘轳转起来，一团泥在指尖立成器——拉高、鼓腹、收口、补水，再入窑烧出你的青瓷天青</p>
+    <style>
+      #pottery .pot-wrap { max-width:420px; margin:0 auto; }
+      #pottery canvas#potCav { width:100%; max-width:360px; border-radius:18px; display:block; margin:0 auto 10px; background:#0c0e16; box-shadow:0 16px 40px rgba(0,0,0,.5); cursor:ns-resize; touch-action:none; }
+      #pottery .pot-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #pottery .pot-hud span { padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #pottery .pot-hud b { font-weight:700; color:#e6b98a; }
+      #pottery .pot-sl { max-width:360px; margin:0 auto 10px; }
+      #pottery .pot-sl label { display:flex; justify-content:space-between; align-items:center; font-size:.8rem; opacity:.82; margin-bottom:4px; }
+      #pottery .pot-sl input[type=range] { width:100%; accent-color:#e6b98a; }
+      #pottery .pot-btns { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #pottery .pot-btns button { padding:8px 13px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #pottery .pot-btns button:active { transform:translateY(1px); background:rgba(255,255,255,.16); }
+      #pottery .pot-btns .pot-water { background:linear-gradient(135deg,#4aa3ff,#3ec6d6); border-color:transparent; color:#062028; }
+      #pottery .pot-btns .pot-res { background:rgba(255,255,255,.04); opacity:.85; }
+      #pottery .pot-btns.done button:not(.pot-res) { opacity:.4; pointer-events:none; }
+      #pottery .pot-fire { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #pottery .pot-fire button { padding:9px 18px; border-radius:999px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.07); color:inherit; font-size:.9rem; font-weight:700; cursor:pointer; }
+      #pottery .pot-fire #potFire { background:linear-gradient(135deg,#ff8a3c,#ff4d4d); border-color:transparent; color:#2a0705; }
+      #pottery .pot-fire #potFire:disabled { opacity:.5; cursor:default; }
+      #pottery .pot-result { border-radius:14px; padding:11px 13px; margin-bottom:12px; font-size:.86rem; line-height:1.6; background:linear-gradient(135deg,rgba(230,185,138,.14),rgba(120,160,255,.08)); border:1px solid rgba(255,255,255,.12); }
+      #pottery .pot-result b { color:#ffd7a8; }
+      #pottery .pot-shelf-t { font-size:.82rem; opacity:.75; text-align:left; margin:2px 2px 8px; font-weight:700; }
+      #pottery .pot-gallery { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:12px; }
+      #pottery .pot-item { position:relative; display:flex; align-items:center; gap:8px; padding:8px 9px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); }
+      #pottery .pot-item svg { flex:0 0 auto; }
+      #pottery .pot-meta { display:flex; flex-direction:column; gap:1px; text-align:left; min-width:0; }
+      #pottery .pot-meta b { font-size:.82rem; }
+      #pottery .pot-meta span { font-size:.68rem; opacity:.62; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      #pottery .pot-meta .pot-sc { color:#e6b98a; opacity:.9; font-weight:700; }
+      #pottery .pot-copy, #pottery .pot-del { position:absolute; top:4px; border:none; background:transparent; color:rgba(255,255,255,.4); font-size:.72rem; cursor:pointer; padding:2px; }
+      #pottery .pot-copy { right:22px; }
+      #pottery .pot-del { right:4px; }
+      #pottery .pot-copy:hover { color:#e6b98a; }
+      #pottery .pot-del:hover { color:#ef5350; }
+      #pottery .pot-empty { grid-column:1/-1; font-size:.78rem; opacity:.55; padding:14px; text-align:center; }
+      #pottery .pot-help { font-size:.78rem; opacity:.75; line-height:1.7; text-align:left; max-width:380px; margin:0 auto; }
+      #pottery .pot-help b { color:#e6b98a; }
+    </style>
+    <div class="pot-wrap">
+      <canvas id="potCav" width="360" height="360" aria-label="拉坯辘轳"></canvas>
+      <div class="pot-hud">
+        <span>坯型 <b id="potClay">圆柱</b></span>
+        <span>湿度 <b id="potWater">润</b></span>
+        <span>手数 <b id="potMoves">0</b></span>
+      </div>
+      <div class="pot-sl">
+        <label>辘轳转速 <b>🌀</b></label>
+        <input id="potMove" type="range" min="0.01" max="0.2" step="0.01" value="0.05">
+        <input id="potSpeed" type="hidden" value="0.05">
+      </div>
+      <div class="pot-btns" id="potBtns"></div>
+      <div class="pot-fire">
+        <button id="potFire">🔥 入窑烧制</button>
+        <button id="potAgain">🌀 再来一团</button>
+      </div>
+      <div class="pot-result" id="potResult">—</div>
+      <div class="pot-shelf-t">🗄️ 作品架 <button id="potClear" style="float:right;border:none;background:transparent;color:rgba(255,255,255,.4);font-size:.72rem;cursor:pointer">清空</button></div>
+      <div class="pot-gallery" id="potGallery"></div>
+      <p class="pot-help">
+        <b>怎么玩</b>：转盘一直在转，你有两种办法塑形——① 直接在画面上<b>按住往外拖</b>把那一圈泥拉宽、<b>往里拖</b>收窄，指尖走到哪儿塑到哪儿；② 或者点下面的手法按钮：<b>收口 / 撇口</b>管瓶口，<b>削肩 / 鼓腹 / 束腰</b>管腰身，<b>敛足</b>加固底座，<b>拔高 / 压矮</b>调整器身高矮。<br>
+        塑形会让泥慢慢变干，干了手感就飘、容易拉出歪扭的坯——随时点 <b>💧补水</b> 把它抹顺。器型满意就 <b>🔥入窑烧制</b>，系统按<b>工整（无歪扭）· 站得稳（底足够宽）· 造型（高矮胖瘦有型）· 韵味（曲线有变化）</b>四项打分，随机上一款釉色，偶尔还会<b>窑变</b>出意外的好色。<br>
+        每件成品都摆进<b>作品架</b>（本地存档 suibian_pottery），可复制作品卡或撤下。烧出第一件解锁「🏺 初出窑火」，烧出评分 ≥ 90 的佳作解锁「🔥 窑火纯青」。Canvas 渲染、纯前端零依赖、不联网。
+      </p>
+    </div>
+  </section>
   </section>
 <script>
 (function () {
@@ -10078,6 +10147,7 @@
     if (id === "sql" && typeof sqlRender === "function") sqlRender();
     if (id === "orbit" && typeof sxgRender === "function") sxgRender();
     if (id === "pack" && typeof packRender === "function") packRender();
+    if (id === "pottery" && typeof potRender === "function") potRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -10160,6 +10230,7 @@
     if (id !== "logic" && typeof lgcStop === "function") lgcStop();
     if (id !== "sql" && typeof sqlStop === "function") sqlStop();
     if (id !== "orbit" && typeof sxgStop === "function") sxgStop();
+    if (id !== "pottery" && typeof potStop === "function") potStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10374,6 +10445,7 @@
     sql: "随便查库 sql SQL 查询 数据库 关系表 SELECT WHERE GROUP BY ORDER BY JOIN 子查询 查询引擎 关卡 学习 游戏",
     orbit: "随便星轨 orbit 太阳系 轨道 引力 开普勒 霍曼 转移 探测器 行星 发射窗口 任务 模拟 物理 游戏 挑战",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
+    pottery: "随便拉坯 pottery 陶艺 陶瓷 拉坯 辘辘 制陶 烧窑 釉 青瓷 花瓶 碗 手工 捏泥 游戏 解压 治愈",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -10648,6 +10720,7 @@ splitbill:"tools",
     sql:"games",
     orbit:"games",
     pack:"tools",
+    pottery:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -66978,6 +67051,613 @@ splitbill:"tools",
       "去金星要减速，去火星要加速：想往下走，先学会踩刹车。",
       "探测器发射之后就没有方向盘了，所有的选择都必须在点火前做完。",
       "轨道力学的浪漫在于：你瞄准的不是行星现在的位置，而是它未来会在的地方。"
+    );
+  }
+})();
+
+
+/* ===== 🏺 随便拉坯 · 陶艺辘轳工坊 pottery ===== */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_pottery";
+  var CW = 360, CH = 360;
+  var N = 30;                 /* 泥壁最多分多少段 */
+  var CX = 180, BASEY = 328, TOPPAD = 22;
+  var USEH = BASEY - TOPPAD;  /* 可用高度像素 */
+  var ROWH = USEH / N;
+  var MAXR = 116;             /* 最大半径像素 */
+  var TWO_PI = Math.PI * 2;
+
+  /* ---------- 纯数值工具 ---------- */
+  function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+  function clampNum(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+  function clampInt(v, lo, hi) {
+    v = parseInt(v, 10);
+    if (isNaN(v)) return lo;
+    return v < lo ? lo : (v > hi ? hi : v);
+  }
+  function clampR(v) { return v < 0.03 ? 0.03 : (v > 1 ? 1 : v); }
+
+  /* 一段圆柱毛坯：rows 段高、半径 r0 */
+  function newCyl(rows, r0) {
+    rows = clampInt(rows, 4, N);
+    if (r0 === undefined) r0 = 0.46;
+    var p = [];
+    for (var i = 0; i < N; i++) p.push(i < rows ? r0 : 0);
+    return p;
+  }
+
+  /* 高斯笔刷：在 center 段附近把半径推 delta，宽度 width（段） */
+  function applyBrush(prof, top, center, delta, width) {
+    var out = prof.slice(0);
+    if (width < 0.6) width = 0.6;
+    var w2 = 2 * width * width;
+    for (var i = 0; i < top; i++) {
+      var d = i - center;
+      var w = Math.exp(-(d * d) / w2);
+      out[i] = clampR(out[i] + delta * w);
+    }
+    return out;
+  }
+
+  /* 三点平滑（湿泥补水后更顺） */
+  function smooth(prof, top, k) {
+    if (k === undefined) k = 0.5;
+    var out = prof.slice(0);
+    for (var i = 1; i < top - 1; i++) {
+      var avg = (prof[i - 1] + prof[i] + prof[i + 1]) / 3;
+      out[i] = clampR(prof[i] * (1 - k) + avg * k);
+    }
+    return out;
+  }
+
+  /* 预置手法：返回 {prof, top} 新状态（纯函数，wob 为额外抖动量） */
+  function applyMove(prof, top, name, wob) {
+    var p = prof.slice(0), t = top;
+    var rim = t - 1, mid = t * 0.5, low = t * 0.15, up = t * 0.72;
+    if (name === "neck") p = applyBrush(p, t, rim, -0.14, Math.max(1, t * 0.16));
+    else if (name === "flare") p = applyBrush(p, t, rim, 0.15, Math.max(1, t * 0.14));
+    else if (name === "belly") p = applyBrush(p, t, mid * 0.9, 0.14, Math.max(1.5, t * 0.22));
+    else if (name === "waist") p = applyBrush(p, t, mid, -0.13, Math.max(1.5, t * 0.2));
+    else if (name === "foot") p = applyBrush(p, t, low, 0.12, Math.max(1, t * 0.16));
+    else if (name === "shoulder") p = applyBrush(p, t, up, 0.12, Math.max(1, t * 0.16));
+    else if (name === "taller") {
+      t = clampInt(t + 2, 4, N);
+      for (var i = 0; i < t; i++) p[i] = clampR((p[i] || (i > 0 ? p[i - 1] : 0.4)) * 0.955);
+    } else if (name === "lower") {
+      t = clampInt(t - 2, 4, N);
+      for (var j = 0; j < t; j++) p[j] = clampR(p[j] * 1.04);
+      for (var z = t; z < N; z++) p[z] = 0;
+    } else if (name === "reset") {
+      return { prof: newCyl(16, 0.46), top: 16 };
+    }
+    if (wob && wob > 0) {
+      for (var m = 0; m < t; m++) p[m] = clampR(p[m] + (rndUnit() - 0.5) * wob);
+    }
+    for (var q = t; q < N; q++) p[q] = 0;
+    return { prof: p, top: t };
+  }
+
+  /* 可播种的伪随机，方便自测复现 */
+  var rndState = 0x2f6a1c3d;
+  function rndUnit() {
+    rndState = (rndState * 1103515245 + 12345) & 0x7fffffff;
+    return rndState / 0x7fffffff;
+  }
+  function seedRnd(s) { rndState = (s | 0) & 0x7fffffff; if (rndState === 0) rndState = 1; }
+
+  /* ---------- 造型判定 ---------- */
+  function classify(prof, top) {
+    var n = clampInt(top, 0, N), arr = [];
+    for (var i = 0; i < n; i++) arr.push(clamp01(prof[i]));
+    if (n < 3) return "泥团";
+    var mx = 0; for (i = 0; i < n; i++) mx = Math.max(mx, arr[i]);
+    if (mx < 0.08) return "泥团";
+    var rim = arr[n - 1], base = arr[0];
+    var belly = 0, bi0 = Math.floor(n * 0.18), bi1 = Math.floor(n * 0.78);
+    for (i = bi0; i <= bi1 && i < n; i++) belly = Math.max(belly, arr[i]);
+    var upMin = 1, ui = Math.max(1, Math.floor(n * 0.6));
+    for (i = ui; i < n; i++) upMin = Math.min(upMin, arr[i]);
+    var h = n / N;
+    if (h < 0.24 && rim >= 0.72 * mx) return "浅盘";
+    if (h < 0.44 && rim >= 0.82 * mx && rim >= belly * 0.95) return "敞口碗";
+    if (mx <= 0.24) return "细颈瓶";
+    if (belly > rim * 1.22 && rim < 0.72 * mx) {
+      if (rim > upMin * 1.18) return "花口瓶";
+      return h > 0.62 ? "长颈瓶" : "敛口罐";
+    }
+    if (rim > belly * 1.12 && h > 0.4) return "撇口盏";
+    if (Math.abs(rim - belly) < 0.12 * mx && h >= 0.42) return "直筒杯";
+    if (h >= 0.6) return "梅瓶";
+    if (base < 0.4 * mx && belly > 0.7 * mx) return "高足杯";
+    return "钵";
+  }
+
+  /* ---------- 评分 ---------- */
+  function score(prof, top) {
+    var n = clampInt(top, 0, N), arr = [];
+    for (var i = 0; i < n; i++) arr.push(clamp01(prof[i]));
+    if (n < 4) return { score: 0, smooth: 0, stable: 0, form: 0, grace: 0 };
+    var mx = 0, innerMin = 1;
+    for (i = 0; i < n; i++) mx = Math.max(mx, arr[i]);
+    for (i = 1; i < n - 1; i++) innerMin = Math.min(innerMin, arr[i]);
+    if (mx < 0.08) return { score: 0, smooth: 0, stable: 0, form: 0, grace: 0 };
+    var curv = 0, cn = 0;
+    for (i = 1; i < n - 1; i++) { curv += Math.abs(arr[i - 1] - 2 * arr[i] + arr[i + 1]); cn++; }
+    curv = cn ? curv / cn : 0;
+    var sm = clamp01(1 - curv / 0.09);
+    var base = arr[0];
+    var stable = clamp01(base / (0.42 * mx));
+    var hf = clamp01((n / N) / 0.72);
+    var wf = clamp01(mx / 0.55);
+    var form = clamp01(0.55 * hf + 0.55 * wf);
+    var variety = clamp01((mx - innerMin) / 0.4);
+    var grace = variety;
+    var s = Math.round(34 * sm + 22 * stable + 22 * form + 22 * grace);
+    s = clampNum(s, 0, 100);
+    return { score: s, smooth: sm, stable: stable, form: form, grace: grace };
+  }
+  function gradeOf(s) {
+    if (s >= 92) return "巧夺天工";
+    if (s >= 82) return "神韵天成";
+    if (s >= 70) return "匠心可嘉";
+    if (s >= 55) return "有模有样";
+    if (s >= 40) return "初学乍练";
+    return "泥团待塑";
+  }
+
+  /* ---------- 釉色 ---------- */
+  var GLAZES = [
+    { id: "celadon", name: "青瓷", base: "#9cc2ad", hi: "#e6f2e4", lo: "#5b8c74", glow: "#dff3e6" },
+    { id: "yingqing", name: "影青", base: "#cfe6e2", hi: "#f2faf8", lo: "#8fb4ad", glow: "#e8f6f3" },
+    { id: "sky", name: "天青", base: "#aac9e0", hi: "#e7f2fa", lo: "#5f87a6", glow: "#dceefb" },
+    { id: "copper", name: "铜红", base: "#c0654f", hi: "#f0b6a4", lo: "#7a2c22", glow: "#e8a78f" },
+    { id: "tea", name: "茶叶末", base: "#9a8a4e", hi: "#d7ca8a", lo: "#5d4f24", glow: "#cdbd7e" },
+    { id: "black", name: "乌金", base: "#4a4750", hi: "#9a96a3", lo: "#23212a", glow: "#7c7888" }
+  ];
+  var GIDX = {};
+  for (var _g = 0; _g < GLAZES.length; _g++) GIDX[GLAZES[_g].id] = _g;
+  function glazeById(id) { var i = GIDX[id]; return i === undefined ? GLAZES[0] : GLAZES[i]; }
+
+  function pickGlaze(idx) {
+    if (idx === undefined) idx = clampInt(Math.floor(rndUnit() * GLAZES.length), 0, GLAZES.length - 1);
+    return GLAZES[idx];
+  }
+  function maybeKiln(g) {
+    /* 约 1/6 概率窑变，随机换成别的釉 */
+    if (rndUnit() < 0.17) {
+      var j = clampInt(Math.floor(rndUnit() * GLAZES.length), 0, GLAZES.length - 1);
+      return GLAZES[j];
+    }
+    return g;
+  }
+
+  /* 作品命名：雅字 + 釉色 + 器型 */
+  var NAME_A = ["清", "润", "拙", "朴", "素", "闲", "雅", "澹", "逸", "澄", "和", "温", "疏", "简", "远", "幽"];
+  function namePiece(kind, glaze) {
+    var a = NAME_A[clampInt(Math.floor(rndUnit() * NAME_A.length), 0, NAME_A.length - 1)];
+    var gn = glaze.name.length > 2 ? glaze.name.slice(0, 2) : glaze.name;
+    return a + gn + kind;
+  }
+
+  function fmtDate(ts) {
+    var d = new Date(ts || Date.now());
+    function pad(x) { return (x < 10 ? "0" : "") + x; }
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  /* ---------- 存档 ---------- */
+  function defRec() { return { runs: 0, fired: 0, best: 0, master: 0, pieces: [] }; }
+  function loadRec() {
+    var r = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return r;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return r;
+      r.runs = clampInt(o.runs, 0, 999999);
+      r.fired = clampInt(o.fired, 0, 999999);
+      r.best = clampInt(o.best, 0, 100);
+      r.master = clampInt(o.master, 0, 1);
+      if (o.pieces && typeof o.pieces === "object" && o.pieces.length) {
+        for (var i = 0; i < o.pieces.length && i < 60; i++) {
+          var p = o.pieces[i];
+          if (!p || typeof p !== "object") continue;
+          r.pieces.push({
+            name: typeof p.name === "string" ? p.name.slice(0, 16) : "无名器",
+            kind: typeof p.kind === "string" ? p.kind.slice(0, 8) : "器",
+            glaze: typeof p.glaze === "string" ? p.glaze.slice(0, 12) : "celadon",
+            kiln: p.kiln ? 1 : 0,
+            score: clampInt(p.score, 0, 100),
+            prof: (p.prof && p.prof.length === N) ? p.prof.map(function (x) { return clamp01(x); }) : null,
+            top: clampInt(p.top, 0, N),
+            ts: clampInt(p.ts, 0, 9999999999999)
+          });
+        }
+      }
+    } catch (e) { }
+    return r;
+  }
+  function saveRec(r) { try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) { } }
+
+  /* ---------- 状态 ---------- */
+  var inited = false, active = false, raf = 0;
+  var prof = newCyl(16, 0.46), top = 16;
+  var spin = 0, speed = 0.05, water = 1, moves = 0;
+  var cav = null, ctx = null;
+  var fired = null;            /* 烧成后的作品（含釉色），null 表示还是湿坯 */
+  var lastScore = null, lastGrade = "";
+  var rec = defRec();
+  var dragging = false, dragY = 0, dragH = 1, dragDir = 0, dragWob = 0;
+
+  function el(id) { return typeof document === "undefined" ? null : document.getElementById(id); }
+
+  function wobNow() { return water < 0.35 ? 0.05 : 0.0; }
+
+  function doMove(name) {
+    if (fired || !inited) return;
+    seedRnd(0x1234 + moves * 2654435761 + name.length * 40503);
+    var r = applyMove(prof, top, name, wobNow());
+    prof = r.prof; top = r.top; moves++;
+    if (water > 0) water = clamp01(water - 0.14);
+    sync();
+  }
+
+  function doWater() {
+    if (fired || !inited) return;
+    prof = smooth(prof, top, 0.6);
+    water = 1; moves++;
+    sync();
+  }
+
+  function doResetClay() {
+    if (!inited) return;
+    var r = applyMove(prof, top, "reset", 0);
+    prof = r.prof; top = r.top; water = 1; moves = 0; fired = null; lastScore = null; lastGrade = "";
+    sync();
+  }
+
+  function doFire() {
+    if (fired || !inited) return;
+    var sc = score(prof, top);
+    var kind = classify(prof, top);
+    var g = maybeKiln(pickGlaze());
+    fired = {
+      name: namePiece(kind, g), kind: kind, glaze: g.id, kiln: g !== glazeById(g.id),
+      score: sc.score, prof: prof.slice(0), top: top, ts: Date.now()
+    };
+    lastScore = sc.score; lastGrade = gradeOf(sc.score);
+    rec.fired++;
+    if (sc.score > rec.best) rec.best = sc.score;
+    if (sc.score >= 90 && !rec.master) { rec.master = 1; try { bumpUsage("potmaster"); } catch (e2) { } }
+    rec.pieces.unshift({ name: fired.name, kind: kind, glaze: g.id, kiln: fired.kiln ? 1 : 0, score: sc.score, prof: prof.slice(0), top: top, ts: fired.ts });
+    if (rec.pieces.length > 60) rec.pieces = rec.pieces.slice(0, 60);
+    try { bumpUsage("potfirst"); } catch (e1) { }
+    saveRec(rec);
+    sync();
+  }
+
+  function doClear() {
+    if (!inited) return;
+    rec.pieces = [];
+    saveRec(rec);
+    sync();
+  }
+  function doDel(ts) {
+    if (!inited) return;
+    var np = [];
+    for (var i = 0; i < rec.pieces.length; i++) if (rec.pieces[i].ts !== ts) np.push(rec.pieces[i]);
+    rec.pieces = np;
+    saveRec(rec);
+    sync();
+  }
+  function doCopyCard(p) {
+    var g = glazeById(p.glaze);
+    var txt = "🏺 " + p.name + " · " + p.kind + "\n釉色：" + g.name + (p.kiln ? "（窑变）" : "") + "\n评分：" + p.score + " / 100";
+    try { if (navigator.clipboard) navigator.clipboard.writeText(txt); } catch (e) { }
+    var t = el("toast"); if (t) { t.textContent = "已复制作品卡片 📋"; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(function () { t.classList.remove("show"); }, 1600); }
+  }
+
+  /* ---------- 坐标 ---------- */
+  function yFor(i) { return BASEY - (i + 1) * ROWH; }
+  function rFor(v) { return v * MAXR; }
+  function cavXY(ev) {
+    var rect = cav.getBoundingClientRect();
+    var cx = (ev.touches && ev.touches[0]) ? ev.touches[0].clientX : ev.clientX;
+    var cy = (ev.touches && ev.touches[0]) ? ev.touches[0].clientY : ev.clientY;
+    return [cx - rect.left, cy - rect.top];
+  }
+
+  function onDown(ev) {
+    if (fired || !inited || !cav) return;
+    var p = cavXY(ev);
+    dragY = p[1]; dragging = true;
+    var ratio = (BASEY - dragY) / USEH;
+    dragH = clampInt(Math.round(ratio * N), 0, N - 1);
+    dragDir = 0; dragWob = 0;
+    ev.preventDefault && ev.preventDefault();
+  }
+  function onMove(ev) {
+    if (!dragging || fired || !inited) return;
+    var p = cavXY(ev);
+    var dx = p[0] - CX;
+    var dir = dx > 0 ? 1 : (dx < 0 ? -1 : 0);
+    if (dir !== dragDir) {
+      dragDir = dir;
+      if (dir !== 0 && dragH >= 0 && dragH < top) {
+        prof = applyBrush(prof, top, dragH, dir * 0.16, Math.max(1, top * 0.18));
+        if (wobNow() > 0) { prof = applyBrush(prof, top, dragH, (rndUnit() - 0.5) * 0.05, Math.max(1, top * 0.18)); }
+        moves++; if (water > 0) water = clamp01(water - 0.10);
+        sync();
+      }
+    }
+    ev.preventDefault && ev.preventDefault();
+  }
+  function onUp() { dragging = false; dragDir = 0; }
+
+  /* ---------- 绘制 ---------- */
+  function grad(c, x0, y0, x1, y1, stops) {
+    try {
+      var g = c.createLinearGradient(x0, y0, x1, y1);
+      for (var i = 0; i < stops.length; i++) g.addColorStop(stops[i][0], stops[i][1]);
+      return g;
+    } catch (e) { return stops[stops.length - 1][1]; }
+  }
+
+  function draw() {
+    if (!ctx) return;
+    spin += speed; if (spin > TWO_PI) spin -= TWO_PI;
+    /* 背景 */
+    ctx.fillStyle = grad(ctx, 0, 0, 0, CH, [[0, "#0c0e16"], [1, "#171a26"]]);
+    ctx.fillRect(0, 0, CW, CH);
+
+    var wet = !fired;
+    var baseCol = wet ? "#b89b7a" : null;
+    var hiCol = wet ? "#e7d6bd" : null;
+    var loCol = wet ? "#6f5a42" : null;
+    if (!wet) {
+      var gz = glazeById(fired.glaze);
+      baseCol = gz.base; hiCol = gz.hi; loCol = gz.lo;
+    }
+
+    /* 辘轳转盘 */
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(CX, BASEY + 10, 132, 22, 0, 0, TWO_PI);
+    ctx.fillStyle = grad(ctx, CX - 132, BASEY, CX + 132, BASEY, [[0, "#2a2e3c"], [0.5, "#4b5066"], [1, "#23262f"]]);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.07)"; ctx.lineWidth = 1;
+    for (var s = 0; s < 6; s++) {
+      var a = spin + s * (TWO_PI / 6);
+      ctx.beginPath();
+      ctx.ellipse(CX + Math.cos(a) * 70, BASEY + 10 + Math.sin(a) * 11, 26, 5, 0, 0, TWO_PI);
+      ctx.strokeStyle = "rgba(255,255,255," + (0.04 + 0.05 * (0.5 + 0.5 * Math.cos(a))) + ")";
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    /* 器身路径 */
+    if (top < 1) { tick(); return; }
+    var r0p = rFor(prof[0]);
+    ctx.beginPath();
+    ctx.moveTo(CX - r0p, yFor(0) + ROWH / 2);
+    for (var i = 0; i < top; i++) { var r = rFor(prof[i]); ctx.lineTo(CX - r, yFor(i)); }
+    for (var j = top - 1; j >= 0; j--) { var r2 = rFor(prof[j]); ctx.lineTo(CX + r2, yFor(j)); }
+    ctx.closePath();
+
+    ctx.save();
+    ctx.fillStyle = grad(ctx, CX - MAXR, 0, CX + MAXR, 0, [[0, loCol], [0.32, baseCol], [0.5, hiCol], [0.66, baseCol], [1, loCol]]);
+    ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 18; ctx.shadowOffsetY = 8;
+    ctx.fill();
+    ctx.restore();
+
+    /* 拉坯线（随转盘转的浅弧），裁剪在器身内 */
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(CX - r0p, yFor(0) + ROWH / 2);
+    for (i = 0; i < top; i++) { r = rFor(prof[i]); ctx.lineTo(CX - r, yFor(i)); }
+    for (j = top - 1; j >= 0; j--) { r2 = rFor(prof[j]); ctx.lineTo(CX + r2, yFor(j)); }
+    ctx.closePath(); ctx.clip();
+    ctx.strokeStyle = "rgba(255,255,255,.10)"; ctx.lineWidth = 1;
+    for (var k = 0; k < top; k++) {
+      var yy = yFor(k) + ROWH / 2;
+      var rr = rFor(prof[k]);
+      ctx.beginPath();
+      ctx.ellipse(CX, yy, rr * (0.92 + 0.08 * Math.cos(spin + k)), ROWH * 0.42, 0, 0, TWO_PI);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    /* 口沿椭圆 */
+    var rTop = rFor(prof[top - 1]);
+    ctx.beginPath();
+    ctx.ellipse(CX, yFor(top - 1), rTop, ROWH * 0.42, 0, 0, TWO_PI);
+    ctx.fillStyle = wet ? "rgba(60,44,30,.55)" : grad(ctx, CX - rTop, 0, CX + rTop, 0, [[0, loCol], [0.5, hiCol], [1, loCol]]);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.16)"; ctx.lineWidth = 1; ctx.stroke();
+
+    /* 高光带 */
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = hiCol;
+    ctx.beginPath();
+    ctx.ellipse(CX - rFor(prof[0]) * 0.5, (yFor(0) + yFor(top - 1)) / 2, MAXR * 0.16, USEH * 0.34, 0, 0, TWO_PI);
+    ctx.fill();
+    ctx.restore();
+
+    if (fired && lastScore !== null) {
+      ctx.fillStyle = "rgba(255,255,255,.85)";
+      ctx.font = "700 15px ui-monospace,Menlo,Consolas,monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(lastScore + " · " + lastGrade, CX, 26);
+    }
+    tick();
+  }
+
+  function tick() { if (active) raf = requestAnimationFrame(draw); }
+
+  /* ---------- 同步 UI ---------- */
+  function sync() {
+    var cv = el("potClay"); if (cv) cv.textContent = classify(prof, top);
+    var wv = el("potWater"); if (wv) wv.textContent = water >= 0.7 ? "润" : (water >= 0.35 ? "将干" : "干裂");
+    var mv = el("potMoves"); if (mv) mv.textContent = String(moves);
+    var btns = el("potBtns"); if (btns) btns.classList.toggle("done", !!fired);
+    var fire = el("potFire"); if (fire) { fire.disabled = !!fired; fire.textContent = fired ? "🔥 已入窑" : "🔥 入窑烧制"; }
+    var res = el("potResult"); if (res) {
+      if (fired) {
+        var gz = glazeById(fired.glaze);
+        res.innerHTML = "烧成 <b>" + fired.name + "</b>（" + fired.kind + "）｜釉色 <b>" + gz.name + (fired.kiln ? "·窑变" : "") +
+          "</b>｜评分 <b>" + fired.score + "</b> · " + lastGrade + "。点「再来一团」重塑新器。";
+      } else {
+        var sc = score(prof, top);
+        res.innerHTML = "当前坯体：<b>" + classify(prof, top) + "</b>｜预估评分 <b>" + sc.score + "</b>（" + gradeOf(sc.score) +
+          "）｜" + (water < 0.35 ? "泥快干了，点「补水」更顺手" : "手感不错，点「入窑烧制」看看成色");
+      }
+    }
+    renderGallery();
+  }
+
+  function pieceSvg(p) {
+    var arr = p.prof && p.prof.length === N ? p.prof : null;
+    var w = 70, h = 46, maxr = 24, base = h - 5, n = p.top || 0;
+    var gz = glazeById(p.glaze);
+    if (!arr || n < 1) return '<svg width="' + w + '" height="' + h + '"></svg>';
+    var rh = (base - 4) / n, pts = [];
+    for (var i = 0; i < n; i++) { var r = arr[i] * maxr; pts.push([w / 2 - r, base - (i + 1) * rh]); }
+    for (var j = n - 1; j >= 0; j--) { var r2 = arr[j] * maxr; pts.push([w / 2 + r2, base - (j + 1) * rh]); }
+    var d = "M" + pts[0][0].toFixed(1) + "," + pts[0][1].toFixed(1);
+    for (var k = 1; k < pts.length; k++) d += " L" + pts[k][0].toFixed(1) + "," + pts[k][1].toFixed(1);
+    d += " Z";
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+      '<path d="' + d + '" fill="' + gz.base + '" stroke="' + gz.lo + '" stroke-width="1"/>' +
+      '<ellipse cx="' + (w / 2) + '" cy="' + (base - n * rh) + '" rx="' + (arr[n - 1] * maxr).toFixed(1) + '" ry="2.4" fill="' + gz.hi + '"/>' +
+      '</svg>';
+  }
+
+  function renderGallery() {
+    var box = el("potGallery");
+    if (!box) return;
+    if (!rec.pieces.length) { box.innerHTML = '<div class="pot-empty">作品架还空着——拉一团泥，入窑烧制后它就出现在这里。</div>'; return; }
+    var h = "";
+    for (var i = 0; i < rec.pieces.length; i++) {
+      var p = rec.pieces[i];
+      var gz = glazeById(p.glaze);
+      h += '<div class="pot-item" data-ts="' + p.ts + '">' + pieceSvg(p) +
+        '<div class="pot-meta"><b>' + p.name + '</b><span>' + p.kind + ' · ' + gz.name + (p.kiln ? '·窑变' : '') + '</span>' +
+        '<span class="pot-sc">' + p.score + ' 分</span></div>' +
+        '<button class="pot-copy" data-ts="' + p.ts + '" title="复制卡片">📋</button>' +
+        '<button class="pot-del" data-ts="' + p.ts + '" title="撤下">✕</button></div>';
+    }
+    box.innerHTML = h;
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = el("potCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+    cav.width = CW; cav.height = CH;
+
+    var sp = el("potSpeed");
+    if (sp) { sp.value = String(speed); sp.addEventListener("input", function () { speed = parseFloat(sp.value) || 0.05; }); }
+    var mv = el("potMove");
+    if (mv) mv.addEventListener("input", function () { speed = clampNum(parseFloat(mv.value) || 0.05, 0.01, 0.2); if (sp) sp.value = String(speed); });
+
+    var moveList = ["neck", "flare", "shoulder", "belly", "waist", "foot", "taller", "lower"];
+    var labels = { neck: "收口", flare: "撇口", shoulder: "削肩", belly: "鼓腹", waist: "束腰", foot: "敛足", taller: "拔高", lower: "压矮" };
+    var bar = el("potBtns");
+    if (bar) {
+      var bh = "";
+      for (var i = 0; i < moveList.length; i++) bh += '<button data-move="' + moveList[i] + '">' + labels[moveList[i]] + '</button>';
+      bh += '<button data-move="water" class="pot-water">💧 补水</button><button data-move="reset" class="pot-res">🔄 揉泥重来</button>';
+      bar.innerHTML = bh;
+      bar.addEventListener("click", function (ev) {
+        var t = ev.target;
+        var m = t && t.getAttribute ? t.getAttribute("data-move") : null;
+        if (!m) return;
+        if (m === "water") doWater();
+        else if (m === "reset") doResetClay();
+        else doMove(m);
+      });
+    }
+    var fire = el("potFire"); if (fire) fire.addEventListener("click", doFire);
+    var again = el("potAgain"); if (again) again.addEventListener("click", doResetClay);
+    var clr = el("potClear"); if (clr) clr.addEventListener("click", doClear);
+
+    if (cav.addEventListener) {
+      cav.addEventListener("mousedown", onDown);
+      cav.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+      cav.addEventListener("touchstart", onDown, { passive: false });
+      cav.addEventListener("touchmove", onMove, { passive: false });
+      cav.addEventListener("touchend", onUp);
+    }
+    var gal = el("potGallery");
+    if (gal) gal.addEventListener("click", function (ev) {
+      var t = ev.target; var ts = t && t.getAttribute ? t.getAttribute("data-ts") : null;
+      if (!ts) return;
+      for (var i = 0; i < rec.pieces.length; i++) {
+        if (String(rec.pieces[i].ts) === ts) { if (t.classList.contains("pot-del")) doDel(rec.pieces[i].ts); else if (t.classList.contains("pot-copy")) doCopyCard(rec.pieces[i]); break; }
+      }
+    });
+
+    inited = true;
+  }
+
+  window.potRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    var r = score(prof, top);
+    lastScore = fired ? lastScore : (top >= 4 ? r.score : lastScore);
+    lastGrade = fired ? lastGrade : gradeOf(lastScore || 0);
+    sync();
+    if (!raf) raf = requestAnimationFrame(draw);
+  };
+
+  window.potStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  };
+
+  window.__potTest = {
+    KEY: KEY, N: N, CW: CW, CH: CH, GLAZES: GLAZES, newCyl: newCyl, applyBrush: applyBrush,
+    smooth: smooth, applyMove: applyMove, classify: classify, score: score, gradeOf: gradeOf,
+    glazeById: glazeById, pickGlaze: pickGlaze, maybeKiln: maybeKiln, namePiece: namePiece,
+    fmtDate: fmtDate, clamp01: clamp01, clampNum: clampNum, clampInt: clampInt, clampR: clampR,
+    seedRnd: seedRnd, defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    doMove: doMove, doWater: doWater, doResetClay: doResetClay, doFire: doFire,
+    doClear: doClear, doDel: doDel, doCopyCard: doCopyCard,
+    draw: draw, sync: sync, renderGallery: renderGallery, pieceSvg: pieceSvg,
+    get: function () { return { prof: prof.slice(0), top: top, spin: spin, speed: speed, water: water, moves: moves, fired: fired, lastScore: lastScore, lastGrade: lastGrade, inited: inited, active: active }; },
+    set: function (o) {
+      if (o.prof) prof = o.prof.slice(0);
+      if (o.top !== undefined) top = o.top;
+      if (o.speed !== undefined) speed = o.speed;
+      if (o.water !== undefined) water = o.water;
+      if (o.moves !== undefined) moves = o.moves;
+      if (o.fired !== undefined) fired = o.fired;
+      if (o.active !== undefined) active = o.active;
+    },
+    resetInit: function () { inited = false; ctx = null; cav = null; raf = 0; dragging = false; },
+    reset: function () { prof = newCyl(16, 0.46); top = 16; spin = 0; speed = 0.05; water = 1; moves = 0; fired = null; lastScore = null; lastGrade = ""; }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🏺", name: "初出窑火", desc: "在随便拉坯里烧制出第一件陶器", test: function (u) { return (u.potfirst || 0) >= 1; } },
+      { emoji: "🔥", name: "窑火纯青", desc: "在随便拉坯里烧出一件评分 ≥ 90 的佳作", test: function (u) { return (u.potmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "拉坯的诀窍不在手快，在于舍得等泥自己顺着离心力立起来。",
+      "同一团泥，今天的心情不同，拉出来的瓶口就不一样。",
+      "入窑前谁都说不准成色——开窑那一刻，才见分晓。",
+      "好的器型不靠削出来，靠在转动里慢慢找那条最顺的线。",
+      "窑变是火开的小差，常常比人算的更好看。"
     );
   }
 })();
