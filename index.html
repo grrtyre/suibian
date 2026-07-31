@@ -1598,6 +1598,7 @@
         <button data-tab="whodunit">🕵️ 随便断案</button>
         <button data-tab="parking">🅿️ 随便泊车</button>
         <button data-tab="logic">🔌 随便电路</button>
+        <button data-tab="sql">🗄️ 随便查库</button>
         <button data-tab="pack">🎒 随便打包</button>
   </nav>
   <div class="favbar" id="favbar"></div>
@@ -8802,6 +8803,76 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="sql">
+    <h2>🗄️ 随便查库</h2>
+    <p class="sub">一台跑在你浏览器里的真·SQL 引擎——四张表、十二道关卡，从 SELECT * 一路写到子查询</p>
+    <style>
+      #sql .sql-wrap { max-width: 720px; margin: 0 auto; }
+      #sql .sql-bar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+      #sql .sql-bar button { padding:8px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; cursor:pointer; }
+      #sql .sql-bar button:active { transform:translateY(1px); background:rgba(255,255,255,.16); }
+      #sql .sql-bar button#sqlRun { background:linear-gradient(135deg,#3ddc97,#1f9e6e); color:#06231a; border-color:transparent; }
+      #sql .sql-bar select { padding:8px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.82rem; font-weight:700; }
+      #sql .sql-task { border-radius:14px; padding:12px 14px; margin-bottom:10px; background:linear-gradient(135deg,rgba(61,220,151,.12),rgba(90,160,255,.10)); border:1px solid rgba(255,255,255,.12); }
+      #sql .sql-task-h { font-weight:800; font-size:.94rem; margin-bottom:5px; }
+      #sql .sql-task-b { font-size:.85rem; line-height:1.6; opacity:.92; }
+      #sql .sql-done { font-size:.72rem; padding:1px 8px; border-radius:99px; background:rgba(61,220,151,.24); margin-left:6px; }
+      #sql .sql-flag { font-size:.76rem; opacity:.72; }
+      #sql textarea#sqlEditor { width:100%; min-height:120px; resize:vertical; padding:12px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.16); background:rgba(8,12,20,.55); color:#d9f7ea; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace; font-size:.9rem; line-height:1.55; box-sizing:border-box; }
+      #sql textarea#sqlEditor:focus { outline:none; border-color:rgba(61,220,151,.6); box-shadow:0 0 0 3px rgba(61,220,151,.14); }
+      #sql .sql-status { margin:8px 0 10px; font-size:.84rem; line-height:1.55; padding:8px 12px; border-radius:12px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); }
+      #sql .sql-status code { font-family:ui-monospace,Menlo,Consolas,monospace; background:rgba(255,255,255,.1); padding:1px 5px; border-radius:5px; }
+      #sql .sql-status.good { background:rgba(61,220,151,.14); border-color:rgba(61,220,151,.34); }
+      #sql .sql-status.warn { background:rgba(255,196,84,.13); border-color:rgba(255,196,84,.32); }
+      #sql .sql-status.bad { background:rgba(255,102,102,.14); border-color:rgba(255,102,102,.34); }
+      #sql .sql-tablewrap { overflow-x:auto; border-radius:14px; border:1px solid rgba(255,255,255,.12); }
+      #sql table.sql-table { border-collapse:collapse; width:100%; font-size:.82rem; }
+      #sql table.sql-table th { text-align:left; padding:8px 12px; background:rgba(61,220,151,.16); font-weight:800; white-space:nowrap; position:sticky; top:0; }
+      #sql table.sql-table td { padding:7px 12px; border-top:1px solid rgba(255,255,255,.08); white-space:nowrap; }
+      #sql table.sql-table tbody tr:nth-child(even) { background:rgba(255,255,255,.03); }
+      #sql .sql-null { opacity:.45; font-style:italic; }
+      #sql .sql-empty { font-size:.82rem; opacity:.7; padding:10px 4px; }
+      #sql .sql-schema { margin-top:14px; }
+      #sql .sql-schema-title { font-size:.82rem; font-weight:800; opacity:.8; margin-bottom:8px; }
+      #sql .sql-tab-card { border-radius:12px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); padding:9px 12px; margin-bottom:8px; }
+      #sql .sql-tab-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+      #sql .sql-tname { font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:800; font-size:.84rem; padding:3px 10px; border-radius:8px; border:1px solid rgba(61,220,151,.4); background:rgba(61,220,151,.14); color:inherit; cursor:pointer; }
+      #sql .sql-tnote { font-size:.76rem; opacity:.66; }
+      #sql .sql-cols { display:flex; flex-wrap:wrap; gap:5px; }
+      #sql .sql-cname { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.75rem; padding:2px 8px; border-radius:7px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; cursor:pointer; }
+      #sql .sql-cname:active { background:rgba(255,255,255,.16); }
+      #sql .sql-rec { margin-top:12px; }
+      #sql .sql-prog { display:flex; align-items:center; gap:10px; font-size:.8rem; font-weight:700; }
+      #sql .sql-prog-bar { flex:1; height:8px; border-radius:99px; background:rgba(255,255,255,.1); overflow:hidden; }
+      #sql .sql-prog-bar i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#3ddc97,#5aa0ff); transition:width .35s ease; }
+      #sql .sql-stats { font-size:.76rem; opacity:.62; margin-top:5px; }
+      #sql .sql-help { font-size:.78rem; line-height:1.75; opacity:.68; margin-top:14px; }
+      @media (max-width:520px) { #sql .sql-bar button, #sql .sql-bar select { font-size:.76rem; padding:7px 10px; } }
+    </style>
+    <div class="sql-wrap">
+      <div class="sql-bar">
+        <select id="sqlLevel" aria-label="选择关卡"></select>
+        <button id="sqlRun">▶ 运行</button>
+        <button id="sqlHint">💡 提示</button>
+        <button id="sqlAnswer">🔑 答案</button>
+        <button id="sqlClear">🧹 清空</button>
+      </div>
+      <div class="sql-task" id="sqlTask"></div>
+      <textarea id="sqlEditor" spellcheck="false" placeholder="SELECT * FROM emp WHERE salary > 20000"></textarea>
+      <div class="sql-status" id="sqlStatus">写好查询，按「▶ 运行」或 Ctrl+Enter 执行</div>
+      <div class="sql-out" id="sqlOut"></div>
+      <div class="sql-schema" id="sqlSchema"></div>
+      <div class="sql-rec" id="sqlRec"></div>
+      <p class="sql-help">
+        这不是假装的 SQL——页面里内置了一台完整的查询引擎：词法分析 → 语法分析 → 执行计划，全部现算。<br>
+        已支持：SELECT / DISTINCT / WHERE / GROUP BY / HAVING / ORDER BY / LIMIT / OFFSET、
+        INNER 与 LEFT JOIN、AND OR NOT、IN、BETWEEN、LIKE、IS NULL、CASE WHEN、标量子查询与 IN 子查询；<br>
+        函数：COUNT SUM AVG MIN MAX（可加 DISTINCT）、ABS ROUND UPPER LOWER LENGTH TRIM SUBSTR CONCAT COALESCE。<br>
+        十二道关卡由易到难，答对自动判定通关；首关解锁「🗄️ 初识查询」，十二关全通解锁「🧙 查库宗师」，进度存在本地（suibian_sql）。
+      </p>
+    </div>
+  </section>
+
   <section class="panel" id="parking">
     <h2>🅿️ 随便泊车</h2>
     <p class="sub">侧方、倒库、斜列三种车位——阿克曼转向物理模拟，慢一点不丢人，蹭一下才丢人</p>
@@ -9893,6 +9964,7 @@
     if (id === "whodunit" && typeof dtvRender === "function") dtvRender();
     if (id === "parking" && typeof prkRender === "function") prkRender();
     if (id === "logic" && typeof lgcRender === "function") lgcRender();
+    if (id === "sql" && typeof sqlRender === "function") sqlRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
@@ -9974,6 +10046,7 @@
     if (id !== "whodunit" && typeof dtvStop === "function") dtvStop();
     if (id !== "parking" && typeof prkStop === "function") prkStop();
     if (id !== "logic" && typeof lgcStop === "function") lgcStop();
+    if (id !== "sql" && typeof sqlStop === "function") sqlStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10185,6 +10258,7 @@
     whodunit: "随便断案 whodunit 断案 推理 侦探 悬疑 案件 凶手 嫌疑人 线索 逻辑 排除法 斑马谜题 爱因斯坦谜题 谜题 烧脑 解谜 推定 指控 真相 益智 游戏 挑战",
     parking: "随便泊车 parking 泊车 停车 倒车 入库 侧方 斜列 车位 科目二 驾校 练车 方向盘 泊车入位 车辆 物理 模拟 雷达 老司机 技巧 游戏 挑战",
     logic: "随便电路 logic circuit 电路 逻辑 逻辑门 门电路 与门 或门 非门 异或 与非 或非 真值表 半加器 全加器 数电 布尔 二进制 接线 搭电路 解谜 关卡 游戏",
+    sql: "随便查库 sql SQL 查询 数据库 关系表 SELECT WHERE GROUP BY ORDER BY JOIN 子查询 查询引擎 关卡 学习 游戏",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
@@ -10457,6 +10531,7 @@ splitbill:"tools",
     whodunit:"games",
     parking:"games",
     logic:"games",
+    sql:"games",
     pack:"tools",
     horo:"fortune",
     muyu:"life",
@@ -64525,6 +64600,1527 @@ splitbill:"tools",
     );
   }
 })();
+/* ================= 🗄️ 随便查库 · 浏览器内 SQL 引擎 ================= */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_sql";
+  var MAX_ROWS = 20000;
+  var MAX_TABLES = 3;
+  var SHOW_ROWS = 200;
+
+  /* ---------- 示例数据库 ---------- */
+  var DB = {
+    dept: {
+      cols: ["id", "name", "city", "budget"],
+      rows: [
+        [1, "研发部", "深圳", 900000],
+        [2, "市场部", "上海", 520000],
+        [3, "设计部", "杭州", 380000],
+        [4, "运维部", "深圳", 260000]
+      ]
+    },
+    emp: {
+      cols: ["id", "name", "dept_id", "role", "salary", "age", "city", "hired"],
+      rows: [
+        [1, "赵敏", 1, "架构师", 42000, 36, "深圳", "2018-03-11"],
+        [2, "钱多多", 1, "后端", 28000, 29, "深圳", "2020-07-01"],
+        [3, "孙一鸣", 1, "前端", 24000, 26, "广州", "2021-09-15"],
+        [4, "李思思", 2, "市场经理", 31000, 34, "上海", "2019-05-20"],
+        [5, "周星星", 2, "商务", 18000, 25, "上海", "2022-02-14"],
+        [6, "吴用", 3, "设计师", 22000, 31, "杭州", "2020-11-03"],
+        [7, "郑好", 3, "设计师", 19000, 24, "杭州", "2023-04-08"],
+        [8, "王小虎", 4, "运维", 21000, 28, "深圳", "2021-01-25"],
+        [9, "冯程程", 1, "测试", 17000, 23, "深圳", "2023-08-19"],
+        [10, "陈平安", 2, "商务", 20000, 41, "北京", "2017-06-30"],
+        [11, "褚倩", 3, "插画师", 16000, 22, "杭州", "2024-03-01"],
+        [12, "卫东来", null, "顾问", 35000, 47, "北京", "2016-10-12"]
+      ]
+    },
+    proj: {
+      cols: ["id", "name", "dept_id", "budget", "status"],
+      rows: [
+        [1, "凤凰重构", 1, 300000, "进行中"],
+        [2, "灯塔大屏", 1, 150000, "已完成"],
+        [3, "春潮投放", 2, 220000, "进行中"],
+        [4, "新视觉", 3, 90000, "已完成"],
+        [5, "夜巡监控", 4, 130000, "进行中"],
+        [6, "星火实验", 1, 60000, "已搁置"]
+      ]
+    },
+    works: {
+      cols: ["emp_id", "proj_id", "hours"],
+      rows: [
+        [1, 1, 160], [1, 2, 40], [2, 1, 180], [3, 1, 120], [3, 2, 60],
+        [4, 3, 150], [5, 3, 90], [6, 4, 130], [6, 1, 30], [7, 4, 110],
+        [8, 5, 170], [9, 1, 70], [9, 6, 20], [10, 3, 100], [1, 6, 25],
+        [2, 2, 50], [8, 1, 45], [4, 1, 20]
+      ]
+    }
+  };
+
+  var TABLE_NOTE = {
+    emp: "员工表",
+    dept: "部门表",
+    proj: "项目表",
+    works: "参与表（员工 × 项目 × 工时）"
+  };
+  var TABLE_ORDER = ["emp", "dept", "proj", "works"];
+
+  /* ================= 词法分析 ================= */
+
+  var KEYWORDS = [
+    "SELECT", "DISTINCT", "FROM", "AS", "WHERE", "GROUP", "BY", "HAVING",
+    "ORDER", "ASC", "DESC", "LIMIT", "OFFSET", "JOIN", "INNER", "LEFT",
+    "OUTER", "CROSS", "ON", "AND", "OR", "NOT", "IN", "BETWEEN", "LIKE",
+    "IS", "NULL", "CASE", "WHEN", "THEN", "ELSE", "END", "TRUE", "FALSE"
+  ];
+
+  function sqlErr(msg, pos) {
+    var e = new Error(msg);
+    e.isSql = true;
+    e.sqlPos = typeof pos === "number" ? pos : -1;
+    return e;
+  }
+
+  function isDigit(c) { return c >= "0" && c <= "9"; }
+  function isIdentStart(c) {
+    return (c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || c === "_" || c.charCodeAt(0) > 127;
+  }
+  function isIdentPart(c) { return isIdentStart(c) || isDigit(c); }
+
+  function tokenize(src) {
+    var s = String(src == null ? "" : src);
+    var toks = [], i = 0, n = s.length;
+    while (i < n) {
+      var c = s.charAt(i);
+      if (c === " " || c === "\t" || c === "\n" || c === "\r") { i++; continue; }
+      if (c === "-" && s.charAt(i + 1) === "-") { while (i < n && s.charAt(i) !== "\n") i++; continue; }
+      if (c === "/" && s.charAt(i + 1) === "*") {
+        i += 2;
+        while (i < n && !(s.charAt(i) === "*" && s.charAt(i + 1) === "/")) i++;
+        if (i >= n) throw sqlErr("注释 /* 没有收尾的 */", n);
+        i += 2; continue;
+      }
+      var start = i;
+      if (isDigit(c) || (c === "." && isDigit(s.charAt(i + 1)))) {
+        var dots = 0;
+        while (i < n && (isDigit(s.charAt(i)) || s.charAt(i) === ".")) {
+          if (s.charAt(i) === ".") dots++;
+          i++;
+        }
+        var txt = s.slice(start, i);
+        if (dots > 1) throw sqlErr("数字写错了：" + txt, start);
+        toks.push({ t: "num", v: parseFloat(txt), p: start });
+        continue;
+      }
+      if (c === "'" || c === '"' || c === "`") {
+        var q = c; i++;
+        var buf = "", closed = false;
+        while (i < n) {
+          var ch = s.charAt(i);
+          if (ch === q) {
+            if (s.charAt(i + 1) === q) { buf += q; i += 2; continue; }
+            i++; closed = true; break;
+          }
+          buf += ch; i++;
+        }
+        if (!closed) throw sqlErr("字符串少了收尾的 " + q, start);
+        toks.push({ t: q === "'" ? "str" : "ident", v: buf, p: start });
+        continue;
+      }
+      if (isIdentStart(c)) {
+        while (i < n && isIdentPart(s.charAt(i))) i++;
+        var w = s.slice(start, i);
+        var U = w.toUpperCase();
+        if (KEYWORDS.indexOf(U) >= 0) toks.push({ t: "kw", v: U, p: start });
+        else toks.push({ t: "ident", v: w, p: start });
+        continue;
+      }
+      var two = s.substr(i, 2);
+      if (two === "<>" || two === "!=" || two === "<=" || two === ">=" || two === "||") {
+        toks.push({ t: "op", v: two === "!=" ? "<>" : two, p: start });
+        i += 2; continue;
+      }
+      if ("=<>+-*/%".indexOf(c) >= 0) { toks.push({ t: "op", v: c, p: start }); i++; continue; }
+      if ("(),.;".indexOf(c) >= 0) { toks.push({ t: "punc", v: c, p: start }); i++; continue; }
+      throw sqlErr("不认识的符号：" + c, start);
+    }
+    toks.push({ t: "eof", v: "", p: n });
+    return toks;
+  }
+
+  /* ================= 语法分析 ================= */
+
+  function pk(P) { return P.toks[P.i]; }
+  function isKw(P, v) { var t = pk(P); return t.t === "kw" && t.v === v; }
+  function eatKw(P, v) { if (isKw(P, v)) { P.i++; return true; } return false; }
+  function isPunc(P, v) { var t = pk(P); return t.t === "punc" && t.v === v; }
+  function eatPunc(P, v) { if (isPunc(P, v)) { P.i++; return true; } return false; }
+  function need(P, cond, msg) {
+    if (!cond) {
+      var t = pk(P);
+      var near = t.t === "eof" ? "语句末尾" : "「" + String(t.v) + "」";
+      throw sqlErr(msg + "（在 " + near + " 附近）", t.p);
+    }
+  }
+  function expectKw(P, v) { need(P, isKw(P, v), "这里应该有关键字 " + v); P.i++; }
+  function expectPunc(P, v) { need(P, isPunc(P, v), "这里应该有 " + v); P.i++; }
+
+  function parse(src) {
+    var P = { toks: tokenize(src), i: 0 };
+    if (pk(P).t === "eof") throw sqlErr("还没写查询语句呢", 0);
+    var ast = parseSelect(P);
+    eatPunc(P, ";");
+    need(P, pk(P).t === "eof", "这里多出了看不懂的内容");
+    return ast;
+  }
+
+  function parseSelect(P) {
+    need(P, isKw(P, "SELECT"), "查询要以 SELECT 开头");
+    P.i++;
+    var distinct = eatKw(P, "DISTINCT");
+    var cols = [];
+    do { cols.push(parseSelItem(P)); } while (eatPunc(P, ","));
+    var from = null;
+    if (eatKw(P, "FROM")) from = parseFrom(P);
+    var where = null;
+    if (eatKw(P, "WHERE")) where = parseExpr(P);
+    var group = [], having = null;
+    if (eatKw(P, "GROUP")) {
+      expectKw(P, "BY");
+      do { group.push(parseExpr(P)); } while (eatPunc(P, ","));
+      if (eatKw(P, "HAVING")) having = parseExpr(P);
+    }
+    var order = [];
+    if (eatKw(P, "ORDER")) {
+      expectKw(P, "BY");
+      do {
+        var oe = parseExpr(P);
+        var dir = 1;
+        if (eatKw(P, "DESC")) dir = -1; else eatKw(P, "ASC");
+        order.push({ expr: oe, dir: dir });
+      } while (eatPunc(P, ","));
+    }
+    var limit = null, offset = 0;
+    if (eatKw(P, "LIMIT")) {
+      var lt = pk(P);
+      need(P, lt.t === "num", "LIMIT 后面要跟一个数字");
+      limit = Math.max(0, Math.floor(lt.v)); P.i++;
+      if (eatKw(P, "OFFSET")) {
+        var ot = pk(P);
+        need(P, ot.t === "num", "OFFSET 后面要跟一个数字");
+        offset = Math.max(0, Math.floor(ot.v)); P.i++;
+      }
+    }
+    return {
+      type: "select", distinct: distinct, cols: cols, from: from, where: where,
+      group: group, having: having, order: order, limit: limit, offset: offset
+    };
+  }
+
+  function parseSelItem(P) {
+    var t = pk(P);
+    if (t.t === "op" && t.v === "*") { P.i++; return { star: true, starTable: null, p: t.p }; }
+    var t1 = P.toks[P.i + 1], t2 = P.toks[P.i + 2];
+    if (t.t === "ident" && t1 && t1.t === "punc" && t1.v === "." && t2 && t2.t === "op" && t2.v === "*") {
+      P.i += 3;
+      return { star: true, starTable: String(t.v), p: t.p };
+    }
+    var e = parseExpr(P);
+    var alias = null;
+    if (eatKw(P, "AS")) {
+      var a = pk(P);
+      need(P, a.t === "ident" || a.t === "str", "AS 后面要跟一个别名");
+      alias = String(a.v); P.i++;
+    } else if (pk(P).t === "ident") {
+      alias = String(pk(P).v); P.i++;
+    }
+    return { star: false, expr: e, alias: alias, p: t.p };
+  }
+
+  function parseAlias(P) {
+    if (eatKw(P, "AS")) {
+      var a = pk(P);
+      need(P, a.t === "ident", "AS 后面要跟一个别名");
+      P.i++; return String(a.v);
+    }
+    var t = pk(P);
+    if (t.t === "ident") { P.i++; return String(t.v); }
+    return null;
+  }
+
+  function parseFrom(P) {
+    var t = pk(P);
+    need(P, t.t === "ident", "FROM 后面要跟表名");
+    P.i++;
+    var f = { table: String(t.v), alias: parseAlias(P), joins: [], p: t.p };
+    while (true) {
+      var type = null;
+      if (isPunc(P, ",")) { P.i++; type = "CROSS"; }
+      else if (isKw(P, "JOIN")) { P.i++; type = "INNER"; }
+      else if (isKw(P, "INNER")) { P.i++; expectKw(P, "JOIN"); type = "INNER"; }
+      else if (isKw(P, "CROSS")) { P.i++; expectKw(P, "JOIN"); type = "CROSS"; }
+      else if (isKw(P, "LEFT")) { P.i++; eatKw(P, "OUTER"); expectKw(P, "JOIN"); type = "LEFT"; }
+      else break;
+      var tt = pk(P);
+      need(P, tt.t === "ident", "JOIN 后面要跟表名");
+      P.i++;
+      var jn = { type: type, table: String(tt.v), alias: parseAlias(P), on: null, p: tt.p };
+      if (eatKw(P, "ON")) jn.on = parseExpr(P);
+      else need(P, type === "CROSS", type + " JOIN 后面要写 ON 连接条件");
+      f.joins.push(jn);
+    }
+    if (1 + f.joins.length > MAX_TABLES) {
+      throw sqlErr("一次连接的表太多啦（最多 " + MAX_TABLES + " 张），先减少几张表再查，免得爆出天文数字的笛卡尔积", f.p);
+    }
+    return f;
+  }
+
+  function parseExpr(P) { return parseOr(P); }
+  function parseOr(P) {
+    var a = parseAnd(P);
+    while (eatKw(P, "OR")) a = { k: "bin", op: "OR", a: a, b: parseAnd(P) };
+    return a;
+  }
+  function parseAnd(P) {
+    var a = parseNot(P);
+    while (eatKw(P, "AND")) a = { k: "bin", op: "AND", a: a, b: parseNot(P) };
+    return a;
+  }
+  function parseNot(P) {
+    if (isKw(P, "NOT")) {
+      var t1 = P.toks[P.i + 1];
+      if (!(t1 && t1.t === "kw" && (t1.v === "IN" || t1.v === "BETWEEN" || t1.v === "LIKE"))) {
+        P.i++;
+        return { k: "unary", op: "NOT", a: parseNot(P) };
+      }
+    }
+    return parseCmp(P);
+  }
+  function parseCmp(P) {
+    var a = parseAdd(P);
+    while (true) {
+      var t = pk(P);
+      if (t.t === "op" && ["=", "<>", "<", "<=", ">", ">="].indexOf(t.v) >= 0) {
+        P.i++; a = { k: "bin", op: t.v, a: a, b: parseAdd(P), p: t.p }; continue;
+      }
+      if (t.t === "kw" && t.v === "IS") {
+        P.i++;
+        var ng = eatKw(P, "NOT");
+        expectKw(P, "NULL");
+        a = { k: "isnull", a: a, neg: ng, p: t.p }; continue;
+      }
+      var neg = false;
+      if (t.t === "kw" && t.v === "NOT") {
+        var nx = P.toks[P.i + 1];
+        if (nx && nx.t === "kw" && ["IN", "BETWEEN", "LIKE"].indexOf(nx.v) >= 0) { P.i++; neg = true; t = pk(P); }
+        else break;
+      }
+      if (t.t === "kw" && t.v === "IN") {
+        P.i++; expectPunc(P, "(");
+        if (isKw(P, "SELECT")) {
+          var sel = parseSelect(P); expectPunc(P, ")");
+          a = { k: "in", a: a, sub: sel, list: null, neg: neg, p: t.p };
+        } else {
+          var list = [];
+          do { list.push(parseExpr(P)); } while (eatPunc(P, ","));
+          expectPunc(P, ")");
+          a = { k: "in", a: a, sub: null, list: list, neg: neg, p: t.p };
+        }
+        continue;
+      }
+      if (t.t === "kw" && t.v === "BETWEEN") {
+        P.i++;
+        var lo = parseAdd(P);
+        expectKw(P, "AND");
+        var hi = parseAdd(P);
+        a = { k: "between", a: a, lo: lo, hi: hi, neg: neg, p: t.p }; continue;
+      }
+      if (t.t === "kw" && t.v === "LIKE") {
+        P.i++; a = { k: "like", a: a, b: parseAdd(P), neg: neg, p: t.p }; continue;
+      }
+      break;
+    }
+    return a;
+  }
+  function parseAdd(P) {
+    var a = parseMul(P);
+    while (true) {
+      var t = pk(P);
+      if (t.t === "op" && (t.v === "+" || t.v === "-" || t.v === "||")) {
+        P.i++; a = { k: "bin", op: t.v, a: a, b: parseMul(P), p: t.p };
+      } else break;
+    }
+    return a;
+  }
+  function parseMul(P) {
+    var a = parseUnary(P);
+    while (true) {
+      var t = pk(P);
+      if (t.t === "op" && (t.v === "*" || t.v === "/" || t.v === "%")) {
+        P.i++; a = { k: "bin", op: t.v, a: a, b: parseUnary(P), p: t.p };
+      } else break;
+    }
+    return a;
+  }
+  function parseUnary(P) {
+    var t = pk(P);
+    if (t.t === "op" && (t.v === "-" || t.v === "+")) {
+      P.i++; return { k: "unary", op: t.v, a: parseUnary(P), p: t.p };
+    }
+    return parsePrimary(P);
+  }
+  function parsePrimary(P) {
+    var t = pk(P);
+    if (t.t === "num") { P.i++; return { k: "num", v: t.v, p: t.p }; }
+    if (t.t === "str") { P.i++; return { k: "str", v: t.v, p: t.p }; }
+    if (t.t === "kw" && t.v === "NULL") { P.i++; return { k: "null", p: t.p }; }
+    if (t.t === "kw" && (t.v === "TRUE" || t.v === "FALSE")) {
+      P.i++; return { k: "bool", v: t.v === "TRUE", p: t.p };
+    }
+    if (t.t === "kw" && t.v === "CASE") {
+      P.i++;
+      var whens = [], els = null;
+      while (eatKw(P, "WHEN")) {
+        var w = parseExpr(P);
+        expectKw(P, "THEN");
+        whens.push({ w: w, t: parseExpr(P) });
+      }
+      need(P, whens.length > 0, "CASE 后面至少要有一个 WHEN");
+      if (eatKw(P, "ELSE")) els = parseExpr(P);
+      expectKw(P, "END");
+      return { k: "case", whens: whens, els: els, p: t.p };
+    }
+    if (t.t === "punc" && t.v === "(") {
+      P.i++;
+      if (isKw(P, "SELECT")) {
+        var sel = parseSelect(P);
+        expectPunc(P, ")");
+        return { k: "sub", sel: sel, p: t.p };
+      }
+      var e = parseExpr(P);
+      expectPunc(P, ")");
+      return e;
+    }
+    if (t.t === "ident") {
+      var n1 = P.toks[P.i + 1];
+      if (n1 && n1.t === "punc" && n1.v === "(") {
+        var nm = String(t.v);
+        P.i += 2;
+        var dist = eatKw(P, "DISTINCT");
+        var args = [];
+        if (isPunc(P, ")")) { P.i++; }
+        else {
+          if (pk(P).t === "op" && pk(P).v === "*") { args.push({ k: "star", p: pk(P).p }); P.i++; }
+          else { do { args.push(parseExpr(P)); } while (eatPunc(P, ",")); }
+          expectPunc(P, ")");
+        }
+        return { k: "func", name: nm, args: args, distinct: dist, p: t.p };
+      }
+      if (n1 && n1.t === "punc" && n1.v === ".") {
+        var cn = P.toks[P.i + 2];
+        need(P, cn && cn.t === "ident", "「.」后面要跟列名");
+        var tn = String(t.v);
+        P.i += 3;
+        return { k: "col", t: tn, n: String(cn.v), p: t.p };
+      }
+      P.i++;
+      return { k: "col", t: null, n: String(t.v), p: t.p };
+    }
+    need(P, false, "这里应该是一个值、列名或括号表达式");
+  }
+
+  /* ================= 求值 ================= */
+
+  var AGGS = { COUNT: 1, SUM: 1, AVG: 1, MIN: 1, MAX: 1 };
+
+  function isNull(v) { return v === null || v === undefined; }
+
+  function truthy(v) {
+    if (isNull(v)) return false;
+    if (typeof v === "boolean") return v;
+    if (typeof v === "number") return v !== 0;
+    return String(v) !== "";
+  }
+
+  function toNum(v) {
+    if (isNull(v)) return null;
+    if (typeof v === "number") return isFinite(v) ? v : null;
+    if (typeof v === "boolean") return v ? 1 : 0;
+    var n = parseFloat(v);
+    return isFinite(n) ? n : null;
+  }
+
+  function cmp(a, b) {
+    if (isNull(a) || isNull(b)) return null;
+    if (typeof a === "boolean") a = a ? 1 : 0;
+    if (typeof b === "boolean") b = b ? 1 : 0;
+    if (typeof a === "number" && typeof b === "number") return a < b ? -1 : (a > b ? 1 : 0);
+    if (typeof a === "number" || typeof b === "number") {
+      var na = toNum(a), nb = toNum(b);
+      if (na !== null && nb !== null) return na < nb ? -1 : (na > nb ? 1 : 0);
+    }
+    var sa = String(a), sb = String(b);
+    return sa < sb ? -1 : (sa > sb ? 1 : 0);
+  }
+
+  function likeMatch(s, pat) {
+    var re = "";
+    for (var i = 0; i < pat.length; i++) {
+      var c = pat.charAt(i);
+      if (c === "%") re += "[\\s\\S]*";
+      else if (c === "_") re += "[\\s\\S]";
+      else re += c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+    try { return new RegExp("^" + re + "$").test(s); } catch (e) { return false; }
+  }
+
+  function valKey(v) {
+    if (isNull(v)) return "\u0000N";
+    if (typeof v === "number") return "#" + (Math.round(v * 1e6) / 1e6);
+    if (typeof v === "boolean") return "?" + (v ? 1 : 0);
+    return "$" + String(v);
+  }
+  function rowKey(r) {
+    var out = [];
+    for (var i = 0; i < r.length; i++) out.push(valKey(r[i]));
+    return out.join("\u0001");
+  }
+
+  function exprKey(e) {
+    if (!e) return "-";
+    switch (e.k) {
+      case "num": return "n" + e.v;
+      case "str": return "s" + e.v;
+      case "null": return "null";
+      case "bool": return "b" + e.v;
+      case "star": return "*";
+      case "col": return "c" + (e.t ? String(e.t).toLowerCase() + "." : "") + String(e.n).toLowerCase();
+      case "bin": return "(" + exprKey(e.a) + e.op + exprKey(e.b) + ")";
+      case "unary": return "(" + e.op + exprKey(e.a) + ")";
+      case "isnull": return "(" + exprKey(e.a) + (e.neg ? " isnotnull)" : " isnull)");
+      case "like": return "(" + exprKey(e.a) + (e.neg ? " notlike " : " like ") + exprKey(e.b) + ")";
+      case "between": return "(" + exprKey(e.a) + (e.neg ? " notbtw " : " btw ") + exprKey(e.lo) + "," + exprKey(e.hi) + ")";
+      case "in": {
+        var ls = "sub";
+        if (e.list) { ls = ""; for (var i = 0; i < e.list.length; i++) ls += exprKey(e.list[i]) + ","; }
+        return "(" + exprKey(e.a) + (e.neg ? " notin " : " in ") + ls + ")";
+      }
+      case "case": {
+        var s = "case";
+        for (var j = 0; j < e.whens.length; j++) s += "w" + exprKey(e.whens[j].w) + "t" + exprKey(e.whens[j].t);
+        return s + "e" + exprKey(e.els);
+      }
+      case "func": {
+        var f = String(e.name).toUpperCase() + "(" + (e.distinct ? "distinct " : "");
+        for (var m = 0; m < e.args.length; m++) f += exprKey(e.args[m]) + ",";
+        return f + ")";
+      }
+      case "sub": return "subquery";
+    }
+    return "?";
+  }
+
+  function exprName(e) {
+    if (!e) return "?";
+    switch (e.k) {
+      case "col": return e.n;
+      case "num": return String(e.v);
+      case "str": return "'" + e.v + "'";
+      case "null": return "NULL";
+      case "bool": return e.v ? "TRUE" : "FALSE";
+      case "func": {
+        var inner = "";
+        for (var i = 0; i < e.args.length; i++) {
+          inner += (i ? "," : "") + (e.args[i].k === "star" ? "*" : exprName(e.args[i]));
+        }
+        return String(e.name).toUpperCase() + "(" + (e.distinct ? "DISTINCT " : "") + inner + ")";
+      }
+      case "bin": return exprName(e.a) + " " + e.op + " " + exprName(e.b);
+      case "unary": return e.op + exprName(e.a);
+      case "case": return "CASE";
+      case "sub": return "子查询";
+    }
+    return "表达式";
+  }
+
+  function hasAgg(e) {
+    if (!e) return false;
+    switch (e.k) {
+      case "func": {
+        if (AGGS[String(e.name).toUpperCase()]) return true;
+        for (var i = 0; i < e.args.length; i++) if (hasAgg(e.args[i])) return true;
+        return false;
+      }
+      case "bin": return hasAgg(e.a) || hasAgg(e.b);
+      case "unary": return hasAgg(e.a);
+      case "isnull": return hasAgg(e.a);
+      case "like": return hasAgg(e.a) || hasAgg(e.b);
+      case "between": return hasAgg(e.a) || hasAgg(e.lo) || hasAgg(e.hi);
+      case "in": {
+        if (hasAgg(e.a)) return true;
+        if (e.list) for (var j = 0; j < e.list.length; j++) if (hasAgg(e.list[j])) return true;
+        return false;
+      }
+      case "case": {
+        for (var m = 0; m < e.whens.length; m++) if (hasAgg(e.whens[m].w) || hasAgg(e.whens[m].t)) return true;
+        return hasAgg(e.els);
+      }
+    }
+    return false;
+  }
+
+  function tableOf(db, nm, p) {
+    var keys = [];
+    for (var k in db) if (Object.prototype.hasOwnProperty.call(db, k)) keys.push(k);
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].toLowerCase() === String(nm).toLowerCase()) return db[keys[i]];
+    }
+    throw sqlErr("没有这张表：" + nm + "（可用的表：" + keys.join("、") + "）", p);
+  }
+
+  function recOf(tab, r) {
+    var o = {};
+    for (var i = 0; i < tab.cols.length; i++) o[tab.cols[i]] = r[i] === undefined ? null : r[i];
+    return o;
+  }
+  function nullRec(tab) {
+    var o = {};
+    for (var i = 0; i < tab.cols.length; i++) o[tab.cols[i]] = null;
+    return o;
+  }
+  function shallow(o) {
+    var r = {};
+    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) r[k] = o[k];
+    return r;
+  }
+
+  function makeCtx(db, outer) {
+    var ctx = {
+      db: db, aliases: [], cols: {}, outer: outer || null, groupRows: null
+    };
+    ctx.aliasOf = function (nm) {
+      var s = String(nm).toLowerCase();
+      for (var i = 0; i < ctx.aliases.length; i++) if (ctx.aliases[i].toLowerCase() === s) return ctx.aliases[i];
+      return null;
+    };
+    ctx.colOf = function (al, nm) {
+      var cs = ctx.cols[al] || [], s = String(nm).toLowerCase();
+      for (var i = 0; i < cs.length; i++) if (cs[i].toLowerCase() === s) return cs[i];
+      return null;
+    };
+    return ctx;
+  }
+  function subCtx(ctx, grp) {
+    var c = Object.create(ctx);
+    c.groupRows = grp;
+    return c;
+  }
+
+  function resolveCol(e, row, ctx) {
+    if (e.t) {
+      var al = ctx.aliasOf(e.t);
+      if (al && row && Object.prototype.hasOwnProperty.call(row, al)) {
+        var cn = ctx.colOf(al, e.n);
+        if (cn === null) throw sqlErr("表 " + e.t + " 里没有列 " + e.n + "（有：" + (ctx.cols[al] || []).join("、") + "）", e.p);
+        return row[al][cn];
+      }
+      if (ctx.outer) return resolveCol(e, ctx.outer.row, ctx.outer.ctx);
+      throw sqlErr("查询里没有用到表或别名：" + e.t, e.p);
+    }
+    var found = null, cnt = 0;
+    for (var i = 0; i < ctx.aliases.length; i++) {
+      var a = ctx.aliases[i];
+      var c = ctx.colOf(a, e.n);
+      if (c !== null && row && Object.prototype.hasOwnProperty.call(row, a)) { cnt++; found = row[a][c]; }
+    }
+    if (cnt === 0) {
+      if (ctx.outer) return resolveCol(e, ctx.outer.row, ctx.outer.ctx);
+      throw sqlErr("找不到列：" + e.n, e.p);
+    }
+    if (cnt > 1) throw sqlErr("列名 " + e.n + " 有歧义，请写成 表名." + e.n, e.p);
+    return found;
+  }
+
+  function evalBin(e, row, ctx) {
+    var op = e.op;
+    if (op === "AND") {
+      var a1 = evalExpr(e.a, row, ctx);
+      if (!isNull(a1) && !truthy(a1)) return false;
+      var b1 = evalExpr(e.b, row, ctx);
+      if (!isNull(b1) && !truthy(b1)) return false;
+      if (isNull(a1) || isNull(b1)) return null;
+      return true;
+    }
+    if (op === "OR") {
+      var a2 = evalExpr(e.a, row, ctx);
+      if (!isNull(a2) && truthy(a2)) return true;
+      var b2 = evalExpr(e.b, row, ctx);
+      if (!isNull(b2) && truthy(b2)) return true;
+      if (isNull(a2) || isNull(b2)) return null;
+      return false;
+    }
+    var a = evalExpr(e.a, row, ctx);
+    var b = evalExpr(e.b, row, ctx);
+    if (op === "||") {
+      if (isNull(a) || isNull(b)) return null;
+      return String(a) + String(b);
+    }
+    if (["=", "<>", "<", "<=", ">", ">="].indexOf(op) >= 0) {
+      var c = cmp(a, b);
+      if (c === null) return null;
+      if (op === "=") return c === 0;
+      if (op === "<>") return c !== 0;
+      if (op === "<") return c < 0;
+      if (op === "<=") return c <= 0;
+      if (op === ">") return c > 0;
+      return c >= 0;
+    }
+    var na = toNum(a), nb = toNum(b);
+    if (na === null || nb === null) return null;
+    if (op === "+") return na + nb;
+    if (op === "-") return na - nb;
+    if (op === "*") return na * nb;
+    if (op === "/") return nb === 0 ? null : na / nb;
+    if (op === "%") return nb === 0 ? null : na % nb;
+    throw sqlErr("不支持的运算符：" + op, e.p);
+  }
+
+  function evalFunc(e, row, ctx) {
+    var nm = String(e.name).toUpperCase();
+    if (AGGS[nm]) {
+      var grp = ctx.groupRows;
+      if (!grp) throw sqlErr(nm + "() 是汇总函数，只能用在 SELECT / HAVING / ORDER BY 里", e.p);
+      var arg = e.args.length ? e.args[0] : null;
+      if (!arg) throw sqlErr(nm + "() 少了参数", e.p);
+      var inner = subCtx(ctx, null);
+      var vals = [];
+      for (var i = 0; i < grp.length; i++) {
+        if (arg.k === "star") { vals.push(1); continue; }
+        var v = evalExpr(arg, grp[i], inner);
+        if (!isNull(v)) vals.push(v);
+      }
+      if (e.distinct) {
+        var seen = {}, out = [];
+        for (var d = 0; d < vals.length; d++) {
+          var kk = valKey(vals[d]);
+          if (!seen[kk]) { seen[kk] = 1; out.push(vals[d]); }
+        }
+        vals = out;
+      }
+      if (nm === "COUNT") return vals.length;
+      if (!vals.length) return null;
+      if (nm === "MIN" || nm === "MAX") {
+        var best = vals[0];
+        for (var m = 1; m < vals.length; m++) {
+          var c = cmp(vals[m], best);
+          if (c !== null && ((nm === "MIN" && c < 0) || (nm === "MAX" && c > 0))) best = vals[m];
+        }
+        return best;
+      }
+      var sum = 0;
+      for (var s = 0; s < vals.length; s++) {
+        var n = toNum(vals[s]);
+        if (n === null) throw sqlErr(nm + "() 只能算数字", e.p);
+        sum += n;
+      }
+      return nm === "SUM" ? sum : sum / vals.length;
+    }
+    var A = [];
+    for (var q = 0; q < e.args.length; q++) {
+      if (e.args[q].k === "star") throw sqlErr(nm + "() 不能用 *", e.p);
+      A.push(evalExpr(e.args[q], row, ctx));
+    }
+    function n0(x) { var v = toNum(x); return v; }
+    switch (nm) {
+      case "ABS": return isNull(A[0]) ? null : Math.abs(n0(A[0]));
+      case "ROUND": {
+        if (isNull(A[0])) return null;
+        var d = A.length > 1 ? Math.max(0, Math.floor(toNum(A[1]) || 0)) : 0;
+        var f = Math.pow(10, d);
+        return Math.round(n0(A[0]) * f) / f;
+      }
+      case "UPPER": return isNull(A[0]) ? null : String(A[0]).toUpperCase();
+      case "LOWER": return isNull(A[0]) ? null : String(A[0]).toLowerCase();
+      case "LENGTH": return isNull(A[0]) ? null : String(A[0]).length;
+      case "TRIM": return isNull(A[0]) ? null : String(A[0]).replace(/^\s+|\s+$/g, "");
+      case "SUBSTR": {
+        if (isNull(A[0])) return null;
+        var st = Math.floor(toNum(A[1]) || 1);
+        var str = String(A[0]);
+        var from = st > 0 ? st - 1 : Math.max(0, str.length + st);
+        var len = A.length > 2 ? Math.max(0, Math.floor(toNum(A[2]) || 0)) : str.length;
+        return str.substr(from, len);
+      }
+      case "CONCAT": {
+        var r = "";
+        for (var ci = 0; ci < A.length; ci++) { if (isNull(A[ci])) return null; r += String(A[ci]); }
+        return r;
+      }
+      case "COALESCE":
+      case "IFNULL": {
+        for (var vi = 0; vi < A.length; vi++) if (!isNull(A[vi])) return A[vi];
+        return null;
+      }
+    }
+    throw sqlErr("不支持的函数：" + e.name + "（可用：COUNT SUM AVG MIN MAX ABS ROUND UPPER LOWER LENGTH TRIM SUBSTR CONCAT COALESCE）", e.p);
+  }
+
+  function subColumn(sel, row, ctx) {
+    var rs = runSelect(sel, ctx.db, { row: row, ctx: ctx });
+    var out = [];
+    for (var i = 0; i < rs.rows.length; i++) out.push(rs.rows[i][0]);
+    return out;
+  }
+
+  function evalExpr(e, row, ctx) {
+    switch (e.k) {
+      case "num": return e.v;
+      case "str": return e.v;
+      case "null": return null;
+      case "bool": return e.v;
+      case "col": return resolveCol(e, row, ctx);
+      case "bin": return evalBin(e, row, ctx);
+      case "func": return evalFunc(e, row, ctx);
+      case "unary": {
+        if (e.op === "NOT") {
+          var v = evalExpr(e.a, row, ctx);
+          return isNull(v) ? null : !truthy(v);
+        }
+        var n = toNum(evalExpr(e.a, row, ctx));
+        if (n === null) return null;
+        return e.op === "-" ? -n : n;
+      }
+      case "isnull": {
+        var x = evalExpr(e.a, row, ctx);
+        var b = isNull(x);
+        return e.neg ? !b : b;
+      }
+      case "between": {
+        var a = evalExpr(e.a, row, ctx);
+        var lo = evalExpr(e.lo, row, ctx);
+        var hi = evalExpr(e.hi, row, ctx);
+        var c1 = cmp(a, lo), c2 = cmp(a, hi);
+        if (c1 === null || c2 === null) return null;
+        var r = c1 >= 0 && c2 <= 0;
+        return e.neg ? !r : r;
+      }
+      case "like": {
+        var s = evalExpr(e.a, row, ctx), p = evalExpr(e.b, row, ctx);
+        if (isNull(s) || isNull(p)) return null;
+        var m = likeMatch(String(s), String(p));
+        return e.neg ? !m : m;
+      }
+      case "in": {
+        var av = evalExpr(e.a, row, ctx);
+        var vals = e.sub ? subColumn(e.sub, row, ctx) : [];
+        if (!e.sub) {
+          for (var i = 0; i < e.list.length; i++) vals.push(evalExpr(e.list[i], row, ctx));
+        }
+        if (isNull(av)) return null;
+        var hit = false, sawNull = false;
+        for (var j = 0; j < vals.length; j++) {
+          if (isNull(vals[j])) { sawNull = true; continue; }
+          if (cmp(av, vals[j]) === 0) { hit = true; break; }
+        }
+        var res = hit ? true : (sawNull ? null : false);
+        if (e.neg && res !== null) res = !res;
+        return res;
+      }
+      case "case": {
+        for (var w = 0; w < e.whens.length; w++) {
+          if (truthy(evalExpr(e.whens[w].w, row, ctx))) return evalExpr(e.whens[w].t, row, ctx);
+        }
+        return e.els ? evalExpr(e.els, row, ctx) : null;
+      }
+      case "sub": {
+        var rs = runSelect(e.sel, ctx.db, { row: row, ctx: ctx });
+        if (!rs.rows.length) return null;
+        return rs.rows[0][0];
+      }
+      case "star": throw sqlErr("* 只能写在 SELECT 后面或 COUNT(*) 里", e.p);
+    }
+    throw sqlErr("算不出来的表达式", e.p);
+  }
+
+  /* ================= 执行 ================= */
+
+  function buildFrom(f, db, ctx) {
+    if (!f) return [{}];
+    var t0 = tableOf(db, f.table, f.p);
+    var a0 = f.alias || f.table;
+    ctx.aliases.push(a0);
+    ctx.cols[a0] = t0.cols.slice();
+    var rows = [];
+    for (var i = 0; i < t0.rows.length; i++) {
+      var o = {};
+      o[a0] = recOf(t0, t0.rows[i]);
+      rows.push(o);
+    }
+    for (var j = 0; j < f.joins.length; j++) {
+      var jn = f.joins[j];
+      var tj = tableOf(db, jn.table, jn.p);
+      var aj = jn.alias || jn.table;
+      if (ctx.aliasOf(aj)) throw sqlErr("表名/别名重复了：" + aj + "，给它起个别名吧", jn.p);
+      ctx.aliases.push(aj);
+      ctx.cols[aj] = tj.cols.slice();
+      var out = [];
+      for (var r = 0; r < rows.length; r++) {
+        var matched = false;
+        for (var s = 0; s < tj.rows.length; s++) {
+          var merged = shallow(rows[r]);
+          merged[aj] = recOf(tj, tj.rows[s]);
+          var ok = jn.on ? truthy(evalExpr(jn.on, merged, ctx)) : true;
+          if (ok) {
+            out.push(merged);
+            matched = true;
+            if (out.length > MAX_ROWS) throw sqlErr("连出来的行数太多了（超过 " + MAX_ROWS + "），检查一下 ON 条件", jn.p);
+          }
+        }
+        if (!matched && jn.type === "LEFT") {
+          var m2 = shallow(rows[r]);
+          m2[aj] = nullRec(tj);
+          out.push(m2);
+        }
+      }
+      rows = out;
+    }
+    return rows;
+  }
+
+  function runSelect(ast, db, outer) {
+    var ctx = makeCtx(db, outer);
+    var rows = buildFrom(ast.from, db, ctx);
+
+    if (ast.where) {
+      if (hasAgg(ast.where)) throw sqlErr("WHERE 里不能用汇总函数，请改用 HAVING", 0);
+      var kept = [];
+      for (var i = 0; i < rows.length; i++) {
+        if (truthy(evalExpr(ast.where, rows[i], ctx))) kept.push(rows[i]);
+      }
+      rows = kept;
+    }
+
+    var outCols = [], outExprs = [];
+    for (var c = 0; c < ast.cols.length; c++) {
+      var it = ast.cols[c];
+      if (it.star) {
+        var list = ctx.aliases;
+        if (it.starTable) {
+          var al = ctx.aliasOf(it.starTable);
+          if (!al) throw sqlErr("查询里没有这张表：" + it.starTable, it.p);
+          list = [al];
+        }
+        if (!list.length) throw sqlErr("* 需要先有 FROM 表", it.p);
+        for (var li = 0; li < list.length; li++) {
+          var cs = ctx.cols[list[li]];
+          for (var ci = 0; ci < cs.length; ci++) {
+            outExprs.push({ k: "col", t: list[li], n: cs[ci], p: it.p });
+            outCols.push(cs[ci]);
+          }
+        }
+      } else {
+        outExprs.push(it.expr);
+        outCols.push(it.alias || exprName(it.expr));
+      }
+    }
+    if (!outExprs.length) throw sqlErr("SELECT 后面要至少选一列", 0);
+
+    var agg = ast.group.length > 0 || !!ast.having;
+    if (!agg) for (var ai = 0; ai < outExprs.length; ai++) if (hasAgg(outExprs[ai])) { agg = true; break; }
+    if (!agg) for (var oi = 0; oi < ast.order.length; oi++) if (hasAgg(ast.order[oi].expr)) { agg = true; break; }
+
+    var recs = [];
+    if (agg) {
+      var groups;
+      if (ast.group.length) {
+        var map = {}, order = [];
+        for (var g = 0; g < rows.length; g++) {
+          var kp = [];
+          for (var ge = 0; ge < ast.group.length; ge++) kp.push(valKey(evalExpr(ast.group[ge], rows[g], ctx)));
+          var ks = kp.join("\u0001");
+          if (!map[ks]) { map[ks] = []; order.push(ks); }
+          map[ks].push(rows[g]);
+        }
+        groups = [];
+        for (var od = 0; od < order.length; od++) groups.push(map[order[od]]);
+      } else {
+        groups = [rows];
+      }
+      for (var gi = 0; gi < groups.length; gi++) {
+        var grp = groups[gi];
+        var base = grp.length ? grp[0] : {};
+        var gc = subCtx(ctx, grp);
+        if (ast.having && !truthy(evalExpr(ast.having, base, gc))) continue;
+        var vals = [];
+        for (var ve = 0; ve < outExprs.length; ve++) vals.push(evalExpr(outExprs[ve], base, gc));
+        recs.push({ vals: vals, base: base, grp: grp });
+      }
+    } else {
+      for (var ri = 0; ri < rows.length; ri++) {
+        var vv = [];
+        for (var xe = 0; xe < outExprs.length; xe++) vv.push(evalExpr(outExprs[xe], rows[ri], ctx));
+        recs.push({ vals: vv, base: rows[ri], grp: null });
+      }
+    }
+
+    if (ast.distinct) {
+      var seen = {}, dd = [];
+      for (var di = 0; di < recs.length; di++) {
+        var dk = rowKey(recs[di].vals);
+        if (!seen[dk]) { seen[dk] = 1; dd.push(recs[di]); }
+      }
+      recs = dd;
+    }
+
+    if (ast.order.length) {
+      var outKeys = [];
+      for (var ok = 0; ok < outExprs.length; ok++) outKeys.push(exprKey(outExprs[ok]));
+      var plans = [];
+      for (var pi = 0; pi < ast.order.length; pi++) {
+        var oe = ast.order[pi].expr;
+        var plan = { dir: ast.order[pi].dir, idx: -1, expr: oe };
+        if (oe.k === "num" && oe.v === Math.floor(oe.v) && oe.v >= 1 && oe.v <= outCols.length) {
+          plan.idx = oe.v - 1;
+        } else {
+          var ek = exprKey(oe);
+          for (var q = 0; q < outKeys.length; q++) if (outKeys[q] === ek) { plan.idx = q; break; }
+          if (plan.idx < 0 && oe.k === "col" && !oe.t) {
+            var inSrc = false;
+            for (var si = 0; si < ctx.aliases.length; si++) if (ctx.colOf(ctx.aliases[si], oe.n) !== null) { inSrc = true; break; }
+            if (!inSrc) {
+              for (var nc = 0; nc < outCols.length; nc++) {
+                if (String(outCols[nc]).toLowerCase() === String(oe.n).toLowerCase()) { plan.idx = nc; break; }
+              }
+            }
+          }
+        }
+        plans.push(plan);
+      }
+      var keyed = [];
+      for (var kr = 0; kr < recs.length; kr++) {
+        var ks2 = [];
+        for (var kp2 = 0; kp2 < plans.length; kp2++) {
+          var pl = plans[kp2];
+          if (pl.idx >= 0) ks2.push(recs[kr].vals[pl.idx]);
+          else ks2.push(evalExpr(pl.expr, recs[kr].base, recs[kr].grp ? subCtx(ctx, recs[kr].grp) : ctx));
+        }
+        keyed.push({ rec: recs[kr], keys: ks2, i: kr });
+      }
+      keyed.sort(function (x, y) {
+        for (var z = 0; z < plans.length; z++) {
+          var a = x.keys[z], b = y.keys[z];
+          var an = isNull(a), bn = isNull(b);
+          var d = 0;
+          if (an && bn) d = 0;
+          else if (an) d = -1;
+          else if (bn) d = 1;
+          else { var cc = cmp(a, b); d = cc === null ? 0 : cc; }
+          if (d !== 0) return d * plans[z].dir;
+        }
+        return x.i - y.i;
+      });
+      recs = [];
+      for (var kk = 0; kk < keyed.length; kk++) recs.push(keyed[kk].rec);
+    }
+
+    var off = ast.offset || 0;
+    var end = ast.limit === null ? recs.length : off + ast.limit;
+    recs = recs.slice(off, end);
+
+    var outRows = [];
+    for (var fr = 0; fr < recs.length; fr++) outRows.push(recs[fr].vals);
+    return { cols: outCols, rows: outRows };
+  }
+
+  function runSql(text, db) {
+    var t0 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    var ast = parse(text);
+    var res = runSelect(ast, db || DB, null);
+    var t1 = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    res.ms = Math.max(0, Math.round((t1 - t0) * 100) / 100);
+    return res;
+  }
+
+  /* ================= 关卡 ================= */
+
+  var LEVELS = [
+    {
+      k: "l1", nm: "开门见山", em: "🚪",
+      task: "把「部门表 dept」里的所有内容原封不动查出来。",
+      hint: "最基础的查询：SELECT 星号 FROM 表名。",
+      ref: "SELECT * FROM dept", ordered: false
+    },
+    {
+      k: "l2", nm: "挑人挑列", em: "🔍",
+      task: "找出薪资高于 25000 的员工，只要「姓名 name」和「薪资 salary」两列。",
+      hint: "先用 SELECT 选列，再用 WHERE 加条件：WHERE salary > 25000。",
+      ref: "SELECT name, salary FROM emp WHERE salary > 25000", ordered: false
+    },
+    {
+      k: "l3", nm: "且或之间", em: "🔀",
+      task: "找出「在深圳且薪资低于 25000」或者「年龄不小于 45 岁」的员工，要 name、city、salary 三列。",
+      hint: "AND 比 OR 优先级高，拿不准就加括号：WHERE (A AND B) OR C。",
+      ref: "SELECT name, city, salary FROM emp WHERE (city = '深圳' AND salary < 25000) OR age >= 45", ordered: false
+    },
+    {
+      k: "l4", nm: "排行前三", em: "🏅",
+      task: "薪资最高的前三名，要 name 和 salary 两列，按薪资从高到低排。",
+      hint: "ORDER BY salary DESC 负责排序，LIMIT 3 负责只取前三。",
+      ref: "SELECT name, salary FROM emp ORDER BY salary DESC LIMIT 3", ordered: true
+    },
+    {
+      k: "l5", nm: "以师结尾", em: "🔤",
+      task: "找出岗位 role 以「师」字结尾的员工，要 name 和 role 两列。",
+      hint: "模糊匹配用 LIKE，% 代表任意多个字符：role LIKE '%师'。",
+      ref: "SELECT name, role FROM emp WHERE role LIKE '%师'", ordered: false
+    },
+    {
+      k: "l6", nm: "圈定范围", em: "🎯",
+      task: "找出年龄在 25 到 35 之间（含两端）、并且城市是上海或杭州的员工，要 name、age、city 三列。",
+      hint: "区间用 BETWEEN 25 AND 35，多选一用 IN ('上海','杭州')。",
+      ref: "SELECT name, age, city FROM emp WHERE age BETWEEN 25 AND 35 AND city IN ('上海','杭州')", ordered: false
+    },
+    {
+      k: "l7", nm: "分头点名", em: "🧮",
+      task: "统计每个 dept_id 各有多少名员工，输出 dept_id 和人数两列（没有部门的那一组也要保留）。",
+      hint: "GROUP BY dept_id 分组，COUNT(*) 数人头。",
+      ref: "SELECT dept_id, COUNT(*) FROM emp GROUP BY dept_id", ordered: false
+    },
+    {
+      k: "l8", nm: "分组之后", em: "📊",
+      task: "找出平均薪资超过 20000 的 dept_id，输出 dept_id 和平均薪资两列。",
+      hint: "分组后再过滤要用 HAVING，不能用 WHERE：HAVING AVG(salary) > 20000。",
+      ref: "SELECT dept_id, AVG(salary) FROM emp GROUP BY dept_id HAVING AVG(salary) > 20000", ordered: false
+    },
+    {
+      k: "l9", nm: "两表相认", em: "🔗",
+      task: "列出每位有部门的员工的「员工姓名」和「所在部门名称」两列。",
+      hint: "JOIN dept ON emp.dept_id = dept.id；同名列记得写成 emp.name / dept.name。",
+      ref: "SELECT emp.name, dept.name FROM emp JOIN dept ON emp.dept_id = dept.id", ordered: false
+    },
+    {
+      k: "l10", nm: "落单的人", em: "🕳️",
+      task: "找出一个项目都没参与过的员工姓名，只要一列。",
+      hint: "LEFT JOIN works 保留所有员工，再用 WHERE works.emp_id IS NULL 捞出没配上对的。",
+      ref: "SELECT emp.name FROM emp LEFT JOIN works ON emp.id = works.emp_id WHERE works.emp_id IS NULL", ordered: false
+    },
+    {
+      k: "l11", nm: "工时总账", em: "⏱️",
+      task: "统计每个项目的总工时，输出「项目名」和「总工时」两列，按总工时从多到少排。",
+      hint: "works 连 proj，GROUP BY 项目名，SUM(works.hours) 求和，再 ORDER BY ... DESC。",
+      ref: "SELECT proj.name, SUM(works.hours) FROM works JOIN proj ON works.proj_id = proj.id GROUP BY proj.name ORDER BY SUM(works.hours) DESC",
+      ordered: true
+    },
+    {
+      k: "l12", nm: "问问平均", em: "🧠",
+      task: "找出薪资高于「全公司平均薪资」的员工，输出 name 和 salary，按薪资从高到低排。",
+      hint: "括号里可以再塞一整条查询：WHERE salary > (SELECT AVG(salary) FROM emp)。",
+      ref: "SELECT name, salary FROM emp WHERE salary > (SELECT AVG(salary) FROM emp) ORDER BY salary DESC",
+      ordered: true
+    }
+  ];
+
+  var SAMPLES = [
+    "SELECT * FROM emp",
+    "SELECT name, role, salary FROM emp ORDER BY salary DESC",
+    "SELECT city, COUNT(*) AS 人数 FROM emp GROUP BY city ORDER BY 人数 DESC",
+    "SELECT name, salary, CASE WHEN salary >= 30000 THEN '高' WHEN salary >= 20000 THEN '中' ELSE '起步' END AS 档位 FROM emp",
+    "SELECT dept.name, COUNT(emp.id) AS 人数 FROM dept LEFT JOIN emp ON emp.dept_id = dept.id GROUP BY dept.name",
+    "SELECT status, COUNT(*), SUM(budget) FROM proj GROUP BY status",
+    "SELECT DISTINCT role FROM emp ORDER BY role",
+    "SELECT emp.name, proj.name, works.hours FROM works JOIN emp ON works.emp_id = emp.id JOIN proj ON works.proj_id = proj.id ORDER BY works.hours DESC LIMIT 5"
+  ];
+
+  function levelAt(i) { return LEVELS[i] || null; }
+  function levelIndexOf(k) {
+    for (var i = 0; i < LEVELS.length; i++) if (LEVELS[i].k === k) return i;
+    return -1;
+  }
+
+  function checkLevel(lv, res) {
+    var exp = runSelect(parse(lv.ref), DB, null);
+    if (res.cols.length !== exp.cols.length) {
+      return { ok: false, why: "结果有 " + res.cols.length + " 列，题目要 " + exp.cols.length + " 列" };
+    }
+    if (res.rows.length !== exp.rows.length) {
+      return { ok: false, why: "结果有 " + res.rows.length + " 行，题目要 " + exp.rows.length + " 行" };
+    }
+    var a = [], b = [];
+    for (var i = 0; i < res.rows.length; i++) a.push(rowKey(res.rows[i]));
+    for (var j = 0; j < exp.rows.length; j++) b.push(rowKey(exp.rows[j]));
+    if (!lv.ordered) { a = a.slice().sort(); b = b.slice().sort(); }
+    for (var m = 0; m < a.length; m++) {
+      if (a[m] !== b[m]) {
+        return { ok: false, why: lv.ordered ? ("第 " + (m + 1) + " 行的内容或顺序对不上") : "有一行的内容对不上" };
+      }
+    }
+    return { ok: true };
+  }
+
+  /* ================= 存档 ================= */
+
+  var rec = null;
+
+  function defRec() { return { solved: [], runs: 0, helps: 0, aF: 0, aM: 0 }; }
+
+  function loadRec() {
+    var r = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return r;
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return r;
+      if (Object.prototype.toString.call(o.solved) === "[object Array]") {
+        var seen = {};
+        for (var i = 0; i < o.solved.length; i++) {
+          var k = String(o.solved[i]);
+          if (levelIndexOf(k) >= 0 && !seen[k]) { seen[k] = 1; r.solved.push(k); }
+        }
+      }
+      r.runs = clampInt(o.runs, 0, 1e9);
+      r.helps = clampInt(o.helps, 0, 1e9);
+      r.aF = o.aF ? 1 : 0;
+      r.aM = o.aM ? 1 : 0;
+    } catch (e) { return defRec(); }
+    return r;
+  }
+
+  function clampInt(v, lo, hi) {
+    var n = Math.floor(Number(v));
+    if (!isFinite(n)) return lo;
+    return Math.min(hi, Math.max(lo, n));
+  }
+
+  function saveRec() {
+    try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) {}
+  }
+
+  function isSolved(k) { return rec.solved.indexOf(k) >= 0; }
+
+  function markSolved(k) {
+    if (!isSolved(k)) { rec.solved.push(k); saveRec(); }
+    award();
+  }
+
+  function award() {
+    if (rec.solved.length >= 1 && !rec.aF) {
+      rec.aF = 1; saveRec();
+      try { bumpUsage("sqlfirst"); } catch (e1) {}
+    }
+    if (rec.solved.length >= LEVELS.length && !rec.aM) {
+      rec.aM = 1; saveRec();
+      try { bumpUsage("sqlmaster"); } catch (e2) {}
+    }
+  }
+
+  /* ================= 界面 ================= */
+
+  var inited = false, active = false, curLevel = 0;
+
+  function el(id) { return document.getElementById(id); }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function fmtVal(v) {
+    if (isNull(v)) return '<span class="sql-null">NULL</span>';
+    if (typeof v === "boolean") return v ? "TRUE" : "FALSE";
+    if (typeof v === "number") {
+      var r = Math.round(v * 1e6) / 1e6;
+      return esc(String(r));
+    }
+    return esc(String(v));
+  }
+
+  function setStatus(html, cls) {
+    var s = el("sqlStatus");
+    if (!s) return;
+    s.className = "sql-status" + (cls ? " " + cls : "");
+    s.innerHTML = html;
+  }
+
+  function renderTable(res) {
+    var out = el("sqlOut");
+    if (!out) return;
+    if (!res.rows.length) {
+      out.innerHTML = '<div class="sql-empty">查询成功，但一行都没查到。</div>';
+      return;
+    }
+    var h = '<div class="sql-tablewrap"><table class="sql-table"><thead><tr>';
+    for (var c = 0; c < res.cols.length; c++) h += "<th>" + esc(res.cols[c]) + "</th>";
+    h += "</tr></thead><tbody>";
+    var lim = Math.min(res.rows.length, SHOW_ROWS);
+    for (var r = 0; r < lim; r++) {
+      h += "<tr>";
+      for (var k = 0; k < res.rows[r].length; k++) h += "<td>" + fmtVal(res.rows[r][k]) + "</td>";
+      h += "</tr>";
+    }
+    h += "</tbody></table></div>";
+    if (res.rows.length > lim) {
+      h += '<div class="sql-empty">还有 ' + (res.rows.length - lim) + " 行没显示。</div>";
+    }
+    out.innerHTML = h;
+  }
+
+  function renderSchema() {
+    var box = el("sqlSchema");
+    if (!box) return;
+    var h = '<div class="sql-schema-title">📚 数据库结构（点表名直接查，点列名插入编辑器）</div>';
+    for (var i = 0; i < TABLE_ORDER.length; i++) {
+      var t = TABLE_ORDER[i], tab = DB[t];
+      h += '<div class="sql-tab-card"><div class="sql-tab-head"><button class="sql-tname" data-sqltable="' + t + '">' + t + "</button>" +
+        '<span class="sql-tnote">' + esc(TABLE_NOTE[t]) + " · " + tab.rows.length + " 行</span></div><div class=\"sql-cols\">";
+      for (var c = 0; c < tab.cols.length; c++) {
+        h += '<button class="sql-cname" data-sqlcol="' + esc(tab.cols[c]) + '">' + esc(tab.cols[c]) + "</button>";
+      }
+      h += "</div></div>";
+    }
+    box.innerHTML = h;
+  }
+
+  function renderLevels() {
+    var s = el("sqlLevel");
+    if (!s) return;
+    var keep = s.value;
+    var h = "";
+    for (var i = 0; i < LEVELS.length; i++) {
+      var lv = LEVELS[i];
+      h += '<option value="' + i + '">第 ' + (i + 1) + " 关 · " + lv.em + " " + lv.nm + (isSolved(lv.k) ? " ✅" : "") + "</option>";
+    }
+    h += '<option value="-1">🧪 自由探索（随便查）</option>';
+    s.innerHTML = h;
+    if (keep !== "" && keep !== null && keep !== undefined) s.value = keep;
+    else s.value = String(curLevel);
+    if (s.value === "") s.value = String(curLevel);
+  }
+
+  function renderTask() {
+    var t = el("sqlTask");
+    if (!t) return;
+    if (curLevel < 0) {
+      t.innerHTML = '<div class="sql-task-h">🧪 自由探索</div><div class="sql-task-b">想查什么查什么，四张表随便折腾。写完按「▶ 运行」或 Ctrl+Enter。</div>';
+      return;
+    }
+    var lv = LEVELS[curLevel];
+    t.innerHTML = '<div class="sql-task-h">' + lv.em + " 第 " + (curLevel + 1) + " 关 · " + esc(lv.nm) +
+      (isSolved(lv.k) ? ' <span class="sql-done">已通关</span>' : "") + "</div>" +
+      '<div class="sql-task-b">' + esc(lv.task) + (lv.ordered ? ' <span class="sql-flag">（本关要求顺序一致）</span>' : "") + "</div>";
+  }
+
+  function renderRec() {
+    var b = el("sqlRec");
+    if (!b) return;
+    var pct = Math.round((rec.solved.length / LEVELS.length) * 100);
+    b.innerHTML = '<div class="sql-prog"><div class="sql-prog-bar"><i style="width:' + pct + '%"></i></div>' +
+      '<span>已通关 ' + rec.solved.length + " / " + LEVELS.length + "</span></div>" +
+      '<div class="sql-stats">累计执行 ' + rec.runs + " 次 · 看过答案 " + rec.helps + " 次</div>";
+  }
+
+  function syncAll() {
+    renderLevels();
+    renderTask();
+    renderRec();
+  }
+
+  function insertAtCursor(txt) {
+    var ta = el("sqlEditor");
+    if (!ta) return;
+    var s = ta.selectionStart, e = ta.selectionEnd;
+    if (typeof s !== "number") { ta.value += txt; return; }
+    var v = ta.value;
+    ta.value = v.slice(0, s) + txt + v.slice(e);
+    var p = s + txt.length;
+    ta.selectionStart = ta.selectionEnd = p;
+    ta.focus();
+  }
+
+  function caretLine(text, pos) {
+    if (pos < 0 || pos > text.length) return "";
+    var line = 1, col = 1;
+    for (var i = 0; i < pos; i++) {
+      if (text.charAt(i) === "\n") { line++; col = 1; } else col++;
+    }
+    return "第 " + line + " 行第 " + col + " 列";
+  }
+
+  function doRun() {
+    var ta = el("sqlEditor");
+    if (!ta) return null;
+    var text = ta.value || "";
+    if (!text.replace(/\s/g, "")) {
+      setStatus("先写点什么再运行吧 —— 比如 <code>SELECT * FROM emp</code>", "warn");
+      return null;
+    }
+    var res;
+    try {
+      res = runSql(text, DB);
+    } catch (err) {
+      var pos = err && typeof err.sqlPos === "number" ? err.sqlPos : -1;
+      var where = pos >= 0 ? "（" + caretLine(text, pos) + "）" : "";
+      setStatus("❌ " + esc(err && err.message ? err.message : String(err)) + where, "bad");
+      var out = el("sqlOut");
+      if (out) out.innerHTML = "";
+      return null;
+    }
+    rec.runs++;
+    saveRec();
+    renderTable(res);
+    var base = "✅ 查到 " + res.rows.length + " 行 × " + res.cols.length + " 列 · 用时 " + res.ms + " ms";
+    if (curLevel >= 0) {
+      var lv = LEVELS[curLevel];
+      var chk = checkLevel(lv, res);
+      if (chk.ok) {
+        var first = !isSolved(lv.k);
+        markSolved(lv.k);
+        syncAll();
+        setStatus(base + " · 🎉 " + (first ? "第 " + (curLevel + 1) + " 关通关！" : "答案正确（本关此前已通关）"), "good");
+      } else {
+        setStatus(base + " · 🤔 还不是本关要的结果：" + esc(chk.why), "warn");
+      }
+    } else {
+      renderRec();
+      setStatus(base, "good");
+    }
+    return res;
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    var ta = el("sqlEditor");
+    if (!ta) return;
+    rec = loadRec();
+
+    var runBtn = el("sqlRun");
+    if (runBtn) runBtn.addEventListener("click", function () { doRun(); });
+
+    var hintBtn = el("sqlHint");
+    if (hintBtn) hintBtn.addEventListener("click", function () {
+      if (curLevel < 0) { setStatus("自由探索没有提示，试试点下面的表名？", "warn"); return; }
+      setStatus("💡 " + esc(LEVELS[curLevel].hint), "warn");
+    });
+
+    var ansBtn = el("sqlAnswer");
+    if (ansBtn) ansBtn.addEventListener("click", function () {
+      if (curLevel < 0) {
+        var s = SAMPLES[Math.floor(Math.random() * SAMPLES.length)];
+        var t1 = el("sqlEditor");
+        if (t1) { t1.value = s; t1.focus(); }
+        setStatus("🎲 给你换了个示例查询，按 Ctrl+Enter 跑跑看", "warn");
+        return;
+      }
+      var t2 = el("sqlEditor");
+      if (t2) { t2.value = LEVELS[curLevel].ref; t2.focus(); }
+      rec.helps++;
+      saveRec();
+      renderRec();
+      setStatus("🔑 参考答案已填入，运行前先读一遍它为什么这么写", "warn");
+    });
+
+    var clrBtn = el("sqlClear");
+    if (clrBtn) clrBtn.addEventListener("click", function () {
+      var t3 = el("sqlEditor");
+      if (t3) { t3.value = ""; t3.focus(); }
+      var out = el("sqlOut");
+      if (out) out.innerHTML = "";
+      setStatus("清空了，Ctrl+Enter 可以直接运行");
+    });
+
+    var sel = el("sqlLevel");
+    if (sel) sel.addEventListener("change", function () {
+      curLevel = parseInt(sel.value, 10);
+      if (isNaN(curLevel)) curLevel = 0;
+      var out2 = el("sqlOut");
+      if (out2) out2.innerHTML = "";
+      var t4 = el("sqlEditor");
+      if (t4 && curLevel >= 0) t4.value = "";
+      renderTask();
+      setStatus(curLevel >= 0 ? "读题、写查询、Ctrl+Enter 运行" : "自由探索模式，随便查");
+    });
+
+    ta.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "Enter" || e.keyCode === 13)) {
+        e.preventDefault();
+        doRun();
+      }
+    });
+
+    var box = el("sqlSchema");
+    if (box) box.addEventListener("click", function (e) {
+      var t = e.target;
+      if (!t || !t.getAttribute) return;
+      var tn = t.getAttribute("data-sqltable");
+      if (tn) {
+        var t5 = el("sqlEditor");
+        if (t5) { t5.value = "SELECT * FROM " + tn; }
+        doRun();
+        return;
+      }
+      var cn = t.getAttribute("data-sqlcol");
+      if (cn) insertAtCursor(cn);
+    });
+
+    renderSchema();
+    inited = true;
+  }
+
+  window.sqlRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    var sel = el("sqlLevel");
+    if (sel) {
+      syncAll();
+      var v = parseInt(sel.value, 10);
+      if (!isNaN(v)) curLevel = v;
+    }
+    renderTask();
+    renderRec();
+  };
+
+  window.sqlStop = function () { active = false; };
+
+  window.__sqlTest = {
+    DB: DB, LEVELS: LEVELS, SAMPLES: SAMPLES,
+    tokenize: tokenize, parse: parse, runSelect: runSelect, runSql: runSql,
+    evalExpr: evalExpr, exprKey: exprKey, exprName: exprName, hasAgg: hasAgg,
+    cmp: cmp, truthy: truthy, toNum: toNum, likeMatch: likeMatch,
+    valKey: valKey, rowKey: rowKey, clampInt: clampInt,
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec, checkLevel: checkLevel,
+    levelAt: levelAt, levelIndexOf: levelIndexOf, isSolved: isSolved,
+    markSolved: markSolved, award: award, doRun: doRun, ensureInit: ensureInit,
+    syncAll: syncAll, renderSchema: renderSchema, renderTable: renderTable,
+    caretLine: caretLine, insertAtCursor: insertAtCursor, fmtVal: fmtVal,
+    getRec: function () { return rec; },
+    setRec: function (r) { rec = r; },
+    getLevel: function () { return curLevel; },
+    setLevel: function (i) { curLevel = i; },
+    resetInit: function () { inited = false; },
+    isActive: function () { return active; }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🗄️", name: "初识查询", desc: "在随便查库里通关第一道 SQL 关卡", test: function (u) { return (u.sqlfirst || 0) >= 1; } },
+      { emoji: "🧙", name: "查库宗师", desc: "在随便查库里通关全部十二道题，含多表连接与子查询", test: function (u) { return (u.sqlmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "SELECT 是问「要什么」，WHERE 是问「要谁的」，两句话就能问遍整个世界。",
+      "写不出查询，多半不是不会 SQL，是还没想清楚自己到底要什么。",
+      "JOIN 的本质是：两张表各拿一行，凑一对，看看合不合适。",
+      "WHERE 管的是每一行，HAVING 管的是每一组，站错队伍就报错。",
+      "先跑 SELECT 看清楚，再动手改数据——这是数据库世界的第一条保命法则。"
+    );
+  }
+})();
+
 </script>
 </body>
 </html>
