@@ -1606,6 +1606,7 @@
         <button data-tab="optics">🔦 随便光路</button>
         <button data-tab="brg">🌉 随便造桥</button>
         <button data-tab="quantum">⚛️ 随便量子</button>
+        <button data-tab="sandbox">🏜️ 随便沙盘</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -9987,6 +9988,74 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="sandbox">
+    <h2>🏜️ 随便沙盘</h2>
+    <p class="sub">浏览器里的粉末沙盒——沙会堆坡、水会找路、油浮在水上、熔岩烤沙成玻璃，10 道物理关卡等你折腾</p>
+    <style>
+      #sandbox .psb-wrap { max-width:540px; margin:0 auto; }
+      #sandbox canvas#psbCav { width:100%; max-width:480px; border-radius:16px; display:block; margin:0 auto 10px; background:#070b16; box-shadow:0 18px 44px rgba(0,0,0,.55); cursor:crosshair; touch-action:none; image-rendering:pixelated; }
+      #sandbox .psb-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #sandbox .psb-hud span { padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #sandbox .psb-hud b { font-weight:700; color:#f59e0b; }
+      #sandbox .psb-lab { text-align:center; font-size:.74rem; opacity:.6; margin:2px 0 5px; }
+      #sandbox .psb-tipbar { text-align:center; font-size:.78rem; line-height:1.65; opacity:.9; padding:8px 12px; border-radius:12px; background:rgba(245,158,11,.09); border:1px solid rgba(245,158,11,.22); margin-bottom:8px; }
+      #sandbox #psbGoal { text-align:center; font-size:.76rem; line-height:1.6; padding:7px 10px; border-radius:10px; background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.08); margin-bottom:10px; }
+      #sandbox .psb-row { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:9px; }
+      #sandbox .psb-row button { padding:7px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+      #sandbox .psb-row button:active { transform:translateY(1px); }
+      #sandbox .psb-row button.on { background:linear-gradient(135deg,#f59e0b,#ef4444); border-color:transparent; color:#fff; box-shadow:0 6px 18px rgba(245,158,11,.34); }
+      #sandbox #psbPal { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:9px; }
+      #sandbox #psbPal button { min-width:56px; display:inline-flex; flex-direction:column; align-items:center; gap:1px; padding:6px 8px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; cursor:pointer; font-size:1.05rem; line-height:1.15; }
+      #sandbox #psbPal button i { font-style:normal; font-size:.6rem; opacity:.75; font-weight:700; }
+      #sandbox #psbPal button em { font-style:normal; font-size:.58rem; opacity:.6; font-weight:700; letter-spacing:.02em; min-height:.72em; }
+      #sandbox #psbPal button.on { background:linear-gradient(135deg,#f59e0b,#ef4444); border-color:transparent; color:#fff; box-shadow:0 6px 18px rgba(245,158,11,.34); }
+      #sandbox #psbPal button.on em, #sandbox #psbPal button.on i { opacity:.92; }
+      #sandbox #psbBrush { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:9px; }
+      #sandbox #psbBrush button { padding:5px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; font-size:.75rem; font-weight:700; cursor:pointer; }
+      #sandbox #psbBrush button.on { background:linear-gradient(135deg,#f59e0b,#ef4444); border-color:transparent; color:#fff; }
+      #sandbox #psbLevels { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #sandbox #psbLevels button { min-width:34px; padding:5px 7px; border-radius:10px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; font-size:.75rem; font-weight:700; cursor:pointer; line-height:1.2; }
+      #sandbox #psbLevels button.on { background:linear-gradient(135deg,#f59e0b,#ef4444); border-color:transparent; color:#fff; }
+      #sandbox #psbLevels button i { display:block; font-style:normal; font-size:.58rem; opacity:.7; }
+      #sandbox #psbInfo { text-align:center; font-size:.82rem; font-weight:700; padding:7px 12px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14); margin-bottom:10px; min-height:1.2em; }
+      #sandbox #psbInfo.ok { background:rgba(74,222,128,.12); border-color:rgba(74,222,128,.4); color:#86efac; }
+      #sandbox .psb-help { font-size:.76rem; line-height:1.75; opacity:.78; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
+      #sandbox .psb-help b { color:#fcd34d; }
+    </style>
+    <div class="psb-wrap">
+      <div class="psb-hud">
+        <span>关卡 <b id="psbName">—</b></span>
+        <span>用料 <b id="psbBudget">—</b></span>
+        <span>本关 <b id="psbStars">☆☆☆</b></span>
+        <span>进度 <b id="psbTotal">0/10 关</b></span>
+      </div>
+      <div class="psb-tipbar" id="psbTip">—</div>
+      <canvas id="psbCav" width="480" height="360" aria-label="粉末沙盒画布"></canvas>
+      <div id="psbGoal">—</div>
+      <div class="psb-lab">材料（数字是本关剩余额度 · 点一下选中，再到画布上按住涂）</div>
+      <div id="psbPal"></div>
+      <div class="psb-lab">笔刷粗细</div>
+      <div id="psbBrush"></div>
+      <div id="psbInfo">▶ 模拟运行中</div>
+      <div class="psb-row">
+        <button id="psbPlay" type="button">⏸ 暂停</button>
+        <button id="psbFast" type="button">⏩ 快进</button>
+        <button id="psbClear" type="button">🧹 清空画面</button>
+        <button id="psbReset" type="button">↺ 重开本关</button>
+      </div>
+      <div class="psb-row">
+        <button id="psbPrev" type="button">◀ 上一关</button>
+        <button id="psbNext" type="button">下一关 ▶</button>
+      </div>
+      <div class="psb-lab">关卡（数字下方是已得星）</div>
+      <div id="psbLevels"></div>
+      <p class="psb-help">
+        <b>怎么玩</b>：选一种材料，在画布上<b>按住拖动</b>就能撒下去，然后交给物理引擎自己跑。粉末会堆成坡、液体会摊平、气体往上飘；<b>密度说了算</b>——沙子沉进水里，油浮在水面上，熔岩比水重。虚线框是<b>目标区</b>，框变绿说明这一条达标了。
+        <br><b>反应表</b>：熔岩+水 → <b>岩石</b>+蒸汽；熔岩+沙 → <b>玻璃</b>；火+木/油/藤蔓 → 烧起来；火/熔岩+火药 → <b>爆炸</b>（炸得开岩石，炸不动石墙）；水+火 → 蒸汽；寒冰会把旁边的水一起冻上；藤蔓喝水就长；<b>强酸</b>腐蚀几乎一切，唯独拿<b>玻璃</b>没办法。
+        <br><b>省着点用</b>：关卡里每种材料都有额度，<b>用得越少星越多</b>（剩一半以上 ★★★）。用 <b>🧽 橡皮</b> 擦掉自己画错的会退还额度。想纯玩的话点关卡条最右边的 <b>🧪 自由</b>，材料无限。
+      </p>
+    </div>
+  </section>
 </section>
 <script>
 (function () {
@@ -10413,6 +10482,7 @@
     if (id === "optics" && typeof lzrRender === "function") lzrRender();
     if (id === "brg" && typeof brgRender === "function") brgRender();
     if (id === "quantum" && typeof qbtRender === "function") qbtRender();
+    if (id === "sandbox" && typeof psbRender === "function") psbRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -10500,6 +10570,7 @@
     if (id !== "optics" && typeof lzrStop === "function") lzrStop();
     if (id !== "brg" && typeof brgStop === "function") brgStop();
     if (id !== "quantum" && typeof qbtStop === "function") qbtStop();
+    if (id !== "sandbox" && typeof psbStop === "function") psbStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10719,6 +10790,7 @@
     optics: "随便光路 optics 激光 光学 镜子 反射 折射 分光 棱镜 滤色 三原色 加色 彩虹 光线 追迹 解谜 益智 逻辑 关卡 物理 游戏 laser mirror prism",
     brg: "随便造桥 造桥 桥梁 桁架 结构 力学 受力 受压 受拉 支座 桥墩 卡车 工程 建筑 物理 解谜 益智 关卡 应力 应变 刚度 稳定性 桥梁工程 土木 truss bridge 三角 稳定性",
     quantum: "随便量子 量子 量子计算 量子线路 量子电路 量子比特 qubit 叠加 叠加态 纠缠 贝尔态 GHZ 相位 保真度 测量 塌缩 波函数 态矢量 阿达玛 Hadamard 受控非 CNOT CZ SWAP 泡利 物理 解谜 益智 关卡 模拟器 quantum circuit 量子门 薛定谔",
+    sandbox: "随便沙盘 沙盘 沙盒 落沙 沙子 粉末 物理沙盒 powder toy 元胞自动机 细胞自动机 模拟 仿真 材料 化学反应 水 油 熔岩 岩浆 火 火苗 燃烧 蒸汽 烟 木头 藤蔓 寒冰 玻璃 火药 爆炸 强酸 腐蚀 岩石 灰烬 密度 浮力 沉降 造物 沙雕 关卡 解谜 益智 涂鸦 画画 沙画",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -10998,6 +11070,7 @@ splitbill:"tools",
     optics:"games",
     brg:"games",
     quantum:"games",
+    sandbox:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -71092,6 +71165,940 @@ splitbill:"tools",
       "纠缠不是通信，它只是两个人从一开始就说好了。",
       "测量是最粗暴的操作：一看，所有可能性只剩一个。",
       "量子计算不是把答案都算一遍，是让错的答案自己抵消掉。"
+    );
+  }
+})();
+/* ===== 🏜️ 随便沙盘 · 粉末沙盒实验室（前缀 psb / 存档 suibian_sandbox） ===== */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_sandbox";
+  var GW = 120, GH = 90, CELL = 4;
+  var CW = GW * CELL, CH = GH * CELL;
+  var NCELL = GW * GH;
+  var HOLD = 10;          // 目标需连续成立多少 tick 才判通关
+  var FLOOR = 3;          // 底部地基厚度
+
+  /* ---------- 材料 ---------- */
+  var E = 0, WALL = 1, SAND = 2, WATER = 3, OIL = 4, LAVA = 5, FIRE = 6, STEAM = 7,
+      SMOKE = 8, WOOD = 9, PLANT = 10, ICE = 11, GLASS = 12, GUN = 13, ACID = 14,
+      STONE = 15, ASH = 16;
+  var NMAT = 17;
+
+  // kind: 0 静止固体 / 1 粉末 / 2 液体 / 3 气体
+  var SOLID = 0, POWDER = 1, LIQUID = 2, GAS = 3;
+
+  var MAT = [
+    { id: E,     key: "E",     name: "橡皮",   emoji: "🧽", kind: GAS,    dens: 0,  flow: 0, tip: "擦掉格子里的东西（不消耗预算）" },
+    { id: WALL,  key: "WALL",  name: "石墙",   emoji: "🧱", kind: SOLID,  dens: 99, flow: 0, tip: "不动如山，只怕强酸" },
+    { id: SAND,  key: "SAND",  name: "细沙",   emoji: "🏜️", kind: POWDER, dens: 12, flow: 0, tip: "会堆坡，遇熔岩烧成玻璃" },
+    { id: WATER, key: "WATER", name: "清水",   emoji: "💧", kind: LIQUID, dens: 5,  flow: 3, tip: "灭火、养藤蔓，遇熔岩变石头" },
+    { id: OIL,   key: "OIL",   name: "原油",   emoji: "🛢️", kind: LIQUID, dens: 3,  flow: 2, tip: "比水轻，会浮在水面上，极易燃" },
+    { id: LAVA,  key: "LAVA",  name: "熔岩",   emoji: "🌋", kind: LIQUID, dens: 9,  flow: 1, tip: "点燃一切；遇水成岩，烤沙成玻璃" },
+    { id: FIRE,  key: "FIRE",  name: "火苗",   emoji: "🔥", kind: GAS,    dens: 0,  flow: 0, tip: "有寿命，得靠燃料续命" },
+    { id: STEAM, key: "STEAM", name: "蒸汽",   emoji: "☁️", kind: GAS,    dens: 0,  flow: 0, tip: "往上飘，冷了会重新变回水" },
+    { id: SMOKE, key: "SMOKE", name: "烟",     emoji: "💨", kind: GAS,    dens: 0,  flow: 0, tip: "燃烧的残念，飘一会儿就散" },
+    { id: WOOD,  key: "WOOD",  name: "木头",   emoji: "🪵", kind: SOLID,  dens: 40, flow: 0, tip: "结实但怕火" },
+    { id: PLANT, key: "PLANT", name: "藤蔓",   emoji: "🌿", kind: SOLID,  dens: 30, flow: 0, tip: "喝水就疯长，怕火" },
+    { id: ICE,   key: "ICE",   name: "寒冰",   emoji: "🧊", kind: SOLID,  dens: 35, flow: 0, tip: "会把旁边的水一起冻上" },
+    { id: GLASS, key: "GLASS", name: "玻璃",   emoji: "🔷", kind: SOLID,  dens: 45, flow: 0, tip: "熔岩烤沙而成，唯一不怕酸" },
+    { id: GUN,   key: "GUN",   name: "火药",   emoji: "🧨", kind: POWDER, dens: 11, flow: 0, tip: "沾火就炸，能炸开岩石" },
+    { id: ACID,  key: "ACID",  name: "强酸",   emoji: "🧪", kind: LIQUID, dens: 6,  flow: 2, tip: "腐蚀万物，但拿玻璃没办法" },
+    { id: STONE, key: "STONE", name: "岩石",   emoji: "🪨", kind: SOLID,  dens: 50, flow: 0, tip: "熔岩遇水的产物，能被炸开" },
+    { id: ASH,   key: "ASH",   name: "灰烬",   emoji: "🌫️", kind: POWDER, dens: 7,  flow: 0, tip: "烧完剩下的，轻飘飘" }
+  ];
+
+  var SHADE = [
+    ["#070b16", "#070b16", "#070b16", "#070b16"],
+    ["#5b6472", "#66707f", "#515a67", "#727d8c"],
+    ["#e8c887", "#dcb96f", "#f0d59b", "#cfa95e"],
+    ["#2f7fd6", "#3b8ee6", "#2a6fbe", "#4a9bf0"],
+    ["#4a3b2a", "#5a4832", "#3e3123", "#655039"],
+    ["#ff6a2a", "#ff8a3a", "#e2481a", "#ffa64d"],
+    ["#ffcc33", "#ff9a1f", "#ff6b2b", "#ffe680"],
+    ["#cfd8e3", "#e2e8f0", "#b9c4d2", "#eef2f7"],
+    ["#4b5563", "#5b6472", "#3c444f", "#6b7280"],
+    ["#8b5a2b", "#7a4e25", "#9c6733", "#6d4520"],
+    ["#3fa34d", "#4cb85c", "#348a41", "#5ccf6d"],
+    ["#a8e3f0", "#c3edf7", "#8fd6e8", "#dbf5fb"],
+    ["#9fd8e8", "#b8e6f2", "#8ccada", "#cdeff7"],
+    ["#3b3b46", "#4a4a57", "#2e2e38", "#585866"],
+    ["#a3e635", "#bef264", "#84cc16", "#d9f99d"],
+    ["#7d7d8a", "#8d8d99", "#6c6c78", "#9a9aa6"],
+    ["#9ca3af", "#aab0bb", "#8b919c", "#b8bec8"]
+  ];
+
+  // 可被强酸溶解（玻璃免疫）
+  var ACIDABLE = {};
+  ACIDABLE[WALL] = 1; ACIDABLE[SAND] = 1; ACIDABLE[WOOD] = 1; ACIDABLE[PLANT] = 1;
+  ACIDABLE[ICE] = 1; ACIDABLE[STONE] = 1; ACIDABLE[ASH] = 1; ACIDABLE[GUN] = 1;
+  // 可被爆炸摧毁（石墙是关卡骨架，炸不动）
+  var BLASTABLE = {};
+  BLASTABLE[SAND] = 1; BLASTABLE[WOOD] = 1; BLASTABLE[PLANT] = 1; BLASTABLE[ICE] = 1;
+  BLASTABLE[GLASS] = 1; BLASTABLE[STONE] = 1; BLASTABLE[ASH] = 1;
+
+  /* ---------- 随机（可播种，方便复现与自测） ---------- */
+  var _seed = 20260801;
+  function srnd(s) { _seed = (s >>> 0) || 1; }
+  function rnd() { _seed = (_seed * 1664525 + 1013904223) >>> 0; return _seed / 4294967296; }
+  function ri(n) { return (rnd() * n) | 0; }
+
+  /* ---------- 网格 ---------- */
+  var g = new Uint8Array(NCELL);     // 材料
+  var aux = new Uint8Array(NCELL);   // 寿命 / 酸的剩余腐蚀力
+  var tint = new Uint8Array(NCELL);  // 颜色微扰
+  var own = new Uint8Array(NCELL);   // 1 = 玩家亲手画的（擦除可退预算）
+  var mv = new Uint8Array(NCELL);    // 本 tick 是否已处理
+
+  function idx(x, y) { return y * GW + x; }
+  function inb(x, y) { return x >= 0 && x < GW && y >= 0 && y < GH; }
+  function at(x, y) { return inb(x, y) ? g[y * GW + x] : WALL; }   // 界外当石墙，兜住整个世界
+
+  function initAux(m) {
+    if (m === FIRE) return 24 + ri(34);
+    if (m === STEAM) return 70 + ri(90);
+    if (m === SMOKE) return 44 + ri(56);
+    if (m === ACID) return 40;
+    return 0;
+  }
+  function setCell(i, m, byUser) {
+    g[i] = m; aux[i] = initAux(m); tint[i] = ri(4) & 3;
+    own[i] = byUser ? 1 : 0; mv[i] = 1;
+  }
+  function swapCell(a, b) {
+    var t = g[a]; g[a] = g[b]; g[b] = t;
+    t = aux[a]; aux[a] = aux[b]; aux[b] = t;
+    t = tint[a]; tint[a] = tint[b]; tint[b] = t;
+    t = own[a]; own[a] = own[b]; own[b] = t;
+    mv[a] = 1; mv[b] = 1;
+  }
+  function clearGrid() {
+    var i;
+    for (i = 0; i < NCELL; i++) { g[i] = E; aux[i] = 0; tint[i] = 0; own[i] = 0; mv[i] = 0; }
+  }
+  function fillRect(x, y, w, h, m) {
+    var xx, yy;
+    for (yy = y; yy < y + h; yy++) {
+      for (xx = x; xx < x + w; xx++) {
+        if (inb(xx, yy)) setCell(idx(xx, yy), m, false);
+      }
+    }
+  }
+  function countMat(m, area) {
+    var x, y, n = 0, i;
+    if (!area) {
+      for (i = 0; i < NCELL; i++) if (g[i] === m) n++;
+      return n;
+    }
+    for (y = area.y; y < area.y + area.h; y++) {
+      for (x = area.x; x < area.x + area.w; x++) {
+        if (inb(x, y) && g[idx(x, y)] === m) n++;
+      }
+    }
+    return n;
+  }
+
+  /* ---------- 物理 ---------- */
+  function kindOf(m) { return MAT[m].kind; }
+  function densOf(m) { return MAT[m].dens; }
+  // 粉末/液体能不能“沉进”目标格
+  function canSink(m, o) {
+    if (o === E) return true;
+    var ko = kindOf(o);
+    if (ko === GAS) return true;
+    if (ko === LIQUID) return densOf(m) > densOf(o);
+    return false;
+  }
+  // 气体能不能“浮上”目标格
+  function canRise(o) {
+    if (o === E) return true;
+    return kindOf(o) === LIQUID;
+  }
+
+  function stepPowder(x, y, i) {
+    var below = idx(x, y + 1);
+    if (inb(x, y + 1) && canSink(g[i], g[below])) { swapCell(i, below); return; }
+    var d = rnd() < 0.5 ? -1 : 1, k, nx, j;
+    for (k = 0; k < 2; k++) {
+      nx = x + (k === 0 ? d : -d);
+      if (inb(nx, y + 1)) {
+        j = idx(nx, y + 1);
+        if (canSink(g[i], g[j])) { swapCell(i, j); return; }
+      }
+    }
+  }
+
+  function stepLiquid(x, y, i) {
+    var m = g[i];
+    var below = idx(x, y + 1);
+    if (inb(x, y + 1) && canSink(m, g[below])) { swapCell(i, below); return; }
+    var d = rnd() < 0.5 ? -1 : 1, k, nx, j;
+    for (k = 0; k < 2; k++) {
+      nx = x + (k === 0 ? d : -d);
+      if (inb(nx, y + 1)) {
+        j = idx(nx, y + 1);
+        if (canSink(m, g[j])) { swapCell(i, j); return; }
+      }
+    }
+    // 水平摊平
+    var flow = MAT[m].flow, best = -1, cx = x, s;
+    for (s = 1; s <= flow; s++) {
+      nx = x + d * s;
+      if (!inb(nx, y)) break;
+      j = idx(nx, y);
+      if (!canSink(m, g[j])) break;
+      best = j; cx = nx;
+    }
+    if (best < 0) {
+      d = -d;
+      for (s = 1; s <= flow; s++) {
+        nx = x + d * s;
+        if (!inb(nx, y)) break;
+        j = idx(nx, y);
+        if (!canSink(m, g[j])) break;
+        best = j; cx = nx;
+      }
+    }
+    if (best >= 0) swapCell(i, best);
+  }
+
+  // 火苗旁边有能烧的/能灭它的东西，就赖在原地不飘走（不然还没点着就窜上天了）
+  function fireCling(x, y) {
+    var k, nx, ny, nm;
+    for (k = 0; k < 4; k++) {
+      nx = x + NX[k]; ny = y + NY[k];
+      if (!inb(nx, ny)) continue;
+      nm = g[idx(nx, ny)];
+      if (nm === WOOD || nm === OIL || nm === PLANT || nm === GUN ||
+          nm === WATER || nm === ACID || nm === ICE) return true;
+    }
+    return false;
+  }
+
+  function stepGas(x, y, i) {
+    var m = g[i];
+    if (m === FIRE) {
+      if (rnd() < 0.42) return;                     // 火苗窜得慢一点
+      if (fireCling(x, y)) return;                  // 咬住燃料
+    }
+    var up = idx(x, y - 1);
+    if (inb(x, y - 1) && canRise(g[up])) { swapCell(i, up); return; }
+    var d = rnd() < 0.5 ? -1 : 1, k, nx, j;
+    for (k = 0; k < 2; k++) {
+      nx = x + (k === 0 ? d : -d);
+      if (inb(nx, y - 1)) {
+        j = idx(nx, y - 1);
+        if (canRise(g[j])) { swapCell(i, j); return; }
+      }
+    }
+    nx = x + d;
+    if (inb(nx, y)) {
+      j = idx(nx, y);
+      if (g[j] === E) { swapCell(i, j); }
+    }
+  }
+
+  /* ---------- 反应 ---------- */
+  var NX = [0, 0, 1, -1], NY = [1, -1, 0, 0];
+
+  function explode(cx, cy, R) {
+    var dx, dy, x, y, i, m, dd, rr = R * R;
+    for (dy = -R; dy <= R; dy++) {
+      for (dx = -R; dx <= R; dx++) {
+        dd = dx * dx + dy * dy;
+        if (dd > rr) continue;
+        x = cx + dx; y = cy + dy;
+        if (!inb(x, y)) continue;
+        i = idx(x, y); m = g[i];
+        if (m === WALL) continue;
+        if (m === GUN) { setCell(i, FIRE, false); continue; }   // 连锁：下一 tick 由火苗引爆
+        if (m === E || BLASTABLE[m] || kindOf(m) === LIQUID || kindOf(m) === GAS) {
+          setCell(i, dd < rr * 0.34 ? FIRE : (rnd() < 0.45 ? FIRE : SMOKE), false);
+        }
+      }
+    }
+  }
+
+  // 返回 true 表示该格已被反应改写，本 tick 不再走移动
+  function react(x, y, i) {
+    var m = g[i], k, j, nm, nx, ny, life;
+
+    if (m === FIRE) {
+      for (k = 0; k < 4; k++) {
+        nx = x + NX[k]; ny = y + NY[k];
+        if (!inb(nx, ny)) continue;
+        j = idx(nx, ny); nm = g[j];
+        if (nm === WATER) { setCell(j, STEAM, false); setCell(i, STEAM, false); return true; }
+        if (nm === WOOD && rnd() < 0.11) setCell(j, FIRE, false);
+        else if (nm === OIL && rnd() < 0.5) setCell(j, FIRE, false);
+        else if (nm === PLANT && rnd() < 0.24) setCell(j, FIRE, false);
+        else if (nm === GUN) { explode(nx, ny, 6); return true; }
+        else if (nm === ICE && rnd() < 0.18) setCell(j, WATER, false);
+      }
+      life = aux[i] - 1;
+      if (life <= 0) { setCell(i, rnd() < 0.32 ? SMOKE : E, false); return true; }
+      aux[i] = life;
+      return false;
+    }
+
+    if (m === LAVA) {
+      for (k = 0; k < 4; k++) {
+        nx = x + NX[k]; ny = y + NY[k];
+        if (!inb(nx, ny)) continue;
+        j = idx(nx, ny); nm = g[j];
+        if (nm === WATER || nm === ACID) { setCell(j, STEAM, false); setCell(i, STONE, false); return true; }
+        if (nm === ICE) { setCell(j, WATER, false); continue; }
+        if (nm === SAND) { if (rnd() < 0.06) setCell(j, GLASS, false); continue; }
+        if (nm === WOOD || nm === PLANT || nm === OIL) { setCell(j, FIRE, false); continue; }
+        if (nm === GUN) { explode(nx, ny, 6); return true; }
+      }
+      if (inb(x, y - 1) && g[idx(x, y - 1)] === E && rnd() < 0.02) setCell(idx(x, y - 1), FIRE, false);
+      return false;
+    }
+
+    if (m === ACID) {
+      var chg = aux[i];
+      for (k = 0; k < 4; k++) {
+        nx = x + NX[k]; ny = y + NY[k];
+        if (!inb(nx, ny)) continue;
+        j = idx(nx, ny); nm = g[j];
+        if (!ACIDABLE[nm]) continue;
+        if (rnd() < (nm === WALL ? 0.07 : 0.24)) {
+          setCell(j, rnd() < 0.25 ? SMOKE : E, false);
+          chg -= 8;
+          if (chg <= 0) { setCell(i, SMOKE, false); return true; }
+        }
+      }
+      aux[i] = chg;
+      return false;
+    }
+
+    if (m === PLANT) {
+      for (k = 0; k < 4; k++) {
+        nx = x + NX[k]; ny = y + NY[k];
+        if (!inb(nx, ny)) continue;
+        j = idx(nx, ny);
+        if (g[j] === WATER && rnd() < 0.12) { setCell(j, PLANT, false); }
+      }
+      return false;
+    }
+
+    if (m === ICE) {
+      for (k = 0; k < 4; k++) {
+        nx = x + NX[k]; ny = y + NY[k];
+        if (!inb(nx, ny)) continue;
+        j = idx(nx, ny); nm = g[j];
+        if (nm === WATER && rnd() < 0.03) setCell(j, ICE, false);
+        else if (nm === LAVA) { setCell(i, WATER, false); return true; }
+      }
+      return false;
+    }
+
+    if (m === STEAM) {
+      for (k = 0; k < 4; k++) {
+        nx = x + NX[k]; ny = y + NY[k];
+        if (!inb(nx, ny)) continue;
+        if (g[idx(nx, ny)] === ICE && rnd() < 0.3) { setCell(i, WATER, false); return true; }
+      }
+      life = aux[i] - 1;
+      if (life <= 0) { setCell(i, rnd() < 0.34 ? WATER : E, false); return true; }
+      aux[i] = life;
+      return false;
+    }
+
+    if (m === SMOKE) {
+      life = aux[i] - 1;
+      if (life <= 0) { setCell(i, E, false); return true; }
+      aux[i] = life;
+      return false;
+    }
+
+    return false;
+  }
+
+  /* ---------- 一 tick ---------- */
+  var tick = 0;
+  function step() {
+    var x, y, i, m, kd;
+    for (i = 0; i < NCELL; i++) mv[i] = 0;
+    tick++;
+    for (y = GH - 1; y >= 0; y--) {
+      var l2r = ((tick + y) & 1) === 0;
+      for (var c = 0; c < GW; c++) {
+        x = l2r ? c : GW - 1 - c;
+        i = y * GW + x;
+        m = g[i];
+        if (m === E || mv[i]) continue;
+        if (react(x, y, i)) continue;
+        m = g[i];
+        if (m === E || mv[i]) continue;
+        kd = MAT[m].kind;
+        if (kd === POWDER) stepPowder(x, y, i);
+        else if (kd === LIQUID) stepLiquid(x, y, i);
+        else if (kd === GAS) stepGas(x, y, i);
+      }
+    }
+  }
+
+  /* ---------- 关卡 ---------- */
+  // build 指令：["r", x, y, w, h, mat]
+  var LEVELS = [
+    {
+      name: "细水长流", icon: "💧",
+      brief: "水会自己找路——把水灌进屋顶开口下方的水池里。",
+      build: [["r", 76, 58, 3, 29, WALL], ["r", 112, 58, 3, 29, WALL],
+              ["r", 76, 56, 39, 2, WALL], ["r", 92, 56, 5, 2, E]],
+      budget: [[WATER, 200]],
+      goal: [{ mat: WATER, cmp: ">=", n: 60, area: { x: 79, y: 60, w: 33, h: 27 }, label: "水池里的清水" }]
+    },
+    {
+      name: "玻璃工坊", icon: "🔷",
+      brief: "熔岩烤沙子会烧出玻璃。把沙铺进坑里，再浇上熔岩。",
+      build: [["r", 30, 60, 3, 27, WALL], ["r", 88, 60, 3, 27, WALL]],
+      budget: [[SAND, 300], [LAVA, 150]],
+      goal: [{ mat: GLASS, cmp: ">=", n: 40, area: null, label: "烧成的玻璃" }]
+    },
+    {
+      name: "以水灭火", icon: "🚒",
+      brief: "木堆已经着了，赶紧灭——烧掉太多就算救援失败。",
+      build: [["r", 48, 72, 16, 15, WOOD], ["r", 54, 71, 4, 1, FIRE]],
+      budget: [[WATER, 150], [ICE, 40]],
+      goal: [{ mat: WOOD, cmp: ">=", n: 200, area: { x: 48, y: 72, w: 16, h: 15 }, label: "保住的木头" },
+             { mat: FIRE, cmp: "<=", n: 0, area: null, label: "还在烧的火苗" }]
+    },
+    {
+      name: "火药开山", icon: "🧨",
+      brief: "岩层堵死了沙子的去路。火药落到岩层底下，再点一把火。",
+      build: [["r", 20, 44, 3, 36, WALL], ["r", 60, 44, 3, 36, WALL],
+              ["r", 23, 50, 37, 26, SAND], ["r", 23, 77, 37, 3, STONE]],
+      budget: [[GUN, 100], [FIRE, 20]],
+      goal: [{ mat: SAND, cmp: ">=", n: 60, area: { x: 24, y: 80, w: 35, h: 7 }, label: "漏到下层的沙" }]
+    },
+    {
+      name: "酸蚀开闸", icon: "🧪",
+      brief: "水库底下封着石墙。强酸比水重，会自己沉底干活。",
+      build: [["r", 10, 40, 3, 23, WALL], ["r", 46, 40, 3, 23, WALL],
+              ["r", 13, 60, 33, 3, WALL], ["r", 13, 44, 33, 16, WATER],
+              ["r", 10, 66, 3, 21, WALL], ["r", 46, 66, 3, 21, WALL]],
+      budget: [[ACID, 90]],
+      goal: [{ mat: WATER, cmp: ">=", n: 40, area: { x: 13, y: 68, w: 33, h: 19 }, label: "放进下池的水" }]
+    },
+    {
+      name: "藤蔓花园", icon: "🌿",
+      brief: "藤蔓靠喝水疯长。往池子里撒几颗，然后看着它铺满。",
+      build: [["r", 37, 56, 3, 31, WALL], ["r", 81, 56, 3, 31, WALL],
+              ["r", 40, 62, 41, 24, WATER]],
+      budget: [[PLANT, 24], [WATER, 120]],
+      goal: [{ mat: PLANT, cmp: ">=", n: 120, area: null, label: "长出的藤蔓" }]
+    },
+    {
+      name: "熔岩铸岩", icon: "🪨",
+      brief: "熔岩遇水会瞬间凝成岩石。表层凝住后就浇不动了——分几层来。",
+      build: [["r", 44, 64, 3, 23, WALL], ["r", 76, 64, 3, 23, WALL]],
+      budget: [[LAVA, 240], [WATER, 240]],
+      goal: [{ mat: STONE, cmp: ">=", n: 60, area: { x: 47, y: 64, w: 29, h: 23 }, label: "模子里的岩石" }]
+    },
+    {
+      name: "冰封水池", icon: "🧊",
+      brief: "寒冰会把挨着的水一起冻上。撒一把种子，剩下的交给低温。",
+      build: [["r", 30, 58, 3, 29, WALL], ["r", 90, 58, 3, 29, WALL],
+              ["r", 33, 64, 57, 22, WATER]],
+      budget: [[ICE, 30]],
+      goal: [{ mat: ICE, cmp: ">=", n: 200, area: null, label: "冻住的冰" }]
+    },
+    {
+      name: "油水不容", icon: "🛢️",
+      brief: "油比水轻，不管你先倒哪个，它们最后都会自己分层。",
+      build: [["r", 44, 56, 3, 31, WALL], ["r", 76, 56, 3, 31, WALL]],
+      budget: [[WATER, 300], [OIL, 240]],
+      goal: [{ mat: WATER, cmp: ">=", n: 200, area: { x: 47, y: 78, w: 29, h: 9 }, label: "沉在下层的水" },
+             { mat: OIL, cmp: ">=", n: 150, area: { x: 47, y: 70, w: 29, h: 8 }, label: "浮在上层的油" }]
+    },
+    {
+      name: "造物工坊", icon: "🏆",
+      brief: "毕业考：玻璃、岩石、藤蔓，一次凑齐三样。",
+      build: [["r", 18, 62, 3, 25, WALL], ["r", 58, 62, 3, 25, WALL], ["r", 98, 62, 3, 25, WALL]],
+      budget: [[SAND, 220], [LAVA, 200], [WATER, 320], [PLANT, 12]],
+      goal: [{ mat: GLASS, cmp: ">=", n: 30, area: null, label: "玻璃" },
+             { mat: STONE, cmp: ">=", n: 30, area: null, label: "岩石" },
+             { mat: PLANT, cmp: ">=", n: 30, area: null, label: "藤蔓" }]
+    }
+  ];
+  var NLV = LEVELS.length;
+
+  var FREE_PAL = [WALL, SAND, WATER, OIL, LAVA, FIRE, WOOD, PLANT, ICE, GLASS, GUN, ACID, STONE];
+
+  /* ---------- 存档 ---------- */
+  function defRec() {
+    var s = [], k;
+    for (k = 0; k < NLV; k++) s.push(0);
+    return { v: 1, st: s, last: 0 };
+  }
+  function loadRec() {
+    var r = defRec(), o, k;
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return r;
+      o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return r;
+      if (Object.prototype.toString.call(o.st) === "[object Array]") {
+        for (k = 0; k < NLV; k++) {
+          var v = parseInt(o.st[k], 10);
+          r.st[k] = (isFinite(v) && v > 0) ? (v > 3 ? 3 : v) : 0;
+        }
+      }
+      var l = parseInt(o.last, 10);
+      r.last = (isFinite(l) && l >= 0 && l < NLV) ? l : 0;
+    } catch (e) { }
+    return r;
+  }
+  function saveRec() {
+    try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) { }
+  }
+  function clearedCount() {
+    var n = 0, k;
+    for (k = 0; k < NLV; k++) if (rec.st[k] > 0) n++;
+    return n;
+  }
+  function totalStars() {
+    var n = 0, k;
+    for (k = 0; k < NLV; k++) n += rec.st[k];
+    return n;
+  }
+  function starStr(n) {
+    return (n >= 1 ? "★" : "☆") + (n >= 2 ? "★" : "☆") + (n >= 3 ? "★" : "☆");
+  }
+
+  /* ---------- 状态 ---------- */
+  var rec = defRec();
+  var li = 0;              // -1 = 自由沙盘
+  var used = null;         // 本关各材料已用量
+  var budget = null;       // 本关预算（自由模式为 null）
+  var tool = SAND;
+  var brush = 1;           // 0/1/2 → 半径 1/2/4
+  var BRUSH_R = [1, 2, 4];
+  var running = true, fast = false;
+  var hold = 0, done = false, msg = "";
+  var inited = false, active = false, raf = 0;
+  var cav = null, ctx = null, painting = false, px = -1, py = -1;
+
+  function budgetOf(mat) {
+    if (!budget) return Infinity;
+    return (budget[mat] === undefined) ? 0 : budget[mat];
+  }
+  function leftOf(mat) {
+    if (!budget) return Infinity;
+    return budgetOf(mat) - (used[mat] || 0);
+  }
+  function budgetTotal() {
+    if (!budget) return 0;
+    var s = 0, k;
+    for (k = 0; k < NMAT; k++) if (budget[k] !== undefined) s += budget[k];
+    return s;
+  }
+  function usedTotal() {
+    var s = 0, k;
+    if (!used) return 0;
+    for (k = 0; k < NMAT; k++) if (used[k]) s += used[k];
+    return s;
+  }
+  function starsFor() {
+    var tot = budgetTotal();
+    if (tot <= 0) return 3;
+    var leftRatio = 1 - usedTotal() / tot;
+    if (leftRatio >= 0.5) return 3;
+    if (leftRatio >= 0.2) return 2;
+    return 1;
+  }
+  function palette() {
+    var out = [E], k;
+    if (li < 0) {
+      for (k = 0; k < FREE_PAL.length; k++) out.push(FREE_PAL[k]);
+      return out;
+    }
+    var lv = LEVELS[li];
+    for (k = 0; k < lv.budget.length; k++) out.push(lv.budget[k][0]);
+    return out;
+  }
+
+  function loadLevel(n) {
+    li = (n === -1) ? -1 : ((n % NLV) + NLV) % NLV;
+    srnd(20260801 + (li + 2) * 7919);
+    clearGrid();
+    tick = 0; hold = 0; done = false; msg = "";
+    fillRect(0, GH - FLOOR, GW, FLOOR, WALL);
+    used = {}; budget = null;
+    if (li >= 0) {
+      var lv = LEVELS[li], k, op;
+      for (k = 0; k < lv.build.length; k++) {
+        op = lv.build[k];
+        if (op[0] === "r") fillRect(op[1], op[2], op[3], op[4], op[5]);
+      }
+      budget = {};
+      for (k = 0; k < lv.budget.length; k++) budget[lv.budget[k][0]] = lv.budget[k][1];
+      rec.last = li; saveRec();
+    }
+    var pal = palette();
+    if (pal.indexOf(tool) < 0) tool = pal.length > 1 ? pal[1] : E;
+    buildPal();            // 每关材料不同，调色板必须跟着换
+    running = true;
+  }
+
+  /* ---------- 画笔 ---------- */
+  function paint(cx, cy, mat) {
+    var r = BRUSH_R[brush], dx, dy, x, y, i, n = 0, cur;
+    for (dy = -r; dy <= r; dy++) {
+      for (dx = -r; dx <= r; dx++) {
+        if (dx * dx + dy * dy > r * r) continue;
+        x = cx + dx; y = cy + dy;
+        if (!inb(x, y)) continue;
+        if (y >= GH - FLOOR) continue;            // 地基不许动
+        i = idx(x, y); cur = g[i];
+        if (cur === mat) continue;
+        if (mat === E) {
+          if (cur === E) continue;
+          if (budget && own[i] && used[cur]) used[cur]--;   // 退还自己画的
+          setCell(i, E, false);
+          n++;
+          continue;
+        }
+        if (budget) {
+          if (budget[mat] === undefined) { msg = "本关不给你这种材料"; return n; }
+          if (leftOf(mat) <= 0) { msg = "「" + MAT[mat].name + "」预算用完啦"; return n; }
+          if (cur !== E && own[i] && used[cur]) used[cur]--;
+          used[mat] = (used[mat] || 0) + 1;
+        }
+        setCell(i, mat, true);
+        n++;
+      }
+    }
+    return n;
+  }
+
+  /* ---------- 目标判定 ---------- */
+  function clauseNow(c) { return countMat(c.mat, c.area); }
+  function clauseOk(c) {
+    var v = clauseNow(c);
+    return c.cmp === ">=" ? v >= c.n : v <= c.n;
+  }
+  function goalMet() {
+    if (li < 0) return false;
+    var gs = LEVELS[li].goal, k;
+    for (k = 0; k < gs.length; k++) if (!clauseOk(gs[k])) return false;
+    return true;
+  }
+  function checkGoal() {
+    if (li < 0 || done) return false;
+    if (goalMet()) {
+      hold++;
+      if (hold >= HOLD) {
+        done = true;
+        var s = starsFor();
+        var first = rec.st[li] === 0;
+        if (s > rec.st[li]) rec.st[li] = s;
+        saveRec();
+        msg = "🎉 达成！" + starStr(s) + "（用料 " + usedTotal() + " / " + budgetTotal() + "）";
+        if (first) { try { bumpUsage("psbfirst"); } catch (e) { } }
+        if (clearedCount() >= NLV) { try { bumpUsage("psbmaster"); } catch (e2) { } }
+        return true;
+      }
+    } else { hold = 0; }
+    return false;
+  }
+
+  /* ---------- 渲染 ---------- */
+  function draw() {
+    if (!ctx) return;
+    ctx.fillStyle = "#070b16";
+    ctx.fillRect(0, 0, CW, CH);
+    var x, y, i, m, run, runM, runT, t;
+    for (y = 0; y < GH; y++) {
+      run = 0; runM = -1; runT = 0;
+      for (x = 0; x <= GW; x++) {
+        if (x < GW) { i = y * GW + x; m = g[i]; t = tint[i] & 3; } else { m = -2; t = 0; }
+        if (m === runM && t === runT) { run++; continue; }
+        if (run > 0 && runM > 0) {
+          ctx.fillStyle = SHADE[runM][runT];
+          ctx.fillRect((x - run) * CELL, y * CELL, run * CELL, CELL);
+        }
+        runM = m; runT = t; run = 1;
+      }
+    }
+    // 目标区虚线框
+    if (li >= 0) {
+      var gs = LEVELS[li].goal, k, a;
+      for (k = 0; k < gs.length; k++) {
+        a = gs[k].area;
+        if (!a) continue;
+        ctx.strokeStyle = clauseOk(gs[k]) ? "rgba(74,222,128,.85)" : "rgba(255,255,255,.5)";
+        ctx.lineWidth = 2;
+        if (ctx.setLineDash) ctx.setLineDash([6, 5]);
+        ctx.strokeRect(a.x * CELL + 1, a.y * CELL + 1, a.w * CELL - 2, a.h * CELL - 2);
+        if (ctx.setLineDash) ctx.setLineDash([]);
+      }
+    }
+    // 笔刷光标
+    if (px >= 0 && py >= 0) {
+      ctx.strokeStyle = "rgba(255,255,255,.7)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc((px + 0.5) * CELL, (py + 0.5) * CELL, (BRUSH_R[brush] + 0.5) * CELL, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  /* ---------- UI ---------- */
+  function $(id) { return document.getElementById(id); }
+  function setTxt(id, s) { var el = $(id); if (el) el.textContent = s; }
+
+  var palBtns = [], lvBtns = [], brushBtns = [];
+
+  function buildPal() {
+    var box = $("psbPal");
+    if (!box) return;
+    box.innerHTML = "";
+    palBtns = [];
+    var list = palette(), k;
+    for (k = 0; k < list.length; k++) {
+      (function (mat) {
+        var b = document.createElement("button");
+        b.setAttribute("type", "button");
+        b.innerHTML = "<span>" + MAT[mat].emoji + "</span><i>" + MAT[mat].name + "</i><em></em>";
+        b.title = MAT[mat].tip;
+        b.addEventListener("click", function () { setTool(mat); });
+        box.appendChild(b);
+        palBtns.push({ mat: mat, el: b });
+      }(list[k]));
+    }
+  }
+  function buildBrush() {
+    var box = $("psbBrush");
+    if (!box) return;
+    box.innerHTML = "";
+    brushBtns = [];
+    var names = ["细笔", "中笔", "粗笔"], k;
+    for (k = 0; k < 3; k++) {
+      (function (n) {
+        var b = document.createElement("button");
+        b.setAttribute("type", "button");
+        b.textContent = names[n];
+        b.addEventListener("click", function () { setBrush(n); });
+        box.appendChild(b);
+        brushBtns.push(b);
+      }(k));
+    }
+  }
+  function buildLevels() {
+    var box = $("psbLevels");
+    if (!box) return;
+    box.innerHTML = "";
+    lvBtns = [];
+    var k;
+    for (k = 0; k < NLV; k++) {
+      (function (n) {
+        var b = document.createElement("button");
+        b.setAttribute("type", "button");
+        b.innerHTML = (n + 1) + "<i>" + starStr(rec.st[n]) + "</i>";
+        b.title = LEVELS[n].icon + " " + LEVELS[n].name;
+        b.addEventListener("click", function () { loadLevel(n); sync(); draw(); });
+        box.appendChild(b);
+        lvBtns.push(b);
+      }(k));
+    }
+    var f = document.createElement("button");
+    f.setAttribute("type", "button");
+    f.innerHTML = "🧪<i>自由</i>";
+    f.title = "自由沙盘：材料无限，随便造";
+    f.addEventListener("click", function () { loadLevel(-1); sync(); draw(); });
+    box.appendChild(f);
+    lvBtns.push(f);
+  }
+
+  function goalText() {
+    if (li < 0) return "自由沙盘：材料无限，没有目标，尽情折腾。";
+    var gs = LEVELS[li].goal, k, out = [], c;
+    for (k = 0; k < gs.length; k++) {
+      c = gs[k];
+      out.push(c.label + " " + (c.cmp === ">=" ? "≥" : "≤") + " " + c.n + "（现在 " + clauseNow(c) + "）" + (clauseOk(c) ? " ✓" : ""));
+    }
+    return out.join("　·　");
+  }
+
+  function sync() {
+    var k, p, b;
+    setTxt("psbName", li < 0 ? "🧪 自由沙盘" : (LEVELS[li].icon + " " + (li + 1) + ". " + LEVELS[li].name));
+    setTxt("psbStars", li < 0 ? "—" : starStr(rec.st[li]));
+    setTxt("psbTotal", clearedCount() + "/" + NLV + " 关 · " + totalStars() + "★");
+    setTxt("psbBudget", li < 0 ? "∞" : (Math.max(0, budgetTotal() - usedTotal()) + " / " + budgetTotal()));
+    setTxt("psbTip", li < 0 ? "自由沙盘：左边挑材料，在画布上按住涂抹。" : LEVELS[li].brief);
+    setTxt("psbGoal", goalText());
+    var info = $("psbInfo");
+    if (info) {
+      info.textContent = msg || (running ? (fast ? "⏩ 快进中" : "▶ 模拟运行中") : "⏸ 已暂停（还能继续画）");
+      info.className = done ? "ok" : "";
+    }
+    for (k = 0; k < palBtns.length; k++) {
+      p = palBtns[k];
+      p.el.className = (p.mat === tool) ? "on" : "";
+      var em = p.el.getElementsByTagName ? p.el.getElementsByTagName("em") : null;
+      var lt = (p.mat === E || !budget) ? "" : String(Math.max(0, leftOf(p.mat)));
+      if (em && em[0]) em[0].textContent = lt;
+    }
+    for (k = 0; k < brushBtns.length; k++) brushBtns[k].className = (k === brush) ? "on" : "";
+    for (k = 0; k < lvBtns.length; k++) {
+      if (k < NLV) {
+        lvBtns[k].className = (li === k) ? "on" : "";
+        lvBtns[k].innerHTML = (k + 1) + "<i>" + starStr(rec.st[k]) + "</i>";
+      } else {
+        lvBtns[k].className = (li < 0) ? "on" : "";
+      }
+    }
+    b = $("psbPlay");
+    if (b) b.textContent = running ? "⏸ 暂停" : "▶ 继续";
+    b = $("psbFast");
+    if (b) b.className = fast ? "on" : "";
+  }
+
+  function setTool(m) { tool = m; msg = ""; sync(); draw(); }
+  function setBrush(n) { brush = n < 0 ? 0 : (n > 2 ? 2 : n); sync(); draw(); }
+  function togglePlay() { running = !running; msg = ""; sync(); }
+  function toggleFast() { fast = !fast; sync(); }
+  function doClear() {
+    // 只清掉“非骨架”的东西：保留石墙地基与关卡墙体
+    var i;
+    for (i = 0; i < NCELL; i++) {
+      if (g[i] !== E && g[i] !== WALL) { g[i] = E; aux[i] = 0; own[i] = 0; }
+    }
+    msg = "已清空画面（关卡骨架保留）";
+    hold = 0;
+    sync(); draw();
+  }
+  function doReset() { loadLevel(li); sync(); draw(); }
+  function doPrev() { loadLevel(li < 0 ? NLV - 1 : (li - 1 + NLV) % NLV); sync(); draw(); }
+  function doNext() { loadLevel(li < 0 ? 0 : (li + 1) % NLV); sync(); draw(); }
+
+  function cavXY(ev) {
+    var r = cav.getBoundingClientRect();
+    var sx = r.width ? CW / r.width : 1, sy = r.height ? CH / r.height : 1;
+    var x = ((ev.clientX || 0) - r.left) * sx, y = ((ev.clientY || 0) - r.top) * sy;
+    return { x: Math.floor(x / CELL), y: Math.floor(y / CELL) };
+  }
+
+  function loop() {
+    raf = 0;
+    if (!active) return;
+    if (running) {
+      var n = fast ? 3 : 1, k;
+      for (k = 0; k < n; k++) { step(); checkGoal(); }
+    }
+    draw();
+    if ((tick & 3) === 0 || done) sync();
+    if (typeof requestAnimationFrame === "function") raf = requestAnimationFrame(loop);
+  }
+
+  function bind(id, fn) {
+    var el = $(id);
+    if (el && el.addEventListener) el.addEventListener("click", fn);
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = $("psbCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    rec = loadRec();
+    buildBrush(); buildLevels();
+    loadLevel(rec.last || 0);
+
+    bind("psbPlay", togglePlay);
+    bind("psbFast", toggleFast);
+    bind("psbClear", doClear);
+    bind("psbReset", doReset);
+    bind("psbPrev", doPrev);
+    bind("psbNext", doNext);
+
+    cav.addEventListener("pointerdown", function (ev) {
+      if (ev.preventDefault) ev.preventDefault();
+      var p = cavXY(ev);
+      painting = true; px = p.x; py = p.y;
+      msg = "";
+      paint(p.x, p.y, tool);
+      sync(); draw();
+    });
+    cav.addEventListener("pointermove", function (ev) {
+      var p = cavXY(ev);
+      px = p.x; py = p.y;
+      if (painting) { paint(p.x, p.y, tool); sync(); }
+      if (!running) draw();
+    });
+    cav.addEventListener("pointerup", function () { painting = false; });
+    cav.addEventListener("pointerleave", function () { painting = false; px = -1; py = -1; });
+
+    inited = true;
+  }
+
+  window.psbRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    sync(); draw();
+    if (!raf && typeof requestAnimationFrame === "function") raf = requestAnimationFrame(loop);
+  };
+  window.psbStop = function () {
+    active = false;
+    painting = false;
+    if (raf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf);
+    raf = 0;
+  };
+
+  window.__psbTest = {
+    KEY: KEY, GW: GW, GH: GH, CELL: CELL, CW: CW, CH: CH, NCELL: NCELL, NMAT: NMAT,
+    FLOOR: FLOOR, HOLD: HOLD, MAT: MAT, SHADE: SHADE, LEVELS: LEVELS, NLV: NLV,
+    FREE_PAL: FREE_PAL, BRUSH_R: BRUSH_R, ACIDABLE: ACIDABLE, BLASTABLE: BLASTABLE,
+    M: { E: E, WALL: WALL, SAND: SAND, WATER: WATER, OIL: OIL, LAVA: LAVA, FIRE: FIRE,
+         STEAM: STEAM, SMOKE: SMOKE, WOOD: WOOD, PLANT: PLANT, ICE: ICE, GLASS: GLASS,
+         GUN: GUN, ACID: ACID, STONE: STONE, ASH: ASH },
+    srnd: srnd, rnd: rnd, ri: ri,
+    idx: idx, inb: inb, at: at, setCell: setCell, swapCell: swapCell,
+    clearGrid: clearGrid, fillRect: fillRect, countMat: countMat,
+    canSink: canSink, canRise: canRise, kindOf: kindOf, densOf: densOf,
+    step: step, react: react, explode: explode,
+    stepPowder: stepPowder, stepLiquid: stepLiquid, stepGas: stepGas,
+    loadLevel: loadLevel, paint: paint, palette: palette,
+    goalMet: goalMet, checkGoal: checkGoal, clauseNow: clauseNow, clauseOk: clauseOk,
+    goalText: goalText, starsFor: starsFor, starStr: starStr,
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    clearedCount: clearedCount, totalStars: totalStars,
+    budgetOf: budgetOf, leftOf: leftOf, budgetTotal: budgetTotal, usedTotal: usedTotal,
+    setTool: setTool, setBrush: setBrush, togglePlay: togglePlay, toggleFast: toggleFast,
+    doClear: doClear, doReset: doReset, doPrev: doPrev, doNext: doNext,
+    draw: draw, sync: sync, cavXY: cavXY,
+    grid: function () { return g; },
+    auxArr: function () { return aux; },
+    ownArr: function () { return own; },
+    get: function () {
+      return { li: li, tool: tool, brush: brush, running: running, fast: fast, hold: hold,
+               done: done, msg: msg, tick: tick, inited: inited, active: active,
+               used: used, budget: budget, rec: rec };
+    },
+    setRec: function (r) { rec = r; },
+    resetInit: function () { inited = false; ctx = null; cav = null; raf = 0; active = false; },
+    reset: function () { rec = defRec(); tool = SAND; brush = 1; fast = false; loadLevel(0); }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🏜️", name: "初次落沙", desc: "在随便沙盘里第一次达成关卡目标", test: function (u) { return (u.psbfirst || 0) >= 1; } },
+      { emoji: "🌋", name: "造物之手", desc: "在随便沙盘里打通全部 10 道沙盘关卡", test: function (u) { return (u.psbmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "一粒沙落下时不需要计划，一堆沙落完自然就有了形状。",
+      "水从不跟石头较劲，它只是绕过去，然后把石头磨圆。",
+      "火需要柴，柴需要时间，时间不讲价。",
+      "熔岩遇水成岩：最激烈的相遇，往往留下最硬的东西。",
+      "沙盘的好处是——推倒重来，从来不用道歉。"
     );
   }
 })();
