@@ -1605,6 +1605,7 @@
         <button data-tab="papercut">✂️ 随便剪纸</button>
         <button data-tab="optics">🔦 随便光路</button>
         <button data-tab="brg">🌉 随便造桥</button>
+        <button data-tab="quantum">⚛️ 随便量子</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -9921,6 +9922,71 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="quantum">
+    <h2>⚛️ 随便量子</h2>
+    <p class="sub">浏览器里的真·量子线路模拟器——摆几扇门，把 |00⟩ 调成纠缠态，看叠加与相位怎么打架</p>
+    <style>
+      #quantum .qbt-wrap { max-width:540px; margin:0 auto; }
+      #quantum canvas#qbtCav { width:100%; max-width:484px; border-radius:18px; display:block; margin:0 auto 10px; background:#0a0f21; box-shadow:0 18px 44px rgba(0,0,0,.55); cursor:pointer; touch-action:none; }
+      #quantum .qbt-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #quantum .qbt-hud span { padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #quantum .qbt-hud b { font-weight:700; color:#8b5cf6; }
+      #quantum .qbt-lab { text-align:center; font-size:.74rem; opacity:.6; margin:2px 0 5px; }
+      #quantum .qbt-row { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:9px; }
+      #quantum .qbt-row button { padding:7px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+      #quantum .qbt-row button:active { transform:translateY(1px); }
+      #quantum .qbt-row button.on { background:linear-gradient(135deg,#8b5cf6,#22d3ee); border-color:transparent; color:#fff; box-shadow:0 6px 18px rgba(139,92,246,.34); }
+      #quantum #qbtPal button { min-width:52px; display:inline-flex; flex-direction:column; align-items:center; gap:1px; font-size:1rem; padding:6px 10px; }
+      #quantum #qbtPal button i { font-style:normal; font-size:.6rem; opacity:.72; font-weight:600; letter-spacing:.02em; }
+      #quantum #qbtLevels { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #quantum #qbtLevels button { min-width:34px; padding:5px 7px; border-radius:10px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; font-size:.75rem; font-weight:700; cursor:pointer; line-height:1.2; }
+      #quantum #qbtLevels button.on { background:linear-gradient(135deg,#8b5cf6,#22d3ee); border-color:transparent; color:#fff; }
+      #quantum #qbtLevels button i { display:block; font-style:normal; font-size:.6rem; opacity:.7; }
+      #quantum .qbt-tipbar { text-align:center; font-size:.78rem; line-height:1.65; opacity:.9; padding:8px 12px; border-radius:12px; background:rgba(139,92,246,.09); border:1px solid rgba(139,92,246,.2); margin-bottom:10px; }
+      #quantum #qbtVec { text-align:center; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.74rem; opacity:.8; padding:6px 10px; border-radius:10px; background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.08); margin-bottom:10px; word-break:break-all; }
+      #quantum #qbtInfo { text-align:center; font-size:.82rem; font-weight:700; padding:7px 12px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14); margin-bottom:10px; min-height:1.2em; }
+      #quantum #qbtInfo.ok { background:rgba(74,222,128,.12); border-color:rgba(74,222,128,.4); color:#86efac; }
+      #quantum .qbt-legend { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; font-size:.72rem; opacity:.7; margin-bottom:10px; }
+      #quantum .qbt-legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:-1px; }
+      #quantum .qbt-help { font-size:.76rem; line-height:1.75; opacity:.78; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
+      #quantum .qbt-help b { color:#c4b5fd; }
+    </style>
+    <div class="qbt-wrap">
+      <div class="qbt-hud">
+        <span>关卡 <b id="qbtName">—</b></span>
+        <span>门数 <b id="qbtGates">0 / 0</b></span>
+        <span>本关 <b id="qbtStars">☆☆☆</b></span>
+        <span>总进度 <b id="qbtTotal">0/12 关</b></span>
+      </div>
+      <div class="qbt-tipbar" id="qbtTip">—</div>
+      <canvas id="qbtCav" width="484" height="344" aria-label="量子线路工作台"></canvas>
+      <div id="qbtVec">|ψ⟩ = 1|0⟩</div>
+      <div class="qbt-legend">
+        <span><i style="background:hsl(0,85%,62%)"></i>相位 0（实正）</span>
+        <span><i style="background:hsl(180,85%,62%)"></i>相位 π（实负）</span>
+        <span><i style="background:hsl(90,85%,62%)"></i>相位 π/2（i）</span>
+        <span><i style="background:rgba(255,255,255,.45)"></i>虚线=目标概率</span>
+      </div>
+      <div class="qbt-lab">量子门（点一扇门 → 再点线路上的格子放下去 · 双比特门要点同一列的两根线）</div>
+      <div class="qbt-row" id="qbtPal"></div>
+      <div id="qbtInfo">选一扇门，点线路上的格子放下去</div>
+      <div class="qbt-row">
+        <button id="qbtPrev">◀ 上一关</button>
+        <button id="qbtReset">🧽 清空线路</button>
+        <button id="qbtMeasure">🎲 测量 200 次</button>
+        <button id="qbtSol">💡 看参考线路</button>
+        <button id="qbtNext">下一关 ▶</button>
+      </div>
+      <div class="qbt-lab">关卡（数字下方是已得星）</div>
+      <div id="qbtLevels"></div>
+      <p class="qbt-help">
+        <b>怎么玩</b>：每根横线是一个量子比特，开机都是 <b>|0⟩</b>，从左往右依次经过你摆的门。选好门再点格子放置；<b>⊕ CNOT / CZ / × SWAP</b> 是双比特门，要在<b>同一列</b>点两根不同的线（CNOT 先点的那根是控制位）。选 <b>🧹 擦除</b> 点格子可拆门。
+        <br><b>目标</b>：把线路末端的态调成关卡要求的目标态。柱状图里<b>柱高=测到该结果的概率</b>、<b>颜色=该分量的相位</b>、<b>白色虚线框=目标概率</b>；底部是<b>保真度</b>，到 100% 自动过关（全局相位不算数，这是物理规矩）。
+        <br><b>算星</b>：门数<b>不超过参考门数</b> ★★★，超 1~2 扇 ★★，再多 ★；点 <b>💡看参考线路</b> 直接摆好（算通关但只记一星）。<b>🎲 测量</b> 会按当前概率抽 200 次，让你亲眼看见叠加态是怎么塌缩的。
+        <br><b>物理彩蛋</b>：第 10 关封了 CNOT——但 <b>H·CZ·H</b> 拼起来就是一个 CNOT，这正是真实超导量子芯片上常干的事。打通首关解锁「⚛️ 初见叠加」，十二关全通解锁「🔬 纠缠大师」。态矢量为完整复数模拟，纯前端零依赖、不联网。
+      </p>
+    </div>
+  </section>
 </section>
 <script>
 (function () {
@@ -10346,6 +10412,7 @@
     if (id === "papercut" && typeof jzhRender === "function") jzhRender();
     if (id === "optics" && typeof lzrRender === "function") lzrRender();
     if (id === "brg" && typeof brgRender === "function") brgRender();
+    if (id === "quantum" && typeof qbtRender === "function") qbtRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -10432,6 +10499,7 @@
     if (id !== "papercut" && typeof jzhStop === "function") jzhStop();
     if (id !== "optics" && typeof lzrStop === "function") lzrStop();
     if (id !== "brg" && typeof brgStop === "function") brgStop();
+    if (id !== "quantum" && typeof qbtStop === "function") qbtStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10650,6 +10718,7 @@
     papercut: "随便剪纸 papercut 剪纸 窗花 团花 对折 对称 折纸 红纸 镂空 手工 年味 民俗 非遗 创作 解压 治愈 画画",
     optics: "随便光路 optics 激光 光学 镜子 反射 折射 分光 棱镜 滤色 三原色 加色 彩虹 光线 追迹 解谜 益智 逻辑 关卡 物理 游戏 laser mirror prism",
     brg: "随便造桥 造桥 桥梁 桁架 结构 力学 受力 受压 受拉 支座 桥墩 卡车 工程 建筑 物理 解谜 益智 关卡 应力 应变 刚度 稳定性 桥梁工程 土木 truss bridge 三角 稳定性",
+    quantum: "随便量子 量子 量子计算 量子线路 量子电路 量子比特 qubit 叠加 叠加态 纠缠 贝尔态 GHZ 相位 保真度 测量 塌缩 波函数 态矢量 阿达玛 Hadamard 受控非 CNOT CZ SWAP 泡利 物理 解谜 益智 关卡 模拟器 quantum circuit 量子门 薛定谔",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -10928,6 +10997,7 @@ splitbill:"tools",
     papercut:"create",
     optics:"games",
     brg:"games",
+    quantum:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -70242,6 +70312,786 @@ splitbill:"tools",
       "受拉的和受压的都很重要，缺一个桥就塌。",
       "桥没塌，不代表它不吃力，只是还没到那一下。",
       "跨度每宽一格，代价都不是线性涨的。"
+    );
+  }
+})();
+/* ===== ⚛️ 随便量子 · 量子线路实验室（前缀 qbt / 存档 suibian_quantum） ===== */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_quantum";
+  var COLS = 10, MAXQ = 3;
+  var CW = 484, CH = 344;
+  var GX = 50, CELLW = 40, TOPY = 36, ROWH = 44;   // 线路区：第 r 根线 y = TOPY + r*ROWH
+  var SY = 188, SBH = 104;                          // 态矢量条形区顶端与高度
+  var PASS = 0.9999;                                // 保真度阈值（全局相位无关）
+  var S2 = Math.SQRT1_2;
+
+  /* ---------- 门定义 ---------- */
+  var GATES = {
+    H:    { nq: 1, label: "H",  col: "#38bdf8", desc: "阿达玛门：把确定的 0/1 打成叠加态" },
+    X:    { nq: 1, label: "X",  col: "#f472b6", desc: "非门：|0⟩ 与 |1⟩ 对调" },
+    Y:    { nq: 1, label: "Y",  col: "#fb923c", desc: "Y 门：翻转的同时带 ±i 相位" },
+    Z:    { nq: 1, label: "Z",  col: "#a78bfa", desc: "Z 门：给 |1⟩ 分量加个负号" },
+    S:    { nq: 1, label: "S",  col: "#34d399", desc: "S 门：给 |1⟩ 加 i（半个 Z）" },
+    T:    { nq: 1, label: "T",  col: "#facc15", desc: "T 门：给 |1⟩ 加 45° 相位（半个 S）" },
+    CNOT: { nq: 2, label: "⊕",  col: "#60a5fa", desc: "受控非：控制位为 1 时翻转目标位（能造纠缠）" },
+    CZ:   { nq: 2, label: "CZ", col: "#c084fc", desc: "受控 Z：两位同时为 1 时加负号（对称）" },
+    SWAP: { nq: 2, label: "×",  col: "#94a3b8", desc: "交换门：把两根线上的量子态互换" }
+  };
+  var ALLK = ["H", "X", "Y", "Z", "S", "T", "CNOT", "CZ", "SWAP"];
+
+  // 单比特门矩阵：[a.re,a.im, b.re,b.im, c.re,c.im, d.re,d.im]
+  var M1 = {
+    H: [S2, 0, S2, 0, S2, 0, -S2, 0],
+    X: [0, 0, 1, 0, 1, 0, 0, 0],
+    Y: [0, 0, 0, -1, 0, 1, 0, 0],
+    Z: [1, 0, 0, 0, 0, 0, -1, 0],
+    S: [1, 0, 0, 0, 0, 0, 0, 1],
+    T: [1, 0, 0, 0, 0, 0, S2, S2]
+  };
+
+  /* ---------- 小工具 ---------- */
+  function clampInt(v, lo, hi, dflt) {
+    v = parseInt(v, 10);
+    if (!isFinite(v)) return dflt;
+    return v < lo ? lo : (v > hi ? hi : v);
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function bits(i, n) {
+    var s = "", k;
+    for (k = n - 1; k >= 0; k--) s += ((i >> k) & 1);
+    return s;
+  }
+  function ketOf(i, n) { return "|" + bits(i, n) + "⟩"; }
+
+  /* ---------- 态矢量运算 ---------- */
+  function zeroState(n) {
+    var dim = 1 << n, re = [], im = [], i;
+    for (i = 0; i < dim; i++) { re.push(0); im.push(0); }
+    re[0] = 1;
+    return { n: n, re: re, im: im };
+  }
+  function qmask(n, q) { return 1 << (n - 1 - q); }   // 约定：q0 是最高位（显示最左）
+
+  function applySingle(s, q, m) {
+    var dim = s.re.length, mask = qmask(s.n, q), i, j, ar, ai, br, bi;
+    for (i = 0; i < dim; i++) {
+      if (i & mask) continue;
+      j = i | mask;
+      ar = s.re[i]; ai = s.im[i]; br = s.re[j]; bi = s.im[j];
+      s.re[i] = m[0] * ar - m[1] * ai + m[2] * br - m[3] * bi;
+      s.im[i] = m[0] * ai + m[1] * ar + m[2] * bi + m[3] * br;
+      s.re[j] = m[4] * ar - m[5] * ai + m[6] * br - m[7] * bi;
+      s.im[j] = m[4] * ai + m[5] * ar + m[6] * bi + m[7] * br;
+    }
+    return s;
+  }
+  function applyCNOT(s, c, t) {
+    var dim = s.re.length, cm = qmask(s.n, c), tm = qmask(s.n, t), i, j, tr, ti;
+    for (i = 0; i < dim; i++) {
+      if (!(i & cm)) continue;
+      if (i & tm) continue;
+      j = i | tm;
+      tr = s.re[i]; ti = s.im[i];
+      s.re[i] = s.re[j]; s.im[i] = s.im[j];
+      s.re[j] = tr; s.im[j] = ti;
+    }
+    return s;
+  }
+  function applyCZ(s, a, b) {
+    var dim = s.re.length, am = qmask(s.n, a), bm = qmask(s.n, b), i;
+    for (i = 0; i < dim; i++) {
+      if ((i & am) && (i & bm)) { s.re[i] = -s.re[i]; s.im[i] = -s.im[i]; }
+    }
+    return s;
+  }
+  function applySWAP(s, a, b) {
+    var dim = s.re.length, am = qmask(s.n, a), bm = qmask(s.n, b), i, j, tr, ti;
+    for (i = 0; i < dim; i++) {
+      if (!(i & am) || (i & bm)) continue;
+      j = (i & ~am) | bm;
+      tr = s.re[i]; ti = s.im[i];
+      s.re[i] = s.re[j]; s.im[i] = s.im[j];
+      s.re[j] = tr; s.im[j] = ti;
+    }
+    return s;
+  }
+  function applyGate(s, g) {
+    if (M1[g.k]) return applySingle(s, g.a, M1[g.k]);
+    if (g.k === "CNOT") return applyCNOT(s, g.a, g.b);
+    if (g.k === "CZ") return applyCZ(s, g.a, g.b);
+    if (g.k === "SWAP") return applySWAP(s, g.a, g.b);
+    return s;
+  }
+  function simulate(n, gates) {
+    var s = zeroState(n), sorted = gates.slice(), i;
+    sorted.sort(function (p, q) { return p.c === q.c ? p.a - q.a : p.c - q.c; });
+    for (i = 0; i < sorted.length; i++) applyGate(s, sorted[i]);
+    return s;
+  }
+  function probs(s) {
+    var p = [], i;
+    for (i = 0; i < s.re.length; i++) p.push(s.re[i] * s.re[i] + s.im[i] * s.im[i]);
+    return p;
+  }
+  function fidelity(s, t) {
+    var dr = 0, di = 0, i;
+    for (i = 0; i < s.re.length; i++) {
+      dr += t.re[i] * s.re[i] + t.im[i] * s.im[i];
+      di += t.re[i] * s.im[i] - t.im[i] * s.re[i];
+    }
+    return dr * dr + di * di;
+  }
+  function measure(s, shots, rng) {
+    var p = probs(s), out = [], i, k, r, acc;
+    for (i = 0; i < p.length; i++) out.push(0);
+    for (k = 0; k < shots; k++) {
+      r = (rng ? rng() : Math.random());
+      acc = 0;
+      for (i = 0; i < p.length; i++) {
+        acc += p[i];
+        if (r < acc) { out[i]++; break; }
+        if (i === p.length - 1) out[i]++;
+      }
+    }
+    return out;
+  }
+
+  /* ---------- 关卡 ---------- */
+  function amp(n, pairs) {   // pairs: [索引, re, im, ...]
+    var dim = 1 << n, re = [], im = [], i;
+    for (i = 0; i < dim; i++) { re.push(0); im.push(0); }
+    for (i = 0; i < pairs.length; i += 3) {
+      re[pairs[i]] = pairs[i + 1];
+      im[pairs[i]] = pairs[i + 2] || 0;
+    }
+    return { n: n, re: re, im: im };
+  }
+  function g1(c, k, a) { return { c: c, k: k, a: a, b: -1 }; }
+  function g2(c, k, a, b) { return { c: c, k: k, a: a, b: b }; }
+
+  var LEVELS = [
+    {
+      name: "翻转一个比特", nq: 1, par: 1,
+      goal: "|1⟩",
+      tip: "所有量子比特开机都是 |0⟩。想让它变成 |1⟩，用最朴素的那扇门。",
+      tgt: amp(1, [1, 1, 0]),
+      sol: [g1(0, "X", 0)]
+    },
+    {
+      name: "量子硬币", nq: 1, par: 1,
+      goal: "(|0⟩+|1⟩)/√2",
+      tip: "别翻它，让它同时是 0 也是 1——这就是叠加态，测量时各一半概率。",
+      tgt: amp(1, [0, S2, 0, 1, S2, 0]),
+      sol: [g1(0, "H", 0)]
+    },
+    {
+      name: "背面朝上", nq: 1, par: 2,
+      goal: "(|0⟩−|1⟩)/√2",
+      tip: "概率还是各一半，但 |1⟩ 前面要带个负号。概率看不出区别，相位能。",
+      tgt: amp(1, [0, S2, 0, 1, -S2, 0]),
+      sol: [g1(0, "H", 0), g1(1, "Z", 0)]
+    },
+    {
+      name: "虚数硬币", nq: 1, par: 2,
+      goal: "(|0⟩+i|1⟩)/√2",
+      tip: "把负号换成 i——相位转 90°，正好是半个 Z。",
+      tgt: amp(1, [0, S2, 0, 1, 0, S2]),
+      sol: [g1(0, "H", 0), g1(1, "S", 0)]
+    },
+    {
+      name: "八分之一相位", nq: 1, par: 2,
+      goal: "(|0⟩+e^{iπ/4}|1⟩)/√2",
+      tip: "再切一半：45° 相位。它是通用量子计算里最关键的那扇小门。",
+      tgt: amp(1, [0, S2, 0, 1, 0.5, 0.5]),
+      sol: [g1(0, "H", 0), g1(1, "T", 0)]
+    },
+    {
+      name: "贝尔纠缠 Φ⁺", nq: 2, par: 2,
+      goal: "(|00⟩+|11⟩)/√2",
+      tip: "先让上面那根叠加，再用受控非把下面那根绑上去——两个比特从此同生共死。",
+      tgt: amp(2, [0, S2, 0, 3, S2, 0]),
+      sol: [g1(0, "H", 0), g2(1, "CNOT", 0, 1)]
+    },
+    {
+      name: "交叉纠缠 Ψ⁺", nq: 2, par: 3,
+      goal: "(|01⟩+|10⟩)/√2",
+      tip: "这回要的是「一个 0 一个 1」。在贝尔态基础上，把其中一根再翻一下。",
+      tgt: amp(2, [1, S2, 0, 2, S2, 0]),
+      sol: [g1(0, "H", 0), g2(1, "CNOT", 0, 1), g1(2, "X", 1)]
+    },
+    {
+      name: "反相纠缠 Ψ⁻", nq: 2, par: 4,
+      goal: "(|01⟩−|10⟩)/√2",
+      tip: "单态：交换两根线会整体变号的那个。比 Ψ⁺ 只差一个负号，但难在负号加对地方。",
+      tgt: amp(2, [1, S2, 0, 2, -S2, 0]),
+      sol: [g1(0, "H", 0), g2(1, "CNOT", 0, 1), g1(2, "X", 1), g1(3, "Z", 0)]
+    },
+    {
+      name: "打了标记的四重叠加", nq: 2, par: 3,
+      goal: "(|00⟩+|01⟩+|10⟩−|11⟩)/2",
+      tip: "四种可能等概率，但要把 |11⟩ 单独标上负号——Grover 搜索里的「预言机」就长这样。",
+      tgt: amp(2, [0, 0.5, 0, 1, 0.5, 0, 2, 0.5, 0, 3, -0.5, 0]),
+      sol: [g1(0, "H", 0), g1(0, "H", 1), g2(1, "CZ", 0, 1)]
+    },
+    {
+      name: "没有 CNOT 的纠缠", nq: 2, par: 4,
+      allow: ["H", "X", "Z", "S", "CZ", "SWAP"],
+      goal: "(|00⟩+|11⟩)/√2",
+      tip: "本关封了 CNOT。别急——受控 Z 夹在两个 H 中间，就是一个受控非。",
+      tgt: amp(2, [0, S2, 0, 3, S2, 0]),
+      sol: [g1(0, "H", 0), g1(0, "H", 1), g2(1, "CZ", 0, 1), g1(2, "H", 1)]
+    },
+    {
+      name: "GHZ 三重纠缠", nq: 3, par: 3,
+      goal: "(|000⟩+|111⟩)/√2",
+      tip: "三根线全绑一起：要么全 0，要么全 1，中间状态一个都不许有。",
+      tgt: amp(3, [0, S2, 0, 7, S2, 0]),
+      sol: [g1(0, "H", 0), g2(1, "CNOT", 0, 1), g2(2, "CNOT", 1, 2)]
+    },
+    {
+      name: "奇偶校验器", nq: 3, par: 5,
+      goal: "(|001⟩+|010⟩+|100⟩+|111⟩)/2",
+      tip: "最后一根线要变成前两根的「异或再取反」：四种奇数个 1 的组合等概率出现。",
+      tgt: amp(3, [1, 0.5, 0, 2, 0.5, 0, 4, 0.5, 0, 7, 0.5, 0]),
+      sol: [g1(0, "H", 0), g1(0, "H", 1), g2(1, "CNOT", 0, 2), g2(2, "CNOT", 1, 2), g1(3, "X", 2)]
+    }
+  ];
+  var NLV = LEVELS.length;
+
+  function allowOf(lv) {
+    var out = [], i, k;
+    for (i = 0; i < ALLK.length; i++) {
+      k = ALLK[i];
+      if (GATES[k].nq > lv.nq) continue;
+      if (lv.allow && lv.allow.indexOf(k) < 0) continue;
+      out.push(k);
+    }
+    return out;
+  }
+
+  /* ---------- 线路编辑 ---------- */
+  function occAt(gates, c, r) {
+    var i, g;
+    for (i = 0; i < gates.length; i++) {
+      g = gates[i];
+      if (g.c !== c) continue;
+      if (g.a === r || g.b === r) return i;
+    }
+    return -1;
+  }
+  function crossBlocked(gates, c, a, b) {
+    var lo = Math.min(a, b), hi = Math.max(a, b), r;
+    for (r = lo + 1; r < hi; r++) if (occAt(gates, c, r) >= 0) return true;
+    return false;
+  }
+  function placeGate(lv, gates, k, c, a, b) {
+    if (!GATES[k]) return "没有这扇门";
+    if (allowOf(lv).indexOf(k) < 0) return "本关不许用 " + k + " 门";
+    if (c < 0 || c >= COLS) return "超出线路范围";
+    if (a < 0 || a >= lv.nq) return "超出线路范围";
+    if (GATES[k].nq === 1) {
+      var e = occAt(gates, c, a);
+      if (e >= 0) gates.splice(e, 1);
+      gates.push({ c: c, k: k, a: a, b: -1 });
+      return "";
+    }
+    if (b < 0 || b >= lv.nq) return "双比特门要点两根不同的线";
+    if (a === b) return "双比特门要点两根不同的线";
+    if (crossBlocked(gates, c, a, b)) return "中间那一格被占了，换一列放";
+    var e1 = occAt(gates, c, a); if (e1 >= 0) gates.splice(e1, 1);
+    var e2 = occAt(gates, c, b); if (e2 >= 0) gates.splice(e2, 1);
+    gates.push({ c: c, k: k, a: a, b: b });
+    return "";
+  }
+  function delAt(gates, c, r) {
+    var i = occAt(gates, c, r);
+    if (i < 0) return false;
+    gates.splice(i, 1);
+    return true;
+  }
+  function gateCount(gates) { return gates.length; }
+  function depthUsed(gates) {
+    var d = 0, i;
+    for (i = 0; i < gates.length; i++) if (gates[i].c + 1 > d) d = gates[i].c + 1;
+    return d;
+  }
+
+  /* ---------- 存档 ---------- */
+  function defRec() {
+    var s = [], g = [], i;
+    for (i = 0; i < NLV; i++) { s.push(0); g.push(0); }
+    return { st: s, gt: g, aF: 0, aM: 0, last: 0 };
+  }
+  function loadRec() {
+    var r = defRec(), raw, o, i;
+    try { raw = localStorage.getItem(KEY); } catch (e) { raw = null; }
+    if (!raw) return r;
+    try { o = JSON.parse(raw); } catch (e2) { return r; }
+    if (!o || typeof o !== "object") return r;
+    for (i = 0; i < NLV; i++) {
+      if (o.st && o.st.length > i) r.st[i] = clampInt(o.st[i], 0, 3, 0);
+      if (o.gt && o.gt.length > i) r.gt[i] = clampInt(o.gt[i], 0, 9999, 0);
+    }
+    r.aF = clampInt(o.aF, 0, 1, 0);
+    r.aM = clampInt(o.aM, 0, 1, 0);
+    r.last = clampInt(o.last, 0, NLV - 1, 0);
+    return r;
+  }
+  function saveRec(r) {
+    try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) { }
+  }
+  function clearedCount(r) {
+    var n = 0, i;
+    for (i = 0; i < NLV; i++) if (r.st[i] > 0) n++;
+    return n;
+  }
+  function totalStars(r) {
+    var n = 0, i;
+    for (i = 0; i < NLV; i++) n += r.st[i];
+    return n;
+  }
+  function starStr(n) { return (n >= 1 ? "★" : "☆") + (n >= 2 ? "★" : "☆") + (n >= 3 ? "★" : "☆"); }
+  function starsFor(lv, used, usedSol) {
+    if (usedSol) return 1;
+    if (used <= lv.par) return 3;
+    if (used <= lv.par + 2) return 2;
+    return 1;
+  }
+
+  /* ---------- 运行状态 ---------- */
+  var cav = null, ctx = null, raf = 0, inited = false, active = false, tick = 0;
+  var st = null, rec = defRec(), tool = "H", pend = null, msg = "", flash = 0;
+  var cur = null, fid = 0, shots = null, done = false;
+
+  function mkState(li) {
+    return { li: clampInt(li, 0, NLV - 1, 0), gates: [], usedSol: false };
+  }
+  function lvNow() { return LEVELS[st ? st.li : 0]; }
+
+  function recompute() {
+    var lv = lvNow();
+    cur = simulate(lv.nq, st.gates);
+    fid = fidelity(cur, lv.tgt);
+    return fid;
+  }
+  function checkSolve() {
+    var lv = lvNow();
+    if (done) return false;
+    if (fid < PASS) return false;
+    done = true;
+    var used = gateCount(st.gates);
+    var s = starsFor(lv, used, st.usedSol);
+    var newMaster = false;
+    if (s > rec.st[st.li]) rec.st[st.li] = s;
+    if (rec.gt[st.li] === 0 || used < rec.gt[st.li]) rec.gt[st.li] = used;
+    rec.last = st.li;
+    if (!rec.aF) { rec.aF = 1; try { bumpUsage("qbtfirst"); } catch (e) { } }
+    if (!rec.aM && clearedCount(rec) >= NLV) { rec.aM = 1; newMaster = true; try { bumpUsage("qbtmaster"); } catch (e2) { } }
+    saveRec(rec);
+    msg = "🎉 目标态达成！用了 " + used + " 扇门（参考 " + lv.par + "），" + starStr(s) +
+      (newMaster ? "　十二关全通！" : "");
+    flash = 60;
+    return true;
+  }
+
+  /* ---------- 操作 ---------- */
+  function loadLevel(i) {
+    st = mkState(i);
+    pend = null; msg = ""; shots = null; done = false;
+    rec.last = st.li;
+    saveRec(rec);
+    recompute();
+  }
+  function doReset() {
+    st.gates = []; st.usedSol = false; pend = null; shots = null; done = false; msg = "";
+    recompute();
+  }
+  function doPrev() { loadLevel((st.li - 1 + NLV) % NLV); }
+  function doNext() { loadLevel((st.li + 1) % NLV); }
+  function doSol() {
+    var lv = lvNow(), i;
+    st.gates = [];
+    for (i = 0; i < lv.sol.length; i++) {
+      st.gates.push({ c: lv.sol[i].c, k: lv.sol[i].k, a: lv.sol[i].a, b: lv.sol[i].b });
+    }
+    st.usedSol = true; pend = null; shots = null; done = false;
+    recompute();
+    msg = "已按参考线路摆好（算通关，但只记一星）";
+    flash = 40;
+    checkSolve();
+  }
+  function doTool(k) {
+    if (allowOf(lvNow()).indexOf(k) < 0 && k !== "del") { msg = "本关用不了这扇门"; flash = 30; return; }
+    tool = k; pend = null;
+  }
+  function doMeasure(rng) {
+    shots = measure(cur, 200, rng);
+    msg = "🎲 测了 200 次（每次测量都会让叠加态塌缩成一个确定结果）";
+    flash = 40;
+    return shots;
+  }
+  function clickCell(c, r) {
+    var lv = lvNow(), why;
+    if (c < 0 || c >= COLS || r < 0 || r >= lv.nq) return "";
+    if (tool === "del") {
+      if (delAt(st.gates, c, r)) { msg = ""; pend = null; shots = null; done = false; recompute(); }
+      return "";
+    }
+    if (GATES[tool] && GATES[tool].nq === 2) {
+      if (!pend) { pend = { c: c, r: r }; msg = "再点同一列的另一根线，选" + (tool === "CNOT" ? "目标位" : "另一端"); return ""; }
+      if (pend.c !== c) { pend = { c: c, r: r }; msg = "双比特门的两端要在同一列"; flash = 30; return ""; }
+      if (pend.r === r) { pend = null; msg = ""; return ""; }
+      why = placeGate(lv, st.gates, tool, c, pend.r, r);
+      pend = null;
+      msg = why || "";
+      if (why) { flash = 30; return why; }
+      shots = null; done = false;
+      recompute(); checkSolve();
+      return "";
+    }
+    why = placeGate(lv, st.gates, tool, c, r, -1);
+    msg = why || "";
+    if (why) { flash = 30; return why; }
+    shots = null; done = false;
+    recompute(); checkSolve();
+    return "";
+  }
+
+  /* ---------- 绘制 ---------- */
+  function rowY(r) { return TOPY + r * ROWH; }
+  function colX(c) { return GX + c * CELLW + CELLW / 2; }
+  function cellAt(px, py) {
+    var lv = lvNow();
+    var c = Math.floor((px - GX) / CELLW), r, best = -1, bd = 1e9, d;
+    if (c < 0 || c >= COLS) return null;
+    for (r = 0; r < lv.nq; r++) {
+      d = Math.abs(py - rowY(r));
+      if (d < bd) { bd = d; best = r; }
+    }
+    if (best < 0 || bd > ROWH * 0.55) return null;
+    return { c: c, r: best };
+  }
+  function phaseCol(re, im, a) {
+    var h = Math.atan2(im, re) * 180 / Math.PI;
+    if (h < 0) h += 360;
+    return "hsla(" + Math.round(h) + ",85%,62%," + a + ")";
+  }
+  function rrect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+  function draw() {
+    if (!ctx) return;
+    var lv = lvNow(), i, r, c, g, x, y;
+    var bg = ctx.createLinearGradient(0, 0, 0, CH);
+    bg.addColorStop(0, "#0a0f21");
+    bg.addColorStop(1, "#141033");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, CW, CH);
+
+    // 列格
+    ctx.strokeStyle = "rgba(255,255,255,.05)";
+    ctx.lineWidth = 1;
+    for (c = 0; c <= COLS; c++) {
+      x = GX + c * CELLW;
+      ctx.beginPath(); ctx.moveTo(x, TOPY - 22); ctx.lineTo(x, rowY(lv.nq - 1) + 22); ctx.stroke();
+    }
+    // 量子线
+    ctx.font = "600 12px system-ui,sans-serif";
+    ctx.textBaseline = "middle";
+    for (r = 0; r < lv.nq; r++) {
+      y = rowY(r);
+      ctx.strokeStyle = "rgba(150,190,255,.34)";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(GX - 6, y); ctx.lineTo(GX + COLS * CELLW + 6, y); ctx.stroke();
+      ctx.fillStyle = "rgba(190,215,255,.85)";
+      ctx.textAlign = "left";
+      ctx.fillText("q" + r, 6, y - 7);
+      ctx.fillStyle = "rgba(140,170,220,.7)";
+      ctx.fillText("|0⟩", 6, y + 8);
+    }
+    // 待定端点
+    if (pend) {
+      x = colX(pend.c); y = rowY(pend.r);
+      ctx.strokeStyle = "rgba(96,165,250,.9)";
+      ctx.setLineDash([4, 3]); ctx.lineWidth = 2;
+      rrect(x - 15, y - 15, 30, 30, 8); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    // 门
+    for (i = 0; i < st.gates.length; i++) {
+      g = st.gates[i];
+      x = colX(g.c);
+      var d = GATES[g.k];
+      if (d.nq === 2) {
+        var ya = rowY(g.a), yb = rowY(g.b);
+        ctx.strokeStyle = d.col; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x, ya); ctx.lineTo(x, yb); ctx.stroke();
+        if (g.k === "CNOT") {
+          ctx.fillStyle = d.col;
+          ctx.beginPath(); ctx.arc(x, ya, 5, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(x, yb, 11, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(x - 11, yb); ctx.lineTo(x + 11, yb);
+          ctx.moveTo(x, yb - 11); ctx.lineTo(x, yb + 11); ctx.stroke();
+        } else if (g.k === "CZ") {
+          ctx.fillStyle = d.col;
+          ctx.beginPath(); ctx.arc(x, ya, 5.5, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(x, yb, 5.5, 0, Math.PI * 2); ctx.fill();
+        } else {
+          ctx.lineWidth = 2.4;
+          [ya, yb].forEach(function (yy) {
+            ctx.beginPath();
+            ctx.moveTo(x - 7, yy - 7); ctx.lineTo(x + 7, yy + 7);
+            ctx.moveTo(x + 7, yy - 7); ctx.lineTo(x - 7, yy + 7);
+            ctx.stroke();
+          });
+        }
+      } else {
+        y = rowY(g.a);
+        ctx.fillStyle = d.col;
+        rrect(x - 14, y - 14, 28, 28, 8); ctx.fill();
+        ctx.fillStyle = "#0b1020";
+        ctx.font = "800 15px system-ui,sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(d.label, x, y + 1);
+      }
+    }
+    // 态矢量条
+    var dim = 1 << lv.nq, p = probs(cur), tp = probs(lv.tgt);
+    var bw = Math.min(46, Math.floor((CW - 40) / dim)) - 6;
+    var startX = (CW - dim * (bw + 6)) / 2;
+    ctx.textAlign = "center";
+    ctx.font = "600 10px system-ui,sans-serif";
+    ctx.fillStyle = "rgba(200,215,255,.55)";
+    ctx.fillText("当前态（柱高=概率，颜色=相位） · 虚线=目标", CW / 2, SY - 8);
+    for (i = 0; i < dim; i++) {
+      x = startX + i * (bw + 6);
+      var base = SY + SBH - 16;
+      ctx.fillStyle = "rgba(255,255,255,.05)";
+      rrect(x, SY + 4, bw, SBH - 20, 4); ctx.fill();
+      var hT = Math.max(0, Math.min(1, tp[i])) * (SBH - 24);
+      if (tp[i] > 1e-9) {
+        ctx.strokeStyle = "rgba(255,255,255,.45)";
+        ctx.setLineDash([3, 2]); ctx.lineWidth = 1;
+        ctx.strokeRect(x + 0.5, base - hT + 0.5, bw - 1, hT);
+        ctx.setLineDash([]);
+      }
+      var hC = Math.max(0, Math.min(1, p[i])) * (SBH - 24);
+      if (p[i] > 1e-9) {
+        ctx.fillStyle = phaseCol(cur.re[i], cur.im[i], 0.9);
+        rrect(x + 2, base - hC, bw - 4, Math.max(2, hC), 3); ctx.fill();
+      }
+      if (shots && shots[i]) {
+        ctx.fillStyle = "rgba(255,255,255,.85)";
+        ctx.font = "700 9px system-ui,sans-serif";
+        ctx.fillText(shots[i] + "", x + bw / 2, base - hC - 7);
+      }
+      ctx.fillStyle = "rgba(200,215,255,.75)";
+      ctx.font = "600 10px system-ui,sans-serif";
+      ctx.fillText(bits(i, lv.nq), x + bw / 2, base + 11);
+    }
+    // 保真度条
+    var fw = CW - 80, fx = 40, fy = CH - 12;
+    ctx.fillStyle = "rgba(255,255,255,.08)";
+    rrect(fx, fy - 6, fw, 8, 4); ctx.fill();
+    var fc = fid >= PASS ? "#4ade80" : (fid > 0.6 ? "#facc15" : "#f87171");
+    ctx.fillStyle = fc;
+    rrect(fx, fy - 6, Math.max(3, fw * Math.max(0, Math.min(1, fid))), 8, 4); ctx.fill();
+    ctx.fillStyle = "rgba(220,232,255,.8)";
+    ctx.font = "700 10px system-ui,sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("保真度", 4, fy - 2);
+    ctx.textAlign = "right";
+    ctx.fillText((fid * 100).toFixed(1) + "%", CW - 4, fy - 2);
+    if (flash > 0 && fid >= PASS) {
+      ctx.strokeStyle = "rgba(74,222,128," + (flash / 90) + ")";
+      ctx.lineWidth = 3;
+      rrect(2, 2, CW - 4, CH - 4, 12); ctx.stroke();
+    }
+  }
+
+  /* ---------- UI 同步 ---------- */
+  function byId(id) { return typeof document !== "undefined" ? document.getElementById(id) : null; }
+  function ampText(s, n) {
+    var out = [], i, re, im, t;
+    for (i = 0; i < s.re.length; i++) {
+      re = s.re[i]; im = s.im[i];
+      if (Math.abs(re) < 1e-9 && Math.abs(im) < 1e-9) continue;
+      t = re.toFixed(3).replace(/\.?0+$/, "");
+      if (Math.abs(im) > 1e-9) t += (im > 0 ? "+" : "−") + Math.abs(im).toFixed(3).replace(/\.?0+$/, "") + "i";
+      out.push(t + ketOf(i, n));
+    }
+    return out.length ? out.join("  ") : "0";
+  }
+  function sync() {
+    var lv = lvNow(), e, i, used = gateCount(st.gates), html;
+    e = byId("qbtName"); if (e) e.textContent = (st.li + 1) + "/" + NLV + " " + lv.name;
+    e = byId("qbtGates"); if (e) e.textContent = used + " / " + lv.par;
+    e = byId("qbtStars"); if (e) e.textContent = starStr(rec.st[st.li]);
+    e = byId("qbtTotal"); if (e) e.textContent = clearedCount(rec) + "/" + NLV + " 关 · " + totalStars(rec) + "★";
+    e = byId("qbtTip");
+    if (e) {
+      e.innerHTML = "<b>" + esc(lv.name) + "</b>（" + lv.nq + " 比特 · 参考 " + lv.par + " 门）　目标态 <b>" +
+        esc(lv.goal) + "</b><br>" + esc(lv.tip);
+    }
+    e = byId("qbtPal");
+    if (e) {
+      var av = allowOf(lv);
+      html = "";
+      for (i = 0; i < av.length; i++) {
+        html += '<button data-qbtgate="' + av[i] + '" class="' + (tool === av[i] ? "on" : "") +
+          '" title="' + esc(GATES[av[i]].desc) + '">' + esc(GATES[av[i]].label) +
+          "<i>" + esc(av[i]) + "</i></button>";
+      }
+      html += '<button data-qbtgate="del" class="' + (tool === "del" ? "on" : "") + '">🧹<i>擦除</i></button>';
+      e.innerHTML = html;
+    }
+    e = byId("qbtLevels");
+    if (e) {
+      html = "";
+      for (i = 0; i < NLV; i++) {
+        html += '<button data-qbtlv="' + i + '" class="' + (i === st.li ? "on" : "") + '">' +
+          (i + 1) + "<i>" + starStr(rec.st[i]) + "</i></button>";
+      }
+      e.innerHTML = html;
+    }
+    e = byId("qbtVec");
+    if (e) e.textContent = "|ψ⟩ = " + ampText(cur, lv.nq);
+    e = byId("qbtInfo");
+    if (e) {
+      if (msg) {
+        e.className = fid >= PASS ? "qbt-info ok" : "qbt-info";
+        e.textContent = msg;
+      } else if (fid >= PASS) {
+        e.className = "qbt-info ok";
+        e.textContent = "✅ 已经是目标态了（保真度 100%）";
+      } else {
+        e.className = "qbt-info";
+        e.textContent = "保真度 " + (fid * 100).toFixed(1) + "% · 选一扇门，点线路上的格子放下去";
+      }
+    }
+  }
+
+  /* ---------- 主循环 ---------- */
+  function loop() {
+    raf = 0;
+    if (!active) return;
+    tick++;
+    if (flash > 0) flash--;
+    draw();
+    if (typeof requestAnimationFrame === "function") raf = requestAnimationFrame(loop);
+  }
+
+  /* ---------- 初始化 ---------- */
+  function cavXY(ev) {
+    var r = cav.getBoundingClientRect();
+    return { x: (ev.clientX - r.left) * (CW / r.width), y: (ev.clientY - r.top) * (CH / r.height) };
+  }
+  function ensureInit() {
+    if (inited || typeof document === "undefined") return;
+    cav = byId("qbtCav");
+    if (!cav) return;
+    ctx = cav.getContext ? cav.getContext("2d") : null;
+    rec = loadRec();
+    st = mkState(rec.last || 0);
+    recompute();
+
+    var pal = byId("qbtPal");
+    if (pal) pal.addEventListener("click", function (ev) {
+      var t = ev.target && ev.target.getAttribute ? (ev.target.getAttribute("data-qbtgate") ||
+        (ev.target.parentNode && ev.target.parentNode.getAttribute ? ev.target.parentNode.getAttribute("data-qbtgate") : null)) : null;
+      if (!t) return;
+      doTool(t); sync(); draw();
+    });
+    var lvs = byId("qbtLevels");
+    if (lvs) lvs.addEventListener("click", function (ev) {
+      var v = ev.target && ev.target.getAttribute ? (ev.target.getAttribute("data-qbtlv") ||
+        (ev.target.parentNode && ev.target.parentNode.getAttribute ? ev.target.parentNode.getAttribute("data-qbtlv") : null)) : null;
+      if (v === null) return;
+      loadLevel(parseInt(v, 10)); sync(); draw();
+    });
+    function bind(id, fn) {
+      var b = byId(id);
+      if (b) b.addEventListener("click", function () { fn(); sync(); draw(); });
+    }
+    bind("qbtReset", doReset);
+    bind("qbtPrev", doPrev);
+    bind("qbtNext", doNext);
+    bind("qbtSol", doSol);
+    bind("qbtMeasure", function () { doMeasure(); });
+
+    cav.addEventListener("pointerdown", function (ev) {
+      if (ev.preventDefault) ev.preventDefault();
+      var p = cavXY(ev), cell = cellAt(p.x, p.y);
+      if (!cell) return;
+      clickCell(cell.c, cell.r);
+      sync(); draw();
+    });
+
+    inited = true;
+  }
+
+  window.qbtRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    if (!st) st = mkState(rec.last || 0);
+    recompute();
+    sync(); draw();
+    if (!raf && typeof requestAnimationFrame === "function") raf = requestAnimationFrame(loop);
+  };
+  window.qbtStop = function () {
+    active = false;
+    if (raf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf);
+    raf = 0;
+  };
+
+  window.__qbtTest = {
+    KEY: KEY, CW: CW, CH: CH, COLS: COLS, MAXQ: MAXQ, PASS: PASS,
+    GATES: GATES, ALLK: ALLK, M1: M1, LEVELS: LEVELS, NLV: NLV,
+    clampInt: clampInt, esc: esc, bits: bits, ketOf: ketOf, ampText: ampText,
+    zeroState: zeroState, qmask: qmask, amp: amp, g1: g1, g2: g2,
+    applySingle: applySingle, applyCNOT: applyCNOT, applyCZ: applyCZ, applySWAP: applySWAP,
+    applyGate: applyGate, simulate: simulate, probs: probs, fidelity: fidelity, measure: measure,
+    allowOf: allowOf, occAt: occAt, crossBlocked: crossBlocked, placeGate: placeGate,
+    delAt: delAt, gateCount: gateCount, depthUsed: depthUsed,
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec,
+    clearedCount: clearedCount, totalStars: totalStars, starStr: starStr, starsFor: starsFor,
+    mkState: mkState, recompute: recompute, checkSolve: checkSolve,
+    loadLevel: loadLevel, doReset: doReset, doPrev: doPrev, doNext: doNext,
+    doSol: doSol, doTool: doTool, doMeasure: doMeasure, clickCell: clickCell,
+    cellAt: cellAt, rowY: rowY, colX: colX, draw: draw, sync: sync, phaseCol: phaseCol,
+    get: function () {
+      var s = st || mkState(0);
+      return { li: s.li, gates: s.gates, usedSol: s.usedSol, tool: tool, pend: pend, cur: cur, fid: fid, shots: shots, done: done, rec: rec, msg: msg, inited: inited, active: active };
+    },
+    resetInit: function () { inited = false; ctx = null; cav = null; raf = 0; active = false; },
+    reset: function () { rec = defRec(); st = mkState(0); tool = "H"; pend = null; msg = ""; shots = null; done = false; recompute(); }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "⚛️", name: "初见叠加", desc: "在随便量子里第一次把线路调成目标态", test: function (u) { return (u.qbtfirst || 0) >= 1; } },
+      { emoji: "🔬", name: "纠缠大师", desc: "在随便量子里打通全部 12 道量子线路", test: function (u) { return (u.qbtmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "叠加态最迷人的地方在于：不看它的时候，它什么都是。",
+      "相位这东西，概率上看不出来，可它决定了最后谁跟谁抵消。",
+      "纠缠不是通信，它只是两个人从一开始就说好了。",
+      "测量是最粗暴的操作：一看，所有可能性只剩一个。",
+      "量子计算不是把答案都算一遍，是让错的答案自己抵消掉。"
     );
   }
 })();
