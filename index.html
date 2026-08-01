@@ -1608,6 +1608,7 @@
         <button data-tab="quantum">⚛️ 随便量子</button>
         <button data-tab="sandbox">🏜️ 随便沙盘</button>
         <button data-tab="factory">⚙️ 随便工厂</button>
+        <button data-tab="wnd">🌬️ 随便风洞</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -10132,6 +10133,94 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="wnd">
+    <h2>🌬️ 随便风洞</h2>
+    <p class="sub">一台真的会算的格子玻尔兹曼（LBM D2Q9）风洞——用鼠标把障碍物画进气流里，实时看压力、涡街和分离泡，量出它的阻力系数与升力系数，5 道绕流挑战等你把 Cd 压到最低</p>
+    <style>
+      #wnd .wnd-wrap { max-width:660px; margin:0 auto; }
+      #wnd canvas#wndCav { width:100%; max-width:640px; border-radius:14px; display:block; margin:0 auto 10px; background:#04060f; box-shadow:0 18px 44px rgba(0,0,0,.55); cursor:crosshair; touch-action:none; image-rendering:pixelated; }
+      #wnd .wnd-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #wnd .wnd-hud span { padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #wnd .wnd-hud b { font-weight:700; color:#7dd3fc; }
+      #wnd .wnd-tip { text-align:center; font-size:.78rem; line-height:1.65; opacity:.92; padding:8px 12px; border-radius:12px; background:rgba(56,189,248,.09); border:1px solid rgba(56,189,248,.22); margin-bottom:8px; }
+      #wnd #wndMeter { text-align:center; font-size:.76rem; line-height:1.55; padding:6px 10px; border-radius:10px; background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.08); margin-bottom:8px; }
+      #wnd #wndMeter.ok { background:rgba(74,222,128,.12); border-color:rgba(74,222,128,.32); color:#bbf7d0; }
+      #wnd #wndShapes { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #wnd #wndShapes button { min-width:56px; display:inline-flex; flex-direction:column; align-items:center; gap:1px; padding:6px 8px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; cursor:pointer; font-size:1.05rem; line-height:1.15; }
+      #wnd #wndShapes button i { font-style:normal; font-size:.6rem; opacity:.75; font-weight:700; }
+      #wnd .wnd-row { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:7px; }
+      #wnd .wnd-row button { padding:7px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+      #wnd .wnd-row button:active { transform:translateY(1px); }
+      #wnd .wnd-row button.on { background:linear-gradient(135deg,#38bdf8,#6366f1); border-color:transparent; color:#fff; box-shadow:0 6px 18px rgba(56,189,248,.34); }
+      #wnd .wnd-sliders { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:8px 14px; margin:10px 0 8px; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
+      #wnd .wnd-sl { display:flex; flex-direction:column; gap:3px; }
+      #wnd .wnd-sl label { font-size:.72rem; opacity:.75; display:flex; justify-content:space-between; gap:8px; }
+      #wnd .wnd-sl label b { color:#7dd3fc; font-weight:700; }
+      #wnd .wnd-sl input[type=range] { width:100%; accent-color:#38bdf8; }
+      #wnd #wndLevels { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #wnd #wndLevels button { min-width:60px; padding:5px 8px; border-radius:10px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; font-size:.75rem; font-weight:700; cursor:pointer; line-height:1.2; }
+      #wnd #wndLevels button.on { background:linear-gradient(135deg,#38bdf8,#6366f1); border-color:transparent; color:#fff; }
+      #wnd #wndLevels button i { display:block; font-style:normal; font-size:.58rem; opacity:.7; }
+      #wnd #wndInfo { text-align:center; font-size:.82rem; font-weight:700; padding:7px 12px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14); margin-bottom:10px; min-height:1.2em; }
+      #wnd #wndInfo.ok { background:rgba(74,222,128,.12); border-color:rgba(74,222,128,.4); color:#86efac; }
+      #wnd .wnd-lab { text-align:center; font-size:.72rem; opacity:.62; margin:2px 0 6px; }
+      #wnd .wnd-help { font-size:.76rem; line-height:1.75; opacity:.78; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
+      #wnd .wnd-help b { color:#7dd3fc; }
+    </style>
+    <div class="wnd-wrap">
+      <div class="wnd-hud">
+        <span>模式 <b id="wndMode">自由风洞</b></span>
+        <span>Re <b id="wndRe">—</b></span>
+        <span>阻力 Cd <b id="wndCd">—</b></span>
+        <span>升力 Cl <b id="wndCl">—</b></span>
+        <span>涡 <b id="wndShed">0</b></span>
+        <span>格 <b id="wndCells">0</b></span>
+        <span>累计 <b id="wndTotal">0/15 ★</b></span>
+      </div>
+      <div class="wnd-tip" id="wndTip">—</div>
+      <canvas id="wndCav" width="640" height="320" aria-label="风洞画布"></canvas>
+      <div id="wndMeter">测量中 0%</div>
+      <div class="wnd-lab">一键放形状（会覆盖当前障碍）</div>
+      <div id="wndShapes"></div>
+      <div class="wnd-row">
+        <button id="wndPlay" type="button">⏸ 暂停</button>
+        <button id="wndSpeed" type="button">⏩ 1×</button>
+        <button id="wndBrush" type="button">🖌 笔刷 3</button>
+        <button id="wndErase" type="button">🧽 擦除</button>
+        <button id="wndClear" type="button">🧹 清空</button>
+        <button id="wndRestart" type="button">↺ 重吹</button>
+      </div>
+      <div class="wnd-row">
+        <button id="wndVSpd" type="button" class="on">🌈 速度场</button>
+        <button id="wndVCurl" type="button">🌀 涡量场</button>
+        <button id="wndVRho" type="button">🎈 压力场</button>
+        <button id="wndVTrace" type="button" class="on">✨ 示踪粒子</button>
+      </div>
+      <div class="wnd-sliders">
+        <div class="wnd-sl">
+          <label>风速 u₀ <b id="wndU0V">0.100</b></label>
+          <input id="wndU0" type="range" min="4" max="14" step="1" value="10" aria-label="风速">
+        </div>
+        <div class="wnd-sl">
+          <label>黏度 ν <b id="wndVisV">0.012</b></label>
+          <input id="wndVis" type="range" min="5" max="60" step="1" value="12" aria-label="黏度">
+        </div>
+        <div class="wnd-sl">
+          <label>迎角 α <b id="wndAoaV">8°</b></label>
+          <input id="wndAoa" type="range" min="-18" max="18" step="1" value="8" aria-label="迎角">
+        </div>
+      </div>
+      <div id="wndInfo">—</div>
+      <div class="wnd-lab">挑战关卡（下方是已得星）</div>
+      <div id="wndLevels"></div>
+      <p class="wnd-help">
+        <b>这是什么</b>：一台货真价实的 <b>格子玻尔兹曼流体求解器</b>（D2Q9，160×80 格），风从左边吹进来，遇到你画的障碍就绕流、分离、甩涡。阻力和升力用<b>动量交换法</b>直接从边界上积出来，不是假动画。
+        <br><b>怎么玩</b>：画布上<b>左键拖动画障碍、右键擦除</b>（手机直接手指涂）；也可以点上面的一键形状（圆柱 / 方块 / 平板 / 机翼 / 水滴 / 车身 / 楔形）。切换<b>速度场 / 涡量场 / 压力场</b>三种看法，涡量场最容易看出卡门涡街。
+        <br><b>关卡</b>：5 道题分别考<b>涡街、减阻、升力、升阻比、下压力</b>。关卡会画一个红框「核心区」，你的形状必须盖住核心区、且总格数不超上限，防止靠堆料作弊。测量要跑满预热+采样约 2800 步，<b>记得点 ⏩ 提速</b>。
+        <br><b>星级</b>：每关三档门槛，成绩越好星越多；进度存在本地（suibian_windtunnel），刷新不丢。通关全部 5 关可解锁「🏎️ 低阻大师」。
+      </p>
+    </div>
+  </section>
 </section>
 <script>
 (function () {
@@ -10560,6 +10649,7 @@
     if (id === "quantum" && typeof qbtRender === "function") qbtRender();
     if (id === "sandbox" && typeof psbRender === "function") psbRender();
     if (id === "factory" && typeof facRender === "function") facRender();
+    if (id === "wnd" && typeof wndRender === "function") wndRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -10649,6 +10739,7 @@
     if (id !== "quantum" && typeof qbtStop === "function") qbtStop();
     if (id !== "sandbox" && typeof psbStop === "function") psbStop();
     if (id !== "factory" && typeof facStop === "function") facStop();
+    if (id !== "wnd" && typeof wndStop === "function") wndStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10870,6 +10961,7 @@
     quantum: "随便量子 量子 量子计算 量子线路 量子电路 量子比特 qubit 叠加 叠加态 纠缠 贝尔态 GHZ 相位 保真度 测量 塌缩 波函数 态矢量 阿达玛 Hadamard 受控非 CNOT CZ SWAP 泡利 物理 解谜 益智 关卡 模拟器 quantum circuit 量子门 薛定谔",
     sandbox: "随便沙盘 沙盘 沙盒 落沙 沙子 粉末 物理沙盒 powder toy 元胞自动机 细胞自动机 模拟 仿真 材料 化学反应 水 油 熔岩 岩浆 火 火苗 燃烧 蒸汽 烟 木头 藤蔓 寒冰 玻璃 火药 爆炸 强酸 腐蚀 岩石 灰烬 密度 浮力 沉降 造物 沙雕 关卡 解谜 益智 涂鸦 画画 沙画",
     factory: "随便工厂 工厂 流水线 传送带 自动化 物流 采矿 冶炼 熔炉 组装 齿轮 电路板 引擎 生产 制造 工业 factorio 异星工厂 满意工厂 运输 调度 优化 产线 关卡 解谜 益智 自动化流水线 物流模拟 沙盒工厂",
+    wnd: "随便风洞 风洞 流体 空气动力学 气动 绕流 涡街 卡门涡街 阻力 升力 阻力系数 升力系数 Cd Cl 升阻比 下压力 机翼 翼型 雷诺数 层流 湍流 边界层 分离 流线型 CFD 仿真 模拟 格子玻尔兹曼 LBM D2Q9 速度场 涡量 压力场 示踪粒子 减阻 赛车 尾流 物理",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -11151,6 +11243,7 @@ splitbill:"tools",
     quantum:"games",
     sandbox:"games",
     factory:"games",
+    wnd:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -73242,6 +73335,935 @@ splitbill:"tools",
       "传送带只认方向，不认你当初是怎么想的。",
       "产能瓶颈永远在你最不愿意重修的那一段。",
       "先让它跑起来，再让它跑得快——顺序反了就会一直不动。"
+    );
+  }
+})();
+/* ===== 🌬️ 随便风洞 · 流体绕流实验室（前缀 wnd / 存档 suibian_windtunnel） ===== */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_windtunnel";
+  var NX = 160, NY = 80, PX = 4;
+  var N = NX * NY;
+  var CW = NX * PX, CH = NY * PX;
+
+  var W0 = 4 / 9, W1 = 1 / 9, W2 = 1 / 36;
+  var WARM = 600;            // 预热多少步之后才开始采样受力
+  var MEAS = 2200;           // 跑满多少步算一次有效测量
+  var MAXCELL = 1500;        // 障碍格上限，防止把风洞糊死
+
+  /* ---------------- 场量 ---------------- */
+  function F32() { return new Float32Array(N); }
+  var f0 = F32(), fE = F32(), fW = F32(), fN = F32(), fS = F32(),
+      fNE = F32(), fNW = F32(), fSE = F32(), fSW = F32();
+  var rho = F32(), vx = F32(), vy = F32();
+  var bar = new Uint8Array(N);
+  var blist = new Int32Array(N), bn = 0;   // 全部障碍格
+  var slist = new Int32Array(N), sn = 0;   // 表面障碍格（至少一个邻居是流体）
+
+  /* ---------------- 参数 ---------------- */
+  var u0 = 0.10, visc = 0.012, omega = 1 / (3 * 0.012 + 0.5);
+  var aoa = 8;               // 翼型攻角（度）
+  var STD_U0 = 0.10, STD_VIS = 0.012;   // 挑战模式锁定的标准工况
+
+  /* ---------------- 运行态 ---------------- */
+  var mSteps = 0, sumFx = 0, sumFy = 0, sumN = 0;
+  var lastFx = 0, lastFy = 0;
+  var probeI = -1, probeSign = 0, halfC = 0;
+  var bbCache = null;
+  var mode = -1;             // -1 = 自由风洞，>=0 = 挑战关卡下标
+  var view = "spd", trace = true, running = true, spd = 1;
+  var brush = 5, erase = false;
+  var msg = "", msgOk = false;
+  var rec = null, inited = false, active = false, raf = 0;
+  var cav = null, ctx = null, off = null, octx = null, imgData = null;
+
+  /* ---------------- 调色板 ---------------- */
+  var NC = 384;
+  var PAL = new Uint8Array(NC * 3);      // 速度 / 压力：暗蓝 → 青 → 绿 → 黄 → 橙 → 白
+  var PALC = new Uint8Array(NC * 3);     // 涡量：蓝 ← 深底 → 红
+  function ramp(out, stops) {
+    for (var c = 0; c < NC; c++) {
+      var t = c / (NC - 1), k = 0;
+      while (k < stops.length - 2 && t > stops[k + 1][0]) k++;
+      var t0 = stops[k][0], t1 = stops[k + 1][0];
+      var f = t1 > t0 ? (t - t0) / (t1 - t0) : 0;
+      for (var j = 0; j < 3; j++) {
+        out[c * 3 + j] = Math.round(stops[k][1][j] + (stops[k + 1][1][j] - stops[k][1][j]) * f);
+      }
+    }
+  }
+  ramp(PAL, [[0, [7, 11, 28]], [0.16, [16, 54, 126]], [0.34, [22, 140, 166]],
+             [0.54, [80, 198, 112]], [0.72, [246, 212, 84]], [0.87, [238, 116, 52]], [1, [255, 244, 236]]]);
+  ramp(PALC, [[0, [62, 132, 255]], [0.34, [18, 40, 96]], [0.5, [9, 12, 26]],
+              [0.66, [104, 24, 44]], [1, [255, 94, 88]]]);
+
+  /* ---------------- 基础工具 ---------------- */
+  function idx(x, y) { return x + y * NX; }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+
+  function setEquil(i, ex, ey, r) {
+    var x3 = 3 * ex, y3 = 3 * ey, x2 = ex * ex, y2 = ey * ey;
+    var xy2 = 2 * ex * ey, u2 = x2 + y2, h = 1.5 * u2;
+    f0[i] = W0 * r * (1 - h);
+    fE[i] = W1 * r * (1 + x3 + 4.5 * x2 - h);
+    fW[i] = W1 * r * (1 - x3 + 4.5 * x2 - h);
+    fN[i] = W1 * r * (1 + y3 + 4.5 * y2 - h);
+    fS[i] = W1 * r * (1 - y3 + 4.5 * y2 - h);
+    fNE[i] = W2 * r * (1 + x3 + y3 + 4.5 * (u2 + xy2) - h);
+    fSE[i] = W2 * r * (1 + x3 - y3 + 4.5 * (u2 - xy2) - h);
+    fNW[i] = W2 * r * (1 - x3 + y3 + 4.5 * (u2 - xy2) - h);
+    fSW[i] = W2 * r * (1 - x3 - y3 + 4.5 * (u2 + xy2) - h);
+    rho[i] = r; vx[i] = ex; vy[i] = ey;
+  }
+
+  /* 可复现的伪随机（给初始扰动用：完全对称的流场永远甩不出涡街） */
+  var seed = 20260801;
+  function rnd() {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
+  }
+
+  function initFluid() {
+    seed = 20260801;
+    for (var i = 0; i < N; i++) {
+      setEquil(i, u0 * (1 + 0.03 * (rnd() - 0.5)), u0 * 0.03 * (rnd() - 0.5), 1);
+    }
+    resetMeasure();
+    seedTracers();
+  }
+
+  function resetMeasure() {
+    mSteps = 0; sumFx = 0; sumFy = 0; sumN = 0;
+    lastFx = 0; lastFy = 0; probeSign = 0; halfC = 0;
+  }
+
+  function setBoundaries() {
+    var x, y;
+    for (x = 0; x < NX; x++) { setEquil(x, u0, 0, 1); setEquil(x + (NY - 1) * NX, u0, 0, 1); }
+    for (y = 1; y < NY - 1; y++) { setEquil(y * NX, u0, 0, 1); setEquil(NX - 1 + y * NX, u0, 0, 1); }
+  }
+
+  /* ---------------- LBM 三步 ---------------- */
+  function collide() {
+    var x, y, i, r, ex, ey, r0, r1, r2, x3, y3, xy2, h, ix;
+    for (y = 1; y < NY - 1; y++) {
+      ix = y * NX;
+      for (x = 1; x < NX - 1; x++) {
+        i = ix + x;
+        if (bar[i]) continue;
+        r = f0[i] + fN[i] + fS[i] + fE[i] + fW[i] + fNE[i] + fSE[i] + fNW[i] + fSW[i];
+        if (!(r > 1e-6)) { setEquil(i, u0, 0, 1); continue; }
+        ex = (fE[i] + fNE[i] + fSE[i] - fW[i] - fNW[i] - fSW[i]) / r;
+        ey = (fN[i] + fNE[i] + fNW[i] - fS[i] - fSE[i] - fSW[i]) / r;
+        rho[i] = r; vx[i] = ex; vy[i] = ey;
+        r0 = W0 * r; r1 = W1 * r; r2 = W2 * r;
+        x3 = 3 * ex; y3 = 3 * ey; xy2 = 2 * ex * ey;
+        h = 1.5 * (ex * ex + ey * ey);
+        f0[i] += omega * (r0 * (1 - h) - f0[i]);
+        fE[i] += omega * (r1 * (1 + x3 + 4.5 * ex * ex - h) - fE[i]);
+        fW[i] += omega * (r1 * (1 - x3 + 4.5 * ex * ex - h) - fW[i]);
+        fN[i] += omega * (r1 * (1 + y3 + 4.5 * ey * ey - h) - fN[i]);
+        fS[i] += omega * (r1 * (1 - y3 + 4.5 * ey * ey - h) - fS[i]);
+        fNE[i] += omega * (r2 * (1 + x3 + y3 + 4.5 * (ex * ex + ey * ey + xy2) - h) - fNE[i]);
+        fSE[i] += omega * (r2 * (1 + x3 - y3 + 4.5 * (ex * ex + ey * ey - xy2) - h) - fSE[i]);
+        fNW[i] += omega * (r2 * (1 - x3 + y3 + 4.5 * (ex * ex + ey * ey - xy2) - h) - fNW[i]);
+        fSW[i] += omega * (r2 * (1 - x3 - y3 + 4.5 * (ex * ex + ey * ey + xy2) - h) - fSW[i]);
+      }
+    }
+    // 右端自由出流：把倒数第二列的左行分布抄到最后一列
+    for (y = 1; y < NY - 1; y++) {
+      i = NX - 1 + y * NX;
+      fW[i] = fW[i - 1]; fNW[i] = fNW[i - 1]; fSW[i] = fSW[i - 1];
+    }
+  }
+
+  /* 迁移：N 表示屏幕向上（y-1），S 表示屏幕向下（y+1） */
+  function stream() {
+    var x, y, i;
+    // 向上/右上：源在下方（y+1）、左边（x-1）→ y 升序、x 降序
+    for (y = 1; y < NY - 1; y++) {
+      for (x = NX - 2; x > 0; x--) {
+        i = x + y * NX;
+        fN[i] = fN[i + NX];
+        fNE[i] = fNE[i + NX - 1];
+      }
+    }
+    // 左上：源在下方、右边 → y 升序、x 升序
+    for (y = 1; y < NY - 1; y++) {
+      for (x = 1; x < NX - 1; x++) {
+        i = x + y * NX;
+        fW[i] = fW[i + 1];
+        fNW[i] = fNW[i + NX + 1];
+      }
+    }
+    // 向右/右下：源在上方（y-1）、左边 → y 降序、x 降序
+    for (y = NY - 2; y > 0; y--) {
+      for (x = NX - 2; x > 0; x--) {
+        i = x + y * NX;
+        fE[i] = fE[i - 1];
+        fSE[i] = fSE[i - NX - 1];
+      }
+    }
+    // 向下/左下：源在上方、右边 → y 降序、x 升序
+    for (y = NY - 2; y > 0; y--) {
+      for (x = 1; x < NX - 1; x++) {
+        i = x + y * NX;
+        fS[i] = fS[i - NX];
+        fSW[i] = fSW[i - NX + 1];
+      }
+    }
+  }
+
+  /* 反弹 + 动量交换测力 */
+  function bounce() {
+    var k, i, x, y, fx = 0, fy = 0;
+    for (k = 0; k < sn; k++) {
+      i = slist[k];
+      x = i % NX; y = (i / NX) | 0;
+      fx += fE[i] + fNE[i] + fSE[i] - fW[i] - fNW[i] - fSW[i];
+      fy += fN[i] + fNE[i] + fNW[i] - fS[i] - fSE[i] - fSW[i];
+      if (x > 0) fW[i - 1] = fE[i];
+      if (x < NX - 1) fE[i + 1] = fW[i];
+      if (y < NY - 1) fS[i + NX] = fN[i];
+      if (y > 0) fN[i - NX] = fS[i];
+      if (x > 0 && y < NY - 1) fSW[i + NX - 1] = fNE[i];
+      if (x < NX - 1 && y < NY - 1) fSE[i + NX + 1] = fNW[i];
+      if (x > 0 && y > 0) fNW[i - NX - 1] = fSE[i];
+      if (x < NX - 1 && y > 0) fNE[i - NX + 1] = fSW[i];
+    }
+    for (k = 0; k < bn; k++) {
+      i = blist[k];
+      f0[i] = fE[i] = fW[i] = fN[i] = fS[i] = fNE[i] = fNW[i] = fSE[i] = fSW[i] = 0;
+      rho[i] = 1; vx[i] = 0; vy[i] = 0;
+    }
+    lastFx = 2 * fx; lastFy = 2 * fy;
+  }
+
+  function step() {
+    setBoundaries();
+    collide();
+    stream();
+    bounce();
+    mSteps++;
+    if (mSteps > WARM) { sumFx += lastFx; sumFy += lastFy; sumN++; }
+    probeTick();
+    if ((mSteps & 255) === 0 && !isFinite(rho[idx(NX >> 1, NY >> 1)])) initFluid();
+    return mSteps;
+  }
+
+  function run(n) { for (var k = 0; k < n; k++) step(); return mSteps; }
+
+  /* ---------------- 障碍管理 ---------------- */
+  function rebuild() {
+    bn = 0; sn = 0;
+    for (var y = 0; y < NY; y++) {
+      for (var x = 0; x < NX; x++) {
+        var i = x + y * NX;
+        if (!bar[i]) continue;
+        blist[bn++] = i;
+        var surf = false;
+        if (x > 0 && !bar[i - 1]) surf = true;
+        else if (x < NX - 1 && !bar[i + 1]) surf = true;
+        else if (y > 0 && !bar[i - NX]) surf = true;
+        else if (y < NY - 1 && !bar[i + NX]) surf = true;
+        else if (x > 0 && y > 0 && !bar[i - NX - 1]) surf = true;
+        else if (x < NX - 1 && y > 0 && !bar[i - NX + 1]) surf = true;
+        else if (x > 0 && y < NY - 1 && !bar[i + NX - 1]) surf = true;
+        else if (x < NX - 1 && y < NY - 1 && !bar[i + NX + 1]) surf = true;
+        if (surf) slist[sn++] = i;
+      }
+    }
+    bbCache = null;
+    var b = bbox();
+    if (b) {
+      var py = clamp((b.y0 + b.y1) >> 1, 2, NY - 3);
+      var px = clamp(b.x1 + 22, 3, NX - 4);
+      probeI = idx(px, py);
+    } else probeI = -1;
+    resetMeasure();
+    return bn;
+  }
+
+  function bbox() {
+    if (bbCache !== null) return bbCache.n ? bbCache : null;
+    var x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1, n = 0;
+    for (var y = 0; y < NY; y++) {
+      for (var x = 0; x < NX; x++) {
+        if (!bar[x + y * NX]) continue;
+        n++;
+        if (x < x0) x0 = x; if (x > x1) x1 = x;
+        if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+    }
+    bbCache = n ? { x0: x0, y0: y0, x1: x1, y1: y1, n: n } : { n: 0 };
+    return n ? bbCache : null;
+  }
+
+  function setBar(x, y, v) {
+    if (x < 1 || y < 1 || x > NX - 2 || y > NY - 2) return false;
+    var i = x + y * NX;
+    if (bar[i] === (v ? 1 : 0)) return false;
+    if (v && bn >= MAXCELL) return false;
+    bar[i] = v ? 1 : 0;
+    if (!v) setEquil(i, u0, 0, 1);
+    else bn++;      // 粗略计数，rebuild 时会精确重算
+    return true;
+  }
+
+  function clearBar() { bar.fill(0); rebuild(); }
+
+  function paint(cx, cy, r, v) {
+    var changed = 0, r2 = r * r;
+    for (var y = Math.floor(cy - r); y <= Math.ceil(cy + r); y++) {
+      for (var x = Math.floor(cx - r); x <= Math.ceil(cx + r); x++) {
+        var dx = x - cx, dy = y - cy;
+        if (dx * dx + dy * dy <= r2 && setBar(x, y, v)) changed++;
+      }
+    }
+    if (changed) rebuild();
+    return changed;
+  }
+
+  /* ---------------- 预设形状 ---------------- */
+  var OX = 46, OY = NY / 2;      // 形状默认落点
+
+  function stampCircle(cx, cy, r) {
+    for (var y = Math.floor(cy - r); y <= cy + r; y++) {
+      for (var x = Math.floor(cx - r); x <= cx + r; x++) {
+        var dx = x - cx, dy = y - cy;
+        if (dx * dx + dy * dy <= r * r) setBar(x, y, 1);
+      }
+    }
+  }
+  function stampRect(x0, y0, w, h) {
+    for (var y = y0; y < y0 + h; y++) for (var x = x0; x < x0 + w; x++) setBar(x, y, 1);
+  }
+  function polyHit(px, py, pts) {
+    var inside = false;
+    for (var i = 0, j = pts.length - 2; i < pts.length; j = i, i += 2) {
+      var xi = pts[i], yi = pts[i + 1], xj = pts[j], yj = pts[j + 1];
+      if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  }
+  function stampPoly(pts) {
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, i;
+    for (i = 0; i < pts.length; i += 2) {
+      if (pts[i] < x0) x0 = pts[i]; if (pts[i] > x1) x1 = pts[i];
+      if (pts[i + 1] < y0) y0 = pts[i + 1]; if (pts[i + 1] > y1) y1 = pts[i + 1];
+    }
+    for (var y = Math.floor(y0); y <= Math.ceil(y1); y++) {
+      for (var x = Math.floor(x0); x <= Math.ceil(x1); x++) {
+        if (polyHit(x + 0.5, y + 0.5, pts)) setBar(x, y, 1);
+      }
+    }
+  }
+  /* NACA 00tt 对称翼型，chord 弦长，a 攻角（度，正=抬头） */
+  function stampWing(cx, cy, chord, a, thick) {
+    /* 攻角为正 = 抬头（前缘朝上），屏幕 y 向下，所以这里取负角 */
+    var rad = -a * Math.PI / 180, cs = Math.cos(rad), sn2 = Math.sin(rad);
+    var t = thick === undefined ? 0.13 : thick;
+    var pad = Math.ceil(chord * 0.75) + 4;
+    for (var y = Math.floor(cy - pad); y <= cy + pad; y++) {
+      for (var x = Math.floor(cx - pad); x <= cx + pad; x++) {
+        var mx = x + 0.5 - cx, my = -(y + 0.5 - cy);
+        var xa = mx * cs + my * sn2 + chord * 0.3;
+        var ya = -mx * sn2 + my * cs;
+        if (xa < 0 || xa > chord) continue;
+        var s = xa / chord;
+        var yt = 5 * t * chord * (0.2969 * Math.sqrt(s) - 0.1260 * s
+                 - 0.3516 * s * s + 0.2843 * s * s * s - 0.1015 * s * s * s * s);
+        if (Math.abs(ya) <= yt) setBar(x, y, 1);
+      }
+    }
+  }
+  function stampDrop(cx, cy, r, len) {
+    for (var y = Math.floor(cy - r - 1); y <= cy + r + 1; y++) {
+      for (var x = Math.floor(cx - r - 1); x <= cx + len; x++) {
+        var dx = x + 0.5 - cx, dy = y + 0.5 - cy, h;
+        if (dx <= 0) { if (dx * dx + dy * dy <= r * r) setBar(x, y, 1); continue; }
+        h = r * (1 - Math.pow(dx / len, 1.6));
+        if (h > 0 && Math.abs(dy) <= h) setBar(x, y, 1);
+      }
+    }
+  }
+  function stampCar(x0, y0) {
+    stampPoly([x0, y0 + 20, x0 + 3, y0 + 11, x0 + 12, y0 + 9, x0 + 18, y0 + 1,
+               x0 + 33, y0 + 1, x0 + 40, y0 + 9, x0 + 46, y0 + 11, x0 + 46, y0 + 20]);
+  }
+
+  var SHAPES = [
+    { key: "cyl", icon: "⚪", name: "圆柱", fn: function () { stampCircle(OX, OY, 10); } },
+    { key: "box", icon: "⬛", name: "方柱", fn: function () { stampRect(OX - 9, OY - 9, 19, 19); } },
+    { key: "plate", icon: "▮", name: "平板", fn: function () { stampRect(OX - 1, OY - 14, 3, 29); } },
+    { key: "wing", icon: "✈️", name: "翼型", fn: function () { stampWing(OX + 8, OY, 44, aoa); } },
+    { key: "drop", icon: "💧", name: "水滴", fn: function () { stampDrop(OX - 6, OY, 10, 34); } },
+    { key: "car", icon: "🚗", name: "汽车", fn: function () { stampCar(OX - 20, NY - 30); } },
+    { key: "wedge", icon: "🔺", name: "楔形", fn: function () { stampPoly([OX - 12, OY - 14, OX + 16, OY, OX - 12, OY + 14]); } },
+    { key: "none", icon: "🧹", name: "空风洞", fn: function () { } }
+  ];
+
+  function useShape(key) {
+    var s = null;
+    for (var i = 0; i < SHAPES.length; i++) if (SHAPES[i].key === key) s = SHAPES[i];
+    if (!s) return false;
+    bar.fill(0); bn = 0;
+    s.fn();
+    rebuild();
+    initFluid();
+    msg = s.key === "none" ? "风洞已清空，拿笔刷自己画一个吧。" : ("已换上「" + s.name + "」，等测量条走满再看数据。");
+    msgOk = false;
+    return true;
+  }
+
+  /* ---------------- 挑战关卡 ---------------- */
+  var LV = [
+    { key: "l1", icon: "🌀", name: "初见涡街", metric: "shed", better: "up", th: [1, 3, 6],
+      core: null, minCells: 60,
+      goal: "放个钝头障碍，让尾流甩出卡门涡街——右侧探针每摆一个来回算一个周期，多等一会儿星就多",
+      tip: "钝的东西才甩得出涡：点 ⚪ 圆柱，然后什么都别动，盯着尾巴看它左右摆（一个周期约一千步，按 ⏩ 加速会快很多）。流线体永远甩不出来。" },
+    { key: "l2", icon: "🗡", name: "削尖脑袋", metric: "cd", better: "down", th: [1.95, 1.62, 1.42],
+      core: { x: 40, y: 32, w: 6, h: 16 }, minCells: 96,
+      goal: "红框区域必须全被挡住，在此前提下把阻力系数 Cd 压到最低",
+      tip: "光挡红框的方块 Cd 约 2.14。围着它补一个尖头长尾的流线体，能一路砍到 1.4 以下。" },
+    { key: "l3", icon: "🪶", name: "让它飞起来", metric: "cl", better: "up", th: [0.15, 0.40, 0.70],
+      core: { x: 36, y: 39, w: 28, h: 3 }, minCells: 96,
+      goal: "红框是机翼骨架，必须全被挡住；把升力系数 Cl 做到最大",
+      tip: "平躺的板子一点升力都没有。用 ✈️ 翼型配上攻角滑块斜着压在骨架上，气流被往下按，机翼才被抬起来。" },
+    { key: "l4", icon: "🦅", name: "升阻比之王", metric: "ld", better: "up", th: [0.60, 1.15, 1.55],
+      core: { x: 36, y: 39, w: 28, h: 3 }, minCells: 96,
+      goal: "同样的机翼骨架，这次比的是升力 ÷ 阻力（升阻比）",
+      tip: "攻角越大升力越大，但阻力涨得更凶。滑块从 6° 往上一格格试，找那个最甜的角度。" },
+    { key: "l5", icon: "🏎", name: "压住车头", metric: "df", better: "up", th: [0.20, 0.55, 0.95],
+      core: { x: 36, y: 52, w: 26, h: 10 }, minCells: 260,
+      goal: "红框是车厢，必须全被挡住；给它装尾翼，把下压力（负升力）做到最大",
+      tip: "光车厢是被往上抬的（Cl 为正）。在车尾上方架一片负攻角的 ✈️ 翼，把气流往上甩，车就被按在地上了。" }
+  ];
+  var NLV = LV.length;
+
+  function coreOK(lv) {
+    if (!lv || !lv.core) return true;
+    var c = lv.core;
+    for (var y = c.y; y < c.y + c.h; y++) {
+      for (var x = c.x; x < c.x + c.w; x++) if (!bar[x + y * NX]) return false;
+    }
+    return true;
+  }
+
+  function metrics() {
+    var b = bbox();
+    var D = b ? (b.y1 - b.y0 + 1) : 1;
+    var C = b ? (b.x1 - b.x0 + 1) : 1;
+    var fx = sumN ? sumFx / sumN : 0, fy = sumN ? sumFy / sumN : 0;
+    var q = 0.5 * u0 * u0;
+    return {
+      fx: fx, fy: fy, D: D, C: C, cells: bn,
+      cd: q * D > 0 ? fx / (q * D) : 0,
+      cl: q * C > 0 ? fy / (q * C) : 0,
+      ld: Math.abs(fx) > 1e-9 ? fy / fx : 0,
+      shed: (halfC / 2) | 0,
+      re: visc > 0 ? u0 * D / visc : 0,
+      ready: mSteps >= MEAS,
+      prog: Math.min(1, mSteps / MEAS)
+    };
+  }
+
+  function metricOf(lv, m) {
+    if (lv.metric === "cd") return m.cd;
+    if (lv.metric === "cl") return m.cl;
+    if (lv.metric === "ld") return m.ld;
+    if (lv.metric === "df") return -m.cl;      // 下压力 = 负升力
+    return m.shed;
+  }
+
+  function starsFor(lv, v) {
+    var s = 0, i;
+    for (i = 0; i < 3; i++) {
+      if (lv.better === "down" ? v <= lv.th[i] : v >= lv.th[i]) s = i + 1;
+    }
+    return s;
+  }
+
+  function fmt(lv, v) {
+    if (lv.metric === "shed") return String(v | 0) + " 周期";
+    return (Math.round(v * 1000) / 1000).toFixed(3);
+  }
+
+  /* 判定当前局面，返回 {state, stars, val, why} */
+  function judge() {
+    if (mode < 0) return { state: "free", stars: 0, val: 0, why: "" };
+    var lv = LV[mode], m = metrics();
+    if (bn < lv.minCells) return { state: "small", stars: 0, val: 0, m: m, why: "障碍太小了（" + bn + " / 至少 " + lv.minCells + " 格）" };
+    if (!coreOK(lv)) return { state: "core", stars: 0, val: 0, m: m, why: "红框区域还没被完全挡住" };
+    if (Math.abs(u0 - STD_U0) > 1e-6 || Math.abs(visc - STD_VIS) > 1e-6) {
+      return { state: "param", stars: 0, val: 0, m: m, why: "挑战要在标准工况下比（风速 0.100 / 黏度 0.012）" };
+    }
+    if (!m.ready) return { state: "wait", stars: 0, val: 0, m: m, why: "测量中 " + Math.round(m.prog * 100) + "%" };
+    var v = metricOf(lv, m);
+    return { state: "done", stars: starsFor(lv, v), val: v, m: m, why: "" };
+  }
+
+  function submit() {
+    var j = judge();
+    if (mode < 0 || j.state !== "done") return j;
+    var lv = LV[mode];
+    var old = rec.st[lv.key] || 0;
+    if (j.stars > old) rec.st[lv.key] = j.stars;
+    var b = rec.best[lv.key];
+    if (b === undefined || (lv.better === "down" ? j.val < b : j.val > b)) rec.best[lv.key] = j.val;
+    if (j.stars > 0) {
+      try { bumpUsage("wndfirst"); } catch (e) { }
+      if (clearedCount() >= NLV) { try { bumpUsage("wndmaster"); } catch (e2) { } }
+    }
+    save();
+    return j;
+  }
+
+  function clearedCount() {
+    var n = 0;
+    for (var i = 0; i < NLV; i++) if ((rec.st[LV[i].key] || 0) > 0) n++;
+    return n;
+  }
+  function totalStars() {
+    var n = 0;
+    for (var i = 0; i < NLV; i++) n += rec.st[LV[i].key] || 0;
+    return n;
+  }
+  function starStr(n) { return "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n); }
+
+  /* ---------------- 存档 ---------------- */
+  function defRec() { return { st: {}, best: {}, view: "spd", trace: 1, aoa: 8 }; }
+  function load() {
+    var r = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && typeof o === "object") {
+          if (o.st && typeof o.st === "object") r.st = o.st;
+          if (o.best && typeof o.best === "object") r.best = o.best;
+          if (typeof o.view === "string") r.view = o.view;
+          if (typeof o.trace === "number") r.trace = o.trace;
+          if (typeof o.aoa === "number") r.aoa = clamp(o.aoa, -18, 18);
+        }
+      }
+    } catch (e) { r = defRec(); }
+    rec = r;
+    view = r.view === "curl" || r.view === "rho" ? r.view : "spd";
+    trace = !!r.trace;
+    aoa = r.aoa;
+    return r;
+  }
+  function save() {
+    if (!rec) return;
+    rec.view = view; rec.trace = trace ? 1 : 0; rec.aoa = aoa;
+    try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) { }
+  }
+
+  /* ---------------- 关卡装载 ---------------- */
+  function loadLevel(i) {
+    mode = i;
+    bar.fill(0); bn = 0;
+    if (i >= 0) {
+      u0 = STD_U0; visc = STD_VIS; omega = 1 / (3 * visc + 0.5);
+      var c = LV[i].core;
+      if (c) stampRect(c.x, c.y, c.w, c.h);
+      msg = LV[i].tip; msgOk = false;
+    } else {
+      stampCircle(OX, OY, 10);
+      msg = "自由风洞：随便调风速黏度，随便画形状，看流场自己演。"; msgOk = false;
+    }
+    rebuild();
+    initFluid();
+  }
+
+  /* ---------------- 示踪粒子 ---------------- */
+  var NT = 420;
+  var tx = new Float32Array(NT), ty = new Float32Array(NT),
+      tpx = new Float32Array(NT), tpy = new Float32Array(NT);
+  function seedTracers() {
+    for (var k = 0; k < NT; k++) {
+      tx[k] = 1 + Math.random() * (NX - 3);
+      ty[k] = 1 + Math.random() * (NY - 3);
+      tpx[k] = tx[k]; tpy[k] = ty[k];
+    }
+  }
+  function moveTracers(dt) {
+    for (var k = 0; k < NT; k++) {
+      var x = tx[k], y = ty[k];
+      var xi = x | 0, yi = y | 0;
+      if (x < 1 || x > NX - 2 || y < 1 || y > NY - 2 || bar[xi + yi * NX]) {
+        tx[k] = 1 + Math.random() * 2;
+        ty[k] = 1 + Math.random() * (NY - 3);
+        tpx[k] = tx[k]; tpy[k] = ty[k];
+        continue;
+      }
+      var i = xi + yi * NX;
+      tpx[k] = x; tpy[k] = y;
+      tx[k] = x + vx[i] * dt;
+      ty[k] = y - vy[i] * dt;
+    }
+  }
+
+  function probeTick() {
+    if (probeI < 0 || mSteps < 200) return;
+    var v = vy[probeI];
+    if (v > 0.004 && probeSign <= 0) { probeSign = 1; halfC++; }
+    else if (v < -0.004 && probeSign >= 0) { probeSign = -1; halfC++; }
+  }
+
+  /* ---------------- 绘制 ---------------- */
+  function curlAt(x, y) {
+    var i = x + y * NX;
+    return (vy[i + 1] - vy[i - 1]) * 0.5 + (vx[i + NX] - vx[i - NX]) * 0.5;
+  }
+
+  function draw() {
+    if (!ctx || !imgData) return;
+    var d = imgData.data;
+    var i, p, t, c, x, y;
+    var sScale = 1 / (u0 * 2.1);
+    for (y = 0; y < NY; y++) {
+      for (x = 0; x < NX; x++) {
+        i = x + y * NX; p = i << 2;
+        if (bar[i]) {
+          var edge = (x > 0 && !bar[i - 1]) || (x < NX - 1 && !bar[i + 1]) ||
+                     (y > 0 && !bar[i - NX]) || (y < NY - 1 && !bar[i + NX]);
+          d[p] = edge ? 226 : 60; d[p + 1] = edge ? 232 : 66; d[p + 2] = edge ? 244 : 84; d[p + 3] = 255;
+          continue;
+        }
+        if (view === "curl") {
+          if (x < 1 || y < 1 || x > NX - 2 || y > NY - 2) t = 0.5;
+          else t = 0.5 + curlAt(x, y) * 11;
+          c = (clamp(t, 0, 0.9999) * NC) | 0;
+          d[p] = PALC[c * 3]; d[p + 1] = PALC[c * 3 + 1]; d[p + 2] = PALC[c * 3 + 2]; d[p + 3] = 255;
+        } else if (view === "rho") {
+          t = 0.5 + (rho[i] - 1) * 26;
+          c = (clamp(t, 0, 0.9999) * NC) | 0;
+          d[p] = PAL[c * 3]; d[p + 1] = PAL[c * 3 + 1]; d[p + 2] = PAL[c * 3 + 2]; d[p + 3] = 255;
+        } else {
+          t = Math.sqrt(vx[i] * vx[i] + vy[i] * vy[i]) * sScale;
+          c = (clamp(t, 0, 0.9999) * NC) | 0;
+          d[p] = PAL[c * 3]; d[p + 1] = PAL[c * 3 + 1]; d[p + 2] = PAL[c * 3 + 2]; d[p + 3] = 255;
+        }
+      }
+    }
+    octx.putImageData(imgData, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(off, 0, 0, CW, CH);
+    ctx.imageSmoothingEnabled = true;
+
+    // 示踪粒子拖尾
+    if (trace) {
+      ctx.strokeStyle = "rgba(255,255,255,.5)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (var k = 0; k < NT; k++) {
+        ctx.moveTo(tpx[k] * PX, tpy[k] * PX);
+        ctx.lineTo(tx[k] * PX, ty[k] * PX);
+      }
+      ctx.stroke();
+    }
+
+    // 关卡红框
+    if (mode >= 0 && LV[mode].core) {
+      var cr = LV[mode].core, full = coreOK(LV[mode]);
+      ctx.strokeStyle = full ? "rgba(74,222,128,.85)" : "rgba(248,113,113,.95)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(cr.x * PX - 1, cr.y * PX - 1, cr.w * PX + 2, cr.h * PX + 2);
+      ctx.setLineDash([]);
+    }
+
+    // 探针
+    if (probeI >= 0) {
+      var px2 = (probeI % NX) * PX, py2 = (((probeI / NX) | 0)) * PX;
+      ctx.fillStyle = "rgba(255,255,255,.75)";
+      ctx.fillRect(px2 - 1, py2 - 5, 2, 10);
+      ctx.fillRect(px2 - 5, py2 - 1, 10, 2);
+    }
+
+    // 受力箭头
+    var b = bbox();
+    if (b && sumN > 0) {
+      var mx = (b.x0 + b.x1) * 0.5 * PX, my = (b.y0 + b.y1) * 0.5 * PX;
+      var m = metrics();
+      arrow(mx, my, mx + clamp(m.cd, -6, 6) * 26, my, "#f87171");
+      arrow(mx, my, mx, my - clamp(m.cl, -6, 6) * 26, "#60a5fa");
+    }
+
+    // 风向标注
+    ctx.fillStyle = "rgba(255,255,255,.45)";
+    ctx.font = "11px system-ui,sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("风 →", 8, 16);
+  }
+
+  function arrow(x0, y0, x1, y1, col) {
+    var dx = x1 - x0, dy = y1 - y0, len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 4) return;
+    var a = Math.atan2(dy, dx);
+    ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x1 - 8 * Math.cos(a - 0.4), y1 - 8 * Math.sin(a - 0.4));
+    ctx.lineTo(x1 - 8 * Math.cos(a + 0.4), y1 - 8 * Math.sin(a + 0.4));
+    ctx.closePath(); ctx.fill();
+  }
+
+  /* ---------------- UI ---------------- */
+  function $(id) { return document.getElementById(id); }
+  function txt(id, s) { var e = $(id); if (e) e.textContent = s; }
+
+  function sync() {
+    var m = metrics(), j = judge();
+    txt("wndMode", mode < 0 ? "自由风洞" : (LV[mode].icon + " " + LV[mode].name));
+    txt("wndRe", bn ? String(Math.round(m.re)) : "—");
+    txt("wndCd", sumN && m.ready ? m.cd.toFixed(3) : (sumN ? m.cd.toFixed(3) + "…" : "—"));
+    txt("wndCl", sumN && m.ready ? m.cl.toFixed(3) : (sumN ? m.cl.toFixed(3) + "…" : "—"));
+    txt("wndShed", String(m.shed));
+    txt("wndCells", String(bn));
+    txt("wndTotal", totalStars() + "/" + (NLV * 3) + " ★");
+    var mt = $("wndMeter");
+    if (mt) {
+      mt.textContent = m.ready
+        ? "测量完成：Cd " + m.cd.toFixed(3) + " ｜ Cl " + m.cl.toFixed(3) + " ｜ 升阻比 " + m.ld.toFixed(2) + " ｜ 涡周期 " + m.shed
+        : "测量中 " + Math.round(m.prog * 100) + "%（改动形状或参数会重新计时）";
+      mt.className = m.ready ? "ok" : "";
+    }
+    txt("wndTip", mode < 0 ? "自由风洞：左键画障碍、右键擦除；风速黏度随便调，看它自己甩涡。" : LV[mode].goal);
+    var inf = $("wndInfo");
+    if (inf) {
+      var s = msg;
+      if (mode >= 0) {
+        var lv = LV[mode];
+        if (j.state === "done") {
+          s = "本关成绩 " + fmt(lv, j.val) + " → " + starStr(j.stars) +
+              "（门槛 " + lv.th.map(function (t) { return fmt(lv, t); }).join(" / ") + "）";
+        } else if (j.why) s = j.why;
+      }
+      inf.textContent = s || "—";
+      inf.className = (mode >= 0 && j.state === "done" && j.stars > 0) || msgOk ? "ok" : "";
+    }
+    var pb = $("wndPlay"); if (pb) pb.textContent = running ? "⏸ 暂停" : "▶ 继续";
+    var sb = $("wndSpeed"); if (sb) sb.textContent = "⏩ " + spd + "×";
+    var bb2 = $("wndBrush"); if (bb2) bb2.textContent = "🖌 笔刷 " + brush;
+    var eb = $("wndErase"); if (eb) eb.className = erase ? "on" : "";
+    var tb = $("wndVTrace"); if (tb) tb.className = trace ? "on" : "";
+    var v1 = $("wndVSpd"); if (v1) v1.className = view === "spd" ? "on" : "";
+    var v2 = $("wndVCurl"); if (v2) v2.className = view === "curl" ? "on" : "";
+    var v3 = $("wndVRho"); if (v3) v3.className = view === "rho" ? "on" : "";
+    txt("wndU0V", u0.toFixed(3));
+    txt("wndVisV", visc.toFixed(3));
+    txt("wndAoaV", aoa + "°");
+    /* 关卡会强制标准工况，滑块位置也要跟着回位 */
+    var su2 = $("wndU0"); if (su2 && String(su2.value) !== String(Math.round(u0 * 100))) su2.value = String(Math.round(u0 * 100));
+    var sv2 = $("wndVis"); if (sv2 && String(sv2.value) !== String(Math.round(visc * 1000))) sv2.value = String(Math.round(visc * 1000));
+    var sa2 = $("wndAoa"); if (sa2 && String(sa2.value) !== String(aoa)) sa2.value = String(aoa);
+    syncLevels();
+  }
+
+  function syncLevels() {
+    var box = $("wndLevels");
+    if (!box || box._n === NLV + 1) { if (box) markLevels(box); return; }
+    box.innerHTML = "";
+    var mk = function (label, sub, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      var em = document.createElement("i");
+      em.textContent = sub;
+      b.appendChild(em);
+      b.addEventListener("click", function () { loadLevel(i); sync(); });
+      box.appendChild(b);
+      return b;
+    };
+    mk("🌬 自由", "沙盘", -1);
+    for (var i = 0; i < NLV; i++) mk(LV[i].icon + " " + LV[i].name, starStr(rec.st[LV[i].key] || 0), i);
+    box._n = NLV + 1;
+    markLevels(box);
+  }
+  function markLevels(box) {
+    var ch = box.children || [];
+    for (var i = 0; i < ch.length; i++) {
+      ch[i].className = (i - 1) === mode ? "on" : "";
+      if (i > 0 && ch[i].children && ch[i].children[0]) {
+        ch[i].children[0].textContent = starStr(rec.st[LV[i - 1].key] || 0);
+      }
+    }
+  }
+
+  function buildShapes() {
+    var box = $("wndShapes");
+    if (!box || box._n) return;
+    box.innerHTML = "";
+    for (var i = 0; i < SHAPES.length; i++) {
+      (function (s) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = s.icon;
+        var em = document.createElement("i");
+        em.textContent = s.name;
+        b.appendChild(em);
+        b.addEventListener("click", function () { useShape(s.key); sync(); });
+        box.appendChild(b);
+      })(SHAPES[i]);
+    }
+    box._n = SHAPES.length;
+  }
+
+  function cavXY(ev) {
+    if (!cav) return null;
+    var r = cav.getBoundingClientRect();
+    var cx = ev.clientX !== undefined ? ev.clientX : (ev.touches && ev.touches[0] ? ev.touches[0].clientX : 0);
+    var cy = ev.clientY !== undefined ? ev.clientY : (ev.touches && ev.touches[0] ? ev.touches[0].clientY : 0);
+    var x = (cx - r.left) / (r.width || CW) * NX;
+    var y = (cy - r.top) / (r.height || CH) * NY;
+    if (x < 0 || y < 0 || x >= NX || y >= NY) return null;
+    return { x: x, y: y };
+  }
+
+  var painting = 0;
+  function onPaint(ev, btn) {
+    var p = cavXY(ev);
+    if (!p) return;
+    var v = (btn === 2 || erase) ? 0 : 1;
+    paint(p.x, p.y, brush, v);
+    sync();
+  }
+
+  function setU0(v) {
+    u0 = clamp(v, 0.04, 0.14);
+    resetMeasure();
+  }
+  function setVisc(v) {
+    visc = clamp(v, 0.005, 0.06);
+    omega = 1 / (3 * visc + 0.5);
+    resetMeasure();
+  }
+
+  function frame() {
+    if (!active) return;
+    if (running) {
+      var n = 6 * spd;
+      for (var k = 0; k < n; k++) step();
+      moveTracers(2.2 * spd);
+      if (mode >= 0) submit();
+    }
+    draw();
+    sync();
+    raf = requestAnimationFrame(frame);
+  }
+
+  function init() {
+    if (inited) return;
+    inited = true;
+    load();
+    cav = $("wndCav");
+    if (cav) {
+      cav.width = CW; cav.height = CH;
+      ctx = cav.getContext("2d");
+      off = document.createElement("canvas");
+      off.width = NX; off.height = NY;
+      octx = off.getContext("2d");
+      imgData = octx.createImageData ? octx.createImageData(NX, NY) : null;
+      if (!imgData) imgData = { data: new Uint8ClampedArray(N * 4), width: NX, height: NY };
+      for (var q = 3; q < N * 4; q += 4) imgData.data[q] = 255;
+
+      cav.addEventListener("mousedown", function (e) {
+        painting = 1; onPaint(e, e.button); if (e.preventDefault) e.preventDefault();
+      });
+      cav.addEventListener("mousemove", function (e) { if (painting) onPaint(e, e.buttons === 2 ? 2 : 0); });
+      cav.addEventListener("mouseup", function () { painting = 0; });
+      cav.addEventListener("mouseleave", function () { painting = 0; });
+      cav.addEventListener("contextmenu", function (e) { if (e.preventDefault) e.preventDefault(); });
+      cav.addEventListener("touchstart", function (e) {
+        painting = 1; onPaint(e, 0); if (e.preventDefault) e.preventDefault();
+      });
+      cav.addEventListener("touchmove", function (e) {
+        if (painting) onPaint(e, 0); if (e.preventDefault) e.preventDefault();
+      });
+      cav.addEventListener("touchend", function () { painting = 0; });
+    }
+    var bind = function (id, fn) { var e = $(id); if (e) e.addEventListener("click", fn); };
+    bind("wndPlay", function () { running = !running; sync(); });
+    bind("wndSpeed", function () { spd = spd === 1 ? 2 : (spd === 2 ? 4 : 1); sync(); });
+    bind("wndBrush", function () { brush = brush === 3 ? 5 : (brush === 5 ? 8 : (brush === 8 ? 12 : 3)); sync(); });
+    bind("wndErase", function () { erase = !erase; sync(); });
+    bind("wndClear", function () { clearBar(); initFluid(); msg = "清空了，重新画。"; msgOk = false; sync(); });
+    bind("wndRestart", function () { initFluid(); msg = "气流已重置，重新测量。"; msgOk = false; sync(); });
+    bind("wndVSpd", function () { view = "spd"; save(); sync(); });
+    bind("wndVCurl", function () { view = "curl"; save(); sync(); });
+    bind("wndVRho", function () { view = "rho"; save(); sync(); });
+    bind("wndVTrace", function () { trace = !trace; save(); sync(); });
+    var su = $("wndU0");
+    if (su) su.addEventListener("input", function () { setU0(parseInt(su.value, 10) / 100); sync(); });
+    var sv = $("wndVis");
+    if (sv) sv.addEventListener("input", function () { setVisc(parseInt(sv.value, 10) / 1000); sync(); });
+    var sa = $("wndAoa");
+    if (sa) sa.addEventListener("input", function () {
+      aoa = clamp(parseInt(sa.value, 10) || 0, -18, 18);
+      save(); sync();
+    });
+    buildShapes();
+    loadLevel(-1);
+    sync();
+  }
+
+  window.wndRender = function () {
+    init();
+    active = true;
+    if (!raf) raf = requestAnimationFrame(frame);
+  };
+  window.wndStop = function () {
+    active = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    save();
+  };
+
+  /* ---------------- 测试接口 ---------------- */
+  window.__wndTest = {
+    KEY: KEY, NX: NX, NY: NY, N: N, PX: PX, CW: CW, CH: CH,
+    WARM: WARM, MEAS: MEAS, MAXCELL: MAXCELL, NLV: NLV, LV: LV, SHAPES: SHAPES,
+    bar: bar, rho: rho, vx: vx, vy: vy,
+    idx: idx, setEquil: setEquil, initFluid: initFluid, setBoundaries: setBoundaries,
+    collide: collide, stream: stream, bounce: bounce, step: step, run: run,
+    rebuild: rebuild, bbox: bbox, setBar: setBar, clearBar: clearBar, paint: paint,
+    stampCircle: stampCircle, stampRect: stampRect, stampPoly: stampPoly,
+    stampWing: stampWing, stampDrop: stampDrop, stampCar: stampCar, useShape: useShape,
+    coreOK: coreOK, metrics: metrics, metricOf: metricOf, starsFor: starsFor,
+    judge: judge, submit: submit, clearedCount: clearedCount, totalStars: totalStars,
+    starStr: starStr, fmt: fmt, loadLevel: loadLevel, save: save, load: load, defRec: defRec,
+    draw: draw, sync: sync, cavXY: cavXY, moveTracers: moveTracers, seedTracers: seedTracers,
+    setU0: setU0, setVisc: setVisc,
+    counts: function () { return { bn: bn, sn: sn }; },
+    get: function () {
+      return { mode: mode, view: view, trace: trace, running: running, spd: spd,
+               brush: brush, erase: erase, u0: u0, visc: visc, omega: omega, aoa: aoa,
+               mSteps: mSteps, sumN: sumN, msg: msg, inited: inited, active: active,
+               probeI: probeI, rec: rec };
+    },
+    setAoa: function (a) { aoa = clamp(a, -18, 18); },
+    setMode: function (m) { mode = m; },
+    setRec: function (r) { rec = r; },
+    resetInit: function () { inited = false; ctx = null; cav = null; off = null; octx = null; imgData = null; raf = 0; active = false; }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🌬️", name: "初入风洞", desc: "在随便风洞里第一次通过一道绕流挑战", test: function (u) { return (u.wndfirst || 0) >= 1; } },
+      { emoji: "🏎️", name: "低阻大师", desc: "在随便风洞里打通全部 5 道绕流挑战", test: function (u) { return (u.wndmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "阻力不是被速度制造的，是被形状纵容的。",
+      "尾巴拖得长一点，风就不会在你背后打转。",
+      "所有的涡，都是流体想拐弯却没拐过来的证据。",
+      "升力从来不是硬顶出来的，是把气流温柔地往下按出来的。",
+      "钝头的代价，要一路吹到尾流里才结清。"
     );
   }
 })();
