@@ -1609,6 +1609,7 @@
         <button data-tab="sandbox">🏜️ 随便沙盘</button>
         <button data-tab="factory">⚙️ 随便工厂</button>
         <button data-tab="wnd">🌬️ 随便风洞</button>
+        <button data-tab="traffic">🚦 随便路口</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -10221,6 +10222,109 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="traffic">
+    <h2>🚦 随便路口</h2>
+    <p class="sub">一条会真的堵起来的城市干道——每辆车都按 IDM 跟驰模型自己踩油门刹车，红绿灯按你写的配时方案走。调周期、调绿信比、调相位差，把整条走廊的平均延误压下去，10 道配时挑战等你签字</p>
+    <style>
+      #traffic .trf-wrap { max-width:680px; margin:0 auto; }
+      #traffic canvas.trf-cav { width:100%; max-width:660px; display:block; margin:0 auto 8px; border-radius:14px; background:#070c18; box-shadow:0 18px 44px rgba(0,0,0,.55); }
+      #traffic .trf-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:8px; }
+      #traffic .trf-hud span { padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #traffic .trf-hud b { font-weight:700; color:#7dd3fc; }
+      #traffic .trf-prog { height:6px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin:0 auto 9px; max-width:660px; }
+      #traffic .trf-prog i { display:block; height:100%; width:0%; background:linear-gradient(90deg,#4ade80,#38bdf8); transition:width .2s linear; }
+      #traffic .trf-row { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:7px; }
+      #traffic .trf-row button { padding:7px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+      #traffic .trf-row button:active { transform:translateY(1px); }
+      #traffic .trf-row button.on { background:linear-gradient(135deg,#4ade80,#0ea5e9); border-color:transparent; color:#04121f; box-shadow:0 6px 18px rgba(74,222,128,.3); }
+      #traffic #trfPick { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin:2px 0 8px; }
+      #traffic #trfPick button { padding:5px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; font-size:.75rem; font-weight:700; cursor:pointer; }
+      #traffic #trfPick button.on { background:linear-gradient(135deg,#38bdf8,#6366f1); border-color:transparent; color:#fff; }
+      #traffic .trf-sliders { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px 14px; margin:8px 0; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
+      #traffic .trf-sl { display:flex; flex-direction:column; gap:3px; }
+      #traffic .trf-sl label { font-size:.72rem; opacity:.78; display:flex; justify-content:space-between; gap:8px; }
+      #traffic .trf-sl label b { color:#7dd3fc; font-weight:700; }
+      #traffic .trf-sl input[type=range] { width:100%; accent-color:#4ade80; }
+      #traffic #trfLevels { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; margin-bottom:9px; }
+      #traffic #trfLevels button { min-width:74px; padding:5px 8px; border-radius:10px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; font-size:.74rem; font-weight:700; cursor:pointer; line-height:1.25; }
+      #traffic #trfLevels button.on { background:linear-gradient(135deg,#4ade80,#0ea5e9); border-color:transparent; color:#04121f; }
+      #traffic #trfLevels button i { display:block; font-style:normal; font-size:.58rem; opacity:.72; letter-spacing:1px; }
+      #traffic #trfInfo { text-align:center; font-size:.82rem; font-weight:700; line-height:1.6; padding:8px 12px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14); margin-bottom:8px; min-height:1.2em; }
+      #traffic #trfInfo.ok { background:rgba(74,222,128,.12); border-color:rgba(74,222,128,.4); color:#86efac; }
+      #traffic #trfBest { text-align:center; font-size:.72rem; opacity:.7; margin:0 0 8px; }
+      #traffic .trf-lab { text-align:center; font-size:.72rem; opacity:.62; margin:6px 0 5px; }
+      #traffic .trf-help { font-size:.76rem; line-height:1.75; opacity:.8; padding:10px 12px; border-radius:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
+      #traffic .trf-help b { color:#7dd3fc; }
+    </style>
+    <div class="trf-wrap">
+      <div class="trf-hud">
+        <span>关卡 <b id="trfLvName">—</b></span>
+        <span>时钟 <b id="trfClock">—</b></span>
+        <span>平均延误 <b id="trfAvg">—</b></span>
+        <span>通过 <b id="trfDone">0</b></span>
+        <span>排队 <b id="trfQueue">0</b></span>
+        <span>累计 <b id="trfTotal">0/30 ★</b></span>
+      </div>
+      <div class="trf-prog"><i id="trfBar"></i></div>
+      <canvas id="trfCav" class="trf-cav" width="660" height="300" aria-label="干道车流俯视图"></canvas>
+      <div id="trfTSWrap">
+        <div class="trf-lab">绿波时空图（横轴＝位置，纵轴＝时间，绿块＝主路绿灯）</div>
+        <canvas id="trfTS" class="trf-cav" width="660" height="170" aria-label="绿波时空图"></canvas>
+      </div>
+      <div id="trfInfo">—</div>
+      <div id="trfBest">—</div>
+      <div class="trf-row">
+        <button id="trfPlay" type="button">⏸ 暂停</button>
+        <button id="trfSpeed" type="button">⏩ 4×</button>
+        <button id="trfFF" type="button">⚡ 直接算完</button>
+        <button id="trfReset" type="button">↺ 重跑</button>
+        <button id="trfView" type="button">📊 时空图</button>
+      </div>
+      <div class="trf-lab">选一个路口来调它的绿信比与相位差</div>
+      <div id="trfPick"></div>
+      <div class="trf-sliders">
+        <div class="trf-sl">
+          <label>信号周期（全线统一） <b id="trfCycV">60s</b></label>
+          <input id="trfCyc" type="range" min="40" max="140" step="5" value="60" aria-label="信号周期">
+        </div>
+        <div class="trf-sl">
+          <label>主路绿信比 <b id="trfSplV">50%</b></label>
+          <input id="trfSpl" type="range" min="25" max="75" step="5" value="50" aria-label="主路绿信比">
+        </div>
+        <div class="trf-sl">
+          <label>相位差（相对全线零点） <b id="trfOffV">0s</b></label>
+          <input id="trfOff" type="range" min="0" max="135" step="5" value="0" aria-label="相位差">
+        </div>
+      </div>
+      <div class="trf-row">
+        <button id="trfWave" type="button">🌊 东行绿波</button>
+        <button id="trfWaveW" type="button">🌊 西行绿波</button>
+        <button id="trfEven" type="button">🧹 裸配时</button>
+      </div>
+      <div id="trfFree">
+        <div class="trf-lab">自由沙盘的车流量（只在自由模式生效）</div>
+        <div class="trf-sliders">
+          <div class="trf-sl">
+            <label>主路单向流量 <b id="trfFMainV">800 辆/时</b></label>
+            <input id="trfFMain" type="range" min="200" max="1400" step="50" value="800" aria-label="主路流量">
+          </div>
+          <div class="trf-sl">
+            <label>支路单向流量 <b id="trfFCrossV">220 辆/时</b></label>
+            <input id="trfFCross" type="range" min="60" max="700" step="20" value="220" aria-label="支路流量">
+          </div>
+        </div>
+      </div>
+      <div class="trf-lab">挑战关卡（下方是已得星）</div>
+      <div id="trfLevels"></div>
+      <p class="trf-help">
+        <b>这是什么</b>：一台微观交通仿真器。车不是按脚本走的动画，每辆车每 0.25 秒都在用 <b>IDM 智能驾驶员模型</b> 算自己的加速度——看前车距离、看速度差、看红灯还有多远，黄灯还会判断「刹不刹得住」。红绿灯严格按你设的<b>周期 / 绿信比 / 相位差</b>循环，含 3 秒黄灯 + 1 秒全红。
+        <br><b>怎么玩</b>：先点下面的关卡，再用三个滑杆调配时。<b>周期</b>全线统一（协调控制的前提），<b>绿信比</b>和<b>相位差</b>逐个路口调——先在「路口 N」里选中一个再拖。改任何参数都会自动重跑。
+        <br><b>看什么</b>：上面是干道俯视图（蓝＝跑得快、紫＝减速、红＝快停了）；下面是<b>绿波时空图</b>，绿块是各路口主路绿灯的时间窗，蓝实线／粉虚线是理论车队轨迹——<b>让线穿过所有绿块，就是一条绿波带</b>。
+        <br><b>怎么算分</b>：每关固定跑 360 秒（前 60 秒预热不计分），成绩是<b>平均延误</b>＝每辆车比一路畅通多花的秒数，把还堵在路上和还没挤进路网的车全算进去，所以卡死进口道并不能刷分。越小越好，三档门槛给三档星。
+        <br><b>诀窍</b>：流量大就把绿灯多给主路；周期太短会被损失时间吃掉通行能力，太长又让人干等；多路口时先点 <b>🌊 东行绿波</b> 看看理论解，再手动微调兼顾另一向。进度存在本地（suibian_traffic），刷新不丢。打通全部 10 关解锁「🌊 绿波大师」。
+      </p>
+    </div>
+  </section>
 </section>
 <script>
 (function () {
@@ -10650,6 +10754,7 @@
     if (id === "sandbox" && typeof psbRender === "function") psbRender();
     if (id === "factory" && typeof facRender === "function") facRender();
     if (id === "wnd" && typeof wndRender === "function") wndRender();
+    if (id === "traffic" && typeof trfRender === "function") trfRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -10740,6 +10845,7 @@
     if (id !== "sandbox" && typeof psbStop === "function") psbStop();
     if (id !== "factory" && typeof facStop === "function") facStop();
     if (id !== "wnd" && typeof wndStop === "function") wndStop();
+    if (id !== "traffic" && typeof trfStop === "function") trfStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10962,6 +11068,7 @@
     sandbox: "随便沙盘 沙盘 沙盒 落沙 沙子 粉末 物理沙盒 powder toy 元胞自动机 细胞自动机 模拟 仿真 材料 化学反应 水 油 熔岩 岩浆 火 火苗 燃烧 蒸汽 烟 木头 藤蔓 寒冰 玻璃 火药 爆炸 强酸 腐蚀 岩石 灰烬 密度 浮力 沉降 造物 沙雕 关卡 解谜 益智 涂鸦 画画 沙画",
     factory: "随便工厂 工厂 流水线 传送带 自动化 物流 采矿 冶炼 熔炉 组装 齿轮 电路板 引擎 生产 制造 工业 factorio 异星工厂 满意工厂 运输 调度 优化 产线 关卡 解谜 益智 自动化流水线 物流模拟 沙盒工厂",
     wnd: "随便风洞 风洞 流体 空气动力学 气动 绕流 涡街 卡门涡街 阻力 升力 阻力系数 升力系数 Cd Cl 升阻比 下压力 机翼 翼型 雷诺数 层流 湍流 边界层 分离 流线型 CFD 仿真 模拟 格子玻尔兹曼 LBM D2Q9 速度场 涡量 压力场 示踪粒子 减阻 赛车 尾流 物理",
+    traffic: "随便路口 路口 信号灯 红绿灯 交通 配时 信号配时 周期 绿信比 相位 相位差 绿波 协调控制 干道 车流 排队 延误 平均延误 通行能力 饱和流率 跟驰 IDM 智能驾驶员模型 微观交通仿真 时空图 潮汐车流 施工封路 行人过街 全红 黄灯 停车次数 交通工程 城市 堵车 模拟",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -11244,6 +11351,7 @@ splitbill:"tools",
     sandbox:"games",
     factory:"games",
     wnd:"games",
+    traffic:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -74264,6 +74372,888 @@ splitbill:"tools",
       "所有的涡，都是流体想拐弯却没拐过来的证据。",
       "升力从来不是硬顶出来的，是把气流温柔地往下按出来的。",
       "钝头的代价，要一路吹到尾流里才结清。"
+    );
+  }
+})();
+/* ===== 🚦 随便路口 · 城市信号配时实验室（前缀 trf / 存档 suibian_traffic） ===== */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_traffic";
+
+  /* ---------------- 物理 / 信号常量 ---------------- */
+  var DT = 0.25;                 // 仿真步长（秒）
+  var A_MAX = 1.7;               // 最大加速度 m/s²
+  var B_COMF = 2.4;              // 舒适减速度 m/s²
+  var S0 = 2.2;                  // 静止最小净距 m
+  var T_HW = 1.1;                // 期望车头时距 s
+  var CAR_LEN = 5.0;             // 车长 m
+  var V_MAIN = 14;               // 主路自由流车速 m/s（≈50km/h）
+  var V_CROSS = 11;              // 支路自由流车速 m/s（≈40km/h）
+  var YEL = 3;                   // 黄灯 s
+  var ARED = 1;                  // 全红清空 s
+  var WARM = 60;                 // 预热（不计分）s
+  var SCORE_T = 300;             // 计分时长 s
+  var TOTAL_T = WARM + SCORE_T;  // 一次评测总时长 s
+  var ARTL = 800;                // 干道长度 m
+  var CROSSL = 200;              // 支路可见长度 m
+  var CROSSSTOP = 100;           // 支路停车线位置 m
+  var BACK = 6;                  // 停车线相对路口中心的后退量 m
+  var CMIN = 40, CMAX = 140;     // 周期上下限 s
+  var LOST = 2 * (YEL + ARED);   // 每周期固定损失时间 s
+
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function r1(x) { return Math.round(x * 10) / 10; }
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ---------------- 关卡 ---------------- */
+  /* xs: 路口位置(m)；fE/fW: 主路东行/西行流量(veh/h)；fN/fS: 各路口南北进口流量
+     pd: 各路口行人全红时长；zone: 施工慢行区；tide: 潮汐；star: 三档平均延误门槛(越小越好) */
+  var LV = [
+    {
+      key: "l1", name: "单口热身", icon: "①", seed: 1101,
+      xs: [400], fE: 620, fW: 620, fN: [300], fS: [300],
+      tip: "一个孤零零的十字路口。主路和支路车流差不多，先把周期和绿信比调顺，感受一下配时的手感。",
+      star: [14, 16, 20]
+    },
+    {
+      key: "l2", name: "主次分明", icon: "②", seed: 1202,
+      xs: [400], fE: 950, fW: 950, fN: [180], fS: [180],
+      tip: "主路车多、支路车少。绿灯该给谁？绿信比不按流量分配，主路就会排到天边。",
+      star: [15, 17, 22]
+    },
+    {
+      key: "l3", name: "饱和路口", icon: "③", seed: 1303,
+      xs: [400], fE: 1000, fW: 1000, fN: [460], fS: [460],
+      tip: "接近通行能力的大流量。周期太短损失时间吃掉通行能力，太长又让人干等——找那个甜点。",
+      star: [18, 22, 28]
+    },
+    {
+      key: "l4", name: "双口绿波", icon: "④", seed: 1404, lockC: 70,
+      xs: [280, 560], fE: 860, fW: 860, fN: [330, 330], fS: [330, 330],
+      tip: "两个路口相距 280 米，周期锁死 70 秒（协调控制必须用公共周期）。把相位差调对，车队就能一路绿灯穿过去——这就是绿波。",
+      star: [30, 36, 45]
+    },
+    {
+      key: "l5", name: "三口协调", icon: "⑤", seed: 1505, lockC: 75,
+      xs: [200, 400, 600], fE: 900, fW: 600, fN: [320, 320, 320], fS: [320, 320, 320],
+      tip: "三个路口、周期锁 75 秒，东行比西行车多。双向绿波往往不能两全，先保住流量大的那一向。",
+      star: [25, 30, 37]
+    },
+    {
+      key: "l6", name: "四口干道", icon: "⑥", seed: 1606, lockC: 80,
+      xs: [160, 320, 480, 640], fE: 880, fW: 780, fN: [300, 300, 300, 300], fS: [300, 300, 300, 300],
+      tip: "四个等间距路口、周期锁 80 秒。间距一致时，等差相位差就是理论上的绿波解，动手验证一下。",
+      star: [30, 35, 44]
+    },
+    {
+      key: "l7", name: "潮汐车流", icon: "⑦", seed: 1707, tide: 1, lockC: 80,
+      xs: [200, 400, 600], fE: 850, fW: 850, fN: [300, 300, 300], fS: [300, 300, 300],
+      tip: "早高峰进城、晚高峰出城：东行流量前重后轻，西行相反。一套固定配时要照顾两个半场。",
+      star: [30, 35, 44]
+    },
+    {
+      key: "l8", name: "施工封路", icon: "⑧", seed: 1808, lockC: 80,
+      xs: [200, 400, 600], fE: 880, fW: 720, fN: [310, 310, 310], fS: [310, 310, 310],
+      zone: { lane: "E", a: 250, b: 360, v: 6 },
+      tip: "东行方向 250~360 米是施工慢行区，限速 6 m/s。瓶颈会把车队拉散、把行程时间拉长，绿波要重新算。",
+      star: [34, 41, 52]
+    },
+    {
+      key: "l9", name: "行人过街", icon: "⑨", seed: 1909, lockC: 90,
+      xs: [200, 400, 600], fE: 880, fW: 740, fN: [300, 300, 300], fS: [300, 300, 300],
+      pd: [10, 0, 10],
+      tip: "1 号和 3 号路口每周期多 10 秒行人全红。可用绿灯被吃掉，剩下的更要精打细算。",
+      star: [38, 45, 57]
+    },
+    {
+      key: "l10", name: "全城大考", icon: "⑩", seed: 2010, lockC: 90,
+      xs: [130, 265, 400, 535, 670], fE: 930, fW: 850,
+      fN: [330, 260, 360, 260, 330], fS: [330, 260, 360, 260, 330],
+      pd: [0, 0, 8, 0, 0],
+      tip: "五个路口、间距 135 米、中间路口还带行人相位。把整条走廊调顺，你就是配时工程师。",
+      star: [37, 45, 56]
+    }
+  ];
+  var NLV = LV.length;
+
+  /* ---------------- 配时方案 ---------------- */
+  function defPlan(lv) {
+    var n = lv.xs.length, sp = [], of = [], i;
+    for (i = 0; i < n; i++) { sp.push(50); of.push(0); }
+    return { C: lv.lockC || 60, sp: sp, of: of };
+  }
+  function clonePlan(p) { return { C: p.C, sp: p.sp.slice(), of: p.of.slice() }; }
+
+  /* 把任意脏输入（undefined / NaN / 字符串）收敛成有限数字 */
+  function num(v, d) { v = +v; return isFinite(v) ? v : d; }
+
+  function normPlan(lv, p) {
+    var n = lv.xs.length;
+    p = p || {};
+    var ps = p.sp || [], po = p.of || [];
+    var C = lv.lockC ? lv.lockC : clamp(Math.round(num(p.C, 60) / 5) * 5, CMIN, CMAX);
+    var sp = [], of = [], i;
+    for (i = 0; i < n; i++) {
+      sp.push(clamp(Math.round(num(ps[i], 50) / 5) * 5, 25, 75));
+      of.push(((Math.round(num(po[i], 0) / 5) * 5) % C + C) % C);
+    }
+    return { C: C, sp: sp, of: of };
+  }
+
+  /* 把方案展开成每个路口的具体相位长度 */
+  function splitOf(lv, plan, i) {
+    var pd = (lv.pd && lv.pd[i]) || 0;
+    var G = plan.C - LOST - pd;
+    if (G < 10) { pd = Math.max(0, plan.C - LOST - 10); G = plan.C - LOST - pd; }
+    var gM = clamp(Math.round(G * plan.sp[i] / 100), 5, G - 5);
+    return { gM: gM, gC: G - gM, pd: pd, C: plan.C };
+  }
+
+  /* 相位查询：返回 'g' / 'y' / 'r' */
+  function phaseAt(ph, off, C, t, main) {
+    var tt = (((t - off) % C) + C) % C;
+    if (tt < ph.gM) return main ? "g" : "r";
+    tt -= ph.gM;
+    if (tt < YEL) return main ? "y" : "r";
+    tt -= YEL;
+    if (tt < ARED) return "r";
+    tt -= ARED;
+    if (tt < ph.gC) return main ? "r" : "g";
+    tt -= ph.gC;
+    if (tt < YEL) return main ? "r" : "y";
+    return "r";
+  }
+
+  /* ---------------- 仿真 ---------------- */
+  function mkLane(dir, len, v0, rate, seed) {
+    return {
+      dir: dir, len: len, v0: v0, rate: rate, cars: [], pend: [],
+      stops: [], zones: [], rng: mulberry32(seed), acc: 0
+    };
+  }
+
+  function mkSim(lv, plan) {
+    plan = normPlan(lv, plan);
+    var s = {
+      lv: lv, plan: plan, t: 0, ix: [], lanes: [],
+      gen: 0, done: 0, sumDone: 0, stops: 0, queue: 0, peakQ: 0, doneAll: 0
+    };
+    var n = lv.xs.length, i;
+    for (i = 0; i < n; i++) {
+      s.ix.push({ x: lv.xs[i], off: plan.of[i], ph: splitOf(lv, plan, i) });
+    }
+    var sd = lv.seed || 1;
+    var laneE = mkLane("E", ARTL, V_MAIN, lv.fE, sd + 11);
+    var laneW = mkLane("W", ARTL, V_MAIN, lv.fW, sd + 23);
+    for (i = 0; i < n; i++) laneE.stops.push({ pos: lv.xs[i] - BACK, ix: i, main: true });
+    for (i = n - 1; i >= 0; i--) laneW.stops.push({ pos: ARTL - lv.xs[i] - BACK, ix: i, main: true });
+    s.lanes.push(laneE, laneW);
+    for (i = 0; i < n; i++) {
+      var ln = mkLane("N", CROSSL, V_CROSS, (lv.fN && lv.fN[i]) || 0, sd + 101 + i * 7);
+      ln.stops.push({ pos: CROSSSTOP - BACK, ix: i, main: false });
+      var ls = mkLane("S", CROSSL, V_CROSS, (lv.fS && lv.fS[i]) || 0, sd + 211 + i * 13);
+      ls.stops.push({ pos: CROSSSTOP - BACK, ix: i, main: false });
+      s.lanes.push(ln, ls);
+    }
+    if (lv.zone) {
+      for (i = 0; i < s.lanes.length; i++) {
+        if (s.lanes[i].dir === lv.zone.lane) s.lanes[i].zones.push(lv.zone);
+      }
+    }
+    return s;
+  }
+
+  /* 潮汐倍率 */
+  function tideMul(lv, dir, t) {
+    if (!lv.tide) return 1;
+    var ph = clamp(t / TOTAL_T, 0, 1);
+    if (dir === "E") return 1.45 - 0.9 * ph;
+    if (dir === "W") return 0.55 + 0.9 * ph;
+    return 1;
+  }
+  function rateAt(s, lane, t) { return lane.rate * tideMul(s.lv, lane.dir, t); }
+
+  /* 车辆当前所处限速 */
+  function v0At(lane, p) {
+    for (var i = 0; i < lane.zones.length; i++) {
+      var z = lane.zones[i];
+      if (p >= z.a && p <= z.b) return z.v;
+    }
+    return lane.v0;
+  }
+
+  function idm(v, gap, dv, v0) {
+    if (gap < 0.1) gap = 0.1;
+    var st = S0 + v * T_HW + v * dv / (2 * Math.sqrt(A_MAX * B_COMF));
+    if (st < S0) st = S0;
+    var a = A_MAX * (1 - Math.pow(v / v0, 4) - (st / gap) * (st / gap));
+    return clamp(a, -9, A_MAX);
+  }
+
+  /* 前方最近的“红灯障碍”距离，没有则 1e9 */
+  function signalGap(s, lane, car) {
+    var best = 1e9;
+    for (var i = 0; i < lane.stops.length; i++) {
+      var st = lane.stops[i];
+      var d = st.pos - car.p;
+      if (d <= 0) continue;
+      if (d >= best) break;
+      var ix = s.ix[st.ix];
+      var ph = phaseAt(ix.ph, ix.off, s.plan.C, s.t, st.main);
+      if (ph === "g") continue;
+      if (ph === "y") {
+        /* 黄灯两难区：刹不住就冲过去 */
+        if (car.v * car.v / (2 * B_COMF) > d - 0.5) continue;
+      }
+      best = d;
+      break;
+    }
+    return best;
+  }
+
+  function admit(s, lane) {
+    while (lane.pend.length) {
+      var rear = lane.cars.length ? lane.cars[0].p : 1e9;
+      if (rear < CAR_LEN + S0 + 2) break;
+      var t0 = lane.pend.shift();
+      lane.cars.unshift({
+        p: 0, v: Math.min(lane.v0 * 0.85, rear * 0.5),
+        t0: t0, cnt: t0 >= WARM ? 1 : 0, sl: 0
+      });
+    }
+  }
+
+  function step(s) {
+    var t = s.t, i, j, k;
+    /* 1. 到达（泊松近似） */
+    for (i = 0; i < s.lanes.length; i++) {
+      var lane = s.lanes[i];
+      var lam = rateAt(s, lane, t) / 3600 * DT;
+      if (lam > 0 && lane.rng() < lam) {
+        lane.pend.push(t);
+        if (t >= WARM) s.gen++;
+      }
+      admit(s, lane);
+    }
+    /* 2. 跟驰更新 */
+    var q = 0;
+    for (i = 0; i < s.lanes.length; i++) {
+      var ln = s.lanes[i], cars = ln.cars;
+      for (j = cars.length - 1; j >= 0; j--) {
+        var c = cars[j], lead = cars[j + 1];
+        var gap = 1e9, dv = 0;
+        if (lead) { gap = lead.p - c.p - CAR_LEN; dv = c.v - lead.v; }
+        var sg = signalGap(s, ln, c);
+        if (sg < gap) { gap = sg; dv = c.v; }
+        var a = idm(c.v, gap, dv, v0At(ln, c.p));
+        c.v = c.v + a * DT;
+        if (c.v < 0) c.v = 0;
+        c.p += c.v * DT;
+        if (c.v < 0.4) {
+          if (!c.sl) { c.sl = 1; if (c.cnt) s.stops++; }
+        } else if (c.v > 1.2) c.sl = 0;
+        if (c.v < 2.5) q++;
+      }
+      /* 3. 驶离 */
+      while (cars.length && cars[cars.length - 1].p >= ln.len) {
+        var d = cars.pop();
+        s.doneAll++;
+        if (d.cnt) {
+          s.done++;
+          var dl = (s.t + DT - d.t0) - ln.len / ln.v0;
+          s.sumDone += dl > 0 ? dl : 0;
+        }
+      }
+    }
+    s.queue = q;
+    if (q > s.peakQ) s.peakQ = q;
+    s.t = t + DT;
+    return s;
+  }
+
+  function run(s, secs) {
+    var n = Math.round(secs / DT);
+    for (var i = 0; i < n; i++) step(s);
+    return s;
+  }
+
+  /* 累计总延误 = 已离开 + 在途 + 还没挤进来的 */
+  function stats(s) {
+    var total = s.sumDone, i, j;
+    for (i = 0; i < s.lanes.length; i++) {
+      var ln = s.lanes[i];
+      for (j = 0; j < ln.cars.length; j++) {
+        var c = ln.cars[j];
+        if (!c.cnt) continue;
+        var dl = (s.t - c.t0) - c.p / ln.v0;
+        if (dl > 0) total += dl;
+      }
+      for (j = 0; j < ln.pend.length; j++) {
+        if (ln.pend[j] >= WARM) total += s.t - ln.pend[j];
+      }
+    }
+    return {
+      gen: s.gen, done: s.done, queue: s.queue, peakQ: s.peakQ,
+      totalDelay: total,
+      avg: s.gen > 0 ? total / s.gen : 0,
+      stopRate: s.gen > 0 ? s.stops / s.gen : 0,
+      progress: clamp(s.t / TOTAL_T, 0, 1)
+    };
+  }
+
+  /* 一次完整评测（纯函数，供标定与测试用） */
+  function evaluate(lv, plan) {
+    var s = mkSim(lv, plan);
+    run(s, TOTAL_T);
+    return stats(s);
+  }
+
+  function starsFor(lv, avg) {
+    var th = lv.star;
+    if (avg <= th[0]) return 3;
+    if (avg <= th[1]) return 2;
+    if (avg <= th[2]) return 1;
+    return 0;
+  }
+
+  /* 理论绿波相位差（按东行车队推算） */
+  function waveOffsets(lv, C, dir) {
+    var n = lv.xs.length, out = [], i;
+    for (i = 0; i < n; i++) {
+      var d = dir === "W" ? (lv.xs[n - 1] - lv.xs[i]) : (lv.xs[i] - lv.xs[0]);
+      var o = Math.round(d / V_MAIN / 5) * 5;
+      out.push(((o % C) + C) % C);
+    }
+    return out;
+  }
+
+  /* ---------------- 存档 ---------------- */
+  function defRec() { return { st: {}, best: {}, plan: {}, view: 0 }; }
+  var rec = null;
+  function load() {
+    var r = defRec();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && typeof o === "object") {
+          if (o.st && typeof o.st === "object") r.st = o.st;
+          if (o.best && typeof o.best === "object") r.best = o.best;
+          if (o.plan && typeof o.plan === "object") r.plan = o.plan;
+          if (typeof o.view === "number") r.view = o.view ? 1 : 0;
+        }
+      }
+    } catch (e) { r = defRec(); }
+    rec = r;
+    return r;
+  }
+  function save() {
+    if (!rec) return;
+    try { localStorage.setItem(KEY, JSON.stringify(rec)); } catch (e) { }
+  }
+  function clearedCount() {
+    if (!rec) return 0;
+    var n = 0;
+    for (var i = 0; i < NLV; i++) if ((rec.st[LV[i].key] || 0) > 0) n++;
+    return n;
+  }
+  function totalStars() {
+    if (!rec) return 0;
+    var n = 0;
+    for (var i = 0; i < NLV; i++) n += rec.st[LV[i].key] || 0;
+    return n;
+  }
+  function starStr(n) { return "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n); }
+
+  /* ---------------- 运行态 ---------------- */
+  var mode = -1;            // -1 自由模式，>=0 关卡下标
+  var freeLv = {
+    key: "free", name: "自由模式", icon: "🎛", seed: 777,
+    xs: [200, 400, 600], fE: 800, fW: 800, fN: [220, 220, 220], fS: [220, 220, 220],
+    tip: "自由模式：随便调流量和配时，看车流自己演。", star: [1e9, 1e9, 1e9]
+  };
+  var cur = null;           // 当前关卡定义
+  var plan = null;          // 当前方案
+  var sim = null;
+  var sel = 0;              // 选中的路口
+  var running = true, spd = 4, view = 0;
+  var msg = "", msgOk = false, judged = false;
+  var inited = false, active = false, raf = 0, lastTs = 0;
+  var cav = null, ctx = null, tcav = null, tctx = null;
+
+  function curLv() { return mode >= 0 ? LV[mode] : freeLv; }
+
+  function planKeyOf(lv) { return lv.key; }
+  function loadPlan(lv) {
+    var p = defPlan(lv);
+    if (rec && rec.plan && rec.plan[planKeyOf(lv)]) {
+      var o = rec.plan[planKeyOf(lv)];
+      try {
+        if (typeof o.C === "number") p.C = o.C;
+        if (o.sp && o.sp.length === lv.xs.length) p.sp = o.sp.slice();
+        if (o.of && o.of.length === lv.xs.length) p.of = o.of.slice();
+      } catch (e) { p = defPlan(lv); }
+    }
+    return normPlan(lv, p);
+  }
+  function savePlan() {
+    if (!rec || !cur) return;
+    rec.plan[planKeyOf(cur)] = clonePlan(plan);
+    save();
+  }
+
+  function resetSim(keepMsg) {
+    plan = normPlan(cur, plan);
+    sim = mkSim(cur, plan);
+    judged = false;
+    if (!keepMsg) { msg = cur.tip; msgOk = false; }
+  }
+
+  function loadLevel(i) {
+    mode = i;
+    cur = curLv();
+    sel = 0;
+    plan = loadPlan(cur);
+    resetSim(false);
+  }
+
+  function judge() {
+    var st = stats(sim);
+    if (mode < 0) {
+      msg = "自由模式跑完 " + TOTAL_T + " 秒：平均延误 " + r1(st.avg) + " 秒/车，通过 " + st.done + " 辆。";
+      msgOk = true;
+      judged = true;
+      return { stars: 0, st: st };
+    }
+    var lv = LV[mode];
+    var stars = starsFor(lv, st.avg);
+    var prevBest = rec.best[lv.key];
+    if (prevBest === undefined || st.avg < prevBest) rec.best[lv.key] = st.avg;
+    var prev = rec.st[lv.key] || 0;
+    if (stars > prev) rec.st[lv.key] = stars;
+    save();
+    if (stars > 0) {
+      try { bumpUsage("trffirst"); } catch (e) { }
+      if (clearedCount() >= NLV) { try { bumpUsage("trfmaster"); } catch (e2) { } }
+      msg = "✅ 平均延误 " + r1(st.avg) + " 秒/车（通过 " + st.done + " 辆，停车 " +
+        r1(st.stopRate) + " 次/车）→ " + starStr(stars) +
+        (stars < 3 ? "　三星门槛 " + lv.star[0] + " 秒" : "　配时大师！");
+      msgOk = true;
+    } else {
+      msg = "❌ 平均延误 " + r1(st.avg) + " 秒/车，还没进 " + lv.star[2] + " 秒的及格线。" +
+        "试试改周期、绿信比，或者把相位差排成绿波。";
+      msgOk = false;
+    }
+    judged = true;
+    return { stars: stars, st: st };
+  }
+
+  /* ---------------- DOM ---------------- */
+  function $(id) { return typeof document !== "undefined" ? document.getElementById(id) : null; }
+
+  function fillLevels() {
+    var box = $("trfLevels");
+    if (!box) return;
+    var html = '<button type="button" data-lv="-1"' + (mode < 0 ? ' class="on"' : '') +
+      '>🎛 自由<i>沙盘</i></button>';
+    for (var i = 0; i < NLV; i++) {
+      var lv = LV[i], s = (rec && rec.st[lv.key]) || 0;
+      html += '<button type="button" data-lv="' + i + '"' + (mode === i ? ' class="on"' : '') + '>' +
+        lv.icon + ' ' + lv.name + '<i>' + starStr(s) + '</i></button>';
+    }
+    box.innerHTML = html;
+    var bs = box.getElementsByTagName("button");
+    for (var k = 0; k < bs.length; k++) {
+      (function (b) {
+        b.addEventListener("click", function () {
+          loadLevel(parseInt(b.getAttribute("data-lv"), 10));
+          fillLevels(); fillPicker(); sync();
+        });
+      })(bs[k]);
+    }
+  }
+
+  function fillPicker() {
+    var box = $("trfPick");
+    if (!box || !cur) return;
+    var html = "", i;
+    for (i = 0; i < cur.xs.length; i++) {
+      html += '<button type="button" data-ix="' + i + '"' + (sel === i ? ' class="on"' : '') +
+        '>路口 ' + (i + 1) + '</button>';
+    }
+    box.innerHTML = html;
+    var bs = box.getElementsByTagName("button");
+    for (var k = 0; k < bs.length; k++) {
+      (function (b) {
+        b.addEventListener("click", function () {
+          sel = parseInt(b.getAttribute("data-ix"), 10);
+          fillPicker(); sync();
+        });
+      })(bs[k]);
+    }
+  }
+
+  function sync() {
+    if (typeof document === "undefined") return;
+    var st = sim ? stats(sim) : null;
+    var e;
+    if ((e = $("trfLvName"))) e.textContent = cur ? (cur.icon + " " + cur.name) : "—";
+    if ((e = $("trfClock"))) e.textContent = sim ? (Math.floor(sim.t) + "/" + TOTAL_T + "s") : "—";
+    if ((e = $("trfAvg"))) e.textContent = st ? r1(st.avg) + "s" : "—";
+    if ((e = $("trfDone"))) e.textContent = st ? String(st.done) : "0";
+    if ((e = $("trfQueue"))) e.textContent = st ? String(st.queue) : "0";
+    if ((e = $("trfTotal"))) e.textContent = totalStars() + "/" + (NLV * 3) + " ★";
+    var locked = !!(cur && cur.lockC);
+    if ((e = $("trfCycV"))) e.textContent = plan ? (plan.C + "s" + (locked ? "（🔒 本关锁定）" : "")) : "—";
+    if ((e = $("trfCyc")) && plan) { e.value = String(plan.C); e.disabled = locked; }
+    if (plan && cur) {
+      var ph = splitOf(cur, plan, sel);
+      if ((e = $("trfSplV"))) e.textContent = plan.sp[sel] + "%（主 " + ph.gM + "s / 支 " + ph.gC + "s" +
+        (ph.pd ? " / 行人 " + ph.pd + "s" : "") + "）";
+      if ((e = $("trfSpl"))) e.value = String(plan.sp[sel]);
+      if ((e = $("trfOffV"))) e.textContent = plan.of[sel] + "s";
+      if ((e = $("trfOff"))) { e.max = String(plan.C - 5); e.value = String(Math.min(plan.of[sel], plan.C - 5)); }
+    }
+    if ((e = $("trfPlay"))) e.textContent = running ? "⏸ 暂停" : "▶ 继续";
+    if ((e = $("trfSpeed"))) e.textContent = "⏩ " + spd + "×";
+    if ((e = $("trfView"))) e.className = view ? "on" : "";
+    if ((e = $("trfBar"))) e.style.width = (st ? Math.round(st.progress * 100) : 0) + "%";
+    if ((e = $("trfInfo"))) { e.textContent = msg || "—"; e.className = msgOk ? "ok" : ""; }
+    if ((e = $("trfBest")) && cur) {
+      var b = rec && rec.best[cur.key];
+      e.textContent = (mode >= 0)
+        ? ("门槛 ★★★≤" + cur.star[0] + "s　★★≤" + cur.star[1] + "s　★≤" + cur.star[2] + "s" +
+          (b !== undefined ? "　｜ 我的最好 " + r1(b) + "s" : ""))
+        : "自由沙盘不计分，随便折腾。";
+    }
+    var fr = $("trfFree");
+    if (fr) fr.style.display = mode < 0 ? "" : "none";
+    draw();
+  }
+
+  /* ---------------- 绘制 ---------------- */
+  var CW = 660, CH = 300, MX = 24;
+  function sx(x) { return MX + x * (CW - 2 * MX) / ARTL; }
+  var SCALE = (CW - 2 * MX) / ARTL;
+
+  function lightColor(ph) { return ph === "g" ? "#4ade80" : (ph === "y" ? "#fbbf24" : "#f87171"); }
+
+  function draw() {
+    if (!ctx || !sim || !cur) return;
+    var i, j;
+    ctx.clearRect(0, 0, CW, CH);
+    var g = ctx.createLinearGradient(0, 0, 0, CH);
+    g.addColorStop(0, "#0b1120"); g.addColorStop(1, "#070c18");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH);
+
+    var cy = CH / 2;
+    /* 支路路面 */
+    for (i = 0; i < cur.xs.length; i++) {
+      var X = sx(cur.xs[i]);
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(X - 11, 0, 22, CH);
+    }
+    /* 主路路面 */
+    ctx.fillStyle = "#1e293b";
+    ctx.fillRect(0, cy - 13, CW, 26);
+    /* 中心虚线 */
+    ctx.strokeStyle = "rgba(250,204,21,.45)"; ctx.lineWidth = 1;
+    ctx.setLineDash([7, 7]); ctx.beginPath();
+    ctx.moveTo(0, cy); ctx.lineTo(CW, cy); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* 施工区 */
+    if (cur.zone) {
+      var za = sx(cur.zone.a), zb = sx(cur.zone.b);
+      ctx.fillStyle = "rgba(251,146,60,.22)";
+      ctx.fillRect(za, cy, zb - za, 13);
+      ctx.strokeStyle = "rgba(251,146,60,.7)"; ctx.lineWidth = 1;
+      ctx.strokeRect(za, cy, zb - za, 13);
+    }
+
+    /* 停车线与信号灯 */
+    for (i = 0; i < cur.xs.length; i++) {
+      var ix = sim.ix[i], XX = sx(cur.xs[i]);
+      var pm = phaseAt(ix.ph, ix.off, sim.plan.C, sim.t, true);
+      var pc = phaseAt(ix.ph, ix.off, sim.plan.C, sim.t, false);
+      ctx.fillStyle = lightColor(pm);
+      ctx.fillRect(XX - 13 - 3, cy + 1, 3, 12);
+      ctx.fillRect(XX + 13, cy - 13, 3, 12);
+      ctx.fillStyle = lightColor(pc);
+      ctx.fillRect(XX - 12, cy + 13, 12, 3);
+      ctx.fillRect(XX, cy - 13 - 3, 12, 3);
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      ctx.font = "bold 10px system-ui,sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(String(i + 1) + (i === sel ? "◀" : ""), XX, 12);
+    }
+
+    /* 车辆 */
+    for (i = 0; i < sim.lanes.length; i++) {
+      var ln = sim.lanes[i];
+      for (j = 0; j < ln.cars.length; j++) {
+        var c = ln.cars[j];
+        var fast = c.v > 6 ? "#38bdf8" : (c.v > 2.5 ? "#a78bfa" : "#fb7185");
+        ctx.fillStyle = fast;
+        if (ln.dir === "E") {
+          ctx.fillRect(sx(c.p) - 4, cy + 3, 5, 7);
+        } else if (ln.dir === "W") {
+          ctx.fillRect(sx(ARTL - c.p) - 1, cy - 10, 5, 7);
+        } else {
+          var k = ln.stops[0].ix, X2 = sx(cur.xs[k]);
+          var yy = ln.dir === "N" ? (cy + 90 - c.p * SCALE) : (cy - 90 + c.p * SCALE);
+          if (yy < -8 || yy > CH + 8) continue;
+          ctx.fillRect(ln.dir === "N" ? X2 + 3 : X2 - 8, yy - 2, 7, 5);
+        }
+      }
+    }
+
+    /* 方向提示 */
+    ctx.fillStyle = "rgba(255,255,255,.35)";
+    ctx.font = "10px system-ui,sans-serif";
+    ctx.textAlign = "left"; ctx.fillText("东行 →", 4, cy + 22);
+    ctx.textAlign = "right"; ctx.fillText("← 西行", CW - 4, cy - 16);
+
+    drawTS();
+  }
+
+  /* 绿波时空图 */
+  var TW = 660, TH = 170, TP = 26;
+  function drawTS() {
+    if (!tctx || !sim || !cur) return;
+    var C = sim.plan.C, i;
+    tctx.clearRect(0, 0, TW, TH);
+    tctx.fillStyle = "#080d1a"; tctx.fillRect(0, 0, TW, TH);
+    var h = TH - TP - 6, ty = function (tt) { return TP + tt / (2 * C) * h; };
+
+    /* 每个路口的红绿带 */
+    for (i = 0; i < cur.xs.length; i++) {
+      var ix = sim.ix[i], X = sx(cur.xs[i]);
+      for (var tt = 0; tt < 2 * C; tt += 0.5) {
+        var ph = phaseAt(ix.ph, ix.off, C, tt, true);
+        tctx.fillStyle = ph === "g" ? "rgba(74,222,128,.75)"
+          : (ph === "y" ? "rgba(251,191,36,.7)" : "rgba(248,113,113,.35)");
+        tctx.fillRect(X - 7, ty(tt), 14, h / (2 * C) * 0.5 + 1);
+      }
+      tctx.fillStyle = "rgba(255,255,255,.5)";
+      tctx.font = "9px system-ui,sans-serif"; tctx.textAlign = "center";
+      tctx.fillText("#" + (i + 1), X, TP - 4);
+    }
+
+    /* 理论车队轨迹（东行实线 / 西行虚线），画两个周期 */
+    var rep;
+    tctx.lineWidth = 1.4;
+    for (rep = -1; rep <= 2; rep++) {
+      tctx.strokeStyle = "rgba(56,189,248,.85)";
+      tctx.setLineDash([]);
+      tctx.beginPath();
+      tctx.moveTo(sx(0), ty(rep * C));
+      tctx.lineTo(sx(ARTL), ty(rep * C + ARTL / V_MAIN));
+      tctx.stroke();
+      tctx.strokeStyle = "rgba(244,114,182,.8)";
+      tctx.setLineDash([4, 4]);
+      tctx.beginPath();
+      tctx.moveTo(sx(ARTL), ty(rep * C));
+      tctx.lineTo(sx(0), ty(rep * C + ARTL / V_MAIN));
+      tctx.stroke();
+    }
+    tctx.setLineDash([]);
+    tctx.fillStyle = "rgba(255,255,255,.42)";
+    tctx.font = "9px system-ui,sans-serif";
+    tctx.textAlign = "left";
+    tctx.fillText("时间 ↓（两个周期 " + (2 * C) + "s）　—— 东行车队　- - 西行车队", 4, TH - 4);
+  }
+
+  /* ---------------- 主循环 ---------------- */
+  function frame(ts) {
+    raf = 0;
+    if (!active) return;
+    if (!lastTs) lastTs = ts;
+    var dtr = Math.min(0.12, (ts - lastTs) / 1000);
+    lastTs = ts;
+    if (running && sim && sim.t < TOTAL_T) {
+      var need = Math.round(dtr * spd / DT);
+      if (need > 260) need = 260;
+      for (var i = 0; i < need && sim.t < TOTAL_T; i++) step(sim);
+      if (sim.t >= TOTAL_T && !judged) judge();
+      sync();
+    }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function fastForward() {
+    if (!sim) return;
+    while (sim.t < TOTAL_T) step(sim);
+    if (!judged) judge();
+    fillLevels();
+    sync();
+  }
+
+  /* ---------------- 初始化 ---------------- */
+  function bind(id, fn) {
+    var el = $(id);
+    if (el) el.addEventListener("click", fn);
+  }
+
+  function init() {
+    if (inited) return;
+    inited = true;
+    load();
+    cav = $("trfCav");
+    if (cav && cav.getContext) { ctx = cav.getContext("2d"); }
+    tcav = $("trfTS");
+    if (tcav && tcav.getContext) { tctx = tcav.getContext("2d"); }
+    loadLevel(-1);
+
+    bind("trfPlay", function () { running = !running; sync(); });
+    bind("trfSpeed", function () { spd = spd === 1 ? 4 : (spd === 4 ? 16 : (spd === 16 ? 64 : 1)); sync(); });
+    bind("trfReset", function () { resetSim(false); fillLevels(); sync(); });
+    bind("trfFF", fastForward);
+    bind("trfWave", function () {
+      plan.of = waveOffsets(cur, plan.C, "E");
+      savePlan(); resetSim(true);
+      msg = "已套用东行理论绿波：相位差按 " + V_MAIN + " m/s 车速推算。西行不一定同样舒服，自己再微调。";
+      msgOk = false;
+      sync();
+    });
+    bind("trfWaveW", function () {
+      plan.of = waveOffsets(cur, plan.C, "W");
+      savePlan(); resetSim(true);
+      msg = "已套用西行理论绿波。双向兼顾往往要牺牲一点，看你保哪一向。";
+      msgOk = false;
+      sync();
+    });
+    bind("trfEven", function () {
+      for (var i = 0; i < plan.sp.length; i++) plan.sp[i] = 50;
+      for (i = 0; i < plan.of.length; i++) plan.of[i] = 0;
+      savePlan(); resetSim(true);
+      msg = "已重置为「全部 50% 绿信比、零相位差」的裸配时。";
+      msgOk = false;
+      sync();
+    });
+    bind("trfView", function () {
+      view = view ? 0 : 1;
+      var el = $("trfTSWrap");
+      if (el) el.style.display = view ? "none" : "";
+      if (rec) { rec.view = view; save(); }
+      sync();
+    });
+
+    var sc = $("trfCyc");
+    if (sc) sc.addEventListener("input", function () {
+      if (cur && cur.lockC) { sync(); return; }
+      plan.C = clamp(Math.round(parseInt(sc.value, 10) / 5) * 5, CMIN, CMAX);
+      for (var i = 0; i < plan.of.length; i++) plan.of[i] = plan.of[i] % plan.C;
+      savePlan(); resetSim(true); sync();
+    });
+    var ss = $("trfSpl");
+    if (ss) ss.addEventListener("input", function () {
+      plan.sp[sel] = clamp(Math.round(parseInt(ss.value, 10) / 5) * 5, 25, 75);
+      savePlan(); resetSim(true); sync();
+    });
+    var so = $("trfOff");
+    if (so) so.addEventListener("input", function () {
+      plan.of[sel] = clamp(Math.round(parseInt(so.value, 10) / 5) * 5, 0, plan.C - 5);
+      savePlan(); resetSim(true); sync();
+    });
+    var fm = $("trfFMain");
+    if (fm) fm.addEventListener("input", function () {
+      var v = parseInt(fm.value, 10) || 600;
+      freeLv.fE = v; freeLv.fW = v;
+      var el = $("trfFMainV"); if (el) el.textContent = v + " 辆/时";
+      if (mode < 0) { resetSim(true); sync(); }
+    });
+    var fc = $("trfFCross");
+    if (fc) fc.addEventListener("input", function () {
+      var v = parseInt(fc.value, 10) || 200;
+      for (var i = 0; i < 3; i++) { freeLv.fN[i] = v; freeLv.fS[i] = v; }
+      var el = $("trfFCrossV"); if (el) el.textContent = v + " 辆/时";
+      if (mode < 0) { resetSim(true); sync(); }
+    });
+
+    view = (rec && rec.view) ? 1 : 0;
+    var tw = $("trfTSWrap");
+    if (tw) tw.style.display = view ? "none" : "";
+    fillLevels();
+    fillPicker();
+    sync();
+  }
+
+  if (typeof window !== "undefined") {
+    window.trfRender = function () {
+      init();
+      active = true;
+      lastTs = 0;
+      if (!raf && typeof requestAnimationFrame === "function") raf = requestAnimationFrame(frame);
+    };
+    window.trfStop = function () {
+      active = false;
+      if (raf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf);
+      raf = 0;
+      save();
+    };
+
+    /* ---------------- 测试接口 ---------------- */
+    window.__trfTest = {
+      KEY: KEY, DT: DT, YEL: YEL, ARED: ARED, LOST: LOST,
+      WARM: WARM, SCORE_T: SCORE_T, TOTAL_T: TOTAL_T,
+      ARTL: ARTL, CROSSL: CROSSL, CROSSSTOP: CROSSSTOP, BACK: BACK,
+      V_MAIN: V_MAIN, V_CROSS: V_CROSS, CMIN: CMIN, CMAX: CMAX,
+      CAR_LEN: CAR_LEN, S0: S0, A_MAX: A_MAX, B_COMF: B_COMF,
+      LV: LV, NLV: NLV,
+      clamp: clamp, mulberry32: mulberry32,
+      defPlan: defPlan, clonePlan: clonePlan, normPlan: normPlan,
+      splitOf: splitOf, phaseAt: phaseAt, waveOffsets: waveOffsets,
+      mkLane: mkLane, mkSim: mkSim, tideMul: tideMul, rateAt: rateAt,
+      v0At: v0At, idm: idm, signalGap: signalGap, admit: admit,
+      step: step, run: run, stats: stats, evaluate: evaluate,
+      starsFor: starsFor, starStr: starStr,
+      load: load, save: save, defRec: defRec,
+      clearedCount: clearedCount, totalStars: totalStars,
+      loadLevel: loadLevel, judge: judge, resetSim: resetSim,
+      fastForward: fastForward, draw: draw, drawTS: drawTS, sync: sync,
+      fillLevels: fillLevels, fillPicker: fillPicker, init: init,
+      loadPlan: loadPlan, savePlan: savePlan, freeLv: freeLv,
+      get: function () {
+        return {
+          mode: mode, sel: sel, running: running, spd: spd, view: view,
+          msg: msg, msgOk: msgOk, judged: judged, inited: inited, active: active,
+          plan: plan, sim: sim, rec: rec, cur: cur
+        };
+      },
+      setMode: function (m) { mode = m; cur = curLv(); },
+      setPlan: function (p) { plan = p; },
+      setRec: function (r) { rec = r; },
+      setSel: function (i) { sel = i; },
+      resetInit: function () {
+        inited = false; active = false; raf = 0; ctx = null; tctx = null;
+        cav = null; tcav = null; lastTs = 0;
+      }
+    };
+  }
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🚦", name: "初掌信号", desc: "在随便路口里第一次让一道配时关卡达标", test: function (u) { return (u.trffirst || 0) >= 1; } },
+      { emoji: "🌊", name: "绿波大师", desc: "在随便路口里打通全部 10 道配时关卡", test: function (u) { return (u.trfmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "堵车很少是因为路太窄，多半是因为大家在不同的时刻抢同一秒。",
+      "绿灯给得太久也是一种浪费，空绿是这条路上最贵的沉默。",
+      "所谓绿波，就是让红灯在你到达之前先把自己变绿。",
+      "每一次刹车都要用两次加速来偿还，这就是停车的复利。",
+      "路口的效率不在绿灯有多长，而在损失时间有多短。"
     );
   }
 })();
