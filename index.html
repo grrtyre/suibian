@@ -1602,6 +1602,7 @@
         <button data-tab="orbit">🪐 随便星轨</button>
         <button data-tab="pack">🎒 随便打包</button>
         <button data-tab="pottery">🏺 随便拉坯</button>
+        <button data-tab="papercut">✂️ 随便剪纸</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -9726,6 +9727,84 @@
       </p>
     </div>
   </section>
+  <section class="panel" id="papercut">
+    <h2>✂️ 随便剪纸</h2>
+    <p class="sub">红纸对折，一刀下去满纸开花——挑折数、下剪子、贴上窗，剪出一张只属于你的窗花</p>
+    <style>
+      #papercut .jzh-wrap { max-width:420px; margin:0 auto; }
+      #papercut canvas#jzhCav { width:100%; max-width:360px; border-radius:18px; display:block; margin:0 auto 10px; background:#0b1020; box-shadow:0 16px 40px rgba(0,0,0,.5); cursor:crosshair; touch-action:none; }
+      #papercut .jzh-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #papercut .jzh-hud span { padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #papercut .jzh-hud b { font-weight:700; color:#ff9b9b; }
+      #papercut .jzh-row { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:9px; }
+      #papercut .jzh-row button { padding:7px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+      #papercut .jzh-row button:active { transform:translateY(1px); }
+      #papercut .jzh-row button.on { background:linear-gradient(135deg,#ef4444,#b91c1c); border-color:transparent; color:#fff; }
+      #papercut .jzh-row button:disabled { opacity:.4; cursor:default; }
+      #papercut .jzh-lab { text-align:center; font-size:.74rem; opacity:.6; margin:2px 0 5px; }
+      #papercut #jzhColors { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #papercut #jzhColors button { width:30px; height:30px; border-radius:50%; border:2px solid rgba(255,255,255,.18); cursor:pointer; padding:0; }
+      #papercut #jzhColors button.on { border-color:#fff; transform:scale(1.12); }
+      #papercut .jzh-sl { max-width:360px; margin:0 auto 10px; }
+      #papercut .jzh-sl label { display:flex; justify-content:space-between; align-items:center; font-size:.8rem; opacity:.82; margin-bottom:4px; }
+      #papercut .jzh-sl input[type=range] { width:100%; accent-color:#ef4444; }
+      #papercut .jzh-fire { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #papercut .jzh-fire button { padding:9px 18px; border-radius:999px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.07); color:inherit; font-size:.9rem; font-weight:700; cursor:pointer; }
+      #papercut .jzh-fire #jzhPaste { background:linear-gradient(135deg,#ef4444,#f97316); border-color:transparent; color:#2a0505; }
+      #papercut .jzh-res { text-align:center; font-size:.92rem; line-height:1.7; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); margin-bottom:12px; }
+      #papercut .jzh-mini { display:block; font-size:.74rem; opacity:.62; margin-top:2px; }
+      #papercut .jzh-shelf-t { font-size:.85rem; font-weight:700; opacity:.85; margin:4px 0 8px; }
+      #papercut .jzh-gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:9px; margin-bottom:12px; }
+      #papercut .jzh-card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:8px 6px; text-align:center; }
+      #papercut .jzh-card svg { display:block; margin:0 auto 4px; border-radius:9px; }
+      #papercut .jzh-cn { font-size:.72rem; font-weight:700; line-height:1.3; }
+      #papercut .jzh-cs { font-size:.7rem; color:#ff9b9b; }
+      #papercut .jzh-ct { font-size:.64rem; opacity:.5; }
+      #papercut .jzh-ca { display:flex; gap:4px; justify-content:center; margin-top:4px; }
+      #papercut .jzh-ca button { flex:1; padding:3px 0; font-size:.66rem; border-radius:8px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; cursor:pointer; }
+      #papercut .jzh-empty { grid-column:1/-1; text-align:center; font-size:.8rem; opacity:.45; padding:14px 0; }
+      #papercut .jzh-help { font-size:.78rem; line-height:1.85; opacity:.8; background:rgba(255,255,255,.04); border-radius:14px; padding:11px 13px; }
+    </style>
+    <div class="jzh-wrap">
+      <canvas id="jzhCav" width="360" height="360" aria-label="剪纸窗花台"></canvas>
+      <div class="jzh-hud">
+        <span>折数 <b id="jzhFoldN">六瓣</b></span>
+        <span>镂空 <b id="jzhHollow">0%</b></span>
+        <span>下刀 <b id="jzhCuts">0</b></span>
+        <span>碎屑 <b id="jzhFrag">0</b></span>
+      </div>
+      <div class="jzh-lab">折数（换折数会换一张新纸）</div>
+      <div class="jzh-row" id="jzhFolds"></div>
+      <div class="jzh-lab">纸色</div>
+      <div id="jzhColors"></div>
+      <div class="jzh-lab">现成纹样（可叠加）</div>
+      <div class="jzh-row" id="jzhTpl"></div>
+      <div class="jzh-row" id="jzhTool">
+        <button data-tool="cut">✂️ 剪</button>
+        <button data-tool="paste">📄 补纸</button>
+      </div>
+      <div class="jzh-sl">
+        <label>剪刀口径 <b>✂️</b></label>
+        <input id="jzhBrush" type="range" min="1" max="6" step="0.2" value="2.4">
+      </div>
+      <div class="jzh-row">
+        <button id="jzhAuto">🎲 随便剪一张</button>
+        <button id="jzhUndo">↩️ 撤销一刀</button>
+        <button id="jzhReset">📄 重来一张</button>
+      </div>
+      <div class="jzh-fire">
+        <button id="jzhPaste">🪟 贴上窗</button>
+      </div>
+      <div class="jzh-res" id="jzhResult">—</div>
+      <div class="jzh-shelf-t">🧧 窗花墙 <button id="jzhClear" style="float:right;border:none;background:transparent;color:rgba(255,255,255,.4);font-size:.72rem;cursor:pointer">清空</button></div>
+      <div class="jzh-gallery" id="jzhGallery"></div>
+      <p class="jzh-help">
+        <b>怎么玩</b>：选好<b>折数</b>（4/5/6/8/12 折）——这决定纸被折成几瓣。然后在纸上<b>按住拖动</b>就是下剪子，你剪的每一刀都会<b>同时出现在所有花瓣上</b>（含镜像），一刀开满纸的花，这就是真剪纸的原理。剪多了想反悔，切到 <b>📄补纸</b> 涂回去，或者 <b>↩️撤销一刀</b>。
+        <br>懒得构思就点 <b>🎲随便剪一张</b> 让它自动生成，或者直接叠加 <b>团花 / 如意 / 星芒 / 水波 / 花牙</b> 五种现成纹样再自己改。注意：<b>剪断了的部分会当碎屑掉下来</b>（HUD 里能看到掉了几片），纸要留得住才成器。
+        <br>满意就 <b>🪟贴上窗</b>，按 <b>镂空（35）· 层次（25）· 花样（25）· 完整（15）</b> 四项评品相（神品 / 上品 / 佳作 / 尚可 / 毛坯），作品自动进<b>窗花墙</b>（本地存档 suibian_papercut，可复制作品卡或撤下）。贴上第一张解锁「✂️ 初试剪刀」，贴出 90 分以上解锁「🪟 一剪成花」。Canvas 渲染、纯前端零依赖、不联网。
+      </p>
+    </div>
+  </section>
   </section>
 <script>
 (function () {
@@ -10148,6 +10227,7 @@
     if (id === "orbit" && typeof sxgRender === "function") sxgRender();
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id === "pottery" && typeof potRender === "function") potRender();
+    if (id === "papercut" && typeof jzhRender === "function") jzhRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -10231,6 +10311,7 @@
     if (id !== "sql" && typeof sqlStop === "function") sqlStop();
     if (id !== "orbit" && typeof sxgStop === "function") sxgStop();
     if (id !== "pottery" && typeof potStop === "function") potStop();
+    if (id !== "papercut" && typeof jzhStop === "function") jzhStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10446,6 +10527,7 @@
     orbit: "随便星轨 orbit 太阳系 轨道 引力 开普勒 霍曼 转移 探测器 行星 发射窗口 任务 模拟 物理 游戏 挑战",
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     pottery: "随便拉坯 pottery 陶艺 陶瓷 拉坯 辘辘 制陶 烧窑 釉 青瓷 花瓶 碗 手工 捏泥 游戏 解压 治愈",
+    papercut: "随便剪纸 papercut 剪纸 窗花 团花 对折 对称 折纸 红纸 镂空 手工 年味 民俗 非遗 创作 解压 治愈 画画",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -10721,6 +10803,7 @@ splitbill:"tools",
     orbit:"games",
     pack:"tools",
     pottery:"games",
+    papercut:"create",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -67663,6 +67746,840 @@ splitbill:"tools",
 })();
 
 
+/* ===== ✂️ 随便剪纸 · 窗花工坊 papercut ===== */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_papercut";
+  var GN = 72;                 /* 纸面网格边长（格） */
+  var CW = 360, CH = 360;      /* 画布像素 */
+  var CELL = CW / GN;          /* 每格 5px */
+  var CC = (GN - 1) / 2;       /* 中心格坐标 */
+  var RAD = 34;                /* 圆纸半径（格） */
+  var MAXH = 14;               /* 撤销栈深度 */
+  var MAXP = 12;               /* 作品架容量 */
+  var TWO_PI = Math.PI * 2;
+  var FOLDS = [4, 5, 6, 8, 12];
+
+  var PAPERS = [
+    { id: "red", name: "大红", c1: "#ef4444", c2: "#b91c1c" },
+    { id: "zhu", name: "朱砂", c1: "#f97316", c2: "#c2410c" },
+    { id: "gold", name: "赤金", c1: "#fbbf24", c2: "#b45309" },
+    { id: "blue", name: "靛蓝", c1: "#60a5fa", c2: "#1d4ed8" },
+    { id: "green", name: "松绿", c1: "#34d399", c2: "#047857" },
+    { id: "ink", name: "墨黑", c1: "#64748b", c2: "#1e293b" }
+  ];
+
+  /* ---------- 基础工具（纯函数） ---------- */
+  function clampNum(v, lo, hi) { v = Number(v); if (!isFinite(v)) return lo; return v < lo ? lo : (v > hi ? hi : v); }
+  function clampInt(v, lo, hi) { v = parseInt(v, 10); if (isNaN(v)) return lo; return v < lo ? lo : (v > hi ? hi : v); }
+  function idx(x, y) { return y * GN + x; }
+  function inCircle(x, y) { var dx = x - CC, dy = y - CC; return dx * dx + dy * dy <= RAD * RAD; }
+
+  var TOTAL = (function () { var n = 0; for (var y = 0; y < GN; y++) for (var x = 0; x < GN; x++) if (inCircle(x, y)) n++; return n; })();
+
+  function newPaper() {
+    var m = new Uint8Array(GN * GN);
+    for (var y = 0; y < GN; y++) for (var x = 0; x < GN; x++) if (inCircle(x, y)) m[idx(x, y)] = 1;
+    return m;
+  }
+  function copyMask(m) { return new Uint8Array(m); }
+
+  /* 折数决定的二面体对称：返回 2*fold 个等价点 */
+  function symPoints(x, y, fold) {
+    fold = clampInt(fold, 2, 24);
+    var dx = x - CC, dy = y - CC;
+    var r = Math.sqrt(dx * dx + dy * dy), a = Math.atan2(dy, dx);
+    var out = [], step = TWO_PI / fold;
+    for (var k = 0; k < fold; k++) {
+      var a1 = a + k * step, a2 = -a + k * step;
+      out.push({ x: CC + r * Math.cos(a1), y: CC + r * Math.sin(a1) });
+      out.push({ x: CC + r * Math.cos(a2), y: CC + r * Math.sin(a2) });
+    }
+    return out;
+  }
+
+  /* 在一点落一个圆刀口；val=0 剪掉、val=1 补纸（补纸只在圆纸内生效） */
+  function stampDisc(m, cx, cy, r, val) {
+    var changed = 0;
+    var x0 = Math.max(0, Math.floor(cx - r)), x1 = Math.min(GN - 1, Math.ceil(cx + r));
+    var y0 = Math.max(0, Math.floor(cy - r)), y1 = Math.min(GN - 1, Math.ceil(cy + r));
+    var rr = r * r;
+    for (var y = y0; y <= y1; y++) {
+      for (var x = x0; x <= x1; x++) {
+        var dx = x - cx, dy = y - cy;
+        if (dx * dx + dy * dy > rr) continue;
+        if (!inCircle(x, y)) continue;
+        var i = idx(x, y);
+        if (m[i] !== val) { m[i] = val; changed++; }
+      }
+    }
+    return changed;
+  }
+
+  /* 一刀落下：对称复制到所有花瓣 */
+  function cutAt(m, x, y, r, fold, val) {
+    var pts = symPoints(x, y, fold), n = 0;
+    for (var i = 0; i < pts.length; i++) n += stampDisc(m, pts[i].x, pts[i].y, r, val);
+    return n;
+  }
+
+  /* 一段走刀（线段插值） */
+  function strokeLine(m, x0, y0, x1, y1, r, fold, val) {
+    var dx = x1 - x0, dy = y1 - y0;
+    var len = Math.sqrt(dx * dx + dy * dy);
+    var step = Math.max(0.35, r * 0.5);
+    var n = Math.max(1, Math.ceil(len / step)), total = 0;
+    for (var i = 0; i <= n; i++) {
+      var t = i / n;
+      total += cutAt(m, x0 + dx * t, y0 + dy * t, r, fold, val);
+    }
+    return total;
+  }
+
+  /* 连通块（四邻域）：val=1 找纸，val=0 找洞（只统计圆纸内） */
+  function components(m, val) {
+    if (val === undefined) val = 1;
+    var lab = new Int32Array(GN * GN);
+    for (var i = 0; i < lab.length; i++) lab[i] = -1;
+    var sizes = [], stack = [], cur = 0;
+    for (var y = 0; y < GN; y++) {
+      for (var x = 0; x < GN; x++) {
+        var s = idx(x, y);
+        if (!inCircle(x, y) || m[s] !== val || lab[s] >= 0) continue;
+        lab[s] = cur; stack.length = 0; stack.push(s);
+        var cnt = 0;
+        while (stack.length) {
+          var p = stack.pop(); cnt++;
+          var px = p % GN, py = (p - px) / GN;
+          if (px > 0) { var l = p - 1; if (inCircle(px - 1, py) && m[l] === val && lab[l] < 0) { lab[l] = cur; stack.push(l); } }
+          if (px < GN - 1) { var rgt = p + 1; if (inCircle(px + 1, py) && m[rgt] === val && lab[rgt] < 0) { lab[rgt] = cur; stack.push(rgt); } }
+          if (py > 0) { var up = p - GN; if (inCircle(px, py - 1) && m[up] === val && lab[up] < 0) { lab[up] = cur; stack.push(up); } }
+          if (py < GN - 1) { var dn = p + GN; if (inCircle(px, py + 1) && m[dn] === val && lab[dn] < 0) { lab[dn] = cur; stack.push(dn); } }
+        }
+        sizes.push(cnt); cur++;
+      }
+    }
+    var main = -1, best = -1;
+    for (var k = 0; k < sizes.length; k++) if (sizes[k] > best) { best = sizes[k]; main = k; }
+    return { labels: lab, sizes: sizes, main: main, count: sizes.length, best: best < 0 ? 0 : best };
+  }
+
+  /* 剪断掉落：只留最大的一整片，其余当碎屑掉下来 */
+  function dropLoose(m) {
+    var cp = components(m, 1);
+    if (cp.count <= 1) return { frags: 0, cells: 0 };
+    var cells = 0;
+    for (var i = 0; i < m.length; i++) {
+      if (m[i] === 1 && cp.labels[i] !== cp.main) { m[i] = 0; cells++; }
+    }
+    return { frags: cp.count - 1, cells: cells };
+  }
+
+  /* 纸面统计：镂空率 + 三层环的镂空分布 + 洞口计数 */
+  function stats(m) {
+    var kept = 0, ring = [0, 0, 0], ringTot = [0, 0, 0];
+    for (var y = 0; y < GN; y++) {
+      for (var x = 0; x < GN; x++) {
+        if (!inCircle(x, y)) continue;
+        var dx = x - CC, dy = y - CC, d = Math.sqrt(dx * dx + dy * dy);
+        var b = d < RAD / 3 ? 0 : (d < RAD * 2 / 3 ? 1 : 2);
+        ringTot[b]++;
+        if (m[idx(x, y)] === 1) kept++; else ring[b]++;
+      }
+    }
+    var rr = [];
+    for (var i = 0; i < 3; i++) rr.push(ringTot[i] ? ring[i] / ringTot[i] : 0);
+    var hollowCp = components(m, 0);
+    var inner = 0, notch = 0;
+    for (var c = 0; c < hollowCp.sizes.length; c++) if (hollowCp.sizes[c] >= 3) inner++;
+    /* 贴边的缺口：与圆外相邻的洞算「边缘花牙」 */
+    var seen = {};
+    for (var yy = 0; yy < GN; yy++) {
+      for (var xx = 0; xx < GN; xx++) {
+        if (!inCircle(xx, yy)) continue;
+        var ii = idx(xx, yy);
+        if (m[ii] !== 0) continue;
+        var lb = hollowCp.labels[ii];
+        if (lb < 0 || seen[lb]) continue;
+        if (!inCircle(xx + 1, yy) || !inCircle(xx - 1, yy) || !inCircle(xx, yy + 1) || !inCircle(xx, yy - 1)) { seen[lb] = 1; notch++; }
+      }
+    }
+    return {
+      total: TOTAL, kept: kept, hollow: TOTAL ? (TOTAL - kept) / TOTAL : 0,
+      ring: rr, holes: inner, notch: notch
+    };
+  }
+
+  /* 评分：镂空 35 · 层次 25 · 花样 25 · 完整 15 */
+  function scoreOf(m, frags) {
+    var st = stats(m);
+    frags = frags || 0;
+    var h = st.hollow;
+    var hollowPt;
+    if (h >= 0.32 && h <= 0.58) hollowPt = 35;
+    else if (h < 0.32) hollowPt = 35 * Math.max(0, 1 - (0.32 - h) / 0.30);
+    else hollowPt = 35 * Math.max(0, 1 - (h - 0.58) / 0.32);
+
+    var densePt = 0;
+    for (var i = 0; i < 3; i++) {
+      var r = st.ring[i];
+      if (r >= 0.15 && r <= 0.80) densePt += 25 / 3;
+      else if (r < 0.15) densePt += (25 / 3) * Math.max(0, r / 0.15);
+      else densePt += (25 / 3) * Math.max(0, 1 - (r - 0.80) / 0.20);
+    }
+
+    var motif = st.holes + st.notch * 0.5;
+    var motifPt;
+    if (motif >= 5 && motif <= 26) motifPt = 25;
+    else if (motif < 5) motifPt = 25 * (motif / 5);
+    else motifPt = 25 * Math.max(0, 1 - (motif - 26) / 30);
+
+    var wholePt = Math.max(0, 15 - frags * 4);
+    if (st.kept < TOTAL * 0.12) wholePt = 0;
+
+    var total = hollowPt + densePt + motifPt + wholePt;
+    if (st.kept <= 0) total = 0;
+    var sc = Math.round(clampNum(total, 0, 100));
+    return {
+      hollowPt: Math.round(hollowPt), densePt: Math.round(densePt),
+      motifPt: Math.round(motifPt), wholePt: Math.round(wholePt),
+      score: sc, st: st, frags: frags
+    };
+  }
+
+  function gradeOf(s) {
+    if (s >= 92) return "神品";
+    if (s >= 82) return "上品";
+    if (s >= 70) return "佳作";
+    if (s >= 55) return "尚可";
+    return "毛坯";
+  }
+
+  var FOLD_NAME = { 4: "四瓣", 5: "五瓣", 6: "六瓣", 8: "八瓣", 12: "十二瓣" };
+  var MOTIF_WORD = ["团花", "缠枝", "如意", "云头", "回纹", "花牙", "折枝", "锁边"];
+  var TAIL_WORD = ["穿花", "献瑞", "纳福", "迎春", "呈祥", "延年", "锦簇", "同心"];
+
+  function nameOf(fold, st, seed) {
+    var s = Math.abs(Math.floor(seed || 0));
+    var a = MOTIF_WORD[(s + st.holes) % MOTIF_WORD.length];
+    var b = TAIL_WORD[(s + st.notch + Math.round(st.hollow * 100)) % TAIL_WORD.length];
+    return (FOLD_NAME[fold] || (fold + "瓣")) + a + "·" + b;
+  }
+
+  /* ---------- 存档 RLE 编解码 ---------- */
+  function packMask(m) {
+    var out = String(m[0] ? 1 : 0), run = 1;
+    for (var i = 1; i < m.length; i++) {
+      if ((m[i] ? 1 : 0) === (m[i - 1] ? 1 : 0)) run++;
+      else { out += "," + run.toString(36); run = 1; }
+    }
+    out += "," + run.toString(36);
+    return out;
+  }
+  function unpackMask(str) {
+    if (typeof str !== "string" || str.length < 2) return null;
+    var parts = str.split(",");
+    var v = parts[0] === "1" ? 1 : 0;
+    var m = new Uint8Array(GN * GN), p = 0;
+    for (var i = 1; i < parts.length; i++) {
+      var n = parseInt(parts[i], 36);
+      if (!isFinite(n) || n < 0) return null;
+      for (var k = 0; k < n && p < m.length; k++) m[p++] = v;
+      v = v ? 0 : 1;
+    }
+    return p === m.length ? m : null;
+  }
+
+  /* ---------- 纹样与随手剪 ---------- */
+  function seedRnd(seed) {
+    var s = (seed | 0) || 20260801;
+    return function () { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+  }
+  /* 在角度 ang、半径 rad 处开一个圆孔（对称复制） */
+  function holeAt(m, rad, ang, r, fold) {
+    return cutAt(m, CC + rad * Math.cos(ang), CC + rad * Math.sin(ang), r, fold, 0);
+  }
+  /* 一条径向长槽 */
+  function slotAt(m, r0, r1, ang, w, fold) {
+    return strokeLine(m, CC + r0 * Math.cos(ang), CC + r0 * Math.sin(ang), CC + r1 * Math.cos(ang), CC + r1 * Math.sin(ang), w, fold, 0);
+  }
+  /* 一段圆弧槽 */
+  function arcAt(m, rad, a0, a1, w, fold) {
+    var steps = Math.max(2, Math.ceil(Math.abs(a1 - a0) * rad / 1.2)), n = 0;
+    for (var i = 0; i <= steps; i++) {
+      var a = a0 + (a1 - a0) * (i / steps);
+      n += cutAt(m, CC + rad * Math.cos(a), CC + rad * Math.sin(a), w, fold, 0);
+    }
+    return n;
+  }
+
+  /* 同一半径上相邻花瓣的间距（格）——折数越多花瓣越窄，刀口必须跟着收 */
+  function petalGap(rad, fold) { return TWO_PI * Math.max(rad, 0.001) / clampInt(fold, 2, 24); }
+  /* 把想要的刀口半径收到「不至于把这一圈纸剪断」的范围内 */
+  function fitR(rad, want, fold) {
+    if (rad < 3) return Math.max(1, Math.min(want, 5));
+    var lim = petalGap(rad, fold) * 0.34;
+    return Math.max(1, Math.min(want, lim));
+  }
+  /* 弧槽的半角：两端要给相邻花瓣留出 bridge 格的纸桥 */
+  function arcExt(rad, fold, w, bridge) {
+    var half = Math.PI / clampInt(fold, 2, 24);
+    if (bridge === undefined) bridge = 1.6;
+    var ext = half - (w + bridge) / Math.max(rad, 1);
+    return ext > 0.04 ? ext : 0.04;
+  }
+  /* 花瓣中线上的孔：既要躲开相邻花瓣的孔，也要给轴线上的径向槽留纸桥 */
+  function midFit(rad, want, fold, slotW) {
+    var half = Math.PI / clampInt(fold, 2, 24);
+    var lim = rad * half - (slotW || 0) - 2.2;   /* 至少留 2.2 格纸桥 */
+    return Math.min(want, fitR(rad, want, fold), lim);
+  }
+  /* 径向槽的安全端点：内留花心、外留边框，且相邻花瓣的槽不能在里圈碰头 */
+  function slotSafe(r0, r1, w, fold) {
+    fold = clampInt(fold, 2, 24);
+    var meet = fold * (2 * w + 2.2) / TWO_PI;   /* 再往里走两槽就并成一圈了 */
+    var a = Math.max(3 + w, r0, meet + w);
+    var b = Math.min(RAD - 3.2 - w, r1);
+    if (b < a + 1) b = a + 1;
+    return [a, b];
+  }
+
+  var TPL = [
+    { id: "tuan", name: "团花" },
+    { id: "ruyi", name: "如意" },
+    { id: "star", name: "星芒" },
+    { id: "wave", name: "水波" },
+    { id: "tooth", name: "花牙" }
+  ];
+
+  function applyTemplate(m, fold, id) {
+    fold = clampInt(fold, 2, 24);
+    var half = Math.PI / fold;      /* 花瓣中线 */
+    var s;
+    if (id === "tuan") {
+      holeAt(m, 0, 0, 4.2, fold);
+      holeAt(m, 12, half, fitR(12, 3.4, fold), fold);
+      holeAt(m, 21, 0, fitR(21, 3.0, fold), fold);
+      arcAt(m, 27, half - arcExt(27, fold, 1.5), half + arcExt(27, fold, 1.5), 1.5, fold);
+    } else if (id === "ruyi") {
+      holeAt(m, 9, half, fitR(9, 3.6, fold), fold);
+      holeAt(m, 15.5, half - half * 0.45, fitR(15.5, 2.4, fold) * 0.8, fold);
+      holeAt(m, 15.5, half + half * 0.45, fitR(15.5, 2.4, fold) * 0.8, fold);
+      s = slotSafe(20, 30, 1.6, fold);
+      slotAt(m, s[0], s[1], half, 1.6, fold);
+    } else if (id === "star") {
+      s = slotSafe(5, 30, 1.8, fold);
+      slotAt(m, s[0], s[1], 0, 1.8, fold);
+      var r1 = midFit(17, 3.8, fold, 1.8), r2 = midFit(27, 2.6, fold, 1.8);
+      if (r1 >= 1.6) holeAt(m, 17, half, r1, fold);
+      if (r2 >= 1.6) holeAt(m, 27, half, r2, fold);
+      if (r1 < 1.6 && r2 < 1.6) holeAt(m, 0, 0, 3.6, fold);   /* 花瓣太窄就只留花心 */
+    } else if (id === "wave") {
+      arcAt(m, 11, -arcExt(11, fold, 1.7), arcExt(11, fold, 1.7), 1.7, fold);
+      arcAt(m, 19, half - arcExt(19, fold, 1.7), half + arcExt(19, fold, 1.7), 1.7, fold);
+      arcAt(m, 27, -arcExt(27, fold, 1.7), arcExt(27, fold, 1.7), 1.7, fold);
+      holeAt(m, 0, 0, 3.2, fold);
+    } else if (id === "tooth") {
+      holeAt(m, 33.5, half, fitR(33.5, 4.2, fold), fold);
+      holeAt(m, 33.5, 0, fitR(33.5, 3.4, fold), fold);
+      holeAt(m, 22, half, fitR(22, 3.6, fold), fold);
+      holeAt(m, 10, 0, fitR(10, 3.2, fold), fold);
+    } else return 0;
+    return 1;
+  }
+
+  /* 随便剪一张：随机纹样组合，尽量剪得像样（刀口按折数自适应） */
+  function autoCut(m, fold, rnd) {
+    rnd = rnd || Math.random;
+    fold = clampInt(fold, 2, 24);
+    var half = Math.PI / fold;
+    var ops = 0, r, w, s;
+    /* 中心花心 */
+    if (rnd() < 0.75) { holeAt(m, 0, 0, 2.6 + rnd() * 2.6, fold); ops++; }
+    /* 内环 */
+    r = 8 + rnd() * 5;
+    holeAt(m, r, rnd() < 0.5 ? 0 : half, fitR(r, 2.4 + rnd() * 1.8, fold), fold); ops++;
+    /* 中环：孔或弧 */
+    if (rnd() < 0.5) { r = 17 + rnd() * 4; holeAt(m, r, half, fitR(r, 2.6 + rnd() * 1.8, fold), fold); }
+    else { r = 16 + rnd() * 5; w = 1.3 + rnd() * 0.8; arcAt(m, r, -arcExt(r, fold, w), arcExt(r, fold, w), w, fold); }
+    ops++;
+    /* 外环：径向槽 */
+    if (rnd() < 0.7) { w = 1.2 + rnd() * 1.0; s = slotSafe(20 + rnd() * 4, 29 + rnd() * 3, w, fold); slotAt(m, s[0], s[1], rnd() < 0.5 ? 0 : half, w, fold); ops++; }
+    /* 边缘花牙 */
+    if (rnd() < 0.8) { r = 33 + rnd() * 2; holeAt(m, r, rnd() < 0.5 ? half : 0, fitR(r, 2.6 + rnd() * 1.8, fold), fold); ops++; }
+    /* 偶尔再来一层 */
+    if (rnd() < 0.45) { r = 24 + rnd() * 4; holeAt(m, r, half * (rnd() < 0.5 ? 0.4 : 1.4), fitR(r, 2.2 + rnd() * 1.6, fold), fold); ops++; }
+    return ops;
+  }
+
+  /* ---------- 存档 ---------- */
+  function defRec() { return { pieces: [], first: 0, master: 0 }; }
+  function loadRec() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return defRec();
+      var o = JSON.parse(raw);
+      if (!o || typeof o !== "object") return defRec();
+      var out = defRec();
+      out.first = o.first ? 1 : 0;
+      out.master = o.master ? 1 : 0;
+      if (Object.prototype.toString.call(o.pieces) === "[object Array]") {
+        for (var i = 0; i < o.pieces.length && out.pieces.length < MAXP; i++) {
+          var p = o.pieces[i];
+          if (!p || typeof p !== "object") continue;
+          if (typeof p.rle !== "string") continue;
+          out.pieces.push({
+            ts: Number(p.ts) || 0,
+            fold: clampInt(p.fold, 2, 24),
+            color: typeof p.color === "string" ? p.color : "red",
+            score: clampInt(p.score, 0, 100),
+            grade: typeof p.grade === "string" ? p.grade.slice(0, 6) : "",
+            name: typeof p.name === "string" ? p.name.slice(0, 24) : "无名窗花",
+            rle: p.rle.slice(0, 20000)
+          });
+        }
+      }
+      return out;
+    } catch (e) { return defRec(); }
+  }
+  function saveRec(r) { try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) { } }
+  function fmtDate(ts) {
+    var d = new Date(ts);
+    function z(n) { return n < 10 ? "0" + n : "" + n; }
+    return (d.getMonth() + 1) + "月" + d.getDate() + "日 " + z(d.getHours()) + ":" + z(d.getMinutes());
+  }
+  function paperById(id) {
+    for (var i = 0; i < PAPERS.length; i++) if (PAPERS[i].id === id) return PAPERS[i];
+    return PAPERS[0];
+  }
+
+  /* ---------- 运行时状态 ---------- */
+  var mask = newPaper(), fold = 6, brush = 2.4, tool = "cut", color = "red";
+  var hist = [], frags = 0, cuts = 0, last = null, rec = defRec();
+  var cav = null, ctx = null, inited = false, active = false, raf = 0;
+  var drag = false, lastPt = null, unfold = 1, animT = 0;
+
+  function $id(i) { return typeof document !== "undefined" ? document.getElementById(i) : null; }
+  function pushHist() {
+    hist.push(copyMask(mask));
+    if (hist.length > MAXH) hist.shift();
+  }
+
+  /* ---------- 绘制 ---------- */
+  function drawLattice(c) {
+    c.fillStyle = "#0b1020";
+    c.fillRect(0, 0, CW, CH);
+    var g = c.createLinearGradient(0, 0, CW, CH);
+    g.addColorStop(0, "rgba(255,255,255,.07)");
+    g.addColorStop(1, "rgba(255,255,255,.02)");
+    c.fillStyle = g;
+    c.fillRect(0, 0, CW, CH);
+    c.strokeStyle = "rgba(255,255,255,.10)";
+    c.lineWidth = 6;
+    for (var i = 1; i < 4; i++) {
+      c.beginPath(); c.moveTo(i * CW / 4, 0); c.lineTo(i * CW / 4, CH); c.stroke();
+      c.beginPath(); c.moveTo(0, i * CH / 4); c.lineTo(CW, i * CH / 4); c.stroke();
+    }
+  }
+
+  function drawPaper(c, m, pid, t) {
+    var pp = paperById(pid);
+    var g = c.createLinearGradient(0, 0, CW, CH);
+    g.addColorStop(0, pp.c1);
+    g.addColorStop(1, pp.c2);
+    c.save();
+    c.translate(CW / 2, CH / 2);
+    var sc = 0.86 + 0.14 * t;
+    c.scale(sc, sc);
+    c.rotate((1 - t) * 0.5);
+    c.globalAlpha = 0.35 + 0.65 * t;
+    c.translate(-CW / 2, -CH / 2);
+    c.fillStyle = g;
+    /* 逐行按连续段填充，省调用 */
+    for (var y = 0; y < GN; y++) {
+      var run = -1;
+      for (var x = 0; x <= GN; x++) {
+        var on = x < GN && m[idx(x, y)] === 1;
+        if (on && run < 0) run = x;
+        else if (!on && run >= 0) { c.fillRect(run * CELL, y * CELL, (x - run) * CELL, CELL + 0.4); run = -1; }
+      }
+    }
+    c.restore();
+  }
+
+  function drawGuide(c) {
+    c.save();
+    c.strokeStyle = "rgba(255,255,255,.20)";
+    c.lineWidth = 1;
+    if (c.setLineDash) c.setLineDash([4, 5]);
+    for (var k = 0; k < fold; k++) {
+      var a = k * TWO_PI / fold;
+      c.beginPath();
+      c.moveTo(CW / 2, CH / 2);
+      c.lineTo(CW / 2 + Math.cos(a) * RAD * CELL, CH / 2 + Math.sin(a) * RAD * CELL);
+      c.stroke();
+    }
+    if (c.setLineDash) c.setLineDash([]);
+    c.restore();
+  }
+
+  function draw() {
+    if (!ctx) return;
+    drawLattice(ctx);
+    drawPaper(ctx, mask, color, unfold);
+    if (unfold >= 1 && !last) drawGuide(ctx);
+  }
+
+  function step() {
+    raf = 0;
+    if (!active) return;
+    animT += 1 / 42;
+    unfold = animT >= 1 ? 1 : animT;
+    draw();
+    if (unfold < 1) raf = (typeof requestAnimationFrame === "function") ? requestAnimationFrame(step) : 0;
+  }
+  function startAnim() {
+    animT = 0; unfold = 0;
+    if (raf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf);
+    raf = 0;
+    if (active && typeof requestAnimationFrame === "function") raf = requestAnimationFrame(step);
+    else { unfold = 1; draw(); }
+  }
+
+  /* ---------- 界面同步 ---------- */
+  function sync() {
+    var st = stats(mask);
+    var e = $id("jzhHollow"); if (e) e.textContent = Math.round(st.hollow * 100) + "%";
+    e = $id("jzhFoldN"); if (e) e.textContent = (FOLD_NAME[fold] || fold + "瓣");
+    e = $id("jzhFrag"); if (e) e.textContent = String(frags);
+    e = $id("jzhCuts"); if (e) e.textContent = String(cuts);
+    var box = $id("jzhFolds");
+    if (box && box.children) {
+      for (var i = 0; i < box.children.length; i++) {
+        var b = box.children[i];
+        if (b.classList) { if (String(b.dataset && b.dataset.fold) === String(fold)) b.classList.add("on"); else b.classList.remove("on"); }
+      }
+    }
+    var cbox = $id("jzhColors");
+    if (cbox && cbox.children) {
+      for (var j = 0; j < cbox.children.length; j++) {
+        var cb = cbox.children[j];
+        if (cb.classList) { if (cb.dataset && cb.dataset.color === color) cb.classList.add("on"); else cb.classList.remove("on"); }
+      }
+    }
+    var tb = $id("jzhTool");
+    if (tb && tb.children) {
+      for (var k = 0; k < tb.children.length; k++) {
+        var t2 = tb.children[k];
+        if (t2.classList) { if (t2.dataset && t2.dataset.tool === tool) t2.classList.add("on"); else t2.classList.remove("on"); }
+      }
+    }
+    var res = $id("jzhResult");
+    if (res) {
+      if (last) {
+        res.innerHTML = "<b>" + last.name + "</b> · " + last.grade + " <b>" + last.score + "</b> 分" +
+          "<span class=\"jzh-mini\">镂空 " + last.hollowPt + "/35 · 层次 " + last.densePt + "/25 · 花样 " + last.motifPt + "/25 · 完整 " + last.wholePt + "/15</span>";
+      } else {
+        res.innerHTML = "镂空 " + Math.round(st.hollow * 100) + "% · 花孔 " + st.holes + " 处 · 花牙 " + st.notch + " 处<span class=\"jzh-mini\">剪好了就点「贴上窗」评品相</span>";
+      }
+    }
+    var u = $id("jzhUndo"); if (u) u.disabled = hist.length === 0;
+    renderGallery();
+  }
+
+  function pieceThumb(p) {
+    /* 用轻量 SVG 画缩略：按行段合并成矩形 */
+    var m = unpackMask(p.rle);
+    var pp = paperById(p.color);
+    var s = "<svg viewBox=\"0 0 " + GN + " " + GN + "\" width=\"84\" height=\"84\" aria-hidden=\"true\">";
+    s += "<rect width=\"" + GN + "\" height=\"" + GN + "\" fill=\"#0b1020\"/>";
+    if (m) {
+      for (var y = 0; y < GN; y++) {
+        var run = -1;
+        for (var x = 0; x <= GN; x++) {
+          var on = x < GN && m[idx(x, y)] === 1;
+          if (on && run < 0) run = x;
+          else if (!on && run >= 0) { s += "<rect x=\"" + run + "\" y=\"" + y + "\" width=\"" + (x - run) + "\" height=\"1.05\" fill=\"" + pp.c1 + "\"/>"; run = -1; }
+        }
+      }
+    }
+    return s + "</svg>";
+  }
+
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
+  function renderGallery() {
+    var box = $id("jzhGallery");
+    if (!box) return;
+    if (!rec.pieces.length) { box.innerHTML = "<div class=\"jzh-empty\">还没贴上窗的作品——剪一张试试</div>"; return; }
+    var h = "";
+    for (var i = 0; i < rec.pieces.length; i++) {
+      var p = rec.pieces[i];
+      h += "<div class=\"jzh-card\">" + pieceThumb(p) +
+        "<div class=\"jzh-cn\">" + esc(p.name) + "</div>" +
+        "<div class=\"jzh-cs\">" + esc(p.grade) + " " + p.score + " 分</div>" +
+        "<div class=\"jzh-ct\">" + esc(fmtDate(p.ts)) + "</div>" +
+        "<div class=\"jzh-ca\"><button class=\"jzh-copy\" data-ts=\"" + p.ts + "\">复制</button>" +
+        "<button class=\"jzh-del\" data-ts=\"" + p.ts + "\">撤下</button></div></div>";
+    }
+    box.innerHTML = h;
+  }
+
+  /* ---------- 动作 ---------- */
+  function doFold(n) {
+    n = clampInt(n, 2, 24);
+    if (FOLDS.indexOf(n) < 0) n = 6;
+    if (n === fold) return;
+    fold = n;
+    doReset(true);
+  }
+  function doTool(t) { tool = (t === "paste") ? "paste" : "cut"; sync(); }
+  function doBrush(v) { brush = clampNum(v, 1, 6); }
+  function doColor(id) { color = paperById(id).id; last = null; draw(); sync(); }
+  function doReset(keepColor) {
+    mask = newPaper(); hist = []; frags = 0; cuts = 0; last = null; unfold = 1;
+    if (!keepColor) color = "red";
+    draw(); sync();
+  }
+  function doUndo() {
+    if (!hist.length) return false;
+    mask = hist.pop();
+    last = null; unfold = 1;
+    draw(); sync();
+    return true;
+  }
+  function doTemplate(id) {
+    pushHist();
+    applyTemplate(mask, fold, id);
+    var d = dropLoose(mask);
+    frags += d.frags; cuts++;
+    last = null; unfold = 1;
+    draw(); sync();
+    return d;
+  }
+  function doAuto(rnd) {
+    pushHist();
+    mask = newPaper();
+    autoCut(mask, fold, rnd);
+    var d = dropLoose(mask);
+    frags = d.frags; cuts++;
+    last = null; unfold = 1;
+    draw(); sync();
+    return d;
+  }
+  function doStroke(x0, y0, x1, y1) {
+    var val = tool === "paste" ? 1 : 0;
+    strokeLine(mask, x0, y0, x1, y1, brush, fold, val);
+  }
+  function endStroke() {
+    var d = dropLoose(mask);
+    frags += d.frags; cuts++;
+    last = null; unfold = 1;
+    draw(); sync();
+    return d;
+  }
+  function doPaste() {
+    var sc = scoreOf(mask, frags);
+    if (sc.st.kept <= 0) {
+      var r0 = $id("jzhResult");
+      if (r0) r0.innerHTML = "整张纸都剪没了…… <span class=\"jzh-mini\">点「重来一张」换张新纸</span>";
+      return null;
+    }
+    var ts = Date.now();
+    var nm = nameOf(fold, sc.st, ts / 1000);
+    last = {
+      name: nm, score: sc.score, grade: gradeOf(sc.score),
+      hollowPt: sc.hollowPt, densePt: sc.densePt, motifPt: sc.motifPt, wholePt: sc.wholePt
+    };
+    rec = loadRec();
+    rec.pieces.unshift({ ts: ts, fold: fold, color: color, score: sc.score, grade: last.grade, name: nm, rle: packMask(mask) });
+    while (rec.pieces.length > MAXP) rec.pieces.pop();
+    if (!rec.first) { rec.first = 1; try { bumpUsage("jzhfirst"); } catch (e1) { } }
+    if (sc.score >= 90 && !rec.master) { rec.master = 1; try { bumpUsage("jzhmaster"); } catch (e2) { } }
+    saveRec(rec);
+    try { bumpUsage("papercut"); } catch (e3) { }
+    startAnim();
+    sync();
+    return last;
+  }
+  function doDel(ts) {
+    rec = loadRec();
+    var out = [];
+    for (var i = 0; i < rec.pieces.length; i++) if (String(rec.pieces[i].ts) !== String(ts)) out.push(rec.pieces[i]);
+    rec.pieces = out; saveRec(rec); renderGallery();
+  }
+  function doClear() {
+    rec = loadRec(); rec.pieces = []; saveRec(rec); renderGallery();
+  }
+  function doCopyCard(p) {
+    var txt = "✂️ 随便剪纸 · " + p.name + "\n" +
+      "品相：" + p.grade + " " + p.score + " 分 | 纸色：" + paperById(p.color).name + " | " + (FOLD_NAME[p.fold] || p.fold + "瓣") + "\n" +
+      "剪于 " + fmtDate(p.ts) + " — https://grrtyre.github.io/suibian/";
+    try {
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt);
+    } catch (e) { }
+    return txt;
+  }
+
+  /* ---------- 事件绑定 ---------- */
+  function cavXY(ev) {
+    var r = cav.getBoundingClientRect ? cav.getBoundingClientRect() : { left: 0, top: 0, width: CW, height: CH };
+    var sx = (r.width || CW) / CW, sy = (r.height || CH) / CH;
+    var px = ((ev.clientX || 0) - r.left) / (sx || 1);
+    var py = ((ev.clientY || 0) - r.top) / (sy || 1);
+    return { x: px / CELL, y: py / CELL };
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = $id("jzhCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+
+    var fb = $id("jzhFolds");
+    if (fb) {
+      var fh = "";
+      for (var i = 0; i < FOLDS.length; i++) fh += "<button data-fold=\"" + FOLDS[i] + "\">" + FOLDS[i] + " 折</button>";
+      fb.innerHTML = fh;
+      fb.addEventListener("click", function (ev) {
+        var t = ev.target;
+        if (t && t.dataset && t.dataset.fold) doFold(t.dataset.fold);
+      });
+    }
+    var cb = $id("jzhColors");
+    if (cb) {
+      var ch = "";
+      for (var j = 0; j < PAPERS.length; j++) {
+        ch += "<button data-color=\"" + PAPERS[j].id + "\" title=\"" + PAPERS[j].name + "\" style=\"background:linear-gradient(135deg," + PAPERS[j].c1 + "," + PAPERS[j].c2 + ")\"></button>";
+      }
+      cb.innerHTML = ch;
+      cb.addEventListener("click", function (ev) {
+        var t = ev.target;
+        if (t && t.dataset && t.dataset.color) doColor(t.dataset.color);
+      });
+    }
+    var tb = $id("jzhTpl");
+    if (tb) {
+      var th = "";
+      for (var k = 0; k < TPL.length; k++) th += "<button data-tpl=\"" + TPL[k].id + "\">" + TPL[k].name + "</button>";
+      tb.innerHTML = th;
+      tb.addEventListener("click", function (ev) {
+        var t = ev.target;
+        if (t && t.dataset && t.dataset.tpl) doTemplate(t.dataset.tpl);
+      });
+    }
+    var tool2 = $id("jzhTool");
+    if (tool2) tool2.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (t && t.dataset && t.dataset.tool) doTool(t.dataset.tool);
+    });
+    var br = $id("jzhBrush");
+    if (br) br.addEventListener("input", function () { doBrush(br.value); });
+    var au = $id("jzhAuto"); if (au) au.addEventListener("click", function () { doAuto(); });
+    var un = $id("jzhUndo"); if (un) un.addEventListener("click", function () { doUndo(); });
+    var rs = $id("jzhReset"); if (rs) rs.addEventListener("click", function () { doReset(true); });
+    var ps = $id("jzhPaste"); if (ps) ps.addEventListener("click", function () { doPaste(); });
+    var cl = $id("jzhClear"); if (cl) cl.addEventListener("click", function () { doClear(); });
+    var gl = $id("jzhGallery");
+    if (gl) gl.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (!t || !t.dataset || !t.dataset.ts) return;
+      var ts = t.dataset.ts;
+      if (t.classList && t.classList.contains("jzh-del")) { doDel(ts); return; }
+      rec = loadRec();
+      for (var i = 0; i < rec.pieces.length; i++) if (String(rec.pieces[i].ts) === String(ts)) { doCopyCard(rec.pieces[i]); break; }
+    });
+
+    cav.addEventListener("pointerdown", function (ev) {
+      if (ev.preventDefault) ev.preventDefault();
+      drag = true; last = null; unfold = 1;
+      pushHist();
+      var p = cavXY(ev);
+      lastPt = p;
+      doStroke(p.x, p.y, p.x, p.y);
+      draw();
+    });
+    cav.addEventListener("pointermove", function (ev) {
+      if (!drag) return;
+      if (ev.preventDefault) ev.preventDefault();
+      var p = cavXY(ev);
+      doStroke(lastPt.x, lastPt.y, p.x, p.y);
+      lastPt = p;
+      draw();
+    });
+    var up = function () { if (!drag) return; drag = false; endStroke(); };
+    cav.addEventListener("pointerup", up);
+    cav.addEventListener("pointerleave", up);
+    cav.addEventListener("pointercancel", up);
+
+    inited = true;
+  }
+
+  window.jzhRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    unfold = 1;
+    draw();
+    sync();
+  };
+  window.jzhStop = function () {
+    active = false;
+    if (raf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf);
+    raf = 0; drag = false;
+  };
+
+  window.__jzhTest = {
+    KEY: KEY, GN: GN, CELL: CELL, RAD: RAD, CC: CC, TOTAL: TOTAL, FOLDS: FOLDS, PAPERS: PAPERS, TPL: TPL, MAXP: MAXP, MAXH: MAXH,
+    clampNum: clampNum, clampInt: clampInt, idx: idx, inCircle: inCircle,
+    newPaper: newPaper, copyMask: copyMask, symPoints: symPoints, stampDisc: stampDisc,
+    cutAt: cutAt, strokeLine: strokeLine, components: components, dropLoose: dropLoose,
+    stats: stats, scoreOf: scoreOf, gradeOf: gradeOf, nameOf: nameOf,
+    packMask: packMask, unpackMask: unpackMask, seedRnd: seedRnd,
+    holeAt: holeAt, slotAt: slotAt, arcAt: arcAt, applyTemplate: applyTemplate, autoCut: autoCut,
+    petalGap: petalGap, fitR: fitR, arcExt: arcExt, slotSafe: slotSafe,
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec, fmtDate: fmtDate, paperById: paperById,
+    doFold: doFold, doTool: doTool, doBrush: doBrush, doColor: doColor, doReset: doReset,
+    doUndo: doUndo, doTemplate: doTemplate, doAuto: doAuto, doStroke: doStroke, endStroke: endStroke,
+    doPaste: doPaste, doDel: doDel, doClear: doClear, doCopyCard: doCopyCard,
+    draw: draw, sync: sync, renderGallery: renderGallery, pieceThumb: pieceThumb, esc: esc,
+    get: function () {
+      return { fold: fold, brush: brush, tool: tool, color: color, frags: frags, cuts: cuts, hist: hist.length, last: last, inited: inited, active: active, unfold: unfold, mask: mask };
+    },
+    set: function (o) {
+      if (o.mask) mask = copyMask(o.mask);
+      if (o.fold !== undefined) fold = o.fold;
+      if (o.brush !== undefined) brush = o.brush;
+      if (o.tool !== undefined) tool = o.tool;
+      if (o.color !== undefined) color = o.color;
+      if (o.frags !== undefined) frags = o.frags;
+      if (o.cuts !== undefined) cuts = o.cuts;
+      if (o.active !== undefined) active = o.active;
+      if (o.last !== undefined) last = o.last;
+    },
+    resetInit: function () { inited = false; ctx = null; cav = null; raf = 0; drag = false; },
+    reset: function () { mask = newPaper(); fold = 6; brush = 2.4; tool = "cut"; color = "red"; hist = []; frags = 0; cuts = 0; last = null; unfold = 1; rec = defRec(); }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "✂️", name: "初试剪刀", desc: "在随便剪纸里贴上第一张窗花", test: function (u) { return (u.jzhfirst || 0) >= 1; } },
+      { emoji: "🪟", name: "一剪成花", desc: "在随便剪纸里贴出一张评分 ≥ 90 的窗花", test: function (u) { return (u.jzhmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "剪纸的妙处在于：你只动一刀，纸上却同时开了十二朵花。",
+      "该留的地方留住，纸才不会散——做事也是这个道理。",
+      "折起来剪的时候看不出名堂，展开那一下才是全部的惊喜。",
+      "手一抖多剪了半分，那道歪也是这张窗花独一份的记号。",
+      "红纸贴上窗，风一吹，屋里就有了年味。"
+    );
+  }
+})();
 </script>
 </body>
 </html>
