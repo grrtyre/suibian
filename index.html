@@ -1603,6 +1603,7 @@
         <button data-tab="pack">🎒 随便打包</button>
         <button data-tab="pottery">🏺 随便拉坯</button>
         <button data-tab="papercut">✂️ 随便剪纸</button>
+        <button data-tab="optics">🔦 随便光路</button>
   </nav>
   <div class="favbar" id="favbar"></div>
 
@@ -9805,7 +9806,60 @@
       </p>
     </div>
   </section>
+    <section class="panel" id="optics">
+    <h2>🔦 随便光路</h2>
+    <p class="sub">摆一面镜子，光就换个活法——反射、分光、拆彩虹，把每一束光送进它该去的靶</p>
+    <style>
+      #optics .lzr-wrap { max-width:520px; margin:0 auto; }
+      #optics canvas#lzrCav { width:100%; max-width:484px; border-radius:18px; display:block; margin:0 auto 10px; background:#070b16; box-shadow:0 18px 44px rgba(0,0,0,.55); cursor:pointer; touch-action:manipulation; }
+      #optics .lzr-hud { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #optics .lzr-hud span { padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); font-size:.8rem; }
+      #optics .lzr-hud b { font-weight:700; color:#7de8ff; }
+      #optics .lzr-lab { text-align:center; font-size:.74rem; opacity:.6; margin:2px 0 5px; }
+      #optics .lzr-row { display:flex; gap:7px; justify-content:center; flex-wrap:wrap; margin-bottom:9px; }
+      #optics .lzr-row button { padding:7px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:inherit; font-size:.8rem; font-weight:700; cursor:pointer; }
+      #optics .lzr-row button:active { transform:translateY(1px); }
+      #optics .lzr-row button.on { background:linear-gradient(135deg,#38bdf8,#6366f1); border-color:transparent; color:#fff; box-shadow:0 6px 18px rgba(56,189,248,.32); }
+      #optics .lzr-row button i { font-style:normal; margin-left:5px; font-size:.72rem; opacity:.75; padding:1px 6px; border-radius:999px; background:rgba(0,0,0,.28); }
+      #optics #lzrLevels { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; margin-bottom:10px; }
+      #optics #lzrLevels button { min-width:34px; padding:5px 7px; border-radius:10px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:inherit; font-size:.75rem; font-weight:700; cursor:pointer; line-height:1.2; }
+      #optics #lzrLevels button.on { background:linear-gradient(135deg,#38bdf8,#6366f1); border-color:transparent; color:#fff; }
+      #optics #lzrLevels button i { display:block; font-style:normal; font-size:.6rem; opacity:.7; }
+      #optics .lzr-tipbar { text-align:center; font-size:.78rem; line-height:1.6; opacity:.8; padding:8px 12px; border-radius:12px; background:rgba(125,232,255,.07); border:1px solid rgba(125,232,255,.16); margin-bottom:10px; }
+      #optics .lzr-res { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-bottom:12px; }
+      #optics .lzr-t { padding:5px 11px; border-radius:999px; font-size:.78rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.14); }
+      #optics .lzr-t.ok { background:rgba(125,232,255,.1); }
+      #optics .lzr-help { font-size:.78rem; line-height:1.85; opacity:.8; background:rgba(255,255,255,.04); border-radius:14px; padding:11px 13px; }
+    </style>
+    <div class="lzr-wrap">
+      <div class="lzr-hud">
+        <span>关卡 <b id="lzrName">1/14</b></span>
+        <span>已用 <b id="lzrUsed">0 件</b></span>
+        <span>本关 <b id="lzrStars">☆☆☆</b></span>
+        <span>进度 <b id="lzrTotal">0/14 关</b></span>
+      </div>
+      <canvas id="lzrCav" width="484" height="396" aria-label="光路谜题台"></canvas>
+      <div class="lzr-tipbar" id="lzrTip">—</div>
+      <div class="lzr-lab">背包（点选元件 → 点空格放置 · 点已放的元件转朝向）</div>
+      <div class="lzr-row" id="lzrPal"></div>
+      <div class="lzr-res" id="lzrRes"></div>
+      <div class="lzr-row">
+        <button id="lzrPrev">◀ 上一关</button>
+        <button id="lzrReset">🧽 重置本关</button>
+        <button id="lzrSol">💡 看参考解</button>
+        <button id="lzrNext">下一关 ▶</button>
+      </div>
+      <div class="lzr-lab">关卡（数字下方是已得星）</div>
+      <div id="lzrLevels"></div>
+      <p class="lzr-help">
+        <b>怎么玩</b>：每关左边有<b>光源</b>、右边（或角落）有若干<b>靶</b>，靶上标着它要的颜色。你要做的是从<b>背包</b>里挑元件摆在网格上，把光一路引过去——<b>颜色必须刚好对上</b>，多一色少一色都不算亮。
+        <br><b>四种元件</b>：<b>🪞 反射镜</b>把光 45° 拐弯；<b>🔷 分光镜</b>一半反射一半直穿，一束变两束；<b>🔺 三棱镜</b>把光拆成三原色——<b>红拐左 · 绿直行 · 蓝拐右</b>（转个向红蓝互换）；<b>🟥 滤色片</b>只放行一种原色。选中元件后<b>点空格放置</b>，<b>再点它一下换朝向</b>，选 <b>🧹拆除</b> 再点就收回背包。
+        <br><b>关键规律</b>：颜色是<b>加起来</b>的——红+绿=黄、绿+蓝=青、红+绿+蓝=白。所以要点亮一个「黄靶」，就得让红光和绿光<b>从任意两个方向汇到同一个靶</b>上。光会被墙、光源和靶挡住，但在空格里可以<b>自由交叉互不干扰</b>，绕出回路也不会卡死。
+        <br>用的元件<b>不超过参考件数</b>就是 ★★★，多两件内 ★★，再多 ★。卡住了点 <b>💡看参考解</b> 直接摆好（算通关但不计星）。进度存在本地（suibian_optics）。点亮第一关解锁「🔦 初见光明」，十四关全通解锁「🌈 光耀千里」。Canvas 渲染、纯前端零依赖、不联网。
+      </p>
+    </div>
   </section>
+</section>
 <script>
 (function () {
   "use strict";
@@ -10228,6 +10282,7 @@
     if (id === "pack" && typeof packRender === "function") packRender();
     if (id === "pottery" && typeof potRender === "function") potRender();
     if (id === "papercut" && typeof jzhRender === "function") jzhRender();
+    if (id === "optics" && typeof lzrRender === "function") lzrRender();
     if (id !== "metronome" && typeof metroStop === "function") metroStop();
     if (id !== "game24" && typeof g24Stop === "function") g24Stop();
     if (id !== "klotski" && typeof klStop === "function") klStop();
@@ -10312,6 +10367,7 @@
     if (id !== "orbit" && typeof sxgStop === "function") sxgStop();
     if (id !== "pottery" && typeof potStop === "function") potStop();
     if (id !== "papercut" && typeof jzhStop === "function") jzhStop();
+    if (id !== "optics" && typeof lzrStop === "function") lzrStop();
     if (id !== "sheet" && typeof sheetStop === "function") sheetStop();
     if (id !== "pong" && typeof pongStop === "function") pongStop();
     if (id !== "stock" && typeof stockStop === "function") stockStop();
@@ -10528,6 +10584,7 @@
     pack: "随便打包 pack packing 打包 行李 清单 清点 收纳 出行 旅行 旅游 出差 露营 探亲 行李箱 登机 忘带 备忘 清单生成 工具 生活",
     pottery: "随便拉坯 pottery 陶艺 陶瓷 拉坯 辘辘 制陶 烧窑 釉 青瓷 花瓶 碗 手工 捏泥 游戏 解压 治愈",
     papercut: "随便剪纸 papercut 剪纸 窗花 团花 对折 对称 折纸 红纸 镂空 手工 年味 民俗 非遗 创作 解压 治愈 画画",
+    optics: "随便光路 optics 激光 光学 镜子 反射 折射 分光 棱镜 滤色 三原色 加色 彩虹 光线 追迹 解谜 益智 逻辑 关卡 物理 游戏 laser mirror prism",
     horo: "星座 运势 星座运势 十二星座 horoscope 占星 今日运势 星盘 幸运 桃花 白羊 金牛 双子 巨蟹 狮子 处女 天秤 天蝎 射手 摩羯 水瓶 双鱼", 
     muyu: "木鱼 电子木鱼 功德 敲木鱼 敲敲 佛系 禅 解压 静心 颂钵 太鼓 muyu merit 积功德 连击",
     connect4: "四子棋 重力四连 connect four 四连 落子 棋类 对战 ai connect4", 
@@ -10804,6 +10861,7 @@ splitbill:"tools",
     pack:"tools",
     pottery:"games",
     papercut:"create",
+    optics:"games",
     horo:"fortune",
     muyu:"life",
     connect4:"games",
@@ -68577,6 +68635,696 @@ splitbill:"tools",
       "折起来剪的时候看不出名堂，展开那一下才是全部的惊喜。",
       "手一抖多剪了半分，那道歪也是这张窗花独一份的记号。",
       "红纸贴上窗，风一吹，屋里就有了年味。"
+    );
+  }
+})();
+/* ===== 🔦 随便光路 · 激光谜题 optics ===== */
+(function () {
+  "use strict";
+
+  var KEY = "suibian_optics";
+  var CW = 484, CH = 396;
+  var DX = [1, 0, -1, 0];
+  var DY = [0, 1, 0, -1];
+  var DNAME = ["东", "南", "西", "北"];
+
+  /* 颜色按位掩码：R=1 G=2 B=4，叠加即加色混合 */
+  var CNAME = { 1: "红", 2: "绿", 4: "蓝", 3: "黄", 5: "品红", 6: "青", 7: "白" };
+  var CHEX = { 1: "#ff3b46", 2: "#3ddc63", 4: "#4a86ff", 3: "#ffd83b", 5: "#ff4fd8", 6: "#3ce0ea", 7: "#ffffff" };
+
+  var TOOLS = [
+    { id: "mir", emoji: "🪞", name: "反射镜", tip: "45° 反射，点一下换朝向" },
+    { id: "spl", emoji: "🔷", name: "分光镜", tip: "一半反射一半直穿，一束变两束" },
+    { id: "pri", emoji: "🔺", name: "三棱镜", tip: "红拐左·绿直行·蓝拐右，白光拆三色" },
+    { id: "flt", emoji: "🟥", name: "滤色片", tip: "只放行一种原色，点一下换红绿蓝" },
+    { id: "del", emoji: "🧹", name: "拆除", tip: "点已放的元件收回背包" }
+  ];
+  var ROT = { mir: 2, spl: 2, pri: 2, flt: 3 };
+  var FLTC = [1, 2, 4];
+
+  /* ---------------- 关卡数据 ----------------
+     src: {x,y,d,c}  d:0东 1南 2西 3北   c:颜色掩码
+     tgt: {x,y,c}    需要恰好被 c 色点亮
+     wall: [[x,y]...]
+     inv: 背包   par: 三星件数   sol: 参考解 [[x,y,type,orient]]
+  */
+  var LEVELS = [
+    {
+      name: "拐个弯", w: 7, h: 5,
+      src: [{ x: 0, y: 4, d: 0, c: 7 }], tgt: [{ x: 6, y: 0, c: 7 }], wall: [],
+      inv: { mir: 2 }, par: 1, sol: [[6, 4, "mir", 0]],
+      tip: "光只会走直线，想拐弯就得给它一面镜子。"
+    },
+    {
+      name: "绕过高墙", w: 7, h: 5,
+      src: [{ x: 0, y: 2, d: 0, c: 7 }], tgt: [{ x: 6, y: 2, c: 7 }],
+      wall: [[3, 1], [3, 2], [3, 3]],
+      inv: { mir: 5 }, par: 3, sol: [[2, 2, "mir", 0], [2, 0, "mir", 0], [6, 0, "mir", 1]],
+      tip: "墙挡得住光，挡不住绕路。上去、过去、再下来。"
+    },
+    {
+      name: "只要红色", w: 7, h: 5,
+      src: [{ x: 0, y: 2, d: 0, c: 7 }], tgt: [{ x: 6, y: 0, c: 1 }], wall: [],
+      inv: { mir: 2, flt: 1 }, par: 2, sol: [[3, 2, "flt", 0], [6, 2, "mir", 0]],
+      tip: "白光里三色都有，滤色片只放行其中一种。"
+    },
+    {
+      name: "一分为二", w: 9, h: 7,
+      src: [{ x: 0, y: 3, d: 0, c: 7 }], tgt: [{ x: 8, y: 0, c: 7 }, { x: 4, y: 6, c: 7 }], wall: [],
+      inv: { mir: 3, spl: 1 }, par: 2, sol: [[4, 3, "spl", 1], [8, 3, "mir", 0]],
+      tip: "分光镜不挑边：反射一束、直穿一束，同时喂两个靶。"
+    },
+    {
+      name: "三棱镜", w: 9, h: 7,
+      src: [{ x: 0, y: 3, d: 0, c: 7 }],
+      tgt: [{ x: 8, y: 1, c: 1 }, { x: 8, y: 3, c: 2 }, { x: 8, y: 5, c: 4 }], wall: [],
+      inv: { mir: 4, pri: 1 }, par: 3,
+      sol: [[4, 3, "pri", 0], [4, 1, "mir", 0], [4, 5, "mir", 1]],
+      tip: "棱镜把白光拆成红绿蓝三束：红拐左、绿直行、蓝拐右。"
+    },
+    {
+      name: "混出白光", w: 9, h: 7,
+      src: [{ x: 0, y: 1, d: 0, c: 1 }, { x: 0, y: 3, d: 0, c: 2 }, { x: 0, y: 5, d: 0, c: 4 }],
+      tgt: [{ x: 8, y: 3, c: 7 }], wall: [],
+      inv: { mir: 4 }, par: 2, sol: [[8, 1, "mir", 1], [8, 5, "mir", 0]],
+      tip: "红 + 绿 + 蓝 = 白。靶子不挑方向，从哪边照进来都算。"
+    },
+    {
+      name: "调出黄光", w: 9, h: 7,
+      src: [{ x: 0, y: 3, d: 0, c: 7 }], tgt: [{ x: 8, y: 3, c: 3 }], wall: [],
+      inv: { mir: 4, spl: 1, flt: 2, pri: 1 }, par: 3,
+      sol: [[2, 3, "pri", 0], [2, 1, "mir", 0], [8, 1, "mir", 1]],
+      tip: "黄 = 红 + 绿。一片滤色片调不出黄，得先拆再合。"
+    },
+    {
+      name: "迷宫回廊", w: 11, h: 9,
+      src: [{ x: 0, y: 0, d: 0, c: 7 }], tgt: [{ x: 10, y: 8, c: 7 }],
+      wall: [[3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7], [7, 8]],
+      inv: { mir: 7 }, par: 5,
+      sol: [[2, 0, "mir", 1], [2, 6, "mir", 1], [6, 6, "mir", 0], [6, 0, "mir", 0], [10, 0, "mir", 1]],
+      tip: "两道长墙错开留缝，光得走个 S 形才过得去。"
+    },
+    {
+      name: "红与青", w: 9, h: 7,
+      src: [{ x: 0, y: 3, d: 0, c: 7 }], tgt: [{ x: 8, y: 1, c: 1 }, { x: 8, y: 5, c: 6 }], wall: [],
+      inv: { mir: 5, spl: 1, flt: 2, pri: 1 }, par: 4,
+      sol: [[4, 3, "pri", 0], [4, 1, "mir", 0], [8, 3, "mir", 1], [4, 5, "mir", 1]],
+      tip: "青 = 绿 + 蓝。红单独走，绿蓝要在同一个靶上汇合。"
+    },
+    {
+      name: "分光成双", w: 9, h: 7,
+      src: [{ x: 0, y: 3, d: 0, c: 7 }], tgt: [{ x: 8, y: 0, c: 7 }, { x: 8, y: 6, c: 7 }], wall: [],
+      inv: { mir: 4, spl: 1 }, par: 3,
+      sol: [[4, 3, "spl", 0], [4, 0, "mir", 0], [8, 3, "mir", 1]],
+      tip: "先分开、再各自拐弯，两个白靶一次点亮。"
+    },
+    {
+      name: "四面开花", w: 11, h: 9,
+      src: [{ x: 0, y: 4, d: 0, c: 7 }],
+      tgt: [{ x: 5, y: 0, c: 7 }, { x: 5, y: 8, c: 7 }, { x: 10, y: 4, c: 7 }], wall: [],
+      inv: { mir: 4, spl: 2 }, par: 3,
+      sol: [[5, 4, "spl", 0], [7, 4, "spl", 1], [7, 8, "mir", 0]],
+      tip: "一束光劈两次，上、下、右三个方向同时供光。"
+    },
+    {
+      name: "隔墙有光", w: 11, h: 9,
+      src: [{ x: 0, y: 0, d: 0, c: 7 }], tgt: [{ x: 10, y: 8, c: 1 }, { x: 0, y: 8, c: 4 }],
+      wall: [[2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4], [8, 4]],
+      inv: { mir: 4, spl: 1, flt: 2, pri: 1 }, par: 2,
+      sol: [[9, 0, "mir", 1], [9, 8, "pri", 0]],
+      tip: "长墙只在两头留缝。落到底再拆色，一个棱镜就能左右开弓。"
+    },
+    {
+      name: "四角开花", w: 11, h: 9,
+      src: [{ x: 5, y: 4, d: 3, c: 7 }],
+      tgt: [{ x: 0, y: 0, c: 7 }, { x: 10, y: 0, c: 7 }, { x: 0, y: 8, c: 7 }, { x: 10, y: 8, c: 7 }],
+      wall: [],
+      inv: { mir: 6, spl: 4 }, par: 8,
+      sol: [
+        [5, 2, "spl", 0], [5, 1, "spl", 1], [8, 2, "spl", 1], [2, 1, "spl", 0],
+        [10, 2, "mir", 0], [0, 1, "mir", 1], [8, 8, "mir", 1], [2, 8, "mir", 0]
+      ],
+      tip: "唯一的光源朝上。层层分光，把它送到四个角落去。"
+    },
+    {
+      name: "彩虹绽放", w: 11, h: 9,
+      src: [{ x: 0, y: 1, d: 0, c: 7 }, { x: 0, y: 4, d: 0, c: 7 }, { x: 0, y: 7, d: 0, c: 7 }],
+      tgt: [
+        { x: 10, y: 0, c: 1 }, { x: 10, y: 2, c: 3 }, { x: 10, y: 4, c: 2 },
+        { x: 10, y: 6, c: 6 }, { x: 10, y: 8, c: 4 }
+      ],
+      wall: [],
+      inv: { mir: 8, spl: 2, flt: 2, pri: 3 }, par: 9,
+      sol: [
+        [2, 1, "pri", 0], [2, 0, "mir", 0], [10, 1, "mir", 1], [2, 8, "mir", 1],
+        [4, 4, "pri", 0], [4, 2, "mir", 0], [4, 6, "mir", 1],
+        [6, 7, "pri", 0], [10, 7, "mir", 0]
+      ],
+      tip: "红、黄、绿、青、蓝五靶齐亮。三道白光、三个棱镜，一条都不能浪费。"
+    }
+  ];
+
+  /* ---------------- 纯逻辑：光线追迹 ---------------- */
+  function key(x, y) { return x + "," + y; }
+  function clampInt(v, lo, hi) { v = parseInt(v, 10); if (isNaN(v)) return lo; return v < lo ? lo : (v > hi ? hi : v); }
+
+  function reflect(d, o) { return o ? (d ^ 1) : (3 - d); }
+
+  function mkState(li) {
+    li = clampInt(li, 0, LEVELS.length - 1);
+    var lv = LEVELS[li];
+    var st = { li: li, w: lv.w, h: lv.h, cells: {}, src: lv.src, tgt: lv.tgt, inv: {}, sol: false };
+    for (var k in lv.inv) if (lv.inv.hasOwnProperty(k)) st.inv[k] = lv.inv[k];
+    var i;
+    for (i = 0; i < lv.wall.length; i++) st.cells[key(lv.wall[i][0], lv.wall[i][1])] = { t: "wall", fixed: 1 };
+    for (i = 0; i < lv.src.length; i++) st.cells[key(lv.src[i].x, lv.src[i].y)] = { t: "src", fixed: 1, i: i };
+    for (i = 0; i < lv.tgt.length; i++) st.cells[key(lv.tgt[i].x, lv.tgt[i].y)] = { t: "tgt", fixed: 1, i: i };
+    return st;
+  }
+
+  function placedCount(st) {
+    var n = 0;
+    for (var k in st.cells) if (st.cells.hasOwnProperty(k) && !st.cells[k].fixed) n++;
+    return n;
+  }
+
+  function trace(st) {
+    var lit = [], i;
+    for (i = 0; i < st.tgt.length; i++) lit.push(0);
+    var segs = [], seen = {}, q = [], steps = 0, capped = false;
+
+    function emit(x, y, d, c) {
+      if (!c) return;
+      segs.push({ x: x, y: y, d: d, c: c, half: 1 });
+      q.push({ x: x + DX[d], y: y + DY[d], d: d, c: c });
+    }
+
+    for (i = 0; i < st.src.length; i++) {
+      var s = st.src[i];
+      emit(s.x, s.y, s.d, s.c);
+    }
+    while (q.length) {
+      if (++steps > 8000) { capped = true; break; }
+      var b = q.shift();
+      if (b.x < 0 || b.y < 0 || b.x >= st.w || b.y >= st.h) continue;
+      if (!b.c) continue;
+      var kk = b.x + "," + b.y + "," + b.d + "," + b.c;
+      if (seen[kk]) continue;
+      seen[kk] = 1;
+      var cell = st.cells[key(b.x, b.y)];
+      segs.push({ x: b.x, y: b.y, d: b.d, c: b.c, half: 0 });
+      if (!cell) { emit(b.x, b.y, b.d, b.c); continue; }
+      if (cell.t === "wall" || cell.t === "src") continue;
+      if (cell.t === "tgt") { lit[cell.i] |= b.c; continue; }
+      if (cell.t === "mir") { emit(b.x, b.y, reflect(b.d, cell.o), b.c); continue; }
+      if (cell.t === "spl") { emit(b.x, b.y, reflect(b.d, cell.o), b.c); emit(b.x, b.y, b.d, b.c); continue; }
+      if (cell.t === "flt") { emit(b.x, b.y, b.d, b.c & FLTC[cell.o]); continue; }
+      if (cell.t === "pri") {
+        var L = (b.d + 3) % 4, R = (b.d + 1) % 4;
+        var cl = cell.o ? 4 : 1, cr = cell.o ? 1 : 4;
+        if (b.c & cl) emit(b.x, b.y, L, cl);
+        if (b.c & 2) emit(b.x, b.y, b.d, 2);
+        if (b.c & cr) emit(b.x, b.y, R, cr);
+      }
+    }
+    var ok = st.tgt.length > 0;
+    for (i = 0; i < st.tgt.length; i++) if (lit[i] !== st.tgt[i].c) ok = false;
+    return { segs: segs, lit: lit, solved: ok, steps: steps, capped: capped };
+  }
+
+  function starsFor(li, used) {
+    var par = LEVELS[li].par;
+    if (used <= par) return 3;
+    if (used <= par + 2) return 2;
+    return 1;
+  }
+
+  function applySol(st) {
+    var s = LEVELS[st.li].sol, i;
+    for (i = 0; i < s.length; i++) {
+      st.cells[key(s[i][0], s[i][1])] = { t: s[i][2], o: s[i][3] };
+      if (st.inv[s[i][2]] !== undefined) st.inv[s[i][2]]--;
+    }
+    st.sol = true;
+    return st;
+  }
+
+  /* ---------------- 存档 ---------------- */
+  function defRec() { return { stars: {}, clr: {}, first: 0, master: 0, last: 0 }; }
+  function loadRec() {
+    var r = defRec(), i;
+    try {
+      var o = JSON.parse(localStorage.getItem(KEY) || "null");
+      if (o && typeof o === "object") {
+        if (o.stars && typeof o.stars === "object") {
+          for (var k in o.stars) {
+            if (!o.stars.hasOwnProperty(k)) continue;
+            i = parseInt(k, 10);
+            if (!isNaN(i) && i >= 0 && i < LEVELS.length) r.stars[i] = clampInt(o.stars[k], 0, 3);
+          }
+        }
+        if (o.clr && typeof o.clr === "object") {
+          for (var k2 in o.clr) {
+            if (!o.clr.hasOwnProperty(k2)) continue;
+            i = parseInt(k2, 10);
+            if (!isNaN(i) && i >= 0 && i < LEVELS.length && o.clr[k2]) r.clr[i] = 1;
+          }
+        }
+        r.first = o.first ? 1 : 0;
+        r.master = o.master ? 1 : 0;
+        r.last = clampInt(o.last, 0, LEVELS.length - 1);
+      }
+    } catch (e) { }
+    /* 旧档兼容：有星必定通关过 */
+    for (i = 0; i < LEVELS.length; i++) if ((r.stars[i] || 0) > 0) r.clr[i] = 1;
+    return r;
+  }
+  function saveRec(r) { try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) { } }
+  function clearedCount(r) {
+    var n = 0;
+    for (var i = 0; i < LEVELS.length; i++) if (r.clr[i]) n++;
+    return n;
+  }
+  function totalStars(r) {
+    var n = 0;
+    for (var i = 0; i < LEVELS.length; i++) n += (r.stars[i] || 0);
+    return n;
+  }
+
+  /* ---------------- 运行时状态 ---------------- */
+  var st = mkState(0), rec = defRec(), tool = "mir", res = null, done = false;
+  var cav = null, ctx = null, inited = false, active = false, raf = 0, phase = 0;
+
+  function $id(id) { return typeof document !== "undefined" && document.getElementById ? document.getElementById(id) : null; }
+  function say(msg) {
+    try {
+      var t = $id("toast");
+      if (!t) return;
+      t.textContent = msg; t.classList.add("show");
+      clearTimeout(t._t); t._t = setTimeout(function () { t.classList.remove("show"); }, 1900);
+    } catch (e) { }
+  }
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function colName(c) { return CNAME[c] || ("色" + c); }
+  function colHex(c) { return CHEX[c] || "#cbd5e1"; }
+  function starStr(n) { return n > 0 ? "★★★☆☆☆".slice(3 - n, 6 - n) : "☆☆☆"; }
+
+  function metrics() {
+    var cs = Math.min(Math.floor(CW / st.w), Math.floor(CH / st.h));
+    return { cs: cs, ox: Math.floor((CW - st.w * cs) / 2), oy: Math.floor((CH - st.h * cs) / 2) };
+  }
+  function cellAt(px, py) {
+    var m = metrics();
+    var x = Math.floor((px - m.ox) / m.cs), y = Math.floor((py - m.oy) / m.cs);
+    if (x < 0 || y < 0 || x >= st.w || y >= st.h) return null;
+    return { x: x, y: y };
+  }
+
+  /* ---------------- 操作 ---------------- */
+  function recompute() {
+    res = trace(st);
+    if (res.solved && !done) {
+      done = true;
+      finish();
+    } else if (!res.solved) {
+      done = false;
+    }
+    return res;
+  }
+
+  function finish() {
+    var used = placedCount(st);
+    var sc = st.sol ? 0 : starsFor(st.li, used);
+    rec = loadRec();
+    var old = rec.stars[st.li] || 0;
+    if (sc > old) rec.stars[st.li] = sc;
+    if (!rec.stars[st.li]) rec.stars[st.li] = 0;
+    rec.clr[st.li] = 1;
+    if (!rec.first && !st.sol) { rec.first = 1; try { bumpUsage("lzrfirst"); } catch (e1) { } }
+    if (clearedCount(rec) >= LEVELS.length && !rec.master) {
+      rec.master = 1;
+      try { bumpUsage("lzrmaster"); } catch (e2) { }
+      say("🌈 十四关全通！解锁「光耀千里」");
+    }
+    rec.last = st.li;
+    saveRec(rec);
+    try { bumpUsage("optics"); } catch (e3) { }
+    if (st.sol) say("💡 已按参考解点亮（看过答案不计星）");
+    else say("🔦 靶全亮！" + starStr(sc) + " 用了 " + used + " 件");
+  }
+
+  function loadLevel(i, quiet) {
+    st = mkState(i);
+    done = false;
+    rec = loadRec();
+    rec.last = st.li;
+    saveRec(rec);
+    recompute();
+    if (!quiet) say("第 " + (st.li + 1) + " 关 · " + LEVELS[st.li].name);
+    draw(); sync();
+  }
+  function doReset() { loadLevel(st.li, true); say("🧽 已重置本关"); }
+  function doPrev() { loadLevel((st.li + LEVELS.length - 1) % LEVELS.length); }
+  function doNext() { loadLevel((st.li + 1) % LEVELS.length); }
+  function doTool(t) {
+    for (var i = 0; i < TOOLS.length; i++) if (TOOLS[i].id === t) { tool = t; sync(); draw(); return true; }
+    return false;
+  }
+  function doSol() {
+    st = mkState(st.li);
+    done = false;
+    applySol(st);
+    recompute();
+    draw(); sync();
+  }
+
+  function doCell(x, y) {
+    if (x < 0 || y < 0 || x >= st.w || y >= st.h) return false;
+    var k = key(x, y), cell = st.cells[k];
+    if (cell && cell.fixed) { say("这格是固定的，动不了"); return false; }
+    if (tool === "del") {
+      if (!cell) return false;
+      if (st.inv[cell.t] !== undefined) st.inv[cell.t]++;
+      delete st.cells[k];
+      recompute(); draw(); sync();
+      return true;
+    }
+    if (cell) {
+      if (cell.t === tool || true) {
+        var n = ROT[cell.t] || 1;
+        cell.o = ((cell.o || 0) + 1) % n;
+        recompute(); draw(); sync();
+        return true;
+      }
+    }
+    if (!st.inv[tool]) { say("「" + toolName(tool) + "」用完了，先拆一个下来"); return false; }
+    st.inv[tool]--;
+    st.cells[k] = { t: tool, o: 0 };
+    recompute(); draw(); sync();
+    return true;
+  }
+  function toolName(t) {
+    for (var i = 0; i < TOOLS.length; i++) if (TOOLS[i].id === t) return TOOLS[i].name;
+    return t;
+  }
+
+  /* ---------------- 绘制 ---------------- */
+  function edgePt(x, y, s, m) {
+    var cx = m.ox + x * m.cs, cy = m.oy + y * m.cs, h = m.cs / 2;
+    if (s === 0) return [cx + m.cs, cy + h];
+    if (s === 1) return [cx + h, cy + m.cs];
+    if (s === 2) return [cx, cy + h];
+    return [cx + h, cy];
+  }
+  function ctrPt(x, y, m) { return [m.ox + x * m.cs + m.cs / 2, m.oy + y * m.cs + m.cs / 2]; }
+
+  function roundRect(g, x, y, w, h, r) {
+    if (g.roundRect) { g.beginPath(); g.roundRect(x, y, w, h, r); return; }
+    g.beginPath();
+    g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r);
+    g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r);
+    g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y);
+    g.closePath();
+  }
+
+  function drawElem(g, x, y, cell, m) {
+    var cx = m.ox + x * m.cs, cy = m.oy + y * m.cs, cs = m.cs, h = cs / 2;
+    var p = cs * 0.17;
+    g.save();
+    if (cell.t === "wall") {
+      g.fillStyle = "#151b2e";
+      roundRect(g, cx + 2, cy + 2, cs - 4, cs - 4, 5); g.fill();
+      g.strokeStyle = "rgba(255,255,255,.10)"; g.lineWidth = 1; g.stroke();
+      g.strokeStyle = "rgba(255,255,255,.07)";
+      for (var w = -cs; w < cs; w += 7) {
+        g.beginPath(); g.moveTo(cx + w + 3, cy + cs - 3); g.lineTo(cx + w + cs - 3, cy + 3); g.stroke();
+      }
+    } else if (cell.t === "src") {
+      var s = st.src[cell.i], hex = colHex(s.c);
+      g.fillStyle = "#0d1424";
+      roundRect(g, cx + 3, cy + 3, cs - 6, cs - 6, 8); g.fill();
+      g.strokeStyle = hex; g.lineWidth = 2; g.stroke();
+      g.fillStyle = hex; g.shadowColor = hex; g.shadowBlur = 12;
+      g.beginPath(); g.arc(cx + h, cy + h, cs * 0.2, 0, Math.PI * 2); g.fill();
+      g.shadowBlur = 0;
+      var e = edgePt(x, y, s.d, m);
+      g.strokeStyle = hex; g.lineWidth = 3; g.beginPath();
+      g.moveTo(cx + h, cy + h); g.lineTo((cx + h) * 0.35 + e[0] * 0.65, (cy + h) * 0.35 + e[1] * 0.65); g.stroke();
+    } else if (cell.t === "tgt") {
+      var t = st.tgt[cell.i], want = t.c, got = res ? res.lit[cell.i] : 0;
+      var okk = got === want, hx = colHex(want);
+      g.fillStyle = "#0b1120";
+      roundRect(g, cx + 3, cy + 3, cs - 6, cs - 6, cs / 2); g.fill();
+      g.strokeStyle = okk ? hx : "rgba(255,255,255,.32)";
+      g.lineWidth = okk ? 3 : 2;
+      if (okk) { g.shadowColor = hx; g.shadowBlur = 16; }
+      g.beginPath(); g.arc(cx + h, cy + h, cs * 0.31, 0, Math.PI * 2); g.stroke();
+      g.shadowBlur = 0;
+      g.fillStyle = okk ? hx : "rgba(255,255,255,.12)";
+      g.beginPath(); g.arc(cx + h, cy + h, cs * 0.17, 0, Math.PI * 2); g.fill();
+      if (!okk && got) {
+        g.fillStyle = colHex(got); g.globalAlpha = 0.5;
+        g.beginPath(); g.arc(cx + h, cy + h, cs * 0.1, 0, Math.PI * 2); g.fill();
+        g.globalAlpha = 1;
+      }
+    } else if (cell.t === "mir") {
+      var a = cell.o ? [cx + p, cy + p, cx + cs - p, cy + cs - p] : [cx + p, cy + cs - p, cx + cs - p, cy + p];
+      g.strokeStyle = "rgba(255,255,255,.20)"; g.lineWidth = 7; g.lineCap = "round";
+      g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(a[2], a[3]); g.stroke();
+      g.strokeStyle = "#dbeafe"; g.lineWidth = 3;
+      g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(a[2], a[3]); g.stroke();
+    } else if (cell.t === "spl") {
+      var b = cell.o ? [cx + p, cy + p, cx + cs - p, cy + cs - p] : [cx + p, cy + cs - p, cx + cs - p, cy + p];
+      g.strokeStyle = "rgba(110,231,255,.22)"; g.lineWidth = 8; g.lineCap = "round";
+      g.beginPath(); g.moveTo(b[0], b[1]); g.lineTo(b[2], b[3]); g.stroke();
+      g.strokeStyle = "#6ee7ff"; g.lineWidth = 2.5;
+      if (g.setLineDash) g.setLineDash([5, 4]);
+      g.beginPath(); g.moveTo(b[0], b[1]); g.lineTo(b[2], b[3]); g.stroke();
+      if (g.setLineDash) g.setLineDash([]);
+    } else if (cell.t === "pri") {
+      g.beginPath();
+      if (cell.o) { g.moveTo(cx + h, cy + cs - p); g.lineTo(cx + cs - p, cy + p); g.lineTo(cx + p, cy + p); }
+      else { g.moveTo(cx + h, cy + p); g.lineTo(cx + cs - p, cy + cs - p); g.lineTo(cx + p, cy + cs - p); }
+      g.closePath();
+      var gr = g.createLinearGradient(cx, cy, cx + cs, cy + cs);
+      gr.addColorStop(0, "rgba(255,120,120,.55)");
+      gr.addColorStop(0.5, "rgba(120,255,170,.5)");
+      gr.addColorStop(1, "rgba(120,170,255,.55)");
+      g.fillStyle = gr; g.fill();
+      g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 1.6; g.stroke();
+    } else if (cell.t === "flt") {
+      var fc = colHex(FLTC[cell.o || 0]);
+      g.fillStyle = fc; g.globalAlpha = 0.42;
+      roundRect(g, cx + p, cy + p, cs - p * 2, cs - p * 2, 5); g.fill();
+      g.globalAlpha = 1;
+      g.strokeStyle = fc; g.lineWidth = 2; g.stroke();
+    }
+    g.restore();
+  }
+
+  function draw() {
+    if (!ctx) return;
+    var g = ctx, m = metrics(), i;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, CW, CH);
+    var bg = g.createLinearGradient(0, 0, 0, CH);
+    bg.addColorStop(0, "#070b16"); bg.addColorStop(1, "#0d1326");
+    g.fillStyle = bg; g.fillRect(0, 0, CW, CH);
+
+    g.strokeStyle = "rgba(255,255,255,.055)"; g.lineWidth = 1;
+    for (i = 0; i <= st.w; i++) {
+      g.beginPath(); g.moveTo(m.ox + i * m.cs + .5, m.oy); g.lineTo(m.ox + i * m.cs + .5, m.oy + st.h * m.cs); g.stroke();
+    }
+    for (i = 0; i <= st.h; i++) {
+      g.beginPath(); g.moveTo(m.ox, m.oy + i * m.cs + .5); g.lineTo(m.ox + st.w * m.cs, m.oy + i * m.cs + .5); g.stroke();
+    }
+
+    if (res) {
+      g.save();
+      g.globalCompositeOperation = "lighter";
+      g.lineCap = "round";
+      for (var pass = 0; pass < 2; pass++) {
+        g.lineWidth = pass ? 2.2 : 7;
+        g.globalAlpha = pass ? 1 : 0.2;
+        for (i = 0; i < res.segs.length; i++) {
+          var s = res.segs[i], a, b;
+          if (s.half) { a = ctrPt(s.x, s.y, m); b = edgePt(s.x, s.y, s.d, m); }
+          else { a = edgePt(s.x, s.y, (s.d + 2) % 4, m); b = ctrPt(s.x, s.y, m); }
+          g.strokeStyle = colHex(s.c);
+          g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke();
+        }
+      }
+      g.globalAlpha = 1;
+      g.restore();
+    }
+
+    for (var k in st.cells) {
+      if (!st.cells.hasOwnProperty(k)) continue;
+      var xy = k.split(",");
+      drawElem(g, parseInt(xy[0], 10), parseInt(xy[1], 10), st.cells[k], m);
+    }
+
+    if (res && res.solved) {
+      g.save();
+      g.strokeStyle = "rgba(125,232,255,.7)"; g.lineWidth = 2;
+      g.shadowColor = "#7de8ff"; g.shadowBlur = 14 + 6 * Math.sin(phase / 14);
+      roundRect(g, m.ox + 1, m.oy + 1, st.w * m.cs - 2, st.h * m.cs - 2, 8);
+      g.stroke();
+      g.restore();
+    }
+  }
+
+  function loop() {
+    if (!active) { raf = 0; return; }
+    phase++;
+    if (res && res.solved && phase % 2 === 0) draw();
+    if (typeof requestAnimationFrame === "function") raf = requestAnimationFrame(loop);
+  }
+
+  /* ---------------- UI 同步 ---------------- */
+  function sync() {
+    var lv = LEVELS[st.li];
+    var e = $id("lzrName"); if (e) e.textContent = (st.li + 1) + "/" + LEVELS.length + " · " + lv.name;
+    e = $id("lzrUsed"); if (e) e.textContent = placedCount(st) + " 件（三星 ≤ " + lv.par + "）";
+    e = $id("lzrStars"); if (e) e.textContent = starStr(rec.stars[st.li] || 0);
+    e = $id("lzrTotal"); if (e) e.textContent = clearedCount(rec) + "/" + LEVELS.length + " 关 · " + totalStars(rec) + "★";
+    e = $id("lzrTip"); if (e) e.textContent = lv.tip;
+
+    var pal = $id("lzrPal");
+    if (pal) {
+      var ph = "", i;
+      for (i = 0; i < TOOLS.length; i++) {
+        var t = TOOLS[i];
+        if (t.id !== "del" && st.inv[t.id] === undefined) continue;
+        var left = t.id === "del" ? "" : "<i>" + st.inv[t.id] + "</i>";
+        ph += '<button data-tool="' + t.id + '"' + (tool === t.id ? ' class="on"' : "") +
+          ' title="' + esc(t.tip) + '">' + t.emoji + " " + t.name + left + "</button>";
+      }
+      pal.innerHTML = ph;
+    }
+
+    var chips = $id("lzrLevels");
+    if (chips) {
+      var ch = "";
+      for (var j = 0; j < LEVELS.length; j++) {
+        var sN = rec.stars[j] || 0;
+        ch += '<button data-lv="' + j + '"' + (j === st.li ? ' class="on"' : "") +
+          ' title="' + esc(LEVELS[j].name) + '">' + (j + 1) + (sN ? "<i>" + sN + "★</i>" : "") + "</button>";
+      }
+      chips.innerHTML = ch;
+    }
+
+    var rr = $id("lzrRes");
+    if (rr) {
+      var out = "";
+      for (var q = 0; q < st.tgt.length; q++) {
+        var want = st.tgt[q].c, got = res ? res.lit[q] : 0;
+        var okk = got === want;
+        out += '<span class="lzr-t' + (okk ? " ok" : "") + '" style="border-color:' + colHex(want) + '">' +
+          '<b style="color:' + colHex(want) + '">' + colName(want) + "</b>靶 " +
+          (okk ? "✅ 已点亮" : (got ? "⚠️ 现在是" + colName(got) : "⭕ 未亮")) + "</span>";
+      }
+      if (res && res.solved) {
+        out += '<span class="lzr-t ok" style="border-color:#7de8ff"><b style="color:#7de8ff">全部点亮</b> ' +
+          (st.sol ? "（参考解，不计星）" : starStr(starsFor(st.li, placedCount(st)))) + "</span>";
+      }
+      rr.innerHTML = out;
+    }
+  }
+
+  /* ---------------- 初始化 ---------------- */
+  function cavXY(ev) {
+    var r = cav.getBoundingClientRect ? cav.getBoundingClientRect() : { left: 0, top: 0, width: CW, height: CH };
+    var sx = (r.width || CW) / CW, sy = (r.height || CH) / CH;
+    return { x: ((ev.clientX || 0) - r.left) / (sx || 1), y: ((ev.clientY || 0) - r.top) / (sy || 1) };
+  }
+
+  function ensureInit() {
+    if (inited) return;
+    cav = $id("lzrCav");
+    if (!cav || !cav.getContext) return;
+    ctx = cav.getContext("2d");
+    if (!ctx) return;
+
+    var pal = $id("lzrPal");
+    if (pal) pal.addEventListener("click", function (ev) {
+      var t = ev.target;
+      while (t && t !== pal && !(t.dataset && t.dataset.tool)) t = t.parentNode;
+      if (t && t.dataset && t.dataset.tool) doTool(t.dataset.tool);
+    });
+    var chips = $id("lzrLevels");
+    if (chips) chips.addEventListener("click", function (ev) {
+      var t = ev.target;
+      while (t && t !== chips && !(t.dataset && t.dataset.lv)) t = t.parentNode;
+      if (t && t.dataset && t.dataset.lv) loadLevel(parseInt(t.dataset.lv, 10));
+    });
+    var b;
+    b = $id("lzrPrev"); if (b) b.addEventListener("click", function () { doPrev(); });
+    b = $id("lzrNext"); if (b) b.addEventListener("click", function () { doNext(); });
+    b = $id("lzrReset"); if (b) b.addEventListener("click", function () { doReset(); });
+    b = $id("lzrSol"); if (b) b.addEventListener("click", function () { doSol(); });
+
+    cav.addEventListener("pointerdown", function (ev) {
+      if (ev.preventDefault) ev.preventDefault();
+      var p = cavXY(ev), c = cellAt(p.x, p.y);
+      if (c) doCell(c.x, c.y);
+    });
+
+    rec = loadRec();
+    st = mkState(rec.last || 0);
+    recompute();
+    inited = true;
+  }
+
+  window.lzrRender = function () {
+    ensureInit();
+    if (!inited) return;
+    active = true;
+    rec = loadRec();
+    recompute();
+    draw(); sync();
+    if (!raf && typeof requestAnimationFrame === "function") raf = requestAnimationFrame(loop);
+  };
+  window.lzrStop = function () {
+    active = false;
+    if (raf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf);
+    raf = 0;
+  };
+
+  window.__lzrTest = {
+    KEY: KEY, CW: CW, CH: CH, DX: DX, DY: DY, DNAME: DNAME, CNAME: CNAME, CHEX: CHEX,
+    TOOLS: TOOLS, ROT: ROT, FLTC: FLTC, LEVELS: LEVELS,
+    key: key, clampInt: clampInt, reflect: reflect, mkState: mkState, placedCount: placedCount,
+    trace: trace, starsFor: starsFor, applySol: applySol,
+    defRec: defRec, loadRec: loadRec, saveRec: saveRec, clearedCount: clearedCount, totalStars: totalStars,
+    colName: colName, colHex: colHex, starStr: starStr, esc: esc, toolName: toolName,
+    metrics: metrics, cellAt: cellAt, edgePt: edgePt, ctrPt: ctrPt,
+    recompute: recompute, finish: finish, loadLevel: loadLevel, doReset: doReset,
+    doPrev: doPrev, doNext: doNext, doTool: doTool, doSol: doSol, doCell: doCell,
+    draw: draw, sync: sync,
+    get: function () {
+      return { li: st.li, tool: tool, done: done, inited: inited, active: active, sol: st.sol, used: placedCount(st), inv: st.inv, res: res, st: st, rec: rec };
+    },
+    resetInit: function () { inited = false; ctx = null; cav = null; raf = 0; active = false; },
+    reset: function () { st = mkState(0); rec = defRec(); tool = "mir"; res = null; done = false; }
+  };
+
+  if (typeof BADGES !== "undefined" && BADGES.push) {
+    BADGES.push(
+      { emoji: "🔦", name: "初见光明", desc: "在随便光路里点亮第一关的全部靶子", test: function (u) { return (u.lzrfirst || 0) >= 1; } },
+      { emoji: "🌈", name: "光耀千里", desc: "在随便光路里通关全部 14 道光学谜题", test: function (u) { return (u.lzrmaster || 0) >= 1; } }
+    );
+  }
+  if (typeof QUOTES !== "undefined" && QUOTES.push) {
+    QUOTES.push(
+      "光走的永远是最短的那条路，人偏偏喜欢绕远。",
+      "一面镜子的角度差一点，落点就差了十万八千里。",
+      "白光看着单调，拆开来才知道里头藏了整条彩虹。",
+      "想同时照亮两个地方，就得舍得把光分出去。",
+      "挡住去路的那堵墙，往往只是提醒你换个方向。"
     );
   }
 })();
